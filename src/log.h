@@ -18,7 +18,7 @@ namespace abc {
 		static basic_log<Char>&	global;
 		static basic_log<Char>&	critical;
 
-		virtual void push(category_t category, tag_t tag, status_t status) noexcept = 0;
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept = 0;
 	}; // class basic_log
 
 
@@ -32,12 +32,19 @@ namespace abc {
 		}
 
 	public:
-		virtual void push(category_t category, tag_t tag, status_t status) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
 			_ostream
 				<< std::right << std::fixed << std::hex << std::showbase
 				<< _separator << category
 				<< _separator << tag
-				<< _separator << status
+				<< _separator << status;
+
+			if (message != nullptr) {
+				_ostream
+					<< _separator << message;
+			}
+
+			_ostream
 				<< _separator << std::endl;
 		}
 
@@ -56,7 +63,7 @@ namespace abc {
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
 			// TODO:
 		}
 
@@ -78,7 +85,7 @@ namespace abc {
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
 			// TODO:
 		}
 
