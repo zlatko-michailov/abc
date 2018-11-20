@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "status.h"
 
 
@@ -14,18 +15,22 @@ namespace abc {
 
 
 	template <typename Char>
-	struct basic_log {
-		static basic_log<Char>&	global;
-		static basic_log<Char>&	critical;
+	class basic_log {
+	public:
+		static const Char* const default_separator;
 
+		static basic_log<Char>& global;
+		static basic_log<Char>& critical;
+
+	public:
 		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept = 0;
-	}; // class basic_log
+	};
 
 
 	template <typename Char>
 	class basic_slog : public basic_log<Char> {
 	public:
-		basic_slog(std::basic_streambuf<Char>* streambuf, const Char* separator) noexcept
+		basic_slog(std::basic_streambuf<Char>* streambuf, const Char* separator = basic_log<Char>::default_separator) noexcept
 			: _ostream(streambuf)
 			, _separator(separator)
 		{
@@ -35,51 +40,49 @@ namespace abc {
 		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
 			_ostream
 				<< std::right << std::fixed << std::hex << std::showbase
-				<< _separator << category
-				<< _separator << tag
-				<< _separator << status;
+				<< _separator.c_str() << category
+				<< _separator.c_str() << tag
+				<< _separator.c_str() << status;
 
+			_ostream << _separator.c_str();
 			if (message != nullptr) {
-				_ostream
-					<< _separator << message;
+				_ostream << message;
 			}
 
 			_ostream
-				<< _separator << std::endl;
+				<< _separator.c_str() << std::endl;
 		}
 
 	private:
-		std::basic_ostream<Char> _ostream;
-		const Char* _separator;
-	}; // class basic_slog
+		std::basic_ostream<Char>	_ostream;
+		std::basic_string<Char>		_separator;
+	};
 
 
 	template <typename Char>
 	class basic_flog : public basic_log<Char> {
 	public:
-		basic_flog(std::string&& path, const Char* separator) noexcept
-			: _path(std::move(path))
-			, _separator(separator)
+		basic_flog(const char* path, const Char* separator = basic_log<Char>::default_separator) noexcept
+			: _ofstream(path)
+			, _slog(_ofstream.rdbuf(), separator)
 		{
 		}
 
 		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
-			// TODO:
+			_slog.push(category, tag, status, message);
 		}
 
 	private:
-		std::string _path;
-		const Char* _separator;
-	}; // class basic_flog
+		std::basic_ofstream<Char>	_ofstream;
+		basic_slog<Char>			_slog;
+	};
 
 
 	template <typename Char>
 	class basic_rflog : public basic_log<Char> {
 	public:
-		typedef std::uint16_t	minutes;
-
-		basic_rflog(std::string&& path, minutes rminutes, const Char* separator) noexcept
-			: _path(std::move(path))
+		basic_rflog(const char* path, std::chrono::minutes rminutes, const Char* separator = basic_log<Char>::default_separator) noexcept
+			: _path(path)
 			, _rminutes(rminutes)
 			, _separator(separator)
 		{
@@ -90,10 +93,10 @@ namespace abc {
 		}
 
 	private:
-		std::string _path;
-		minutes _rminutes;
-		const Char* _separator;
-	}; // class basic_rflog
+		std::string				_path;
+		std::chrono::minutes	_rminutes;
+		std::basic_string<Char>	_separator;
+	};
 
 
 	typedef basic_log<char>			log;
@@ -109,14 +112,14 @@ namespace abc {
 	typedef basic_rflog<wchar_t>	wrflog;
 
 
-	constexpr const char*		default_log_separator	= " | ";
-	constexpr const wchar_t*	wdefault_log_separator	= L" | ";
+	template <> const char* const		log::default_separator		= " | ";
+	template <> const wchar_t* const	wlog::default_separator		= L" | ";
 
-	static slog default_global			= slog(std::cout.rdbuf(), default_log_separator);
-	static slog default_critical		= slog(std::cerr.rdbuf(), default_log_separator);
+	static slog default_global			= slog(std::cout.rdbuf());
+	static slog default_critical		= slog(std::cerr.rdbuf());
 
-	static wslog wdefault_global		= wslog(std::wcout.rdbuf(), wdefault_log_separator);
-	static wslog wdefault_critical		= wslog(std::wcerr.rdbuf(), wdefault_log_separator);
+	static wslog wdefault_global		= wslog(std::wcout.rdbuf());
+	static wslog wdefault_critical		= wslog(std::wcerr.rdbuf());
 
 	template <> log& log::global		= default_global;
 	template <> log& log::critical		= default_critical;
