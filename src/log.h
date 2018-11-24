@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 #include "status.h"
 
 
@@ -23,21 +25,21 @@ namespace abc {
 		static basic_log<Char>& critical;
 
 	public:
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept = 0;
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) = 0;
 	};
 
 
 	template <typename Char>
 	class basic_slog : public basic_log<Char> {
 	public:
-		basic_slog(std::basic_streambuf<Char>* streambuf, const Char* separator = basic_log<Char>::default_separator) noexcept
+		basic_slog(std::basic_streambuf<Char>* streambuf, const Char* separator = basic_log<Char>::default_separator)
 			: _ostream(streambuf)
 			, _separator(separator)
 		{
 		}
 
 	public:
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
 			_ostream
 				<< std::right << std::fixed << std::hex << std::showbase
 				<< _separator.c_str() << category
@@ -62,13 +64,13 @@ namespace abc {
 	template <typename Char>
 	class basic_flog : public basic_log<Char> {
 	public:
-		basic_flog(const char* path, const Char* separator = basic_log<Char>::default_separator) noexcept
+		basic_flog(const char* path, const Char* separator = basic_log<Char>::default_separator)
 			: _ofstream(path)
 			, _slog(_ofstream.rdbuf(), separator)
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
 			_slog.push(category, tag, status, message);
 		}
 
@@ -81,14 +83,35 @@ namespace abc {
 	template <typename Char>
 	class basic_rflog : public basic_log<Char> {
 	public:
-		basic_rflog(const char* path, std::chrono::minutes rminutes, const Char* separator = basic_log<Char>::default_separator) noexcept
+		basic_rflog(const char* path, std::chrono::minutes rminutes, const Char* separator = basic_log<Char>::default_separator)
 			: _path(path)
 			, _rminutes(rminutes)
 			, _separator(separator)
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) noexcept override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
+			typedef int32_t minutes_t;
+			constexpr minutes_t hours_per_day = 24;
+			constexpr minutes_t minutes_per_hour = 60;
+			constexpr minutes_t minutes_per_day = hours_per_day * minutes_per_hour;
+
+			std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+			std::chrono::minutes minutes_since_epoch = std::chrono::duration_cast<std::chrono::minutes>(now.time_since_epoch());
+
+			minutes_t minutes_of_day = static_cast<minutes_t>(minutes_since_epoch.count() % minutes_per_day);
+			minutes_t hours_of_day = minutes_of_day / minutes_per_hour;
+			minutes_t minutes_of_hour = minutes_of_day % minutes_per_hour;
+
+			std::ostringstream hh_mm;
+			hh_mm
+				<< std::setfill('0')
+        		<< std::setw(2) << hours_of_day
+				<< '_'
+        		<< std::setw(2) << minutes_of_hour;
+
+			std::string path = _path + hh_mm.str();
+
 			// TODO:
 		}
 
