@@ -18,13 +18,14 @@ void test_timestamp_date(abc::date_count_t days_since_epoch) {
 		ts.reset_date(days_since_epoch);
 	}
 
-	abc::log::global.push(test_category, test_tag, abc::status::success, "%4.4u-%2.2u-%2.2u", ts.year(), ts.month(), ts.day());
+	abc::log::diag.push(test_category, test_tag, abc::status::success, "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+		ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.nanoseconds());
 }
 
 int main() {
-	test_log(abc::log::global, "UTF-8 console");
+	test_log(abc::log::diag, "UTF-8 console");
 
-	test_log(abc::wlog::global, L"Wide char console");
+	test_log(abc::wlog::diag, L"Wide char console");
 
 	abc::flog flog("out/log.txt");
 	test_log(flog, "UTF-8 file");

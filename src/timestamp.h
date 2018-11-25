@@ -19,11 +19,17 @@ namespace abc {
 	template <typename Clock = std::chrono::system_clock, typename Duration = typename Clock::duration>
 	class timestamp {
 	private:
-		static constexpr category_t category = 0x0003;
-
 		static constexpr nanosecond_t max_nanosecond = 999999999;
 		static constexpr nanosecond_t min_nanosecond = 0;
 		static constexpr nanosecond_t nanosecond_count = max_nanosecond - min_nanosecond + 1;
+
+		static constexpr microsecond_t max_microsecond = 999999;
+		static constexpr microsecond_t min_microsecond = 0;
+		static constexpr microsecond_t microsecond_count = max_microsecond - min_microsecond + 1;
+
+		static constexpr millisecond_t max_millisecond = 999;
+		static constexpr millisecond_t min_millisecond = 0;
+		static constexpr millisecond_t millisecond_count = max_millisecond - min_millisecond + 1;
 
 		static constexpr second_t max_second = 59;
 		static constexpr second_t min_second = 0;
@@ -55,9 +61,16 @@ namespace abc {
 		static constexpr date_count_t days_per_400_years = days_per_100_years_leap + 3 * days_per_100_years;
 
 	public:
-		year_t year() const noexcept { return _year; }
-		month_t month() const noexcept { return _month; }
-		day_t day() const noexcept { return _day; }
+		year_t			year() const noexcept { return _year; }
+		month_t			month() const noexcept { return _month; }
+		day_t			day() const noexcept { return _day; }
+
+		hour_t			hours() const noexcept { return _hours; }
+		minute_t		minutes() const noexcept { return _minutes; }
+		second_t		seconds() const noexcept { return _seconds; }
+		millisecond_t	milliseconds() const noexcept { return _milliseconds; }
+		microsecond_t	microseconds() const noexcept { return _microseconds; }
+		nanosecond_t	nanoseconds() const noexcept { return _nanoseconds; }
 
 	public:
 		timestamp() noexcept 
@@ -105,150 +118,164 @@ namespace abc {
 
 			// There is a well-known number of days per 400 years.
 			if (remaining_days >= days_per_400_years) {
-				abc::log::global.push(category, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year += 400 * (remaining_days / days_per_400_years);
 				remaining_days = remaining_days % days_per_400_years;
-				abc::log::global.push(category, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// The first century bounary is leap.
 			if (remaining_days >= days_per_100_years_leap) {
-				abc::log::global.push(category, 0x0021, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0021, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year += 100;
 				remaining_days -= days_per_100_years_leap;
-				abc::log::global.push(category, 0x0022, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0022, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// The following century boundaries are not leap.
 			// We artificailly make them leap.
 			if (remaining_days >= days_per_100_years) {
-				abc::log::global.push(category, 0x0031, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0031, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				remaining_days += (remaining_days / days_per_100_years);
-				abc::log::global.push(category, 0x0032, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0032, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// Now we have homogenious 4-year chunks.
 			if (remaining_days >= days_per_4_years) {
-				abc::log::global.push(category, 0x0041, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0041, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year += 4 * (remaining_days / days_per_4_years);
 				remaining_days = remaining_days % days_per_4_years;
-				abc::log::global.push(category, 0x0042, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0042, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// Out of any remaining years, the first one is not leap.
 			if (remaining_days >= days_per_1_year) {
-				abc::log::global.push(category, 0x0051, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0051, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year++;
 				remaining_days -= days_per_1_year;
-				abc::log::global.push(category, 0x0052, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0052, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// The second year is leap.
 			if (remaining_days >= days_per_1_year_leap) {
-				abc::log::global.push(category, 0x0061, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0061, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year++;
 				remaining_days -= days_per_1_year_leap;
-				abc::log::global.push(category, 0x0062, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0062, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// The remaining year(s) are not leap.
 			if (remaining_days >= days_per_1_year) {
-				abc::log::global.push(category, 0x0071, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0071, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 				year += (remaining_days / days_per_1_year);
 				remaining_days = remaining_days % days_per_1_year;
-				abc::log::global.push(category, 0x0072, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
+				abc::log::diag.push(abc::category::log, 0x0072, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			}
 
 			// The remaining days are within 1 year (and we are based at Mar 1).
 
 			// Mar
-			abc::log::global.push(category, 0x0081, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0081, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Apr
-			abc::log::global.push(category, 0x0082, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0082, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 30)) {
 				return;
 			}
 
 			// May
-			abc::log::global.push(category, 0x0083, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0083, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Jun
-			abc::log::global.push(category, 0x0084, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0084, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 30)) {
 				return;
 			}
 
 			// Jul
-			abc::log::global.push(category, 0x0085, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0085, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Aug
-			abc::log::global.push(category, 0x0086, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0086, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Sep
-			abc::log::global.push(category, 0x0087, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0087, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 30)) {
 				return;
 			}
 
 			// Oct
-			abc::log::global.push(category, 0x0088, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0088, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Nov
-			abc::log::global.push(category, 0x0089, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x0089, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 30)) {
 				return;
 			}
 
 			// Dec
-			abc::log::global.push(category, 0x008a, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x008a, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Jan
-			abc::log::global.push(category, 0x008b, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x008b, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 31)) {
 				return;
 			}
 
 			// Feb
-			abc::log::global.push(category, 0x008c, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::log::diag.push(abc::category::log, 0x008c, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			if (reset_date_if_done(year, month, day, remaining_days, 29)) {
 				return;
 			}
 
 			// TODO: assert unreachable
-			abc::log::global.push(category, 0x008d, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
-		}
-
-		void reset_date(year_t year, month_t month, day_t day) noexcept {
-			_year = year;
-			_month = month;
-			_day = day;
+			abc::log::diag.push(abc::category::log, 0x008d, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		}
 
 		void reset_time(time_count_t nanoseconds_since_midnight) noexcept {
-			time_count_t remaining_nanoseconds = nanoseconds_since_midnight;
-			abc::log::global.push(category, 0x0201, abc::status::debug, "remaing_nanoseconds=%lld", remaining_nanoseconds);
-			abc::log::global.push(category, 0x0202, abc::status::debug, "hours=%lld, minutes=%lld", 
-				remaining_nanoseconds / nanosecond_count / second_count / minute_count,
-				(remaining_nanoseconds / nanosecond_count / second_count) % (time_count_t)minute_count);
+			// TODO: assert if nanoseconds_since_midnight >= nanoseconds_per_day
+			time_count_t remaining = nanoseconds_since_midnight % nanoseconds_per_day;
+			abc::log::diag.push(abc::category::log, 0x0201, abc::status::debug, "remaing=%lld", remaining);
+
+			time_count_t nanoseconds = remaining % nanosecond_count;
+			remaining = remaining / millisecond_count;
+
+			time_count_t microseconds = remaining % microsecond_count;
+			remaining = remaining / millisecond_count;
+
+			time_count_t milliseconds = remaining % millisecond_count;
+			remaining = remaining / millisecond_count;
+
+			time_count_t seconds = remaining % second_count;
+			remaining = remaining / second_count;
+
+			time_count_t minutes = remaining % minute_count;
+			remaining = remaining / minute_count;
+
+			time_count_t hours = remaining % hour_count;
+
+			abc::log::diag.push(abc::category::log, 0x0202, abc::status::debug, "hours=%lld, minutes=%lld, seconds=%lld, milliseconds=%lld, microsconds=%lld, nanoseconds=%lld", 
+				hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
+
+			reset_time(hours, minutes, seconds, nanoseconds);
 		}
 
 	private:
@@ -256,7 +283,7 @@ namespace abc {
 			if (remaining_days < days_in_1_month) {
 				day += remaining_days;
 
-				abc::log::global.push(category, 0x0100, abc::status::debug, "year=%d, month=%d, day=%d", year, month, day);
+				abc::log::diag.push(abc::category::log, 0x0100, abc::status::debug, "year=%d, month=%d, day=%d", year, month, day);
 				reset_date(year, month, day);
 				return true;
 			}
@@ -267,9 +294,24 @@ namespace abc {
 			}
 
 			remaining_days -= days_in_1_month;
-			abc::log::global.push(category, 0x00ff, abc::status::debug, "year=%d, month=%d, day=%d", year, month, day);
+			abc::log::diag.push(abc::category::log, 0x00ff, abc::status::debug, "year=%d, month=%d, day=%d", year, month, day);
 
 			return false;
+		}
+
+		void reset_date(year_t year, month_t month, day_t day) noexcept {
+			_year = year;
+			_month = month;
+			_day = day;
+		}
+
+		void reset_time(hour_t hours, minute_t minutes, second_t seconds, nanosecond_t nanoseconds) noexcept {
+			_hours = hours;
+			_minutes = minutes;
+			_seconds = seconds;
+			_milliseconds = nanoseconds / microsecond_count;
+			_microseconds = nanoseconds / millisecond_count;
+			_nanoseconds = nanoseconds;
 		}
 
 	private:
@@ -280,6 +322,8 @@ namespace abc {
 		hour_t			_hours;
 		minute_t		_minutes;
 		second_t		_seconds;
+		millisecond_t	_milliseconds;
+		microsecond_t	_microseconds;
 		nanosecond_t	_nanoseconds;
 	};
 }

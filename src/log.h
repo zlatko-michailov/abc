@@ -17,13 +17,19 @@ namespace abc {
 	typedef std::uint16_t	category_t;
 	typedef std::uint32_t	tag_t;
 
+	namespace category {
+		static const category_t log		= 0x0001;
+
+		static const category_t custom	= 0x8000;
+	}
+
 
 	template <typename Char>
 	class basic_log {
 	public:
 		static const Char* const default_separator;
 
-		static basic_log<Char>& global;
+		static basic_log<Char>& diag;
 		static basic_log<Char>& critical;
 
 	public:
@@ -165,16 +171,16 @@ namespace abc {
 	template <> const char* const		log::default_separator		= " | ";
 	template <> const wchar_t* const	wlog::default_separator		= L" | ";
 
-	static slog default_global			= slog(std::cout.rdbuf());
+	static slog default_diag			= slog(std::cout.rdbuf());
 	static slog default_critical		= slog(std::cerr.rdbuf());
 
-	static wslog wdefault_global		= wslog(std::wcout.rdbuf());
+	static wslog wdefault_diag			= wslog(std::wcout.rdbuf());
 	static wslog wdefault_critical		= wslog(std::wcerr.rdbuf());
 
-	template <> log& log::global		= default_global;
+	template <> log& log::diag			= default_diag;
 	template <> log& log::critical		= default_critical;
 
-	template <> wlog& wlog::global		= wdefault_global;
+	template <> wlog& wlog::diag		= wdefault_diag;
 	template <> wlog& wlog::critical	= wdefault_critical;
 
 } // namespce abc
