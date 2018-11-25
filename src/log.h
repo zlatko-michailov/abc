@@ -61,7 +61,7 @@ namespace abc {
 		void push(category_t category, tag_t tag, status_t status, const char* format, va_list vlist) {
 			char buffer[buffer_capacity];
 
-			snprintf(buffer, sizeof(buffer) / sizeof(char), "0x%4.4x%s0x%8.8x%s0x%4.4x%s", category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
+			snprintf(buffer, sizeof(buffer) / sizeof(char), "%s0x%4.4x%s0x%8.8x%s0x%4.4x%s", _separator.c_str(), category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
 			_ostream << buffer;
 
 			if (format != nullptr) {
@@ -76,7 +76,7 @@ namespace abc {
 		void push(category_t category, tag_t tag, status_t status, const wchar_t* format, va_list vlist) {
 			wchar_t buffer[buffer_capacity];
 
-			swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"0x%4.4x%ls0x%8.8x%ls0x%4.4x%ls", category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
+			swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"%ls0x%4.4x%ls0x%8.8x%ls0x%4.4x%ls", _separator.c_str(), category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
 			_ostream << buffer;
 
 			if (format != nullptr) {
@@ -101,6 +101,18 @@ namespace abc {
 			: _ofstream(path)
 			, _slog(_ofstream.rdbuf(), separator)
 		{
+			_ofstream
+				 << separator << "categ."
+				 << separator << "   tag    "
+				 << separator << "status"
+				 << separator << "message"
+				 << separator << std::endl
+
+				 << separator << "------"
+				 << separator << "----------"
+				 << separator << "------"
+				 << separator << "-------"
+				 << separator << std::endl;
 		}
 
 		virtual void push(category_t category, tag_t tag, status_t status, const Char* format = nullptr, ...) override {
