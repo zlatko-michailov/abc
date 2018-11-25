@@ -11,6 +11,7 @@ namespace abc {
 	namespace severity {
 		static const status_t mask		= 0xF000;
 
+		static const status_t abc		= 0x1000;
 		static const status_t verbose	= 0x4000;
 		static const status_t info		= 0x7000;
 		static const status_t warning	= 0xA000;
@@ -21,8 +22,10 @@ namespace abc {
 	namespace status {
 		static const status_t custom			= 0x800;
 
-		static const status_t success			= severity::info | 0x000;
-		static const status_t custom_success	= severity::info | custom;
+		static const status_t debug				= severity::abc | 0x001;
+
+		static const status_t success			= severity::verbose | 0x0000;
+		static const status_t custom_verbose	= severity::verbose | custom;
 
 		static const status_t bad_input			= severity::warning | 0x001;
 		static const status_t not_ready			= severity::warning | 0x002;

@@ -7,6 +7,8 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <cstdarg>
+#include <cstdio>
 #include "status.h"
 
 
@@ -25,12 +27,15 @@ namespace abc {
 		static basic_log<Char>& critical;
 
 	public:
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) = 0;
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr, ...) = 0;
 	};
 
 
 	template <typename Char>
 	class basic_slog : public basic_log<Char> {
+	private:
+		static constexpr size_t buffer_capacity = 4 * 1024 + 1;
+
 	public:
 		basic_slog(std::basic_streambuf<Char>* streambuf, const Char* separator = basic_log<Char>::default_separator)
 			: _ostream(streambuf)
@@ -39,16 +44,38 @@ namespace abc {
 		}
 
 	public:
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
-			_ostream
-				<< std::right << std::fixed << std::hex << std::showbase
-				<< _separator.c_str() << category
-				<< _separator.c_str() << tag
-				<< _separator.c_str() << status;
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* format = nullptr, ...) override {
+			va_list vlist;
+			va_start(vlist, format);
 
-			_ostream << _separator.c_str();
-			if (message != nullptr) {
-				_ostream << message;
+			push(category, tag, status, format, vlist);
+		}
+
+	protected:
+		void push(category_t category, tag_t tag, status_t status, const char* format, va_list vlist) {
+			char buffer[buffer_capacity];
+
+			snprintf(buffer, sizeof(buffer) / sizeof(char), "0x%4.4x%s0x%8.8x%s0x%4.4x%s", category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
+			_ostream << buffer;
+
+			if (format != nullptr) {
+				vsnprintf(buffer, sizeof(buffer) / sizeof(char), format, vlist);
+				_ostream << buffer;
+			}
+
+			_ostream
+				<< _separator.c_str() << std::endl;
+		}
+
+		void push(category_t category, tag_t tag, status_t status, const wchar_t* format, va_list vlist) {
+			wchar_t buffer[buffer_capacity];
+
+			swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"0x%4.4x%ls0x%8.8x%ls0x%4.4x%ls", category, _separator.c_str(), tag, _separator.c_str(), status, _separator.c_str());
+			_ostream << buffer;
+
+			if (format != nullptr) {
+				vswprintf(buffer, sizeof(buffer) / sizeof(wchar_t), format, vlist);
+				_ostream << buffer;
 			}
 
 			_ostream
@@ -70,8 +97,8 @@ namespace abc {
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
-			_slog.push(category, tag, status, message);
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* format = nullptr, ...) override {
+			_slog.push(category, tag, status, format);
 		}
 
 	private:
@@ -90,7 +117,7 @@ namespace abc {
 		{
 		}
 
-		virtual void push(category_t category, tag_t tag, status_t status, const Char* message = nullptr) override {
+		virtual void push(category_t category, tag_t tag, status_t status, const Char* format = nullptr, ...) override {
 			typedef int32_t minutes_t;
 			constexpr minutes_t hours_per_day = 24;
 			constexpr minutes_t minutes_per_hour = 60;
