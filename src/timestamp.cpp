@@ -61,49 +61,42 @@ namespace abc {
 	}
 
 
-	bool basic_timestamp::operator==(const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator==(const basic_timestamp& other) const noexcept {
 		return _days_since_epoch == other._days_since_epoch
 			&& _nanoseconds_since_midnight == other._nanoseconds_since_midnight;
 	}
 
 
-	bool basic_timestamp::operator!=(const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator!=(const basic_timestamp& other) const noexcept {
 		return !operator==(other);
 	}
 
 
-	bool basic_timestamp::operator> (const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator> (const basic_timestamp& other) const noexcept {
 		return (_days_since_epoch > other._days_since_epoch)
 			|| (_days_since_epoch == other._days_since_epoch
 				&& _nanoseconds_since_midnight > other._nanoseconds_since_midnight);
 	}
 
 
-	bool basic_timestamp::operator>=(const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator>=(const basic_timestamp& other) const noexcept {
 		return (_days_since_epoch > other._days_since_epoch)
 			|| (_days_since_epoch == other._days_since_epoch
 				&& _nanoseconds_since_midnight >= other._nanoseconds_since_midnight);
 	}
 
 
-	bool basic_timestamp::operator< (const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator< (const basic_timestamp& other) const noexcept {
 		return !operator>=(other);
 	}
 
 
-	bool basic_timestamp::operator<=(const basic_timestamp& other) const noexcept
-	{
+	bool basic_timestamp::operator<=(const basic_timestamp& other) const noexcept {
 		return !operator>(other);
 	}
 
 
-	basic_timestamp basic_timestamp::coerse_minutes(std::chrono::minutes::rep minutes) const noexcept
-	{
+	basic_timestamp basic_timestamp::coerse_minutes(std::chrono::minutes::rep minutes) const noexcept {
 		time_count_t minutes_since_midnight = _nanoseconds_since_midnight / nanoseconds_per_minute;
 		time_count_t coersed_minutes_since_midnight = (minutes_since_midnight / minutes) * minutes;
 		time_count_t coersed_nanoseconds_since_midnight = coersed_minutes_since_midnight * nanoseconds_per_minute;
