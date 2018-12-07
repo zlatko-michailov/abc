@@ -10,6 +10,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include "base.h"
+#include "timestamp.h"
 
 
 namespace abc {
@@ -18,6 +19,7 @@ namespace abc {
 	public:
 		static constexpr const char*				default_separator	= " | ";
 		static constexpr std::chrono::minutes::rep	no_rotation			= 0;
+		static constexpr size_t						max_path			= 4 * 1024;
 
 	public:
 		static basic_log& diag;
@@ -57,13 +59,14 @@ namespace abc {
 		status_t push(severity_t severity, category_t category, tag_t tag, status_t status, const wchar_t* format, ...) noexcept;
 
 	private:
-		status_t ensure_f() noexcept;
+		status_t prepare_push(severity_t severity, int fwide_sign) noexcept;
 
 	private:
 		std::FILE*					_f;
 		const char*					_separator;
 		const char*					_path;
 		std::chrono::minutes::rep	_rotation_minutes;
+		timestamp<>					_rotation_timestamp;
 	};
 
 

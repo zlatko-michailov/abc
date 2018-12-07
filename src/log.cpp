@@ -8,9 +8,12 @@
 
 namespace abc {
 
+	static constexpr int fwide_char = -1;
+	static constexpr int fwide_wide = +1;
+
+
 	basic_log::~basic_log() noexcept {
 		if (_f != nullptr) {
-			std::fflush(_f);
 			std::fclose(_f);
 			_f = nullptr;
 		}
@@ -23,16 +26,9 @@ namespace abc {
 
 
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept {
-		// TODO: Filter by severity
-
-		status_t st = ensure_f();
-		if (status::failed(st)) {
+		status_t st = prepare_push(severity, fwide_char);
+		if (st != status::success) {
 			return st;
-		}
-
-		if (std::fwide(_f, 0) > 0)
-		{
-			return status::bad_state;
 		}
 
 		std::fprintf(_f, "%s0x%4.4x%s0x%8.8x%s0x%4.4x%s", _separator, category, _separator, tag, _separator, status, _separator);
@@ -51,16 +47,9 @@ namespace abc {
 
 
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const wchar_t* format, ...) noexcept {
-		// TODO: Filter by severity
-		
-		status_t st = ensure_f();
-		if (status::failed(st)) {
+		status_t st = prepare_push(severity, fwide_wide);
+		if (st != status::success) {
 			return st;
-		}
-
-		if (std::fwide(_f, 0) < 0)
-		{
-			return status::bad_state;
 		}
 
 		std::fwprintf(_f, L"%hs0x%4.4x%hs0x%8.8x%hs0x%4.4x%hs", _separator, category, _separator, tag, _separator, status, _separator);
@@ -78,18 +67,45 @@ namespace abc {
 	}
 
 
-	status_t basic_log::ensure_f() noexcept {
-		// TODO: rotation
+	status_t basic_log::prepare_push(severity_t severity, int fwide_sign) noexcept {
+		// Filter by severity.
+		if (severity < min_severity) {
+			return status::ignored;
+		}
 
+		// Adjust rotation, if needed.
+		if (_rotation_minutes > no_rotation) {
+			timestamp current_timestamp;
+			timestamp expected_rotation_timestamp = current_timestamp.coerse_minutes(_rotation_minutes);
+			if (_rotation_timestamp != expected_rotation_timestamp) {
+				_rotation_timestamp = expected_rotation_timestamp;
+
+				if (_f != nullptr) {
+					std::fclose(_f);
+					_f = nullptr;
+				}
+			}
+		}
+
+		// Re-open the file, if needed.
 		if (_f == nullptr) {
 			if (_path == nullptr) {
 				return status::assert_failed;
 			}
 
-			_f = std::fopen(_path, "w+");
+			char path[max_path + 1];
+			std::snprintf(path, sizeof(path) / sizeof(char), "%s_%4.4u%2.2u%2.2u_%2.2u%2.2u.log", _path,
+				_rotation_timestamp.year(), _rotation_timestamp.month(), _rotation_timestamp.day(), _rotation_timestamp.hours(), _rotation_timestamp.minutes());
+
+			_f = std::fopen(path, "w+");
 			if (_f == nullptr) {
 				return status::bad_state;
 			}
+		}
+
+		// Check wide-ness of the file.
+		if (std::fwide(_f, 0) * fwide_sign < 0) {
+			return status::bad_state;
 		}
 
 		return status::success;

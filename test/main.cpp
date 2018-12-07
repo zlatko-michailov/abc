@@ -45,10 +45,10 @@ int main() {
 
 	test_log(abc::log::diag, L"Wide char console");
 
-	abc::log flog("out/log.txt");
+	abc::log flog("out/log", 3);
 	test_log(flog, "UTF-8 file");
 
-	abc::log wflog("out/wlog.txt");
+	abc::log wflog("out/wlog", 4);
 	test_log(wflog, L"Wide char file");
 
 	test_timestamp(-1);
