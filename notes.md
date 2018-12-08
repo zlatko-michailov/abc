@@ -3,16 +3,15 @@ base: status, severity category
 macros
 timestamp
 	- diag
+spin_mutex
 
 log
-	- lock (push)
 	- push_async
-	- process
+	- ...........
 	- thread
 	- request
 	- field_mask
 
-spin_mutex
 
 
 sequence (request/correlation)

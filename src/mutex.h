@@ -78,7 +78,7 @@ namespace abc {
 		}
 
 	public:
-		status_t operator() noexcept {
+		status_t status() const noexcept {
 			return _st;
 		}
 

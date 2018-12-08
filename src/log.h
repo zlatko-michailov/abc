@@ -11,6 +11,7 @@
 #include <cstdio>
 #include "base.h"
 #include "timestamp.h"
+#include "mutex.h"
 
 
 namespace abc {
@@ -68,6 +69,7 @@ namespace abc {
 		const char*					_path;
 		std::chrono::minutes::rep	_rotation_minutes;
 		timestamp<>					_rotation_timestamp;
+		spin_mutex<spin_for::disk>	_mutex;
 	};
 
 

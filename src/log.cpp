@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include "base.h"
 #include "timestamp.h"
+#include "mutex.h"
 #include "log.h"
 #include "macros.h"
 
@@ -33,6 +34,11 @@ namespace abc {
 
 
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept {
+		status_lock lock(_mutex);
+		if (status::failed(lock.status())) {
+			return lock.status();
+		}
+
 		status_t st = prepare_push(severity, fwide_char);
 		if (st != status::success) {
 			return st;
@@ -60,6 +66,11 @@ namespace abc {
 
 
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const wchar_t* format, ...) noexcept {
+		status_lock lock(_mutex);
+		if (status::failed(lock.status())) {
+			return lock.status();
+		}
+
 		status_t st = prepare_push(severity, fwide_wide);
 		if (st != status::success) {
 			return st;
