@@ -54,6 +54,7 @@ namespace abc {
 	public:
 		severity_t min_severity = severity::warning;
 
+		template<typename Char = char>
 		status_t push(severity_t severity, category_t category, tag_t tag, status_t status) noexcept;
 		status_t push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept;
 		status_t push(severity_t severity, category_t category, tag_t tag, status_t status, const wchar_t* format, ...) noexcept;

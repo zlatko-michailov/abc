@@ -11,7 +11,7 @@ template <typename Char>
 void test_log(abc::basic_log& log, const Char* message) {
 	log.min_severity = abc::severity::info;
 
-	log.push(abc::severity::info, test_category, test_tag, abc::status::success);
+	log.push<Char>(abc::severity::info, test_category, test_tag, abc::status::success);
 	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, message);
 }
 
