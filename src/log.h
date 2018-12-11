@@ -16,6 +16,20 @@
 
 namespace abc {
 
+	typedef std::uint64_t field_t;
+
+	namespace field {
+		constexpr field_t all			= -1;
+
+		constexpr field_t timestamp		= 0x01;
+		constexpr field_t category		= 0x02;
+		constexpr field_t thread		= 0x04;
+		constexpr field_t tag			= 0x08;
+		constexpr field_t status		= 0x10;
+		constexpr field_t request		= 0x20;
+	}
+
+
 	class basic_log {
 	public:
 		static constexpr const char*				default_separator	= " | ";
@@ -53,7 +67,8 @@ namespace abc {
 		}
 
 	public:
-		severity_t min_severity = severity::warning;
+		field_t		filed_mask		= field::all;
+		severity_t	min_severity	= severity::warning;
 
 		template<typename Char = char>
 		status_t push(severity_t severity, category_t category, tag_t tag, status_t status) noexcept;

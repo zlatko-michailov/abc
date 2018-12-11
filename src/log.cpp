@@ -44,13 +44,22 @@ namespace abc {
 			return st;
 		}
 
-		if (min_severity > severity::debug_abc) {
+		if ((filed_mask & field::timestamp) != 0 && min_severity > severity::debug_abc) {
 			timestamp ts;
-			std::fprintf(_f, "%s%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u",
-				_separator, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
+			std::fprintf(_f, "%s%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u", _separator, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
 		}
 
-		std::fprintf(_f, "%s0x%4.4x%s0x%8.8x%s0x%4.4x%s", _separator, category, _separator, tag, _separator, status, _separator);
+		if ((filed_mask & field::category) != 0) {
+			std::fprintf(_f, "%s0x%4.4x", _separator, category);
+		}
+
+		if ((filed_mask & field::tag) != 0) {
+			std::fprintf(_f, "%s0x%8.8x", _separator, tag);
+		}
+
+		if ((filed_mask & field::status) != 0) {
+			std::fprintf(_f, "%s0x%4.4x", _separator, status);
+		}
 
 		if (format != nullptr) {
 			va_list vlist;
@@ -59,7 +68,11 @@ namespace abc {
 			std::vfprintf(_f, format, vlist);
 		}
 
-		std::fprintf(_f, "\n");
+		if (filed_mask != 0) {
+			std::fputs(_separator, _f);
+		}
+
+		std::fputs("\n", _f);
 
 		return status::success;
 	}
