@@ -62,6 +62,10 @@ namespace abc {
 		}
 
 		if (format != nullptr) {
+			if (filed_mask != 0) {
+				std::fputs(_separator, _f);
+			}
+
 			va_list vlist;
 			va_start(vlist, format);
 
