@@ -1,6 +1,9 @@
+#include <thread>
+#include <ostream>
 #include "../src/base.h"
 #include "../src/log.h"
 #include "../src/timestamp.h"
+#include "../src/streambuf.h"
 
 
 constexpr abc::category_t	test_category	= 0x1234;
@@ -14,6 +17,11 @@ void test_log(abc::basic_log& log, const Char* message) {
 
 	log.push<Char>(abc::severity::info, test_category, test_tag, abc::status::success);
 	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, message);
+
+	abc::arraybuf<50> buf;
+	std::ostream s(&buf);
+	s << std::hex << std::this_thread::get_id();
+	log.push(abc::severity::info, test_category, test_tag, abc::status::success, "thread_id=%s", buf.c_str());
 }
 
 
@@ -24,7 +32,7 @@ void test_timestamp(abc::date_count_t days_since_epoch) {
 		ts.reset_date(days_since_epoch);
 	}
 
-	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts =%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
 		ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.nanoseconds());
 
 	abc::timestamp ts2(ts);
