@@ -22,6 +22,11 @@ void test_log(abc::basic_log& log, const Char* message) {
 	std::ostream s(&buf);
 	s << std::hex << std::this_thread::get_id();
 	log.push(abc::severity::info, test_category, test_tag, abc::status::success, "thread_id=%s", buf.c_str());
+
+	abc::arraybuf<50> buf2;
+	std::ostream s2(&buf2);
+	s2 << std::hex << "1234_abc " << std::hex << "xyz_5678";
+	log.push(abc::severity::info, test_category, test_tag, abc::status::success, "mismatch=%s", buf2.c_str());
 }
 
 

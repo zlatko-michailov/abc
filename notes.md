@@ -4,11 +4,10 @@ macros
 timestamp
 	- diag
 spin_mutex
-
 arraybuf
+
 log
-	- thread
-	- char
+	- char (only)
 	- api
 	- push_async
 	- ...........

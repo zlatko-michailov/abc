@@ -1,8 +1,11 @@
 #include <cstdio>
 #include <cstdarg>
+#include <thread>
+#include <ostream>
 #include "base.h"
 #include "timestamp.h"
 #include "mutex.h"
+#include "streambuf.h"
 #include "log.h"
 #include "macros.h"
 
@@ -51,6 +54,15 @@ namespace abc {
 
 		if ((filed_mask & field::category) != 0) {
 			std::fprintf(_f, "%s0x%4.4x", _separator, category);
+		}
+
+		if ((filed_mask & field::thread) != 0) {
+			abc::arraybuf<20> buf;
+			std::ostream stream(&buf);
+			stream << std::hex << std::this_thread::get_id();
+
+			std::fputs(_separator, _f);
+			std::fputs(buf.c_str(), _f);
 		}
 
 		if ((filed_mask & field::tag) != 0) {
