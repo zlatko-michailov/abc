@@ -70,8 +70,7 @@ namespace abc {
 		field_t		filed_mask		= field::all;
 		severity_t	min_severity	= severity::warning;
 
-		status_t push(severity_t severity, category_t category, tag_t tag, status_t status) noexcept;
-		status_t push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept;
+		status_t push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format = nullptr, ...) noexcept;
 
 	private:
 		status_t prepare_push(severity_t severity, int fwide_sign) noexcept;

@@ -24,11 +24,6 @@ namespace abc {
 	}
 
 
-	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status) noexcept {
-		return push(severity, category, tag, status, static_cast<const char*>(nullptr));
-	}
-
-
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept {
 		status_lock lock(_mutex);
 		if (status::failed(lock.status())) {
