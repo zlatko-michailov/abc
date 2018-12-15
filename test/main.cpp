@@ -10,13 +10,15 @@ constexpr abc::category_t	test_category	= 0x1234;
 constexpr abc::tag_t		test_tag		= 0x567890ab;
 
 
-template <typename Char>
-void test_log(abc::basic_log& log, const Char* message) {
+void test_log(abc::basic_log& log) {
 	log.min_severity = abc::severity::info;
 	log.filed_mask = (abc::field::all & ~abc::field::status);
 
-	log.push<Char>(abc::severity::info, test_category, test_tag, abc::status::success);
-	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, message);
+	log.push(abc::severity::info, test_category, test_tag, abc::status::success);
+
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "1 of 3: inline");
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "2 of 3: %s", "UTF-8");
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "3 of 3: %ls", L"wide");
 
 	abc::arraybuf<50> buf;
 	std::ostream s(&buf);
@@ -27,6 +29,8 @@ void test_log(abc::basic_log& log, const Char* message) {
 	std::ostream s2(&buf2);
 	s2 << std::hex << "1234_abc " << std::hex << "xyz_5678";
 	log.push(abc::severity::info, test_category, test_tag, abc::status::success, "mismatch=%s", buf2.c_str());
+
+	log.push(abc::severity::info, test_category, test_tag, abc::status::success);
 }
 
 
@@ -55,15 +59,10 @@ void test_timestamp(abc::date_count_t days_since_epoch) {
 
 
 int main() {
-	test_log(abc::log::diag, "UTF-8 console");
-
-	test_log(abc::log::diag, L"Wide char console");
+	test_log(abc::log::diag);
 
 	abc::log flog("out/log", 3);
-	test_log(flog, "UTF-8 file");
-
-	abc::log wflog("out/wlog", 4);
-	test_log(wflog, L"Wide char file");
+	test_log(flog);
 
 	test_timestamp(-1);
 	test_timestamp(0);

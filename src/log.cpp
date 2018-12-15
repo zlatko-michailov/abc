@@ -24,15 +24,8 @@ namespace abc {
 	}
 
 
-	template <>
-	status_t basic_log::push<char>(severity_t severity, category_t category, tag_t tag, status_t status) noexcept {
+	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status) noexcept {
 		return push(severity, category, tag, status, static_cast<const char*>(nullptr));
-	}
-
-
-	template <>
-	status_t basic_log::push<wchar_t>(severity_t severity, category_t category, tag_t tag, status_t status) noexcept {
-		return push(severity, category, tag, status, static_cast<const wchar_t*>(nullptr));
 	}
 
 
@@ -89,38 +82,6 @@ namespace abc {
 		}
 
 		std::fputs("\n", _f);
-
-		return status::success;
-	}
-
-
-	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const wchar_t* format, ...) noexcept {
-		status_lock lock(_mutex);
-		if (status::failed(lock.status())) {
-			return lock.status();
-		}
-
-		status_t st = prepare_push(severity, fwide_wide);
-		if (st != status::success) {
-			return st;
-		}
-
-		if (min_severity > severity::debug_abc) {
-			timestamp ts;
-			std::fwprintf(_f, L"%hs%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u",
-				_separator, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
-		}
-
-		std::fwprintf(_f, L"%hs0x%4.4x%hs0x%8.8x%hs0x%4.4x%hs", _separator, category, _separator, tag, _separator, status, _separator);
-
-		if (format != nullptr) {
-			va_list vlist;
-			va_start(vlist, format);
-
-			std::vfwprintf(_f, format, vlist);
-		}
-
-		std::fwprintf(_f, L"\n");
 
 		return status::success;
 	}

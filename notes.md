@@ -7,10 +7,9 @@ spin_mutex
 arraybuf
 
 log
-	- char (only)
-	- api
 	- push_async
 	- ...........
+	- api
 	- request
 
 test
