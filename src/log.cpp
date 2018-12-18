@@ -24,7 +24,38 @@ namespace abc {
 	}
 
 
+	std::future<status_t> basic_log::push_async(severity_t severity, category_t category, tag_t tag, status_t status) noexcept {
+		std::thread::id thread_id = std::this_thread::get_id();
+
+		return std::async(
+			[this, severity, category, tag, status, thread_id]() noexcept -> status_t {
+				return this->push(severity, category, tag, status, thread_id, nullptr, false, nullptr);
+			});
+	}
+
+
+	std::future<status_t> basic_log::push_async(severity_t severity, category_t category, tag_t tag, status_t status, std::string&& formatted) noexcept {
+		std::thread::id thread_id = std::this_thread::get_id();
+
+		return std::async(
+			[this, severity, category, tag, status, thread_id, formatted = std::move(formatted)]() mutable noexcept -> status_t {
+				return this->push(severity, category, tag, status, thread_id, formatted.c_str(), false, nullptr);
+			});
+	}
+
+
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, const char* format, ...) noexcept {
+		va_list vlist;
+		va_start(vlist, format);
+
+		status_t st = push(severity, category, tag, status, std::this_thread::get_id(), format, true, vlist);
+
+		va_end(vlist);
+		return st;
+	}
+
+
+	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, std::thread::id thread_id, const char* custom, bool use_vlist, va_list vlist) noexcept {
 		status_lock lock(_mutex);
 		if (status::failed(lock.status())) {
 			return lock.status();
@@ -44,6 +75,14 @@ namespace abc {
 			std::fprintf(_f, "%s0x%4.4x", _separator, category);
 		}
 
+		if ((filed_mask & field::tag) != 0) {
+			std::fprintf(_f, "%s0x%8.8x", _separator, tag);
+		}
+
+		if ((filed_mask & field::status) != 0) {
+			std::fprintf(_f, "%s0x%4.4x", _separator, status);
+		}
+
 		if ((filed_mask & field::thread) != 0) {
 			abc::arraybuf<20> buf;
 			std::ostream stream(&buf);
@@ -53,23 +92,17 @@ namespace abc {
 			std::fputs(buf.c_str(), _f);
 		}
 
-		if ((filed_mask & field::tag) != 0) {
-			std::fprintf(_f, "%s0x%8.8x", _separator, tag);
-		}
-
-		if ((filed_mask & field::status) != 0) {
-			std::fprintf(_f, "%s0x%4.4x", _separator, status);
-		}
-
-		if (format != nullptr) {
+		if (custom != nullptr) {
 			if (filed_mask != 0) {
 				std::fputs(_separator, _f);
 			}
 
-			va_list vlist;
-			va_start(vlist, format);
-
-			std::vfprintf(_f, format, vlist);
+			if (use_vlist) {
+				std::vfprintf(_f, custom, vlist);
+			}
+			else {
+				std::fputs(custom, _f);
+			}
 		}
 
 		if (filed_mask != 0) {

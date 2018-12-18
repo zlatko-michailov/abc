@@ -5,16 +5,13 @@ timestamp
 	- diag
 spin_mutex
 arraybuf
-
 log
-	- push_async
-	- ...........
 	- api
 	- request
 
 test
-sequence (request/correlation)
 usage
+uuid (request/correlation)
 
 tag
 

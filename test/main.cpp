@@ -16,9 +16,10 @@ void test_log(abc::basic_log& log) {
 
 	log.push(abc::severity::info, test_category, test_tag, abc::status::success);
 
-	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "1 of 3: inline");
-	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "2 of 3: %s", "UTF-8");
-	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "3 of 3: %ls", L"wide");
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "1 of 4: inline");
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "2 of 4: %s", "UTF-8");
+	log.push(abc::severity::info, test_category, test_tag, abc::status::not_found, "3 of 4: %ls", L"wide");
+	log.push_async(abc::severity::info, test_category, test_tag, abc::status::not_found, std::move(std::string("4 of 4: async")));
 
 	abc::arraybuf<50> buf;
 	std::ostream s(&buf);
