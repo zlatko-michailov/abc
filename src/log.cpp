@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include <thread>
 #include <ostream>
+
 #include "base.h"
 #include "timestamp.h"
 #include "mutex.h"

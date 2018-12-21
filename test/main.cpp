@@ -1,5 +1,6 @@
 #include <thread>
 #include <ostream>
+
 #include "../src/base.h"
 #include "../src/log.h"
 #include "../src/timestamp.h"
