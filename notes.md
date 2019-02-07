@@ -9,14 +9,20 @@ log
 	- api
 	- request
 
-test
+async
+	async::start(func)
+	async::start_at(time_point, func)
+	async::start_after(duration, func)
+	async::start_when(bool, func)
+	async::start_then(future, func)
+
+
 usage
-uuid (request/correlation)
-
-tag
-
 conf
-flight
+flight (killbit)
+tag
+test
+uuid (request/correlation)
 
 ring
 

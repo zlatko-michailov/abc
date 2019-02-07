@@ -1,7 +1,10 @@
 #include <thread>
 #include <ostream>
 
+#include <iostream>
+
 #include "../src/base.h"
+#include "../src/async.h"
 #include "../src/log.h"
 #include "../src/timestamp.h"
 #include "../src/streambuf.h"
@@ -85,6 +88,9 @@ int main() {
 	test_timestamp(365 - 1);
 	test_timestamp(365);
 	test_timestamp(365 + 1);
+
+	abc::async::start([&c = std::cout]() { c << "ASYNC!\n"; } );
+	std::cin.get();
 
 	return 0;
 }
