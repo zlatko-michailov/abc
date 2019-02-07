@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 
 namespace abc {
@@ -23,6 +24,7 @@ namespace abc {
 		constexpr status_t out_of_memory	= 0x0106;
 		constexpr status_t assert_failed	= 0x0107;
 		constexpr status_t todo				= 0x0108;
+		constexpr status_t exception		= 0x0109;
 		constexpr status_t custom_error		= 0x1000;
 		// constexpr status_t sample_custom_error	= custom_error + 0x0001;
 
@@ -52,12 +54,44 @@ namespace abc {
 	namespace category {
 		constexpr category_t log		= 0x0001;
 		constexpr category_t timestamp	= 0x0002;
+		constexpr category_t async		= 0x0003;
 		constexpr category_t custom		= 0x8000;
 		// constexpr category_t sample_custom_category	= custom + 0x0001;
 	}
 
 
 	typedef std::uint32_t	tag_t;
+	// TODO:: Remove when tagger get implemented
+	constexpr tag_t __TAG__ = 0;
 
+
+	template <typename Value>
+	struct result {
+		result(Value&& val) noexcept
+			: status(abc::status::success)
+			, value(std::move(val)) {
+		}
+
+		result(status_t st) noexcept
+			: status(st)
+			, value() {
+		}
+
+		result(result&& other) noexcept
+			: status(other.status)
+			, value(std::move(other.value)) {
+		}
+
+		operator status_t() const noexcept {
+			return status;
+		}
+
+		operator const Value&() const noexcept {
+			return value;
+		}
+
+		status_t	status;
+		Value		value;
+	};
 }
 
