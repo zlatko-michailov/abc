@@ -32,7 +32,7 @@ namespace abc {
 	public:
 		static constexpr const char*				default_separator	= " | ";
 		static constexpr std::chrono::minutes::rep	no_rotation			= 0;
-		static constexpr size_t						max_path			= 4 * 1024;
+		static constexpr std::size_t				max_path			= 4 * 1024;
 
 	public:
 		static basic_log& diag;

@@ -29,6 +29,7 @@ namespace abc {
 		std::thread::id thread_id = std::this_thread::get_id();
 
 		return std::async(
+			std::launch::async,
 			[this, severity, category, tag, status, thread_id]() noexcept -> status_t {
 				return this->push(severity, category, tag, status, thread_id, nullptr, false, nullptr);
 			});
@@ -39,6 +40,7 @@ namespace abc {
 		std::thread::id thread_id = std::this_thread::get_id();
 
 		return std::async(
+			std::launch::async,
 			[this, severity, category, tag, status, thread_id, formatted = std::move(formatted)]() mutable noexcept -> status_t {
 				return this->push(severity, category, tag, status, thread_id, formatted.c_str(), false, nullptr);
 			});
@@ -148,13 +150,13 @@ namespace abc {
 
 			_f = std::fopen(path, "w+");
 			if (_f == nullptr) {
-				return status::bad_state;
+				abc_warning(status::bad_state, category::log, __TAG__);
 			}
 		}
 
 		// Check wide-ness of the file.
 		if (std::fwide(_f, 0) * fwide_sign < 0) {
-			return status::bad_state;
+			abc_warning(status::bad_state, category::log, __TAG__);
 		}
 
 		return status::success;
