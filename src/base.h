@@ -65,33 +65,57 @@ namespace abc {
 	constexpr tag_t __TAG__ = 0;
 
 
-	template <typename Value>
-	struct result {
-		result(Value&& val) noexcept
-			: status(abc::status::success)
-			, value(std::move(val)) {
+	struct basic_result {
+		basic_result(status_t st) noexcept
+			: status(st) {
 		}
 
-		result(status_t st) noexcept
-			: status(st)
-			, value() {
-		}
-
-		result(result&& other) noexcept
-			: status(other.status)
-			, value(std::move(other.value)) {
+		basic_result(basic_result&& other) noexcept
+			: status(other.status) {
 		}
 
 		operator status_t() const noexcept {
 			return status;
 		}
 
+		status_t status;
+	};
+
+
+	template <typename Value>
+	struct result : public basic_result {
+		result(Value&& val) noexcept
+			: basic_result(abc::status::success)
+			, value(std::move(val)) {
+		}
+
+		result(status_t st) noexcept
+			: basic_result(st)
+			, value() {
+		}
+
+		result(result&& other) noexcept
+			: basic_result(other.status)
+			, value(std::move(other.value)) {
+		}
+
 		operator const Value&() const noexcept {
 			return value;
 		}
 
-		status_t	status;
-		Value		value;
+		Value value;
+	};
+
+
+	template <>
+	struct result<void> : public basic_result {
+		result(status_t st) noexcept
+			: basic_result(st) {
+		}
+
+		result(result&& other) noexcept
+			: basic_result(other.status) {
+		}
 	};
 }
 
