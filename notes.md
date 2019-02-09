@@ -10,6 +10,7 @@ log
 	- request
 
 async
+	queue
 	async::start(func)
 	async::start_at(time_point, func)
 	async::start_after(duration, func)

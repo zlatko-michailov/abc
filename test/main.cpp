@@ -89,7 +89,14 @@ int main() {
 	test_timestamp(365);
 	test_timestamp(365 + 1);
 
-	abc::async::start([&c = std::cout]() { c << "ASYNC!\n"; } );
+	abc::result<int> r1(42);
+	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x: %d", r1.status, r1.value);
+
+	abc::result<void> r2(abc::status::bad_state);
+	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x", r2.status);
+
+
+	abc::async::start<int>([&c = std::cout]() -> int { c << "NEW ASYNC!\n"; return 42;} );
 	std::cin.get();
 
 	return 0;

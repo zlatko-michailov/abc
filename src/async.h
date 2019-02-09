@@ -1,9 +1,11 @@
 #pragma once
 
 
+#include <atomic>
 #include <future>
 #include <chrono>
 #include <memory>
+#include <functional>
 
 #include <queue>
 #include <deque>
@@ -17,14 +19,188 @@
 namespace abc {
 
 	template <typename Value>
+	class promise;
+
+	template <typename Value>
+	class future_state {
+		friend class promise<Value>;
+
+	// For promise
+	private:
+		future_state() noexcept
+			: _mutex()
+			, _has_value(false)
+			, _value() {
+		}
+
+	private:
+		status_t set_value(const Value& value) noexcept {
+			if (_has_value) {
+				return status::abort;
+			}
+
+			status_lock lock(_mutex);
+			abc_warning(lock.status(), category::async, __TAG__);
+
+			_value = value;
+			_has_value = true;
+			return status::success;
+		}
+
+	public:
+		future_state(const future_state& other) noexcept
+			: _mutex()
+			, _has_value(other._has_value)
+			, _value(other._value) {
+		}
+
+	public:
+		bool has_value() const noexcept {
+			return _has_value;
+		}
+
+		result<Value> get_value() const noexcept {
+			if (!_has_value) {
+				return status::bad_state;
+			}
+
+			return _value;
+		}
+
+	private:
+		spin_mutex<spin_for::memory>	_mutex;
+		bool							_has_value;
+		Value							_value;
+	};
+
+
+	template <>
+	class future_state<void> {
+		friend class promise<void>;
+
+	// For promise
+	private:
+		future_state() noexcept
+			: _has_value(false) {
+		}
+
+	private:
+		status_t set_value() noexcept {
+			if (_has_value) {
+				return status::abort;
+			}
+
+			_has_value = true;
+			return status::success;
+		}
+
+	public:
+		future_state(const future_state& other) noexcept
+			: _has_value(other.has_value()) {
+		}
+
+	public:
+		bool has_value() const noexcept {
+			return _has_value;
+		}
+
+	private:
+		std::atomic_bool _has_value;
+	};
+
+
+	template <typename Value>
+	class future {
+		friend class promise<Value>;
+	
+	// For promise
+	private:
+		future(const std::shared_ptr<future_state<Value>>& state) noexcept
+			: _state(state) {
+		}
+
+	public:
+		future() noexcept
+			: _state() {
+		}
+
+		future(const future<Value>& other) noexcept
+			: _state(other._state) {
+		}
+
+	public:
+		bool valid() const noexcept {
+			return _state;
+		}
+
+		result<Value> get() noexcept {
+			abc_assert(_state, category::async, __TAG__);
+			try {
+				return _state->get_value();
+			}
+			catch (...) {
+				return status::bad_state;
+			}
+		}
+
+	public:
+		bool ready() const noexcept {
+			abc_assert(_state, category::async, __TAG__);
+			return _state->has_value();
+		}
+
+	private:
+		std::shared_ptr<future_state<Value>> _state;
+	};
+
+
+	template <typename Value>
+	class promise {
+	public:
+		promise() noexcept
+			: _state() {
+			try {
+				_state.reset(new (std::nothrow) future_state<Value>());
+			}
+			catch (...) {
+			}
+		}
+
+		promise(const promise& other) noexcept
+			: _state(other._state){
+		}
+
+	// std-like API
+	public:
+		result<future<Value>> get_future() noexcept {
+			abc_assert(_state, category::async, __TAG__);
+			return future<Value>(_state);
+		}
+
+		status_t set_value(const Value& value) noexcept {
+			abc_assert(_state, category::async, __TAG__);
+			abc_warning(_state->set_value(value), category::async, __TAG__);
+			return status::success;
+		}
+
+	private:
+		std::shared_ptr<future_state<Value>> _state;
+	};
+
+
+	// ---------------------------------------------------------
+#ifdef DELETE
+	template <typename Value>
 	class shared_promise;
 
 
 	template <typename Future, typename Value>
 	class basic_future {
-		friend class shared_promise<Value>;
-
 	public:
+		basic_future() noexcept
+			: _future() {
+		}
+
 		basic_future(basic_future<Future, Value>&& other) noexcept
 			: _future(std::move(other._future)) {
 		}
@@ -81,13 +257,25 @@ namespace abc {
 	};
 
 
-	template <typename Value>
+	template <typename Value = void>
 	class future : public basic_future<std::future<Value>, Value> {
+		friend class shared_promise<Value>;
+
+	public:
+		future() noexcept
+			: basic_future<std::future<Value>, Value>() {
+		}
+
+	private:
+		future(std::future<Value>&& fut) noexcept
+			: basic_future<std::future<Value>, Value>(std::move(fut)) {
+		}
+
 	public:
 	};
 
 
-	template <typename Value>
+	template <typename Value = void>
 	class shared_future : public basic_future<std::shared_future<Value>, Value> {
 	public:
 		shared_future(const shared_future<Value>& other) noexcept {
@@ -117,7 +305,7 @@ namespace abc {
 			abc_warning(ensure_promise(), category::async, __TAG__);
 
 			try {
-				return std::move(_promise->get_future());
+				return std::move(future<Value>(std::move(_promise->get_future())));
 			}
 			catch (...) {
 				return status::bad_state;
@@ -142,6 +330,19 @@ namespace abc {
 
 			try {
 				_promise->set_value(std::move(value));
+			}
+			catch (...) {
+				return status::bad_state;
+			}
+
+			return status::success;
+		}
+
+		status_t set_value() noexcept {
+			abc_warning(ensure_promise(), category::async, __TAG__);
+
+			try {
+				_promise->set_value();
 			}
 			catch (...) {
 				return status::bad_state;
@@ -180,11 +381,55 @@ namespace abc {
 	protected:
 		std::shared_ptr<std::promise<Value>> _promise;
 	};
+#endif
+	// ---------------------------------------------------------
 
 
 	class async {
 	public:
-		template <typename Function, typename... Args>
+		template <typename Value>
+		static result<future<Value>> start(std::function<Value()>&& func) noexcept {
+			promise<Value> promise;
+
+			try {
+				std::async(std::launch::async, [func, promise]() mutable noexcept -> status_t {
+					Value value = func();
+					abc_warning(promise.set_value(value), category::async, __TAG__);
+					return status::success;
+				});
+
+				result<future<Value>> fut = promise.get_future();
+				abc_warning(fut, category::async, __TAG__);
+				return fut;
+			}
+			catch (...) {
+				return status::exception;
+			}
+		}
+
+		/*static result<future<void>> start(std::function<void()>&& func) noexcept {
+			shared_promise<void> promise;
+
+			try {
+				std::async(std::launch::async, [func, promise]() mutable noexcept -> status_t {
+					try {
+						func();
+						promise.set_value();
+						return status::success;
+					}
+					catch (...) {
+						return status::exception;
+					}
+				});
+
+				return std::move(promise.get_future());
+			}
+			catch (...) {
+				return status::exception;
+			}
+		}*/
+
+		/*template <typename Function, typename... Args>
 		static result<std::future<std::invoke_result_t<std::decay_t<Function>, std::decay_t<Args>...>>> start(Function&& func, Args&&... args) noexcept {
 			try {
 				return std::move(std::async(std::launch::async, func, args...));
@@ -194,7 +439,7 @@ namespace abc {
 			}
 
 			abc_assert(false, category::async, __TAG__);
-		}
+		}*/
 
 	public:
 	
