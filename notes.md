@@ -10,6 +10,8 @@ log
 	- request
 
 async
+	future_state::continuations
+	future::then
 	queue
 	async::start(func)
 	async::start_at(time_point, func)

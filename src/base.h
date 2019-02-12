@@ -12,6 +12,8 @@ namespace abc {
 		constexpr status_t min_success		= 0x0000;
 		constexpr status_t success			= 0x0000;
 		constexpr status_t ignored			= 0x0001;
+		constexpr status_t not_started		= 0x0002;
+		constexpr status_t not_finished		= 0x0002;
 		constexpr status_t custom_success	= 0x0010;
 		// constexpr status_t sample_custom_success	= custom_success + 0x0001;
 		constexpr status_t max_success		= 0x00FF;
