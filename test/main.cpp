@@ -96,7 +96,10 @@ int main() {
 	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x", r2.status);
 
 
-	abc::async::start<int>([&c = std::cout]() -> int { c << "NEW ASYNC!\n"; return 42;} );
+	abc::async::start<int>([&c = std::cout]() -> int { c << "ASYNC \n"; return 42;})
+		.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 53;})
+		;//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 65;})
+		//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 78;});
 	std::cin.get();
 
 	return 0;

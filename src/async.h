@@ -19,7 +19,25 @@
 namespace abc {
 
 	template <typename Value>
+	class future;
+
+	template <typename Value>
 	class promise;
+
+	class async {
+	public:
+		template <typename Value, typename PredValue>
+		static inline result<future<Value>> start(std::function<Value(const PredValue&)>&& func, const PredValue& pred_value) noexcept;
+
+		template <typename PredValue>
+		static inline result<future<void>> start(std::function<void(const PredValue&)>&& func, const PredValue& pred_value) noexcept;
+
+		template <typename Value>
+		static inline result<future<Value>> start(std::function<Value()>&& func) noexcept;
+
+		static inline result<future<void>> start(std::function<void()>&& func) noexcept;
+	};
+
 
 	template <typename Value>
 	class future_state {
@@ -49,6 +67,13 @@ namespace abc {
 
 			_value = value;
 			_has_value = true;
+
+			while (!_thens.empty()) {
+				std::function<int(const Value&)> func = std::move(_thens.front());
+				_thens.pop();
+				async::start(std::move(func), _value);
+				// TODO: log
+			}
 			return status::success;
 		}
 
@@ -65,44 +90,33 @@ namespace abc {
 			return _value;
 		}
 
-		status_t then(std::function<void(const Value&)>&& func) noexcept {
+		status_t then(std::function<int(const Value&)>&& func) noexcept {
 			if (_has_value) {
-				try {
-					func(_value);
-					return status::success;
-				}
-				catch (...) {
-					abc_warning(status::exception, category::async, __TAG__);
-				}
+				abc_warning(async::start(std::move(func), _value), category::async, __TAG__);
 			}
 
 			status_lock lock(_mutex);
 			abc_warning(lock.status(), category::async, __TAG__);
 
 			if (_has_value) {
-				try {
-					func(_value);
-					return status::success;
-				}
-				catch (...) {
-					abc_warning(status::exception, category::async, __TAG__);
-				}
+				abc_warning(async::start(std::move(func), _value), category::async, __TAG__);
 			}
 
 			try {
 				_thens.push(std::move(func));
-				return status::success;
 			}
 			catch (...) {
 				abc_warning(status::exception, category::async, __TAG__);
 			}
+
+			return status::success;
 		}
 
 	private:
 		spin_mutex<spin_for::memory>					_mutex;
 		bool											_has_value;
 		Value											_value;
-		std::queue<std::function<void(const Value&)>>	_thens;
+		std::queue<std::function<int(const Value&)>>	_thens;
 	};
 
 
@@ -213,10 +227,11 @@ namespace abc {
 			return _state->has_value();
 		}
 
-		/*template <typename ThenValue>
-		result<future<ThenValue>> then(std::function<ThenValue(const Value&)> func) noexcept {
-			promise<ThenValue> then_promise;
-		}*/
+		status_t then(std::function<int(const Value&)>&& func) noexcept {
+			abc_assert(_state, category::async, __TAG__);
+			abc_warning(_state->then(std::move(func)), category::async, __TAG__);
+			return status::success;
+		}
 
 	private:
 		std::shared_ptr<future_state<Value>> _state;
@@ -564,8 +579,8 @@ namespace abc {
 	// ---------------------------------------------------------
 
 
-	class async {
-	public:
+	//class async {
+	//public:
 		/*template <typename Value>
 		static result<future<Value>> start(std::function<Value()>&& func) noexcept {
 			packaged_task<Value> task(std::move(func));
@@ -574,7 +589,7 @@ namespace abc {
 		}*/
 
 		template <typename Value, typename PredValue>
-		static result<future<Value>> start(std::function<Value(const PredValue&)>&& func, const PredValue& pred_value) noexcept {
+		result<future<Value>> async::start(std::function<Value(const PredValue&)>&& func, const PredValue& pred_value) noexcept {
 			promise<Value> prom;
 
 			try {
@@ -600,8 +615,35 @@ namespace abc {
 		}
 
 
+		/*template <typename PredValue>
+		result<future<void>> async::start(std::function<void(const PredValue&)>&& func, const PredValue& pred_value) noexcept {
+			promise<void> prom;
+
+			try {
+				std::async(std::launch::async, [func, pred_value, prom]() mutable noexcept -> status_t {
+					try {
+						func(pred_value);
+						abc_warning(prom.set_value(), category::async, __TAG__);
+					}
+					catch (...) {
+						// TODO: prom.set_error()
+						abc_warning(status::exception, category::async, __TAG__);
+					}
+
+					return status::success;
+				});
+			}
+			catch (...) {
+				// TODO: prom.set_error()
+				abc_warning(status::exception, category::async, __TAG__);
+			}
+
+			return prom.get_future();
+		}*/
+
+
 		template <typename Value>
-		static result<future<Value>> start(std::function<Value()>&& func) noexcept {
+		result<future<Value>> async::start(std::function<Value()>&& func) noexcept {
 			promise<Value> prom;
 
 			try {
@@ -625,7 +667,33 @@ namespace abc {
 
 			return prom.get_future();
 		}
-	};
+
+
+		/*result<future<void>> async::start(std::function<void()>&& func) noexcept {
+			promise<void> prom;
+
+			try {
+				std::async(std::launch::async, [func, prom]() mutable noexcept -> status_t {
+					try {
+						func();
+						abc_warning(prom.set_value(), category::async, __TAG__);
+					}
+					catch (...) {
+						// TODO: prom.set_error()
+						abc_warning(status::exception, category::async, __TAG__);
+					}
+
+					return status::success;
+				});
+			}
+			catch (...) {
+				// TODO: prom.set_error()
+				abc_warning(status::exception, category::async, __TAG__);
+			}
+
+			return prom.get_future();
+		}*/
+	//};
 
 #ifdef DELETE
 	template <typename In, typename Out>
