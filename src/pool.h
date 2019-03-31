@@ -32,15 +32,16 @@ namespace abc {
 	protected:
 		friend class instance<pool<capacity_t>>;
 
-		capacity_t	reserve_instance();
-		void		release_instance() noexcept;
+		capacity_t	reserve();
+		void		release() noexcept;
 
-		capacity_t	active_instance_count() const noexcept;
+		capacity_t	capacity() const noexcept;
+		capacity_t	count() const noexcept;
 
 	private:
 		const capacity_t		_capacity;
-		std::atomic<capacity_t>	_next_instance_id;
-		std::atomic<capacity_t>	_active_instance_count;
+		std::atomic<capacity_t>	_next_id;
+		std::atomic<capacity_t>	_count;
 	};
 
 
@@ -50,12 +51,12 @@ namespace abc {
 		instance(const std::shared_ptr<Pool>& pool);
 		~instance() noexcept;
 
-		typename Pool::capacity_t		instance_id() const noexcept;
+		typename Pool::capacity_t		id() const noexcept;
 		const std::shared_ptr<Pool>&	pool() const noexcept;
 
 	private:
 		std::shared_ptr<Pool>		_pool;
-		typename Pool::capacity_t	_instance_id;
+		typename Pool::capacity_t	_id;
 	};
 
 
@@ -65,52 +66,58 @@ namespace abc {
 	template <typename Capacity>
 	inline pool<Capacity>::pool(Capacity capacity) noexcept
 		: _capacity(capacity)
-		, _next_instance_id(0)
-		, _active_instance_count(0) {
+		, _next_id(0)
+		, _count(0) {
 	}
 
 
 	template <typename Capacity>
-	inline typename pool<Capacity>::capacity_t pool<Capacity>::reserve_instance() {
-		capacity_t active_instance_count = ++(_active_instance_count);
+	inline typename pool<Capacity>::capacity_t pool<Capacity>::reserve() {
+		capacity_t count = ++(_count);
 
-		if (_capacity != unlimited && active_instance_count > _capacity) {
-			--(_active_instance_count);
+		if (_capacity != unlimited && count > _capacity) {
+			--(_count);
 			throw; // TODO: What exception?
 		}
 
-		return ++(_next_instance_id);
+		return ++(_next_id);
 	}
 
 
 	template <typename Capacity>
-	inline void pool<Capacity>::release_instance() noexcept {
-		--(_active_instance_count);
+	inline void pool<Capacity>::release() noexcept {
+		--(_count);
 	}
 
 
 	template <typename Capacity>
-	typename pool<Capacity>::capacity_t pool<Capacity>::active_instance_count() const noexcept {
-		return _active_instance_count;
+	typename pool<Capacity>::capacity_t pool<Capacity>::capacity() const noexcept {
+		return _capacity;
+	}
+
+
+	template <typename Capacity>
+	typename pool<Capacity>::capacity_t pool<Capacity>::count() const noexcept {
+		return _count;
 	}
 
 
 	template <typename Pool>
 	inline instance<Pool>::instance(const std::shared_ptr<Pool>& pool)
 		: _pool(pool) {
-		_instance_id = pool->reserve_instance();
+		_id = pool->reserve();
 	}
 
 
 	template <typename Pool>
 	inline instance<Pool>::~instance() noexcept {
-		_pool->release_instance();
+		_pool->release();
 	}
 
 
 	template <typename Pool>
-	inline typename Pool::capacity_t instance<Pool>::instance_id() const noexcept {
-		return _instance_id;
+	inline typename Pool::capacity_t instance<Pool>::id() const noexcept {
+		return _id;
 	}
 
 
