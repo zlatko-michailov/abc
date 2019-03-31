@@ -9,6 +9,7 @@
 #include "../src/timestamp.h"
 #include "../src/streambuf.h"
 #include "../src/pool.h"
+#include "../src/process.h"
 
 
 constexpr abc::category_t	test_category	= 0x1234;

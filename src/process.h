@@ -10,13 +10,19 @@
 
 namespace abc {
 
+	template <typename InstanceId> class runnable;
+	class thread;
 	class process;
-	class root;
-	struct daemon_def;
-	class daemon;
-	class transaction;
+	class root_process;
+	class daemon_process;
+	class transaction_process;
 
-	typedef std::function<void(daemon&, const std::vector<daemon>&)>	daemon_start;
+	template <typename InstanceId> using basic_runnable_handler = std::function<void(runnable<InstanceId>&)>;
+	typedef std::function<void(thread&)>	basic_thread_handler_t;
+	typedef std::function<void(process&)>	basic_process_handler_t;
+
+	struct daemon_def;
+	typedef std::function<void(daemon_process&, const std::vector<daemon_process>&)>	daemon_start;
 
 
 	// --------------------------------------------------------------
@@ -44,37 +50,40 @@ namespace abc {
 	};
 
 
-	class thread : public instance<abc::pool<thread_id_t>> {
-	public:
-		thread(const std::shared_ptr<abc::pool<thread_id_t>>& pool);
+	template <typename InstanceId>
+	class runnable : public instance<abc::pool<InstanceId>> {
+	protected:
+		runnable(std::shared_ptr<abc::pool<InstanceId>>&& pool);
+		runnable(std::shared_ptr<abc::pool<InstanceId>>&& pool, basic_runnable_handler<InstanceId>&& start_handler);
 
 	public:
-		void set_exception_handler() noexcept;
+		virtual void start();
 
-	public:
-		void start();
+	private:
+		basic_runnable_handler<InstanceId> _start_handler;
 	};
 
 
-	class process : public instance<abc::pool<process_id_t>> {
-	public:
+	class thread : public runnable<thread_id_t> {
+	private:
+		friend class process;
+
+		thread(const std::shared_ptr<abc::pool<thread_id_t>>& pool, basic_thread_handler_t&& start_handler);
+	};
+
+
+	class process : public runnable<process_id_t> {
+	protected:
+		static basic_process_handler_t	noop;
+
+	protected:
 		process(
 			const std::shared_ptr<abc::pool<process_id_t>>&	pool,
 			const std::shared_ptr<abc::pool<thread_id_t>>&	thread_pool,
 			const std::shared_ptr<abc::pool<process_id_t>>&	child_process_pool);
 
-	public:
-		void set_exception_handler() noexcept;
-		void set_child_crash_handler() noexcept;
-
-	public:
-		void start();
-		void stop();
-		void recycle();
-
-	public:
-		const std::shared_ptr<abc::pool<thread_id_t>>&	thread_pool() const noexcept;
-		const std::shared_ptr<abc::pool<process_id_t>>&	child_process_pool() const noexcept;
+	protected:
+		virtual void child_process_crashed() = 0;
 
 	protected:
 		std::shared_ptr<abc::pool<thread_id_t>>		_thread_pool;
@@ -82,26 +91,33 @@ namespace abc {
 	};
 
 
-	class root_process : public process {
+	class root_process final : public process {
 	public:
-		root_process(const std::vector<daemon_def>& daemon_defs);
+		root_process(
+			const std::shared_ptr<abc::pool<process_id_t>>&	singleton_pool,
+			const std::shared_ptr<abc::pool<thread_id_t>>&	disabled_thread_pool,
+			const std::shared_ptr<abc::pool<process_id_t>>&	daemon_process_pool);
+
+	public:
+		virtual void start() override;
+
+	protected:
+		virtual void child_process_crashed() override;
+
 	};
 
 
-	class daemon {
+	class daemon_process : public process {
 	private:
-		friend class root;
+		friend class root_process;
 
-		daemon();
-		daemon(const daemon_def& def);
-		daemon(daemon&& other);
+		daemon_process();
+		daemon_process(const daemon_def& def);
+		daemon_process(daemon_process&& other);
 
-		void start(daemon& this_daemon, const std::vector<daemon>& all_daemons);
-		void stop();
-		void recycle();
+		void start(const std::vector<daemon_process>& all_daemons);
 
 	public:
-		process_id_t		id() const noexcept;
 		std::size_t			heap_size() const noexcept;
 		std::size_t			output_size() const noexcept;
 		const void*			heap() const noexcept;
@@ -115,15 +131,11 @@ namespace abc {
 		void*			_heap;
 		void*			_output;
 		process_cycle_t	_cycle;
-
-	private:
-		instance<process_id_t, pool<process_id_t>>	_daemon_instance;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	inline pool<process_id_t> root::_root_pool(1);
 
 }
