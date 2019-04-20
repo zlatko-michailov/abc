@@ -48,14 +48,14 @@ namespace abc {
 	template <typename Pool>
 	class instance {
 	public:
-		instance(const std::shared_ptr<Pool>& pool);
+		instance(Pool& pool);
 		~instance() noexcept;
 
-		typename Pool::capacity_t		id() const noexcept;
-		const std::shared_ptr<Pool>&	pool() const noexcept;
+		typename Pool::capacity_t	id() const noexcept;
+		const Pool&					pool() const noexcept;
 
 	private:
-		std::shared_ptr<Pool>		_pool;
+		Pool&						_pool;
 		typename Pool::capacity_t	_id;
 	};
 
@@ -103,15 +103,15 @@ namespace abc {
 
 
 	template <typename Pool>
-	inline instance<Pool>::instance(const std::shared_ptr<Pool>& pool)
+	inline instance<Pool>::instance(Pool& pool)
 		: _pool(pool) {
-		_id = pool->reserve();
+		_id = pool.reserve();
 	}
 
 
 	template <typename Pool>
 	inline instance<Pool>::~instance() noexcept {
-		_pool->release();
+		_pool.release();
 	}
 
 
@@ -122,7 +122,7 @@ namespace abc {
 
 
 	template <typename Pool>
-	inline const std::shared_ptr<Pool>& instance<Pool>::pool() const noexcept {
+	inline const Pool& instance<Pool>::pool() const noexcept {
 		return _pool;
 	}
 

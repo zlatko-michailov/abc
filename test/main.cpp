@@ -104,14 +104,15 @@ int main() {
 		//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 78;});
 	std::cin.get();
 
-	std::shared_ptr<abc::pool<std::int32_t>> upool = std::make_shared<abc::pool<std::int32_t>>(abc::pool<std::int32_t>::unlimited);
+	abc::pool<std::int32_t> upool(abc::pool<std::int32_t>::unlimited);
 	std::cout << "upinst1 begin" << std::endl;
 	abc::instance<abc::pool<std::int32_t>> upinst1(upool);
 	std::cout << "upinst1 end" << std::endl;
 	std::cout << "upinst2 begin" << std::endl;
 	abc::instance<abc::pool<std::int32_t>> upinst2(upool);
 	std::cout << "upinst2 end" << std::endl;
-	std::shared_ptr<abc::pool<std::int32_t>> pool = std::make_shared<abc::pool<std::int32_t>>(abc::pool<std::int32_t>::singleton);
+
+	abc::pool<std::int32_t> pool(abc::pool<std::int32_t>::singleton);
 	std::cout << "pinst1 begin" << std::endl;
 	abc::instance<abc::pool<std::int32_t>> pinst1(pool);
 	std::cout << "pinst1 end" << std::endl;
