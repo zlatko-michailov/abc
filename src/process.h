@@ -1,55 +1,25 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
+//#include <memory>
 #include <functional>
-#include <atomic>
+//#include <atomic>
+#include <iostream> // TODO: remove
 
 #include "pool.h"
 
 
 namespace abc {
 
-	template <typename InstanceId>
-	class runnable;
+	class process;
 
-		template <std::size_t DaemonsCount>
-		class thread;
-	
-		class process;
-	
-			template <std::size_t DaemonsCount>
-			class root_process;
-			
-			template <std::size_t DaemonsCount>
-			class daemon_process;
-			
-			template <std::size_t DaemonsCount>
-			class job_process;
+		class program;
 
-	template <typename Runnable>
-	using basic_runnable_handler = std::function<void(Runnable&)>;
-	
-		template <std::size_t DaemonsCount>
-		using thread_start_handler = basic_runnable_handler<thread<DaemonsCount>>;
-		
-		template <std::size_t DaemonsCount>
-		using thread_crash_handler = basic_runnable_handler<thread<DaemonsCount>>;
+		class daemon;
 
-		template <std::size_t DaemonsCount>
-		using daemon_start_handler = basic_runnable_handler<daemon_process<DaemonsCount>>;
-		
-		template <std::size_t DaemonsCount>
-		using daemon_crash_handler = basic_runnable_handler<daemon_process<DaemonsCount>>;
-		
-		template <std::size_t DaemonsCount>
-		using job_start_handler = basic_runnable_handler<job_process<DaemonsCount>>;
+		class job;
 
-		template <std::size_t DaemonsCount>
-		using job_crash_handler = basic_runnable_handler<job_process<DaemonsCount>>;
-
-	template <std::size_t DaemonsCount>
-	struct daemon_def;
+	class thread;
 
 
 	typedef std::uint8_t	process_kind_t;
@@ -66,141 +36,196 @@ namespace abc {
 	}
 
 
-// --------------------------------------------------------------
+	using daemon_container		= std::vector<daemon>;
 
-
-	template <std::size_t DaemonsCount>
-	struct daemon_def {
-		process_id_t						id;
-		std::size_t							heap_size;
-		std::size_t							output_size;
-		daemon_start_handler<DaemonsCount>	start_handler;
-	};
-
-
-	template <typename InstanceId>
-	class runnable
-		: public instance<abc::pool<InstanceId>> {
-
-	protected:
-		runnable(abc::pool<InstanceId>& pool);
-
-	protected:
-		virtual void start() = 0;
-	};
-
-
-	template <std::size_t DaemonsCount>
-	class thread final
-		: public runnable<thread_id_t> {
-
-	private:
-		friend class job_process<DaemonsCount>;
-
-		thread(const job_process<DaemonsCount>& parent, thread_start_handler&& start_handler);
-		thread(thread<DaemonsCount>&& other);
-
-	public:
-		virtual void start() override;
-
-	private:
-		const job_process<DaemonsCount>	_parent;
-		thread_start_handler			_start_handler;
-	};
-
-
-	class process
-		: public runnable<process_id_t> {
-
-	protected:
-		process(abc::pool<process_id_t>& pool, abc::pool<thread_id_t>& thread_pool, abc::pool<process_id_t>& child_process_pool);
-		process(process&& other);
-
-	protected:
-		abc::pool<thread_id_t>		_thread_pool;
-		abc::pool<process_id_t>		_child_process_pool;
-	};
-
-
-	template <std::size_t DaemonsCount>
-	class root_process final
-		: public process {
-
-	public:
-		root_process(std::array<daemon_def, DaemonsCount>&& daemon_defs);
-		root_process(root_process&& other);
-
-	public:
-		const std::array<daemon_process, DaemonsCount>& daemons() const noexcept;
-
-	public:
-		virtual void start() override;
-
-	private:
-		std::array<daemon_process, DaemonsCount> _daemons;
-	};
-
-
-	template <std::size_t DaemonsCount>
-	class daemon_process final
-		: public process {
-
-	private:
-		friend class root_process<DaemonsCount>;
-
-		daemon_process(const root_process& parent, const daemon_def& def);
-		daemon_process(daemon_process&& other);
-
-	public:
-		job_process&& create_job(job_start_handler<DaemonsCount>&& start_handler);
-
-	public:
-		const root_process<DaemonsCount>&	parent() const noexcept;
-		std::size_t							heap_size() const noexcept;
-		std::size_t							output_size() const noexcept;
-		const void*							heap() const noexcept;
-		void*								heap() noexcept;
-		const void*							output() const noexcept;
-		void*								output() noexcept;
-		process_cycle_t						cycle() const noexcept;
-
-	protected:
-		virtual void start() override;
-
-	private:
-		const root_process<DaemonsCount>&	_parent;
-		daemon_def							_def;
-		void*								_heap;
-		void*								_output;
-		process_cycle_t						_cycle;
-	};
-
-
-	template <std::size_t DaemonsCount>
-	class job_process final
-		: public process {
-
-	private:
-		friend class daemon_process<DaemonsCount>;
-
-		job_process(const daemon_process& parent, job_start_handler&& start_handler);
-		job_process(job_process&& other);
-
-	public:
-		const daemon_process<DaemonsCount>&	parent() const noexcept;
-		thread&& create_thread(thread_start_handler&& start_handler);
-
-	protected:
-		virtual void start() override;
-
-	private:
-		const daemon_process<DaemonsCount>&	_parent;
-		job_start_handler<DaemonsCount> 	_start_handler;
-	};
+	using daemon_start_handler	= std::function<void(daemon&, process_cycle_t)>;
+	using job_start_handler		= std::function<void(job&, process_cycle_t)>;
+	using thread_start_handler	= std::function<void(thread&)>;
 
 
 	// --------------------------------------------------------------
 
 
+	class thread final
+		: public instance<abc::pool<thread_id_t>> {
+
+	public:
+		thread(job& parent, thread_start_handler&& start_handler);
+
+	public:
+		const job&	parent() const noexcept;
+
+	public:
+		void start();
+
+	private:
+		const job&				_parent;
+		thread_start_handler	_start_handler;
+	};
+
+
+	class process
+		: public instance<abc::pool<process_id_t>> {
+
+	protected:
+		process(abc::pool<process_id_t>& peer_pool, thread_id_t thread_pool_capacity, process_id_t child_pool_capacity);
+
+	public:
+		abc::pool<thread_id_t>&		thread_pool() noexcept;
+		abc::pool<process_id_t>&	child_pool() noexcept;
+
+	protected:
+		abc::pool<thread_id_t>		_thread_pool;
+		abc::pool<process_id_t>		_child_pool;
+	};
+
+
+	class program final
+		: public process {
+
+	public:
+		program();
+
+	public:
+		template <typename... Args>
+		void emplace_back_daemon(Args&&... args);
+
+		const daemon_container& daemons() const noexcept;
+
+		void start();
+
+	private:
+		static abc::pool<process_id_t>	_program_pool;
+		daemon_container				_daemons;
+	};
+
+
+	class daemon final
+		: public process {
+
+	public:
+		daemon(program& parent, daemon_start_handler&& start_handler, std::size_t heap_size, std::size_t output_size);
+
+	public:
+		const program&		parent() const noexcept;
+		process_cycle_t		cycle() const noexcept;
+
+		std::size_t			heap_size() const noexcept;
+		const void*			heap() const noexcept;
+		void*				heap() noexcept;
+		std::size_t			output_size() const noexcept;
+		const void*			output() const noexcept;
+		void*				output() noexcept;
+
+	private:
+		friend class program;
+
+		void start(process_cycle_t cycle);
+
+	private:
+		const program&			_parent;
+		daemon_start_handler	_start_handler;
+		process_cycle_t			_cycle;
+
+		std::size_t				_heap_size;
+		void*					_heap;
+		std::size_t				_output_size;
+		void*					_output;
+	};
+
+
+	class job final
+		: public process {
+
+	public:
+		job(daemon& parent, job_start_handler&& start_handler);
+
+	public:
+		const daemon&		parent() const noexcept;
+		process_cycle_t		cycle() const noexcept;
+
+		void start(process_cycle_t cycle);
+
+	private:
+		const daemon&		_parent;
+		process_cycle_t		_cycle;
+		job_start_handler	_start_handler;
+	};
+
+
+	// --------------------------------------------------------------
+	// process
+
+	process::process(abc::pool<process_id_t>& peer_pool, thread_id_t thread_pool_capacity, process_id_t child_pool_capacity)
+		: instance<abc::pool<process_id_t>>(peer_pool)
+		, _thread_pool(thread_pool_capacity)
+		, _child_pool(child_pool_capacity) {
+	}
+
+
+	abc::pool<thread_id_t>& process::thread_pool() noexcept {
+		return _thread_pool;
+	}
+
+
+	abc::pool<process_id_t>& process::child_pool() noexcept {
+		return _child_pool;
+	}
+
+
+	// --------------------------------------------------------------
+	// program
+
+	program::program()
+		: process(_program_pool, abc::pool<thread_id_t>::disabled, abc::pool<process_id_t>::unlimited)
+		, _daemons() {
+	}
+
+
+	template<typename... Args>
+	inline void program::emplace_back_daemon(Args&&... args) {
+		_daemons.emplace_back(args...);
+	} 
+
+
+	const daemon_container& program::daemons() const noexcept {
+		return _daemons;
+	}
+
+
+	void program::start() {
+		// TODO: Log instead of std::cout
+		std::cout << "[program] Starting..." << std::endl;
+		for (daemon& daemon : _daemons) {
+			daemon.start(1);
+		}
+		std::cout << "[program] Started." << std::endl;
+
+		std::cout << "[program] Exiting..." << std::endl;
+	}
+
+
+	/*static*/ inline abc::pool<process_id_t>	program::_program_pool(abc::pool<process_id_t>::singleton);
+
+
+	// --------------------------------------------------------------
+	// daemon
+
+	daemon::daemon(program& parent, daemon_start_handler&& start_handler, std::size_t heap_size, std::size_t output_size)
+		: process(parent.child_pool(), abc::pool<thread_id_t>::disabled, abc::pool<process_id_t>::unlimited)
+		, _parent(parent)
+		, _start_handler(std::move(start_handler))
+		, _cycle(0)
+		, _heap_size(heap_size)
+		, _heap(nullptr)
+		, _output_size(output_size)
+		, _output(nullptr) {
+	}
+
+
+	void daemon::start(process_cycle_t cycle) {
+		_cycle = cycle;
+		_start_handler(*this, cycle);
+	}
 
 }

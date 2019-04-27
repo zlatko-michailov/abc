@@ -65,6 +65,60 @@ void test_timestamp(abc::date_count_t days_since_epoch) {
 }
 
 
+void test_async() {
+	abc::async::start<int>([&c = std::cout]() -> int { c << "ASYNC \n"; return 42;})
+		.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 53;})
+		;//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 65;})
+		//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 78;});
+	std::cin.get();
+}
+
+
+void test_pool() {
+	abc::pool<std::int32_t> upool(abc::pool<std::int32_t>::unlimited);
+	std::cout << "upinst1 begin" << std::endl;
+	abc::instance<abc::pool<std::int32_t>> upinst1(upool);
+	std::cout << "upinst1 end" << std::endl;
+	std::cout << "upinst2 begin" << std::endl;
+	abc::instance<abc::pool<std::int32_t>> upinst2(upool);
+	std::cout << "upinst2 end" << std::endl;
+
+	abc::pool<std::int32_t> pool(abc::pool<std::int32_t>::singleton);
+	std::cout << "pinst1 begin" << std::endl;
+	abc::instance<abc::pool<std::int32_t>> pinst1(pool);
+	std::cout << "pinst1 end" << std::endl;
+
+	std::cout << "pinst2 begin" << std::endl;
+	try {
+		abc::instance<abc::pool<std::int32_t>> pinst2(pool);
+	}
+	catch(...) {
+		std::cout << "pinst2 exceeded the pool capacity" << std::endl;
+	}
+	std::cout << "pinst2 end" << std::endl;
+}
+
+
+void test_process() {
+	abc::program program;
+
+	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
+		std::cout << "\t[daemon 1] Starting..." << std::endl;
+		std::cout << "\t[daemon 1] Started." << std::endl;
+	}, 0, 0);
+	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
+		std::cout << "\t[daemon 2] Starting..." << std::endl;
+		std::cout << "\t[daemon 2] Started." << std::endl;
+	}, 0, 0);
+	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
+		std::cout << "\t[daemon 3] Starting..." << std::endl;
+		std::cout << "\t[daemon 3] Started." << std::endl;
+	}, 0, 0);
+
+	program.start();
+}
+
+
 int main() {
 	test_log(abc::log::diag);
 
@@ -97,28 +151,9 @@ int main() {
 	abc::result<void> r2(abc::status::bad_state);
 	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x", r2.status);
 
-
-	abc::async::start<int>([&c = std::cout]() -> int { c << "ASYNC \n"; return 42;})
-		.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 53;})
-		;//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 65;})
-		//.value.then([&c = std::cout](int v) -> int { c << "ASYNC " << v << "\n"; return 78;});
-	std::cin.get();
-
-	abc::pool<std::int32_t> upool(abc::pool<std::int32_t>::unlimited);
-	std::cout << "upinst1 begin" << std::endl;
-	abc::instance<abc::pool<std::int32_t>> upinst1(upool);
-	std::cout << "upinst1 end" << std::endl;
-	std::cout << "upinst2 begin" << std::endl;
-	abc::instance<abc::pool<std::int32_t>> upinst2(upool);
-	std::cout << "upinst2 end" << std::endl;
-
-	abc::pool<std::int32_t> pool(abc::pool<std::int32_t>::singleton);
-	std::cout << "pinst1 begin" << std::endl;
-	abc::instance<abc::pool<std::int32_t>> pinst1(pool);
-	std::cout << "pinst1 end" << std::endl;
-	std::cout << "pinst2 begin" << std::endl;
-	abc::instance<abc::pool<std::int32_t>> pinst2(pool);
-	std::cout << "pinst2 end" << std::endl;
+	test_async();
+	test_pool();
+	test_process();
 
 	return 0;
 }
