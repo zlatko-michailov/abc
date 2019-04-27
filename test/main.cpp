@@ -100,19 +100,21 @@ void test_pool() {
 
 
 void test_process() {
+	std::cout << "[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Starting test..." << std::endl;
+
 	abc::program program;
 
 	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
-		std::cout << "\t[daemon 1] Starting..." << std::endl;
-		std::cout << "\t[daemon 1] Started." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Starting..." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Started." << std::endl;
 	}, 0, 0);
 	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
-		std::cout << "\t[daemon 2] Starting..." << std::endl;
-		std::cout << "\t[daemon 2] Started." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Starting..." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Started." << std::endl;
 	}, 0, 0);
 	program.emplace_back_daemon(program, [=](abc::daemon&, abc::process_cycle_t cycle) {
-		std::cout << "\t[daemon 3] Starting..." << std::endl;
-		std::cout << "\t[daemon 3] Started." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Starting..." << std::endl;
+		std::cout << "\t[" << abc::process::current().kind() << " " << abc::process::current().id() << "] Started." << std::endl;
 	}, 0, 0);
 
 	program.start();
