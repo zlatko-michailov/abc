@@ -28,6 +28,7 @@ namespace abc {
 
 	public:
 		pool(capacity_t capacity) noexcept;
+		pool(pool&& other) noexcept;
 
 	protected:
 		friend class instance<pool<capacity_t>>;
@@ -35,11 +36,12 @@ namespace abc {
 		capacity_t	reserve();
 		void		release() noexcept;
 
+	public:
 		capacity_t	capacity() const noexcept;
 		capacity_t	count() const noexcept;
 
 	private:
-		const capacity_t		_capacity;
+		capacity_t				_capacity;
 		std::atomic<capacity_t>	_next_id;
 		std::atomic<capacity_t>	_count;
 	};
@@ -52,7 +54,7 @@ namespace abc {
 		~instance() noexcept;
 
 		typename Pool::capacity_t	id() const noexcept;
-		const Pool&					pool() const noexcept;
+		Pool&						pool() noexcept;
 
 	private:
 		Pool&						_pool;
@@ -61,7 +63,7 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
-
+	// pool
 
 	template <typename Capacity>
 	inline pool<Capacity>::pool(Capacity capacity) noexcept
@@ -72,12 +74,22 @@ namespace abc {
 
 
 	template <typename Capacity>
+	inline pool<Capacity>::pool(pool&& other) noexcept
+		: _capacity(other._capacity)
+		, _next_id(other._next_id.load())
+		, _count(other._count.load()) {
+		other._capacity = disabled;
+		other._next_id.store(0);
+		other._count.store(0);
+	}
+
+	template <typename Capacity>
 	inline typename pool<Capacity>::capacity_t pool<Capacity>::reserve() {
 		capacity_t count = ++(_count);
 
 		if (_capacity != unlimited && count > _capacity) {
 			--(_count);
-			throw; // TODO: What exception?
+			throw "capacity"; // TODO: What exception?
 		}
 
 		return ++(_next_id);
@@ -102,6 +114,9 @@ namespace abc {
 	}
 
 
+	// --------------------------------------------------------------
+	// instance
+
 	template <typename Pool>
 	inline instance<Pool>::instance(Pool& pool)
 		: _pool(pool) {
@@ -122,7 +137,7 @@ namespace abc {
 
 
 	template <typename Pool>
-	inline const Pool& instance<Pool>::pool() const noexcept {
+	inline Pool& instance<Pool>::pool() noexcept {
 		return _pool;
 	}
 
