@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cstdint>
-//#include <memory>
 #include <functional>
-//#include <atomic>
 #include <iostream> // TODO: remove
 
 #include "pool.h"
@@ -299,4 +297,8 @@ namespace abc {
 	}
 
 
+	// --------------------------------------------------------------
+	// job
+
+	
 }
