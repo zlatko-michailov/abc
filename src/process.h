@@ -8,7 +8,23 @@
 namespace abc {
 
 	// --------------------------------------------------------------
+	// thread
+
+	/*static*/ thread_id_t thread::current_thread_id() noexcept {
+		return _current != nullptr ? _current->id() : 0;
+	}
+
+
+	/*static*/ inline thread*	thread::_current = nullptr;
+
+
+	// --------------------------------------------------------------
 	// process
+
+	/*static*/ process_id_t process::current_process_id() noexcept {
+		return _current->id();
+	}
+
 
 	/*static*/ process& process::current() noexcept {
 		return *_current;

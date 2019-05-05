@@ -8,6 +8,8 @@
 
 namespace abc {
 
+	class thread;
+
 	class process;
 
 		class launcher;
@@ -17,8 +19,6 @@ namespace abc {
 		class daemon;
 
 		class job;
-
-	class thread;
 
 
 	typedef char			process_kind_t;
@@ -53,14 +53,18 @@ namespace abc {
 		thread(job& parent, thread_start_handler&& start_handler);
 
 	public:
-		const job&	parent() const noexcept;
+		static thread_id_t		current_thread_id() noexcept;
+
+		const process&			parent() const noexcept;
 
 	public:
 		void start();
 
 	private:
-		const job&				_parent;
-		thread_start_handler	_start_handler;
+		static thread*					_current;
+
+		const process&					_parent;
+		thread_start_handler			_start_handler;
 	};
 
 
@@ -68,6 +72,7 @@ namespace abc {
 		: public instance<abc::pool<process_id_t>> {
 
 	public:
+		static process_id_t			current_process_id() noexcept;
 		static process&				current() noexcept;
 
 	protected:

@@ -10,6 +10,7 @@
 #include "../src/streambuf.h"
 #include "../src/pool.h"
 #include "../src/process.h"
+#include "../src/host.itf.h"
 
 
 constexpr abc::category_t	test_category	= 0x1234;
