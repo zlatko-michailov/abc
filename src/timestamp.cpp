@@ -309,7 +309,7 @@ namespace abc {
 		if (remaining_days < days_in_1_month) {
 			day += remaining_days;
 
-			abc::log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0100, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0100, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			reset_date(days_since_epoch, year, month, day);
 			return true;
 		}
@@ -320,7 +320,7 @@ namespace abc {
 		}
 
 		remaining_days -= days_in_1_month;
-		abc::log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0101, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+		abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0101, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 
 		return false;
 	}

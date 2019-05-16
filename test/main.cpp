@@ -49,19 +49,19 @@ void test_timestamp(abc::date_count_t days_since_epoch) {
 		ts.reset_date(days_since_epoch);
 	}
 
-	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+	abc::legacy_log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
 		ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.nanoseconds());
 
 	abc::timestamp ts2(ts);
-	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts2=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+	abc::legacy_log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts2=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
 		ts2.year(), ts2.month(), ts2.day(), ts2.hours(), ts2.minutes(), ts2.seconds(), ts2.nanoseconds());
 
 	abc::timestamp ts3 = ts;
-	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts3=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+	abc::legacy_log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts3=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
 		ts3.year(), ts3.month(), ts3.day(), ts3.hours(), ts3.minutes(), ts3.seconds(), ts3.nanoseconds());
 
 	abc::timestamp ts4 = ts.coerse_minutes(3);
-	abc::log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts4=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
+	abc::legacy_log::diag.push(abc::severity::warning, test_category, test_tag, abc::status::success, "ts4=%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%9.9u",
 		ts4.year(), ts4.month(), ts4.day(), ts4.hours(), ts4.minutes(), ts4.seconds(), ts4.nanoseconds());
 }
 
@@ -123,9 +123,9 @@ void test_process() {
 
 
 int main() {
-	test_log(abc::log::diag);
+	test_log(abc::legacy_log::diag);
 
-	abc::log flog("out/log", 3);
+	abc::legacy_log flog("out/log", 3);
 	test_log(flog);
 
 	test_timestamp(-1);
@@ -149,10 +149,10 @@ int main() {
 	test_timestamp(365 + 1);
 
 	abc::result<int> r1(42);
-	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x: %d", r1.status, r1.value);
+	abc::legacy_log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x: %d", r1.status, r1.value);
 
 	abc::result<void> r2(abc::status::bad_state);
-	abc::log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x", r2.status);
+	abc::legacy_log::diag.push(abc::severity::info, test_category, test_tag, abc::status::success, "%x", r2.status);
 
 	test_async();
 	test_pool();

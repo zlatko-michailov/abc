@@ -86,23 +86,23 @@ namespace abc {
 	};
 
 
-	class log : public basic_log {
+	class legacy_log : public basic_log {
 	public:
-		log(std::FILE* f, const char* separator = default_separator) /*throws*/
+		legacy_log(std::FILE* f, const char* separator = default_separator) /*throws*/
 			: basic_log()
 			, _path()
 			, _separator(separator) {
 			reset(f, nullptr, 0, _separator.c_str());
 		}
 
-		log(const char* path, const char* separator = default_separator) /*throws*/
+		legacy_log(const char* path, const char* separator = default_separator) /*throws*/
 			: basic_log()
 			, _path(path)
 			, _separator(separator) {
 			reset(nullptr, _path.c_str(), 0, _separator.c_str());
 		}
 
-		log(const char* path, std::chrono::minutes::rep rotation_minutes, const char* separator = default_separator) /*throws*/
+		legacy_log(const char* path, std::chrono::minutes::rep rotation_minutes, const char* separator = default_separator) /*throws*/
 			: basic_log()
 			, _path(path)
 			, _separator(separator) {
