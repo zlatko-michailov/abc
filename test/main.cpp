@@ -5,7 +5,7 @@
 
 #include "../src/base.h"
 #include "../src/async.h"
-#include "../src/log.h"
+#include "../src/legacy_log.h"
 #include "../src/timestamp.h"
 #include "../src/streambuf.h"
 #include "../src/pool.h"

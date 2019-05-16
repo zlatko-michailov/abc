@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base.h"
-#include "log.h"
+#include "legacy_log.h"
 
 
 #define abc_assert_ret(cond, cat, tag, ret) { \

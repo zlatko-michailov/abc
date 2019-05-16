@@ -1,6 +1,6 @@
 #include "base.h"
 #include "timestamp.h"
-#include "log.h"
+#include "legacy_log.h"
 #include "macros.h"
 
 

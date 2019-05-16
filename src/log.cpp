@@ -7,7 +7,7 @@
 #include "timestamp.h"
 #include "mutex.h"
 #include "streambuf.h"
-#include "log.h"
+#include "legacy_log.h"
 #include "macros.h"
 
 
