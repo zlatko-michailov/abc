@@ -5,6 +5,10 @@
 
 namespace abc {
 
+	template <typename Clock>
+	class timestamp;
+
+
 	typedef int32_t date_count_t;
 	typedef int64_t time_count_t;
 
@@ -19,10 +23,21 @@ namespace abc {
 	typedef int32_t nanosecond_t;
 
 
-	class basic_timestamp {
+	// --------------------------------------------------------------
+
+
+	template <typename Clock = std::chrono::system_clock>
+	class timestamp {
 	public:
-		basic_timestamp() noexcept;
-		basic_timestamp(const basic_timestamp& other) noexcept;
+		timestamp() noexcept;
+		timestamp(std::chrono::time_point<Clock> tp) noexcept;
+
+	public:
+		void reset(std::chrono::time_point<Clock> tp) noexcept;
+		void reset(time_count_t nanoseconds_since_epoch) noexcept;
+
+		void reset_date(date_count_t days_since_epoch) noexcept;
+		void reset_time(time_count_t nanoseconds_since_midnight) noexcept;
 
 	public:
 		year_t			year()			const noexcept { return _year; }
@@ -45,13 +60,7 @@ namespace abc {
 		bool operator<=(const basic_timestamp& other) const noexcept;
 
 	public:
-		basic_timestamp coerse_minutes(std::chrono::minutes::rep minutes) const noexcept;
-
-	public:
-		void reset(time_count_t nanoseconds_since_epoch) noexcept;
-
-		void reset_date(date_count_t days_since_epoch) noexcept;
-		void reset_time(time_count_t nanoseconds_since_midnight) noexcept;
+		timestamp<Clock> coerse_minutes(std::chrono::minutes::rep minutes) const noexcept;
 
 	private:
 		bool reset_date_if_done(date_count_t days_since_epoch, date_count_t& year, date_count_t& month, date_count_t& day, date_count_t& remaining_days, date_count_t days_in_1_month) noexcept;
@@ -73,30 +82,6 @@ namespace abc {
 		millisecond_t	_milliseconds;
 		microsecond_t	_microseconds;
 		nanosecond_t	_nanoseconds;
-	};
-
-
-	template <typename Clock = std::chrono::system_clock>
-	class timestamp : public basic_timestamp {
-	public:
-		timestamp() noexcept
-			: timestamp(Clock::now()) {
-		}
-
-		timestamp(std::chrono::time_point<Clock> tp) noexcept
-			: basic_timestamp() {
-			reset(tp);
-		}
-
-		timestamp(const basic_timestamp& other) noexcept
-			: basic_timestamp(other) {
-		}
-
-		void reset(std::chrono::time_point<Clock> tp) noexcept {
-			std::chrono::nanoseconds tp_nanoseconds_since_epoch = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch());
-			basic_timestamp::reset(tp_nanoseconds_since_epoch.count());
-		}
-
 	};
 
 }
