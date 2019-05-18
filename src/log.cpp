@@ -59,7 +59,7 @@ namespace abc {
 
 
 	status_t basic_log::push(severity_t severity, category_t category, tag_t tag, status_t status, std::thread::id thread_id, const char* custom, bool use_vlist, va_list vlist) noexcept {
-		status_lock lock(_mutex);
+		legacy_status_lock lock(_mutex);
 		if (status::failed(lock.status())) {
 			return lock.status();
 		}

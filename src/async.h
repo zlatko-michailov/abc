@@ -58,7 +58,7 @@ namespace abc {
 				return status::abort;
 			}
 
-			status_lock lock(_mutex);
+			legacy_status_lock lock(_mutex);
 			abc_warning(lock.status(), category::async, __TAG__);
 
 			if (_has_value) {
@@ -95,7 +95,7 @@ namespace abc {
 				abc_warning(async::start(std::move(func), _value), category::async, __TAG__);
 			}
 
-			status_lock lock(_mutex);
+			legacy_status_lock lock(_mutex);
 			abc_warning(lock.status(), category::async, __TAG__);
 
 			if (_has_value) {
@@ -158,7 +158,7 @@ namespace abc {
 				}
 			}
 
-			status_lock lock(_mutex);
+			legacy_status_lock lock(_mutex);
 			abc_warning(lock.status(), category::async, __TAG__);
 
 			if (_has_value) {
@@ -299,7 +299,7 @@ namespace abc {
 		}
 
 		status_t start() noexcept {
-			status_lock lock(_mutex);
+			legacy_status_lock lock(_mutex);
 			abc_warning(lock.status(), category::async, __TAG__);
 
 			abc_assert(_status == status::not_started, category::async, __TAG__);
@@ -876,7 +876,7 @@ namespace abc {
 			t.func = std::move(func);
 
 			{
-				status_lock lock(_mutex);
+				legacy_status_lock lock(_mutex);
 				if (status::failed(lock.status())) {
 					// TODO: log
 					return completed_future(status::abort);
@@ -908,7 +908,7 @@ namespace abc {
 
 				clock::time_point now = clock::now();
 				{
-					status_lock lock(_mutex);
+					legacy_status_lock lock(_mutex);
 					if (status::failed(lock.status())) {
 						// TODO: log
 						continue;
