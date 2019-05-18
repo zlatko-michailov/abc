@@ -16,6 +16,7 @@ namespace abc {
 		_mutex.lock();
 	}
 
+
 	template <spin_count_t SpinCount, typename Mutex>
 	inline bool spin_mutex<SpinCount, Mutex>::try_lock() {
 		if (SpinCount != 0) {
@@ -25,6 +26,7 @@ namespace abc {
 		return _mutex.try_lock();
 	}
 
+
 	template <spin_count_t SpinCount, typename Mutex>
 	inline void spin_mutex<SpinCount, Mutex>::unlock() {
 		if (SpinCount != 0) {
@@ -33,6 +35,9 @@ namespace abc {
 
 		_mutex.unlock();
 	}
+
+
+	// --------------------------------------------------------------
 
 
 	template <typename Mutex>
