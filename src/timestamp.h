@@ -1,7 +1,7 @@
-#include "base.h"
-#include "timestamp.h"
+#pragma once
+
+#include "timestamp.itf.h"
 #include "legacy_log.h"
-#include "macros.h"
 
 
 namespace abc {
@@ -49,67 +49,30 @@ namespace abc {
 	static constexpr date_count_t days_per_400_years = days_per_100_years_leap + 3 * days_per_100_years;
 
 
-	basic_timestamp::basic_timestamp() noexcept {
-		reset_date(0, min_year, min_month, min_day);
-		reset_time(0, min_hour, min_minute, min_second, min_nanosecond);
+	// --------------------------------------------------------------
+
+
+	template <typename Clock>
+	inline timestamp<Clock>::timestamp() noexcept
+		: timestamp(Clock::now()) {
 	}
 
 
-	basic_timestamp::basic_timestamp(const basic_timestamp& other) noexcept {
-		reset_date(other._days_since_epoch, other._year, other._month, other._day);
-		reset_time(other._nanoseconds_since_midnight, other._hours, other._minutes,other._seconds, other._nanoseconds);
+	template <typename Clock>
+	inline timestamp<Clock>::timestamp(std::chrono::time_point<Clock> tp) noexcept {
+		reset(tp);
 	}
 
 
-	bool basic_timestamp::operator==(const basic_timestamp& other) const noexcept {
-		return _days_since_epoch == other._days_since_epoch
-			&& _nanoseconds_since_midnight == other._nanoseconds_since_midnight;
+	template <typename Clock>
+	inline void timestamp<Clock>::reset(std::chrono::time_point<Clock> tp) noexcept {
+		std::chrono::nanoseconds tp_nanoseconds_since_epoch = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch());
+		reset(tp_nanoseconds_since_epoch.count());
 	}
 
 
-	bool basic_timestamp::operator!=(const basic_timestamp& other) const noexcept {
-		return !operator==(other);
-	}
-
-
-	bool basic_timestamp::operator> (const basic_timestamp& other) const noexcept {
-		return (_days_since_epoch > other._days_since_epoch)
-			|| (_days_since_epoch == other._days_since_epoch
-				&& _nanoseconds_since_midnight > other._nanoseconds_since_midnight);
-	}
-
-
-	bool basic_timestamp::operator>=(const basic_timestamp& other) const noexcept {
-		return (_days_since_epoch > other._days_since_epoch)
-			|| (_days_since_epoch == other._days_since_epoch
-				&& _nanoseconds_since_midnight >= other._nanoseconds_since_midnight);
-	}
-
-
-	bool basic_timestamp::operator< (const basic_timestamp& other) const noexcept {
-		return !operator>=(other);
-	}
-
-
-	bool basic_timestamp::operator<=(const basic_timestamp& other) const noexcept {
-		return !operator>(other);
-	}
-
-
-	basic_timestamp basic_timestamp::coerse_minutes(std::chrono::minutes::rep minutes) const noexcept {
-		time_count_t minutes_since_midnight = _nanoseconds_since_midnight / nanoseconds_per_minute;
-		time_count_t coersed_minutes_since_midnight = (minutes_since_midnight / minutes) * minutes;
-		time_count_t coersed_nanoseconds_since_midnight = coersed_minutes_since_midnight * nanoseconds_per_minute;
-
-		basic_timestamp copy;
-		copy.reset_date(_days_since_epoch, _year, _month, _day);
-		copy.reset_time(coersed_nanoseconds_since_midnight);
-
-		return copy;
-	}
-
-
-	void basic_timestamp::reset(time_count_t nanoseconds_since_epoch) noexcept {
+	template <typename Clock>
+	inline void timestamp<Clock>::reset(time_count_t nanoseconds_since_epoch) noexcept {
 		date_count_t days_since_epoch = static_cast<date_count_t>(nanoseconds_since_epoch / nanoseconds_per_day);
 		reset_date(days_since_epoch);
 
@@ -118,7 +81,63 @@ namespace abc {
 	}
 
 
-	void basic_timestamp::reset_date(date_count_t days_since_epoch) noexcept {
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator==(const timestamp<Clock>& other) const noexcept {
+		return _days_since_epoch == other._days_since_epoch
+			&& _nanoseconds_since_midnight == other._nanoseconds_since_midnight;
+	}
+
+
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator!=(const timestamp<Clock>& other) const noexcept {
+		return !operator==(other);
+	}
+
+
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator> (const timestamp<Clock>& other) const noexcept {
+		return (_days_since_epoch > other._days_since_epoch)
+			|| (_days_since_epoch == other._days_since_epoch
+				&& _nanoseconds_since_midnight > other._nanoseconds_since_midnight);
+	}
+
+
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator>=(const timestamp<Clock>& other) const noexcept {
+		return (_days_since_epoch > other._days_since_epoch)
+			|| (_days_since_epoch == other._days_since_epoch
+				&& _nanoseconds_since_midnight >= other._nanoseconds_since_midnight);
+	}
+
+
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator< (const timestamp<Clock>& other) const noexcept {
+		return !operator>=(other);
+	}
+
+
+	template <typename Clock>
+	inline bool timestamp<Clock>::operator<=(const timestamp<Clock>& other) const noexcept {
+		return !operator>(other);
+	}
+
+
+	template <typename Clock>
+	inline timestamp<Clock> timestamp<Clock>::coerse_minutes(std::chrono::minutes::rep minutes) const noexcept {
+		time_count_t minutes_since_midnight = _nanoseconds_since_midnight / nanoseconds_per_minute;
+		time_count_t coersed_minutes_since_midnight = (minutes_since_midnight / minutes) * minutes;
+		time_count_t coersed_nanoseconds_since_midnight = coersed_minutes_since_midnight * nanoseconds_per_minute;
+
+		timestamp<Clock> copy;
+		copy.reset_date(_days_since_epoch, _year, _month, _day);
+		copy.reset_time(coersed_nanoseconds_since_midnight);
+
+		return copy;
+	}
+
+
+	template <typename Clock>
+	inline void timestamp<Clock>::reset_date(date_count_t days_since_epoch) noexcept {
 		date_count_t year = min_year;
 		date_count_t month = min_month;
 		date_count_t day = min_day;
@@ -275,8 +294,9 @@ namespace abc {
 	}
 
 
-	void basic_timestamp::reset_time(time_count_t nanoseconds_since_midnight) noexcept {
-		abc_assert_void(nanoseconds_since_midnight < nanoseconds_per_day, abc::category::log, 0x0200);
+	template <typename Clock>
+	inline void timestamp<Clock>::reset_time(time_count_t nanoseconds_since_midnight) noexcept {
+		////abc_assert_void(nanoseconds_since_midnight < nanoseconds_per_day, abc::category::log, 0x0200);
 
 		time_count_t remaining = nanoseconds_since_midnight % nanoseconds_per_day;
 		////abc::log::diag.push(abc::category::log, 0x0201, abc::status::debug, "remaing=%lld", remaining);
@@ -305,11 +325,12 @@ namespace abc {
 	}
 
 
-	bool basic_timestamp::reset_date_if_done(date_count_t days_since_epoch, date_count_t& year, date_count_t& month, date_count_t& day, date_count_t& remaining_days, date_count_t days_in_1_month) noexcept {
+	template <typename Clock>
+	inline bool timestamp<Clock>::reset_date_if_done(date_count_t days_since_epoch, date_count_t& year, date_count_t& month, date_count_t& day, date_count_t& remaining_days, date_count_t days_in_1_month) noexcept {
 		if (remaining_days < days_in_1_month) {
 			day += remaining_days;
 
-			abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0100, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+			//////abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0100, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			reset_date(days_since_epoch, year, month, day);
 			return true;
 		}
@@ -320,13 +341,14 @@ namespace abc {
 		}
 
 		remaining_days -= days_in_1_month;
-		abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0101, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
+		//////abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0101, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 
 		return false;
 	}
 
 
-	void basic_timestamp::reset_date(date_count_t days_since_epoch, year_t year, month_t month, day_t day) noexcept {
+	template <typename Clock>
+	inline void timestamp<Clock>::reset_date(date_count_t days_since_epoch, year_t year, month_t month, day_t day) noexcept {
 		_days_since_epoch = days_since_epoch;
 
 		_year = year;
@@ -335,7 +357,8 @@ namespace abc {
 	}
 
 
-	void basic_timestamp::reset_time(time_count_t nanoseconds_since_midnight, hour_t hours, minute_t minutes, second_t seconds, nanosecond_t nanoseconds) noexcept {
+	template <typename Clock>
+	inline void timestamp<Clock>::reset_time(time_count_t nanoseconds_since_midnight, hour_t hours, minute_t minutes, second_t seconds, nanosecond_t nanoseconds) noexcept {
 		_nanoseconds_since_midnight = nanoseconds_since_midnight;
 
 		_hours = hours;

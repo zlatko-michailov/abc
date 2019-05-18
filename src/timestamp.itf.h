@@ -52,12 +52,12 @@ namespace abc {
 		nanosecond_t	nanoseconds()	const noexcept { return _nanoseconds; }
 
 	public:
-		bool operator==(const basic_timestamp& other) const noexcept;
-		bool operator!=(const basic_timestamp& other) const noexcept;
-		bool operator> (const basic_timestamp& other) const noexcept;
-		bool operator>=(const basic_timestamp& other) const noexcept;
-		bool operator< (const basic_timestamp& other) const noexcept;
-		bool operator<=(const basic_timestamp& other) const noexcept;
+		bool operator==(const timestamp<Clock>& other) const noexcept;
+		bool operator!=(const timestamp<Clock>& other) const noexcept;
+		bool operator> (const timestamp<Clock>& other) const noexcept;
+		bool operator>=(const timestamp<Clock>& other) const noexcept;
+		bool operator< (const timestamp<Clock>& other) const noexcept;
+		bool operator<=(const timestamp<Clock>& other) const noexcept;
 
 	public:
 		timestamp<Clock> coerse_minutes(std::chrono::minutes::rep minutes) const noexcept;
