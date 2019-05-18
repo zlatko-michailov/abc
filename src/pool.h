@@ -103,13 +103,13 @@ namespace abc {
 
 
 	template <typename Capacity>
-	typename pool<Capacity>::capacity_t pool<Capacity>::capacity() const noexcept {
+	inline typename pool<Capacity>::capacity_t pool<Capacity>::capacity() const noexcept {
 		return _capacity;
 	}
 
 
 	template <typename Capacity>
-	typename pool<Capacity>::capacity_t pool<Capacity>::count() const noexcept {
+	inline typename pool<Capacity>::capacity_t pool<Capacity>::count() const noexcept {
 		return _count;
 	}
 
