@@ -11,9 +11,9 @@
 //#include <deque>
 //#include <thread>
 
-#include "base.h"
+#include "legacy_base.h"
+#include "legacy_macros.h"
 #include "mutex.h"
-#include "macros.h"
 
 
 namespace abc {

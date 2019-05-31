@@ -4,7 +4,7 @@
 #include <array>
 #include <streambuf>
 
-#include "base.h"
+#include "legacy_base.h"
 
 
 namespace abc {

@@ -3,12 +3,12 @@
 #include <thread>
 #include <ostream>
 
-#include "base.h"
+#include "legacy_base.h"
+#include "legacy_macros.h"
+#include "streambuf.h"
 #include "timestamp.h"
 #include "mutex.h"
-#include "streambuf.h"
 #include "legacy_log.h"
-#include "macros.h"
 
 
 namespace abc {
