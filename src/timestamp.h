@@ -1,7 +1,6 @@
 #pragma once
 
 #include "timestamp.itf.h"
-#include "legacy_log.h"
 
 
 namespace abc {
