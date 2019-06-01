@@ -3,19 +3,22 @@
 #include <cstdint>
 #include <functional>
 
+#include "os.itf.h"
 
 namespace abc {
 
-	class os;
+	class posix_os;
 
 
 	// --------------------------------------------------------------
 
-	class os {
+
+	class posix_os
+		: public os {
 
 	public:
-		virtual void fork() = 0;
+		virtual void fork() override;
 	};
 
-
+	
 }

@@ -87,20 +87,10 @@ __PENDING QUESTIONS__
 ## Mutex and Locks
 ## Ring
 ## Isolation
-## Tracing
-
+## Trace
+## Test
 
 ---
-
-- base: status, severity category
-- macros
-- timestamp
-	+ diag
-- spin_mutex
-- arraybuf
-- log
-	+ api
-	+ request
 
 - async
 	+ future_state::continuations
