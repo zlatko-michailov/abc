@@ -11,11 +11,12 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+
 	class host {
 
 	public:
-		virtual abc::os& os() noexcept = 0;
-		virtual log& diag() noexcept = 0;
+		virtual abc::os&	os() noexcept = 0;
+		virtual log&		diag() noexcept = 0;
 	};
 
 

@@ -20,8 +20,8 @@ namespace abc {
 		posix_host(posix_os&& os, log&& diag);
 
 	public:
-		virtual abc::os& os() noexcept override;
-		virtual log& diag() noexcept override;
+		virtual abc::os&	os() noexcept override;
+		virtual log&		diag() noexcept override;
 
 	private:
 		posix_os	_os;
