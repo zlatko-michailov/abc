@@ -7,6 +7,7 @@
 #include <thread>
 #include <future>
 
+#include "tag.h"
 #include "mutex.itf.h"
 #include "timestamp.h"
 #include "process.itf.h"
@@ -45,9 +46,9 @@ namespace abc {
 	}
 
 
-	typedef std::uint32_t	tag_t;
+	////typedef std::uint32_t	tag_t;
 	// TODO:: Remove when tagger gets implemented
-	constexpr tag_t __TAG__ = 0;
+	////constexpr tag_t __TAG__ = 0;
 
 
 	typedef std::uint64_t field_t;
