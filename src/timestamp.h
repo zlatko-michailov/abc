@@ -156,7 +156,7 @@ namespace abc {
 			return;
 		}
 
-		// Now the eopch is Mar 1, 1970.
+		// Now the epoch is Mar 1, 1970.
 
 		// There is a well-known number of days per 400 years.
 		if (remaining_days >= days_per_400_years) {
