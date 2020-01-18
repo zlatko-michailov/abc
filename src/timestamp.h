@@ -160,136 +160,109 @@ namespace abc {
 
 		// There is a well-known number of days per 400 years.
 		if (remaining_days >= days_per_400_years) {
-			////abc::log::diag.push(abc::category::log, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year += 400 * (remaining_days / days_per_400_years);
 			remaining_days = remaining_days % days_per_400_years;
-			////abc::log::diag.push(abc::category::log, 0x0011, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// The first century bounary is leap.
 		if (remaining_days >= days_per_100_years_leap) {
-			////abc::log::diag.push(abc::category::log, 0x0021, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year += 100;
 			remaining_days -= days_per_100_years_leap;
-			////abc::log::diag.push(abc::category::log, 0x0022, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// The following century boundaries are not leap.
 		// We artificailly make them leap.
 		if (remaining_days >= days_per_100_years) {
-			////abc::log::diag.push(abc::category::log, 0x0031, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			remaining_days += (remaining_days / days_per_100_years);
-			////abc::log::diag.push(abc::category::log, 0x0032, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// Now we have homogenious 4-year chunks.
 		if (remaining_days >= days_per_4_years) {
-			////abc::log::diag.push(abc::category::log, 0x0041, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year += 4 * (remaining_days / days_per_4_years);
 			remaining_days = remaining_days % days_per_4_years;
-			////abc::log::diag.push(abc::category::log, 0x0042, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// Out of any remaining years, the first one is not leap.
 		if (remaining_days >= days_per_1_year) {
-			////abc::log::diag.push(abc::category::log, 0x0051, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year++;
 			remaining_days -= days_per_1_year;
-			////abc::log::diag.push(abc::category::log, 0x0052, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// The second year is leap.
 		if (remaining_days >= days_per_1_year_leap) {
-			////abc::log::diag.push(abc::category::log, 0x0061, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year++;
 			remaining_days -= days_per_1_year_leap;
-			////abc::log::diag.push(abc::category::log, 0x0062, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// The remaining year(s) are not leap.
 		if (remaining_days >= days_per_1_year) {
-			////abc::log::diag.push(abc::category::log, 0x0071, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 			year += (remaining_days / days_per_1_year);
 			remaining_days = remaining_days % days_per_1_year;
-			////abc::log::diag.push(abc::category::log, 0x0072, abc::status::debug, "remaing_days=%d, year=%d", remaining_days, year);
 		}
 
 		// The remaining days are within 1 year (and we are based at Mar 1).
 
 		// Mar
-		////abc::log::diag.push(abc::category::log, 0x0081, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Apr
-		////abc::log::diag.push(abc::category::log, 0x0082, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 30)) {
 			return;
 		}
 
 		// May
-		////abc::log::diag.push(abc::category::log, 0x0083, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Jun
-		////abc::log::diag.push(abc::category::log, 0x0084, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 30)) {
 			return;
 		}
 
 		// Jul
-		////abc::log::diag.push(abc::category::log, 0x0085, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Aug
-		////abc::log::diag.push(abc::category::log, 0x0086, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Sep
-		////abc::log::diag.push(abc::category::log, 0x0087, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 30)) {
 			return;
 		}
 
 		// Oct
-		////abc::log::diag.push(abc::category::log, 0x0088, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Nov
-		////abc::log::diag.push(abc::category::log, 0x0089, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 30)) {
 			return;
 		}
 
 		// Dec
-		////abc::log::diag.push(abc::category::log, 0x008a, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Jan
-		////abc::log::diag.push(abc::category::log, 0x008b, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 31)) {
 			return;
 		}
 
 		// Feb
-		////abc::log::diag.push(abc::category::log, 0x008c, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 		if (reset_date_if_done(days_since_epoch, year, month, day, remaining_days, 29)) {
 			return;
 		}
 
 		// TODO: assert unreachable
-		////abc::log::diag.push(abc::category::log, 0x008d, abc::status::debug, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 	}
 
 
