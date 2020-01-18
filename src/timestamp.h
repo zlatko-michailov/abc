@@ -1,6 +1,6 @@
 #pragma once
 
-#include "timestamp.itf.h"
+#include "timestamp.i.h"
 
 
 namespace abc {
