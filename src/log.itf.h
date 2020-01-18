@@ -8,7 +8,7 @@
 #include <future>
 
 #include "tag.h"
-#include "mutex.itf.h"
+#include "mutex.i.h"
 #include "timestamp.h"
 #include "process.itf.h"
 

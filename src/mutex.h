@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mutex.itf.h"
+#include "mutex.i.h"
 
 
 namespace abc {
