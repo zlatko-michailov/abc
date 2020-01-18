@@ -11,8 +11,8 @@ namespace abc {
 
 	namespace spin_for {
 		constexpr spin_count_t	memory	= -1;
-		constexpr spin_count_t	os		= 25 * 1000;
-		constexpr spin_count_t	disk	= 50 * 1000;
+		constexpr spin_count_t	os		=  25 * 1000;
+		constexpr spin_count_t	disk	= 100 * 1000;
 		constexpr spin_count_t	network	=  1;
 	}
 
