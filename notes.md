@@ -91,6 +91,22 @@ __PENDING QUESTIONS__
 ## Test
 
 ---
+# v0.3
+## Done
+tag
+exception
+timestamp
+mutex
+
+## To Do
+log
+test
+
+## To Ignore/Remove
+os
+host
+pool
+process
 
 - async
 	+ future_state::continuations

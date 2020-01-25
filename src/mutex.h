@@ -36,41 +36,4 @@ namespace abc {
 		_mutex.unlock();
 	}
 
-
-	// --------------------------------------------------------------
-
-
-	template <typename Mutex>
-	class legacy_status_lock {
-	public:
-		legacy_status_lock(Mutex& mutex) noexcept
-			: _mutex(mutex)
-			, _st(status::success) {
-			try {
-				_mutex.lock();
-			}
-			catch(...) {
-				_st = status::bad_state;
-			}
-		}
-
-		~legacy_status_lock() noexcept {
-			if (status::succeeded(_st)) {
-				try {
-					_mutex.unlock();
-				}
-				catch(...) {
-				}
-			}
-		}
-
-	public:
-		status_t status() const noexcept {
-			return _st;
-		}
-
-	private:
-		Mutex&		_mutex;
-		status_t	_st;
-	};
 }

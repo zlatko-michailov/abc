@@ -5,7 +5,7 @@
 
 namespace abc {
 
-	typedef std::uint32_t	tag_t;
+	typedef std::uint64_t	tag_t;
 
 
 	constexpr tag_t __TAG__ = 0;

@@ -1,14 +1,86 @@
-#include <cstdio>
-#include <cstdarg>
+//#include <cstdio>
+//#include <cstdarg>
 
-#include "log.itf.h"
-#include "exception.h"
-#include "process.h"
+#include "log.i.h"
 #include "timestamp.h"
+#include "mutex.h"
 
 
 namespace abc {
 
+	namespace log_container {
+		inline ostream::ostream(std::streambuf* sb) noexcept
+			: _mutex()
+			, _stream(sb) {
+		}
+
+
+		inline void ostream::push_back(const char* line) {
+			std::lock_guard lock(_mutex);
+			_stream << line << std::endl;
+		}
+
+
+		inline void ostream::set_stream(std::streambuf* sb) {
+			std::lock_guard lock(_mutex);
+			_stream.flush();
+			_stream .rdbuf(sb);
+		}
+
+
+		template <typename Clock>
+		inline file<Clock>::file(const char* path)
+			: file<Clock>(path, no_rotation) {
+		}
+
+
+		template <typename Clock>
+		inline file<Clock>::file(const char* path, std::chrono::minutes::rep rotation_minutes)
+			: ostream(nullptr)
+			, _path(path)
+			, _rotation_minutes(rotation_minutes) {
+			ensure_file_stream();
+		}
+
+
+		template <typename Clock>
+		inline void file<Clock>::push_back(const char* line) {
+			ensure_file_stream();
+			ostream::push_back(line);
+		}
+
+
+		template <typename Clock>
+		inline void file<Clock>::ensure_file_stream() {
+		}
+	}
+
+
+	namespace log_view {
+
+	}
+
+
+	namespace lpg_filter {
+
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifdef REMOVE
 	static constexpr int fwide_char = -1;
 	static constexpr int fwide_wide = +1;
 
@@ -147,3 +219,4 @@ namespace abc {
 
 
 }
+#endif
