@@ -1,12 +1,9 @@
 #pragma once
 
-//#include <string>
 #include <iostream>
 #include <chrono>
 #include <cstdarg>
-//#include <cstdio>
 #include <thread>
-//#include <future>
 
 #include "tag.h"
 #include "timestamp.i.h"
@@ -15,29 +12,8 @@
 
 namespace abc {
 
-	template <typename Container, typename View, typename Filter, std::size_t LineSize>
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	class log;
-
-
-	namespace log_container {
-		class ostream;
-		
-		template <typename Clock>
-		class file;
-	}
-
-
-	namespace log_view {
-		class diag;
-		class test;
-		class blank;
-	}
-
-
-	namespace log_filter {
-		class none;
-		class severity;
-	}
 
 
 	namespace size {
@@ -51,12 +27,13 @@ namespace abc {
 	typedef std::uint8_t	severity_t;
 
 	namespace severity {
-		constexpr severity_t critical	= 0x1; // C
-		constexpr severity_t warning	= 0x2; // W
-		constexpr severity_t important	= 0x3; // I
-		constexpr severity_t optional	= 0x4; // O
-		constexpr severity_t debug		= 0x5; // D
-		constexpr severity_t abc		= 0x6; // A
+		constexpr severity_t off		= 0x0;
+		constexpr severity_t critical	= 0x1;
+		constexpr severity_t warning	= 0x2;
+		constexpr severity_t important	= 0x3;
+		constexpr severity_t optional	= 0x4;
+		constexpr severity_t debug		= 0x5;
+		constexpr severity_t abc		= 0x6;
 
 		bool is_higher(severity_t severity, severity_t other);
 		bool is_higher_or_equal(severity_t severity, severity_t other);
@@ -74,44 +51,74 @@ namespace abc {
 	}
 
 
-	template <typename Clock = std::chrono::system_clock>
-	void format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts);
+	namespace log_container {
+		class ostream;
+		
+		template <typename Clock>
+		class file;
+	}
 
-	template <typename Clock = std::chrono::system_clock>
-	void format_current_timestamp(char* line, std::size_t line_size);
 
-	void format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id);
-	void format_current_thread_id(char* line, std::size_t line_size);
+	namespace log_view {
+		class diag;
+		class test;
+		class blank;
+	
+		namespace format {
+			static constexpr const char* friendly_datetime	= "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u";
+			static constexpr const char* friendly_date		= "%4.4u-%2.2u-%2.2u";
+			static constexpr const char* friendly_time		= "%2.2u:%2.2u:%2.2u.%3.3u";
+			static constexpr const char* iso_datetime		= "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ";
+			static constexpr const char* none				= "";
+		}
 
-	void format_category(char* line, std::size_t line_size, category_t category);
-	void format_severity(char* line, std::size_t line_size, severity_t severity);
-	void format_tag(char* line, std::size_t line_size, tag_t tag);
+		namespace separator {
+			static constexpr const char* pipe	= " | ";
+			static constexpr const char* space	= " ";
+			static constexpr const char* none	= "";
+		}
+
+		template <typename Clock = std::chrono::system_clock>
+		int format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts, const char* format = format::friendly_datetime);
+
+		int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id);
+		int format_category(char* line, std::size_t line_size, category_t category);
+		int format_severity(char* line, std::size_t line_size, severity_t severity);
+		int format_tag(char* line, std::size_t line_size, tag_t tag);
+	}
+
+
+	namespace log_filter {
+		class none;
+		class severity;
+	}
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename Container = log_container::ostream, typename View = log_view::diag, typename Filter = log_filter::none, std::size_t LineSize = size::k4>
+	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag, typename Filter = log_filter::none>
 	class log {
 	public:
-		log(Container&& container, View&& view, Filter&& filter, std::size_t line_size);
+		log(Container&& container, View&& view, Filter&& filter) noexcept;
+		log(log&& other) noexcept = default;
 
 	public:
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...);
-		void push_back_v(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+		void vpush_back(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 
 	private:
 		Container		_container;
 		View			_view;
 		Filter			_filter;
-		std::size_t		_line_size;
 	};
 
 
 	namespace log_container {
 		class ostream {
 		public:
-			ostream(std::streambuf* sb) noexcept;
+			ostream(std::streambuf* sb = std::clog.rdbuf()) noexcept;
+			ostream(ostream&& other) noexcept;
 
 		public:
 			void push_back(const char* line);
@@ -133,6 +140,7 @@ namespace abc {
 		public:
 			file(const char* path);
 			file(const char* path, std::chrono::minutes::rep rotation_minutes);
+			file(file&& other) noexcept = default;
 
 		public:
 			void push_back(const char* line);
@@ -151,31 +159,31 @@ namespace abc {
 	namespace log_view {
 		class diag {
 		public:
-			static constexpr const char* separator	= " | ";
+			diag() noexcept = default;
+			diag(diag&& other) noexcept = default;
 
 		public:
-			diag();
-
-		public:
-			void format_v(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		};
 
 
 		class test {
 		public:
-			test();
+			test() noexcept = default;
+			test(test&& other) noexcept = default;
 
 		public:
-			void format_v(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		};
 
 
 		class blank {
 		public:
-			blank();
+			blank() noexcept = default;
+			blank(blank&& other) noexcept = default;
 
 		public:
-			void format_v(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		};
 	}
 
@@ -183,7 +191,8 @@ namespace abc {
 	namespace log_filter {
 		class none {
 		public:
-			none();
+			none() noexcept = default;
+			none(none&& other) noexcept = default;
 
 		public:
 			bool is_enabled(category_t category, severity_t severity) const noexcept;
@@ -192,7 +201,11 @@ namespace abc {
 
 		class severity {
 		public:
-			severity(severity_t min_severity);
+			severity() noexcept = default;
+			severity(severity&& other) noexcept = default;
+
+		public:
+			severity(severity_t min_severity) noexcept;
 
 		public:
 			bool is_enabled(category_t category, severity_t severity) const noexcept;

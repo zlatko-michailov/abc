@@ -27,6 +27,9 @@ namespace abc {
 	template <spin_count_t SpinCount, typename Mutex = std::mutex>
 	class spin_mutex {
 	public:
+		spin_mutex() noexcept = default;
+
+	public:
 		void lock();
 		bool try_lock();
 		void unlock();

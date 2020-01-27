@@ -1,5 +1,5 @@
 //#include <cstdio>
-//#include <cstdarg>
+#include <cstring>
 
 #include "log.i.h"
 #include "timestamp.h"
@@ -8,10 +8,47 @@
 
 namespace abc {
 
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline log<LineSize, Container, View, Filter>::log(Container&& container, View&& view, Filter&& filter) noexcept
+		: _container(std::move(container))
+		, _view(std::move(view))
+		, _filter(std::move(filter)) {
+	}
+
+
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline void log<LineSize, Container, View, Filter>::push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+		va_list vlist;
+		va_start(vlist, format);
+
+		vpush_back(category, severity, tag, format, vlist);
+
+		va_end(vlist);
+	}
+
+
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline void log<LineSize, Container, View, Filter>::vpush_back(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		if (_filter.is_enabled(category, severity)) {
+			char line[LineSize];
+			_view.format(line, LineSize, category, severity, tag, format, vlist);
+
+			_container.push_back(line);
+		}
+	}
+
+
 	namespace log_container {
 		inline ostream::ostream(std::streambuf* sb) noexcept
 			: _mutex()
 			, _stream(sb) {
+		}
+
+
+		inline ostream::ostream(ostream&& other) noexcept
+			: _mutex()
+			, _stream(other._stream.rdbuf()) {
+			other._stream.rdbuf(nullptr);
 		}
 
 
@@ -52,17 +89,94 @@ namespace abc {
 
 		template <typename Clock>
 		inline void file<Clock>::ensure_file_stream() {
+			// TODO:
 		}
 	}
 
 
 	namespace log_view {
+		inline void diag::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+			char buf_timestamp[31];
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::friendly_datetime);
 
+			char buf_category[5];
+			format_category(buf_category, sizeof(buf_category), category);
+
+			char buf_severity[2];
+			format_severity(buf_severity, sizeof(buf_severity), severity);
+
+			char buf_tag[17];
+			format_tag(buf_tag, sizeof(buf_tag), tag);
+
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, separator::pipe, buf_category, separator::pipe, buf_severity, separator::pipe, buf_tag, separator::pipe);
+			if (0 <= char_count && char_count < line_size) {
+				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
+			}
+		}
+
+
+		inline void test::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t /*tag*/, const char* format, va_list vlist) {
+			char buf_timestamp[31];
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::friendly_datetime);
+
+			char buf_severity[2 * severity::abc + 1];
+			severity = severity <= severity::abc ? severity : severity::abc;
+			std::memset(buf_severity, ' ', 2 * severity);
+			buf_severity[2 * (severity - 1)] = '\0';
+
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s", buf_timestamp, separator::space, buf_severity, separator::space);
+			if (0 <= char_count && char_count < line_size) {
+				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
+			}
+		}
+
+
+		inline void blank::format(char* line, std::size_t line_size, category_t /*category*/, severity_t /*severity*/, tag_t /*tag*/, const char* format, va_list vlist) {
+			std::vsnprintf(line, line_size, format, vlist);
+		}
+
+
+		template <typename Clock = std::chrono::system_clock>
+		inline int format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts, const char* format) {
+			return std::snprintf(line, line_size, format, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
+		}
+
+
+		inline int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id) {
+			// TODO:
+			return -1;
+		}
+
+
+		inline int format_category(char* line, std::size_t line_size, category_t category) {
+			return std::snprintf(line, line_size, "%4.4x", category);
+		}
+
+
+		inline int format_severity(char* line, std::size_t line_size, severity_t severity) {
+			return std::snprintf(line, line_size, "%1.1x", severity);
+		}
+
+
+		inline int format_tag(char* line, std::size_t line_size, tag_t tag) {
+			return std::snprintf(line, line_size, "%16.16llx", tag);
+		}
 	}
 
 
-	namespace lpg_filter {
+	namespace log_filter {
+		inline bool none::is_enabled(category_t category, severity_t severity) const noexcept {
+			return true;
+		}
 
+
+		inline severity::severity(severity_t min_severity) noexcept
+			: _min_severity(min_severity) {
+		}
+
+		inline bool severity::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
+			return abc::severity::is_higher_or_equal(severity, _min_severity);
+		}
 	}
 
 }
