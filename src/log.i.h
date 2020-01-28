@@ -65,26 +65,44 @@ namespace abc {
 		class blank;
 	
 		namespace format {
-			static constexpr const char* friendly_datetime	= "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u";
-			static constexpr const char* friendly_date		= "%4.4u-%2.2u-%2.2u";
-			static constexpr const char* friendly_time		= "%2.2u:%2.2u:%2.2u.%3.3u";
-			static constexpr const char* iso_datetime		= "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ";
-			static constexpr const char* none				= "";
-		}
+			namespace datetime {
+				static constexpr const char* friendly	= "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u";
+				static constexpr const char* iso		= "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ";
+				static constexpr const char* date_only	= "%4.4u-%2.2u-%2.2u";
+				static constexpr const char* time_only	= "%2.2u:%2.2u:%2.2u.%3.3u";
+			}
 
-		namespace separator {
-			static constexpr const char* pipe	= " | ";
-			static constexpr const char* space	= " ";
-			static constexpr const char* none	= "";
+			namespace category {
+				static constexpr const char* friendly	= "%4.4x";
+				static constexpr const char* compact	= "%.4x";
+			}
+
+			namespace severity {
+				static constexpr const char* friendly	= "%1.1x";
+				static constexpr const char* compact	= "%1.1x";
+			}
+
+			namespace tag {
+				static constexpr const char* friendly	= "%16llx";
+				static constexpr const char* compact	= "%llx";
+			}
+
+			namespace separator {
+				static constexpr const char* friendly	= " | ";
+				static constexpr const char* compact	= "|";
+				static constexpr const char* space		= " ";
+			}
+
+			static constexpr const char* none			= "";
 		}
 
 		template <typename Clock = std::chrono::system_clock>
-		int format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts, const char* format = format::friendly_datetime);
+		int format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts, const char* format = format::datetime::friendly);
 
 		int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id);
-		int format_category(char* line, std::size_t line_size, category_t category);
-		int format_severity(char* line, std::size_t line_size, severity_t severity);
-		int format_tag(char* line, std::size_t line_size, tag_t tag);
+		int format_category(char* line, std::size_t line_size, category_t category, const char* format = format::category::friendly);
+		int format_severity(char* line, std::size_t line_size, severity_t severity, const char* format = format::severity::friendly);
+		int format_tag(char* line, std::size_t line_size, tag_t tag, const char* format = format::tag::friendly);
 	}
 
 
@@ -157,6 +175,16 @@ namespace abc {
 
 
 	namespace log_view {
+		class debug {
+		public:
+			debug() noexcept = default;
+			debug(debug&& other) noexcept = default;
+
+		public:
+			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+		};
+
+
 		class diag {
 		public:
 			diag() noexcept = default;

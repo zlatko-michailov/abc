@@ -95,20 +95,40 @@ namespace abc {
 
 
 	namespace log_view {
-		inline void diag::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		inline void debug::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::friendly_datetime);
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::friendly);
 
 			char buf_category[5];
-			format_category(buf_category, sizeof(buf_category), category);
+			format_category(buf_category, sizeof(buf_category), category, format::category::friendly);
 
 			char buf_severity[2];
-			format_severity(buf_severity, sizeof(buf_severity), severity);
+			format_severity(buf_severity, sizeof(buf_severity), severity, format::severity::friendly);
 
 			char buf_tag[17];
-			format_tag(buf_tag, sizeof(buf_tag), tag);
+			format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::friendly);
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, separator::pipe, buf_category, separator::pipe, buf_severity, separator::pipe, buf_tag, separator::pipe);
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::friendly, buf_category, format::separator::friendly, buf_severity, format::separator::friendly, buf_tag, format::separator::friendly);
+			if (0 <= char_count && char_count < line_size) {
+				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
+			}
+		}
+
+
+		inline void diag::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+			char buf_timestamp[31];
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::iso);
+
+			char buf_category[5];
+			format_category(buf_category, sizeof(buf_category), category, format::category::compact);
+
+			char buf_severity[2];
+			format_severity(buf_severity, sizeof(buf_severity), severity, format::severity::compact);
+
+			char buf_tag[17];
+			format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::compact);
+
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::compact, buf_category, format::separator::compact, buf_severity, format::separator::compact, buf_tag, format::separator::compact);
 			if (0 <= char_count && char_count < line_size) {
 				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
 			}
@@ -117,14 +137,14 @@ namespace abc {
 
 		inline void test::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t /*tag*/, const char* format, va_list vlist) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::friendly_datetime);
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::friendly);
 
 			char buf_severity[2 * severity::abc + 1];
 			severity = severity <= severity::abc ? severity : severity::abc;
 			std::memset(buf_severity, ' ', 2 * severity);
 			buf_severity[2 * (severity - 1)] = '\0';
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s", buf_timestamp, separator::space, buf_severity, separator::space);
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space);
 			if (0 <= char_count && char_count < line_size) {
 				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
 			}
@@ -148,18 +168,18 @@ namespace abc {
 		}
 
 
-		inline int format_category(char* line, std::size_t line_size, category_t category) {
-			return std::snprintf(line, line_size, "%4.4x", category);
+		inline int format_category(char* line, std::size_t line_size, category_t category, const char* format) {
+			return std::snprintf(line, line_size, format, category);
 		}
 
 
-		inline int format_severity(char* line, std::size_t line_size, severity_t severity) {
-			return std::snprintf(line, line_size, "%1.1x", severity);
+		inline int format_severity(char* line, std::size_t line_size, severity_t severity, const char* format) {
+			return std::snprintf(line, line_size, format, severity);
 		}
 
 
-		inline int format_tag(char* line, std::size_t line_size, tag_t tag) {
-			return std::snprintf(line, line_size, "%16.16llx", tag);
+		inline int format_tag(char* line, std::size_t line_size, tag_t tag, const char* format) {
+			return std::snprintf(line, line_size, format, tag);
 		}
 	}
 
