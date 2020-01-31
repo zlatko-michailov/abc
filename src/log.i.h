@@ -142,9 +142,6 @@ namespace abc {
 		public:
 			void push_back(const char* line);
 
-		protected:
-			void set_streambuf(std::streambuf* sb);
-
 		private:
 			spin_mutex<spin_for::disk>	_mutex;
 			std::ostream				_stream;
@@ -152,7 +149,7 @@ namespace abc {
 
 
 		template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock>
-		class file : public ostream {
+		class file {
 		public:
 			static constexpr std::chrono::minutes::rep	no_rotation	= 0;
 
@@ -160,7 +157,6 @@ namespace abc {
 			file(const char* path);
 			file(const char* path, std::chrono::minutes::rep rotation_minutes);
 			file(file&& other) noexcept;
-			virtual ~file();
 
 		public:
 			void push_back(const char* line);
@@ -171,9 +167,10 @@ namespace abc {
 		private:
 			char						_path[MaxPath + 1];
 			std::size_t					_path_length;
-			std::filebuf				_filebuf;
 			std::chrono::minutes::rep	_rotation_minutes;
 			timestamp<Clock>			_rotation_timestamp;
+			std::filebuf				_filebuf;
+			ostream						_ostream;
 		};
 	}
 

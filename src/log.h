@@ -67,13 +67,6 @@ namespace abc {
 		}
 
 
-		inline void ostream::set_streambuf(std::streambuf* sb) {
-			std::lock_guard lock(_mutex);
-			_stream.flush();
-			_stream.rdbuf(sb);
-		}
-
-
 		template <std::size_t MaxPath, typename Clock>
 		inline file<MaxPath, Clock>::file(const char* path)
 			: file<MaxPath, Clock>(path, no_rotation) {
@@ -82,11 +75,8 @@ namespace abc {
 
 		template <std::size_t MaxPath, typename Clock>
 		inline file<MaxPath, Clock>::file(const char* path, std::chrono::minutes::rep rotation_minutes)
-			: ostream(&_filebuf)
-			, _rotation_minutes(rotation_minutes) {
-			std::cout << "construct  path='" << path << "'" << std::endl;
-
-			set_streambuf(&_filebuf);
+			: _rotation_minutes(rotation_minutes)
+			, _ostream(&_filebuf) {
 
 			std::size_t path_length = std::strlen(path);
 			if (path_length + 16 > MaxPath) {
@@ -102,12 +92,12 @@ namespace abc {
 
 		template <std::size_t MaxPath, typename Clock>
 		inline file<MaxPath, Clock>::file(file<MaxPath, Clock>&& other) noexcept
-			: ostream(&_filebuf) {
+			: _path_length(other._path_length)
+			, _rotation_minutes(other._rotation_minutes)
+			, _rotation_timestamp(other._rotation_timestamp)
+			, _filebuf(std::move(other._filebuf))
+			, _ostream(&_filebuf) {
 			std::memmove(_path, other._path, sizeof(_path));
-			_path_length = other._path_length;
-			_filebuf = std::move(other._filebuf);
-			_rotation_minutes = other._rotation_minutes;
-			_rotation_timestamp = other._rotation_timestamp;
 		}
 
 		template <std::size_t MaxPath, typename Clock>
@@ -116,16 +106,7 @@ namespace abc {
 				ensure_filebuf();
 			}
 	
-			ostream::push_back(line);
-		}
-
-
-		template <std::size_t MaxPath, typename Clock>
-		inline file<MaxPath, Clock>::~file() {
-			std::cout << "destroy _path='" << _path << "', is_open=" << _filebuf.is_open() << std::endl;
-			if (_filebuf.is_open()) {
-				_filebuf.close();
-			}
+			_ostream.push_back(line);
 		}
 
 
@@ -141,11 +122,9 @@ namespace abc {
 				_rotation_timestamp = expected_rotation_timestamp;
 
 				if (_filebuf.is_open()) {
-					std::cout << "close _path='" << _path << "'" << std::endl;
 					_filebuf.close();
 				}
 
-				std::cout << "open  _path='" << _path << "'" << std::endl;
 				_filebuf.open(_path, std::ios_base::out);
 			}
 		}
