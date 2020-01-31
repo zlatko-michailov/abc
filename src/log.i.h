@@ -54,7 +54,7 @@ namespace abc {
 	namespace log_container {
 		class ostream;
 		
-		template <typename Clock>
+		template <std::size_t MaxPath, typename Clock>
 		class file;
 	}
 
@@ -68,6 +68,7 @@ namespace abc {
 			namespace datetime {
 				static constexpr const char* friendly	= "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u";
 				static constexpr const char* iso		= "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ";
+				static constexpr const char* file		= "%4.4u%2.2u%2.2u_%2.2u%2.2u";
 				static constexpr const char* date_only	= "%4.4u-%2.2u-%2.2u";
 				static constexpr const char* time_only	= "%2.2u:%2.2u:%2.2u.%3.3u";
 			}
@@ -119,7 +120,7 @@ namespace abc {
 	class log {
 	public:
 		log(Container&& container, View&& view, Filter&& filter) noexcept;
-		log(log&& other) noexcept = default;
+		log(log&& other) noexcept;
 
 	public:
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...);
@@ -135,14 +136,14 @@ namespace abc {
 	namespace log_container {
 		class ostream {
 		public:
-			ostream(std::streambuf* sb = std::clog.rdbuf()) noexcept;
+			ostream(std::streambuf* sb) noexcept;
 			ostream(ostream&& other) noexcept;
 
 		public:
 			void push_back(const char* line);
 
 		protected:
-			void set_stream(std::streambuf* sb);
+			void set_streambuf(std::streambuf* sb);
 
 		private:
 			spin_mutex<spin_for::disk>	_mutex;
@@ -150,7 +151,7 @@ namespace abc {
 		};
 
 
-		template <typename Clock = std::chrono::system_clock>
+		template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock>
 		class file : public ostream {
 		public:
 			static constexpr std::chrono::minutes::rep	no_rotation	= 0;
@@ -158,16 +159,19 @@ namespace abc {
 		public:
 			file(const char* path);
 			file(const char* path, std::chrono::minutes::rep rotation_minutes);
-			file(file&& other) noexcept = default;
+			file(file&& other) noexcept;
+			virtual ~file();
 
 		public:
 			void push_back(const char* line);
 
 		protected:
-			void ensure_file_stream();
+			void ensure_filebuf();
 
 		private:
-			std::string					_path;
+			char						_path[MaxPath + 1];
+			std::size_t					_path_length;
+			std::filebuf				_filebuf;
 			std::chrono::minutes::rep	_rotation_minutes;
 			timestamp<Clock>			_rotation_timestamp;
 		};

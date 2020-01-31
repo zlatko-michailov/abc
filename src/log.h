@@ -1,9 +1,10 @@
-//#include <cstdio>
 #include <cstring>
+#include <fstream>
 
 #include "log.i.h"
 #include "timestamp.h"
 #include "mutex.h"
+#include "exception.h"
 
 
 namespace abc {
@@ -13,6 +14,14 @@ namespace abc {
 		: _container(std::move(container))
 		, _view(std::move(view))
 		, _filter(std::move(filter)) {
+	}
+
+
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline log<LineSize, Container, View, Filter>::log(log<LineSize, Container, View, Filter>&& other) noexcept {
+		_container = std::move(other._container);
+		_view = std::move(other._view);
+		_filter = std::move(other.filter);
 	}
 
 
@@ -58,43 +67,93 @@ namespace abc {
 		}
 
 
-		inline void ostream::set_stream(std::streambuf* sb) {
+		inline void ostream::set_streambuf(std::streambuf* sb) {
 			std::lock_guard lock(_mutex);
 			_stream.flush();
-			_stream .rdbuf(sb);
+			_stream.rdbuf(sb);
 		}
 
 
-		template <typename Clock>
-		inline file<Clock>::file(const char* path)
-			: file<Clock>(path, no_rotation) {
+		template <std::size_t MaxPath, typename Clock>
+		inline file<MaxPath, Clock>::file(const char* path)
+			: file<MaxPath, Clock>(path, no_rotation) {
 		}
 
 
-		template <typename Clock>
-		inline file<Clock>::file(const char* path, std::chrono::minutes::rep rotation_minutes)
-			: ostream(nullptr)
-			, _path(path)
+		template <std::size_t MaxPath, typename Clock>
+		inline file<MaxPath, Clock>::file(const char* path, std::chrono::minutes::rep rotation_minutes)
+			: ostream(&_filebuf)
 			, _rotation_minutes(rotation_minutes) {
-			ensure_file_stream();
+			std::cout << "construct  path='" << path << "'" << std::endl;
+
+			set_streambuf(&_filebuf);
+
+			std::size_t path_length = std::strlen(path);
+			if (path_length + 16 > MaxPath) {
+				throw unexpected("std::strlen(path)", __TAG__);
+			}
+
+			_path_length = path_length;
+			std::strcpy(_path, path);
+
+			ensure_filebuf();
 		}
 
 
-		template <typename Clock>
-		inline void file<Clock>::push_back(const char* line) {
-			ensure_file_stream();
+		template <std::size_t MaxPath, typename Clock>
+		inline file<MaxPath, Clock>::file(file<MaxPath, Clock>&& other) noexcept
+			: ostream(&_filebuf) {
+			std::memmove(_path, other._path, sizeof(_path));
+			_path_length = other._path_length;
+			_filebuf = std::move(other._filebuf);
+			_rotation_minutes = other._rotation_minutes;
+			_rotation_timestamp = other._rotation_timestamp;
+		}
+
+		template <std::size_t MaxPath, typename Clock>
+		inline void file<MaxPath, Clock>::push_back(const char* line) {
+			if (_rotation_minutes > no_rotation) {
+				ensure_filebuf();
+			}
+	
 			ostream::push_back(line);
 		}
 
 
-		template <typename Clock>
-		inline void file<Clock>::ensure_file_stream() {
-			// TODO:
+		template <std::size_t MaxPath, typename Clock>
+		inline file<MaxPath, Clock>::~file() {
+			std::cout << "destroy _path='" << _path << "', is_open=" << _filebuf.is_open() << std::endl;
+			if (_filebuf.is_open()) {
+				_filebuf.close();
+			}
+		}
+
+
+		template <std::size_t MaxPath, typename Clock>
+		inline void file<MaxPath, Clock>::ensure_filebuf() {
+			timestamp<Clock> expected_rotation_timestamp;
+			if (_rotation_minutes > no_rotation) {
+				expected_rotation_timestamp = expected_rotation_timestamp.coerse_minutes(_rotation_minutes);
+			}
+
+			if (_rotation_timestamp != expected_rotation_timestamp || !_filebuf.is_open()) {
+				log_view::format_timestamp(_path + _path_length, MaxPath + 1 - _path_length, expected_rotation_timestamp, log_view::format::datetime::file);
+				_rotation_timestamp = expected_rotation_timestamp;
+
+				if (_filebuf.is_open()) {
+					std::cout << "close _path='" << _path << "'" << std::endl;
+					_filebuf.close();
+				}
+
+				std::cout << "open  _path='" << _path << "'" << std::endl;
+				_filebuf.open(_path, std::ios_base::out);
+			}
 		}
 	}
 
 
 	namespace log_view {
+		// TODO: template <Clock>
 		inline void debug::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			char buf_timestamp[31];
 			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::friendly);
