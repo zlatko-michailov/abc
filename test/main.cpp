@@ -2,12 +2,19 @@
 
 #include "../src/timestamp.h"
 #include "../src/log.h"
+#include "../src/streambuf.h"
 
 
 int main() {
 	abc::timestamp ts1;
-
 	std::cout << ts1.year() << "-" << ts1.month() << "-" << ts1.day() << std::endl;
+
+	char s[31];
+	memset(s, '+', 30);
+	abc::streambuf_adapter streambuf(s, 0, 30);
+	std::ostream stream(&streambuf);
+	stream << "thread_id=" << std::hex << std::this_thread::get_id() << '\0';
+	std::cout << s << std::endl;
 
 	std::cout << std::endl;
 
