@@ -132,10 +132,10 @@ namespace abc {
 
 
 	namespace log_view {
-		// TODO: template <Clock>
-		inline void debug::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		template <typename Clock>
+		inline void debug<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::friendly);
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
 
 			char buf_category[5];
 			format_category(buf_category, sizeof(buf_category), category, format::category::friendly);
@@ -153,9 +153,10 @@ namespace abc {
 		}
 
 
-		inline void diag::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		template <typename Clock>
+		inline void diag<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::iso);
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::iso);
 
 			char buf_category[5];
 			format_category(buf_category, sizeof(buf_category), category, format::category::compact);
@@ -173,9 +174,10 @@ namespace abc {
 		}
 
 
-		inline void test::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t /*tag*/, const char* format, va_list vlist) {
+		template <typename Clock>
+		inline void test<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t /*tag*/, const char* format, va_list vlist) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp(), format::datetime::friendly);
+			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
 
 			char buf_severity[2 * severity::abc + 1];
 			severity = severity <= severity::abc ? severity : severity::abc;
@@ -194,14 +196,14 @@ namespace abc {
 		}
 
 
-		template <typename Clock = std::chrono::system_clock>
+		template <typename Clock>
 		inline int format_timestamp(char* line, std::size_t line_size, const timestamp<Clock>& ts, const char* format) {
 			return std::snprintf(line, line_size, format, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
 		}
 
 
 		inline int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id) {
-			// TODO:
+			// TODO: thread_id
 			return -1;
 		}
 

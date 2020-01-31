@@ -60,8 +60,15 @@ namespace abc {
 
 
 	namespace log_view {
+		template <typename Clock = std::chrono::system_clock>
+		class debug;
+
+		template <typename Clock = std::chrono::system_clock>
 		class diag;
+
+		template <typename Clock = std::chrono::system_clock>
 		class test;
+
 		class blank;
 	
 		namespace format {
@@ -116,7 +123,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag, typename Filter = log_filter::none>
+	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag<>, typename Filter = log_filter::none>
 	class log {
 	public:
 		log(Container&& container, View&& view, Filter&& filter) noexcept;
@@ -176,6 +183,7 @@ namespace abc {
 
 
 	namespace log_view {
+		template <typename Clock>
 		class debug {
 		public:
 			debug() noexcept = default;
@@ -186,6 +194,7 @@ namespace abc {
 		};
 
 
+		template <typename Clock>
 		class diag {
 		public:
 			diag() noexcept = default;
@@ -196,6 +205,7 @@ namespace abc {
 		};
 
 
+		template <typename Clock>
 		class test {
 		public:
 			test() noexcept = default;

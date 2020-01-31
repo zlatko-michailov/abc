@@ -1,7 +1,7 @@
 #pragma once
 
 #include "timestamp.i.h"
-
+#include "exception.h"
 
 namespace abc {
 
@@ -262,16 +262,13 @@ namespace abc {
 			return;
 		}
 
-		// TODO: assert unreachable
+		// TODO: diag 'unreachable'
 	}
 
 
 	template <typename Clock>
 	inline void timestamp<Clock>::reset_time(time_count_t nanoseconds_since_midnight) noexcept {
-		////abc_assert_void(nanoseconds_since_midnight < nanoseconds_per_day, abc::category::log, 0x0200);
-
 		time_count_t remaining = nanoseconds_since_midnight % nanoseconds_per_day;
-		////abc::log::diag.push(abc::category::log, 0x0201, abc::status::debug, "remaing=%lld", remaining);
 
 		time_count_t nanoseconds = remaining % nanosecond_count;
 		remaining = remaining / millisecond_count;
@@ -290,9 +287,6 @@ namespace abc {
 
 		time_count_t hours = remaining % hour_count;
 
-		////abc::log::diag.push(abc::category::log, 0x0202, abc::status::debug, "hours=%lld, minutes=%lld, seconds=%lld, milliseconds=%lld, microsconds=%lld, nanoseconds=%lld", 
-		////	hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
-
 		reset_time(nanoseconds_since_midnight, hours, minutes, seconds, nanoseconds);
 	}
 
@@ -302,7 +296,6 @@ namespace abc {
 		if (remaining_days < days_in_1_month) {
 			day += remaining_days;
 
-			//////abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0100, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 			reset_date(days_since_epoch, year, month, day);
 			return true;
 		}
@@ -313,7 +306,6 @@ namespace abc {
 		}
 
 		remaining_days -= days_in_1_month;
-		//////abc::legacy_log::diag.push(abc::severity::debug_abc, abc::category::log, 0x0101, abc::status::success, "remaing_days=%d, year=%d, month=%d, day=%d", remaining_days, year, month, day);
 
 		return false;
 	}
