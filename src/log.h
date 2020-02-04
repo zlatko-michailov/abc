@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstring>
 #include <fstream>
 
@@ -19,10 +21,10 @@ namespace abc {
 
 
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
-	inline log<LineSize, Container, View, Filter>::log(log<LineSize, Container, View, Filter>&& other) noexcept {
-		_container = std::move(other._container);
-		_view = std::move(other._view);
-		_filter = std::move(other.filter);
+	inline log<LineSize, Container, View, Filter>::log(log<LineSize, Container, View, Filter>&& other) noexcept
+		: _container(std::move(other._container))
+		, _view(std::move(other._view))
+		, _filter(std::move(other._filter)) {
 	}
 
 
@@ -44,6 +46,14 @@ namespace abc {
 			_view.format(line, LineSize, category, severity, tag, format, vlist);
 
 			_container.push_back(line);
+		}
+	}
+
+
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline void log<LineSize, Container, View, Filter>::push_back_blank(category_t category, severity_t severity) {
+		if (_filter.is_enabled(category, severity)) {
+			_container.push_back("");
 		}
 	}
 
@@ -250,6 +260,16 @@ namespace abc {
 		inline bool severity::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
 			return abc::severity::is_higher_or_equal(severity, _min_severity);
 		}
+	}
+
+
+	inline bool severity::is_higher(severity_t severity, severity_t other) noexcept {
+		return severity < other;
+	}
+
+
+	inline bool severity::is_higher_or_equal(severity_t severity, severity_t other) noexcept {
+		return severity <= other;
 	}
 
 }

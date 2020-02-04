@@ -24,6 +24,23 @@ namespace abc {
 	}
 
 
+	namespace color {
+		constexpr const char* begin			= "\x1b[";
+		constexpr const char* end			= "\x1b[0m";
+		constexpr const char* black			= "30m";
+		constexpr const char* red			= "31m";
+		constexpr const char* green			= "32m";
+		constexpr const char* blue			= "34m";
+		constexpr const char* purple		= "35m";
+		constexpr const char* cyan			= "36m";
+		constexpr const char* light_gray	= "37m";
+		constexpr const char* dark_gray		= "1;30m";
+		constexpr const char* light_red		= "1;31m";
+		constexpr const char* yello			= "1;33m";
+		constexpr const char* light_cyan	= "1;36m";
+	}
+
+
 	typedef std::uint8_t	severity_t;
 
 	namespace severity {
@@ -35,8 +52,8 @@ namespace abc {
 		constexpr severity_t debug		= 0x5;
 		constexpr severity_t abc		= 0x6;
 
-		bool is_higher(severity_t severity, severity_t other);
-		bool is_higher_or_equal(severity_t severity, severity_t other);
+		bool is_higher(severity_t severity, severity_t other) noexcept;
+		bool is_higher_or_equal(severity_t severity, severity_t other) noexcept;
 	}
 
 
@@ -132,6 +149,7 @@ namespace abc {
 	public:
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...);
 		void vpush_back(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+		void push_back_blank(category_t category, severity_t severity);
 
 	private:
 		Container		_container;
