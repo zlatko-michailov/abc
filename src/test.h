@@ -42,7 +42,7 @@ namespace abc {
 
 	template <typename Log>
 	struct test_suite {
-		//test_suite(std::unordered_map<std::string, test_category<Log>>&& categories) noexcept;
+		test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, unsigned seed) noexcept;
 		test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, unsigned seed) noexcept;
 
 		bool run() noexcept;
@@ -50,6 +50,9 @@ namespace abc {
 		std::unordered_map<std::string, test_category<Log>>		categories;
 		Log														log;
 		unsigned												seed;
+
+	private:
+		void srand() const noexcept;
 	};
 
 
@@ -65,12 +68,12 @@ namespace abc {
 	}
 
 
-	/*template <typename Log>
+	template <typename Log>
 	inline test_suite<Log>::test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, unsigned seed) noexcept
 		: categories(std::move(categories))
 		, log(std::move(log))
 		, seed(seed) {
-	}*/
+	}
 
 	template <typename Log>
 	inline test_suite<Log>::test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, unsigned seed) noexcept
