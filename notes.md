@@ -98,9 +98,11 @@ exception
 timestamp
 mutex
 log
+test
 
 ## To Do
-test
+license
+crc
 
 ## To Ignore/Remove
 os
