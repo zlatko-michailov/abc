@@ -77,6 +77,13 @@ namespace abc {
 
 
 	template <typename Clock>
+	inline timestamp<Clock>::timestamp(nullptr_t) noexcept {
+		reset_date(0);
+		reset_time(0);
+	}
+
+
+	template <typename Clock>
 	inline timestamp<Clock>::timestamp() noexcept
 		: timestamp(Clock::now()) {
 	}

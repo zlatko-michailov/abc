@@ -54,6 +54,16 @@ namespace abc {
 
 
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline log<LineSize, Container, View, Filter>& log<LineSize, Container, View, Filter>::operator=(log<LineSize, Container, View, Filter>&& other) noexcept {
+		_container = std::move(other._container);
+		_view = std::move(other._view);
+		_filter = std::move(other._filter);
+
+		return *this;
+	}
+
+
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	inline void log<LineSize, Container, View, Filter>::push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
 		va_list vlist;
 		va_start(vlist, format);
@@ -84,6 +94,11 @@ namespace abc {
 
 
 	namespace log_container {
+		inline ostream::ostream() noexcept
+			: ostream(std::clog.rdbuf()) {
+		}
+
+
 		inline ostream::ostream(std::streambuf* sb) noexcept
 			: _mutex()
 			, _stream(sb) {
@@ -94,6 +109,14 @@ namespace abc {
 			: _mutex()
 			, _stream(other._stream.rdbuf()) {
 			other._stream.rdbuf(nullptr);
+		}
+
+
+		inline ostream& ostream::operator=(ostream&& other) noexcept {
+			_stream.rdbuf(other._stream.rdbuf());
+			other._stream.rdbuf(nullptr);
+
+			return *this;
 		}
 
 
@@ -217,7 +240,7 @@ namespace abc {
 
 
 		template <typename Clock>
-		inline void test<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t /*tag*/, const char* format, va_list vlist) {
+		inline void test<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			char buf_timestamp[31];
 			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
 
@@ -226,7 +249,15 @@ namespace abc {
 			std::memset(buf_severity, ' ', 2 * severity);
 			buf_severity[2 * (severity - 1)] = '\0';
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space);
+			char buf_tag[17];
+			if (tag != tag::none) {
+				format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::compact);
+			}
+			else {
+				buf_tag[0] = '\0';
+			}
+
+			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
 			if (0 <= char_count && char_count < line_size) {
 				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
 			}

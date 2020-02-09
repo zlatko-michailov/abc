@@ -5,10 +5,15 @@
 #include "../src/log.h"
 #include "../src/streambuf.h"
 
+#include "timestamp.h"
+
 
 int main() {
-	abc::timestamp ts1;
+	abc::timestamp ts1(nullptr);
 	std::cout << ts1.year() << "-" << ts1.month() << "-" << ts1.day() << std::endl;
+
+	abc::timestamp ts2;
+	std::cout << ts2.year() << "-" << ts2.month() << "-" << ts2.day() << std::endl;
 
 	char s[31];
 	memset(s, '+', 30);
@@ -80,11 +85,11 @@ int main() {
 	os << "123" << std::endl << "99" << std::endl;
 
 	{
-		abc::test_log test_log(std::move(abc::log_container::ostream(std::clog.rdbuf())), std::move(abc::log_view::test<>()), std::move(abc::log_filter::severity(abc::severity::important)));
+		abc::test_log test_log1(std::move(abc::log_container::ostream(std::clog.rdbuf())), std::move(abc::log_view::test<>()), std::move(abc::log_filter::severity(abc::severity::important)));
 
-		abc::test_suite<> test_suite ( {
+		abc::test_suite<> test_suite1 ( {
 			{ "hacks", {
-				{ "hack1", [=](abc::test_context<>& context) { return true; } },
+				{ "hack1", abc::test::timestamp::test_null_timestamp },
 				{ "hack2", [=](abc::test_context<>& context) { return false; } },
 				{ "hack3", [=](abc::test_context<>& context) { return true; } },
 			} },
@@ -99,16 +104,16 @@ int main() {
 				{ "hack3", [=](abc::test_context<>& context) { return true; } },
 			} },
 		},
-		std::move(test_log),
+		std::move(test_log1),
 		0);
 
-		test_suite.run();
+		test_suite1.run();
 	}
 	
 	{
-		abc::test_log test_log(std::move(abc::log_container::ostream(std::clog.rdbuf())), std::move(abc::log_view::test<>()), std::move(abc::log_filter::severity(abc::severity::important)));
+		abc::test_log test_log2(std::move(abc::log_container::ostream(std::clog.rdbuf())), std::move(abc::log_view::test<>()), std::move(abc::log_filter::severity(abc::severity::important)));
 
-		std::unordered_map<std::string, abc::test_category<>> categories = {
+		std::map<std::string, abc::test_category<>> categories = {
 			{ "hacks", {
 				{ "hack1", [=](abc::test_context<>& context) { return true; } },
 				{ "hack2", [=](abc::test_context<>& context) { return false; } },
@@ -126,8 +131,24 @@ int main() {
 			} },
 		};
 
-		abc::test_suite<> test_suite(std::move(categories), std::move(test_log), 0);
+		abc::test_suite<> test_suite2(std::move(categories), std::move(test_log2), 0);
 	}
 
+
+	abc::test_log test_log(
+		std::move(abc::log_container::ostream(std::clog.rdbuf())),
+		std::move(abc::log_view::test<>()),
+		std::move(abc::log_filter::severity(abc::severity::optional)));
+
+		abc::test_suite<> test_suite ( {
+			{ "timestamp", {
+				{ "test_null_timestamp", abc::test::timestamp::test_null_timestamp },
+			} },
+		},
+		std::move(test_log),
+		0);
+
+		test_suite.run();
+	
 	return 0;
 }

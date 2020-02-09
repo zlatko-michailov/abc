@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdlib>
 #include <string>
 #include <functional>
 #include <map>
@@ -36,6 +37,12 @@ SOFTWARE.
 
 namespace abc {
 
+	typedef unsigned seed_t;
+	namespace seed {
+		constexpr unsigned random	= 0;
+	}
+
+
 	using test_log = log<size::k4, log_container::ostream, abc::log_view::test<>, abc::log_filter::severity>;
 
 	template <typename Log = test_log>
@@ -45,7 +52,7 @@ namespace abc {
 	using test_method = std::function<bool(test_context<Log>&)>;
 
 	template <typename Log = test_log>
-	using test_category = std::unordered_map<std::string, test_method<Log>>;
+	using test_category = std::map<std::string, test_method<Log>>;
 
 	template <typename Log = test_log>
 	struct test_suite;
@@ -56,7 +63,10 @@ namespace abc {
 
 	template <typename Log>
 	struct test_context {
-		test_context(const char* category_name, const char* method_name, Log& log, unsigned seed) noexcept;
+		test_context(const char* category_name, const char* method_name, Log& log, seed_t seed = seed::random) noexcept;
+
+		template <typename Value>
+		bool are_equal(const Value& actual, const Value& expected, tag_t tag, const char* format);
 
 		const char*		category_name;
 		const char* 	method_name;
@@ -67,17 +77,18 @@ namespace abc {
 
 	template <typename Log>
 	struct test_suite {
-		test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, unsigned seed) noexcept;
-		test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, unsigned seed) noexcept;
+		test_suite() noexcept = default;
+		test_suite(std::map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept;
+		test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, seed_t seed) noexcept;
 
 		bool run() noexcept;
 
-		std::unordered_map<std::string, test_category<Log>>		categories;
-		Log														log;
-		unsigned												seed;
+		std::map<std::string, test_category<Log>>		categories;
+		Log												log;
+		seed_t											seed;
 
 	private:
-		void srand() const noexcept;
+		void srand() noexcept;
 	};
 
 
@@ -85,7 +96,7 @@ namespace abc {
 
 
 	template <typename Log>
-	test_context<Log>::test_context(const char* category_name, const char* method_name, Log& log, unsigned seed) noexcept
+	test_context<Log>::test_context(const char* category_name, const char* method_name, Log& log, seed_t seed) noexcept
 		: category_name(category_name)
 		, method_name(method_name)
 		, log(log)
@@ -94,14 +105,33 @@ namespace abc {
 
 
 	template <typename Log>
-	inline test_suite<Log>::test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, unsigned seed) noexcept
+	template <typename Value>
+	inline bool test_context<Log>::are_equal(const Value& actual, const Value& expected, tag_t tag, const char* format) {
+		bool are_equal = actual == expected;
+
+		char line_format[size::k1];
+		if (!are_equal) {
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "  Fail: are_equal(actual=%s, expected=%s)", format, format);
+			log.push_back(category::any, severity::important, tag, line_format, actual, expected);
+		}
+		else {
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "  Pass: are_equal(actual=%s, expected=%s)", format, format);
+			log.push_back(category::any, severity::optional, tag, line_format, actual, expected);
+		}
+
+		return are_equal;
+	}
+
+
+	template <typename Log>
+	inline test_suite<Log>::test_suite(std::map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept
 		: categories(std::move(categories))
 		, log(std::move(log))
 		, seed(seed) {
 	}
 
 	template <typename Log>
-	inline test_suite<Log>::test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, unsigned seed) noexcept
+	inline test_suite<Log>::test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, seed_t seed) noexcept
 		: categories(init.begin(), init.end())
 		, log(std::move(log))
 		, seed(seed) {
@@ -110,6 +140,8 @@ namespace abc {
 
 	template <typename Log>
 	inline bool test_suite<Log>::run() noexcept {
+		srand();
+
 		bool all_passed = true;
 
 		log.push_back_blank(category::any, severity::critical);
@@ -156,15 +188,25 @@ namespace abc {
 		} // category
 
 		if (all_passed) {
-			log.push_back(category::any, severity::critical, tag::none, "%s%sPASS%s", color::begin, color::green, color::end);
+			log.push_back(category::any, severity::critical, tag::none, "%s%sPASS%s seed=%u", color::begin, color::green, color::end, seed);
 		}
 		else {
-			log.push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s", color::begin, color::red, color::end);
+			log.push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
 		}
 
 		log.push_back_blank(category::any, severity::critical);
 
 		return all_passed;
+	}
+
+	template <typename Log>
+	inline void test_suite<Log>::srand() noexcept {
+		if (seed == seed::random) {
+			std::srand(static_cast<seed_t>(std::chrono::system_clock::now().time_since_epoch().count() % RAND_MAX));
+			seed = std::rand();
+		}
+
+		std::srand(seed);
 	}
 
 }

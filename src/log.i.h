@@ -168,8 +168,11 @@ namespace abc {
 	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag<>, typename Filter = log_filter::none>
 	class log {
 	public:
+		log() noexcept = default;
 		log(Container&& container, View&& view, Filter&& filter) noexcept;
 		log(log&& other) noexcept;
+
+		log& operator=(log&& other) noexcept;
 
 	public:
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...);
@@ -186,8 +189,11 @@ namespace abc {
 	namespace log_container {
 		class ostream {
 		public:
+			ostream() noexcept;
 			ostream(std::streambuf* sb) noexcept;
 			ostream(ostream&& other) noexcept;
+
+			ostream& operator=(ostream&& other) noexcept;
 
 		public:
 			void push_back(const char* line);
@@ -232,6 +238,8 @@ namespace abc {
 			debug() noexcept = default;
 			debug(debug&& other) noexcept = default;
 
+			debug& operator=(debug&& other) noexcept = default;
+
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		};
@@ -242,6 +250,8 @@ namespace abc {
 		public:
 			diag() noexcept = default;
 			diag(diag&& other) noexcept = default;
+
+			diag& operator=(diag&& other) noexcept = default;
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
@@ -254,6 +264,8 @@ namespace abc {
 			test() noexcept = default;
 			test(test&& other) noexcept = default;
 
+			test& operator=(test&& other) noexcept = default;
+
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		};
@@ -263,6 +275,8 @@ namespace abc {
 		public:
 			blank() noexcept = default;
 			blank(blank&& other) noexcept = default;
+
+			blank& operator=(blank&& other) noexcept = default;
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
@@ -276,6 +290,8 @@ namespace abc {
 			none() noexcept = default;
 			none(none&& other) noexcept = default;
 
+			none& operator=(none&& other) noexcept = default;
+
 		public:
 			bool is_enabled(category_t category, severity_t severity) const noexcept;
 		};
@@ -285,6 +301,8 @@ namespace abc {
 		public:
 			severity() noexcept = default;
 			severity(severity&& other) noexcept = default;
+
+			severity& operator=(severity&& other) noexcept = default;
 
 		public:
 			severity(severity_t min_severity) noexcept;

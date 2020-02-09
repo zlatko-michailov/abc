@@ -54,6 +54,7 @@ namespace abc {
 	template <typename Clock = std::chrono::system_clock>
 	class timestamp {
 	public:
+		timestamp(nullptr_t) noexcept;
 		timestamp() noexcept;
 		timestamp(std::chrono::time_point<Clock> tp) noexcept;
 

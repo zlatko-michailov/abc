@@ -99,9 +99,9 @@ timestamp
 mutex
 log
 test
+license
 
 ## To Do
-license
 crc
 
 ## To Ignore/Remove
