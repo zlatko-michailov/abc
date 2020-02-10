@@ -52,7 +52,7 @@ namespace abc {
 	using test_method = std::function<bool(test_context<Log>&)>;
 
 	template <typename Log = test_log>
-	using test_category = std::map<std::string, test_method<Log>>;
+	using test_category = std::unordered_map<std::string, test_method<Log>>;
 
 	template <typename Log = test_log>
 	struct test_suite;
@@ -78,14 +78,14 @@ namespace abc {
 	template <typename Log>
 	struct test_suite {
 		test_suite() noexcept = default;
-		test_suite(std::map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept;
+		test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept;
 		test_suite(std::initializer_list<std::pair<std::string, test_category<Log>>> init, Log&& log, seed_t seed) noexcept;
 
 		bool run() noexcept;
 
-		std::map<std::string, test_category<Log>>		categories;
-		Log												log;
-		seed_t											seed;
+		std::unordered_map<std::string, test_category<Log>>		categories;
+		Log														log;
+		seed_t													seed;
 
 	private:
 		void srand() noexcept;
@@ -111,11 +111,11 @@ namespace abc {
 
 		char line_format[size::k1];
 		if (!are_equal) {
-			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "  Fail: are_equal(actual=%s, expected=%s)", format, format);
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%s, expected=%s)", format, format);
 			log.push_back(category::any, severity::important, tag, line_format, actual, expected);
 		}
 		else {
-			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "  Pass: are_equal(actual=%s, expected=%s)", format, format);
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%s, expected=%s)", format, format);
 			log.push_back(category::any, severity::optional, tag, line_format, actual, expected);
 		}
 
@@ -124,7 +124,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline test_suite<Log>::test_suite(std::map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept
+	inline test_suite<Log>::test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept
 		: categories(std::move(categories))
 		, log(std::move(log))
 		, seed(seed) {

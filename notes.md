@@ -95,14 +95,15 @@ __PENDING QUESTIONS__
 ## Done
 tag
 exception
-timestamp
-mutex
+timestamp + unit tests
+mutex + 
 log
 test
 license
-
 ## To Do
+mutex unit tests
 crc
+socket (dgram)
 
 ## To Ignore/Remove
 os

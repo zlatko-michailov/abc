@@ -1,3 +1,28 @@
+/*
+MIT License
+
+Copyright (c) 2018 Zlatko Michailov 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 #include <iostream>
 
 #include "../src/test.h"
@@ -9,12 +34,7 @@
 
 
 int main() {
-	abc::timestamp ts1(nullptr);
-	std::cout << ts1.year() << "-" << ts1.month() << "-" << ts1.day() << std::endl;
-
-	abc::timestamp ts2;
-	std::cout << ts2.year() << "-" << ts2.month() << "-" << ts2.day() << std::endl;
-
+#ifdef REMOVE
 	char s[31];
 	memset(s, '+', 30);
 	abc::streambuf_adapter streambuf(s, 0, 30);
@@ -113,7 +133,7 @@ int main() {
 	{
 		abc::test_log test_log2(std::move(abc::log_container::ostream(std::clog.rdbuf())), std::move(abc::log_view::test<>()), std::move(abc::log_filter::severity(abc::severity::important)));
 
-		std::map<std::string, abc::test_category<>> categories = {
+		std::unordered_map<std::string, abc::test_category<>> categories = {
 			{ "hacks", {
 				{ "hack1", [=](abc::test_context<>& context) { return true; } },
 				{ "hack2", [=](abc::test_context<>& context) { return false; } },
@@ -133,7 +153,7 @@ int main() {
 
 		abc::test_suite<> test_suite2(std::move(categories), std::move(test_log2), 0);
 	}
-
+#endif
 
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream(std::clog.rdbuf())),
@@ -142,13 +162,17 @@ int main() {
 
 		abc::test_suite<> test_suite ( {
 			{ "timestamp", {
-				{ "test_null_timestamp", abc::test::timestamp::test_null_timestamp },
+				{ "test_null_timestamp",							abc::test::timestamp::test_null_timestamp },
+				{ "test_before_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },
+				{ "test_before_year_2000_after_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_after_mar_1_timestamp },
+				{ "test_after_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_after_year_2000_before_mar_1_timestamp },
+				{ "test_after_year_2000_after_mar_1_timestamp",		abc::test::timestamp::test_after_year_2000_after_mar_1_timestamp },
 			} },
 		},
 		std::move(test_log),
 		0);
 
-		test_suite.run();
+		bool passed = test_suite.run();
 	
-	return 0;
+	return passed ? 0 : 1;
 }
