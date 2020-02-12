@@ -29,6 +29,7 @@ SOFTWARE.
 #include "../src/timestamp.h"
 #include "../src/log.h"
 #include "../src/streambuf.h"
+#include "../src/crc.h"
 
 #include "timestamp.h"
 
