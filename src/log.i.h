@@ -29,10 +29,10 @@ SOFTWARE.
 #include <chrono>
 #include <cstdarg>
 #include <thread>
+#include <mutex>
 
 #include "tag.h"
 #include "timestamp.i.h"
-#include "mutex.i.h"
 
 
 namespace abc {
@@ -199,8 +199,8 @@ namespace abc {
 			void push_back(const char* line);
 
 		private:
-			spin_mutex<spin_for::disk>	_mutex;
-			std::ostream				_stream;
+			std::mutex		_mutex;
+			std::ostream	_stream;
 		};
 
 

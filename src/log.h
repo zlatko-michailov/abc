@@ -30,7 +30,6 @@ SOFTWARE.
 
 #include "log.i.h"
 #include "timestamp.h"
-#include "mutex.h"
 #include "streambuf.h"
 #include "exception.h"
 

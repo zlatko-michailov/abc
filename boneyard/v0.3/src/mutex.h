@@ -25,43 +25,40 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstdint>
-#include <atomic>
-#include <mutex>
+#include "mutex.i.h"
 
 
 namespace abc {
 
-	typedef std::int32_t spin_count_t;
+	template <spin_count_t SpinCount, typename Mutex>
+	inline void spin_mutex<SpinCount, Mutex>::lock() {
+		for (spin_count_t spin_count = 0; SpinCount < 0 || spin_count < SpinCount; spin_count++) {
+			if (!_flag.test_and_set()) {
+				break;
+			}
+		}
 
-	namespace spin_for {
-		constexpr spin_count_t	memory	= -1;
-		constexpr spin_count_t	os		=  25 * 1000;
-		constexpr spin_count_t	disk	= 100 * 1000;
-		constexpr spin_count_t	network	=  1;
+		_mutex.lock();
 	}
 
 
 	template <spin_count_t SpinCount, typename Mutex>
-	class spin_mutex;
+	inline bool spin_mutex<SpinCount, Mutex>::try_lock() {
+		if (SpinCount != 0) {
+			return !_flag.test_and_set();
+		}
+
+		return _mutex.try_lock();
+	}
 
 
-	// --------------------------------------------------------------
+	template <spin_count_t SpinCount, typename Mutex>
+	inline void spin_mutex<SpinCount, Mutex>::unlock() {
+		if (SpinCount != 0) {
+			_flag.clear();
+		}
 
-
-	template <spin_count_t SpinCount, typename Mutex = std::mutex>
-	class spin_mutex {
-	public:
-		spin_mutex() noexcept = default;
-
-	public:
-		void lock();
-		bool try_lock();
-		void unlock();
-
-	private:
-		std::atomic_flag	_flag;
-		Mutex 				_mutex;
-	};
+		_mutex.unlock();
+	}
 
 }
