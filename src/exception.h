@@ -32,22 +32,21 @@ SOFTWARE.
 
 namespace abc {
 
+	template <typename Exception>
 	class exception;
 
 	// logic_error
-	class unexpected;
-
 	// runtime_error
-	class failed;
 
 
 	// --------------------------------------------------------------
 
 
-	class exception {
+	template <typename Exception>
+	class exception : public Exception {
 
 	public:
-		exception(tag_t tag);
+		exception(const char* message, tag_t tag);
 
 	public:
 		tag_t	tag() const noexcept;
@@ -60,55 +59,16 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	class unexpected
-		: public std::logic_error
-		, public abc::exception {
-
-	public:
-		unexpected(const char* message, tag_t tag);
-	};
-
-
-	// --------------------------------------------------------------
-
-
-	class failed
-		: public std::runtime_error
-		, public abc::exception {
-
-	public:
-		failed(const char* message, tag_t tag);
-	};
-
-
-	// --------------------------------------------------------------
-
-
-	inline exception::exception(tag_t tag)
-		: _tag(tag) {
+	template <typename Exception>
+	inline exception<Exception>::exception(const char* message, tag_t tag)
+		: Exception(message)
+		, _tag(tag) {
 	}
 
 
-	inline tag_t exception::tag() const noexcept {
+	template <typename Exception>
+	inline tag_t exception<Exception>::tag() const noexcept {
 		return _tag;
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline unexpected::unexpected(const char* message, tag_t tag)
-		: std::logic_error(message)
-		, abc::exception(tag) {
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline failed::failed(const char* message, tag_t tag)
-		: std::runtime_error(message)
-		, abc::exception(tag) {
 	}
 
 }
