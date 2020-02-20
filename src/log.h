@@ -27,6 +27,7 @@ SOFTWARE.
 
 #include <cstring>
 #include <fstream>
+#include <stdexcept>
 
 #include "log.i.h"
 #include "timestamp.h"

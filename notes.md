@@ -96,13 +96,10 @@ __PENDING QUESTIONS__
 tag
 exception
 timestamp + unit tests
-mutex + 
 log
 test
 license
 ## To Do
-mutex unit tests
-crc
 socket (dgram)
 
 ## To Ignore/Remove
