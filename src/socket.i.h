@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 Zlatko Michailov 
+Copyright (c) 2018-2020 Zlatko Michailov 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,9 @@ SOFTWARE.
 #include <cstdint>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
 
 namespace abc {
 
@@ -48,7 +50,7 @@ namespace abc {
 
 
 		namespace kind {
-			constexpr type_t	stream	= SOCK_STREAM;
+			constexpr kind_t	stream	= SOCK_STREAM;
 			constexpr kind_t	dgram	= SOCK_DGRAM;
 		}
 
@@ -82,14 +84,14 @@ namespace abc {
 
 	class _basic_socket {
 	public:
-		_basic_socket(socket::kind_t kind, socket::family_t family, socket::purpose_t purpose) noexcept;
+		_basic_socket(socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
 		_basic_socket(_basic_socket&& other) noexcept = default;
 
 	public:
-		virtual ~_basic_socket() noexcept;
+		~_basic_socket() noexcept;
 
 	protected:
-		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, socket::purpose_t purpose) noexcept;
+		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
 
 	public:
 		bool		is_opened() const noexcept;
@@ -98,6 +100,13 @@ namespace abc {
 	protected:
 		void				open() noexcept;
 		addrinfo			hints() const noexcept;
+
+	protected:
+		socket::kind_t		kind() const noexcept;
+		socket::family_t	family() const noexcept;
+		socket::protocol_t	protocol() const noexcept;
+		socket::purpose_t	purpose() const noexcept;
+		socket::handle_t	handle() const noexcept;
 
 	private:
 		socket::kind_t		_kind;
@@ -110,11 +119,11 @@ namespace abc {
 
 	class _connected_socket : public _basic_socket {
 	public:
-		_connected_socket(socket::kind_t kind, socket::family_t family) noexcept;
+		_connected_socket(socket::kind_t kind, socket::family_t family);
 		_connected_socket(_connected_socket&& other) noexcept = default;
 
 	protected:
-		_connected_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family) noexcept;
+		_connected_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
 
 	public:
 		void send(const void* buffer, std::size_t byte_count);
@@ -127,11 +136,11 @@ namespace abc {
 
 	class _client_socket : public _connected_socket {
 	public:
-		_client_socket(socket::kind_t kind, socket::family_t family) noexcept;
+		_client_socket(socket::kind_t kind, socket::family_t family);
 		_client_socket(_client_socket&& other) noexcept = default;
 
 	protected:
-		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family) noexcept;
+		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
 
 	public:
 		void connect(const char* host, const char* port);
@@ -142,46 +151,47 @@ namespace abc {
 
 	class udp_client_socket : public _client_socket {
 	public:
-		udp_client_socket(socket::family_t family = socket::family::ipv4) noexcept;
+		udp_client_socket(socket::family_t family = socket::family::ipv4);
 		udp_client_socket(udp_client_socket&& other) noexcept = default;
 	};
 
 
 	class tcp_client_socket : public _client_socket {
 	public:
-		tcp_client_socket(socket::family_t family = socket::family::ipv4) noexcept;
+		tcp_client_socket(socket::family_t family = socket::family::ipv4);
 		tcp_client_socket(tcp_client_socket&& other) noexcept = default;
 
 	protected:
-		tcp_client_socket(socket::handle_t handle, socket::family_t family) noexcept;
+		friend class tcp_server_socket;
+		tcp_client_socket(socket::handle_t handle, socket::family_t family);
 	};
 
 
 	class _server_socket : public _basic_socket {
 	public:
-		_server_socket(socket::kind_t, socket::family_t family) noexcept;
+		_server_socket(socket::kind_t, socket::family_t family);
 		_server_socket(_server_socket&& other) noexcept = default;
 
 	public:
-		void bind();
+		void bind(const char* port);
 	};
 
 
 	class udp_server_socket : public _server_socket {
 	public:
-		udp_server_socket(socket::family_t family = socket::family::ipv4) noexcept;
+		udp_server_socket(socket::family_t family = socket::family::ipv4);
 		udp_server_socket(udp_server_socket&& other) noexcept = default;
 	};
 
 
 	class tcp_server_socket : public _server_socket {
 	public:
-		tcp_server_socket(socket::family_t family = socket::family::ipv4) noexcept;
+		tcp_server_socket(socket::family_t family = socket::family::ipv4);
 		tcp_server_socket(tcp_server_socket&& other) noexcept = default;
 
 	public:
 		void				listen(socket::backlog_size_t backlog_size);
-		tcp_client_socket&&	accept() const;
+		tcp_client_socket	accept() const;
 	};
 
 }
