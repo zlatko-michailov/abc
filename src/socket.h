@@ -59,7 +59,6 @@ namespace abc {
 
 
 	inline _basic_socket::~_basic_socket() noexcept {
-		std::cout << "Destroying handle=" << _handle << std::endl;
 		close();
 	}
 
@@ -149,7 +148,6 @@ namespace abc {
 			throw exception<std::logic_error>("!is_opened()", __TAG__);
 		}
 
-std::cout << "before recv()" << std::endl;
 		ssize_t received_byte_count;
 		if (address != nullptr) {
 			 received_byte_count = ::recvfrom(_socket.handle(), buffer, byte_count, 0, &address->value, &address->size);
@@ -157,14 +155,11 @@ std::cout << "before recv()" << std::endl;
 		else {
 			 received_byte_count = ::recv(_socket.handle(), buffer, byte_count, 0);
 		}
-std::cout << "after recv(), ret=" << received_byte_count << std::endl;
 
 		if (received_byte_count < 0) {
-std::cout << "throwing <0" << std::endl;
 			throw exception<std::runtime_error>("::recv()", __TAG__);
 		}
 		else if (received_byte_count < byte_count) {
-std::cout << "throwing <expected" << std::endl;
 			throw exception<std::runtime_error>("::recv()", __TAG__);
 		}
 	}
@@ -255,10 +250,6 @@ std::cout << "throwing <expected" << std::endl;
 				err = ::bind(_socket.handle(), host->ai_addr, host->ai_addrlen);
 
 				if (err == 0) {
-					std::printf("bind: %d.%d.%d.%d port: %d\n",
-						host->ai_addr->sa_data[2], host->ai_addr->sa_data[3], host->ai_addr->sa_data[4], host->ai_addr->sa_data[5],
-						::ntohs(*(std::uint16_t*)host->ai_addr->sa_data));
-
 					is_boud = true;
 					break; // Success
 				}
