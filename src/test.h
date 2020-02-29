@@ -67,6 +67,7 @@ namespace abc {
 
 		template <typename Value>
 		bool are_equal(const Value& actual, const Value& expected, tag_t tag, const char* format);
+		bool are_equal(const char* actual, const char* expected, tag_t tag);
 
 		const char*		category_name;
 		const char* 	method_name;
@@ -124,6 +125,24 @@ namespace abc {
 
 
 	template <typename Log>
+	inline bool test_context<Log>::are_equal(const char* actual, const char* expected, tag_t tag) {
+		bool are_equal = std::strcmp(actual, expected) == 0;
+
+		char line_format[size::k1];
+		if (!are_equal) {
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
+			log.push_back(category::any, severity::important, tag, line_format, actual, expected);
+		}
+		else {
+			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
+			log.push_back(category::any, severity::optional, tag, line_format, actual, expected);
+		}
+
+		return are_equal;
+	}
+
+
+	template <typename Log>
 	inline test_suite<Log>::test_suite(std::unordered_map<std::string, test_category<Log>>&& categories, Log&& log, seed_t seed) noexcept
 		: categories(std::move(categories))
 		, log(std::move(log))
@@ -162,8 +181,9 @@ namespace abc {
 					test_context<Log> context(category_it->first.c_str(), method_it->first.c_str(), log, seed);
 					method_passed = method_it->second(context);
 				}
-				catch(...) {
+				catch(const std::exception& ex) {
 					method_passed = false;
+					log.push_back(category::any, severity::critical, tag::none, "    %s%sEXCEPTION%s %s", color::begin, color::red, color::end, ex.what());
 				}
 
 				if (method_passed) {

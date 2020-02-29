@@ -34,9 +34,10 @@ SOFTWARE.
 
 namespace abc {
 
+	class udp_socket;
 	class udp_client_socket;
-	class tcp_client_socket;
 	class udp_server_socket;
+	class tcp_client_socket;
 	class tcp_server_socket;
 
 
@@ -76,6 +77,12 @@ namespace abc {
 		namespace handle {
 			constexpr handle_t	invalid	= -1;
 		}
+
+
+		struct address {
+			sockaddr		value;
+			socklen_t		size = sizeof(sockaddr);
+		};
 	}
 
 
@@ -83,6 +90,14 @@ namespace abc {
 
 
 	class _basic_socket {
+		friend class _connected_socket;
+		friend class _client_socket;
+		friend class _server_socket;
+		friend class udp_client_socket;
+		friend class tcp_client_socket;
+		friend class udp_server_socket;
+		friend class tcp_server_socket;
+		
 	public:
 		_basic_socket(socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
 		_basic_socket(_basic_socket&& other) noexcept = default;
@@ -94,8 +109,8 @@ namespace abc {
 		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
 
 	public:
-		bool		is_opened() const noexcept;
-		void		close() noexcept;
+		bool				is_opened() const noexcept;
+		void				close() noexcept;
 
 	protected:
 		void				open() noexcept;
@@ -111,52 +126,70 @@ namespace abc {
 	private:
 		socket::kind_t		_kind;
 		socket::family_t	_family;
-		socket::protocol_t	_protocol;
-		socket::purpose_t	_purpose;
+		socket::protocol_t	_protocol;	// TODO: remove
+		socket::purpose_t	_purpose;	// TODO: remove
 		socket::handle_t	_handle;
 	};
 
 
-	class _connected_socket : public _basic_socket {
+	class _connected_socket {
 	public:
-		_connected_socket(socket::kind_t kind, socket::family_t family);
+		_connected_socket(_basic_socket& socket) noexcept;
 		_connected_socket(_connected_socket&& other) noexcept = default;
 
-	protected:
-		_connected_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
-
 	public:
-		void send(const void* buffer, std::size_t byte_count);
-		void receive(void* buffer, std::size_t byte_count);
+		void send(const void* buffer, std::size_t byte_count);	// TODO: Rename byte_count to length
+		void receive(void* buffer, std::size_t byte_count, socket::address* address = nullptr);
 
 		////void send_async();
 		////void async_async();
+
+	protected:
+		_basic_socket&	_socket;
 	};
 
 
 	class _client_socket : public _connected_socket {
 	public:
-		_client_socket(socket::kind_t kind, socket::family_t family);
+		_client_socket(_basic_socket& socket) noexcept;
 		_client_socket(_client_socket&& other) noexcept = default;
-
-	protected:
-		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
 
 	public:
 		void connect(const char* host, const char* port);
+		void connect(const socket::address& address);
 
 		////void connect_async();
 	};
 
 
-	class udp_client_socket : public _client_socket {
+	class _server_socket {
+	public:
+		_server_socket(_basic_socket& socket) noexcept;
+		_server_socket(_server_socket&& other) noexcept = default;
+
+	public:
+		void bind(const char* port);
+
+	protected:
+		_basic_socket&	_socket;
+	};
+
+
+	class udp_socket : public _basic_socket, public _server_socket, public _client_socket {
+	public:
+		udp_socket(socket::family_t family = socket::family::ipv4);
+		udp_socket(udp_socket&& other) noexcept = default;
+	};
+
+
+	class udp_client_socket : public _basic_socket, public _client_socket {
 	public:
 		udp_client_socket(socket::family_t family = socket::family::ipv4);
 		udp_client_socket(udp_client_socket&& other) noexcept = default;
 	};
 
 
-	class tcp_client_socket : public _client_socket {
+	class tcp_client_socket : public _basic_socket, public _client_socket {
 	public:
 		tcp_client_socket(socket::family_t family = socket::family::ipv4);
 		tcp_client_socket(tcp_client_socket&& other) noexcept = default;
@@ -167,24 +200,14 @@ namespace abc {
 	};
 
 
-	class _server_socket : public _basic_socket {
-	public:
-		_server_socket(socket::kind_t, socket::family_t family);
-		_server_socket(_server_socket&& other) noexcept = default;
-
-	public:
-		void bind(const char* port);
-	};
-
-
-	class udp_server_socket : public _server_socket {
+	class udp_server_socket : public _basic_socket, public _server_socket, public _connected_socket {
 	public:
 		udp_server_socket(socket::family_t family = socket::family::ipv4);
 		udp_server_socket(udp_server_socket&& other) noexcept = default;
 	};
 
 
-	class tcp_server_socket : public _server_socket {
+	class tcp_server_socket : public _basic_socket, public _server_socket {
 	public:
 		tcp_server_socket(socket::family_t family = socket::family::ipv4);
 		tcp_server_socket(tcp_server_socket&& other) noexcept = default;

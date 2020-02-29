@@ -23,13 +23,87 @@ SOFTWARE.
 */
 
 
+#include <thread>
+#include <cctype>
+
 #include "socket.h"
 
 
 namespace abc { namespace test { namespace socket {
 
 	bool test_udp_sync_socket(test_context<abc::test_log>& context) {
-		return true;
+		const char server_port[] = "31234";
+		const char request_content[] = "Some request content.";
+		const char response_content[] = "The corresponding response content.";
+		bool passed = true;
+
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x199, "begin");
+		abc::udp_socket server;
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x200, "server: created");
+		server.bind(server_port);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x201, "server: bound");
+
+		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
+			try {
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x251, "client: start");
+				abc::udp_socket client;
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x252, "client: created");
+				client.connect("localhost", server_port);
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x253, "client: connected");
+
+				std::uint16_t content_length = std::strlen(request_content);
+				client.send(&content_length, sizeof(std::uint16_t));
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x254, "client: sent 2 bytes: %d", content_length);
+				client.send(request_content, content_length);
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x255, "client: sent %d bytes: %s", content_length, request_content);
+
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x256, "client: will receive 2 bytes");
+				abc::socket::address server_address;
+				client.receive(&content_length, sizeof(std::uint16_t), &server_address);
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x257, "client: received 2 bytes: %d", content_length);
+
+				char content[1024];
+				client.receive(content, content_length, &server_address);
+				content[content_length] = '\0';
+					context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x258, "client: received %d bytes: %s", content_length, content);
+				passed = context.are_equal(content, response_content, __TAG__) && passed;
+			}
+			catch (const std::exception& ex) {
+				context.log.push_back(abc::category::abc::base, abc::severity::important, 0x261, "client: EXCEPTION: %s", ex.what());
+			}
+
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x262, "client: exiting");
+		});
+
+		abc::socket::address client_address;
+		std::uint16_t content_length;
+		server.receive(&content_length, sizeof(std::uint16_t), &client_address);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x202, "server: received 2 bytes: %d", content_length);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x202, "server: client address: %d.%d.%d.%d port: %d",
+				client_address.value.sa_data[2], client_address.value.sa_data[3], client_address.value.sa_data[4], client_address.value.sa_data[5],
+				::ntohs(*(std::uint16_t*)client_address.value.sa_data));
+
+		char content[1024];
+		server.receive(content, content_length);
+		content[content_length] = '\0';
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x203, "server: received %d bytes: %s", content_length, content);
+		passed = context.are_equal(content, request_content, __TAG__) && passed;
+
+		server.connect(client_address);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x204, "server: connected");
+
+		content_length = std::strlen(response_content);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x205, "server: will send 2 bytes: %d", content_length);
+		server.send(&content_length, sizeof(std::uint16_t));
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x206, "server: sent 2 bytes: %d", content_length);
+
+		server.send(response_content, content_length);
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x207, "server: sent %d bytes", content_length);
+
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x208, "server: wait for client");
+		client_thread.join();
+			context.log.push_back(abc::category::abc::base, abc::severity::debug, 0x208, "server: exiting");
+		return passed;
 	}
 
 }}}
