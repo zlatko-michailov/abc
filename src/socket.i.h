@@ -46,8 +46,9 @@ namespace abc {
 		typedef int				family_t;
 		typedef int				protocol_t;
 		typedef int				handle_t;
-		typedef std::uint8_t	purpose_t;
 		typedef int				backlog_size_t;
+		typedef int				error_t;
+		typedef std::uint8_t	tie_t;
 
 
 		namespace kind {
@@ -68,14 +69,20 @@ namespace abc {
 		}
 
 
-		namespace purpose {
-			constexpr purpose_t	client	= 0;
-			constexpr purpose_t	server	= 1;
+		namespace handle {
+			constexpr handle_t	invalid	= -1;
 		}
 
 
-		namespace handle {
-			constexpr handle_t	invalid	= -1;
+		namespace error {
+			constexpr error_t	none	=  0;
+			constexpr error_t	any		= -1;
+		}
+
+
+		namespace tie {
+			constexpr tie_t		bind	= 1;
+			constexpr tie_t		connect	= 2;
 		}
 
 
@@ -99,35 +106,39 @@ namespace abc {
 		friend class tcp_server_socket;
 		
 	public:
-		_basic_socket(socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
+		_basic_socket(socket::kind_t kind, socket::family_t family);
 		_basic_socket(_basic_socket&& other) noexcept = default;
 
 	public:
 		~_basic_socket() noexcept;
 
 	protected:
-		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, socket::purpose_t purpose);
+		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
 
 	public:
-		bool				is_opened() const noexcept;
+		bool				is_open() const noexcept;
 		void				close() noexcept;
 
 	protected:
-		void				open() noexcept;
+		void				open();
 		addrinfo			hints() const noexcept;
+
+		void				tie(const char* host, const char* port, socket::tie_t tt);
+		void				tie(const socket::address& address, socket::tie_t tt);
+
+	private:
+		socket::error_t		tie(const sockaddr& addr, socklen_t addr_length, socket::tie_t tt);
 
 	protected:
 		socket::kind_t		kind() const noexcept;
 		socket::family_t	family() const noexcept;
 		socket::protocol_t	protocol() const noexcept;
-		socket::purpose_t	purpose() const noexcept;
 		socket::handle_t	handle() const noexcept;
 
 	private:
 		socket::kind_t		_kind;
 		socket::family_t	_family;
-		socket::protocol_t	_protocol;	// TODO: remove
-		socket::purpose_t	_purpose;	// TODO: remove
+		socket::protocol_t	_protocol;
 		socket::handle_t	_handle;
 	};
 
