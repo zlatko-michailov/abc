@@ -1,3 +1,41 @@
+// udp_server:
+//		bind(host?, port)
+//		receive(..., &address)
+//		send(..., &address)
+
+
+// udp_client
+//		connect(host, port) ?
+//		send(..., &address)
+//		receive(...)
+
+
+// tcp_server
+//		bind(host?, port)
+//		listen()
+//		accept()
+
+
+// tcp_client
+//		connect(host, port)
+//		send(...)
+//		receive(...)
+
+
+// basic
+//		close()
+//		bind(host, port)
+//
+//		open()
+//		is_open()
+//		bind_connect(host, port, bc)
+
+// client -> basic
+// tcp_client, udp -> client
+// tcp_server -> basic
+
+
+
 class _basic_socket {
 	void close();
 };
@@ -109,6 +147,25 @@ void dgram_receive_async() {
 			dgram.close();
 		})
 		.wait();
+}
+
+
+void dgram_echo() {
+	udp_server_socket server;
+
+	server.bind("12345");
+
+	// No need to server.listen()
+
+	socket::address addr;
+
+	std::uint16_t len;
+	server.receive(&len, 2, /*out*/ &addr);
+
+	char content[1024 + 1];
+	server.receive(content, len);
+
+	server.connect(addr);
 }
 
 

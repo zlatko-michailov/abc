@@ -95,6 +95,16 @@ namespace abc {
 	}
 
 
+	inline void _basic_socket::bind(const char* port) {
+		bind(nullptr, port);
+	}
+
+
+	inline void _basic_socket::bind(const char* host, const char* port) {
+		tie(host, port, socket::tie::bind);
+	}
+
+
 	inline void _basic_socket::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (!is_open()) {
 			open();
@@ -122,7 +132,7 @@ namespace abc {
 
 			if (err == socket::error::none) {
 				is_done = true;
-				break; // Success
+				break;
 			}
 		}
 
@@ -196,77 +206,56 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline _connected_socket::_connected_socket(_basic_socket& socket) noexcept
-		: _socket(socket) {
-	}
-
-
-	inline void _connected_socket::send(const void* buffer, std::size_t byte_count) {
-		if (!_socket.is_open()) {
-			throw exception<std::logic_error>("!is_open()", __TAG__);
-		}
-
-		ssize_t sent_byte_count = ::send(_socket.handle(), buffer, byte_count, 0);
-
-		if (sent_byte_count < 0) {
-			throw exception<std::runtime_error>("::send()", __TAG__);
-		}
-		else if (sent_byte_count < byte_count) {
-			throw exception<std::runtime_error>("::send()", __TAG__);
-		}
-	}
-
-
-	inline void _connected_socket::receive(void* buffer, std::size_t byte_count, socket::address* address) {
-		if (!_socket.is_open()) {
-			throw exception<std::logic_error>("!is_open()", __TAG__);
-		}
-
-		ssize_t received_byte_count;
-		if (address != nullptr) {
-			 received_byte_count = ::recvfrom(_socket.handle(), buffer, byte_count, 0, &address->value, &address->size);
-		}
-		else {
-			 received_byte_count = ::recv(_socket.handle(), buffer, byte_count, 0);
-		}
-
-		if (received_byte_count < 0) {
-			throw exception<std::runtime_error>("::recv()", __TAG__);
-		}
-		else if (received_byte_count < byte_count) {
-			throw exception<std::runtime_error>("::recv()", __TAG__);
-		}
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline _client_socket::_client_socket(_basic_socket& socket) noexcept
-		: _connected_socket(socket) {
+	inline _client_socket::_client_socket(socket::kind_t kind, socket::family_t family)
+		: _basic_socket(kind, family) {
 	}
 
 
 	inline void _client_socket::connect(const char* host, const char* port) {
-		_socket.tie(host, port, socket::tie::connect);
+		tie(host, port, socket::tie::connect);
 	}
 
 
 	inline void _client_socket::connect(const socket::address& address) {
-		_socket.tie(address, socket::tie::connect);
+		tie(address, socket::tie::connect);
 	}
 
 
-	// --------------------------------------------------------------
+	inline void _client_socket::send(const void* buffer, std::size_t size) {
+		if (!is_open()) {
+			throw exception<std::logic_error>("!is_open()", __TAG__);
+		}
 
+		ssize_t sent_size = ::send(handle(), buffer, size, 0);
 
-	inline _server_socket::_server_socket(_basic_socket& socket) noexcept
-		: _socket(socket) {
+		if (sent_size < 0) {
+			throw exception<std::runtime_error>("::send()", __TAG__);
+		}
+		else if (sent_size < size) {
+			throw exception<std::runtime_error>("::send()", __TAG__);
+		}
 	}
 
 
-	inline void _server_socket::bind(const char* port) {
-		_socket.tie(nullptr, port, socket::tie::bind);
+	inline void _client_socket::receive(void* buffer, std::size_t size, socket::address* address) {
+		if (!is_open()) {
+			throw exception<std::logic_error>("!is_open()", __TAG__);
+		}
+
+		ssize_t received_size;
+		if (address != nullptr) {
+			 received_size = ::recvfrom(handle(), buffer, size, 0, &address->value, &address->size);
+		}
+		else {
+			 received_size = ::recv(handle(), buffer, size, 0);
+		}
+
+		if (received_size < 0) {
+			throw exception<std::runtime_error>("::recv()", __TAG__);
+		}
+		else if (received_size < size) {
+			throw exception<std::runtime_error>("::recv()", __TAG__);
+		}
 	}
 
 
@@ -274,18 +263,7 @@ namespace abc {
 
 
 	inline udp_socket::udp_socket(socket::family_t family)
-		: _basic_socket(socket::kind::dgram, family)
-		, _client_socket(static_cast<_basic_socket&>(*this))
-		, _server_socket(static_cast<_basic_socket&>(*this)) {
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline udp_client_socket::udp_client_socket(socket::family_t family)
-		: _basic_socket(socket::kind::dgram, family)
-		, _client_socket(static_cast<_basic_socket&>(*this)) {
+		: _client_socket(socket::kind::dgram, family) {
 	}
 
 
@@ -293,24 +271,12 @@ namespace abc {
 
 
 	inline tcp_client_socket::tcp_client_socket(socket::family_t family)
-		: _basic_socket(socket::kind::stream, family)
-		, _client_socket(static_cast<_basic_socket&>(*this)) {
+		: _client_socket(socket::kind::stream, family) {
 	}
 
 
 	inline tcp_client_socket::tcp_client_socket(socket::handle_t handle, socket::family_t family)
-		: _basic_socket(handle, socket::kind::dgram, family)
-		, _client_socket(static_cast<_basic_socket&>(*this)) {
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline udp_server_socket::udp_server_socket(socket::family_t family)
-		: _basic_socket(socket::kind::dgram, family)
-		, _connected_socket(static_cast<_basic_socket&>(*this))
-		, _server_socket(static_cast<_basic_socket&>(*this)) {
+		: _client_socket(socket::kind::stream, family) {
 	}
 
 
@@ -318,28 +284,27 @@ namespace abc {
 
 
 	inline tcp_server_socket::tcp_server_socket(socket::family_t family)
-		: _basic_socket(socket::kind::stream, family)
-		, _server_socket(static_cast<_basic_socket&>(*this)) {
+		: _basic_socket(socket::kind::stream, family) {
 	}
 
 
 	inline void tcp_server_socket::listen(socket::backlog_size_t backlog_size) {
-		int err = ::listen(_socket.handle(), backlog_size);
+		socket::error_t err = ::listen(handle(), backlog_size);
 
-		if (err != 0) {
+		if (err != socket::error::none) {
 			throw exception<std::runtime_error>("::listen()", __TAG__);
 		}
 	}
 
 
 	inline tcp_client_socket tcp_server_socket::accept() const {
-		socket::handle_t hnd = ::accept(_socket.handle(), nullptr, nullptr);
+		socket::handle_t hnd = ::accept(handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
 			throw exception<std::runtime_error>("::accept()", __TAG__);
 		}
 
-		return tcp_client_socket(hnd, _socket.family());
+		return tcp_client_socket(hnd, family());
 	}
 
 }
