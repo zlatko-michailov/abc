@@ -161,7 +161,7 @@ int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream(std::clog.rdbuf())),
 		std::move(abc::log_view::test<>()),
-		std::move(abc::log_filter::severity(abc::severity::debug)));
+		std::move(abc::log_filter::severity(abc::severity::optional)));
 
 		abc::test_suite<> test_suite ( {
 			{ "timestamp", {
@@ -173,6 +173,7 @@ int main() {
 			} },
 			{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
+				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
 			} },
 		},
 		std::move(test_log),

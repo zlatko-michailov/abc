@@ -53,6 +53,16 @@ namespace abc {
 	}
 
 
+	inline _basic_socket::_basic_socket(_basic_socket&& other) noexcept {
+		_kind = other._kind;
+		_family = other._family;
+		_protocol = other._protocol;
+		_handle = other._handle;
+
+		other._handle = socket::handle::invalid;
+	}
+
+
 	inline _basic_socket::~_basic_socket() noexcept {
 		close();
 	}
@@ -211,6 +221,11 @@ namespace abc {
 	}
 
 
+	inline _client_socket::_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family)
+		: _basic_socket(handle, kind, family) {
+	}
+
+
 	inline void _client_socket::connect(const char* host, const char* port) {
 		tie(host, port, socket::tie::connect);
 	}
@@ -221,12 +236,22 @@ namespace abc {
 	}
 
 
-	inline void _client_socket::send(const void* buffer, std::size_t size) {
+	inline void _client_socket::send(const void* buffer, std::size_t size, socket::address* address) {
 		if (!is_open()) {
 			throw exception<std::logic_error>("!is_open()", __TAG__);
 		}
 
-		ssize_t sent_size = ::send(handle(), buffer, size, 0);
+		ssize_t sent_size;
+		if (address != nullptr) {
+			if (kind() != socket::kind::dgram) {
+				throw exception<std::logic_error>("!dgram", __TAG__);
+			}
+
+			sent_size = ::sendto(handle(), buffer, size, 0, &address->value, address->size);
+		}
+		else {
+			sent_size = ::send(handle(), buffer, size, 0);
+		}
 
 		if (sent_size < 0) {
 			throw exception<std::runtime_error>("::send()", __TAG__);
@@ -244,6 +269,10 @@ namespace abc {
 
 		ssize_t received_size;
 		if (address != nullptr) {
+			if (kind() != socket::kind::dgram) {
+				throw exception<std::logic_error>("!dgram", __TAG__);
+			}
+
 			 received_size = ::recvfrom(handle(), buffer, size, 0, &address->value, &address->size);
 		}
 		else {
@@ -276,7 +305,7 @@ namespace abc {
 
 
 	inline tcp_client_socket::tcp_client_socket(socket::handle_t handle, socket::family_t family)
-		: _client_socket(socket::kind::stream, family) {
+		: _client_socket(handle, socket::kind::stream, family) {
 	}
 
 

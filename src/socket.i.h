@@ -97,7 +97,7 @@ namespace abc {
 	class _basic_socket {
 	public:
 		_basic_socket(socket::kind_t kind, socket::family_t family);
-		_basic_socket(_basic_socket&& other) noexcept = default;
+		_basic_socket(_basic_socket&& other) noexcept;
 
 	public:
 		~_basic_socket() noexcept;
@@ -110,6 +110,8 @@ namespace abc {
 		void				close() noexcept;
 		void				bind(const char* port);
 		void				bind(const char* host, const char* port);
+
+		// void tie_async();
 
 	protected:
 		void				open();
@@ -139,16 +141,19 @@ namespace abc {
 	public:
 		_client_socket(socket::kind_t kind, socket::family_t family);
 		_client_socket(_client_socket&& other) noexcept = default;
+		_client_socket(const _client_socket& other) = delete;
+
+	protected:
+		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family);
 
 	public:
 		void connect(const char* host, const char* port);
 		void connect(const socket::address& address);
 
-		////void connect_async();
-
-		void send(const void* buffer, std::size_t size);
+		void send(const void* buffer, std::size_t size, socket::address* address = nullptr);
 		void receive(void* buffer, std::size_t size, socket::address* address = nullptr);
 
+		////void connect_async();
 		////void send_async();
 		////void async_async();
 	};
