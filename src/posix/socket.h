@@ -29,7 +29,7 @@ SOFTWARE.
 #include <memory>
 
 #include "socket.i.h"
-#include "exception.h"
+#include "../exception.h"
 
 
 namespace abc {

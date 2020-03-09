@@ -24,7 +24,7 @@ SOFTWARE.
 
 
 #include "../src/test.h"
-#include "../src/socket.h"
+#include "../src/posix/socket.h"
 
 
 namespace abc { namespace test { namespace socket {
