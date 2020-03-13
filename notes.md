@@ -99,8 +99,10 @@ timestamp + unit tests
 log
 test
 license
+socket (sync)
 ## To Do
-socket (dgram)
+socket (async)
+tagger
 
 ## To Ignore/Remove
 os
