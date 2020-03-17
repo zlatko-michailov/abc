@@ -78,16 +78,16 @@ namespace abc { namespace test { namespace timestamp {
 
 	static bool test_timestamp_properties(test_context<abc::test_log>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds) {
 		bool passed = true;
-		passed = context.are_equal<std::int32_t>(ts.year(),			year, 0x101, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.month(),		month, 0x102, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.day(),			day, 0x103, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.year(),			year, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.month(),		month, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.day(),			day, __TAG__, "%d") && passed;
 
-		passed = context.are_equal<std::int32_t>(ts.hours(),		hours, 0x104, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.minutes(),		minutes, 0x105, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.seconds(),		seconds, 0x106, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.milliseconds(),	milliseconds, 0x107, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.microseconds(),	microseconds, 0x108, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.nanoseconds(),	nanoseconds, 0x109, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.hours(),		hours, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.minutes(),		minutes, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.seconds(),		seconds, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.milliseconds(),	milliseconds, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.microseconds(),	microseconds, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::int32_t>(ts.nanoseconds(),	nanoseconds, __TAG__, "%d") && passed;
 
 		return passed;
 	}
