@@ -44,11 +44,11 @@ namespace abc {
 		, _family(family)
 		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
-			throw exception<std::logic_error>("kind", __TAG__);
+			throw exception<std::logic_error>("kind", 0x6);
 		}
 
 		if (family != socket::family::ipv4 && family != socket::family::ipv6) {
-			throw exception<std::logic_error>("family", __TAG__);
+			throw exception<std::logic_error>("family", 0x7);
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace abc {
 		_handle = ::socket(_family, _kind, _protocol);
 
 		if (!is_open()) {
-			throw exception<std::runtime_error>("::socket()", __TAG__);
+			throw exception<std::runtime_error>("::socket()", 0x8);
 		}
 	}
 
@@ -120,7 +120,7 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error>("is_open()", __TAG__);
+			throw exception<std::runtime_error>("is_open()", 0x9);
 		}
 
 		addrinfo hnt = hints();
@@ -133,7 +133,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error>("::getaddrinfo()", __TAG__);
+			throw exception<std::runtime_error>("::getaddrinfo()", 0xa);
 		}
 
 		bool is_done = false;
@@ -153,7 +153,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error>("connect()", __TAG__);
+			throw exception<std::runtime_error>("connect()", 0xb);
 		}
 	}
 
@@ -163,20 +163,20 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error>("is_open()", __TAG__);
+			throw exception<std::runtime_error>("is_open()", 0xc);
 		}
 
 		socket::error_t err = tie(address.value, address.size, tt);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error>("bind() / connect()", __TAG__);
+			throw exception<std::runtime_error>("bind() / connect()", 0xd);
 		}
 	}
 
 
 	inline socket::error_t _basic_socket::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
-			throw exception<std::runtime_error>("!is_open()", __TAG__);
+			throw exception<std::runtime_error>("!is_open()", 0xe);
 		}
 
 		switch(tt) {
@@ -187,7 +187,7 @@ namespace abc {
 				return ::connect(handle(), &addr, addr_len);
 
 			default:
-				throw exception<std::logic_error>("tt", __TAG__);
+				throw exception<std::logic_error>("tt", 0xf);
 		}
 
 		return socket::error::any;
@@ -238,13 +238,13 @@ namespace abc {
 
 	inline void _client_socket::send(const void* buffer, std::size_t size, socket::address* address) {
 		if (!is_open()) {
-			throw exception<std::logic_error>("!is_open()", __TAG__);
+			throw exception<std::logic_error>("!is_open()", 0x10);
 		}
 
 		ssize_t sent_size;
 		if (address != nullptr) {
 			if (kind() != socket::kind::dgram) {
-				throw exception<std::logic_error>("!dgram", __TAG__);
+				throw exception<std::logic_error>("!dgram", 0x11);
 			}
 
 			sent_size = ::sendto(handle(), buffer, size, 0, &address->value, address->size);
@@ -254,23 +254,23 @@ namespace abc {
 		}
 
 		if (sent_size < 0) {
-			throw exception<std::runtime_error>("::send()", __TAG__);
+			throw exception<std::runtime_error>("::send()", 0x12);
 		}
 		else if (sent_size < size) {
-			throw exception<std::runtime_error>("::send()", __TAG__);
+			throw exception<std::runtime_error>("::send()", 0x13);
 		}
 	}
 
 
 	inline void _client_socket::receive(void* buffer, std::size_t size, socket::address* address) {
 		if (!is_open()) {
-			throw exception<std::logic_error>("!is_open()", __TAG__);
+			throw exception<std::logic_error>("!is_open()", 0x14);
 		}
 
 		ssize_t received_size;
 		if (address != nullptr) {
 			if (kind() != socket::kind::dgram) {
-				throw exception<std::logic_error>("!dgram", __TAG__);
+				throw exception<std::logic_error>("!dgram", 0x15);
 			}
 
 			 received_size = ::recvfrom(handle(), buffer, size, 0, &address->value, &address->size);
@@ -280,10 +280,10 @@ namespace abc {
 		}
 
 		if (received_size < 0) {
-			throw exception<std::runtime_error>("::recv()", __TAG__);
+			throw exception<std::runtime_error>("::recv()", 0x16);
 		}
 		else if (received_size < size) {
-			throw exception<std::runtime_error>("::recv()", __TAG__);
+			throw exception<std::runtime_error>("::recv()", 0x17);
 		}
 	}
 
@@ -321,7 +321,7 @@ namespace abc {
 		socket::error_t err = ::listen(handle(), backlog_size);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error>("::listen()", __TAG__);
+			throw exception<std::runtime_error>("::listen()", 0x18);
 		}
 	}
 
@@ -330,7 +330,7 @@ namespace abc {
 		socket::handle_t hnd = ::accept(handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
-			throw exception<std::runtime_error>("::accept()", __TAG__);
+			throw exception<std::runtime_error>("::accept()", 0x19);
 		}
 
 		return tcp_client_socket(hnd, family());

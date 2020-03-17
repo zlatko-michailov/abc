@@ -139,7 +139,7 @@ namespace abc {
 
 			std::size_t path_length = std::strlen(path);
 			if (path_length + 16 > MaxPath) {
-				throw exception<std::logic_error>("std::strlen(path)", __TAG__);
+				throw exception<std::logic_error>("std::strlen(path)", 0x4);
 			}
 
 			_path_length = path_length;
@@ -277,7 +277,7 @@ namespace abc {
 
 		inline int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id) {
 			if (line_size < 17) {
-				throw exception<std::logic_error>("line_size", __TAG__);
+				throw exception<std::logic_error>("line_size", 0x5);
 			}
 
 			streambuf_adapter streambuf(line, &line[line_size - 1]);

@@ -126,7 +126,7 @@ namespace abc {
 		// Re-open the file, if needed.
 		if (_f == nullptr) {
 			if (_path.empty()) {
-				throw unexpected("_path == nullptr", __TAG__);
+				throw unexpected("_path == nullptr", 0x1);
 			}
 
 			char path[max_path + 1];
@@ -135,13 +135,13 @@ namespace abc {
 
 			_f = std::fopen(path, "w+");
 			if (_f == nullptr) {
-				throw failed("fopen()", __TAG__);
+				throw failed("fopen()", 0x2);
 			}
 		}
 
 		// Check wide-ness of the file.
 		if (std::fwide(_f, 0) * fwide_sign < 0) {
-			throw failed("fwide()", __TAG__);
+			throw failed("fwide()", 0x3);
 		}
 	}
 
