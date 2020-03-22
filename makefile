@@ -23,31 +23,39 @@
 # SOFTWARE.
 
 
-VERSION = 0.1
+PROJECT = abc
+VERSION = 0.3.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++17 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so
+SUBDIR_SRC = src
+SUBDIR_TEST = test
+SUBDIR_OUT = out
+SUBDIR_INCLUDE = include
+PROG_TEST = $(PROJECT)_test
+
 
 all: pack
 
 pack: test
 	#
 	# ---------- Begin packing ----------
-	cp -r $(CURDIR)/src/*  $(CURDIR)/out/abc/inc
+	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
+	ln --symbolic $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
 	# ---------- Done packing ----------
 	#
 
 test: build_test
 	#
 	# ---------- Begin testing ----------
-	$(CURDIR)/out/test/abc_test
+	$(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST)
 	# ---------- Done testing ----------
 	#
 
 build_test: build_product
 	#
 	# ---------- Begin building tests ----------
-	g++ $(CPPOPTIONS) -o $(CURDIR)/out/test/abc_test $(CURDIR)/test/*.cpp $(LINKOPTIONS)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) $(CURDIR)/$(SUBDIR_TEST)/*.cpp $(LINKOPTIONS)
 	# ----------Done building tests ----------
 	#
 
@@ -61,11 +69,12 @@ build_product: clean
 clean:
 	#
 	# ---------- Begin cleaning ----------
-	rm -fdr $(CURDIR)/out
-	mkdir $(CURDIR)/out
-	mkdir $(CURDIR)/out/test
-	mkdir $(CURDIR)/out/abc
-	mkdir $(CURDIR)/out/abc/inc
+	rm -fdr $(CURDIR)/$(SUBDIR_OUT)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
 	# ---------- Done cleaning ----------
 	#
 
