@@ -297,6 +297,18 @@ namespace abc {
 		};
 
 
+		class off {
+		public:
+			off() noexcept = default;
+			off(off&& other) noexcept = default;
+
+			off& operator=(off&& other) noexcept = default;
+
+		public:
+			bool is_enabled(category_t category, severity_t severity) const noexcept;
+		};
+
+
 		class severity {
 		public:
 			severity() noexcept = default;
@@ -319,5 +331,6 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	using null_log = log<1, log_container::ostream, abc::log_view::blank, abc::log_filter::off>;
 
 }

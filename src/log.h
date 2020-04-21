@@ -309,6 +309,11 @@ namespace abc {
 		}
 
 
+		inline bool off::is_enabled(category_t category, severity_t severity) const noexcept {
+			return false;
+		}
+
+
 		inline severity::severity(severity_t min_severity) noexcept
 			: _min_severity(min_severity) {
 		}
