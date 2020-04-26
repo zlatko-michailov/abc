@@ -6,7 +6,7 @@ Minimalistic library of essential utilities for C++ development.
 `abc` contains a few (mostly unrelated) classes that are missing in the `std` library. The key entities are:
 - timestamp
 - log
-- BSD socket
+- socket (TCP and UDP)
 
 All classes are provided as headers, and must be compiled in client programs.
 There is no precompiled flavor of the library.

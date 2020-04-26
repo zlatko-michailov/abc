@@ -70,6 +70,13 @@
 		"future": "cpp",
 		"iomanip": "cpp",
 		"queue": "cpp",
-		"concepts": "cpp"
+		"concepts": "cpp",
+		"*.tcc": "cpp",
+		"cwctype": "cpp",
+		"memory_resource": "cpp",
+		"numeric": "cpp",
+		"random": "cpp",
+		"sstream": "cpp",
+		"bit": "cpp"
 	}
 }

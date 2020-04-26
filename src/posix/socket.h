@@ -34,15 +34,19 @@ SOFTWARE.
 
 namespace abc {
 
-	inline _basic_socket::_basic_socket(socket::kind_t kind, socket::family_t family)
-		: _basic_socket(socket::handle::invalid, kind, family) {
+	template <typename LogPtr>
+	inline _basic_socket<LogPtr>::_basic_socket(socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr)
+		: _basic_socket(socket::handle::invalid, kind, family, log_ptr) {
 	}
 
-	inline _basic_socket::_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family)
+
+	template <typename LogPtr>
+	inline _basic_socket<LogPtr>::_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr)
 		: _handle(handle)
 		, _kind(kind)
 		, _family(family)
-		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp) {
+		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
+		, _log_ptr(log_ptr) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
 			throw exception<std::logic_error>("kind", 0x6);
 		}
@@ -53,27 +57,32 @@ namespace abc {
 	}
 
 
-	inline _basic_socket::_basic_socket(_basic_socket&& other) noexcept {
+	template <typename LogPtr>
+	inline _basic_socket<LogPtr>::_basic_socket(_basic_socket&& other) noexcept {
 		_kind = other._kind;
 		_family = other._family;
 		_protocol = other._protocol;
 		_handle = other._handle;
+		_log_ptr = std::move(other._log_ptr);
 
 		other._handle = socket::handle::invalid;
 	}
 
 
-	inline _basic_socket::~_basic_socket() noexcept {
+	template <typename LogPtr>
+	inline _basic_socket<LogPtr>::~_basic_socket() noexcept {
 		close();
 	}
 
 
-	inline bool _basic_socket::is_open() const noexcept {
+	template <typename LogPtr>
+	inline bool _basic_socket<LogPtr>::is_open() const noexcept {
 		return _handle != socket::handle::invalid;
 	}
 
 
-	inline void _basic_socket::close() noexcept {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::close() noexcept {
 		if (is_open()) {
 			::close(_handle);
 
@@ -82,7 +91,8 @@ namespace abc {
 	}
 
 
-	inline void _basic_socket::open() {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::open() {
 		close();
 
 		_handle = ::socket(_family, _kind, _protocol);
@@ -93,7 +103,8 @@ namespace abc {
 	}
 
 
-	inline addrinfo	_basic_socket::hints() const noexcept {
+	template <typename LogPtr>
+	inline addrinfo	_basic_socket<LogPtr>::hints() const noexcept {
 		addrinfo hints = { 0 };
 
 		hints.ai_family		= _family;
@@ -105,17 +116,20 @@ namespace abc {
 	}
 
 
-	inline void _basic_socket::bind(const char* port) {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::bind(const char* port) {
 		bind(nullptr, port);
 	}
 
 
-	inline void _basic_socket::bind(const char* host, const char* port) {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::bind(const char* host, const char* port) {
 		tie(host, port, socket::tie::bind);
 	}
 
 
-	inline void _basic_socket::tie(const char* host, const char* port, socket::tie_t tt) {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (!is_open()) {
 			open();
 		}
@@ -158,7 +172,8 @@ namespace abc {
 	}
 
 
-	inline void _basic_socket::tie(const socket::address& address, socket::tie_t tt) {
+	template <typename LogPtr>
+	inline void _basic_socket<LogPtr>::tie(const socket::address& address, socket::tie_t tt) {
 		if (!is_open()) {
 			open();
 		}
@@ -174,7 +189,8 @@ namespace abc {
 	}
 
 
-	inline socket::error_t _basic_socket::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
+	template <typename LogPtr>
+	inline socket::error_t _basic_socket<LogPtr>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
 			throw exception<std::runtime_error>("!is_open()", 0xe);
 		}
@@ -194,63 +210,79 @@ namespace abc {
 	}
 
 
-	inline socket::kind_t _basic_socket::kind() const noexcept {
+	template <typename LogPtr>
+	inline socket::kind_t _basic_socket<LogPtr>::kind() const noexcept {
 		return _kind;
 	}
 
 
-	inline socket::family_t _basic_socket::family() const noexcept {
+	template <typename LogPtr>
+	inline socket::family_t _basic_socket<LogPtr>::family() const noexcept {
 		return _family;
 	}
 
-	inline socket::protocol_t _basic_socket::protocol() const noexcept {
+
+	template <typename LogPtr>
+	inline socket::protocol_t _basic_socket<LogPtr>::protocol() const noexcept {
 		return _protocol;
 	}
 
 
-	inline socket::handle_t _basic_socket::handle() const noexcept {
+	template <typename LogPtr>
+	inline socket::handle_t _basic_socket<LogPtr>::handle() const noexcept {
 		return _handle;
+	}
+
+
+	template <typename LogPtr>
+	inline const LogPtr& _basic_socket<LogPtr>::log_ptr() const noexcept {
+		return _log_ptr;
 	}
 
 
 	// --------------------------------------------------------------
 
 
-	inline _client_socket::_client_socket(socket::kind_t kind, socket::family_t family)
-		: _basic_socket(kind, family) {
+	template <typename LogPtr>
+	inline _client_socket<LogPtr>::_client_socket(socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr)
+		: _basic_socket<LogPtr>(kind, family, log_ptr) {
 	}
 
 
-	inline _client_socket::_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family)
-		: _basic_socket(handle, kind, family) {
+	template <typename LogPtr>
+	inline _client_socket<LogPtr>::_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr)
+		: _basic_socket<LogPtr>(handle, kind, family, log_ptr) {
 	}
 
 
-	inline void _client_socket::connect(const char* host, const char* port) {
-		tie(host, port, socket::tie::connect);
+	template <typename LogPtr>
+	inline void _client_socket<LogPtr>::connect(const char* host, const char* port) {
+		this->tie(host, port, socket::tie::connect);
 	}
 
 
-	inline void _client_socket::connect(const socket::address& address) {
-		tie(address, socket::tie::connect);
+	template <typename LogPtr>
+	inline void _client_socket<LogPtr>::connect(const socket::address& address) {
+		this->tie(address, socket::tie::connect);
 	}
 
 
-	inline void _client_socket::send(const void* buffer, std::size_t size, socket::address* address) {
-		if (!is_open()) {
+	template <typename LogPtr>
+	inline void _client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
+		if (!this->is_open()) {
 			throw exception<std::logic_error>("!is_open()", 0x10);
 		}
 
 		ssize_t sent_size;
 		if (address != nullptr) {
-			if (kind() != socket::kind::dgram) {
+			if (this->kind() != socket::kind::dgram) {
 				throw exception<std::logic_error>("!dgram", 0x11);
 			}
 
-			sent_size = ::sendto(handle(), buffer, size, 0, &address->value, address->size);
+			sent_size = ::sendto(this->handle(), buffer, size, 0, &address->value, address->size);
 		}
 		else {
-			sent_size = ::send(handle(), buffer, size, 0);
+			sent_size = ::send(this->handle(), buffer, size, 0);
 		}
 
 		if (sent_size < 0) {
@@ -262,21 +294,22 @@ namespace abc {
 	}
 
 
-	inline void _client_socket::receive(void* buffer, std::size_t size, socket::address* address) {
-		if (!is_open()) {
+	template <typename LogPtr>
+	inline void _client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
+		if (!this->is_open()) {
 			throw exception<std::logic_error>("!is_open()", 0x14);
 		}
 
 		ssize_t received_size;
 		if (address != nullptr) {
-			if (kind() != socket::kind::dgram) {
+			if (this->kind() != socket::kind::dgram) {
 				throw exception<std::logic_error>("!dgram", 0x15);
 			}
 
-			 received_size = ::recvfrom(handle(), buffer, size, 0, &address->value, &address->size);
+			 received_size = ::recvfrom(this->handle(), buffer, size, 0, &address->value, &address->size);
 		}
 		else {
-			 received_size = ::recv(handle(), buffer, size, 0);
+			 received_size = ::recv(this->handle(), buffer, size, 0);
 		}
 
 		if (received_size < 0) {
@@ -291,34 +324,39 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline udp_socket::udp_socket(socket::family_t family)
-		: _client_socket(socket::kind::dgram, family) {
+	template <typename LogPtr>
+	inline udp_socket<LogPtr>::udp_socket(socket::family_t family, const LogPtr& log_ptr)
+		: _client_socket<LogPtr>(socket::kind::dgram, family, log_ptr) {
 	}
 
 
 	// --------------------------------------------------------------
 
 
-	inline tcp_client_socket::tcp_client_socket(socket::family_t family)
-		: _client_socket(socket::kind::stream, family) {
+	template <typename LogPtr>
+	inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family_t family, const LogPtr& log_ptr)
+		: _client_socket<LogPtr>(socket::kind::stream, family, log_ptr) {
 	}
 
 
-	inline tcp_client_socket::tcp_client_socket(socket::handle_t handle, socket::family_t family)
-		: _client_socket(handle, socket::kind::stream, family) {
+	template <typename LogPtr>
+	inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::handle_t handle, socket::family_t family, const LogPtr& log_ptr)
+		: _client_socket<LogPtr>(handle, socket::kind::stream, family, log_ptr) {
 	}
 
 
 	// --------------------------------------------------------------
 
 
-	inline tcp_server_socket::tcp_server_socket(socket::family_t family)
-		: _basic_socket(socket::kind::stream, family) {
+	template <typename LogPtr>
+	inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family_t family, const LogPtr& log_ptr)
+		: _basic_socket<LogPtr>(socket::kind::stream, family, log_ptr) {
 	}
 
 
-	inline void tcp_server_socket::listen(socket::backlog_size_t backlog_size) {
-		socket::error_t err = ::listen(handle(), backlog_size);
+	template <typename LogPtr>
+	inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
+		socket::error_t err = ::listen(this->handle(), backlog_size);
 
 		if (err != socket::error::none) {
 			throw exception<std::runtime_error>("::listen()", 0x18);
@@ -326,14 +364,15 @@ namespace abc {
 	}
 
 
-	inline tcp_client_socket tcp_server_socket::accept() const {
-		socket::handle_t hnd = ::accept(handle(), nullptr, nullptr);
+	template <typename LogPtr>
+	inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
+		socket::handle_t hnd = ::accept(this->handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
 			throw exception<std::runtime_error>("::accept()", 0x19);
 		}
 
-		return tcp_client_socket(hnd, family());
+		return tcp_client_socket<LogPtr>(hnd, this->family(), this->log_ptr());
 	}
 
 }
