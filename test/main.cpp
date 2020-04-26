@@ -163,7 +163,7 @@ int main() {
 		std::move(abc::log_view::test<>()),
 		std::move(abc::log_filter::severity(abc::severity::important)));
 
-		abc::test_suite<> test_suite ( {
+	abc::test_suite<> test_suite ( {
 			{ "timestamp", {
 				{ "test_null_timestamp",							abc::test::timestamp::test_null_timestamp },
 				{ "test_before_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },
@@ -176,10 +176,10 @@ int main() {
 				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
 			} },
 		},
-		std::move(test_log),
+		&test_log,
 		0);
 
-		bool passed = test_suite.run();
+	bool passed = test_suite.run();
 	
 	return passed ? 0 : 1;
 }

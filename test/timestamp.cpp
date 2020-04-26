@@ -28,19 +28,19 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace timestamp {
 
-	static bool test_timestamp_properties(test_context<abc::test_log>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds);
+	static bool test_timestamp_properties(test_context<abc::test_log_ptr>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds);
 
 	static constexpr time_count_t nanoseconds_per_day = static_cast<time_count_t>(nanosecond_count) * second_count * minute_count * hour_count;
 
 
-	bool test_null_timestamp(test_context<abc::test_log>& context) {
+	bool test_null_timestamp(test_context<abc::test_log_ptr>& context) {
 		abc::timestamp ts(nullptr);
 
 		return test_timestamp_properties(context, ts, 1970, 1, 1, 0, 0, 0, 0, 0, 0);
 	}
 
 
-	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test_log>& context) {
+	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test_log_ptr>& context) {
 		time_count_t date_1995_1_31 = (25 * 365 + 6 + 30) * nanoseconds_per_day;
 		abc::timestamp ts(nullptr);
 		ts.reset(date_1995_1_31);
@@ -49,7 +49,7 @@ namespace abc { namespace test { namespace timestamp {
 	}
 
 
-	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test_log>& context) {
+	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test_log_ptr>& context) {
 		time_count_t date_1995_3_10 = (25 * 365 + 6 + 31 + 28 + 9) * nanoseconds_per_day;
 		abc::timestamp ts(nullptr);
 		ts.reset(date_1995_3_10);
@@ -58,7 +58,7 @@ namespace abc { namespace test { namespace timestamp {
 	}
 
 
-	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test_log>& context) {
+	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test_log_ptr>& context) {
 		time_count_t date_2010_2_16 = (40 * 365 + 10 + 31 + 15) * nanoseconds_per_day;
 		abc::timestamp ts(nullptr);
 		ts.reset(date_2010_2_16);
@@ -67,7 +67,7 @@ namespace abc { namespace test { namespace timestamp {
 	}
 
 
-	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test_log>& context) {
+	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test_log_ptr>& context) {
 		time_count_t date_2010_4_15 = (40 * 365 + 10 + 31 + 28 + 31 + 14) * nanoseconds_per_day;
 		abc::timestamp ts(nullptr);
 		ts.reset(date_2010_4_15);
@@ -76,7 +76,7 @@ namespace abc { namespace test { namespace timestamp {
 	}
 
 
-	static bool test_timestamp_properties(test_context<abc::test_log>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds) {
+	static bool test_timestamp_properties(test_context<abc::test_log_ptr>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds) {
 		bool passed = true;
 		passed = context.are_equal<std::int32_t>(ts.year(),			year, 0x4c, "%d") && passed;
 		passed = context.are_equal<std::int32_t>(ts.month(),		month, 0x4d, "%d") && passed;
