@@ -28,11 +28,12 @@ SOFTWARE.
 #include <stdexcept>
 
 #include "tag.h"
+#include "log.i.h"
 
 
 namespace abc {
 
-	template <typename Exception>
+	template <typename Exception, typename LogPtr>
 	class exception;
 
 	// logic_error
@@ -42,11 +43,11 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Exception>
+	template <typename Exception, typename LogPtr = null_log_ptr>
 	class exception : public Exception {
 
 	public:
-		exception(const char* message, tag_t tag);
+		exception(const char* message, tag_t tag, const LogPtr& log_ptr = nullptr);
 
 	public:
 		tag_t	tag() const noexcept;
@@ -59,15 +60,18 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Exception>
-	inline exception<Exception>::exception(const char* message, tag_t tag)
+	template <typename Exception, typename LogPtr>
+	inline exception<Exception, LogPtr>::exception(const char* message, tag_t tag, const LogPtr& log_ptr)
 		: Exception(message)
 		, _tag(tag) {
+		if (log_ptr != nullptr) {
+			log_ptr->push_back(category::abc::exception, severity::warning, __TAG__, "Exception thrown! %s", message);
+		}
 	}
 
 
-	template <typename Exception>
-	inline tag_t exception<Exception>::tag() const noexcept {
+	template <typename Exception, typename LogPtr>
+	inline tag_t exception<Exception, LogPtr>::tag() const noexcept {
 		return _tag;
 	}
 
