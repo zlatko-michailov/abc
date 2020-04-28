@@ -124,9 +124,6 @@ namespace abc {
 		void				tie(const char* host, const char* port, socket::tie_t tt);
 		void				tie(const socket::address& address, socket::tie_t tt);
 
-		void				log_text(tag_t tag, const char* label, const char* text);
-		void				log_binary(tag_t tag, const char* label, const void* buffer, std::size_t size);
-
 	private:
 		socket::error_t		tie(const sockaddr& addr, socklen_t addr_length, socket::tie_t tt);
 
@@ -163,18 +160,20 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr = std::nullptr_t>
+	template <typename LogPtr = null_log_ptr>
 	class udp_socket : public _client_socket<LogPtr> {
 	public:
 		udp_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
+		udp_socket(const LogPtr& log_ptr);
 		udp_socket(udp_socket&& other) noexcept = default;
 	};
 
 
-	template <typename LogPtr = std::nullptr_t>
+	template <typename LogPtr = null_log_ptr>
 	class tcp_client_socket : public _client_socket<LogPtr> {
 	public:
 		tcp_client_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
+		tcp_client_socket(const LogPtr& log_ptr);
 		tcp_client_socket(tcp_client_socket&& other) noexcept = default;
 
 	protected:
@@ -183,10 +182,11 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr = std::nullptr_t>
+	template <typename LogPtr = null_log_ptr>
 	class tcp_server_socket : public _basic_socket<LogPtr> {
 	public:
 		tcp_server_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
+		tcp_server_socket(const LogPtr& log_ptr);
 		tcp_server_socket(tcp_server_socket&& other) noexcept = default;
 
 	public:

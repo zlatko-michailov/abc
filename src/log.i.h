@@ -89,6 +89,7 @@ namespace abc {
 
 		namespace abc {
 			constexpr category_t base	= 0x8000;
+			constexpr category_t socket	= base + 1;
 		}
 	}
 
@@ -332,5 +333,6 @@ namespace abc {
 
 
 	using null_log = log<1, log_container::ostream, abc::log_view::blank, abc::log_filter::off>;
+	typedef null_log* null_log_ptr;
 
 }
