@@ -85,7 +85,7 @@ namespace abc {
 	typedef std::uint16_t	category_t;
 
 	namespace category {
-		constexpr category_t any	= 0xFFFF;
+		constexpr category_t any	= 0xffff;
 
 		namespace abc {
 			constexpr category_t base		= 0x8000;
