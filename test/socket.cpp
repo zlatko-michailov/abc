@@ -55,10 +55,10 @@ namespace abc { namespace test { namespace socket {
 				client.receive(content, content_length);
 				content[content_length] = '\0';
 
-				passed = context.are_equal(content, response_content, __TAG__) && passed;
+				passed = context.are_equal(content, response_content, 0x10028) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 
@@ -70,7 +70,7 @@ namespace abc { namespace test { namespace socket {
 		server.receive(content, content_length);
 		content[content_length] = '\0';
 
-		passed = context.are_equal(content, request_content, __TAG__) && passed;
+		passed = context.are_equal(content, request_content, 0x1002a) && passed;
 
 		server.connect(client_address);
 
@@ -109,10 +109,10 @@ namespace abc { namespace test { namespace socket {
 				client.receive(content, content_length);
 				content[content_length] = '\0';
 
-				passed = context.are_equal(content, response_content, __TAG__) && passed;
+				passed = context.are_equal(content, response_content, 0x1002b) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 
@@ -125,7 +125,7 @@ namespace abc { namespace test { namespace socket {
 		client.receive(content, content_length);
 		content[content_length] = '\0';
 
-		passed = context.are_equal(content, request_content, __TAG__) && passed;
+		passed = context.are_equal(content, request_content, 0x1002d) && passed;
 
 		content_length = std::strlen(response_content);
 		client.send(&content_length, sizeof(std::uint16_t));

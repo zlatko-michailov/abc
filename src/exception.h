@@ -65,7 +65,7 @@ namespace abc {
 		: Exception(message)
 		, _tag(tag) {
 		if (log_ptr != nullptr) {
-			log_ptr->push_back(category::abc::exception, severity::warning, __TAG__, "Exception thrown! %s", message);
+			log_ptr->push_back(category::abc::exception, severity::warning, 0x10001, "Exception thrown! %s", message);
 		}
 	}
 

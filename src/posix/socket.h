@@ -48,15 +48,15 @@ namespace abc {
 		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
 		, _log_ptr(log_ptr) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
-			throw exception<std::logic_error, LogPtr>("kind", __TAG__, log_ptr);
+			throw exception<std::logic_error, LogPtr>("kind", 0x10004, log_ptr);
 		}
 
 		if (family != socket::family::ipv4 && family != socket::family::ipv6) {
-			throw exception<std::logic_error, LogPtr>("family", __TAG__, log_ptr);
+			throw exception<std::logic_error, LogPtr>("family", 0x10005, log_ptr);
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10006, "_basic_socket::_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -72,7 +72,7 @@ namespace abc {
 		other._handle = socket::handle::invalid;
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::_basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10007, "_basic_socket::_basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -82,7 +82,7 @@ namespace abc {
 		close();
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::~_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10008, "_basic_socket::~_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -97,7 +97,7 @@ namespace abc {
 	inline void _basic_socket<LogPtr>::close() noexcept {
 		if (is_open()) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::close()");
+				_log_ptr->push_back(category::abc::socket, severity::abc, 0x10009, "_basic_socket::close()");
 			}
 
 			::close(_handle);
@@ -110,7 +110,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline void _basic_socket<LogPtr>::open() {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::open() start");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000a, "_basic_socket::open() start");
 		}
 
 		close();
@@ -118,11 +118,11 @@ namespace abc {
 		_handle = ::socket(_family, _kind, _protocol);
 
 		if (!is_open()) {
-			throw exception<std::runtime_error, LogPtr>("::socket()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("::socket()", 0x1000b, _log_ptr);
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::open() done");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000c, "_basic_socket::open() done");
 		}
 	}
 
@@ -155,14 +155,14 @@ namespace abc {
 	template <typename LogPtr>
 	inline void _basic_socket<LogPtr>::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000d, "_basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 
 		if (!is_open()) {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, LogPtr>("is_open()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("is_open()", 0x1000e, _log_ptr);
 		}
 
 		addrinfo hnt = hints();
@@ -175,7 +175,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, LogPtr>("::getaddrinfo()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("::getaddrinfo()", 0x1000f, _log_ptr);
 		}
 
 		bool is_done = false;
@@ -195,11 +195,11 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, LogPtr>("connect()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("connect()", 0x10010, _log_ptr);
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, __TAG__, "_basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10011, "_basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 	}
 
@@ -210,13 +210,13 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, LogPtr>("is_open()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("is_open()", 0x10012, _log_ptr);
 		}
 
 		socket::error_t err = tie(address.value, address.size, tt);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, LogPtr>("bind() / connect()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("bind() / connect()", 0x10013, _log_ptr);
 		}
 	}
 
@@ -224,7 +224,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline socket::error_t _basic_socket<LogPtr>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
-			throw exception<std::runtime_error, LogPtr>("!is_open()", __TAG__, _log_ptr);
+			throw exception<std::runtime_error, LogPtr>("!is_open()", 0x10014, _log_ptr);
 		}
 
 		switch(tt) {
@@ -235,7 +235,7 @@ namespace abc {
 				return ::connect(handle(), &addr, addr_len);
 
 			default:
-				throw exception<std::logic_error, LogPtr>("tt", __TAG__, _log_ptr);
+				throw exception<std::logic_error, LogPtr>("tt", 0x10015, _log_ptr);
 		}
 
 		return socket::error::any;
@@ -303,17 +303,17 @@ namespace abc {
 	inline void _client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10016, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
 		}
 
 		if (!this->is_open()) {
-			throw exception<std::logic_error, LogPtr>("!is_open()", __TAG__, log_ptr_local);
+			throw exception<std::logic_error, LogPtr>("!is_open()", 0x10017, log_ptr_local);
 		}
 
 		ssize_t sent_size;
 		if (address != nullptr) {
 			if (this->kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, LogPtr>("!dgram", __TAG__, log_ptr_local);
+				throw exception<std::logic_error, LogPtr>("!dgram", 0x10018, log_ptr_local);
 			}
 
 			sent_size = ::sendto(this->handle(), buffer, size, 0, &address->value, address->size);
@@ -323,14 +323,14 @@ namespace abc {
 		}
 
 		if (sent_size < 0) {
-			throw exception<std::runtime_error, LogPtr>("::send()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::send()", 0x10019, log_ptr_local);
 		}
 		else if (sent_size < size) {
-			throw exception<std::runtime_error, LogPtr>("::send()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::send()", 0x1001a, log_ptr_local);
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
 
@@ -339,17 +339,17 @@ namespace abc {
 	inline void _client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001c, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
 		}
 
 		if (!this->is_open()) {
-			throw exception<std::logic_error, LogPtr>("!is_open()", __TAG__, log_ptr_local);
+			throw exception<std::logic_error, LogPtr>("!is_open()", 0x1001d, log_ptr_local);
 		}
 
 		ssize_t received_size;
 		if (address != nullptr) {
 			if (this->kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, LogPtr>("!dgram", __TAG__, log_ptr_local);
+				throw exception<std::logic_error, LogPtr>("!dgram", 0x1001e, log_ptr_local);
 			}
 
 			 received_size = ::recvfrom(this->handle(), buffer, size, 0, &address->value, &address->size);
@@ -359,14 +359,14 @@ namespace abc {
 		}
 
 		if (received_size < 0) {
-			throw exception<std::runtime_error, LogPtr>("::recv()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::recv()", 0x1001f, log_ptr_local);
 		}
 		else if (received_size < size) {
-			throw exception<std::runtime_error, LogPtr>("::recv()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::recv()", 0x10020, log_ptr_local);
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
 
@@ -426,17 +426,17 @@ namespace abc {
 	inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "tcp_server_socket::listen() >>>");
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10022, "tcp_server_socket::listen() >>>");
 		}
 
 		socket::error_t err = ::listen(this->handle(), backlog_size);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, LogPtr>("::listen()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::listen()", 0x10023, log_ptr_local);
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "tcp_server_socket::listen() <<<");
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10024, "tcp_server_socket::listen() <<<");
 		}
 	}
 
@@ -445,17 +445,17 @@ namespace abc {
 	inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "tcp_server_socket::accept() >>>");
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10025, "tcp_server_socket::accept() >>>");
 		}
 
 		socket::handle_t hnd = ::accept(this->handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
-			throw exception<std::runtime_error, LogPtr>("::accept()", __TAG__, log_ptr_local);
+			throw exception<std::runtime_error, LogPtr>("::accept()", 0x10026, log_ptr_local);
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, __TAG__, "tcp_server_socket::accept() <<<");
+			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10027, "tcp_server_socket::accept() <<<");
 		}
 
 		return tcp_client_socket<LogPtr>(hnd, this->family(), this->log_ptr());
