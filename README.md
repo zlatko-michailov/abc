@@ -1,30 +1,52 @@
 # abc
-Minimalistic library of essential utilities for C++ development.
+Header-only library of essential utilities for C++ development.
 
 
 ## Summary
-`abc` contains a few (mostly unrelated) classes that are missing in the `std` library. The key entities are:
+`abc` is a header-only library that contains a few classes that are missing in the `std` library. The key entities are:
 - timestamp
 - log
+- test
 - socket (TCP and UDP)
 
 All classes are provided as headers, and must be compiled in client programs.
 There is no precompiled flavor of the library.
 That is because `abc` targets devices with pequliar architectures and small memory capacities.
 
-### Why Minimalistic?
-Platforms like [node.js](https://nodejs.org/en/) and [python](https://www.python.org/) have healthy ecosysems where independent developers provide individual components on top of the standard frameowrk.
 
-Unfortunately, the `std` library is optimized for microbenchmarks, and not so much for implementing real-life use cases.
-There are some key gaps that make it difficult to implement a component without the need to patch some of those gaps. For instance, futures are not `then`-able.
-Thus, one can hardly implement a meaningful asynchronous pattern without implementing a new `future` and a new `promise`.
-In today's connected world, there is no socket implementtion. Period.
-Believe it or not, there is no thread-safe facility to convert a `time_point` to a timestamp. 
+## Brief Class Description
+### `timestamp`
+A thread-safe, lock-free, facility to calculate the date and time by a `std::chrono::time_point`.
 
-The alternative is to use a big library like [asio](https://think-async.com/Asio/) or [boost](https://www.boost.org/), but then you run into massive overlpas with the `std` library.
+### `log`
+A flexible output facility. The driving entity is `log`. It takes three other sub-entities:
+- `LogContainer`- adapter to the output medium:
+	- `log_container::ostream` - for any existing `std::ostream` instance.  
+	- `log_container::file` - for a disk file.  
+- `LogView` - line formatter:
+	- `log_view::debug` - nicely organized columns suitable for a human eye.
+	- `log_view::diagg` - condensed columns suitable for shipping of the network.
+	- `log_view::test` - balanced information suitable test frameworks.
+	- `log_view::blank` - prints no predefined field, only custom content.
+- `LogFilter` - decides whether a line should be printed or not:
+	- `log_filter::none` - no filtering, i.e. print everything.
+	- `log_filter::none` - don't print anything.
+	- `log_filter::seveity` - print lines with higher or equal to the given seveirty.
+More implementations of each sub-entity could be done in user-space.
+
+### `test`
+A simple test framework. It is used to test `abc` itself. It could be used for projects that use `abc`.
+
+### `socket`
+__Note__: This entity is only available on POSIX systems where the BSD socket C API is available.
+
+This is a C++ wrapper around the BSD socket C API. The following self-explanatory classes are provided:
+- `udp_socket`
+- `tcp_server_socket`
+- `tcp_client_socket`
 
 
-## Dependencies
+## Tool and Platform Dependencies
 ### GCC
 The project is compiled using GCC 9.
 It may be possible to compile with an earlier version of GCC or even with a differnt compiler, but that hasn't been tried.
@@ -48,8 +70,5 @@ At least for now, the process is manual. From a built repo, copy the `out/abc` s
 
 Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for updates. You can follow the above procedure to install multiple versions of `abc` side by side, so you can easily evaluate new versions.
 
-### Tagging
-Tagging is the assignment of unique numbers to places in the code, typically to arguments passed to exceptions and log entries.
-That way, each log entry or exception could be pinpointed to the place in the code where it originated.
 
 
