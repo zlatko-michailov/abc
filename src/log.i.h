@@ -155,6 +155,7 @@ namespace abc {
 		int format_category(char* line, std::size_t line_size, category_t category, const char* format = format::category::friendly);
 		int format_severity(char* line, std::size_t line_size, severity_t severity, const char* format = format::severity::friendly);
 		int format_tag(char* line, std::size_t line_size, tag_t tag, const char* format = format::tag::friendly);
+		int format_binary(char* line, std::size_t line_size, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
 	}
 
 
@@ -180,6 +181,7 @@ namespace abc {
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...);
 		void vpush_back(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		void push_back_blank(category_t category, severity_t severity);
+		void push_back_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
 
 	private:
 		Container		_container;
@@ -244,6 +246,10 @@ namespace abc {
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			int format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
+
+		protected:
+			int format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag);
 		};
 
 
@@ -257,6 +263,10 @@ namespace abc {
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			int format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
+
+		protected:
+			int format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag);
 		};
 
 
@@ -270,6 +280,10 @@ namespace abc {
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			int format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
+
+		protected:
+			int format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag);
 		};
 
 
@@ -282,6 +296,7 @@ namespace abc {
 
 		public:
 			void format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+			int format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
 		};
 	}
 

@@ -93,6 +93,18 @@ namespace abc {
 	}
 
 
+	template <std::size_t LineSize, typename Container, typename View, typename Filter>
+	inline void log<LineSize, Container, View, Filter>::push_back_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+		if (_filter.is_enabled(category, severity)) {
+			char line[LineSize];
+			std::size_t buffer_offset = 0;
+			while (_view.format_binary(line, LineSize, category, severity, tag, buffer, buffer_size, buffer_offset) != 0) {
+				_container.push_back(line);
+			}
+		}
+	}
+
+
 	namespace log_container {
 		inline ostream::ostream() noexcept
 			: ostream(std::clog.rdbuf()) {
@@ -193,6 +205,29 @@ namespace abc {
 	namespace log_view {
 		template <typename Clock>
 		inline void debug<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				std::vsnprintf(line + fixed_size, line_size - fixed_size, format, vlist);
+			}
+		}
+
+
+		template <typename Clock>
+		inline int debug<Clock>::format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				int binary_size = log_view::format_binary(line + fixed_size, line_size - fixed_size, buffer, buffer_size, buffer_offset);
+				if (0 < binary_size) {
+					return fixed_size + binary_size;
+				}
+			}
+
+			return 0;
+		}
+
+
+		template <typename Clock>
+		inline int debug<Clock>::format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag) {
 			char buf_timestamp[31];
 			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
 
@@ -208,15 +243,35 @@ namespace abc {
 			char buf_tag[17];
 			format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::friendly);
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::friendly, buf_thread_id, format::separator::friendly, buf_category, format::separator::friendly, buf_severity, format::separator::friendly, buf_tag, format::separator::friendly);
-			if (0 <= char_count && char_count < line_size) {
-				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
-			}
+			return std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::friendly, buf_thread_id, format::separator::friendly, buf_category, format::separator::friendly, buf_severity, format::separator::friendly, buf_tag, format::separator::friendly);
 		}
 
 
 		template <typename Clock>
 		inline void diag<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				std::vsnprintf(line + fixed_size, line_size - fixed_size, format, vlist);
+			}
+		}
+
+
+		template <typename Clock>
+		inline int diag<Clock>::format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				int binary_size = log_view::format_binary(line + fixed_size, line_size - fixed_size, buffer, buffer_size, buffer_offset);
+				if (0 < binary_size) {
+					return fixed_size + binary_size;
+				}
+			}
+
+			return 0;
+		}
+
+
+		template <typename Clock>
+		inline int diag<Clock>::format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag) {
 			char buf_timestamp[31];
 			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::iso);
 
@@ -232,15 +287,35 @@ namespace abc {
 			char buf_tag[17];
 			format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::compact);
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::compact, buf_thread_id, format::separator::compact, buf_category, format::separator::compact, buf_severity, format::separator::compact, buf_tag, format::separator::compact);
-			if (0 <= char_count && char_count < line_size) {
-				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
-			}
+			return std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::compact, buf_thread_id, format::separator::compact, buf_category, format::separator::compact, buf_severity, format::separator::compact, buf_tag, format::separator::compact);
 		}
 
 
 		template <typename Clock>
 		inline void test<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				std::vsnprintf(line + fixed_size, line_size - fixed_size, format, vlist);
+			}
+		}
+
+
+		template <typename Clock>
+		inline int test<Clock>::format_binary(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+			int fixed_size = format_fixed(line, line_size, category, severity, tag);
+			if (0 <= fixed_size && fixed_size < line_size) {
+				int binary_size = log_view::format_binary(line + fixed_size, line_size - fixed_size, buffer, buffer_size, buffer_offset);
+				if (0 < binary_size) {
+					return fixed_size + binary_size;
+				}
+			}
+
+			return 0;
+		}
+
+
+		template <typename Clock>
+		inline int test<Clock>::format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag) {
 			char buf_timestamp[31];
 			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
 
@@ -257,15 +332,17 @@ namespace abc {
 				buf_tag[0] = '\0';
 			}
 
-			int char_count = std::snprintf(line, line_size, "%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
-			if (0 <= char_count && char_count < line_size) {
-				std::vsnprintf(line + char_count, line_size - char_count, format, vlist);
-			}
+			return std::snprintf(line, line_size, "%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
 		}
 
 
 		inline void blank::format(char* line, std::size_t line_size, category_t /*category*/, severity_t /*severity*/, tag_t /*tag*/, const char* format, va_list vlist) {
 			std::vsnprintf(line, line_size, format, vlist);
+		}
+
+
+		inline int blank::format_binary(char* line, std::size_t line_size, category_t /*category*/, severity_t /*severity*/, tag_t /*tag*/, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+			return log_view::format_binary(line, line_size, buffer, buffer_size, buffer_offset);
 		}
 
 
@@ -277,7 +354,7 @@ namespace abc {
 
 		inline int format_thread_id(char* line, std::size_t line_size, std::thread::id thread_id) {
 			if (line_size < 17) {
-				throw exception<std::logic_error>("line_size", 0x10003);
+				return 0;
 			}
 
 			streambuf_adapter streambuf(line, &line[line_size - 1]);
@@ -300,6 +377,84 @@ namespace abc {
 		inline int format_tag(char* line, std::size_t line_size, tag_t tag, const char* format) {
 			return std::snprintf(line, line_size, format, tag);
 		}
+
+		inline int format_binary(char* line, std::size_t line_size, const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+			// 0000: 00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  abcdefghijklmnop
+			constexpr std::size_t half_chunk_size = 8;
+			constexpr std::size_t chunk_size = half_chunk_size * 2;
+			constexpr std::size_t local_size = 5 + (chunk_size * 3) + 1 + 2 + chunk_size + 1;
+			constexpr char hex[] = "0123456789abcdef";
+
+////std::cout << "buffer_size=" << buffer_size << ", buffer_offset=" << buffer_offset << std::endl;
+			if (line_size < local_size) {
+////std::cout << "exit 1" << std::endl;
+				return 0;
+			}
+
+			if (buffer_size <= buffer_offset) {
+////std::cout << "exit 2" << std::endl;
+				return 0;
+			}
+
+			if ((buffer_offset % chunk_size) != 0) {
+////std::cout << "exit 3" << std::endl;
+				return 0;
+			}
+
+			const std::uint8_t* chunk = static_cast<const std::uint8_t*>(buffer) + buffer_offset;
+			std::size_t local_offset = 0;
+
+			// 0000:
+			line[local_offset++] = hex[(buffer_offset >> 12) & 0xf];
+			line[local_offset++] = hex[(buffer_offset >>  8) & 0xf];
+			line[local_offset++] = hex[(buffer_offset >>  4) & 0xf];
+			line[local_offset++] = hex[buffer_offset & 0xf];
+			line[local_offset++] = ':';
+
+			// 00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f
+			for (int half = 0; half < 2; half++) {
+				line[local_offset++] = ' ';
+
+				for (std::size_t chunk_offset = 0; chunk_offset < half_chunk_size; chunk_offset++) {
+					std::size_t source_offset = half * half_chunk_size + chunk_offset;
+
+					if (buffer_offset + source_offset < buffer_size) {
+						line[local_offset++] = hex[(chunk[source_offset] >> 4) & 0xf];
+						line[local_offset++] = hex[chunk[source_offset] & 0xf];
+					}
+					else {
+						line[local_offset++] = ' ';
+						line[local_offset++] = ' ';
+					}
+		
+					line[local_offset++] = ' ';
+				}
+			}
+
+			line[local_offset++] = ' ';
+
+			//  abcdefghijklmnop
+			for (std::size_t chunk_offset = 0; chunk_offset < chunk_size; chunk_offset++) {
+				if (buffer_offset + chunk_offset < buffer_size) {
+					if (std::isprint(chunk[chunk_offset])) {
+						line[local_offset++] = chunk[chunk_offset];
+					}
+					else {
+						line[local_offset++] = '.';
+					}
+				}
+				else {
+					line[local_offset++] = ' ';
+				}
+			}
+
+			line[local_offset++] = '\0';
+////std::cout << "local_size=" << local_size << ", local_offset=" << local_offset << std::endl;
+
+			buffer_offset += chunk_size;
+			return static_cast<int>(chunk_size);
+		}
+
 	}
 
 

@@ -330,6 +330,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, __TAG__, buffer, size);
 			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
@@ -366,6 +367,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, __TAG__, buffer, size);
 			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
