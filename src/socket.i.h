@@ -32,7 +32,7 @@ SOFTWARE.
 #include <netdb.h>
 #include <unistd.h>
 
-#include "../log.i.h"
+#include "log.i.h"
 
 
 namespace abc {
