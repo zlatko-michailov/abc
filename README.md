@@ -54,6 +54,13 @@ This is a C++ wrapper around the BSD socket C API. The following self-explanator
 - `tcp_server_socket`
 - `tcp_client_socket`
 
+### `streambuf` Specializations
+- `buffer_streambuf`- a `std::streambuf`implementation over a fixed `char` buffer.
+This class comes handy when `std::thread::id` is used.
+The latter can only be sent to a stream. It doesn't support any other operation.
+This `streambuf` specialization allows you to get hold of a `std::thread::id` without any heap allocation.
+- `socket_streambuf` - a `std::streambuf`implementation over `_client_socket`, particularly over `tcp_client_socket`.
+
 ### `exception`
 An envelope around any exception type.
 Its purpose is to log a tag, which identifies the place where this exception was thrown.
@@ -96,13 +103,15 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
   - `socket.h` is no longer in the `posix` subfolder.
   It is in the same folder with all other headers.
   The `posix` subfolder has been removed.
+  - `streambuf.h` has been renamed to `buffer_streambuf.h` and class `streambuf_adapter` has been renamed to `buffer_streambuf`.
+- Add `socket_streambuf`class to enable creation of streams over sockets.
 
 ### 0.4.0
 - No breaking changes.
 - `socket`, `exception`
   - Enable all `socket` and `exception` classes to take a `log`. This way `abc` classes can log diagnostic info in the app's log.
 - `log`
-  - Add a `format_binary` facility that formats a byte buffer.
+  - Add a `format_binary()` method that formats a byte buffer.
   - Enable all `log_view` class to format byte buffers. This enables sockets to log sent and received bytes.
 
 ### 0.3.0
