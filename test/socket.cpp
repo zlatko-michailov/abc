@@ -136,5 +136,54 @@ namespace abc { namespace test { namespace socket {
 		return passed;
 	}
 
+
+	bool test_tcp_socket_stream(test_context<abc::test_log_ptr>& context) {
+		const char server_port[] = "31235";
+		const char request_content[] = "Some request line.";
+		const char response_content[] = "The corresponding response line.";
+		bool passed = true;
+
+		abc::tcp_server_socket server(context.log_ptr);
+		server.bind(server_port);
+		server.listen(5);
+
+		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
+			try {
+				abc::tcp_client_socket client(context.log_ptr);
+				client.connect("localhost", server_port);
+
+				abc::socket_streambuf sb(&client, context.log_ptr);
+				std::istream client_in(&sb);
+				std::ostream client_out(&sb);
+
+				client_out << request_content << "\n";
+				client_out.flush();
+
+				char content[1024];
+				client_in.getline(content, sizeof(content) - 1);
+				passed = context.are_equal(content, response_content, __TAG__) && passed;
+			}
+			catch (const std::exception& ex) {
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+			}
+		});
+
+		abc::tcp_client_socket client = std::move(server.accept());
+
+		abc::socket_streambuf sb(&client, context.log_ptr);
+		std::istream client_in(&sb);
+		std::ostream client_out(&sb);
+
+		char content[1024];
+		client_in.getline(content, sizeof(content) - 1);
+		passed = context.are_equal(content, request_content, __TAG__) && passed;
+
+		client_out << response_content << "\n";
+		client_out.flush();
+
+		client_thread.join();
+		return passed;
+	}
+
 }}}
 
