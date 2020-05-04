@@ -27,10 +27,7 @@ SOFTWARE.
 #include <mutex>
 
 #include "../src/test.h"
-#include "../src/timestamp.h"
 #include "../src/log.h"
-#include "../src/streambuf.h"
-#include "../src/crc.h"
 
 #include "timestamp.h"
 #include "socket.h"

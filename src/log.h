@@ -31,7 +31,7 @@ SOFTWARE.
 
 #include "log.i.h"
 #include "timestamp.h"
-#include "streambuf.h"
+#include "buffer_streambuf.h"
 #include "exception.h"
 
 
@@ -357,8 +357,8 @@ namespace abc {
 				return 0;
 			}
 
-			streambuf_adapter streambuf(line, &line[line_size - 1]);
-			std::ostream stream(&streambuf);
+			buffer_streambuf sb(line, &line[line_size - 1]);
+			std::ostream stream(&sb);
 			stream << std::hex << thread_id << '\0';
 			return std::strlen(line);
 		}
