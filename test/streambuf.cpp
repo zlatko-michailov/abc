@@ -60,7 +60,7 @@ namespace abc { namespace test { namespace streambuf {
 			}
 		}
 
-		return context.are_equal(actual, expected, __TAG__);
+		return context.are_equal(actual, expected, 0x1003a);
 	}
 
 }}}

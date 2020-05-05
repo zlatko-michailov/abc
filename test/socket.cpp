@@ -161,10 +161,10 @@ namespace abc { namespace test { namespace socket {
 
 				char content[1024];
 				client_in.getline(content, sizeof(content) - 1);
-				passed = context.are_equal(content, response_content, __TAG__) && passed;
+				passed = context.are_equal(content, response_content, 0x10037) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 
@@ -176,7 +176,7 @@ namespace abc { namespace test { namespace socket {
 
 		char content[1024];
 		client_in.getline(content, sizeof(content) - 1);
-		passed = context.are_equal(content, request_content, __TAG__) && passed;
+		passed = context.are_equal(content, request_content, 0x10039) && passed;
 
 		client_out << response_content << "\n";
 		client_out.flush();
