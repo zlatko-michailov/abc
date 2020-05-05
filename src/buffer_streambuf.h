@@ -33,8 +33,8 @@ namespace abc {
 	template <typename Char>
 	class basic_buffer_streambuf : public std::basic_streambuf<Char> {
 	public:
-		basic_buffer_streambuf(Char* array, std::size_t begin_pos, std::size_t end_pos) noexcept;
-		basic_buffer_streambuf(Char* begin_ptr, Char* end_ptr) noexcept;
+		basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept;
+		basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
 	};
 
 
@@ -46,15 +46,16 @@ namespace abc {
 
 
 	template <typename Char>
-	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* array, std::size_t begin_pos, std::size_t end_pos) noexcept
-		: basic_buffer_streambuf<Char>(&array[begin_pos], &array[end_pos]) {
+	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept
+		: basic_buffer_streambuf<Char>(&get_buffer[get_begin_pos], &get_buffer[get_end_pos], &put_buffer[put_begin_pos], &put_buffer[put_end_pos]) {
 	}
 
 
 	template <typename Char>
-	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* begin_ptr, Char* end_ptr) noexcept
+	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept
 		: std::basic_streambuf<Char>() {
-		std::basic_streambuf<Char>::setp(begin_ptr, end_ptr);
+		std::basic_streambuf<Char>::setg(get_begin_ptr, get_begin_ptr, get_end_ptr);
+		std::basic_streambuf<Char>::setp(put_begin_ptr, put_end_ptr);
 	}
 
 }

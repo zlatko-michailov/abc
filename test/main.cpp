@@ -30,6 +30,7 @@ SOFTWARE.
 #include "../src/log.h"
 
 #include "timestamp.h"
+#include "streambuf.h"
 #include "socket.h"
 
 
@@ -46,6 +47,10 @@ int main() {
 				{ "test_before_year_2000_after_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_after_mar_1_timestamp },
 				{ "test_after_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_after_year_2000_before_mar_1_timestamp },
 				{ "test_after_year_2000_after_mar_1_timestamp",		abc::test::timestamp::test_after_year_2000_after_mar_1_timestamp },
+			} },
+			{ "streambuf", {
+				{ "test_buffer_streambuf_1_char",					abc::test::streambuf::test_buffer_streambuf_1_char },
+				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
 			} },
 			{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },

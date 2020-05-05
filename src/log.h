@@ -357,7 +357,7 @@ namespace abc {
 				return 0;
 			}
 
-			buffer_streambuf sb(line, &line[line_size - 1]);
+			buffer_streambuf sb(nullptr, 0, 0, line, 0, line_size - 1);
 			std::ostream stream(&sb);
 			stream << std::hex << thread_id << '\0';
 			return std::strlen(line);
