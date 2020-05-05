@@ -151,8 +151,15 @@ tag_changed_files() {
 
 	for FILE in $FILES
 	do
-		# Skip files named tag.*.
+		# Skip files named tag.*
 		echo $( basename $FILE ) | grep -E -q "^tag[\.$]"
+		if test $? -eq 0
+		then
+			continue
+		fi
+
+		# Skip files named *.md
+		echo $( basename $FILE ) | grep -E -q "^.+\.md$"
 		if test $? -eq 0
 		then
 			continue
