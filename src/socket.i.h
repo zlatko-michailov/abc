@@ -217,8 +217,8 @@ namespace abc {
 	private:
 		SocketPtr	_socket_ptr;
 		LogPtr		_log_ptr;
-		char		_gch;
-		char		_pch;
+		char		_get_ch;
+		char		_put_ch;
 	};
 
 }

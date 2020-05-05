@@ -54,8 +54,8 @@ namespace abc {
 	template <typename Char>
 	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept
 		: std::basic_streambuf<Char>() {
-		std::basic_streambuf<Char>::setg(get_begin_ptr, get_begin_ptr, get_end_ptr);
-		std::basic_streambuf<Char>::setp(put_begin_ptr, put_end_ptr);
+		this->setg(get_begin_ptr, get_begin_ptr, get_end_ptr);
+		this->setp(put_begin_ptr, put_end_ptr);
 	}
 
 }

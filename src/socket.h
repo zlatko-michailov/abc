@@ -476,27 +476,27 @@ namespace abc {
 			throw exception<std::logic_error, LogPtr>("socket_ptr", __TAG__, _log_ptr);
 		}
 
-		setg(&_gch, &_gch, &_gch);
-		setp(&_pch, &_pch+1);
+		setg(&_get_ch, &_get_ch, &_get_ch);
+		setp(&_put_ch, &_put_ch + 1);
 	}
 
 
 	template <typename SocketPtr, typename LogPtr>
 	inline std::streambuf::int_type socket_streambuf<SocketPtr, LogPtr>::underflow() {
-		_socket_ptr->receive(&_gch, sizeof(char));
+		_socket_ptr->receive(&_get_ch, sizeof(char));
 
-		setg(&_gch, &_gch, &_gch + 1);
+		setg(&_get_ch, &_get_ch, &_get_ch + 1);
 
-		return _gch;
+		return _get_ch;
 	}
 
 
 	template <typename SocketPtr, typename LogPtr>
 	inline std::streambuf::int_type socket_streambuf<SocketPtr, LogPtr>::overflow(std::streambuf::int_type ch) {
-		_socket_ptr->send(&_pch, sizeof(char));
+		_socket_ptr->send(&_put_ch, sizeof(char));
 		_socket_ptr->send(&ch, sizeof(char));
 
-		setp(&_pch, &_pch + 1);
+		setp(&_put_ch, &_put_ch + 1);
 
 		return ch;
 	}
@@ -504,11 +504,11 @@ namespace abc {
 
 	template <typename SocketPtr, typename LogPtr>
 	inline int socket_streambuf<SocketPtr, LogPtr>::sync() {
-		if (pptr() != &_pch) {
-			_socket_ptr->send(&_pch, sizeof(char));
+		if (pptr() != &_put_ch) {
+			_socket_ptr->send(&_put_ch, sizeof(char));
 		}
 
-		setp(&_pch, &_pch + 1);
+		setp(&_put_ch, &_put_ch + 1);
 
 		return 0;
 	}
