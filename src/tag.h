@@ -30,8 +30,7 @@ SOFTWARE.
 
 namespace abc {
 
-	typedef std::uint64_t	tag_t;
-
+	using tag_t = std::uint64_t;
 
 	constexpr tag_t __TAG__ = 0;
 

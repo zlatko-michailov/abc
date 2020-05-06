@@ -37,14 +37,15 @@ SOFTWARE.
 
 namespace abc {
 
-	typedef unsigned seed_t;
+	using seed_t = unsigned;
+
 	namespace seed {
-		constexpr unsigned random	= 0;
+		constexpr seed_t random	= 0;
 	}
 
 
 	using test_log = log<size::k4, log_container::ostream, abc::log_view::test<>, abc::log_filter::severity>;
-	typedef test_log* test_log_ptr;
+	using test_log_ptr = test_log*;
 
 
 	template <typename LogPtr>
@@ -74,7 +75,7 @@ namespace abc {
 		const char*		category_name;
 		const char* 	method_name;
 		LogPtr			log_ptr;
-		unsigned		seed;
+		seed_t			seed;
 	};
 
 

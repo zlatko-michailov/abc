@@ -53,14 +53,7 @@ namespace abc {
 
 
 	namespace socket {
-		typedef int				kind_t;
-		typedef int				family_t;
-		typedef int				protocol_t;
-		typedef int				handle_t;
-		typedef int				backlog_size_t;
-		typedef int				error_t;
-		typedef std::uint8_t	tie_t;
-
+		using kind_t = int;
 
 		namespace kind {
 			constexpr kind_t	stream	= SOCK_STREAM;
@@ -68,11 +61,15 @@ namespace abc {
 		}
 
 
+		using family_t = int;
+
 		namespace family {
 			constexpr family_t	ipv4	= AF_INET;
 			constexpr family_t	ipv6	= AF_INET6;
 		}
 
+
+		using protocol_t = int;
 
 		namespace protocol {
 			constexpr protocol_t	tcp	= IPPROTO_TCP;
@@ -80,16 +77,22 @@ namespace abc {
 		}
 
 
+		using handle_t = int;
+
 		namespace handle {
 			constexpr handle_t	invalid	= -1;
 		}
 
+
+		using error_t = int;
 
 		namespace error {
 			constexpr error_t	none	=  0;
 			constexpr error_t	any		= -1;
 		}
 
+
+		using tie_t = std::uint8_t;
 
 		namespace tie {
 			constexpr tie_t		bind	= 1;
@@ -101,6 +104,8 @@ namespace abc {
 			sockaddr		value;
 			socklen_t		size = sizeof(sockaddr);
 		};
+
+		using backlog_size_t = int;
 	}
 
 

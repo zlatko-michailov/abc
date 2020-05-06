@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
 #include <chrono>
 
 
@@ -34,18 +35,18 @@ namespace abc {
 	class timestamp;
 
 
-	typedef int32_t date_count_t;
-	typedef int64_t time_count_t;
+	using date_count_t	= std::int32_t;
+	using time_count_t	= std::int64_t;
 
-	typedef int16_t year_t;
-	typedef int16_t month_t;
-	typedef int16_t day_t;
-	typedef int16_t hour_t;
-	typedef int16_t minute_t;
-	typedef int16_t second_t;
-	typedef int16_t millisecond_t;
-	typedef int32_t microsecond_t;
-	typedef int32_t nanosecond_t;
+	using year_t		= std::int16_t;
+	using month_t		= std::int16_t;
+	using day_t			= std::int16_t;
+	using hour_t		= std::int16_t;
+	using minute_t		= std::int16_t;
+	using second_t		= std::int16_t;
+	using millisecond_t	= std::int16_t;
+	using microsecond_t	= std::int32_t;
+	using nanosecond_t	= std::int32_t;
 
 
 	// --------------------------------------------------------------

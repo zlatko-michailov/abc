@@ -66,7 +66,7 @@ namespace abc {
 	}
 
 
-	typedef std::uint8_t	severity_t;
+	using severity_t = std::uint8_t;
 
 	namespace severity {
 		constexpr severity_t off		= 0x0;
@@ -82,7 +82,7 @@ namespace abc {
 	}
 
 
-	typedef std::uint16_t	category_t;
+	using category_t = std::uint16_t;
 
 	namespace category {
 		constexpr category_t any	= 0xffff;
@@ -349,6 +349,6 @@ namespace abc {
 
 
 	using null_log = log<1, log_container::ostream, abc::log_view::blank, abc::log_filter::off>;
-	typedef null_log* null_log_ptr;
+	using null_log_ptr = null_log*;
 
 }
