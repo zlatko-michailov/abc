@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "../src/test.h"
 #include "../src/log.h"
+#include "../src/http.h"
 
 #include "timestamp.h"
 #include "streambuf.h"
@@ -62,6 +63,25 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
-	
+
+
+	//char ins[] = "abcd \t 1234";
+	char ins[] = "GET   http://a.com/b?c=d    HTTP/12.345  \r\n";
+	char outs[20];
+	abc::buffer_streambuf hbuf(ins, 0, std::strlen(ins), nullptr, 0, 0);
+	abc::http_request_istream<abc::null_log_ptr> his(&hbuf, nullptr);
+	char hi[20];
+
+	his.get_method(hi, 20);
+	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
+
+	his.get_resource(hi, 20);
+	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
+
+	his.get_protocol(hi, 20);
+	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
+
+
+
 	return passed ? 0 : 1;
 }
