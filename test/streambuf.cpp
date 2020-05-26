@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 
-#include "timestamp.h"
+#include "streambuf.h"
 
 
 namespace abc { namespace test { namespace streambuf {
