@@ -33,13 +33,14 @@ SOFTWARE.
 #include "timestamp.h"
 #include "streambuf.h"
 #include "socket.h"
+#include "http.h"
 
 
 int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream(std::clog.rdbuf())),
 		std::move(abc::log_view::test<>()),
-		std::move(abc::log_filter::severity(abc::severity::important)));
+		std::move(abc::log_filter::severity(abc::severity::abc)));
 
 	abc::test_suite<> test_suite ( {
 			{ "timestamp", {
@@ -58,30 +59,14 @@ int main() {
 				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
 				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
 			} },
+			{ "http", {
+				{ "test_http_request_istream_extraspaces",			abc::test::http::test_http_request_istream_extraspaces },
+			} },
 		},
 		&test_log,
 		0);
 
 	bool passed = test_suite.run();
-
-
-	//char ins[] = "abcd \t 1234";
-	char ins[] = "GET   http://a.com/b?c=d    HTTP/12.345  \r\n";
-	char outs[20];
-	abc::buffer_streambuf hbuf(ins, 0, std::strlen(ins), nullptr, 0, 0);
-	abc::http_request_istream<abc::null_log_ptr> his(&hbuf, nullptr);
-	char hi[20];
-
-	his.get_method(hi, 20);
-	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
-
-	his.get_resource(hi, 20);
-	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
-
-	his.get_protocol(hi, 20);
-	std::cout << "gcount=" << his.gcount() << ", s=" << hi << ", good=" << his.good() << ", eof=" << his.eof() << ", fail=" << his.fail() << ", bad=" << his.bad() << std::endl;
-
-
 
 	return passed ? 0 : 1;
 }

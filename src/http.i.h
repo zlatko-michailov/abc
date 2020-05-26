@@ -68,6 +68,7 @@ namespace abc {
 			constexpr stream_state_t complete				= 7;
 		}
 
+#ifdef MAYBE
 		static constexpr const char* protocol_11				= "HTTP/1.1";
 
 		namespace request {
@@ -79,8 +80,8 @@ namespace abc {
 			static constexpr const char* method_connect			= "CONNECT";
 			static constexpr const char* method_options			= "OPTIONS";
 		}
+#endif
 	}
-
 
 	// --------------------------------------------------------------
 
