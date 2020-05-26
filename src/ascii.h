@@ -29,73 +29,73 @@ SOFTWARE.
 namespace abc {
 	namespace ascii {
 
-		bool is_between(char ch, char low, char high) noexcept {
+		inline bool is_between(char ch, char low, char high) noexcept {
 			return low <= ch && ch <= high;
 		}
 
 
-		bool is_ascii(char ch) noexcept {
+		inline bool is_ascii(char ch) noexcept {
 			return is_between(ch, 0x00, 0x7f);
 		}
 
 
-		bool is_digit(char ch) noexcept {
+		inline bool is_digit(char ch) noexcept {
 			return is_between(ch, '0', '9');
 		}
 
 
-		bool is_hex(char ch) noexcept {
+		inline bool is_hex(char ch) noexcept {
 			return is_digit(ch) || is_between(ch, 'A', 'F') || is_between(ch, 'a', 'f');
 		}
 
 
-		bool is_upperalpha(char ch) noexcept {
+		inline bool is_upperalpha(char ch) noexcept {
 			return is_between(ch, 'A', 'Z');
 		}
 
 
-		bool is_loweralpha(char ch) noexcept {
+		inline bool is_loweralpha(char ch) noexcept {
 			return is_between(ch, 'a', 'z');
 		}
 
 
-		bool is_alpha(char ch) noexcept {
+		inline bool is_alpha(char ch) noexcept {
 			return is_upperalpha(ch) || is_loweralpha(ch);
 		}
 
 
-		char to_upper(char ch) noexcept {
+		inline char to_upper(char ch) noexcept {
 			return is_loweralpha(ch) ? 'A' + (ch - 'a') : ch;
 		}
 
 
-		char to_lower(char ch) noexcept {
+		inline char to_lower(char ch) noexcept {
 			return is_upperalpha(ch) ? 'a' + (ch - 'A') : ch;
 		}
 
 
-		bool is_space(char ch) noexcept {
+		inline bool is_space(char ch) noexcept {
 			return ch == ' ' || ch == '\t';
 		}
 
 
-		bool is_control(char ch) noexcept {
+		inline bool is_control(char ch) noexcept {
 			return is_between(ch, 0x00, 0x1f) || ch == 0x7f;
 		}
 
 
-		bool is_stdprint(char ch) noexcept {
+		inline bool is_stdprint(char ch) noexcept {
 			return is_between(ch, 0x20, 0x7e);
 		}
 
 
-		bool is_abcprint(char ch) noexcept {
+		inline bool is_abcprint(char ch) noexcept {
 			return is_between(ch, 0x21, 0x7e);
 		}
 
 
 		namespace http {
-			bool is_separator(char ch) noexcept {
+			inline bool is_separator(char ch) noexcept {
 				return
 					is_space(ch) ||
 					ch == '(' || ch == ')' || ch == '<' || ch == '>' || ch == '[' || ch == ']' ||  ch == '{' || ch == '}' ||
@@ -103,7 +103,7 @@ namespace abc {
 			}
 
 
-			bool is_token(char ch) noexcept {
+			inline bool is_token(char ch) noexcept {
 				return is_abcprint(ch) && !is_separator(ch);
 			}
 		}
