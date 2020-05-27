@@ -55,17 +55,15 @@ namespace abc {
 
 
 	namespace http {
-		using stream_state_t = std::uint8_t;
+		using item_t = std::uint8_t;
 
-		namespace stream_state {
-			constexpr stream_state_t not_started			= 0;
-			constexpr stream_state_t after_method			= 1;
-			constexpr stream_state_t after_resource			= 2;
-			constexpr stream_state_t after_protocol			= 3;
-			constexpr stream_state_t after_headername		= 4;
-			constexpr stream_state_t after_headervalue		= 5;
-			constexpr stream_state_t after_all_headers		= 6;
-			constexpr stream_state_t complete				= 7;
+		namespace item {
+			constexpr item_t method			= 0;
+			constexpr item_t resource		= 1;
+			constexpr item_t protocol		= 2;
+			constexpr item_t headername		= 3;
+			constexpr item_t headervalue	= 4;
+			constexpr item_t body			= 5;
 		}
 
 #ifdef MAYBE
@@ -93,29 +91,29 @@ namespace abc {
 		_http_stream(_http_stream&& other) = default;
 
 	public:
-		http::stream_state_t	http_state() const noexcept;
+		http::item_t	next() const noexcept;
 
-		std::size_t				gcount() const;
-		bool					eof() const;
-		bool					good() const;
-		bool					bad() const;
-		bool					fail() const;
-		bool					operator!() const;
-								operator bool() const;
+		std::size_t		gcount() const;
+		bool			eof() const;
+		bool			good() const;
+		bool			bad() const;
+		bool			fail() const;
+		bool			operator!() const;
+						operator bool() const;
 
 	protected:
-		void					assert_http_state(http::stream_state_t http_state);
-		void					set_http_state(http::stream_state_t http_state) noexcept;
-		void					set_gcount(std::size_t gcount) noexcept;
-		bool					is_good() const;
-		void					set_bad();
-		void					set_fail();
-		const LogPtr&			log_ptr() const noexcept;
+		void			assert_next(http::item_t item);
+		void			set_next(http::item_t item) noexcept;
+		void			set_gcount(std::size_t gcount) noexcept;
+		bool			is_good() const;
+		void			set_bad();
+		void			set_fail();
+		const LogPtr&	log_ptr() const noexcept;
 
 	private:
-		http::stream_state_t	_http_state;
-		std::size_t				_gcount;
-		LogPtr					_log_ptr;
+		http::item_t	_next;
+		std::size_t		_gcount;
+		LogPtr			_log_ptr;
 
 	};
 

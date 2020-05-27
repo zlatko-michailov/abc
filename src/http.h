@@ -35,15 +35,15 @@ namespace abc {
 	template <typename LogPtr>
 	inline _http_stream<LogPtr>::_http_stream(std::streambuf* sb, const LogPtr& log_ptr)
 		: std::istream(sb)
-		, _http_state(http::stream_state::not_started)
+		, _next(http::item::method)
 		, _gcount(0)
 		, _log_ptr(log_ptr) {
 	}
 
 
 	template <typename LogPtr>
-	inline http::stream_state_t _http_stream<LogPtr>::http_state() const noexcept {
-		return _http_state;
+	inline http::item_t _http_stream<LogPtr>::next() const noexcept {
+		return _next;
 	}
 
 
@@ -90,16 +90,16 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::assert_http_state(http::stream_state_t http_state) {
-		if (_http_state != http_state) {
-			throw exception<std::logic_error, LogPtr>("_http_state", __TAG__, log_ptr());
+	inline void _http_stream<LogPtr>::assert_next(http::item_t item) {
+		if (_next != item) {
+			throw exception<std::logic_error, LogPtr>("_next", __TAG__, log_ptr());
 		}
 	}
 
 
 	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::set_http_state(http::stream_state_t http_state) noexcept {
-		_http_state = http_state;
+	inline void _http_stream<LogPtr>::set_next(http::item_t item) noexcept {
+		_next = item;
 	}
 
 
@@ -142,7 +142,18 @@ namespace abc {
 	}
 
 
-	// void	get_headername(char* buffer, std::size_t size);
+	template <typename LogPtr>
+	inline void _http_istream<LogPtr>::get_headername(char* buffer, std::size_t size) {
+		this->assert_next(http::item::headername);
+
+		std::size_t gcount = this->get_token(buffer, size);
+		this->set_gcount(gcount);
+
+		this->set_next(http::item::headervalue);
+		this->skip_spaces();
+	}
+
+
 	// void	get_headervalue(char* buffer, std::size_t size);
 	// void	get_body(char* buffer, std::size_t size);
 
@@ -270,31 +281,31 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_method(char* buffer, std::size_t size) {
-		this->assert_http_state(http::stream_state::not_started);
+		this->assert_next(http::item::method);
 
 		std::size_t gcount = this->get_token(buffer, size);
 		this->set_gcount(gcount);
 
-		this->set_http_state(http::stream_state::after_method);
+		this->set_next(http::item::resource);
 		this->skip_spaces();
 	}
 
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_resource(char* buffer, std::size_t size) {
-		this->assert_http_state(http::stream_state::after_method);
+		this->assert_next(http::item::resource);
 
 		std::size_t gcount = this->get_prints(buffer, size);
 		this->set_gcount(gcount);
 
-		this->set_http_state(http::stream_state::after_resource);
+		this->set_next(http::item::protocol);
 		this->skip_spaces();
 	}
 
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		this->assert_http_state(http::stream_state::after_resource);
+		this->assert_next(http::item::protocol);
 
 		std::size_t gcount = this->get_alphas(buffer, size);
 		if (gcount != 4 || std::strncmp("HTTP", buffer, 4) != 0) {
@@ -338,7 +349,7 @@ namespace abc {
 		}
 
 		this->set_gcount(gcount);
-		this->set_http_state(http::stream_state::after_protocol);
+		this->set_next(http::item::headername);
 		this->skip_spaces();
 		this->skip_crlf();
 	}

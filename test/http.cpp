@@ -34,11 +34,11 @@ namespace abc { namespace test { namespace http {
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
 		char content[] =
 			"GET   http://a.com/b?c=d    HTTP/12.345  \r\n"
-			"Name   :   Value\r\n"
-			"Multi_Word-Name  :  Value with spaces inside\r\n"
+			"Name:Value\r\n"
+			"Multi_Word-Name:  Value  with   spaces   inside \t \r\n"
 			"Multi-Line   :   First line\r\n"
-			" Second line\r\n"
-			"                 Third line\r\n"
+			" Second  line  \r\n"
+			"\t    \t  \t    Third  line   \r\n"
 			"Trailing-Spaces  :  3 spaces   \r\n"
 			"\r\n";
 
