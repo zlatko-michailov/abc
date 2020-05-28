@@ -58,6 +58,33 @@ namespace abc { namespace test { namespace http {
 		istream.get_protocol(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "HTTP/12.345", istream);
 
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Name", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Value", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Multi_Word-Name", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Value with spaces inside", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Multi-Line", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "First line Second line Third line", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Trailing-Spaces", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "3 spaces", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
 		return passed;
 	}
 
