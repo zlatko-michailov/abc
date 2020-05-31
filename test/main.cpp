@@ -63,6 +63,7 @@ int main() {
 				{ "test_http_request_istream_extraspaces",			abc::test::http::test_http_request_istream_extraspaces },
 				{ "test_http_request_istream_bodytext",				abc::test::http::test_http_request_istream_bodytext },
 				{ "test_http_request_istream_bodybinary",			abc::test::http::test_http_request_istream_bodybinary },
+				{ "test_http_request_istream_realworld_01",			abc::test::http::test_http_request_istream_realworld_01 },
 			} },
 		},
 		&test_log,

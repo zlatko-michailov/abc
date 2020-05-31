@@ -179,6 +179,97 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	bool test_http_request_istream_realworld_01(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
+			"Host: en.cppreference.com\r\n"
+			"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\n"
+			"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n"
+			"Accept-Language: en-US,en;q=0.5\r\n"
+			"Accept-Encoding: gzip, deflate, br\r\n"
+			"Connection: keep-alive\r\n"
+			"Cookie: __utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437\r\n"
+			"Upgrade-Insecure-Requests: 1\r\n"
+			"Cache-Control: max-age=0\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_request_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[1024];
+		bool passed = true;
+
+		istream.get_method(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "GET", istream);
+
+		istream.get_resource(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", istream);
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Host", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "en.cppreference.com", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "User-Agent", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Accept", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Accept-Language", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "en-US,en;q=0.5", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Accept-Encoding", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "gzip, deflate, br", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Connection", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "keep-alive", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Cookie", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Upgrade-Insecure-Requests", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "1", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Cache-Control", istream);
+
+		istream.get_headervalue(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "max-age=0", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		return passed;
+	}
+
+
 	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream) {
 		bool passed = true;
 
