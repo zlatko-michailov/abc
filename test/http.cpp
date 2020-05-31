@@ -60,31 +60,31 @@ namespace abc { namespace test { namespace http {
 		istream.get_protocol(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "HTTP/12.345", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Name", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Value", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Multi_Word-Name", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Value with spaces inside", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Multi-Line", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "First line Second line Third line", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Trailing-Spaces", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "3 spaces", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "", istream);
 
 		return passed;
@@ -119,7 +119,7 @@ namespace abc { namespace test { namespace http {
 		istream.get_protocol(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "", istream);
 
 		istream.get_body(buffer, binary_line_size);
@@ -163,7 +163,7 @@ namespace abc { namespace test { namespace http {
 		istream.get_protocol(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "", istream);
 
 		istream.get_body(buffer, binary_line_size);
@@ -209,61 +209,61 @@ namespace abc { namespace test { namespace http {
 		istream.get_protocol(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Host", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "en.cppreference.com", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "User-Agent", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Accept", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Accept-Language", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "en-US,en;q=0.5", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Accept-Encoding", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "gzip, deflate, br", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Connection", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "keep-alive", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Cookie", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Upgrade-Insecure-Requests", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "1", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "Cache-Control", istream);
 
-		istream.get_headervalue(buffer, sizeof(buffer));
+		istream.get_header_value(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "max-age=0", istream);
 
-		istream.get_headername(buffer, sizeof(buffer));
+		istream.get_header_name(buffer, sizeof(buffer));
 		passed &= verify_string(context, buffer, "", istream);
 
 		return passed;

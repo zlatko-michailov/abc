@@ -151,8 +151,60 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	inline void _http_istream<LogPtr>::get_headername(char* buffer, std::size_t size) {
-		this->assert_next(http::item::headername);
+	inline void _http_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
+		this->assert_next(http::item::protocol);
+
+		std::size_t gcount = this->get_alphas(buffer, size);
+		if (gcount != 4 || std::strncmp("HTTP", buffer, 4) != 0) {
+			this->set_bad();
+		}
+
+		if (gcount == size - 1) {
+			this->set_fail();
+		}
+
+		if (this->is_good()) {
+			char ch = this->get_char();
+			if (ch == '/') {
+				buffer[gcount++] = '/';
+			}
+			else {
+				this->set_bad();
+			}
+		}
+
+		if (this->is_good()) {
+			gcount += this->get_digits(buffer + gcount, size - gcount);
+		}
+
+		if (gcount == size - 1) {
+			this->set_fail();
+		}
+
+		if (this->is_good()) {
+			char ch = this->get_char();
+			if (ch == '.') {
+				buffer[gcount++] = '.';
+			}
+			else {
+				this->set_bad();
+			}
+		}
+
+		if (this->is_good()) {
+			gcount += this->get_digits(buffer + gcount, size - gcount);
+		}
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::header_name);
+		this->skip_spaces();
+		this->skip_crlf();
+	}
+
+
+	template <typename LogPtr>
+	inline void _http_istream<LogPtr>::get_header_name(char* buffer, std::size_t size) {
+		this->assert_next(http::item::header_name);
 
 		std::size_t gcount = this->get_token(buffer, size);
 		this->skip_spaces();
@@ -172,14 +224,14 @@ namespace abc {
 		}
 
 		this->set_gcount(gcount);
-		this->set_next(http::item::headervalue);
+		this->set_next(http::item::header_value);
 		this->skip_spaces();
 	}
 
 
 	template <typename LogPtr>
-	inline void _http_istream<LogPtr>::get_headervalue(char* buffer, std::size_t size) {
-		this->assert_next(http::item::headervalue);
+	inline void _http_istream<LogPtr>::get_header_value(char* buffer, std::size_t size) {
+		this->assert_next(http::item::header_value);
 
 		std::size_t gcount = 0;
 		std::size_t gc;
@@ -206,7 +258,7 @@ namespace abc {
 		while (this->is_good() && ascii::is_space(this->peek_char()));
 
 		this->set_gcount(gcount);
-		this->set_next(http::item::headername);
+		this->set_next(http::item::header_name);
 		this->skip_spaces();
 	}
 
@@ -375,58 +427,6 @@ namespace abc {
 
 		this->set_next(http::item::protocol);
 		this->skip_spaces();
-	}
-
-
-	template <typename LogPtr>
-	inline void http_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		this->assert_next(http::item::protocol);
-
-		std::size_t gcount = this->get_alphas(buffer, size);
-		if (gcount != 4 || std::strncmp("HTTP", buffer, 4) != 0) {
-			this->set_bad();
-		}
-
-		if (gcount == size - 1) {
-			this->set_fail();
-		}
-
-		if (this->is_good()) {
-			char ch = this->get_char();
-			if (ch == '/') {
-				buffer[gcount++] = '/';
-			}
-			else {
-				this->set_bad();
-			}
-		}
-
-		if (this->is_good()) {
-			gcount += this->get_digits(buffer + gcount, size - gcount);
-		}
-
-		if (gcount == size - 1) {
-			this->set_fail();
-		}
-
-		if (this->is_good()) {
-			char ch = this->get_char();
-			if (ch == '.') {
-				buffer[gcount++] = '.';
-			}
-			else {
-				this->set_bad();
-			}
-		}
-
-		if (this->is_good()) {
-			gcount += this->get_digits(buffer + gcount, size - gcount);
-		}
-
-		this->set_gcount(gcount);
-		this->set_next(http::item::headername);
-		this->skip_spaces();
-		this->skip_crlf();
 	}
 
 

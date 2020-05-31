@@ -61,9 +61,11 @@ namespace abc {
 			constexpr item_t method			= 0;
 			constexpr item_t resource		= 1;
 			constexpr item_t protocol		= 2;
-			constexpr item_t headername		= 3;
-			constexpr item_t headervalue	= 4;
-			constexpr item_t body			= 5;
+			constexpr item_t status_code	= 3;
+			constexpr item_t reason_phrase	= 4;
+			constexpr item_t header_name	= 5;
+			constexpr item_t header_value	= 6;
+			constexpr item_t body			= 7;
 		}
 
 #ifdef MAYBE
@@ -126,8 +128,9 @@ namespace abc {
 		_http_istream(_http_istream&& other) = default;
 
 	public:
-		void		get_headername(char* buffer, std::size_t size);
-		void		get_headervalue(char* buffer, std::size_t size);
+		void		get_protocol(char* buffer, std::size_t size);
+		void		get_header_name(char* buffer, std::size_t size);
+		void		get_header_value(char* buffer, std::size_t size);
 		void		get_body(char* buffer, std::size_t size);
 
 	protected:
@@ -155,10 +158,13 @@ namespace abc {
 		_http_ostream(_http_ostream&& other) = default;
 
 	public:
-		void	put_headername(const char* headername);
-		void	put_headervalue(const char* headervalue);
+		void	put_header_name(const char* header_name);
+		void	put_header_value(const char* header_value);
 		void	put_body(const char* body);
 	};
+
+
+	// --------------------------------------------------------------
 
 
 	template <typename LogPtr = null_log_ptr>
@@ -170,7 +176,6 @@ namespace abc {
 	public:
 		void	get_method(char* buffer, std::size_t size);
 		void	get_resource(char* buffer, std::size_t size);
-		void	get_protocol(char* buffer, std::size_t size);
 	};
 
 
@@ -188,6 +193,18 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
+
+
+	template <typename LogPtr = null_log_ptr>
+	class http_response_istream : public _http_istream<LogPtr> {
+	public:
+		http_response_istream(std::streambuf* sb, const LogPtr& log_ptr);
+		http_response_istream(http_response_istream&& other) = default;
+
+	public:
+		void	get_status_code(char* buffer, std::size_t size);
+		void	get_reason_phrase(char* buffer, std::size_t size);
+	};
 
 }
 
