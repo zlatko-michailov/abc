@@ -36,5 +36,6 @@ namespace abc { namespace test { namespace http {
 
 	bool test_http_response_istream_extraspaces(test_context<abc::test_log_ptr>& context);
 	bool test_http_response_istream_realworld_01(test_context<abc::test_log_ptr>& context);
+	bool test_http_response_istream_realworld_02(test_context<abc::test_log_ptr>& context);
 }}}
 

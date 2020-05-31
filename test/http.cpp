@@ -305,6 +305,126 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	bool test_http_response_istream_realworld_01(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"HTTP/1.1 302\r\n"
+			"Set-Cookie: ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/\r\n"
+			"Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\n"
+			"Location: https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.\r\n"
+			"Content-Length: 0\r\n"
+			"Date: Sun, 31 May 2020 01:26:44 GMT\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_response_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[201];
+		bool passed = true;
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
+
+		istream.get_status_code(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "302", istream);
+
+		istream.get_reason_phrase(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Set-Cookie", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Cache-Control", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "no-cache, no-store, max-age=0, must-revalidate", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Location", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Content-Length", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "0", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Date", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Sun, 31 May 2020 01:26:44 GMT", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		return passed;
+	}
+
+
+	bool test_http_response_istream_realworld_02(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: application/json; charset=utf-8\r\n"
+			"Access-Control-Expose-Headers: X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date\r\n"
+			"Content-Length: 205\r\n"
+			"\r\n"
+			"{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sca=2\"}\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_response_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[201];
+		bool passed = true;
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
+
+		istream.get_status_code(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "200", istream);
+
+		istream.get_reason_phrase(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "OK", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Content-Type", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "application/json; charset=utf-8", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Access-Control-Expose-Headers", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Content-Length", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "205", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		istream.get_body(buffer, 200);
+		passed &= verify_binary(context, buffer, "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sc", 200, istream);
+
+		istream.get_body(buffer, 5);
+		passed &= verify_binary(context, buffer, "a=2\"}", 5, istream);
+
+		return passed;
+	}
+
+
 	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream) {
 		bool passed = true;
 
