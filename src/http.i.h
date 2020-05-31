@@ -89,11 +89,10 @@ namespace abc {
 	template <typename LogPtr>
 	class _http_stream : protected std::istream {
 	public:
-		_http_stream(std::streambuf* sb, const LogPtr& log_ptr);
+		_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_stream(_http_stream&& other) = default;
 
 	public:
-		void			reset();
 		http::item_t	next() const noexcept;
 
 		std::size_t		gcount() const;
@@ -105,6 +104,7 @@ namespace abc {
 						operator bool() const;
 
 	protected:
+		void			reset(http::item_t next);
 		void			assert_next(http::item_t item);
 		void			set_next(http::item_t item) noexcept;
 		void			set_gcount(std::size_t gcount) noexcept;
@@ -124,18 +124,19 @@ namespace abc {
 	template <typename LogPtr>
 	class _http_istream : public _http_stream<LogPtr> {
 	public:
-		_http_istream(std::streambuf* sb, const LogPtr& log_ptr);
+		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_istream(_http_istream&& other) = default;
 
 	public:
-		void		get_protocol(char* buffer, std::size_t size);
 		void		get_header_name(char* buffer, std::size_t size);
 		void		get_header_value(char* buffer, std::size_t size);
 		void		get_body(char* buffer, std::size_t size);
 
 	protected:
+		void		get_protocol(char* buffer, std::size_t size);
 		std::size_t	get_token(char* buffer, std::size_t size);
 		std::size_t	get_prints(char* buffer, std::size_t size);
+		std::size_t	get_prints_and_spaces(char* buffer, std::size_t size);
 		std::size_t	get_alphas(char* buffer, std::size_t size);
 		std::size_t	get_digits(char* buffer, std::size_t size);
 		std::size_t	skip_spaces();
@@ -158,6 +159,7 @@ namespace abc {
 		_http_ostream(_http_ostream&& other) = default;
 
 	public:
+		void	put_protocol(const char* protocol);
 		void	put_header_name(const char* header_name);
 		void	put_header_value(const char* header_value);
 		void	put_body(const char* body);
@@ -173,9 +175,12 @@ namespace abc {
 		http_request_istream(std::streambuf* sb, const LogPtr& log_ptr);
 		http_request_istream(http_request_istream&& other) = default;
 
+		void	reset();
+
 	public:
 		void	get_method(char* buffer, std::size_t size);
 		void	get_resource(char* buffer, std::size_t size);
+		void	get_protocol(char* buffer, std::size_t size);
 	};
 
 
@@ -188,7 +193,6 @@ namespace abc {
 	public:
 		void	put_method(const char* method);
 		void	put_resource(const char* resource);
-		void	put_protocol(const char* protocol);
 	};
 
 
@@ -201,9 +205,24 @@ namespace abc {
 		http_response_istream(std::streambuf* sb, const LogPtr& log_ptr);
 		http_response_istream(http_response_istream&& other) = default;
 
+		void	reset();
+
 	public:
+		void	get_protocol(char* buffer, std::size_t size);
 		void	get_status_code(char* buffer, std::size_t size);
 		void	get_reason_phrase(char* buffer, std::size_t size);
+	};
+
+
+	template <typename LogPtr = null_log_ptr>
+	class http_response_ostream : public _http_ostream<LogPtr> {
+	public:
+		http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr);
+		http_response_ostream(http_response_ostream&& other) = default;
+
+	public:
+		void	put_status_code(char* buffer, std::size_t size);
+		void	put_reason_phrase(char* buffer, std::size_t size);
 	};
 
 }

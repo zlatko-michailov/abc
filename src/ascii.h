@@ -94,6 +94,11 @@ namespace abc {
 		}
 
 
+		inline bool is_abcprint_or_space(char ch) noexcept {
+			return is_abcprint(ch) || is_space(ch);
+		}
+
+
 		namespace http {
 			inline bool is_separator(char ch) noexcept {
 				return

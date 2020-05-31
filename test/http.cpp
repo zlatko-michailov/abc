@@ -270,6 +270,41 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	bool test_http_response_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"HTTP/12.345  789  \t  Something went wrong  \r\n"
+			"Header-Name:Header-Value\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_response_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		bool passed = true;
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/12.345", istream);
+
+		istream.get_status_code(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "789", istream);
+
+		istream.get_reason_phrase(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Something went wrong  ", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Header-Name", istream);
+
+		istream.get_header_value(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "Header-Value", istream);
+
+		istream.get_header_name(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		return passed;
+	}
+
+
 	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream) {
 		bool passed = true;
 

@@ -33,18 +33,18 @@ SOFTWARE.
 namespace abc {
 
 	template <typename LogPtr>
-	inline _http_stream<LogPtr>::_http_stream(std::streambuf* sb, const LogPtr& log_ptr)
+	inline _http_stream<LogPtr>::_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
 		: std::istream(sb)
-		, _next(http::item::method)
+		, _next(next)
 		, _gcount(0)
 		, _log_ptr(log_ptr) {
 	}
 
 
 	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::reset() {
+	inline void _http_stream<LogPtr>::reset(http::item_t next) {
 		this->clear(goodbit);
-		_next = http::item::method;
+		_next = next;
 		_gcount = 0;
 	}
 
@@ -145,8 +145,8 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	inline _http_istream<LogPtr>::_http_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _http_stream<LogPtr>(sb, log_ptr) {
+	inline _http_istream<LogPtr>::_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
+		: _http_stream<LogPtr>(sb, next, log_ptr) {
 	}
 
 
@@ -196,9 +196,7 @@ namespace abc {
 		}
 
 		this->set_gcount(gcount);
-		this->set_next(http::item::header_name);
 		this->skip_spaces();
-		this->skip_crlf();
 	}
 
 
@@ -282,6 +280,12 @@ namespace abc {
 	template <typename LogPtr>
 	inline std::size_t _http_istream<LogPtr>::get_prints(char* buffer, std::size_t size) {
 		return get_chars(ascii::is_abcprint, buffer, size);
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_istream<LogPtr>::get_prints_and_spaces(char* buffer, std::size_t size) {
+		return get_chars(ascii::is_abcprint_or_space, buffer, size);
 	}
 
 
@@ -402,7 +406,13 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline http_request_istream<LogPtr>::http_request_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _http_istream<LogPtr>(sb, log_ptr) {
+		: _http_istream<LogPtr>(sb, http::item::method, log_ptr) {
+	}
+
+
+	template <typename LogPtr>
+	inline void http_request_istream<LogPtr>::reset() {
+		_http_stream<LogPtr>::reset(http::item::method);
 	}
 
 
@@ -429,6 +439,70 @@ namespace abc {
 		this->skip_spaces();
 	}
 
+
+	template <typename LogPtr>
+	inline void http_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
+		_http_istream<LogPtr>::get_protocol(buffer, size);
+
+		this->set_next(http::item::header_name);
+		this->skip_crlf();
+	}
+
+
+	// --------------------------------------------------------------
+
+	// http_request_ostream
+
+	// --------------------------------------------------------------
+
+
+	template <typename LogPtr>
+	inline http_response_istream<LogPtr>::http_response_istream(std::streambuf* sb, const LogPtr& log_ptr)
+		: _http_istream<LogPtr>(sb, http::item::protocol, log_ptr) {
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_istream<LogPtr>::reset() {
+		_http_stream<LogPtr>::reset(http::item::protocol);
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
+		_http_istream<LogPtr>::get_protocol(buffer, size);
+
+		this->set_next(http::item::status_code);
+	}
+
+	template <typename LogPtr>
+	inline void http_response_istream<LogPtr>::get_status_code(char* buffer, std::size_t size) {
+		this->assert_next(http::item::status_code);
+
+		std::size_t gcount = this->get_digits(buffer, size);
+		this->set_gcount(gcount);
+
+		this->set_next(http::item::reason_phrase);
+		this->skip_spaces();
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_istream<LogPtr>::get_reason_phrase(char* buffer, std::size_t size) {
+		this->assert_next(http::item::reason_phrase);
+
+		std::size_t gcount = this->get_prints_and_spaces(buffer, size);
+		this->set_gcount(gcount);
+
+		this->set_next(http::item::header_name);
+		this->skip_spaces();
+		this->skip_crlf();
+	}
+
+
+	// --------------------------------------------------------------
+
+	// http_response_ostream
 
 	// --------------------------------------------------------------
 
