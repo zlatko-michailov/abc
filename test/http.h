@@ -30,6 +30,8 @@ SOFTWARE.
 namespace abc { namespace test { namespace http {
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context);
+	bool test_http_request_istream_bodytext(test_context<abc::test_log_ptr>& context);
+	bool test_http_request_istream_bodybinary(test_context<abc::test_log_ptr>& context);
 
 }}}
 

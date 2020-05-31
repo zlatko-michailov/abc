@@ -42,6 +42,14 @@ namespace abc {
 
 
 	template <typename LogPtr>
+	inline void _http_stream<LogPtr>::reset() {
+		this->clear(goodbit);
+		_next = http::item::method;
+		_gcount = 0;
+	}
+
+
+	template <typename LogPtr>
 	inline http::item_t _http_stream<LogPtr>::next() const noexcept {
 		return _next;
 	}
@@ -203,7 +211,14 @@ namespace abc {
 	}
 
 
-	// void	get_body(char* buffer, std::size_t size);
+	template <typename LogPtr>
+	inline void _http_istream<LogPtr>::get_body(char* buffer, std::size_t size) {
+		this->assert_next(http::item::body);
+
+		std::size_t gcount = this->get_bytes(buffer, size);
+
+		this->set_gcount(gcount);
+	}
 
 
 	template <typename LogPtr>
@@ -251,6 +266,18 @@ namespace abc {
 		}
 
 		return 2;
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_istream<LogPtr>::get_bytes(char* buffer, std::size_t size) {
+		std::size_t gcount = 0;
+
+		while (this->is_good() && gcount < size) {
+			buffer[gcount++] = this->get();
+		}
+
+		return gcount;
 	}
 
 

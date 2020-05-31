@@ -91,6 +91,7 @@ namespace abc {
 		_http_stream(_http_stream&& other) = default;
 
 	public:
+		void			reset();
 		http::item_t	next() const noexcept;
 
 		std::size_t		gcount() const;
@@ -137,6 +138,7 @@ namespace abc {
 		std::size_t	skip_spaces();
 		std::size_t	skip_crlf();
 
+		std::size_t	get_bytes(char* buffer, std::size_t size);
 		template <typename Predicate>
 		std::size_t	get_chars(Predicate&& predicate, char* buffer, std::size_t size);
 		template <typename Predicate>

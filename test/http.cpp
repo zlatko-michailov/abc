@@ -29,6 +29,8 @@ SOFTWARE.
 namespace abc { namespace test { namespace http {
 
 	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream);
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_istream<abc::test_log_ptr>& istream);
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& istream, std::size_t expected_gcount);
 
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
@@ -89,11 +91,118 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	bool test_http_request_istream_bodytext(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"POST http://a.com/b?c=d HTTP/1.1\r\n"
+			"\r\n"
+			"{\r\n"
+			"  \"foo\": 42,\r\n"
+			"  \"bar\": \"qwerty\"\r\n"
+			"}";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_request_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		bool passed = true;
+
+		const std::size_t binary_line_size		= 10;
+		const std::size_t binary_line_remainder	= 7;
+
+		istream.get_method(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "POST", istream);
+
+		istream.get_resource(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "http://a.com/b?c=d", istream);
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		istream.get_body(buffer, binary_line_size);
+		passed &= verify_binary(context, buffer, "{\r\n  \"foo\"", binary_line_size, istream);
+
+		istream.get_body(buffer, binary_line_size);
+		passed &= verify_binary(context, buffer, ": 42,\r\n  \"", binary_line_size, istream);
+
+		istream.get_body(buffer, binary_line_size);
+		passed &= verify_binary(context, buffer, "bar\": \"qwe", binary_line_size, istream);
+
+		istream.get_body(buffer, binary_line_remainder);
+		passed &= verify_binary(context, buffer, "rty\"\r\n}", binary_line_remainder, istream);
+
+		return passed;
+	}
+
+
+	bool test_http_request_istream_bodybinary(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"POST http://a.com/b?c=d HTTP/1.1\r\n"
+			"\r\n"
+			"\x01\x05\x10 text \x02\x03\x12 mixed \x04\x18\x19 with \x7f\x80 bytes \xaa\xff";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::http_request_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		bool passed = true;
+
+		const std::size_t binary_line_size		= 16;
+		const std::size_t binary_line_remainder	= 7;
+
+		istream.get_method(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "POST", istream);
+
+		istream.get_resource(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "http://a.com/b?c=d", istream);
+
+		istream.get_protocol(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "HTTP/1.1", istream);
+
+		istream.get_headername(buffer, sizeof(buffer));
+		passed &= verify_string(context, buffer, "", istream);
+
+		istream.get_body(buffer, binary_line_size);
+		passed &= verify_binary(context, buffer, "\x01\x05\x10 text \x02\x03\x12 mix", binary_line_size, istream);
+
+		istream.get_body(buffer, binary_line_size);
+		passed &= verify_binary(context, buffer, "ed \x04\x18\x19 with \x7f\x80 b", binary_line_size, istream);
+
+		istream.get_body(buffer, binary_line_remainder);
+		passed &= verify_binary(context, buffer, "ytes \xaa\xff", binary_line_remainder, istream);
+
+		return passed;
+	}
+
+
 	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream) {
 		bool passed = true;
 
 		passed &= context.are_equal(actual, expected, __TAG__);
-		passed &= context.are_equal(istream.gcount(), std::strlen(expected), __TAG__, "%u");
+		passed &= verify_stream(context, istream, std::strlen(expected));
+
+		return passed;
+	}
+
+
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_istream<abc::test_log_ptr>& istream) {
+		bool passed = true;
+
+		passed &= context.are_equal(actual, expected, size, __TAG__);
+		passed &= verify_stream(context, istream, size);
+
+		return passed;
+	}
+
+
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& istream, std::size_t expected_gcount) {
+		bool passed = true;
+
+		passed &= context.are_equal(istream.gcount(), expected_gcount, __TAG__, "%u");
 		passed &= context.are_equal(istream.good(), true, __TAG__, "%u");
 		passed &= context.are_equal(istream.eof(), false, __TAG__, "%u");
 		passed &= context.are_equal(istream.fail(), false, __TAG__, "%u");
