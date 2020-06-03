@@ -89,8 +89,9 @@ namespace abc {
 
 		namespace abc {
 			constexpr category_t base		= 0x8000;
-			constexpr category_t exception	= base + 1;
-			constexpr category_t socket		= base + 2;
+			constexpr category_t exception	= base | 0x0001;
+			constexpr category_t socket		= base | 0x0002;
+			constexpr category_t http		= base | 0x0003;
 		}
 	}
 
