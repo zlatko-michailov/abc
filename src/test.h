@@ -55,7 +55,13 @@ namespace abc {
 	using test_method = std::function<bool(test_context<LogPtr>&)>;
 
 	template <typename LogPtr = test_log_ptr>
-	using test_category = std::unordered_map<std::string, test_method<LogPtr>>;
+	using named_test_method = std::pair<std::string, test_method<LogPtr>>;
+
+	template <typename LogPtr = test_log_ptr>
+	using test_category = std::vector<named_test_method<LogPtr>>;
+
+	template <typename LogPtr = test_log_ptr>
+	using named_test_category = std::pair<std::string, test_category<LogPtr>>;
 
 	template <typename LogPtr>
 	struct test_suite;
@@ -83,14 +89,14 @@ namespace abc {
 	template <typename LogPtr = test_log_ptr>
 	struct test_suite {
 		test_suite() noexcept = default;
-		test_suite(std::unordered_map<std::string, test_category<LogPtr>>&& categories, const LogPtr& log_ptr, seed_t seed) noexcept;
-		test_suite(std::initializer_list<std::pair<std::string, test_category<LogPtr>>> init, const LogPtr& log_ptr, seed_t seed) noexcept;
+		test_suite(std::vector<named_test_category<LogPtr>>&& categories, const LogPtr& log_ptr, seed_t seed) noexcept;
+		test_suite(std::initializer_list<named_test_category<LogPtr>> init, const LogPtr& log_ptr, seed_t seed) noexcept;
 
 		bool run() noexcept;
 
-		std::unordered_map<std::string, test_category<LogPtr>>	categories;
-		LogPtr													log_ptr;
-		seed_t													seed;
+		std::vector<named_test_category<LogPtr>>	categories;
+		LogPtr										log_ptr;
+		seed_t										seed;
 
 	private:
 		void srand() noexcept;
@@ -173,14 +179,14 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	inline test_suite<LogPtr>::test_suite(std::unordered_map<std::string, test_category<LogPtr>>&& categories, const LogPtr& log_ptr, seed_t seed) noexcept
+	inline test_suite<LogPtr>::test_suite(std::vector<named_test_category<LogPtr>>&& categories, const LogPtr& log_ptr, seed_t seed) noexcept
 		: categories(std::move(categories))
 		, log_ptr(log_ptr)
 		, seed(seed) {
 	}
 
 	template <typename LogPtr>
-	inline test_suite<LogPtr>::test_suite(std::initializer_list<std::pair<std::string, test_category<LogPtr>>> init, const LogPtr& log_ptr, seed_t seed) noexcept
+	inline test_suite<LogPtr>::test_suite(std::initializer_list<named_test_category<LogPtr>> init, const LogPtr& log_ptr, seed_t seed) noexcept
 		: categories(init.begin(), init.end())
 		, log_ptr(log_ptr)
 		, seed(seed) {

@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 0.3.0
+VERSION = 0.6.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++17 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so

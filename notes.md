@@ -91,24 +91,14 @@ __PENDING QUESTIONS__
 ## Test
 
 ---
-# v0.3
+# v0.6
 ## Done
-tag
-exception
-timestamp + unit tests
-log
-test
-license
-socket (sync)
-## To Do
-socket (async)
-tagger
+- Logging from the product
 
-## To Ignore/Remove
-os
-host
-pool
-process
+## To Do
+- ostreams
+- order tests
+- operator new test
 
 - async
 	+ future_state::continuations
