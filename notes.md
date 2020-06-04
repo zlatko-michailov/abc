@@ -94,11 +94,11 @@ __PENDING QUESTIONS__
 # v0.6
 ## Done
 - Logging from the product
+- Order tests
+- operator new test
 
 ## To Do
 - ostreams
-- order tests
-- operator new test
 
 - async
 	+ future_state::continuations

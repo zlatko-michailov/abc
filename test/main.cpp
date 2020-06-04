@@ -34,6 +34,7 @@ SOFTWARE.
 #include "streambuf.h"
 #include "socket.h"
 #include "http.h"
+#include "heap.h"
 
 
 int main() {
@@ -43,6 +44,10 @@ int main() {
 		std::move(abc::log_filter::severity(abc::severity::important)));
 
 	abc::test_suite<> test_suite ( {
+			{ "pre-tests", {
+				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
+			} },
+
 			{ "timestamp", {
 				{ "test_null_timestamp",							abc::test::timestamp::test_null_timestamp },
 				{ "test_before_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },
@@ -67,6 +72,10 @@ int main() {
 				{ "test_http_response_istream_extraspaces",			abc::test::http::test_http_response_istream_extraspaces },
 				{ "test_http_response_istream_realworld_01",		abc::test::http::test_http_response_istream_realworld_01 },
 				{ "test_http_response_istream_realworld_02",		abc::test::http::test_http_response_istream_realworld_02 },
+			} },
+
+			{ "post-tests", {
+				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
 			} },
 		},
 		&test_log,
