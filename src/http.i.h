@@ -86,9 +86,9 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	class _http_stream : protected std::istream {
-	public:
+	template <typename StdStream, typename LogPtr>
+	class _http_stream : protected StdStream {
+	protected:
 		_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_stream(_http_stream&& other) = default;
 
@@ -122,8 +122,8 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_istream : public _http_stream<LogPtr> {
-	public:
+	class _http_istream : public _http_stream<std::istream, LogPtr> {
+	protected:
 		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_istream(_http_istream&& other) = default;
 
@@ -153,16 +153,22 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_ostream : public _http_stream<LogPtr> {
-	public:
-		_http_ostream(std::streambuf* sb, const LogPtr& log_ptr);
+	class _http_ostream : public _http_stream<std::ostream, LogPtr> {
+	protected:
+		_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_ostream(_http_ostream&& other) = default;
 
 	public:
-		void	put_protocol(const char* protocol);
-		void	put_header_name(const char* header_name);
-		void	put_header_value(const char* header_value);
-		void	put_body(const char* body);
+		void		put_header_name(const char* header_name);
+		void		put_header_value(const char* header_value);
+		void		end_headers();
+		void		put_body(const char* body);
+
+	protected:
+		std::size_t	put_protocol(const char* protocol);
+		std::size_t	put_crlf();
+		std::size_t	put_space();
+
 	};
 
 
@@ -190,9 +196,12 @@ namespace abc {
 		http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr);
 		http_request_ostream(http_request_ostream&& other) = default;
 
+		void	reset();
+
 	public:
 		void	put_method(const char* method);
 		void	put_resource(const char* resource);
+		void	put_protocol(const char* protocol);
 	};
 
 
@@ -220,9 +229,12 @@ namespace abc {
 		http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr);
 		http_response_ostream(http_response_ostream&& other) = default;
 
+		void	reset();
+
 	public:
-		void	put_status_code(char* buffer, std::size_t size);
-		void	put_reason_phrase(char* buffer, std::size_t size);
+		void	put_protocol(const char* protocol);
+		void	put_status_code(const char* status_code);
+		void	put_reason_phrase(const char* reason_phrase);
 	};
 
 }

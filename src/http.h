@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstring>
+
 #include "ascii.h"
 #include "exception.h"
 #include "http.i.h"
@@ -32,9 +34,9 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename LogPtr>
-	inline _http_stream<LogPtr>::_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
-		: std::istream(sb)
+	template <typename StdStream, typename LogPtr>
+	inline _http_stream<StdStream, LogPtr>::_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
+		: StdStream(sb)
 		, _next(next)
 		, _gcount(0)
 		, _log_ptr(log_ptr) {
@@ -44,106 +46,106 @@ namespace abc {
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::reset(http::item_t next) {
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::reset(http::item_t next) {
 		if (_log_ptr != nullptr) {
 			_log_ptr->push_back(category::abc::http, severity::abc, __TAG__, "_http_stream::reset() next=%lu", (std::uint32_t)next);
 		}
 
-		this->clear(goodbit);
+		StdStream::clear(StdStream::goodbit);
 		_next = next;
 		_gcount = 0;
 	}
 
 
-	template <typename LogPtr>
-	inline http::item_t _http_stream<LogPtr>::next() const noexcept {
+	template <typename StdStream, typename LogPtr>
+	inline http::item_t _http_stream<StdStream, LogPtr>::next() const noexcept {
 		return _next;
 	}
 
 
-	template <typename LogPtr>
-	inline std::size_t _http_stream<LogPtr>::gcount() const {
+	template <typename StdStream, typename LogPtr>
+	inline std::size_t _http_stream<StdStream, LogPtr>::gcount() const {
 		return _gcount;
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::eof() const {
-		return std::istream::eof();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::eof() const {
+		return StdStream::eof();
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::good() const {
-		return std::istream::good();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::good() const {
+		return StdStream::good();
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::bad() const {
-		return std::istream::bad();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::bad() const {
+		return StdStream::bad();
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::fail() const {
-		return std::istream::fail();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::fail() const {
+		return StdStream::fail();
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::operator!() const {
-		return std::istream::operator!();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::operator!() const {
+		return StdStream::operator!();
 	}
 
 
-	template <typename LogPtr>
-	inline _http_stream<LogPtr>::operator bool() const {
-		return std::istream::operator bool();
+	template <typename StdStream, typename LogPtr>
+	inline _http_stream<StdStream, LogPtr>::operator bool() const {
+		return StdStream::operator bool();
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::assert_next(http::item_t item) {
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::assert_next(http::item_t item) {
 		if (_next != item) {
 			throw exception<std::logic_error, LogPtr>("_next", __TAG__, log_ptr());
 		}
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::set_next(http::item_t item) noexcept {
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::set_next(http::item_t item) noexcept {
 		_next = item;
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::set_gcount(std::size_t gcount) noexcept {
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::set_gcount(std::size_t gcount) noexcept {
 		_gcount = gcount;
 	}
 
 
-	template <typename LogPtr>
-	inline bool _http_stream<LogPtr>::is_good() const {
-		return good() && !eof();
+	template <typename StdStream, typename LogPtr>
+	inline bool _http_stream<StdStream, LogPtr>::is_good() const {
+		return StdStream::good() && !StdStream::eof();
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::set_bad() {
-		clear(badbit | failbit);
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::set_bad() {
+		StdStream::clear(StdStream::badbit | StdStream::failbit);
 	}
 
 
-	template <typename LogPtr>
-	inline void _http_stream<LogPtr>::set_fail() {
-		setstate(failbit);
+	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::set_fail() {
+		StdStream::setstate(StdStream::failbit);
 	}
 
 
-	template <typename LogPtr>
-	inline const LogPtr& _http_stream<LogPtr>::log_ptr() const noexcept {
+	template <typename StdStream, typename LogPtr>
+	inline const LogPtr& _http_stream<StdStream, LogPtr>::log_ptr() const noexcept {
 		return _log_ptr;
 	}
 
@@ -153,7 +155,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline _http_istream<LogPtr>::_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
-		: _http_stream<LogPtr>(sb, next, log_ptr) {
+		: _http_stream<std::istream, LogPtr>(sb, next, log_ptr) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::_http_istream()");
@@ -445,7 +447,140 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	// _http_ostream
+	template <typename LogPtr>
+	inline _http_ostream<LogPtr>::_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
+		: _http_stream<std::ostream, LogPtr>(sb, next, log_ptr) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::_http_ostream()");
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_ostream<LogPtr>::put_protocol(const char* protocol) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_protocol() >>>");
+		}
+
+		this->assert_next(http::item::protocol);
+
+		std::size_t gcount = std::strlen(protocol);
+		this->write(protocol, gcount);
+
+		this->set_gcount(gcount);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_protocol() <<< protocol='%s', gcount=%lu", protocol, (std::uint32_t)gcount);
+		}
+
+		return gcount;
+	}
+
+
+	template <typename LogPtr>
+	inline void _http_ostream<LogPtr>::put_header_name(const char* header_name) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_name() >>>");
+		}
+
+		this->assert_next(http::item::header_name);
+
+		std::size_t gcount = std::strlen(header_name);
+		this->write(header_name, gcount);
+
+		gcount += this->put(':');
+		gcount += this->put_space();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::header_value);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_name() <<< header_name='%s', gcount=%lu", header_name, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void _http_ostream<LogPtr>::put_header_value(const char* header_value) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_value() >>>");
+		}
+
+		this->assert_next(http::item::header_value);
+
+		std::size_t gcount = std::strlen(header_value);
+		this->write(header_value, gcount);
+
+		gcount += this->put_crlf();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::header_name);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_value() <<< header_value='%s', gcount=%lu", header_value, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void _http_ostream<LogPtr>::end_headers() {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::end_headers() >>>");
+		}
+
+		this->assert_next(http::item::header_name);
+
+		std::size_t gcount = this->put_crlf();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::body);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::end_headers() <<< gcount=%lu", (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void _http_ostream<LogPtr>::put_body(const char* body) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_body() >>>");
+		}
+
+		this->assert_next(http::item::body);
+
+		std::size_t gcount = std::strlen(body);
+		this->write(body, gcount);
+
+		this->set_gcount(gcount);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_body() <<< body='%s', gcount=%lu", body, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_ostream<LogPtr>::put_crlf() {
+		this->put('\r');
+		this->put('\n');
+
+		return 2;
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_ostream<LogPtr>::put_space() {
+		this->put(' ');
+
+		return 1;
+	}
 
 
 	// --------------------------------------------------------------
@@ -456,14 +591,14 @@ namespace abc {
 		: _http_istream<LogPtr>(sb, http::item::method, log_ptr) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_request_istream::htp_request_istream()");
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_request_istream::http_request_istream()");
 		}
 	}
 
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::reset() {
-		_http_stream<LogPtr>::reset(http::item::method);
+		_http_stream<std::istream, LogPtr>::reset(http::item::method);
 	}
 
 
@@ -520,7 +655,79 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-	// http_request_ostream
+
+	template <typename LogPtr>
+	inline http_request_ostream<LogPtr>::http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr)
+		: _http_ostream<LogPtr>(sb, http::item::method, log_ptr) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_request_ostream::http_request_ostream()");
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void http_request_ostream<LogPtr>::reset() {
+		_http_stream<std::ostream, LogPtr>::reset(http::item::method);
+	}
+
+
+	template <typename LogPtr>
+	inline void http_request_ostream<LogPtr>::put_method(const char* method) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_method() >>>");
+		}
+
+		this->assert_next(http::item::method);
+
+		std::size_t gcount = std::strlen(method);
+		this->write(method, gcount);
+
+		gcount += this->put_space();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::resource);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_method() <<< method='%s', gcount=%lu", method, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void http_request_ostream<LogPtr>::put_resource(const char* resource) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_resource() >>>");
+		}
+
+		this->assert_next(http::item::resource);
+
+		std::size_t gcount = std::strlen(resource);
+		this->write(resource, gcount);
+
+		gcount += this->put_space();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::protocol);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_resource() <<< resource='%s', gcount=%lu", resource, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void http_request_ostream<LogPtr>::put_protocol(const char* protocol) {
+		std::size_t gcount = _http_ostream<LogPtr>::put_protocol(protocol);
+
+		gcount += this->put_crlf();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::header_name);
+	}
+
 
 	// --------------------------------------------------------------
 
@@ -537,7 +744,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_response_istream<LogPtr>::reset() {
-		_http_stream<LogPtr>::reset(http::item::protocol);
+		_http_stream<std::istream, LogPtr>::reset(http::item::protocol);
 	}
 
 
@@ -593,7 +800,82 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-	// http_response_ostream
+
+	template <typename LogPtr>
+	inline http_response_ostream<LogPtr>::http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr)
+		: _http_ostream<LogPtr>(sb, http::item::protocol, log_ptr) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::http_response_ostream()");
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_ostream<LogPtr>::reset() {
+		_http_stream<std::ostream, LogPtr>::reset(http::item::protocol);
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_ostream<LogPtr>::put_protocol(const char* protocol) {
+		std::size_t gcount = _http_ostream<LogPtr>::put_protocol(protocol);
+
+		gcount += this->put_space();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::status_code);
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_ostream<LogPtr>::put_status_code(const char* status_code) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_status_code() >>>");
+		}
+
+		this->assert_next(http::item::status_code);
+
+		std::size_t gcount = std::strlen(status_code);
+		this->write(status_code, gcount);
+
+		gcount += this->put_space();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::reason_phrase);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_status_code() <<< status_code='%s', gcount=%lu", status_code, (std::uint32_t)gcount);
+		}
+	}
+
+
+	template <typename LogPtr>
+	inline void http_response_ostream<LogPtr>::put_reason_phrase(const char* reason_phrase) {
+		LogPtr log_ptr_local = this->log_ptr();
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_reason_phrase() >>>");
+		}
+
+		this->assert_next(http::item::reason_phrase);
+
+		std::size_t gcount = 0;
+		if (reason_phrase != nullptr) {
+			gcount = std::strlen(reason_phrase);
+			this->write(reason_phrase, gcount);
+		}
+
+		gcount += this->put_crlf();
+
+		this->set_gcount(gcount);
+		this->set_next(http::item::header_name);
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_reason_phrase() <<< reason_phrase='%s', gcount=%lu", reason_phrase != nullptr ? reason_phrase : "<nullptr>", (std::uint32_t)gcount);
+		}
+	}
+
 
 	// --------------------------------------------------------------
 
