@@ -28,9 +28,14 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace http {
 
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream);
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_istream<abc::test_log_ptr>& istream);
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& istream, std::size_t expected_gcount);
+	template <typename StdStream>
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream);
+
+	template <typename StdStream>
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream);
+
+	template <typename StdStream>
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, std::size_t expected_gcount);
 
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
@@ -270,6 +275,93 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	// --------------------------------------------------------------
+
+
+	bool test_http_request_ostream_bodytext(test_context<abc::test_log_ptr>& context) {
+		const char expected[] =
+			"POST http://a.com/b?c=d HTTP/1.1\r\n"
+			"Simple-Header-Name: Simple-Header-Value\r\n"
+			"List: items separated by a single space\r\n"
+			"Multi-Line: first line second line third line\r\n"
+			"\r\n"
+			"{\r\n"
+			"  \"foo\": 42,\r\n"
+			"  \"bar\": \"qwerty\"\r\n"
+			"}";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		abc::http_request_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
+
+		bool passed = true;
+		const char* input;
+
+		input = "POST";
+		ostream.put_method(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "http://a.com/b?c=d";
+		ostream.put_resource(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "HTTP/1.1";
+		ostream.put_protocol(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Simple-Header-Name";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Simple-Header-Value";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "List";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = " \t items  \t\t  separated   by \t  a\t\tsingle space\t";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Multi-Line";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "first line \r\n  \t  second  line\t \r\n\tthird line\t";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		ostream.end_headers();
+
+		input = "{\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "  \"foo\": 42,\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "  \"bar\": \"qwerty\"\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "}";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		passed = context.are_equal(actual, expected, __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	bool test_http_response_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
 		char content[] =
 			"HTTP/12.345  789  \t  Something went wrong  \r\n"
@@ -425,7 +517,15 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_istream<abc::test_log_ptr>& istream) {
+	// --------------------------------------------------------------
+
+	// test_http_response_оstream_...
+
+	// --------------------------------------------------------------
+
+
+	template <typename StdStream>
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, __TAG__) && passed;
@@ -435,7 +535,8 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_istream<abc::test_log_ptr>& istream) {
+	template <typename StdStream>
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, size, __TAG__) && passed;
@@ -445,14 +546,15 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& istream, std::size_t expected_gcount) {
+	template <typename StdStream>
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& stream, std::size_t expected_gcount) {
 		bool passed = true;
 
-		passed = context.are_equal(istream.gcount(), expected_gcount, __TAG__, "%u") && passed;
-		passed = context.are_equal(istream.good(), true, __TAG__, "%u") && passed;
-		passed = context.are_equal(istream.eof(), false, __TAG__, "%u") && passed;
-		passed = context.are_equal(istream.fail(), false, __TAG__, "%u") && passed;
-		passed = context.are_equal(istream.bad(), false, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.gcount(), expected_gcount, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.good(), true, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.eof(), false, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.fail(), false, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.bad(), false, __TAG__, "%u") && passed;
 
 		return passed;
 	}

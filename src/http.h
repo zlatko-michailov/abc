@@ -491,8 +491,8 @@ namespace abc {
 		std::size_t gcount = std::strlen(header_name);
 		this->write(header_name, gcount);
 
-		gcount += this->put(':');
-		gcount += this->put_space();
+		this->put(':');
+		this->put_space();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::header_value);
@@ -515,7 +515,7 @@ namespace abc {
 		std::size_t gcount = std::strlen(header_value);
 		this->write(header_value, gcount);
 
-		gcount += this->put_crlf();
+		this->put_crlf();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::header_name);
@@ -535,7 +535,8 @@ namespace abc {
 
 		this->assert_next(http::item::header_name);
 
-		std::size_t gcount = this->put_crlf();
+		std::size_t gcount = 0;
+		this->put_crlf();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::body);
@@ -684,7 +685,7 @@ namespace abc {
 		std::size_t gcount = std::strlen(method);
 		this->write(method, gcount);
 
-		gcount += this->put_space();
+		this->put_space();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::resource);
@@ -707,7 +708,7 @@ namespace abc {
 		std::size_t gcount = std::strlen(resource);
 		this->write(resource, gcount);
 
-		gcount += this->put_space();
+		this->put_space();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::protocol);
@@ -722,7 +723,7 @@ namespace abc {
 	inline void http_request_ostream<LogPtr>::put_protocol(const char* protocol) {
 		std::size_t gcount = _http_ostream<LogPtr>::put_protocol(protocol);
 
-		gcount += this->put_crlf();
+		this->put_crlf();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::header_name);
@@ -840,7 +841,7 @@ namespace abc {
 		std::size_t gcount = std::strlen(status_code);
 		this->write(status_code, gcount);
 
-		gcount += this->put_space();
+		this->put_space();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::reason_phrase);
@@ -866,7 +867,7 @@ namespace abc {
 			this->write(reason_phrase, gcount);
 		}
 
-		gcount += this->put_crlf();
+		this->put_crlf();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::header_name);

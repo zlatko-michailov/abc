@@ -41,7 +41,7 @@ int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream(std::clog.rdbuf())),
 		std::move(abc::log_view::test<>()),
-		std::move(abc::log_filter::severity(abc::severity::important)));
+		std::move(abc::log_filter::severity(abc::severity::abc)));
 
 	abc::test_suite<> test_suite ( {
 			{ "pre-tests", {
@@ -69,6 +69,7 @@ int main() {
 				{ "test_http_request_istream_bodytext",				abc::test::http::test_http_request_istream_bodytext },
 				{ "test_http_request_istream_bodybinary",			abc::test::http::test_http_request_istream_bodybinary },
 				{ "test_http_request_istream_realworld_01",			abc::test::http::test_http_request_istream_realworld_01 },
+				{ "test_http_request_ostream_bodytext",				abc::test::http::test_http_request_ostream_bodytext },
 				{ "test_http_response_istream_extraspaces",			abc::test::http::test_http_response_istream_extraspaces },
 				{ "test_http_response_istream_realworld_01",		abc::test::http::test_http_response_istream_realworld_01 },
 				{ "test_http_response_istream_realworld_02",		abc::test::http::test_http_response_istream_realworld_02 },
