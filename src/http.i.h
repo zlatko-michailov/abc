@@ -134,6 +134,7 @@ namespace abc {
 
 	protected:
 		void		get_protocol(char* buffer, std::size_t size);
+
 		std::size_t	get_token(char* buffer, std::size_t size);
 		std::size_t	get_prints(char* buffer, std::size_t size);
 		std::size_t	get_prints_and_spaces(char* buffer, std::size_t size);
@@ -159,16 +160,29 @@ namespace abc {
 		_http_ostream(_http_ostream&& other) = default;
 
 	public:
-		void		put_header_name(const char* header_name);
-		void		put_header_value(const char* header_value);
+		void		put_header_name(const char*buffer, std::size_t size = size::strlen);
+		void		put_header_value(const char* buffer, std::size_t size = size::strlen);
 		void		end_headers();
-		void		put_body(const char* body);
+		void		put_body(const char* buffer, std::size_t size = size::strlen);
 
 	protected:
-		std::size_t	put_protocol(const char* protocol);
+		std::size_t	put_protocol(const char* buffer, std::size_t size);
+
+		std::size_t	put_token(const char* buffer, std::size_t size);
+		std::size_t	put_prints(const char* buffer, std::size_t size);
+		std::size_t	put_prints_and_spaces(const char* buffer, std::size_t size);
+		std::size_t	put_alphas(const char* buffer, std::size_t size);
+		std::size_t	put_digits(const char* buffer, std::size_t size);
 		std::size_t	put_crlf();
 		std::size_t	put_space();
 
+		std::size_t	put_bytes(const char* buffer, std::size_t size);
+		template <typename Predicate>
+		std::size_t	put_chars(Predicate&& predicate, const char* buffer, std::size_t size);
+		std::size_t put_char(char ch);
+
+		std::size_t skip_spaces_in_header_value(const char* buffer, std::size_t size);
+		std::size_t skip_spaces(const char* buffer, std::size_t size);
 	};
 
 
@@ -199,9 +213,9 @@ namespace abc {
 		void	reset();
 
 	public:
-		void	put_method(const char* method);
-		void	put_resource(const char* resource);
-		void	put_protocol(const char* protocol);
+		void	put_method(const char* method, std::size_t size = size::strlen);
+		void	put_resource(const char* resource, std::size_t size = size::strlen);
+		void	put_protocol(const char* protocol, std::size_t size = size::strlen);
 	};
 
 
@@ -232,9 +246,9 @@ namespace abc {
 		void	reset();
 
 	public:
-		void	put_protocol(const char* protocol);
-		void	put_status_code(const char* status_code);
-		void	put_reason_phrase(const char* reason_phrase);
+		void	put_protocol(const char* protocol, std::size_t size = size::strlen);
+		void	put_status_code(const char* status_code, std::size_t size = size::strlen);
+		void	put_reason_phrase(const char* reason_phrase, std::size_t size = size::strlen);
 	};
 
 }

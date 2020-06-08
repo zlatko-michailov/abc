@@ -42,6 +42,8 @@ namespace abc {
 
 
 	namespace size {
+		constexpr std::size_t strlen = -1;
+
 		constexpr std::size_t k1 = 1024;
 		constexpr std::size_t k2 = 2 * k1;
 		constexpr std::size_t k4 = 4 * k1;
