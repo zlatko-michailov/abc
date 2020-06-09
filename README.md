@@ -1,5 +1,5 @@
 # abc
-Header-only library of essential utilities for C++ development.
+Header-only library of essential utilities for C++ development that doesn't use dynamic/heap memory.
 
 
 [Summary](#Summary)  
@@ -7,7 +7,8 @@ Header-only library of essential utilities for C++ development.
 [Toolchain and Platform Dependencies](#Toolchain-and-Platform-Dependencies)  
 [Try It](#Try-It)  
 [Use It](#Use-It)  
-[Release Notes](#Release-Notes)
+[Release Notes](#Release-Notes)  
+[Roadmap](#Roadmap)
 
 
 ## Summary
@@ -16,10 +17,19 @@ Header-only library of essential utilities for C++ development.
 - log
 - test
 - socket (TCP and UDP)
+- http streams
+- streambuf specializations
+- ascii
 
 All classes are provided as headers, and must be compiled in client programs.
 There is no precompiled flavor of the library.
 That is because `abc` targets devices with pequliar architectures and small memory capacities.
+
+### No Dynamic Memory Allocation
+`abc` uses static, caller-provided, buffers instead of dynamically allocating heap memory.
+It doesn't use `std::string`, `std::vector`, or any other `std` class that automatically allocates heap memory.
+This doesn't prevent apps from using classes like `std::string` or `std::vector`.
+It is just a measure to maintain performance and efficiency for apps that care about them.
 
 
 ## Brief Class Reference
@@ -54,12 +64,37 @@ This is a C++ wrapper around the BSD socket C API. The following self-explanator
 - `tcp_server_socket`
 - `tcp_client_socket`
 
+### `http` streams
+These classes provide a _syntactic_ check of http request and response streams.
+The app is responsible for checking the _semantic_ correctness of the stream as well as for any kind of encoding/decoding that the content of the stream implies.
+
+These classes are not suitable for implementing a general-purpose web server.
+Their intent is to be used to implement REST end points or clients in a trusted network, e.g. communicating with a (IoT) device on a LAN.
+
+__Note:__ `abc` does not include a crypto ficility that implements TLS/https, nor is there any plan to implement such a facility.
+
+There are four _core_ http stream classes:
+- `http_request_istream`
+- `http_request_ostream`
+- `http_response_istream`
+- `http_response_ostream`
+
+There are two _convenience_ classes that combine the above core classes as follows:
+- `http_client_stream : http_request_ostream, http_response_istream`
+- `http_server_stream : http_request_istream, http_response_ostream`
+
+
 ### `streambuf` Specializations
 - `buffer_streambuf`- a `std::streambuf`implementation over a fixed `char` buffer.
 This class comes handy when `std::thread::id` is used.
 The latter can only be sent to a stream. It doesn't support any other operation.
 This `streambuf` specialization allows you to get hold of a `std::thread::id` without any heap allocation.
 - `socket_streambuf` - a `std::streambuf`implementation over `_client_socket`, particularly over `tcp_client_socket`.
+
+### `ascii`
+Simple predicates to check ASCII code category.
+The advantage of these predicates over the `std` ones is that they are explicitly defined as opposed to delegated to the `"C"` locale.
+That makes them suitable for implementing protocols like `http`.
 
 ### `exception`
 An envelope around any exception type.
@@ -98,6 +133,13 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 
 
 ## Release Notes
+### 0.6.0
+- No breaking changes.
+- `http`
+  - Introduce _syntactic_ streams.
+- `ascii`
+  - Introduce basic predicates.
+
 ### 0.5.0
 - Breaking changes.
   - `socket.h` is no longer in the `posix` subfolder.
@@ -116,3 +158,14 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 
 ### 0.3.0
 - First promising release. 
+
+
+## Roadmap
+### 0.7.0
+- Introduce `JSON` streams.
+
+### 0.8.0
+- Introduce `WebSocket` client and server.
+- Introduce `base64` encoding and decoding. (Required for WebSocket.)
+- Introduce `SHA-1` hashing. (Required for WebSocket.)
+
