@@ -359,6 +359,64 @@ namespace abc { namespace test { namespace http {
 	}
 
 
+	bool test_http_request_ostream_bodybinary(test_context<abc::test_log_ptr>& context) {
+		const char expected[] =
+			"GET http://a.com/b?c=d HTTP/1.1\r\n"
+			"Multi-Line: second line third line\r\n"
+			"\r\n"
+			"\x01\x04\x10\x1f"
+			"\x20\x70\x7f"
+			"\x80\xa5\xb8\xcc\xdd\xff";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		abc::http_request_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
+
+		bool passed = true;
+		const char* input;
+
+		input = "GET";
+		ostream.put_method(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "http://a.com/b?c=d";
+		ostream.put_resource(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "HTTP/1.1";
+		ostream.put_protocol(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Multi-Line";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\r\n\tsecond line\t\r\n third  line      ";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		ostream.end_headers();
+
+		input = "\x01\x04\x10\x1f";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\x20\x70\x7f";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\x80\xa5\xb8\xcc\xdd\xff";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
+
 	// --------------------------------------------------------------
 
 

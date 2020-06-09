@@ -140,6 +140,7 @@ namespace abc {
 		std::size_t	get_prints_and_spaces(char* buffer, std::size_t size);
 		std::size_t	get_alphas(char* buffer, std::size_t size);
 		std::size_t	get_digits(char* buffer, std::size_t size);
+
 		std::size_t	skip_spaces();
 		std::size_t	skip_crlf();
 
