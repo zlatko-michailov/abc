@@ -252,5 +252,24 @@ namespace abc {
 		void	put_reason_phrase(const char* reason_phrase, std::size_t size = size::strlen);
 	};
 
+
+	// --------------------------------------------------------------
+
+
+	template <typename LogPtr = null_log_ptr>
+	class http_client_stream : public http_request_ostream<LogPtr>, public http_response_istream<LogPtr> {
+	public:
+		http_client_stream(std::streambuf* sb, const LogPtr& log_ptr);
+		http_client_stream(http_client_stream&& other) = default;
+	};
+
+
+	template <typename LogPtr = null_log_ptr>
+	class http_server_stream : public http_request_istream<LogPtr>, public http_response_ostream<LogPtr> {
+	public:
+		http_server_stream(std::streambuf* sb, const LogPtr& log_ptr);
+		http_server_stream(http_server_stream&& other) = default;
+	};
+
 }
 

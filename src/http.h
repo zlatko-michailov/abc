@@ -1000,7 +1000,7 @@ namespace abc {
 	inline void http_response_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
 		std::size_t gcount = _http_ostream<LogPtr>::put_protocol(buffer, size);
 
-		gcount += this->put_space();
+		this->put_space();
 
 		this->set_gcount(gcount);
 		this->set_next(http::item::status_code);
@@ -1063,6 +1063,20 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
+
+
+	template <typename LogPtr>
+	inline http_client_stream<LogPtr>::http_client_stream(std::streambuf* sb, const LogPtr& log_ptr)
+		: http_request_ostream<LogPtr>(sb, log_ptr)
+		, http_response_istream<LogPtr>(sb, log_ptr) {
+	}
+
+
+	template <typename LogPtr>
+	inline http_server_stream<LogPtr>::http_server_stream(std::streambuf* sb, const LogPtr& log_ptr)
+		: http_request_istream<LogPtr>(sb, log_ptr)
+		, http_response_ostream<LogPtr>(sb, log_ptr) {
+	}
 
 }
 

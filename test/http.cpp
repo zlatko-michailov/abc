@@ -353,7 +353,7 @@ namespace abc { namespace test { namespace http {
 		ostream.put_body(input);
 		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
 
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
 
 		return passed;
 	}
@@ -577,7 +577,131 @@ namespace abc { namespace test { namespace http {
 
 	// --------------------------------------------------------------
 
-	// test_http_response_оstream_...
+
+	bool test_http_response_ostream_bodytext(test_context<abc::test_log_ptr>& context) {
+		const char expected[] =
+			"HTTP/1.1 200 OK\r\n"
+			"Simple: simple\r\n"
+			"List: foo bar foobar\r\n"
+			"\r\n"
+			"First line\r\n"
+			"  Second line\r\n"
+			"\tThird line";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		abc::http_response_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
+
+		bool passed = true;
+		const char* input;
+
+		input = "HTTP/1.1";
+		ostream.put_protocol(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "200";
+		ostream.put_status_code(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "OK";
+		ostream.put_reason_phrase(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Simple";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "simple";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "List";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "foo    bar\t\t\tfoobar   \t  \t \t ";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		ostream.end_headers();
+
+		input = "First line\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "  Second line\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\tThird line\r\n";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_http_response_ostream_bodybinary(test_context<abc::test_log_ptr>& context) {
+		const char expected[] =
+			"HTTP/1.1 789 Something went wrong \r\n"
+			"Multi-Line-List: aaa bbbb ccc ddd\r\n"
+			"\r\n"
+			"\x03\x07\x13\x16\x19"
+			"\x20\x24\x35\x46\x57\x71\x7f"
+			"\x80\x89\xa5\xb6\xc7\xff";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		abc::http_response_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
+
+		bool passed = true;
+		const char* input;
+
+		input = "HTTP/1.1";
+		ostream.put_protocol(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "789";
+		ostream.put_status_code(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Somethig went wrong ";
+		ostream.put_reason_phrase(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "Multi-Line-List";
+		ostream.put_header_name(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\r\n  \r\n\taaa  \t bbb\r\n\t\t\tccc\tddd";
+		ostream.put_header_value(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		ostream.end_headers();
+
+		input = "\x03\x07\x13\x16\x19";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\x20\x24\x35\x46\x57\x71\x7f";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		input = "\x80\x89\xa5\xb6\xc7\xff";
+		ostream.put_body(input);
+		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
 
 	// --------------------------------------------------------------
 
