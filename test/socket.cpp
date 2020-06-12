@@ -63,7 +63,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
 
 		abc::socket::address client_address;
 		std::uint16_t content_length;
@@ -118,7 +118,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
@@ -171,7 +171,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
@@ -256,7 +256,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 

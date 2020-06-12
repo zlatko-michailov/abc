@@ -31,7 +31,7 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace heap {
 
-	bool verify_heap_allocation(test_context<abc::test_log_ptr>& context);
+	bool verify_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag);
 
 
 	using counter_t = std::int32_t;
@@ -61,18 +61,18 @@ namespace abc { namespace test { namespace heap {
 
 
 	bool test_heap_allocation(test_context<abc::test_log_ptr>& context) {
-		return verify_heap_allocation(context);
+		return verify_heap_allocation(context, __TAG__);
 	}
 
 
-	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context) {
+	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag) {
 		instance_unaligned_throw_count--;
 
-		return verify_heap_allocation(context);
+		return verify_heap_allocation(context, tag);
 	}
 
 
-	bool verify_heap_allocation(test_context<abc::test_log_ptr>& context) {
+	bool verify_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(instance_unaligned_throw_count,		0, __TAG__, "%ld") && passed;

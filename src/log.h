@@ -338,11 +338,6 @@ namespace abc {
 				buf_thread_id[0] = '\0';
 			}
 
-			char buf_severity[2 * severity::abc + 1];
-			severity = severity <= severity::abc ? severity : severity::abc;
-			std::memset(buf_severity, ' ', 2 * severity);
-			buf_severity[2 * (severity - 1)] = '\0';
-
 			char buf_tag[17];
 			if (_severity >= severity::debug) {
 				format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::friendly);
@@ -351,7 +346,12 @@ namespace abc {
 				buf_tag[0] = '\0';
 			}
 
-			return std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_thread_id, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
+			char buf_severity[2 * severity::abc + 1];
+			severity = severity <= severity::abc ? severity : severity::abc;
+			std::memset(buf_severity, ' ', 2 * severity);
+			buf_severity[2 * (severity - 1)] = '\0';
+
+			return std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_thread_id, format::separator::space, buf_tag, format::separator::space, buf_severity, format::separator::space);
 		}
 
 

@@ -29,13 +29,13 @@ SOFTWARE.
 namespace abc { namespace test { namespace http {
 
 	template <typename StdStream>
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream);
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag);
 
 	template <typename StdStream>
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream);
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag);
 
 	template <typename StdStream>
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, std::size_t expected_gcount);
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, std::size_t expected_gcount, tag_t tag);
 
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
@@ -57,40 +57,40 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream.get_method(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "GET", istream) && passed;
+		passed = verify_string(context, buffer, "GET", istream, __TAG__) && passed;
 
 		istream.get_resource(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream) && passed;
+		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream, __TAG__) && passed;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/12.345", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/12.345", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Name", istream) && passed;
+		passed = verify_string(context, buffer, "Name", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Value", istream) && passed;
+		passed = verify_string(context, buffer, "Value", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Multi_Word-Name", istream) && passed;
+		passed = verify_string(context, buffer, "Multi_Word-Name", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Value with spaces inside", istream) && passed;
+		passed = verify_string(context, buffer, "Value with spaces inside", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Multi-Line", istream) && passed;
+		passed = verify_string(context, buffer, "Multi-Line", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "First line Second line Third line", istream) && passed;
+		passed = verify_string(context, buffer, "First line Second line Third line", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Trailing-Spaces", istream) && passed;
+		passed = verify_string(context, buffer, "Trailing-Spaces", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "3 spaces", istream) && passed;
+		passed = verify_string(context, buffer, "3 spaces", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -116,28 +116,28 @@ namespace abc { namespace test { namespace http {
 		const std::size_t binary_line_remainder	= 7;
 
 		istream.get_method(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "POST", istream) && passed;
+		passed = verify_string(context, buffer, "POST", istream, __TAG__) && passed;
 
 		istream.get_resource(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream) && passed;
+		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream, __TAG__) && passed;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_size);
-		passed = verify_binary(context, buffer, "{\r\n  \"foo\"", binary_line_size, istream) && passed;
+		passed = verify_binary(context, buffer, "{\r\n  \"foo\"", binary_line_size, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_size);
-		passed = verify_binary(context, buffer, ": 42,\r\n  \"", binary_line_size, istream) && passed;
+		passed = verify_binary(context, buffer, ": 42,\r\n  \"", binary_line_size, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_size);
-		passed = verify_binary(context, buffer, "bar\": \"qwe", binary_line_size, istream) && passed;
+		passed = verify_binary(context, buffer, "bar\": \"qwe", binary_line_size, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_remainder);
-		passed = verify_binary(context, buffer, "rty\"\r\n}", binary_line_remainder, istream) && passed;
+		passed = verify_binary(context, buffer, "rty\"\r\n}", binary_line_remainder, istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -160,25 +160,25 @@ namespace abc { namespace test { namespace http {
 		const std::size_t binary_line_remainder	= 7;
 
 		istream.get_method(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "POST", istream) && passed;
+		passed = verify_string(context, buffer, "POST", istream, __TAG__) && passed;
 
 		istream.get_resource(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream) && passed;
+		passed = verify_string(context, buffer, "http://a.com/b?c=d", istream, __TAG__) && passed;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_size);
-		passed = verify_binary(context, buffer, "\x01\x05\x10 text \x02\x03\x12 mix", binary_line_size, istream) && passed;
+		passed = verify_binary(context, buffer, "\x01\x05\x10 text \x02\x03\x12 mix", binary_line_size, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_size);
-		passed = verify_binary(context, buffer, "ed \x04\x18\x19 with \x7f\x80 b", binary_line_size, istream) && passed;
+		passed = verify_binary(context, buffer, "ed \x04\x18\x19 with \x7f\x80 b", binary_line_size, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, binary_line_remainder);
-		passed = verify_binary(context, buffer, "ytes \xaa\xff", binary_line_remainder, istream) && passed;
+		passed = verify_binary(context, buffer, "ytes \xaa\xff", binary_line_remainder, istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -206,70 +206,70 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream.get_method(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "GET", istream) && passed;
+		passed = verify_string(context, buffer, "GET", istream, __TAG__) && passed;
 
 		istream.get_resource(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", istream) && passed;
+		passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", istream, __TAG__) && passed;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Host", istream) && passed;
+		passed = verify_string(context, buffer, "Host", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "en.cppreference.com", istream) && passed;
+		passed = verify_string(context, buffer, "en.cppreference.com", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "User-Agent", istream) && passed;
+		passed = verify_string(context, buffer, "User-Agent", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", istream) && passed;
+		passed = verify_string(context, buffer, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Accept", istream) && passed;
+		passed = verify_string(context, buffer, "Accept", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", istream) && passed;
+		passed = verify_string(context, buffer, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Accept-Language", istream) && passed;
+		passed = verify_string(context, buffer, "Accept-Language", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "en-US,en;q=0.5", istream) && passed;
+		passed = verify_string(context, buffer, "en-US,en;q=0.5", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Accept-Encoding", istream) && passed;
+		passed = verify_string(context, buffer, "Accept-Encoding", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "gzip, deflate, br", istream) && passed;
+		passed = verify_string(context, buffer, "gzip, deflate, br", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Connection", istream) && passed;
+		passed = verify_string(context, buffer, "Connection", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "keep-alive", istream) && passed;
+		passed = verify_string(context, buffer, "keep-alive", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Cookie", istream) && passed;
+		passed = verify_string(context, buffer, "Cookie", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", istream) && passed;
+		passed = verify_string(context, buffer, "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Upgrade-Insecure-Requests", istream) && passed;
+		passed = verify_string(context, buffer, "Upgrade-Insecure-Requests", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "1", istream) && passed;
+		passed = verify_string(context, buffer, "1", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Cache-Control", istream) && passed;
+		passed = verify_string(context, buffer, "Cache-Control", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "max-age=0", istream) && passed;
+		passed = verify_string(context, buffer, "max-age=0", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -301,57 +301,57 @@ namespace abc { namespace test { namespace http {
 
 		input = "POST";
 		ostream.put_method(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "http://a.com/b?c=d";
 		ostream.put_resource(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "HTTP/1.1";
 		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Simple-Header-Name";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Simple-Header-Value";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "List";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = " \t items  \t\t  separated   by \t  a\t\tsingle space\t";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Multi-Line";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "first line \r\n  \t  second  line\t \r\n\tthird line\t";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		ostream.end_headers();
 
 		input = "{\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "  \"foo\": 42,\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "  \"bar\": \"qwerty\"\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "}";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
 
@@ -379,37 +379,37 @@ namespace abc { namespace test { namespace http {
 
 		input = "GET";
 		ostream.put_method(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "http://a.com/b?c=d";
 		ostream.put_resource(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "HTTP/1.1";
 		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Multi-Line";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\r\n\tsecond line\t\r\n third  line      ";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		ostream.end_headers();
 
 		input = "\x01\x04\x10\x1f";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\x20\x70\x7f";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\x80\xa5\xb8\xcc\xdd\xff";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
 
@@ -434,22 +434,22 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/12.345", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/12.345", istream, __TAG__) && passed;
 
 		istream.get_status_code(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "789", istream) && passed;
+		passed = verify_string(context, buffer, "789", istream, __TAG__) && passed;
 
 		istream.get_reason_phrase(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Something went wrong  ", istream) && passed;
+		passed = verify_string(context, buffer, "Something went wrong  ", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Header-Name", istream) && passed;
+		passed = verify_string(context, buffer, "Header-Name", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Header-Value", istream) && passed;
+		passed = verify_string(context, buffer, "Header-Value", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -473,46 +473,46 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", istream, __TAG__) && passed;
 
 		istream.get_status_code(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "302", istream) && passed;
+		passed = verify_string(context, buffer, "302", istream, __TAG__) && passed;
 
 		istream.get_reason_phrase(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Set-Cookie", istream) && passed;
+		passed = verify_string(context, buffer, "Set-Cookie", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/", istream) && passed;
+		passed = verify_string(context, buffer, "ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Cache-Control", istream) && passed;
+		passed = verify_string(context, buffer, "Cache-Control", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "no-cache, no-store, max-age=0, must-revalidate", istream) && passed;
+		passed = verify_string(context, buffer, "no-cache, no-store, max-age=0, must-revalidate", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Location", istream) && passed;
+		passed = verify_string(context, buffer, "Location", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.", istream) && passed;
+		passed = verify_string(context, buffer, "https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Content-Length", istream) && passed;
+		passed = verify_string(context, buffer, "Content-Length", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "0", istream) && passed;
+		passed = verify_string(context, buffer, "0", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Date", istream) && passed;
+		passed = verify_string(context, buffer, "Date", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Sun, 31 May 2020 01:26:44 GMT", istream) && passed;
+		passed = verify_string(context, buffer, "Sun, 31 May 2020 01:26:44 GMT", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -536,40 +536,40 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", istream) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", istream, __TAG__) && passed;
 
 		istream.get_status_code(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "200", istream) && passed;
+		passed = verify_string(context, buffer, "200", istream, __TAG__) && passed;
 
 		istream.get_reason_phrase(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "OK", istream) && passed;
+		passed = verify_string(context, buffer, "OK", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Content-Type", istream) && passed;
+		passed = verify_string(context, buffer, "Content-Type", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "application/json; charset=utf-8", istream) && passed;
+		passed = verify_string(context, buffer, "application/json; charset=utf-8", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Access-Control-Expose-Headers", istream) && passed;
+		passed = verify_string(context, buffer, "Access-Control-Expose-Headers", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", istream) && passed;
+		passed = verify_string(context, buffer, "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "Content-Length", istream) && passed;
+		passed = verify_string(context, buffer, "Content-Length", istream, __TAG__) && passed;
 
 		istream.get_header_value(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "205", istream) && passed;
+		passed = verify_string(context, buffer, "205", istream, __TAG__) && passed;
 
 		istream.get_header_name(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "", istream) && passed;
+		passed = verify_string(context, buffer, "", istream, __TAG__) && passed;
 
 		istream.get_body(buffer, 200);
-		passed = verify_binary(context, buffer, "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sc", 200, istream) && passed;
+		passed = verify_binary(context, buffer, "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sc", 200, istream, __TAG__) && passed;
 
 		istream.get_body(buffer, 5);
-		passed = verify_binary(context, buffer, "a=2\"}", 5, istream) && passed;
+		passed = verify_binary(context, buffer, "a=2\"}", 5, istream, __TAG__) && passed;
 
 		return passed;
 	}
@@ -599,45 +599,45 @@ namespace abc { namespace test { namespace http {
 
 		input = "HTTP/1.1";
 		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "200";
 		ostream.put_status_code(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "OK";
 		ostream.put_reason_phrase(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Simple";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "simple";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "List";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "foo    bar\t\t\tfoobar   \t  \t \t ";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		ostream.end_headers();
 
 		input = "First line\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "  Second line\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\tThird line\r\n";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
 
@@ -665,37 +665,37 @@ namespace abc { namespace test { namespace http {
 
 		input = "HTTP/1.1";
 		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "789";
 		ostream.put_status_code(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Somethig went wrong ";
 		ostream.put_reason_phrase(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "Multi-Line-List";
 		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\r\n  \r\n\taaa  \t bbb\r\n\t\t\tccc\tddd";
 		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		ostream.end_headers();
 
 		input = "\x03\x07\x13\x16\x19";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\x20\x24\x35\x46\x57\x71\x7f";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		input = "\x80\x89\xa5\xb6\xc7\xff";
 		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input)) && passed;
+		passed = verify_stream(context, ostream, std::strlen(input), __TAG__) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
 
@@ -707,36 +707,36 @@ namespace abc { namespace test { namespace http {
 
 
 	template <typename StdStream>
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream) {
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag) {
 		bool passed = true;
 
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
-		passed = verify_stream(context, istream, std::strlen(expected)) && passed;
+		passed = context.are_equal(actual, expected, tag) && passed;
+		passed = verify_stream(context, istream, std::strlen(expected), tag) && passed;
 
 		return passed;
 	}
 
 
 	template <typename StdStream>
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream) {
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag) {
 		bool passed = true;
 
-		passed = context.are_equal(actual, expected, size, __TAG__) && passed;
-		passed = verify_stream(context, istream, size) && passed;
+		passed = context.are_equal(actual, expected, size, tag) && passed;
+		passed = verify_stream(context, istream, size, tag) && passed;
 
 		return passed;
 	}
 
 
 	template <typename StdStream>
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& stream, std::size_t expected_gcount) {
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& stream, std::size_t expected_gcount, tag_t tag) {
 		bool passed = true;
 
-		passed = context.are_equal(stream.gcount(), expected_gcount, __TAG__, "%u") && passed;
-		passed = context.are_equal(stream.good(), true, __TAG__, "%u") && passed;
-		passed = context.are_equal(stream.eof(), false, __TAG__, "%u") && passed;
-		passed = context.are_equal(stream.fail(), false, __TAG__, "%u") && passed;
-		passed = context.are_equal(stream.bad(), false, __TAG__, "%u") && passed;
+		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;
+		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
+		passed = context.are_equal(stream.eof(), false, tag, "%u") && passed;
+		passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;
+		passed = context.are_equal(stream.bad(), false, tag, "%u") && passed;
 
 		return passed;
 	}

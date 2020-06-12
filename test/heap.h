@@ -25,14 +25,14 @@ SOFTWARE.
 
 #include "../src/test.h"
 #include "../src/exception.h"
+#include "../src/tag.h"
 
 
 namespace abc { namespace test { namespace heap {
 
 	bool start_heap_allocation(test_context<abc::test_log_ptr>& context);
 	bool test_heap_allocation(test_context<abc::test_log_ptr>& context);
-
-	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context);
+	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag);
 
 }}}
 
