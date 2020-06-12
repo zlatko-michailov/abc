@@ -63,7 +63,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e6) && passed; // Lambda closure
 
 		abc::socket::address client_address;
 		std::uint16_t content_length;
@@ -118,7 +118,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e7) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
@@ -171,7 +171,7 @@ namespace abc { namespace test { namespace socket {
 				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e8) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
@@ -231,32 +231,32 @@ namespace abc { namespace test { namespace socket {
 
 				// Receive response
 				http.get_protocol(buffer, sizeof(buffer));
-				passed = context.are_equal(buffer, protocol, __TAG__) && passed;
+				passed = context.are_equal(buffer, protocol, 0x100e9) && passed;
 
 				http.get_status_code(buffer, sizeof(buffer));
-				passed = context.are_equal(buffer, response_status_code, __TAG__) && passed;
+				passed = context.are_equal(buffer, response_status_code, 0x100ea) && passed;
 
 				http.get_reason_phrase(buffer, sizeof(buffer));
-				passed = context.are_equal(buffer, response_reason_phrase, __TAG__) && passed;
+				passed = context.are_equal(buffer, response_reason_phrase, 0x100eb) && passed;
 
 				http.get_header_name(buffer, sizeof(buffer));
-				passed = context.are_equal(buffer, response_header_name, __TAG__) && passed;
+				passed = context.are_equal(buffer, response_header_name, 0x100ec) && passed;
 
 				long body_len = std::strlen(response_body);
 				http.get_header_value(buffer, sizeof(buffer));
-				passed = context.are_equal(std::atol(buffer), body_len, __TAG__, "%lu") && passed;
+				passed = context.are_equal(std::atol(buffer), body_len, 0x100ed, "%lu") && passed;
 
 				http.get_header_name(buffer, sizeof(buffer));
-				passed = context.are_equal(buffer, "", __TAG__) && passed;
+				passed = context.are_equal(buffer, "", 0x100ee) && passed;
 
 				http.get_body(buffer, body_len);
-				passed = context.are_equal(buffer, response_body, body_len, __TAG__) && passed;
+				passed = context.are_equal(buffer, response_body, body_len, 0x100ef) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-		passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocation(context, 0x100f1) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
@@ -266,26 +266,26 @@ namespace abc { namespace test { namespace socket {
 
 		// Receive request
 		http.get_method(buffer, sizeof(buffer));
-		passed = context.are_equal(buffer, request_method, __TAG__) && passed;
+		passed = context.are_equal(buffer, request_method, 0x100f2) && passed;
 
 		http.get_resource(buffer, sizeof(buffer));
-		passed = context.are_equal(buffer, request_resource, __TAG__) && passed;
+		passed = context.are_equal(buffer, request_resource, 0x100f3) && passed;
 
 		http.get_protocol(buffer, sizeof(buffer));
-		passed = context.are_equal(buffer, protocol, __TAG__) && passed;
+		passed = context.are_equal(buffer, protocol, 0x100f4) && passed;
 
 		http.get_header_name(buffer, sizeof(buffer));
-		passed = context.are_equal(buffer, request_header_name, __TAG__) && passed;
+		passed = context.are_equal(buffer, request_header_name, 0x100f5) && passed;
 
 		long body_len = std::strlen(request_body);
 		http.get_header_value(buffer, sizeof(buffer));
-		passed = context.are_equal(std::atol(buffer), body_len, __TAG__, "%lu") && passed;
+		passed = context.are_equal(std::atol(buffer), body_len, 0x100f6, "%lu") && passed;
 
 		http.get_header_name(buffer, sizeof(buffer));
-		passed = context.are_equal(buffer, "", __TAG__) && passed;
+		passed = context.are_equal(buffer, "", 0x100f7) && passed;
 
 		http.get_body(buffer, body_len);
-		passed = context.are_equal(buffer, request_body, body_len, __TAG__) && passed;
+		passed = context.are_equal(buffer, request_body, body_len, 0x100f8) && passed;
 
 		// Send response
 		std::snprintf(buffer, sizeof(buffer), "%lu", std::strlen(response_body));

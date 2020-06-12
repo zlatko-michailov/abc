@@ -331,7 +331,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, __TAG__, buffer, size);
+			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, 0x10066, buffer, size);
 			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
@@ -368,7 +368,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, __TAG__, buffer, size);
+			log_ptr_local->push_back_binary(category::abc::socket, severity::abc, 0x10067, buffer, size);
 			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
@@ -474,7 +474,7 @@ namespace abc {
 		, _socket_ptr(socket_ptr)
 		, _log_ptr(log_ptr) {
 		if (socket_ptr == nullptr) {
-			throw exception<std::logic_error, LogPtr>("socket_ptr", __TAG__, _log_ptr);
+			throw exception<std::logic_error, LogPtr>("socket_ptr", 0x10068, _log_ptr);
 		}
 
 		setg(&_get_ch, &_get_ch, &_get_ch);

@@ -61,7 +61,7 @@ namespace abc { namespace test { namespace heap {
 
 
 	bool test_heap_allocation(test_context<abc::test_log_ptr>& context) {
-		return verify_heap_allocation(context, __TAG__);
+		return verify_heap_allocation(context, 0x10069);
 	}
 
 
