@@ -641,6 +641,9 @@ namespace abc {
 
 		this->set_gcount(gcount);
 
+		// It is important to flush, because this may be the last 'put' of this request/response.
+		this->flush();
+
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_body() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
 		}
