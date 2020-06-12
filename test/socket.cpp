@@ -27,6 +27,7 @@ SOFTWARE.
 #include <cctype>
 
 #include "socket.h"
+#include "http.h"
 #include "heap.h"
 
 
@@ -87,7 +88,7 @@ namespace abc { namespace test { namespace socket {
 
 
 	bool test_tcp_sync_socket(test_context<abc::test_log_ptr>& context) {
-		const char server_port[] = "31234";
+		const char server_port[] = "31235";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
@@ -141,7 +142,7 @@ namespace abc { namespace test { namespace socket {
 
 
 	bool test_tcp_socket_stream(test_context<abc::test_log_ptr>& context) {
-		const char server_port[] = "31235";
+		const char server_port[] = "31236";
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
 		bool passed = true;
@@ -184,6 +185,117 @@ namespace abc { namespace test { namespace socket {
 
 		client_out << response_content << "\n";
 		client_out.flush();
+
+		client_thread.join();
+		return passed;
+	}
+
+
+	bool test_http_socket_stream(test_context<abc::test_log_ptr>& context) {
+		const char server_port[] = "31237";
+		const char protocol[] = "HTTP/1.1";
+		const char request_method[] = "POST";
+		const char request_resource[] = "/scope/v1.0/api";
+		const char request_header_name[] = "Content-Length";
+		const char request_body[] = "{\r\n\"param\": \"foo\"\r\n}";
+		const char response_status_code[] = "200";
+		const char response_reason_phrase[] = "OK";
+		const char response_header_name[] = "Content-Length";
+		const char response_body[] = "\x05\x0c\x19 abc \x70\x7f xyz \x80\xff";
+		bool passed = true;
+
+		abc::tcp_server_socket server(context.log_ptr);
+		server.bind(server_port);
+		server.listen(5);
+
+		std::thread client_thread([&passed, &context, server_port,
+								protocol, request_method, request_resource, request_header_name, request_body,
+								response_status_code, response_reason_phrase, response_header_name, response_body] () {
+			try {
+				abc::tcp_client_socket client(context.log_ptr);
+				client.connect("localhost", server_port);
+
+				abc::socket_streambuf sb(&client, context.log_ptr);
+				abc::http_client_stream http(&sb, context.log_ptr);
+				char buffer[1024];
+
+				// Send request
+				std::snprintf(buffer, sizeof(buffer), "%lu", std::strlen(request_body));
+				http.put_method(request_method);
+				http.put_resource(request_resource);
+				http.put_protocol(protocol);
+				http.put_header_name(request_header_name);
+				http.put_header_value(buffer);
+				http.end_headers();
+				http.put_body(request_body);
+
+				// Receive response
+				http.get_protocol(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, protocol, __TAG__) && passed;
+
+				http.get_status_code(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_status_code, __TAG__) && passed;
+
+				http.get_reason_phrase(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_reason_phrase, __TAG__) && passed;
+
+				http.get_header_name(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_header_name, __TAG__) && passed;
+
+				long body_len = std::strlen(response_body);
+				http.get_header_value(buffer, sizeof(buffer));
+				passed = context.are_equal(std::atol(buffer), body_len, __TAG__, "%lu") && passed;
+
+				http.get_header_name(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, "", __TAG__) && passed;
+
+				http.get_body(buffer, body_len);
+				passed = context.are_equal(buffer, response_body, body_len, __TAG__) && passed;
+			}
+			catch (const std::exception& ex) {
+				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+			}
+		});
+		passed = abc::test::heap::ignore_heap_allocation(context) && passed; // Lambda closure
+
+		abc::tcp_client_socket client = std::move(server.accept());
+
+		abc::socket_streambuf sb(&client, context.log_ptr);
+		abc::http_server_stream http(&sb, context.log_ptr);
+		char buffer[1024];
+
+		// Receive request
+		http.get_method(buffer, sizeof(buffer));
+		passed = context.are_equal(buffer, request_method, __TAG__) && passed;
+
+		http.get_resource(buffer, sizeof(buffer));
+		passed = context.are_equal(buffer, request_resource, __TAG__) && passed;
+
+		http.get_protocol(buffer, sizeof(buffer));
+		passed = context.are_equal(buffer, protocol, __TAG__) && passed;
+
+		http.get_header_name(buffer, sizeof(buffer));
+		passed = context.are_equal(buffer, request_header_name, __TAG__) && passed;
+
+		long body_len = std::strlen(request_body);
+		http.get_header_value(buffer, sizeof(buffer));
+		passed = context.are_equal(std::atol(buffer), body_len, __TAG__, "%lu") && passed;
+
+		http.get_header_name(buffer, sizeof(buffer));
+		passed = context.are_equal(buffer, "", __TAG__) && passed;
+
+		http.get_body(buffer, body_len);
+		passed = context.are_equal(buffer, request_body, body_len, __TAG__) && passed;
+
+		// Send response
+		std::snprintf(buffer, sizeof(buffer), "%lu", std::strlen(response_body));
+		http.put_protocol(protocol);
+		http.put_status_code(response_status_code);
+		http.put_reason_phrase(response_reason_phrase);
+		http.put_header_name(response_header_name);
+		http.put_header_value(buffer);
+		http.end_headers();
+		http.put_body(response_body);
 
 		client_thread.join();
 		return passed;

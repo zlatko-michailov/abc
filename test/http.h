@@ -44,7 +44,5 @@ namespace abc { namespace test { namespace http {
 	bool test_http_response_ostream_bodytext(test_context<abc::test_log_ptr>& context);
 	bool test_http_response_ostream_bodybinary(test_context<abc::test_log_ptr>& context);
 
-		bool test_http_socket(test_context<abc::test_log_ptr>& context);
-
 }}}
 

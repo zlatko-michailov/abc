@@ -59,11 +59,6 @@ int main() {
 				{ "test_buffer_streambuf_1_char",					abc::test::streambuf::test_buffer_streambuf_1_char },
 				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
 			} },
-			{ "socket", {
-				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
-				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
-				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
-			} },
 			{ "http", {
 				{ "test_http_request_istream_extraspaces",			abc::test::http::test_http_request_istream_extraspaces },
 				{ "test_http_request_istream_bodytext",				abc::test::http::test_http_request_istream_bodytext },
@@ -75,6 +70,12 @@ int main() {
 				{ "test_http_response_istream_realworld_01",		abc::test::http::test_http_response_istream_realworld_01 },
 				{ "test_http_response_istream_realworld_02",		abc::test::http::test_http_response_istream_realworld_02 },
 				{ "test_http_response_ostream_bodytext",			abc::test::http::test_http_response_ostream_bodytext },
+			} },
+			{ "socket", {
+				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
+				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
+				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
+				{ "test_http_socket_stream",						abc::test::socket::test_http_socket_stream },
 			} },
 
 			{ "post-tests", {
