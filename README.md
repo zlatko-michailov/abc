@@ -136,9 +136,9 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 ### 0.6.0
 - No breaking changes.
 - `http`
-  - Introduce _syntactic_ streams.
+  - Introduce _syntactic_ http streams.
 - `ascii`
-  - Introduce basic predicates.
+  - Introduce basic character predicates.
 
 ### 0.5.0
 - Breaking changes.
@@ -164,7 +164,10 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 ### 0.7.0
 - Introduce `JSON` streams.
 
-### 0.8.0
+### 1.7.0
+- Stabilization and polishing as needed.
+
+### 1.8.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)

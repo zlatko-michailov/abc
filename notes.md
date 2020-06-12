@@ -92,13 +92,8 @@ __PENDING QUESTIONS__
 
 ---
 # v0.6
-## Done
-- Logging from the product
-- Order tests
-- operator new test
-
 ## To Do
-- ostreams
+---
 
 - async
 	+ future_state::continuations
@@ -113,13 +108,9 @@ __PENDING QUESTIONS__
 
 - conf
 - flight (killbit)
-- tag
-- test
 - uuid (request/correlation)
 - usage
-
 - ring
-
 - then
 
 
