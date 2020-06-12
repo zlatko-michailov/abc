@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "socket.i.h"
 #include "exception.h"
+#include "tag.h"
 
 
 namespace abc {
