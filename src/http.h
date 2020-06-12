@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
+#include <cstdio>
 
 #include "ascii.h"
 #include "exception.h"
@@ -109,7 +110,10 @@ namespace abc {
 	template <typename StdStream, typename LogPtr>
 	inline void _http_stream<StdStream, LogPtr>::assert_next(http::item_t item) {
 		if (_next != item) {
-			throw exception<std::logic_error, LogPtr>("_next", __TAG__, log_ptr());
+			char buffer[100];
+			std::snprintf(buffer, sizeof(buffer), "_next: actual=%u, expected=%u", _next, item);
+
+			throw exception<std::logic_error, LogPtr>(buffer, __TAG__, log_ptr());
 		}
 	}
 
