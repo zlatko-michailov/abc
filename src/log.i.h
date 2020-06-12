@@ -276,7 +276,7 @@ namespace abc {
 		template <typename Clock>
 		class test {
 		public:
-			test() noexcept = default;
+			test(severity_t severity = severity::critical) noexcept;
 			test(test&& other) noexcept = default;
 
 			test& operator=(test&& other) noexcept = default;
@@ -287,6 +287,9 @@ namespace abc {
 
 		protected:
 			int format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag);
+
+		private:
+			severity_t	_severity;
 		};
 
 

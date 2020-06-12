@@ -292,6 +292,12 @@ namespace abc {
 
 
 		template <typename Clock>
+		inline test<Clock>::test(severity_t severity) noexcept
+			: _severity(severity) {
+		}
+
+
+		template <typename Clock>
 		inline void test<Clock>::format(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 			int fixed_size = format_fixed(line, line_size, category, severity, tag);
 			if (0 <= fixed_size && fixed_size < line_size) {
@@ -317,7 +323,20 @@ namespace abc {
 		template <typename Clock>
 		inline int test<Clock>::format_fixed(char* line, std::size_t line_size, category_t category, severity_t severity, tag_t tag) {
 			char buf_timestamp[31];
-			format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
+			if (_severity >= severity::important) {
+				format_timestamp(buf_timestamp, sizeof(buf_timestamp), timestamp<Clock>(), format::datetime::friendly);
+			}
+			else {
+				buf_timestamp[0] = '\0';
+			}
+
+			char buf_thread_id[17];
+			if (_severity >= severity::debug) {
+				format_thread_id(buf_thread_id, sizeof(buf_thread_id), std::this_thread::get_id());
+			}
+			else {
+				buf_thread_id[0] = '\0';
+			}
 
 			char buf_severity[2 * severity::abc + 1];
 			severity = severity <= severity::abc ? severity : severity::abc;
@@ -325,14 +344,14 @@ namespace abc {
 			buf_severity[2 * (severity - 1)] = '\0';
 
 			char buf_tag[17];
-			if (tag != tag::none) {
-				format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::compact);
+			if (_severity >= severity::debug) {
+				format_tag(buf_tag, sizeof(buf_tag), tag, format::tag::friendly);
 			}
 			else {
 				buf_tag[0] = '\0';
 			}
 
-			return std::snprintf(line, line_size, "%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
+			return std::snprintf(line, line_size, "%s%s%s%s%s%s%s%s", buf_timestamp, format::separator::space, buf_thread_id, format::separator::space, buf_severity, format::separator::space, buf_tag, format::separator::space);
 		}
 
 
@@ -385,19 +404,15 @@ namespace abc {
 			constexpr std::size_t local_size = 5 + (chunk_size * 3) + 1 + 2 + chunk_size + 1;
 			constexpr char hex[] = "0123456789abcdef";
 
-////std::cout << "buffer_size=" << buffer_size << ", buffer_offset=" << buffer_offset << std::endl;
 			if (line_size < local_size) {
-////std::cout << "exit 1" << std::endl;
 				return 0;
 			}
 
 			if (buffer_size <= buffer_offset) {
-////std::cout << "exit 2" << std::endl;
 				return 0;
 			}
 
 			if ((buffer_offset % chunk_size) != 0) {
-////std::cout << "exit 3" << std::endl;
 				return 0;
 			}
 
@@ -449,7 +464,6 @@ namespace abc {
 			}
 
 			line[local_offset++] = '\0';
-////std::cout << "local_size=" << local_size << ", local_offset=" << local_offset << std::endl;
 
 			buffer_offset += chunk_size;
 			return static_cast<int>(chunk_size);

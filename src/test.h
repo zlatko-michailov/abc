@@ -200,6 +200,7 @@ namespace abc {
 		bool all_passed = true;
 
 		log_ptr->push_back_blank(category::any, severity::critical);
+		log_ptr->push_back_blank(category::any, severity::critical);
 
 		// Category
 		for (auto category_it = categories.begin(); category_it != categories.end(); category_it++) {
@@ -250,6 +251,7 @@ namespace abc {
 			log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
 		}
 
+		log_ptr->push_back_blank(category::any, severity::critical);
 		log_ptr->push_back_blank(category::any, severity::critical);
 
 		return all_passed;

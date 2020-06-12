@@ -40,8 +40,8 @@ SOFTWARE.
 int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream()),
-		std::move(abc::log_view::test<>()),
-		std::move(abc::log_filter::severity(abc::severity::important)));
+		std::move(abc::log_view::test<>(abc::severity::critical)),
+		std::move(abc::log_filter::severity(abc::severity::critical)));
 
 	abc::test_suite<> test_suite ( {
 			{ "pre-tests", {
