@@ -107,7 +107,7 @@ namespace abc {
 
 	namespace log_container {
 		inline ostream::ostream() noexcept
-			: ostream(std::clog.rdbuf()) {
+			: ostream(std::cout.rdbuf()) {
 		}
 
 

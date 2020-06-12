@@ -39,7 +39,7 @@ SOFTWARE.
 
 int main() {
 	abc::test_log test_log(
-		std::move(abc::log_container::ostream(std::clog.rdbuf())),
+		std::move(abc::log_container::ostream()),
 		std::move(abc::log_view::test<>()),
 		std::move(abc::log_filter::severity(abc::severity::important)));
 
