@@ -119,6 +119,13 @@ namespace abc {
 
 
 	template <typename StdStream, typename LogPtr>
+	inline void _http_stream<StdStream, LogPtr>::set_state(std::size_t gcount, http::item_t next) noexcept {
+		_gcount	= gcount;
+		_next	= next;
+	}
+
+
+	template <typename StdStream, typename LogPtr>
 	inline void _http_stream<StdStream, LogPtr>::set_next(http::item_t item) noexcept {
 		_next = item;
 	}
@@ -168,7 +175,13 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	inline void _http_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
+	inline void _http_istream<LogPtr>::set_gstate(std::size_t gcount, http::item_t next) {
+		this->set_state(gcount, next);
+	}
+
+
+	template <typename LogPtr>
+	inline std::size_t _http_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::get_protocol() >>>");
@@ -217,12 +230,13 @@ namespace abc {
 			gcount += this->get_digits(buffer + gcount, size - gcount);
 		}
 
-		this->set_gcount(gcount);
 		this->skip_spaces();
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::get_protocol() <<< protocol='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
 		}
+
+		return gcount;
 	}
 
 
@@ -240,8 +254,8 @@ namespace abc {
 
 		if (gcount == 0) {
 			this->skip_crlf();
-			this->set_gcount(gcount);
-			this->set_next(http::item::body);
+
+			this->set_gstate(gcount, http::item::body);
 			return;
 		}
 
@@ -252,9 +266,9 @@ namespace abc {
 			}
 		}
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_value);
 		this->skip_spaces();
+
+		this->set_gstate(gcount, http::item::header_value);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::get_header_name() <<< header_name='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -280,7 +294,7 @@ namespace abc {
 				if (gcount > 0 && sp > 0 && ascii::is_abcprint(this->peek_char())) {
 					if (gcount == size - 1) {
 						this->set_fail();
-						this->set_gcount(gcount);
+						this->set_gstate(gcount, http::item::header_value);
 						return;
 					}
 
@@ -295,9 +309,9 @@ namespace abc {
 		}
 		while (this->is_good() && ascii::is_space(this->peek_char()));
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_name);
 		this->skip_spaces();
+
+		this->set_gstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::get_header_value() <<< header_value='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -316,7 +330,7 @@ namespace abc {
 
 		std::size_t gcount = this->get_bytes(buffer, size);
 
-		this->set_gcount(gcount);
+		this->set_gstate(gcount, http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_istream::get_body() <<< body='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -462,6 +476,13 @@ namespace abc {
 
 
 	template <typename LogPtr>
+	inline void _http_ostream<LogPtr>::set_pstate(std::size_t gcount, http::item_t next) {
+		this->flush();
+		this->set_state(gcount, next);
+	}
+
+
+	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
@@ -517,8 +538,6 @@ namespace abc {
 			this->set_bad();
 		}
 
-		this->set_gcount(gcount);
-
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_protocol() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
 		}
@@ -553,8 +572,7 @@ namespace abc {
 			this->put_space();
 		}
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_value);
+		this->set_pstate(gcount, http::item::header_value);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_name() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -598,8 +616,7 @@ namespace abc {
 
 		this->put_crlf();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_name);
+		this->set_pstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_header_value() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -619,8 +636,7 @@ namespace abc {
 		std::size_t gcount = 0;
 		this->put_crlf();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::body);
+		this->set_pstate(gcount, http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::end_headers() <<< gcount=%lu", (std::uint32_t)gcount);
@@ -643,10 +659,7 @@ namespace abc {
 
 		std::size_t gcount = this->put_bytes(buffer, size);
 
-		this->set_gcount(gcount);
-
-		// It is important to flush, because this may be the last 'put' of this request/response.
-		this->flush();
+		this->set_pstate(gcount, http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_body() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -792,10 +805,10 @@ namespace abc {
 		this->assert_next(http::item::method);
 
 		std::size_t gcount = this->get_token(buffer, size);
-		this->set_gcount(gcount);
 
-		this->set_next(http::item::resource);
 		this->skip_spaces();
+
+		this->set_gstate(gcount, http::item::resource);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_request_istream::get_method() <<< method='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -813,10 +826,10 @@ namespace abc {
 		this->assert_next(http::item::resource);
 
 		std::size_t gcount = this->get_prints(buffer, size);
-		this->set_gcount(gcount);
 
-		this->set_next(http::item::protocol);
 		this->skip_spaces();
+
+		this->set_gstate(gcount, http::item::protocol);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_request_istream::get_resource() <<< resource='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -826,10 +839,11 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		_http_istream<LogPtr>::get_protocol(buffer, size);
+		std::size_t gcount = _http_istream<LogPtr>::get_protocol(buffer, size);
 
-		this->set_next(http::item::header_name);
 		this->skip_crlf();
+
+		this->set_gstate(gcount, http::item::header_name);
 	}
 
 
@@ -869,8 +883,7 @@ namespace abc {
 
 		this->put_space();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::resource);
+		this->set_pstate(gcount, http::item::resource);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_method() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -895,8 +908,7 @@ namespace abc {
 
 		this->put_space();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::protocol);
+		this->set_pstate(gcount, http::item::protocol);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "_http_ostream::put_resource() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -910,8 +922,7 @@ namespace abc {
 
 		this->put_crlf();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_name);
+		this->set_pstate(gcount, http::item::header_name);
 	}
 
 
@@ -936,9 +947,9 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_response_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		_http_istream<LogPtr>::get_protocol(buffer, size);
+		std::size_t gcount = _http_istream<LogPtr>::get_protocol(buffer, size);
 
-		this->set_next(http::item::status_code);
+		this->set_gstate(gcount, http::item::status_code);
 	}
 
 	template <typename LogPtr>
@@ -951,10 +962,10 @@ namespace abc {
 		this->assert_next(http::item::status_code);
 
 		std::size_t gcount = this->get_digits(buffer, size);
-		this->set_gcount(gcount);
 
-		this->set_next(http::item::reason_phrase);
 		this->skip_spaces();
+
+		this->set_gstate(gcount, http::item::reason_phrase);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_istream::get_status_code() <<< status_code='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -972,11 +983,11 @@ namespace abc {
 		this->assert_next(http::item::reason_phrase);
 
 		std::size_t gcount = this->get_prints_and_spaces(buffer, size);
-		this->set_gcount(gcount);
 
-		this->set_next(http::item::header_name);
 		this->skip_spaces();
 		this->skip_crlf();
+
+		this->set_gstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -1009,8 +1020,7 @@ namespace abc {
 
 		this->put_space();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::status_code);
+		this->set_pstate(gcount, http::item::status_code);
 	}
 
 
@@ -1031,8 +1041,7 @@ namespace abc {
 
 		this->put_space();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::reason_phrase);
+		this->set_pstate(gcount, http::item::reason_phrase);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_status_code() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
@@ -1060,8 +1069,7 @@ namespace abc {
 
 		this->put_crlf();
 
-		this->set_gcount(gcount);
-		this->set_next(http::item::header_name);
+		this->set_pstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::http, severity::abc, __TAG__, "http_response_ostream::put_reason_phrase() <<< buffer='%s', size=%lu, gcount=%lu", buffer != nullptr ? buffer : "<nullptr>", (std::uint32_t)size, (std::uint32_t)gcount);

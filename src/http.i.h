@@ -106,6 +106,7 @@ namespace abc {
 	protected:
 		void			reset(http::item_t next);
 		void			assert_next(http::item_t item);
+		void			set_state(std::size_t gcount, http::item_t next) noexcept;
 		void			set_next(http::item_t item) noexcept;
 		void			set_gcount(std::size_t gcount) noexcept;
 		bool			is_good() const;
@@ -133,7 +134,9 @@ namespace abc {
 		void		get_body(char* buffer, std::size_t size);
 
 	protected:
-		void		get_protocol(char* buffer, std::size_t size);
+		void		set_gstate(std::size_t gcount, http::item_t next);
+
+		std::size_t	get_protocol(char* buffer, std::size_t size);
 
 		std::size_t	get_token(char* buffer, std::size_t size);
 		std::size_t	get_prints(char* buffer, std::size_t size);
@@ -167,6 +170,8 @@ namespace abc {
 		void		put_body(const char* buffer, std::size_t size = size::strlen);
 
 	protected:
+		void		set_pstate(std::size_t gcount, http::item_t next);
+
 		std::size_t	put_protocol(const char* buffer, std::size_t size);
 
 		std::size_t	put_token(const char* buffer, std::size_t size);
