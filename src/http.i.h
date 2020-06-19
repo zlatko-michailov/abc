@@ -67,20 +67,6 @@ namespace abc {
 			constexpr item_t header_value	= 6;
 			constexpr item_t body			= 7;
 		}
-
-#ifdef MAYBE
-		static constexpr const char* protocol_11				= "HTTP/1.1";
-
-		namespace request {
-			static constexpr const char* method_get				= "GET";
-			static constexpr const char* method_post			= "POST";
-			static constexpr const char* method_put				= "PUT";
-			static constexpr const char* method_delete			= "DELETE";
-			static constexpr const char* method_head			= "HEAD";
-			static constexpr const char* method_connect			= "CONNECT";
-			static constexpr const char* method_options			= "OPTIONS";
-		}
-#endif
 	}
 
 	// --------------------------------------------------------------
@@ -118,7 +104,6 @@ namespace abc {
 		http::item_t	_next;
 		std::size_t		_gcount;
 		LogPtr			_log_ptr;
-
 	};
 
 
