@@ -28,16 +28,17 @@ SOFTWARE.
 #include <streambuf>
 #include <istream>
 #include <ostream>
+#include <bitset>
 
 #include "log.i.h"
 
 
 namespace abc {
 
-	template <typename LogPtr>
+	template <typename LogPtr, std::size_t MaxLevels>
 	class json_istream;
 
-	template <typename LogPtr>
+	template <typename LogPtr, std::size_t MaxLevels>
 	class json_ostream;
 
 
@@ -45,7 +46,7 @@ namespace abc {
 		using item_t = std::uint16_t;
 
 		namespace item {
-			constexpr item_t invalid		= 0x0000;
+			constexpr item_t none			= 0x0000;
 
 			constexpr item_t null			= 0x0001;
 			constexpr item_t boolean		= 0x0002;
@@ -58,6 +59,7 @@ namespace abc {
 			constexpr item_t property		= 0x0100;
 		}
 
+
 		union value_t {
 			bool	boolean;
 			double	number;
@@ -65,24 +67,32 @@ namespace abc {
 			char	property[1];
 		};
 		
-		struct token {
+		struct token_t {
 			item_t	item;
 			value_t	value;
 		};
+
+
+		using level_t = bool;
+
+		namespace level {
+			constexpr level_t	array	= false;
+			constexpr level_t	object	= true;
+		}
 	}
 
 	// --------------------------------------------------------------
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels = 64>
+	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	class _json_stream : protected StdStream {
 	protected:
-		_json_stream(std::streambuf* sb, json::item_t last, const LogPtr& log_ptr);
+		_json_stream(std::streambuf* sb, const LogPtr& log_ptr);
 		_json_stream(_json_stream&& other) = default;
 
 	public:
 		json::item_t	last() const noexcept;
-		std::size_t		level() const noexcept;
+		std::size_t		levels() const noexcept;
 
 		std::size_t		gcount() const;
 		bool			eof() const;
@@ -93,10 +103,14 @@ namespace abc {
 						operator bool() const;
 
 	protected:
-		////void			reset(json::item_t last);
-		////void			assert_last(json::item_t item);
-		void			set_state(std::size_t gcount, json::item_t last) noexcept;
-		void			set_last(json::item_t item) noexcept;
+		void			reset();
+		////void			assert_last(json::item_t item); //// REMOVE
+		bool			expect_property() const noexcept;
+		void			set_expect_property(bool expect) noexcept;
+		void			push_level(json::level_t level) noexcept;
+		void			pop_level(json::level_t level) noexcept;
+		void			set_state(std::size_t gcount, json::item_t last) noexcept; //// REMOVE
+		void			set_last(json::item_t item) noexcept; //// REMOVE
 		void			set_gcount(std::size_t gcount) noexcept;
 		bool			is_good() const;
 		void			set_bad();
@@ -104,36 +118,40 @@ namespace abc {
 		const LogPtr&	log_ptr() const noexcept;
 
 	private:
-		json::item_t	_last;
-		std::size_t		_level;
-		std::size_t		_gcount;
-		LogPtr			_log_ptr;
+		json::item_t			_last; //// REMOVE
+		bool					_expect_property;
+		std::size_t				_level_top;
+		std::bitset<MaxLevels>	_level_stack;
+		std::size_t				_gcount;
+		LogPtr					_log_ptr;
 	};
 
 
-	template <typename LogPtr>
-	class json_istream : public _json_stream<std::istream, LogPtr> {
+	template <typename LogPtr, std::size_t MaxLevels = 64>
+	class json_istream : public _json_stream<std::istream, LogPtr, MaxLevels> {
 	public:
 		json_istream(std::streambuf* sb, const LogPtr& log_ptr);
 		json_istream(json_istream&& other) = default;
 
 	public:
-		void		get(json::token* buffer, std::size_t size);
+		void		get_token(json::token_t* buffer, std::size_t size);
 
 	protected:
-		void		get_null();
-		bool		get_boolean();
 		double		get_number();
 		std::size_t	get_string(char* buffer, std::size_t size);
 		void		get_begin_array();
 		void		get_end_array();
 		void		get_begin_object();
 		void		get_end_object();
-		std::size_t	get_property_name(char* buffer, std::size_t size);
 
 	protected:
-		void		set_gstate(std::size_t gcount, json::item_t last);
+		void		set_gstate(std::size_t gcount, json::item_t last); //// REMOVE
 
+		void		get_literal(const char* literal);
+		char		get_escaped_char();
+		std::size_t	get_string_content(char* buffer, std::size_t size);
+		std::size_t	get_hex(char* buffer, std::size_t size);
+		std::size_t	get_digits(char* buffer, std::size_t size);
 		std::size_t	skip_spaces();
 
 		template <typename Predicate>
@@ -145,14 +163,14 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr>
-	class json_ostream : public _json_stream<std::ostream, LogPtr> {
+	template <typename LogPtr, std::size_t MaxLevels = 64>
+	class json_ostream : public _json_stream<std::ostream, LogPtr, MaxLevels> {
 	public:
 		json_ostream(std::streambuf* sb, const LogPtr& log_ptr);
 		json_ostream(json_ostream&& other) = default;
 
 	public:
-		void		put(json::token* buffer, std::size_t size = size::strlen);
+		void		put(json::token_t* buffer, std::size_t size = size::strlen);
 
 		void		put_space();
 		void		put_tab();
@@ -171,7 +189,7 @@ namespace abc {
 		void		put_property_name(char* buffer, std::size_t size = size::strlen);
 
 	protected:
-		void		set_pstate(std::size_t gcount, http::item_t next);
+		void		set_pstate(std::size_t gcount, json::item_t next);
 
 		template <typename Predicate>
 		std::size_t	put_chars(Predicate&& predicate, const char* buffer, std::size_t size);

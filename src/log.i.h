@@ -94,6 +94,7 @@ namespace abc {
 			constexpr category_t exception	= base | 0x0001;
 			constexpr category_t socket		= base | 0x0002;
 			constexpr category_t http		= base | 0x0003;
+			constexpr category_t json		= base | 0x0004;
 		}
 	}
 

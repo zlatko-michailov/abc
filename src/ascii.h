@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
+
 
 namespace abc {
 	namespace ascii {
@@ -99,6 +101,21 @@ namespace abc {
 		}
 
 
+		inline std::uint8_t hex(char ch) noexcept {
+			if (is_digit(ch)) {
+				return ch - '0';
+			}
+			else if (is_between(ch, 'A', 'F')) {
+				return 10 + (ch - 'A');
+			}
+			else if (is_between(ch, 'a', 'f')) {
+				return 10 + (ch - 'a');
+			}
+
+			return 0;
+		}
+
+
 		namespace http {
 			inline bool is_separator(char ch) noexcept {
 				return
@@ -110,6 +127,23 @@ namespace abc {
 
 			inline bool is_token(char ch) noexcept {
 				return is_abcprint(ch) && !is_separator(ch);
+			}
+		}
+
+
+		namespace json {
+			inline bool is_valid(char /*ch*/) noexcept {
+				return true;
+			}
+
+
+			inline bool is_space(char ch) noexcept {
+				return ascii::is_space(ch) || ch == '\r' || ch == '\n';
+			}
+
+
+			inline bool is_string_content(char ch) noexcept {
+				return is_valid(ch) && ch != '"' && ch != '\\';
 			}
 		}
 	}
