@@ -164,7 +164,7 @@ namespace abc {
 
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	inline void _json_stream<StdStream, LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
-		if (_level_top <= 0) {
+		if (_level_top + 1 <= 0) {
 			if (_log_ptr != nullptr) {
 				_log_ptr->push_back(category::abc::json, severity::important, __TAG__, "_json_stream::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
 			}
@@ -251,6 +251,7 @@ namespace abc {
 
 		buffer->item = json::item::none;
 		std::size_t gcount = sizeof(json::item_t);
+		bool trail = true;
 
 		this->skip_spaces();
 
@@ -274,8 +275,10 @@ namespace abc {
 				}
 			}
 			else if (ch == '}') {
-				get_end_object();
+				this->get();
+
 				buffer->item = json::item::end_object;
+				this->pop_level(json::level::object);
 			}
 			else {
 				if (log_ptr_local != nullptr) {
@@ -321,16 +324,24 @@ namespace abc {
 				}
 			}
 			else if (ch == '[') {
+				this->get();
+
 				buffer->item = json::item::begin_array;
-				get_begin_array();
+				this->push_level(json::level::array);
+				trail = false;
 			}
 			else if (ch == ']') {
+				this->get();
+
 				buffer->item = json::item::end_array;
-				get_end_array();
+				this->pop_level(json::level::array);
 			}
 			else if (ch == '{') {
+				this->get();
+
 				buffer->item = json::item::begin_object;
-				get_begin_object();
+				this->pop_level(json::level::object);
+				trail = false;
 			}
 			else {
 				if (log_ptr_local != nullptr) {
@@ -341,7 +352,7 @@ namespace abc {
 
 			this->set_expect_property(true);
 
-			if (this->levels() > 0) {
+			if (trail && this->levels() > 0) {
 				this->skip_spaces();
 
 				ch = this->peek_char();
@@ -366,7 +377,7 @@ namespace abc {
 		this->set_gcount(gcount);
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get() <<<");
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get() ch=%c (\\u%4.4x) <<<", ch, ch);
 		}
 	}
 
@@ -453,66 +464,6 @@ namespace abc {
 		}
 
 		return number;
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_istream<LogPtr, MaxLevels>::get_begin_array() {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_begin_array() >>>");
-		}
-
-		//// TODO:
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_begin_array() <<<");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_istream<LogPtr, MaxLevels>::get_end_array() {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_end_array() >>>");
-		}
-
-		//// TODO:
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_end_array() <<<");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_istream<LogPtr, MaxLevels>::get_begin_object() {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_begin_object() >>>");
-		}
-
-		//// TODO:
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_begin_object() <<<");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_istream<LogPtr, MaxLevels>::get_end_object() {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_end_object() >>>");
-		}
-
-		//// TODO:
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_end_object() <<<");
-		}
 	}
 
 

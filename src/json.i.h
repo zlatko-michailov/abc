@@ -139,10 +139,6 @@ namespace abc {
 	protected:
 		double		get_number();
 		std::size_t	get_string(char* buffer, std::size_t size);
-		void		get_begin_array();
-		void		get_end_array();
-		void		get_begin_object();
-		void		get_end_object();
 
 	protected:
 		void		set_gstate(std::size_t gcount, json::item_t last); //// REMOVE
