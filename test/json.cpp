@@ -205,6 +205,88 @@ namespace abc { namespace test { namespace json {
 	}
 
 
+	bool test_json_istream_string_01(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"\"\"";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("");
+
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "", istream, __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_json_istream_string_02(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			" \r  \"abc xyz\" \n  ";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("abc xyz");
+
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "abc xyz", istream, __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_json_istream_string_03(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"\n\"a\\nb\\rc\\txyz\"";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("a\nb\rc\txyz");
+
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "a\nb\rc\txyz", istream, __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_json_istream_string_04(test_context<abc::test_log_ptr>& context) {
+		char content[] =
+			"\n   \"абв\\u0020юя\"  ";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("абв юя");
+
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "абв юя", istream, __TAG__) && passed;
+
+		return passed;
+	}
 
 
 	// --------------------------------------------------------------
@@ -215,7 +297,7 @@ namespace abc { namespace test { namespace json {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, tag) && passed;
-		passed = verify_stream(context, istream, std::strlen(expected), tag) && passed;
+		passed = verify_stream(context, istream, sizeof(abc::json::item_t) + std::strlen(expected), tag) && passed;
 
 		return passed;
 	}

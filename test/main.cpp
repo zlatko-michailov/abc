@@ -80,6 +80,10 @@ int main() {
 				{ "test_json_istream_number_03",					abc::test::json::test_json_istream_number_03 },
 				{ "test_json_istream_number_04",					abc::test::json::test_json_istream_number_04 },
 				{ "test_json_istream_number_05",					abc::test::json::test_json_istream_number_05 },
+				{ "test_json_istream_string_01",					abc::test::json::test_json_istream_string_01 },
+				{ "test_json_istream_string_02",					abc::test::json::test_json_istream_string_02 },
+				{ "test_json_istream_string_03",					abc::test::json::test_json_istream_string_03 },
+				{ "test_json_istream_string_04",					abc::test::json::test_json_istream_string_04 },
 			} },
 			/*{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },

@@ -37,6 +37,10 @@ namespace abc { namespace test { namespace json {
 	bool test_json_istream_number_03(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_number_04(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_number_05(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_string_01(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_string_02(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_string_03(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_string_04(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_array(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_object(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_nested_01(test_context<abc::test_log_ptr>& context);
