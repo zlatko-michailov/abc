@@ -246,12 +246,12 @@ namespace abc {
 	inline void json_istream<LogPtr, MaxLevels>::get_token(json::token_t* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get() >>>");
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_token() >>>");
 		}
 
 		buffer->item = json::item::none;
 		std::size_t gcount = sizeof(json::item_t);
-		bool trail = true;
+		bool trail_comma = true;
 
 		this->skip_spaces();
 
@@ -259,7 +259,7 @@ namespace abc {
 
 		if (this->expect_property()) {
 			if (ch == '"') {
-				gcount += get_string(buffer->value.string, size - gcount);
+				gcount += get_string(buffer->value.property, size - gcount);
 				if (this->is_good()) {
 					buffer->item = json::item::property;
 
@@ -273,21 +273,24 @@ namespace abc {
 						this->set_bad();
 					}
 				}
+
+				this->set_expect_property(false);
+				trail_comma = false;
 			}
 			else if (ch == '}') {
 				this->get();
 
 				buffer->item = json::item::end_object;
 				this->pop_level(json::level::object);
+
+				this->set_expect_property(true);
 			}
 			else {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get() ch=%c (\\u%4.4x). Expected \".", ch, ch);
+					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_token() ch=%c (\\u%4.4x). Expected \".", ch, ch);
 				}
 				this->set_bad();
 			}
-
-			this->set_expect_property(false);
 		}
 		else {
 			if (ch == 'n') {
@@ -328,7 +331,7 @@ namespace abc {
 
 				buffer->item = json::item::begin_array;
 				this->push_level(json::level::array);
-				trail = false;
+				trail_comma = false;
 			}
 			else if (ch == ']') {
 				this->get();
@@ -340,35 +343,36 @@ namespace abc {
 				this->get();
 
 				buffer->item = json::item::begin_object;
-				this->pop_level(json::level::object);
-				trail = false;
+				this->push_level(json::level::object);
+				trail_comma = false;
 			}
 			else {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get() ch=%c (\\u%4.4x)", ch, ch);
+					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_token() ch=%c (\\u%4.4x)", ch, ch);
 				}
 				this->set_bad();
 			}
 
 			this->set_expect_property(true);
+		}
 
-			if (trail && this->levels() > 0) {
-				this->skip_spaces();
 
-				ch = this->peek_char();
-				if (ch == ',') {
-					this->get();
+		if (trail_comma && this->levels() > 0) {
+			this->skip_spaces();
+
+			ch = this->peek_char();
+			if (ch == ',') {
+				this->get();
+			}
+			else {
+				if (this->expect_property()) {
+					if (ch != '}') {
+						this->set_bad();
+					}
 				}
 				else {
-					if (this->expect_property()) {
-						if (ch != '}') {
-							this->set_bad();
-						}
-					}
-					else {
-						if (ch != ']') {
-							this->set_bad();
-						}
+					if (ch != ']') {
+						this->set_bad();
 					}
 				}
 			}
@@ -377,7 +381,7 @@ namespace abc {
 		this->set_gcount(gcount);
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get() ch=%c (\\u%4.4x) <<<", ch, ch);
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_token() ch=%c (\\u%4.4x) <<<", ch, ch);
 		}
 	}
 
