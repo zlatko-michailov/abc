@@ -49,6 +49,7 @@ namespace abc { namespace test { namespace json {
 	bool test_json_istream_object_03(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_mixed_01(test_context<abc::test_log_ptr>& context);
 	bool test_json_istream_mixed_02(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_skip(test_context<abc::test_log_ptr>& context);
 
 }}}
 
