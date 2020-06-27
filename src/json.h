@@ -37,7 +37,6 @@ namespace abc {
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	inline _json_stream<StdStream, LogPtr, MaxLevels>::_json_stream(std::streambuf* sb, const LogPtr& log_ptr)
 		: StdStream(sb)
-		, _last(json::item::none)
 		, _expect_property(false)
 		, _level_top(-1)
 		, _gcount(0)
@@ -55,16 +54,9 @@ namespace abc {
 		}
 
 		StdStream::clear(StdStream::goodbit);
-		_last = json::item::none;
 		_expect_property = false;
 		_level_top = -1;
 		_gcount = 0;
-	}
-
-
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline json::item_t _json_stream<StdStream, LogPtr, MaxLevels>::last() const noexcept {
-		return _last;
 	}
 
 
@@ -114,19 +106,6 @@ namespace abc {
 	inline _json_stream<StdStream, LogPtr, MaxLevels>::operator bool() const {
 		return StdStream::operator bool();
 	}
-
-
-#if MAYBE
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::assert_next(json::item_t item) {
-		if (_next != item) {
-			char buffer[100];
-			std::snprintf(buffer, sizeof(buffer), "_next: actual=%u, expected=%u", _next, item);
-
-			throw exception<std::logic_error, LogPtr>(buffer, 0x1003d, log_ptr());
-		}
-	}
-#endif
 
 
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
@@ -183,19 +162,6 @@ namespace abc {
 		}
 
 		_level_top--;
-	}
-
-
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_state(std::size_t gcount, json::item_t last) noexcept {
-		_gcount	= gcount;
-		_last	= last;
-	}
-
-
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_last(json::item_t item) noexcept {
-		_last = item;
 	}
 
 
@@ -270,6 +236,10 @@ namespace abc {
 						this->get();
 					}
 					else {
+						if (log_ptr_local != nullptr) {
+							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
+						}
+
 						this->set_bad();
 					}
 				}
@@ -287,8 +257,9 @@ namespace abc {
 			}
 			else {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_token() ch=%c (\\u%4.4x). Expected \".", ch, ch);
+					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_token() ch='%c' (\\u%4.4x). Expected='\"' or '}'.", ch, ch);
 				}
+
 				this->set_bad();
 			}
 		}
@@ -367,11 +338,19 @@ namespace abc {
 			else {
 				if (this->expect_property()) {
 					if (ch != '}') {
+						if (log_ptr_local != nullptr) {
+							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
+						}
+
 						this->set_bad();
 					}
 				}
 				else {
 					if (ch != ']') {
+						if (log_ptr_local != nullptr) {
+							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
+						}
+
 						this->set_bad();
 					}
 				}
@@ -482,8 +461,9 @@ namespace abc {
 			char ch = this->get_char();
 			if (ch != *it) {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_literal() ch=%c (\\u%4.4x). Expected=%c (\\u%4.4x)", ch, ch, *it, *it);
+					log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_literal() ch='%c' (\\u%4.4x). Expected='%c' (\\u%4.4x)", ch, ch, *it, *it);
 				}
+
 				this->set_bad();
 				break;
 			}
@@ -497,6 +477,8 @@ namespace abc {
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline char json_istream<LogPtr, MaxLevels>::get_escaped_char() {
+		LogPtr log_ptr_local = this->log_ptr();
+
 		char ch = peek_char();
 
 		if (ch == '\\') {
@@ -534,6 +516,10 @@ namespace abc {
 				std::size_t gcount = this->get_hex(buffer, sizeof(buffer));
 
 				if (gcount != 4) {
+					if (log_ptr_local != nullptr) {
+						log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_escaped_char() gcount=%d ", gcount);
+					}
+
 					this->set_bad();
 					ch = '\0';
 				}
@@ -541,23 +527,25 @@ namespace abc {
 					ch = (ascii::hex(buffer[2]) << 4) | ascii::hex(buffer[3]);
 				}
 				else {
+					if (log_ptr_local != nullptr) {
+						log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_escaped_char() Wide chars not supported.");
+					}
+
 					this->set_bad();
 					ch = '\0';
 				}
 			}
 		}
 		else {
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_escaped_char() ch='%c' (\\u%4.4x). Unexpected.", ch, ch);
+			}
+
 			this->set_bad();
 			ch = '\0';
 		}
 
 		return ch;
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_istream<LogPtr, MaxLevels>::set_gstate(std::size_t gcount, json::item_t last) {
-		this->set_state(gcount, last);
 	}
 
 

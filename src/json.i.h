@@ -91,34 +91,29 @@ namespace abc {
 		_json_stream(_json_stream&& other) = default;
 
 	public:
-		json::item_t	last() const noexcept;
-		std::size_t		levels() const noexcept;
+		std::size_t			levels() const noexcept;
 
-		std::size_t		gcount() const;
-		bool			eof() const;
-		bool			good() const;
-		bool			bad() const;
-		bool			fail() const;
-		bool			operator!() const;
-						operator bool() const;
+		std::size_t			gcount() const;
+		bool				eof() const;
+		bool				good() const;
+		bool				bad() const;
+		bool				fail() const;
+		bool				operator!() const;
+							operator bool() const;
 
 	protected:
-		void			reset();
-		////void			assert_last(json::item_t item); //// REMOVE
-		bool			expect_property() const noexcept;
-		void			set_expect_property(bool expect) noexcept;
-		void			push_level(json::level_t level) noexcept;
-		void			pop_level(json::level_t level) noexcept;
-		void			set_state(std::size_t gcount, json::item_t last) noexcept; //// REMOVE
-		void			set_last(json::item_t item) noexcept; //// REMOVE
-		void			set_gcount(std::size_t gcount) noexcept;
-		bool			is_good() const;
-		void			set_bad();
-		void			set_fail();
-		const LogPtr&	log_ptr() const noexcept;
+		void				reset();
+		bool				expect_property() const noexcept;
+		void				set_expect_property(bool expect) noexcept;
+		void				push_level(json::level_t level) noexcept;
+		void				pop_level(json::level_t level) noexcept;
+		void				set_gcount(std::size_t gcount) noexcept;
+		bool				is_good() const;
+		void				set_bad();
+		void				set_fail();
+		const LogPtr&		log_ptr() const noexcept;
 
 	private:
-		json::item_t			_last; //// REMOVE
 		bool					_expect_property;
 		std::size_t				_level_top;
 		std::bitset<MaxLevels>	_level_stack;
@@ -134,28 +129,26 @@ namespace abc {
 		json_istream(json_istream&& other) = default;
 
 	public:
-		void		get_token(json::token_t* buffer, std::size_t size);
+		void				get_token(json::token_t* buffer, std::size_t size);
 
 	protected:
-		double		get_number();
-		std::size_t	get_string(char* buffer, std::size_t size);
+		double				get_number();
+		std::size_t			get_string(char* buffer, std::size_t size);
 
 	protected:
-		void		set_gstate(std::size_t gcount, json::item_t last); //// REMOVE
-
-		void		get_literal(const char* literal);
-		char		get_escaped_char();
-		std::size_t	get_string_content(char* buffer, std::size_t size);
-		std::size_t	get_hex(char* buffer, std::size_t size);
-		std::size_t	get_digits(char* buffer, std::size_t size);
-		std::size_t	skip_spaces();
+		void				get_literal(const char* literal);
+		char				get_escaped_char();
+		std::size_t			get_string_content(char* buffer, std::size_t size);
+		std::size_t			get_hex(char* buffer, std::size_t size);
+		std::size_t			get_digits(char* buffer, std::size_t size);
+		std::size_t			skip_spaces();
 
 		template <typename Predicate>
-		std::size_t	get_chars(Predicate&& predicate, char* buffer, std::size_t size);
+		std::size_t			get_chars(Predicate&& predicate, char* buffer, std::size_t size);
 		template <typename Predicate>
-		std::size_t	skip_chars(Predicate&& predicate);
-		char		get_char();
-		char		peek_char();
+		std::size_t			skip_chars(Predicate&& predicate);
+		char				get_char();
+		char				peek_char();
 	};
 
 
@@ -166,30 +159,30 @@ namespace abc {
 		json_ostream(json_ostream&& other) = default;
 
 	public:
-		void		put(json::token_t* buffer, std::size_t size = size::strlen);
+		void				put(json::token_t* buffer, std::size_t size = size::strlen);
 
-		void		put_space();
-		void		put_tab();
-		void		put_cr();
-		void		put_lf();
-
-	protected:
-		void		put_null();
-		void		put_boolean(bool value);
-		void		get_number(double value);
-		void		put_string(char* buffer, std::size_t size = size::strlen);
-		void		put_begin_array();
-		void		put_end_array();
-		void		put_begin_object();
-		void		put_end_object();
-		void		put_property_name(char* buffer, std::size_t size = size::strlen);
+		void				put_space();
+		void				put_tab();
+		void				put_cr();
+		void				put_lf();
 
 	protected:
-		void		set_pstate(std::size_t gcount, json::item_t next);
+		void				put_null();
+		void				put_boolean(bool value);
+		void				put_number(double value);
+		void				put_string(char* buffer, std::size_t size = size::strlen);
+		void				put_begin_array();
+		void				put_end_array();
+		void				put_begin_object();
+		void				put_end_object();
+		void				put_property_name(char* buffer, std::size_t size = size::strlen);
+
+	protected:
+		void				set_pstate(std::size_t gcount, json::item_t next);
 
 		template <typename Predicate>
-		std::size_t	put_chars(Predicate&& predicate, const char* buffer, std::size_t size);
-		std::size_t put_char(char ch);
+		std::size_t			put_chars(Predicate&& predicate, const char* buffer, std::size_t size);
+		std::size_t			put_char(char ch);
 	};
 
 
