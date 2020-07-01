@@ -130,15 +130,17 @@ namespace abc {
 
 	public:
 		void				get_token(json::token_t* buffer, std::size_t size);
+		json::item_t		skip_value();
 
 	protected:
-		double				get_number();
-		std::size_t			get_string(char* buffer, std::size_t size);
+		json::item_t		get_or_skip_token(json::token_t* buffer, std::size_t size);
+		void				get_or_skip_number(double* buffer);
+		std::size_t			get_or_skip_string(char* buffer, std::size_t size);
 
 	protected:
 		void				get_literal(const char* literal);
 		char				get_escaped_char();
-		std::size_t			get_string_content(char* buffer, std::size_t size);
+		std::size_t			get_or_skip_string_content(char* buffer, std::size_t size);
 		std::size_t			get_hex(char* buffer, std::size_t size);
 		std::size_t			get_digits(char* buffer, std::size_t size);
 		std::size_t			skip_spaces();

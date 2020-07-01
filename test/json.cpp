@@ -482,8 +482,17 @@ namespace abc { namespace test { namespace json {
 
 
 	bool test_json_istream_object_02(test_context<abc::test_log_ptr>& context) {
-		char content[] =
-			"\n { \n \t \"a\":12.34, \r \n \t \"bb\" : null, \n   \"ccc\": true, \r \n   \"dddd\" \t \n : \"abc\"}";
+		char content[] = R"####(
+
+ { 
+   		  "a":12.34, 
+	  	"bb" : null, 
+     
+		  "ccc": true, 
+     
+	   "dddd" 		  
+	    : "abc"}
+)####";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
@@ -546,26 +555,27 @@ namespace abc { namespace test { namespace json {
 
 
 	bool test_json_istream_object_03(test_context<abc::test_log_ptr>& context) {
-		char content[] =
-			"{"
-			"    \"a1\": 1,"
-			"    \"a2\": 2,"
-			"    \"a3\": {"
-			"        \"a31\": {"
-			"            \"a313\": 3"
-			"        },"
-			"        \"a32\": {"
-			"            \"a324\": 4"
-			"        }"
-			"    },"
-			"    \"a5\": {"
-			"        \"a51\": {"
-			"            \"a512\": {"
-			"                \"a5123\": 5"
-			"            }"
-			"        }"
-			"    }"
-			"}";
+		char content[] = R"####(
+{
+	"a1": 1,
+	"a2": 2,
+	"a3": {
+		"a31": {
+			"a313": 3
+	},
+		"a32": {
+			"a324": 4
+		}
+	},
+	"a5": {
+		"a51": {
+			"a512": {
+				"a5123": 5
+			}
+		}
+	}
+}
+)####";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
@@ -717,19 +727,20 @@ namespace abc { namespace test { namespace json {
 
 
 	bool test_json_istream_mixed_01(test_context<abc::test_log_ptr>& context) {
-		char content[] =
-			"["
-			"    {"
-			"        \"a11\": [ 1, true ],"
-			"        \"a12\": [ \"abc\", 2 ]"
-			"    },"
-			"    ["
-			"        {"
-			"            \"a211\": [ 4, \"def\", false ],"
-			"            \"a212\": [ null ]"
-			"        }"
-			"    ]"
-			"]";
+		char content[] = R"####(
+[
+	{
+		"a11": [ 1, true ],
+		"a12": [ "abc", 2 ]
+	},
+	[
+		{
+			"a211": [ 4, "def", false ],
+			"a212": [ null ]
+		}
+	]
+]
+)####";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
@@ -868,19 +879,20 @@ namespace abc { namespace test { namespace json {
 
 
 	bool test_json_istream_mixed_02(test_context<abc::test_log_ptr>& context) {
-		char content[] =
-			"{"
-			"    \"a1\": {"
-			"        \"a11\": [ 1, true ],"
-			"        \"a12\": [ \"abc\", 2 ]"
-			"    },"
-			"    \"a2\": ["
-			"        {"
-			"            \"a211\": [ 4, \"def\", false ],"
-			"            \"a212\": [ null ]"
-			"        }"
-			"    ]"
-			"}";
+		char content[] = R"####(
+{
+	"a1": {
+		"a11": [ 1, true ],
+		"a12": [ "abc", 2 ]
+	},
+	"a2": [
+		{
+			"a211": [ 4, "def", false ],
+			"a212": [ null ]
+		}
+	]
+}
+)####";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
@@ -1015,6 +1027,76 @@ namespace abc { namespace test { namespace json {
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
 				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+
+			size = sizeof(abc::json::item_t);
+			istream.get_token(token, sizeof(buffer));
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+
+		size = sizeof(abc::json::item_t);
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+
+		return passed;
+	}
+
+
+	bool test_json_istream_skip(test_context<abc::test_log_ptr>& context) {
+		char content[] = R"####(
+{
+	"a1": {
+		"a11": [ 1, true ],
+		"a12": [ "abc", 2 ]
+	},
+	"a2": [
+		{
+			"a211": [ 4, "def", false ],
+			"a212": [ null ]
+		},
+		42,
+	]
+}
+)####";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::test_log_ptr> istream(&sb, context.log_ptr);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+		std::size_t size;
+		abc::json::item_t item;
+
+		size = sizeof(abc::json::item_t);
+		istream.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+
+			size = sizeof(abc::json::item_t) + std::strlen("a1");
+			istream.get_token(token, sizeof(buffer));
+			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a1", istream, __TAG__) && passed;
+
+				size = sizeof(abc::json::item_t);
+				item = istream.skip_value();
+				passed = verify_value(context, item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+
+			size = sizeof(abc::json::item_t) + std::strlen("a2");
+			istream.get_token(token, sizeof(buffer));
+			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a2", istream, __TAG__) && passed;
+
+			size = sizeof(abc::json::item_t);
+			istream.get_token(token, sizeof(buffer));
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+
+				size = sizeof(abc::json::item_t);
+				item = istream.skip_value();
+				passed = verify_value(context, item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+
+				size = sizeof(abc::json::item_t) + sizeof(double);
+				istream.get_token(token, sizeof(buffer));
+				passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->value.number, 42.0, istream, __TAG__, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
