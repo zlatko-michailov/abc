@@ -161,29 +161,25 @@ namespace abc {
 		json_ostream(json_ostream&& other) = default;
 
 	public:
-		void				put(json::token_t* buffer, std::size_t size = size::strlen);
+		void				put_token(const json::token_t* buffer, std::size_t size = size::strlen);
 
 		void				put_space();
 		void				put_tab();
 		void				put_cr();
 		void				put_lf();
 
-	protected:
 		void				put_null();
 		void				put_boolean(bool value);
 		void				put_number(double value);
-		void				put_string(char* buffer, std::size_t size = size::strlen);
+		void				put_string(const char* buffer, std::size_t size = size::strlen);
+		void				put_property(const char* buffer, std::size_t size = size::strlen);
 		void				put_begin_array();
 		void				put_end_array();
 		void				put_begin_object();
 		void				put_end_object();
-		void				put_property_name(char* buffer, std::size_t size = size::strlen);
 
 	protected:
-		void				set_pstate(std::size_t gcount, json::item_t next);
-
-		template <typename Predicate>
-		std::size_t			put_chars(Predicate&& predicate, const char* buffer, std::size_t size);
+		std::size_t			put_chars(const char* buffer, std::size_t size);
 		std::size_t			put_char(char ch);
 	};
 

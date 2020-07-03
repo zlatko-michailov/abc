@@ -93,6 +93,12 @@ int main() {
 				{ "test_json_istream_mixed_01",						abc::test::json::test_json_istream_mixed_01 },
 				{ "test_json_istream_mixed_02",						abc::test::json::test_json_istream_mixed_02 },
 				{ "test_json_istream_skip",							abc::test::json::test_json_istream_skip },
+				{ "test_json_ostream_null",							abc::test::json::test_json_ostream_null },
+				{ "test_json_ostream_boolean_01",					abc::test::json::test_json_ostream_boolean_01 },
+				{ "test_json_ostream_boolean_02",					abc::test::json::test_json_ostream_boolean_02 },
+				{ "test_json_ostream_number_01",					abc::test::json::test_json_ostream_number_01 },
+				{ "test_json_ostream_number_02",					abc::test::json::test_json_ostream_number_02 },
+				{ "test_json_ostream_number_03",					abc::test::json::test_json_ostream_number_03 },
 			} },
 			/*{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },

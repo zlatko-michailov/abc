@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstdlib>
+#include <cstdio>
 
 #include "ascii.h"
 #include "exception.h"
@@ -242,7 +243,7 @@ namespace abc {
 		while (this->levels() > base_levels);
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::skip_value() <<< item=%4.4x", (std::uint32_t)item);
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::skip_value() <<< item=%4.4x", item);
 		}
 
 		return item;
@@ -279,7 +280,7 @@ namespace abc {
 					}
 					else {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
+							log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -385,7 +386,7 @@ namespace abc {
 				if (this->expect_property()) {
 					if (ch != '}') {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
+							log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -394,7 +395,7 @@ namespace abc {
 				else {
 					if (ch != ']') {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
+							log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -576,7 +577,7 @@ namespace abc {
 
 				if (gcount != 4) {
 					if (log_ptr_local != nullptr) {
-						log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_escaped_char() gcount=%d ", gcount);
+						log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_escaped_char() gcount=%lu", gcount);
 					}
 
 					this->set_bad();
@@ -587,7 +588,7 @@ namespace abc {
 				}
 				else {
 					if (log_ptr_local != nullptr) {
-						log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::get_escaped_char() Wide chars not supported.");
+						log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_istream::get_escaped_char() Wide chars not supported.");
 					}
 
 					this->set_bad();
@@ -701,270 +702,322 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-#ifdef TEMP
+
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline _json_ostream<LogPtr>::_json_ostream(std::streambuf* sb, json::item_t next, const LogPtr& log_ptr)
-		: _json_stream<std::ostream, LogPtr>(sb, next, log_ptr) {
+	inline json_ostream<LogPtr, MaxLevels>::json_ostream(std::streambuf* sb, const LogPtr& log_ptr)
+		: _json_stream<std::ostream, LogPtr, MaxLevels>(sb, log_ptr) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10047, "_json_ostream::_json_ostream()");
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::json_ostream()");
 		}
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_ostream<LogPtr>::set_pstate(std::size_t gcount, json::item_t next) {
-		this->flush();
-		this->set_state(gcount, next);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
+	inline void json_ostream<LogPtr, MaxLevels>::put_token(const json::token_t* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10048, "_json_ostream::put_protocol() >>>");
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
 		}
 
-		this->assert_next(json::item::protocol);
+		switch (buffer->item)
+		{
+		case json::item::null:
+			this->put_null();
+			break;
 
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
+		case json::item::boolean:
+			this->put_boolean(buffer->value.boolean);
+			this->set_gcount(sizeof(bool));
+			break;
 
-		std::size_t gcount = 0;	
+		case json::item::number:
+			this->put_number(buffer->value.number);
+			this->set_gcount(sizeof(double));
+			break;
 
-		if (size < 5 || std::strncmp(buffer, "json/", 5) != 0) {
+		case json::item::string:
+			this->put_string(buffer->value.string, size);
+			break;
+
+		case json::item::property:
+			this->put_property(buffer->value.property, size);
+			break;
+
+		case json::item::begin_array:
+			this->put_begin_array();
+			break;
+
+		case json::item::end_array:
+			this->put_end_array();
+			break;
+
+		case json::item::begin_object:
+			this->put_begin_object();
+			break;
+
+		case json::item::end_object:
+			this->put_end_object();
+			break;
+
+		default:
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_token() Unexpected item=%4.4x <<<", buffer->item);
+			}
+
 			this->set_bad();
+			break;
+		}
+
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_token() <<<");
+		}
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_space() {
+		this->put_chars(" ", 1);
+		this->set_gcount(0);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_tab() {
+		this->put_chars("\t", 1);
+		this->set_gcount(0);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_cr() {
+		this->put_chars("\r", 1);
+		this->set_gcount(0);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_lf() {
+		this->put_chars("\n", 1);
+		this->set_gcount(0);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_null() {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_null() Expected a property.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		this->put_chars("null", 4);
+		this->set_gcount(0);
+
+		this->set_expect_property(true);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_boolean(bool value) {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_boolean() Expected a property.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		if (value) {
+			this->put_chars("true", 4);
 		}
 		else {
-			gcount = this->put_bytes("json/", 5);
+			this->put_chars("false", 5);
 		}
 
-		if (this->is_good() && gcount < size) {
-			std::size_t gcount_local = this->put_digits(buffer + gcount, size - gcount);
-			if (gcount_local == 0) {
-				this->set_bad();
-			}
-			else {
-				gcount += gcount_local;
-			}
-		}
+		this->set_gcount(0);
 
-		if (this->is_good() && gcount < size) {
-			if (buffer[gcount] != '.') {
-				this->set_bad();
-			}
-			else {
-				this->put('.');
-				gcount++;
-			}
-		}
+		this->set_expect_property(true);
+	}
 
-		if (this->is_good() && gcount < size) {
-			std::size_t gcount_local = this->put_digits(buffer + gcount, size - gcount);
-			if (gcount_local == 0) {
-				this->set_bad();
-			}
-			else {
-				gcount += gcount_local;
-			}
-		}
 
-		if (this->is_good() && gcount < size) {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_number(double value) {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_number() Expected a property.");
+			}
+
 			this->set_bad();
+			return;
 		}
 
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10049, "_json_ostream::put_protocol() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
+		char literal[19 + 6 + 1];
+		std::size_t size = std::snprintf(literal, sizeof(literal), "%.16lg", value);
 
-		return gcount;
+		this->put_chars(literal, size);
+		this->set_gcount(0);
+
+		this->set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_ostream<LogPtr>::put_header_name(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004a, "_json_ostream::put_header_name() >>>");
-		}
-
-		this->assert_next(json::item::header_name);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = this->put_token(buffer, size);
-
-		if (this->is_good()) {
-			if (gcount < size) {
-				this->set_bad();
-			}
-		}
-
-		if (this->is_good()) {
-			this->put(':');
-			this->put_space();
-		}
-
-		this->set_pstate(gcount, json::item::header_value);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004b, "_json_ostream::put_header_name() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_ostream<LogPtr>::put_header_value(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004c, "_json_ostream::put_header_value() >>>");
-		}
-
-		this->assert_next(json::item::header_value);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = 0;
-		do {
-			std::size_t sp = this->skip_spaces_in_header_value(buffer + gcount, size - gcount);
-
-			if (gcount > 0 && sp > 0 && gcount + sp < size) {
-				this->put_space();
+	inline void json_ostream<LogPtr, MaxLevels>::put_string(const char* buffer, std::size_t size) {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_string() Expected a property.");
 			}
 
-			gcount += sp;
+			this->set_bad();
+			return;
+		}
 
-			if (gcount < size) {
-				if (ascii::is_abcprint(buffer[gcount])) {
-					gcount += this->put_prints(buffer + gcount, size - gcount);
-				}
-				else {
-					this->set_bad();
-				}
+		this->put_chars("\"", 1);
+		std::size_t gcount = this->put_chars(buffer, size);
+		this->put_chars("\"", 1);
+
+		this->set_gcount(gcount);
+
+		this->set_expect_property(true);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_property(const char* buffer, std::size_t size) {
+		if (!this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_property() Expected a value.");
 			}
+
+			this->set_bad();
+			return;
 		}
-		while (this->is_good() && gcount < size);
 
-		this->put_crlf();
+		this->put_chars("\"", 1);
+		std::size_t gcount = this->put_chars(buffer, size);
+		this->put_chars("\"", 1);
 
-		this->set_pstate(gcount, json::item::header_name);
+		this->set_gcount(gcount);
 
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004d, "_json_ostream::put_header_value() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
+		this->set_expect_property(false);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_ostream<LogPtr>::end_headers() {
+	inline void json_ostream<LogPtr, MaxLevels>::put_begin_array() {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_begin_array() Expected a property.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		this->put_chars("[", 1);
+
+		this->set_gcount(0);
+
+		this->push_level(json::level::array);
+		this->set_expect_property(false);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_end_array() {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_end_array() Expected a property.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		this->put_chars("]", 1);
+
+		this->set_gcount(0);
+
+		this->pop_level(json::level::array);
+		this->set_expect_property(true);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_begin_object() {
+		if (this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_begin_object() Expected a property.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		this->put_chars("{", 1);
+
+		this->set_gcount(0);
+
+		this->push_level(json::level::object);
+		this->set_expect_property(true);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void json_ostream<LogPtr, MaxLevels>::put_end_object() {
+		if (!this->expect_property()) {
+			LogPtr log_ptr_local = this->log_ptr();
+			if (log_ptr_local != nullptr) {
+				log_ptr_local->push_back(category::abc::json, severity::important, __TAG__, "json_ostream::put_null() Expected a value.");
+			}
+
+			this->set_bad();
+			return;
+		}
+
+		this->put_chars("}", 1);
+
+		this->set_gcount(0);
+
+		this->pop_level(json::level::object);
+		this->set_expect_property(true);
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline std::size_t json_ostream<LogPtr, MaxLevels>::put_chars(const char* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004e, "_json_ostream::end_headers() >>>");
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_chars() buffer='%s' >>>", buffer);
 		}
 
-		this->assert_next(json::item::header_name);
-
-		std::size_t gcount = 0;
-		this->put_crlf();
-
-		this->set_pstate(gcount, json::item::body);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1004f, "_json_ostream::end_headers() <<< gcount=%lu", (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_ostream<LogPtr>::put_body(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10050, "_json_ostream::put_body() >>>");
-		}
-
-		this->assert_next(json::item::body);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = this->put_bytes(buffer, size);
-
-		this->set_pstate(gcount, json::item::body);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10051, "_json_ostream::put_body() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_crlf() {
-		return this->put_char('\r') + this->put_char('\n');
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_space() {
-		return this->put_char(' ');
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_token(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::json::is_token, buffer, size);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_prints(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_abcprint, buffer, size);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_prints_and_spaces(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_abcprint_or_space, buffer, size);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_alphas(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_alpha, buffer, size);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_digits(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_digit, buffer, size);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_bytes(const char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
 		while (this->is_good() && gcount < size) {
 			this->put(buffer[gcount++]);
 		}
 
-		return gcount;
-	}
+		if (gcount < size) {
+			this->set_fail();
+		}
 
+		this->flush();
 
-	template <typename LogPtr, std::size_t MaxLevels>
-	template <typename Predicate>
-	inline std::size_t _json_ostream<LogPtr>::put_chars(Predicate&& predicate, const char* buffer, std::size_t size) {
-		std::size_t gcount = 0;
-
-		while (this->is_good() && gcount < size && predicate(buffer[gcount])) {
-			this->put(buffer[gcount++]);
+		if (log_ptr_local != nullptr) {
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_chars() gcount=%lu <<<", gcount);
 		}
 
 		return gcount;
@@ -972,364 +1025,16 @@ namespace abc {
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::put_char(char ch) {
+	inline std::size_t json_ostream<LogPtr, MaxLevels>::put_char(char ch) {
 		if (this->is_good()) {
 			this->put(ch);
 		}
 
-		return this->is_good() ? 1 : 0;;
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::skip_spaces_in_header_value(const char* buffer, std::size_t size) {
-		std::size_t sp = 0;
-
-		while (sp < size) {
-			if (ascii::is_space(buffer[sp])) {
-				sp++;
-			}
-			else if (sp + 3 < size && buffer[sp] == '\r' && buffer[sp + 1] == '\n' && ascii::is_space(buffer[sp + 2])) {
-				sp += 3;
-			}
-			else {
-				break;
-			}
-		}
-
-		return sp;
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_ostream<LogPtr>::skip_spaces(const char* buffer, std::size_t size) {
-		std::size_t sp = 0;
-
-		while (sp < size && ascii::is_space(buffer[sp])) {
-			sp++;
-		}
-
-		return sp;
+		return this->is_good() ? 1 : 0;
 	}
 
 
 	// --------------------------------------------------------------
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_request_istream<LogPtr>::json_request_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: json_istream<LogPtr, MaxLevels>(sb, json::item::method, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10052, "json_request_istream::json_request_istream()");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_istream<LogPtr>::reset() {
-		_json_stream<std::istream, LogPtr>::reset(json::item::method);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_istream<LogPtr>::get_method(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10053, "json_request_istream::get_method() >>>");
-		}
-
-		this->assert_next(json::item::method);
-
-		std::size_t gcount = this->get_token(buffer, size);
-
-		this->skip_spaces();
-
-		this->set_gstate(gcount, json::item::resource);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10054, "json_request_istream::get_method() <<< method='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_istream<LogPtr>::get_resource(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10055, "json_request_istream::get_resource() >>>");
-		}
-
-		this->assert_next(json::item::resource);
-
-		std::size_t gcount = this->get_prints(buffer, size);
-
-		this->skip_spaces();
-
-		this->set_gstate(gcount, json::item::protocol);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10056, "json_request_istream::get_resource() <<< resource='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		std::size_t gcount = json_istream<LogPtr, MaxLevels>::get_protocol(buffer, size);
-
-		this->skip_crlf();
-
-		this->set_gstate(gcount, json::item::header_name);
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_request_ostream<LogPtr>::json_request_ostream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _json_ostream<LogPtr>(sb, json::item::method, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10057, "json_request_ostream::json_request_ostream()");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_ostream<LogPtr>::reset() {
-		_json_stream<std::ostream, LogPtr>::reset(json::item::method);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_ostream<LogPtr>::put_method(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10058, "_json_ostream::put_method() >>>");
-		}
-
-		this->assert_next(json::item::method);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = this->put_token(buffer, size);
-
-		this->put_space();
-
-		this->set_pstate(gcount, json::item::resource);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10059, "_json_ostream::put_method() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_ostream<LogPtr>::put_resource(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005a, "_json_ostream::put_resource() >>>");
-		}
-
-		this->assert_next(json::item::resource);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = this->put_prints(buffer, size);
-
-		this->put_space();
-
-		this->set_pstate(gcount, json::item::protocol);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005b, "_json_ostream::put_resource() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_request_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
-		std::size_t gcount = _json_ostream<LogPtr>::put_protocol(buffer, size);
-
-		this->put_crlf();
-
-		this->set_pstate(gcount, json::item::header_name);
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_response_istream<LogPtr>::json_response_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: json_istream<LogPtr, MaxLevels>(sb, json::item::protocol, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005c, "json_response_istream::json_response_istream()");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_istream<LogPtr>::reset() {
-		_json_stream<std::istream, LogPtr>::reset(json::item::protocol);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		std::size_t gcount = json_istream<LogPtr, MaxLevels>::get_protocol(buffer, size);
-
-		this->set_gstate(gcount, json::item::status_code);
-	}
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_istream<LogPtr>::get_status_code(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005d, "json_response_istream::get_status_code() >>>");
-		}
-
-		this->assert_next(json::item::status_code);
-
-		std::size_t gcount = this->get_digits(buffer, size);
-
-		this->skip_spaces();
-
-		this->set_gstate(gcount, json::item::reason_phrase);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005e, "json_response_istream::get_status_code() <<< status_code='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_istream<LogPtr>::get_reason_phrase(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1005f, "json_response_istream::get_reason_phrase() >>>");
-		}
-
-		this->assert_next(json::item::reason_phrase);
-
-		std::size_t gcount = this->get_prints_and_spaces(buffer, size);
-
-		this->skip_spaces();
-		this->skip_crlf();
-
-		this->set_gstate(gcount, json::item::header_name);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10060, "json_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
-		}
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_response_ostream<LogPtr>::json_response_ostream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _json_ostream<LogPtr>(sb, json::item::protocol, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10061, "json_response_ostream::json_response_ostream()");
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_ostream<LogPtr>::reset() {
-		_json_stream<std::ostream, LogPtr>::reset(json::item::protocol);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
-		std::size_t gcount = _json_ostream<LogPtr>::put_protocol(buffer, size);
-
-		this->put_space();
-
-		this->set_pstate(gcount, json::item::status_code);
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_ostream<LogPtr>::put_status_code(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10062, "json_response_ostream::put_status_code() >>>");
-		}
-
-		this->assert_next(json::item::status_code);
-
-		if (size == size::strlen) {
-			size = std::strlen(buffer);
-		}
-
-		std::size_t gcount = this->put_digits(buffer, size);
-
-		this->put_space();
-
-		this->set_pstate(gcount, json::item::reason_phrase);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10063, "json_response_ostream::put_status_code() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline void json_response_ostream<LogPtr>::put_reason_phrase(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10064, "json_response_ostream::put_reason_phrase() >>>");
-		}
-
-		this->assert_next(json::item::reason_phrase);
-
-		std::size_t gcount = 0;
-		if (buffer != nullptr) {
-			if (size == size::strlen) {
-				size = std::strlen(buffer);
-			}
-
-			gcount = this->put_prints_and_spaces(buffer, size);
-		}
-
-		this->put_crlf();
-
-		this->set_pstate(gcount, json::item::header_name);
-
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10065, "json_response_ostream::put_reason_phrase() <<< buffer='%s', size=%lu, gcount=%lu", buffer != nullptr ? buffer : "<nullptr>", (std::uint32_t)size, (std::uint32_t)gcount);
-		}
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_client_stream<LogPtr>::json_client_stream(std::streambuf* sb, const LogPtr& log_ptr)
-		: json_request_ostream<LogPtr>(sb, log_ptr)
-		, json_response_istream<LogPtr>(sb, log_ptr) {
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline json_server_stream<LogPtr>::json_server_stream(std::streambuf* sb, const LogPtr& log_ptr)
-		: json_request_istream<LogPtr>(sb, log_ptr)
-		, json_response_ostream<LogPtr>(sb, log_ptr) {
-	}
-#endif
 
 }
 
