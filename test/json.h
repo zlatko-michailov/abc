@@ -57,6 +57,11 @@ namespace abc { namespace test { namespace json {
 	bool test_json_ostream_number_01(test_context<abc::test_log_ptr>& context);
 	bool test_json_ostream_number_02(test_context<abc::test_log_ptr>& context);
 	bool test_json_ostream_number_03(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_string_01(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_string_02(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_array_01(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_array_02(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_array_03(test_context<abc::test_log_ptr>& context);
 
 }}}
 

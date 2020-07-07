@@ -68,6 +68,12 @@ namespace abc {
 
 
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
+	inline json::level_t _json_stream<StdStream, LogPtr, MaxLevels>::top_level() const noexcept {
+		return 0 <= _level_top ? _level_stack[_level_top] : json::level::array;
+	}
+
+
+	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	inline std::size_t _json_stream<StdStream, LogPtr, MaxLevels>::gcount() const {
 		return _gcount;
 	}
@@ -815,7 +821,13 @@ namespace abc {
 			return;
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		this->put_chars("null", 4);
+
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->set_expect_property(true);
@@ -834,6 +846,10 @@ namespace abc {
 			return;
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		if (value) {
 			this->put_chars("true", 4);
 		}
@@ -841,6 +857,7 @@ namespace abc {
 			this->put_chars("false", 5);
 		}
 
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->set_expect_property(true);
@@ -859,10 +876,16 @@ namespace abc {
 			return;
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		char literal[19 + 6 + 1];
 		std::size_t size = std::snprintf(literal, sizeof(literal), "%.16lg", value);
 
 		this->put_chars(literal, size);
+
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->set_expect_property(true);
@@ -881,10 +904,19 @@ namespace abc {
 			return;
 		}
 
+		if (size == size::strlen) {
+			size = std::strlen(buffer);
+		}
+
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		this->put_chars("\"", 1);
 		std::size_t gcount = this->put_chars(buffer, size);
 		this->put_chars("\"", 1);
 
+		_skip_comma = false;
 		this->set_gcount(gcount);
 
 		this->set_expect_property(true);
@@ -903,9 +935,13 @@ namespace abc {
 			return;
 		}
 
+		if (size == size::strlen) {
+			size = std::strlen(buffer);
+		}
+
 		this->put_chars("\"", 1);
 		std::size_t gcount = this->put_chars(buffer, size);
-		this->put_chars("\"", 1);
+		this->put_chars("\":", 2);
 
 		this->set_gcount(gcount);
 
@@ -925,8 +961,13 @@ namespace abc {
 			return;
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		this->put_chars("[", 1);
 
+		_skip_comma = true;
 		this->set_gcount(0);
 
 		this->push_level(json::level::array);
@@ -948,6 +989,7 @@ namespace abc {
 
 		this->put_chars("]", 1);
 
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->pop_level(json::level::array);
@@ -967,8 +1009,13 @@ namespace abc {
 			return;
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::array && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		this->put_chars("{", 1);
 
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->push_level(json::level::object);
@@ -990,6 +1037,7 @@ namespace abc {
 
 		this->put_chars("}", 1);
 
+		_skip_comma = false;
 		this->set_gcount(0);
 
 		this->pop_level(json::level::object);

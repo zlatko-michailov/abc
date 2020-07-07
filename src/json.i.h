@@ -92,6 +92,7 @@ namespace abc {
 
 	public:
 		std::size_t			levels() const noexcept;
+		json::level_t		top_level() const noexcept;
 
 		std::size_t			gcount() const;
 		bool				eof() const;
@@ -181,6 +182,9 @@ namespace abc {
 	protected:
 		std::size_t			put_chars(const char* buffer, std::size_t size);
 		std::size_t			put_char(char ch);
+
+	private:
+		bool				_skip_comma;
 	};
 
 
