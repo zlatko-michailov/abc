@@ -939,10 +939,15 @@ namespace abc {
 			size = std::strlen(buffer);
 		}
 
+		if (this->levels() > 0 && this->top_level() == json::level::object && !_skip_comma) {
+			this->put_chars(",", 1);
+		}
+
 		this->put_chars("\"", 1);
 		std::size_t gcount = this->put_chars(buffer, size);
 		this->put_chars("\":", 2);
 
+		_skip_comma = true;
 		this->set_gcount(gcount);
 
 		this->set_expect_property(false);
@@ -1015,7 +1020,7 @@ namespace abc {
 
 		this->put_chars("{", 1);
 
-		_skip_comma = false;
+		_skip_comma = true;
 		this->set_gcount(0);
 
 		this->push_level(json::level::object);

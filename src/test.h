@@ -156,22 +156,27 @@ namespace abc {
 	inline bool test_context<LogPtr>::are_equal(const void* actual, const void* expected, std::size_t size, tag_t tag) {
 		bool are_equal = std::memcmp(actual, expected, size) == 0;
 
-		std::size_t dummy_offset = 0;
-		char line_actual[size::k1];
-		log_view::format_binary(line_actual, sizeof(line_actual) / sizeof(char), actual, size, dummy_offset);
+		std::size_t offset = 0;
+		for (;;) {
+			std::size_t original_offset = offset;
 
-		dummy_offset = 0;
-		char line_expected[size::k1];
-		log_view::format_binary(line_expected, sizeof(line_expected) / sizeof(char), expected, size, dummy_offset);
+			char line_actual[size::k1];
+			if (log_view::format_binary(line_actual, sizeof(line_actual) / sizeof(char), actual, size, offset) == 0) {
+				break;
+			};
 
-		char line_format[size::k1];
-		if (!are_equal) {
-			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-			log_ptr->push_back(category::any, severity::important, tag, line_format, line_actual, line_expected);
-		}
-		else {
-			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-			log_ptr->push_back(category::any, severity::optional, tag, line_format, line_actual, line_expected);
+			char line_expected[size::k1];
+			log_view::format_binary(line_expected, sizeof(line_expected) / sizeof(char), expected, size, original_offset);
+
+			char line_format[size::k1];
+			if (!are_equal) {
+				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
+				log_ptr->push_back(category::any, severity::important, tag, line_format, line_actual, line_expected);
+			}
+			else {
+				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
+				log_ptr->push_back(category::any, severity::optional, tag, line_format, line_actual, line_expected);
+			}
 		}
 
 		return are_equal;
