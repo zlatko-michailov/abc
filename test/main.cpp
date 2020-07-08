@@ -41,14 +41,14 @@ int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream()),
 		std::move(abc::log_view::test<>(abc::severity::optional)),
-		std::move(abc::log_filter::severity(abc::severity::abc)));
+		std::move(abc::log_filter::severity(abc::severity::important)));
 
 	abc::test_suite<> test_suite ( {
 			{ "pre-tests", {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },
 
-			/*{ "timestamp", {
+			{ "timestamp", {
 				{ "test_null_timestamp",							abc::test::timestamp::test_null_timestamp },
 				{ "test_before_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },
 				{ "test_before_year_2000_after_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_after_mar_1_timestamp },
@@ -70,7 +70,7 @@ int main() {
 				{ "test_http_response_istream_realworld_01",		abc::test::http::test_http_response_istream_realworld_01 },
 				{ "test_http_response_istream_realworld_02",		abc::test::http::test_http_response_istream_realworld_02 },
 				{ "test_http_response_ostream_bodytext",			abc::test::http::test_http_response_ostream_bodytext },
-			} },*/
+			} },
 			{ "json", {
 				{ "test_json_istream_null",							abc::test::json::test_json_istream_null },
 				{ "test_json_istream_boolean_01",					abc::test::json::test_json_istream_boolean_01 },
@@ -107,13 +107,15 @@ int main() {
 				{ "test_json_ostream_object_01",					abc::test::json::test_json_ostream_object_01 },
 				{ "test_json_ostream_object_02",					abc::test::json::test_json_ostream_object_02 },
 				{ "test_json_ostream_object_03",					abc::test::json::test_json_ostream_object_03 },
+				{ "test_json_ostream_mixed_01",						abc::test::json::test_json_ostream_mixed_01 },
+				{ "test_json_ostream_mixed_02",						abc::test::json::test_json_ostream_mixed_02 },
 			} },
-			/*{ "socket", {
+			{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
 				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
 				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
 				{ "test_http_socket_stream",						abc::test::socket::test_http_socket_stream },
-			} },*/
+			} },
 
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
