@@ -93,9 +93,9 @@ __PENDING QUESTIONS__
 ---
 # v0.7
 ## To Do
-- JSON: put repeated constructs in methods. 
-- JSON, HTTP: Remove `gcount` from `ostream`s.
-- makefile: Gzip product files.
+- socket: Use the json streams in the tests.
+- json: Put repeated constructs in methods. 
+- json, http: Remove `gcount` from `ostream`s.
 
 ---
 

@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 0.6.0
+VERSION = 0.7.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++17 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so
@@ -42,6 +42,7 @@ pack: test
 	# ---------- Begin packing ----------
 	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
 	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
+	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
 	# ---------- Done packing ----------
 	#
 
