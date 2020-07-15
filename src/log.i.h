@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <cstdarg>
 #include <thread>

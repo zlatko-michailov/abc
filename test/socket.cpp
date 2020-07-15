@@ -26,8 +26,10 @@ SOFTWARE.
 #include <thread>
 #include <cctype>
 
+#include "../src/http.h"
+#include "../src/json.h"
+
 #include "socket.h"
-#include "http.h"
 #include "heap.h"
 
 

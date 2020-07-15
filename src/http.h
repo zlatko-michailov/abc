@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstring>
+
 #include "ascii.h"
 #include "exception.h"
 #include "http.i.h"

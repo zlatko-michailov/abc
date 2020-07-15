@@ -26,7 +26,6 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
-#include <fstream>
 #include <stdexcept>
 
 #include "log.i.h"
