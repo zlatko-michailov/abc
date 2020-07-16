@@ -77,6 +77,10 @@
 		"numeric": "cpp",
 		"random": "cpp",
 		"sstream": "cpp",
-		"bit": "cpp"
+		"bit": "cpp",
+		"bitset": "cpp",
+		"compare": "cpp",
+		"ranges": "cpp",
+		"stop_token": "cpp"
 	}
 }

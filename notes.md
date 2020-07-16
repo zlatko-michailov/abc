@@ -93,7 +93,6 @@ __PENDING QUESTIONS__
 ---
 # v0.7
 ## To Do
-- socket: Use the json streams in the tests.
 - json: Put repeated constructs in methods. 
 - json, http: Remove `gcount` from `ostream`s.
 

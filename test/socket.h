@@ -33,7 +33,7 @@ namespace abc { namespace test { namespace socket {
 	bool test_tcp_sync_socket(test_context<abc::test_log_ptr>& context);
 
 	bool test_tcp_socket_stream(test_context<abc::test_log_ptr>& context);
-	bool test_http_socket_stream(test_context<abc::test_log_ptr>& context);
+	bool test_http_json_socket_stream(test_context<abc::test_log_ptr>& context);
 
 }}}
 
