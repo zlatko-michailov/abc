@@ -91,10 +91,8 @@ __PENDING QUESTIONS__
 ## Test
 
 ---
-# v0.7
+# v0.8
 ## To Do
-- json: Put repeated constructs in methods. 
-- json, http: Remove `gcount` from `ostream`s.
 
 ---
 

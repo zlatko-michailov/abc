@@ -94,7 +94,6 @@ namespace abc {
 		std::size_t			levels() const noexcept;
 		json::level_t		top_level() const noexcept;
 
-		std::size_t			gcount() const;
 		bool				eof() const;
 		bool				good() const;
 		bool				bad() const;
@@ -103,6 +102,7 @@ namespace abc {
 							operator bool() const;
 
 	protected:
+		std::size_t			gcount() const noexcept;
 		void				reset();
 		bool				expect_property() const noexcept;
 		void				set_expect_property(bool expect) noexcept;
@@ -128,6 +128,9 @@ namespace abc {
 	public:
 		json_istream(std::streambuf* sb, const LogPtr& log_ptr);
 		json_istream(json_istream&& other) = default;
+
+	public:
+		std::size_t			gcount() const noexcept;
 
 	public:
 		void				get_token(json::token_t* buffer, std::size_t size);

@@ -74,7 +74,7 @@ namespace abc {
 
 
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_stream<StdStream, LogPtr, MaxLevels>::gcount() const {
+	inline std::size_t _json_stream<StdStream, LogPtr, MaxLevels>::gcount() const noexcept {
 		return _gcount;
 	}
 
@@ -212,6 +212,12 @@ namespace abc {
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_istream::json_istream()");
 		}
+	}
+
+
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline std::size_t json_istream<LogPtr, MaxLevels>::gcount() const noexcept {
+		return _json_stream<std::istream, LogPtr, MaxLevels>::gcount();
 	}
 
 
@@ -734,12 +740,10 @@ namespace abc {
 
 		case json::item::boolean:
 			this->put_boolean(buffer->value.boolean);
-			this->set_gcount(sizeof(bool));
 			break;
 
 		case json::item::number:
 			this->put_number(buffer->value.number);
-			this->set_gcount(sizeof(double));
 			break;
 
 		case json::item::string:
@@ -784,28 +788,24 @@ namespace abc {
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_space() {
 		this->put_chars(" ", 1);
-		this->set_gcount(0);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_tab() {
 		this->put_chars("\t", 1);
-		this->set_gcount(0);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_cr() {
 		this->put_chars("\r", 1);
-		this->set_gcount(0);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_lf() {
 		this->put_chars("\n", 1);
-		this->set_gcount(0);
 	}
 
 
@@ -828,8 +828,6 @@ namespace abc {
 		this->put_chars("null", 4);
 
 		_skip_comma = false;
-		this->set_gcount(0);
-
 		this->set_expect_property(true);
 	}
 
@@ -858,8 +856,6 @@ namespace abc {
 		}
 
 		_skip_comma = false;
-		this->set_gcount(0);
-
 		this->set_expect_property(true);
 	}
 
@@ -886,8 +882,6 @@ namespace abc {
 		this->put_chars(literal, size);
 
 		_skip_comma = false;
-		this->set_gcount(0);
-
 		this->set_expect_property(true);
 	}
 
@@ -913,12 +907,10 @@ namespace abc {
 		}
 
 		this->put_chars("\"", 1);
-		std::size_t gcount = this->put_chars(buffer, size);
+		this->put_chars(buffer, size);
 		this->put_chars("\"", 1);
 
 		_skip_comma = false;
-		this->set_gcount(gcount);
-
 		this->set_expect_property(true);
 	}
 
@@ -944,12 +936,10 @@ namespace abc {
 		}
 
 		this->put_chars("\"", 1);
-		std::size_t gcount = this->put_chars(buffer, size);
+		this->put_chars(buffer, size);
 		this->put_chars("\":", 2);
 
 		_skip_comma = true;
-		this->set_gcount(gcount);
-
 		this->set_expect_property(false);
 	}
 
@@ -972,10 +962,9 @@ namespace abc {
 
 		this->put_chars("[", 1);
 
-		_skip_comma = true;
-		this->set_gcount(0);
-
 		this->push_level(json::level::array);
+
+		_skip_comma = true;
 		this->set_expect_property(false);
 	}
 
@@ -994,10 +983,9 @@ namespace abc {
 
 		this->put_chars("]", 1);
 
-		_skip_comma = false;
-		this->set_gcount(0);
-
 		this->pop_level(json::level::array);
+
+		_skip_comma = false;
 		this->set_expect_property(true);
 	}
 
@@ -1020,10 +1008,9 @@ namespace abc {
 
 		this->put_chars("{", 1);
 
-		_skip_comma = true;
-		this->set_gcount(0);
-
 		this->push_level(json::level::object);
+
+		_skip_comma = true;
 		this->set_expect_property(true);
 	}
 
@@ -1042,10 +1029,9 @@ namespace abc {
 
 		this->put_chars("}", 1);
 
-		_skip_comma = false;
-		this->set_gcount(0);
-
 		this->pop_level(json::level::object);
+
+		_skip_comma = false;
 		this->set_expect_property(true);
 	}
 
@@ -1057,23 +1043,23 @@ namespace abc {
 			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_chars() buffer='%s' >>>", buffer);
 		}
 
-		std::size_t gcount = 0;
+		std::size_t pcount = 0;
 
-		while (this->is_good() && gcount < size) {
-			this->put(buffer[gcount++]);
+		while (this->is_good() && pcount < size) {
+			this->put(buffer[pcount++]);
 		}
 
-		if (gcount < size) {
+		if (pcount < size) {
 			this->set_fail();
 		}
 
 		this->flush();
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_chars() gcount=%lu <<<", gcount);
+			log_ptr_local->push_back(category::abc::json, severity::abc, __TAG__, "json_ostream::put_chars() pcount=%lu <<<", pcount);
 		}
 
-		return gcount;
+		return pcount;
 	}
 
 
