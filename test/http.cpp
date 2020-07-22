@@ -28,14 +28,16 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace http {
 
-	template <typename StdStream>
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag);
+	template <typename HttpStream>
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag);
 
-	template <typename StdStream>
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag);
+	template <typename HttpStream>
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag);
 
-	template <typename StdStream>
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, std::size_t expected_gcount, tag_t tag);
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& stream, std::size_t expected_gcount, tag_t tag);
+
+	template <typename HttpStream>
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const HttpStream& stream, tag_t tag);
 
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test_log_ptr>& context) {
@@ -297,61 +299,47 @@ namespace abc { namespace test { namespace http {
 		abc::http_request_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
 
 		bool passed = true;
-		const char* input;
 
-		input = "POST";
-		ostream.put_method(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x1009b) && passed;
+		ostream.put_method("POST");
+		passed = verify_stream(context, ostream, 0x1009b) && passed;
 
-		input = "http://a.com/b?c=d";
-		ostream.put_resource(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x1009c) && passed;
+		ostream.put_resource("http://a.com/b?c=d");
+		passed = verify_stream(context, ostream, 0x1009c) && passed;
 
-		input = "HTTP/1.1";
-		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x1009d) && passed;
+		ostream.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, ostream, 0x1009d) && passed;
 
-		input = "Simple-Header-Name";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x1009e) && passed;
+		ostream.put_header_name("Simple-Header-Name");
+		passed = verify_stream(context, ostream, 0x1009e) && passed;
 
-		input = "Simple-Header-Value";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x1009f) && passed;
+		ostream.put_header_value("Simple-Header-Value");
+		passed = verify_stream(context, ostream, 0x1009f) && passed;
 
-		input = "List";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a0) && passed;
+		ostream.put_header_name("List");
+		passed = verify_stream(context, ostream, 0x100a0) && passed;
 
-		input = " \t items  \t\t  separated   by \t  a\t\tsingle space\t";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a1) && passed;
+		ostream.put_header_value(" \t items  \t\t  separated   by \t  a\t\tsingle space\t");
+		passed = verify_stream(context, ostream, 0x100a1) && passed;
 
-		input = "Multi-Line";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a2) && passed;
+		ostream.put_header_name("Multi-Line");
+		passed = verify_stream(context, ostream, 0x100a2) && passed;
 
-		input = "first line \r\n  \t  second  line\t \r\n\tthird line\t";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a3) && passed;
+		ostream.put_header_value("first line \r\n  \t  second  line\t \r\n\tthird line\t");
+		passed = verify_stream(context, ostream, 0x100a3) && passed;
 
 		ostream.end_headers();
 
-		input = "{\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a4) && passed;
+		ostream.put_body("{\r\n");
+		passed = verify_stream(context, ostream, 0x100a4) && passed;
 
-		input = "  \"foo\": 42,\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a5) && passed;
+		ostream.put_body("  \"foo\": 42,\r\n");
+		passed = verify_stream(context, ostream, 0x100a5) && passed;
 
-		input = "  \"bar\": \"qwerty\"\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a6) && passed;
+		ostream.put_body("  \"bar\": \"qwerty\"\r\n");
+		passed = verify_stream(context, ostream, 0x100a6) && passed;
 
-		input = "}";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a7) && passed;
+		ostream.put_body("}");
+		passed = verify_stream(context, ostream, 0x100a7) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), 0x100a8) && passed;
 
@@ -375,41 +363,32 @@ namespace abc { namespace test { namespace http {
 		abc::http_request_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
 
 		bool passed = true;
-		const char* input;
 
-		input = "GET";
-		ostream.put_method(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100a9) && passed;
+		ostream.put_method("GET");
+		passed = verify_stream(context, ostream, 0x100a9) && passed;
 
-		input = "http://a.com/b?c=d";
-		ostream.put_resource(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100aa) && passed;
+		ostream.put_resource("http://a.com/b?c=d");
+		passed = verify_stream(context, ostream, 0x100aa) && passed;
 
-		input = "HTTP/1.1";
-		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100ab) && passed;
+		ostream.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, ostream, 0x100ab) && passed;
 
-		input = "Multi-Line";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100ac) && passed;
+		ostream.put_header_name("Multi-Line");
+		passed = verify_stream(context, ostream, 0x100ac) && passed;
 
-		input = "\r\n\tsecond line\t\r\n third  line      ";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100ad) && passed;
+		ostream.put_header_value("\r\n\tsecond line\t\r\n third  line      ");
+		passed = verify_stream(context, ostream, 0x100ad) && passed;
 
 		ostream.end_headers();
 
-		input = "\x01\x04\x10\x1f";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100ae) && passed;
+		ostream.put_body("\x01\x04\x10\x1f");
+		passed = verify_stream(context, ostream, 0x100ae) && passed;
 
-		input = "\x20\x70\x7f";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100af) && passed;
+		ostream.put_body("\x20\x70\x7f");
+		passed = verify_stream(context, ostream, 0x100af) && passed;
 
-		input = "\x80\xa5\xb8\xcc\xdd\xff";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100b0) && passed;
+		ostream.put_body("\x80\xa5\xb8\xcc\xdd\xff");
+		passed = verify_stream(context, ostream, 0x100b0) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), 0x100b1) && passed;
 
@@ -595,49 +574,38 @@ namespace abc { namespace test { namespace http {
 		abc::http_response_ostream<abc::test_log_ptr> ostream(&sb, context.log_ptr);
 
 		bool passed = true;
-		const char* input;
 
-		input = "HTTP/1.1";
-		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d2) && passed;
+		ostream.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, ostream, 0x100d2) && passed;
 
-		input = "200";
-		ostream.put_status_code(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d3) && passed;
+		ostream.put_status_code("200");
+		passed = verify_stream(context, ostream, 0x100d3) && passed;
 
-		input = "OK";
-		ostream.put_reason_phrase(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d4) && passed;
+		ostream.put_reason_phrase("OK");
+		passed = verify_stream(context, ostream, 0x100d4) && passed;
 
-		input = "Simple";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d5) && passed;
+		ostream.put_header_name("Simple");
+		passed = verify_stream(context, ostream, 0x100d5) && passed;
 
-		input = "simple";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d6) && passed;
+		ostream.put_header_value("simple");
+		passed = verify_stream(context, ostream, 0x100d6) && passed;
 
-		input = "List";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d7) && passed;
+		ostream.put_header_name("List");
+		passed = verify_stream(context, ostream, 0x100d7) && passed;
 
-		input = "foo    bar\t\t\tfoobar   \t  \t \t ";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d8) && passed;
+		ostream.put_header_value("foo    bar\t\t\tfoobar   \t  \t \t ");
+		passed = verify_stream(context, ostream, 0x100d8) && passed;
 
 		ostream.end_headers();
 
-		input = "First line\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100d9) && passed;
+		ostream.put_body("First line\r\n");
+		passed = verify_stream(context, ostream, 0x100d9) && passed;
 
-		input = "  Second line\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100da) && passed;
+		ostream.put_body("  Second line\r\n");
+		passed = verify_stream(context, ostream, 0x100da) && passed;
 
-		input = "\tThird line\r\n";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100db) && passed;
+		ostream.put_body("\tThird line\r\n");
+		passed = verify_stream(context, ostream, 0x100db) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), 0x100dc) && passed;
 
@@ -663,39 +631,31 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 		const char* input;
 
-		input = "HTTP/1.1";
-		ostream.put_protocol(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100dd) && passed;
+		ostream.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, ostream, 0x100dd) && passed;
 
-		input = "789";
-		ostream.put_status_code(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100de) && passed;
+		ostream.put_status_code("789");
+		passed = verify_stream(context, ostream, 0x100de) && passed;
 
-		input = "Somethig went wrong ";
-		ostream.put_reason_phrase(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100df) && passed;
+		ostream.put_reason_phrase("Somethig went wrong ");
+		passed = verify_stream(context, ostream, 0x100df) && passed;
 
-		input = "Multi-Line-List";
-		ostream.put_header_name(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100e0) && passed;
+		ostream.put_header_name("Multi-Line-List");
+		passed = verify_stream(context, ostream, 0x100e0) && passed;
 
-		input = "\r\n  \r\n\taaa  \t bbb\r\n\t\t\tccc\tddd";
-		ostream.put_header_value(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100e1) && passed;
+		ostream.put_header_value("\r\n  \r\n\taaa  \t bbb\r\n\t\t\tccc\tddd");
+		passed = verify_stream(context, ostream, 0x100e1) && passed;
 
 		ostream.end_headers();
 
-		input = "\x03\x07\x13\x16\x19";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100e2) && passed;
+		ostream.put_body("\x03\x07\x13\x16\x19");
+		passed = verify_stream(context, ostream, 0x100e2) && passed;
 
-		input = "\x20\x24\x35\x46\x57\x71\x7f";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100e3) && passed;
+		ostream.put_body("\x20\x24\x35\x46\x57\x71\x7f");
+		passed = verify_stream(context, ostream, 0x100e3) && passed;
 
-		input = "\x80\x89\xa5\xb6\xc7\xff";
-		ostream.put_body(input);
-		passed = verify_stream(context, ostream, std::strlen(input), 0x100e4) && passed;
+		ostream.put_body("\x80\x89\xa5\xb6\xc7\xff");
+		passed = verify_stream(context, ostream, 0x100e4) && passed;
 
 		passed = context.are_equal(actual, expected, std::strlen(expected), 0x100e5) && passed;
 
@@ -706,33 +666,42 @@ namespace abc { namespace test { namespace http {
 	// --------------------------------------------------------------
 
 
-	template <typename StdStream>
-	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag) {
+	template <typename HttpStream>
+	static bool verify_string(test_context<abc::test_log_ptr>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, tag) && passed;
-		passed = verify_stream(context, istream, std::strlen(expected), tag) && passed;
+		passed = verify_stream(context, stream, std::strlen(expected), tag) && passed;
 
 		return passed;
 	}
 
 
-	template <typename StdStream>
-	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const abc::_http_stream<StdStream, abc::test_log_ptr>& istream, tag_t tag) {
+	template <typename HttpStream>
+	static bool verify_binary(test_context<abc::test_log_ptr>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, size, tag) && passed;
-		passed = verify_stream(context, istream, size, tag) && passed;
+		passed = verify_stream(context, stream, size, tag) && passed;
 
 		return passed;
 	}
 
 
-	template <typename StdStream>
-	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_stream<StdStream, abc::test_log_ptr>& stream, std::size_t expected_gcount, tag_t tag) {
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const abc::_http_istream<abc::test_log_ptr>& stream, std::size_t expected_gcount, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;
+		passed = verify_stream(context, stream, tag) && passed;
+
+		return passed;
+	}
+
+
+	template <typename HttpStream>
+	static bool verify_stream(test_context<abc::test_log_ptr>& context, const HttpStream& stream, tag_t tag) {
+		bool passed = true;
+
 		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
 		passed = context.are_equal(stream.eof(), false, tag, "%u") && passed;
 		passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;

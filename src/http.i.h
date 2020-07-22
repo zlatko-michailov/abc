@@ -81,7 +81,6 @@ namespace abc {
 	public:
 		http::item_t	next() const noexcept;
 
-		std::size_t		gcount() const;
 		bool			eof() const;
 		bool			good() const;
 		bool			bad() const;
@@ -90,6 +89,8 @@ namespace abc {
 						operator bool() const;
 
 	protected:
+		std::size_t		gcount() const noexcept;
+
 		void			reset(http::item_t next);
 		void			assert_next(http::item_t item);
 		void			set_state(std::size_t gcount, http::item_t next) noexcept;
@@ -112,6 +113,9 @@ namespace abc {
 	protected:
 		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_istream(_http_istream&& other) = default;
+
+	public:
+		std::size_t		gcount() const noexcept;
 
 	public:
 		void		get_header_name(char* buffer, std::size_t size);
@@ -155,7 +159,7 @@ namespace abc {
 		void		put_body(const char* buffer, std::size_t size = size::strlen);
 
 	protected:
-		void		set_pstate(std::size_t gcount, http::item_t next);
+		void		set_pstate(http::item_t next);
 
 		std::size_t	put_protocol(const char* buffer, std::size_t size);
 
