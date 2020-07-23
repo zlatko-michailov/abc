@@ -2,16 +2,16 @@
 Header-only library of essential utilities for C++ development that doesn't use dynamic/heap memory.
 
 
-[Summary](#Summary)  
-[Brief Class Reference](#Brief-Class-Reference)  
-[Toolchain and Platform Dependencies](#Toolchain-and-Platform-Dependencies)  
-[Try It](#Try-It)  
-[Use It](#Use-It)  
-[Release Notes](#Release-Notes)  
-[Roadmap](#Roadmap)
+[1. Summary](#1.-Summary)  
+[2. Brief Class Reference](#2.-Brief-Class-Reference)  
+[3. Toolchain and Platform Dependencies](#3.-Toolchain-and-Platform-Dependencies)  
+[4. Try It](#4.-Try-It)  
+[5. Use It](#5.-Use-It)  
+[6. Release Notes](#6.-Release-Notes)  
+[7. Roadmap](#7.-Roadmap)
 
 
-## Summary
+## 1. Summary
 `abc` is a header-only library that contains a few classes that are missing in the `std` library. The key entities are:
 - timestamp
 - log
@@ -32,7 +32,7 @@ This doesn't prevent apps from using classes like `std::string` or `std::vector`
 It is just a measure to maintain performance and efficiency for apps that care about them.
 
 
-## Brief Class Reference
+## 2. Brief Class Reference
 ### `timestamp`
 A thread-safe, lock-free, facility to calculate the date and time by a `std::chrono::time_point`.
 
@@ -83,6 +83,12 @@ There are two _convenience_ classes that combine the above core classes as follo
 - `http_client_stream : http_request_ostream, http_response_istream`
 - `http_server_stream : http_request_istream, http_response_ostream`
 
+### `json` streams
+These classes enable sequential parsing and generation of JSON payloads:
+- `json_istream`
+- `json_ostream`
+
+It is possible to skip over the entire value of a property you are not interested in. That value could be primitive, array, or object.
 
 ### `streambuf` Specializations
 - `buffer_streambuf`- a `std::streambuf`implementation over a fixed `char` buffer.
@@ -107,7 +113,7 @@ Tags are unique 64-bit integers that identify the place in the code where a log 
 2. At some later point, a designated contributor runs `bin/tag.sh --conf bin/tag.conf` to assign a unique number to each `__TAG__` instance. 
 
 
-## Toolchain and Platform Dependencies
+## 3. Toolchain and Platform Dependencies
 ### GCC
 The project is compiled using GCC 9.
 It may be possible to compile with an earlier version of GCC or even with a differnt compiler, but that hasn't been tried.
@@ -117,22 +123,28 @@ The socket classes use the BSD socket C API.
 This project has been tested on Windows 10 with the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) feature enabled.
 
 
-## Try It
+## 4. Try It
 Clone the repo loclaly.
 
 From the root repo folder, run `make`.
-This will compile and run the tests. The product will be located in the `out/abc/<version>/inc` subfolder. 
+This will compile and run the tests. The product will be located in the `out/abc/<version>/include` subfolder. 
 
 To see examples of how to use these classes, open the test files.
 
 
-## Use It
+## 5. Use It
 At least for now, the process is manual. From a built repo, copy the `out/abc` subfolder to the location where your project includes its dependencies, e.g. something like `deps/abc`.
 
 Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for updates. You can follow the above procedure to install multiple versions of `abc` side by side, so you can easily evaluate new versions.
 
 
-## Release Notes
+## 6. Release Notes
+### 0.7.0
+- Breaking changes.
+  - Removed method `gcount()` from `http_request_ostream` and `http_response_ostream`.
+- `json`
+  - Introduce json streams.
+
 ### 0.6.0
 - No breaking changes.
 - `http`
@@ -160,14 +172,16 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 - First promising release. 
 
 
-## Roadmap
-### 0.7.0
-- Introduce `JSON` streams.
-
-### 1.7.0
-- Stabilization and polishing as needed.
+## 7. Roadmap
+### 0.8.0
+- `log` becomes a stream, and takes a concrete `streambuf` instead of a Container abstraction.
+- Better class reference.
 
 ### 1.8.0
+- Stabilization and polishing as needed.
+- Sample(s).
+
+### 1.9.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)

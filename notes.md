@@ -93,6 +93,12 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## To Do
+- Make `log` a stream.
+- README
+  - Try It - step-by-step instructions
+  - Use It - step-by-step instructions
+  - Organize class reference - Media, Streams, Utilities
+
 
 ---
 
