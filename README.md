@@ -2,13 +2,13 @@
 Header-only library of essential utilities for C++ development that doesn't use dynamic/heap memory.
 
 
-[1. Summary](#1.-Summary)  
-[2. Brief Class Reference](#2.-Brief-Class-Reference)  
-[3. Toolchain and Platform Dependencies](#3.-Toolchain-and-Platform-Dependencies)  
-[4. Try It](#4.-Try-It)  
-[5. Use It](#5.-Use-It)  
-[6. Release Notes](#6.-Release-Notes)  
-[7. Roadmap](#7.-Roadmap)
+[1. Summary](#1-Summary)  
+[2. Brief Class Reference](#2-Brief-Class-Reference)  
+[3. Toolchain and Platform Dependencies](#3-Toolchain-and-Platform-Dependencies)  
+[4. Try It](#4-Try-It)  
+[5. Use It](#5-Use-It)  
+[6. Release Notes](#6-Release-Notes)  
+[7. Roadmap](#7-Roadmap)
 
 
 ## 1. Summary
