@@ -264,26 +264,26 @@ namespace abc { namespace test { namespace socket {
 					abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 					json.get_token(token, sizeof(buffer));
-					passed = context.are_equal(token->item, abc::json::item::begin_object, __TAG__, "%u") && passed;
+					passed = context.are_equal(token->item, abc::json::item::begin_object, 0x102a0, "%u") && passed;
 
 						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::property, __TAG__, "%u") && passed;
-						passed = context.are_equal(token->value.property, "n", __TAG__) && passed;
+						passed = context.are_equal(token->item, abc::json::item::property, 0x102a1, "%u") && passed;
+						passed = context.are_equal(token->value.property, "n", 0x102a2) && passed;
 
 						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::number, __TAG__, "%u") && passed;
-						passed = context.are_equal(token->value.number, 42.0, __TAG__, "%g") && passed;
+						passed = context.are_equal(token->item, abc::json::item::number, 0x102a3, "%u") && passed;
+						passed = context.are_equal(token->value.number, 42.0, 0x102a4, "%g") && passed;
 
 						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::property, __TAG__, "%u") && passed;
-						passed = context.are_equal(token->value.property, "s", __TAG__) && passed;
+						passed = context.are_equal(token->item, abc::json::item::property, 0x102a5, "%u") && passed;
+						passed = context.are_equal(token->value.property, "s", 0x102a6) && passed;
 
 						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::string, __TAG__, "%u") && passed;
-						passed = context.are_equal(token->value.string, "bar", __TAG__) && passed;
+						passed = context.are_equal(token->item, abc::json::item::string, 0x102a7, "%u") && passed;
+						passed = context.are_equal(token->value.string, "bar", 0x102a8) && passed;
 
 					json.get_token(token, sizeof(buffer));
-					passed = context.are_equal(token->item, abc::json::item::end_object, __TAG__, "%u") && passed;
+					passed = context.are_equal(token->item, abc::json::item::end_object, 0x102a9, "%u") && passed;
 				}
 			}
 			catch (const std::exception& ex) {
@@ -324,18 +324,18 @@ namespace abc { namespace test { namespace socket {
 			abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 			json.get_token(token, sizeof(buffer));
-			passed = context.are_equal(token->item, abc::json::item::begin_object, __TAG__, "%u") && passed;
+			passed = context.are_equal(token->item, abc::json::item::begin_object, 0x102aa, "%u") && passed;
 
 				json.get_token(token, sizeof(buffer));
-				passed = context.are_equal(token->item, abc::json::item::property, __TAG__, "%u") && passed;
-				passed = context.are_equal(token->value.property, "param", __TAG__) && passed;
+				passed = context.are_equal(token->item, abc::json::item::property, 0x102ab, "%u") && passed;
+				passed = context.are_equal(token->value.property, "param", 0x102ac) && passed;
 
 				json.get_token(token, sizeof(buffer));
-				passed = context.are_equal(token->item, abc::json::item::string, __TAG__, "%u") && passed;
-				passed = context.are_equal(token->value.string, "foo", __TAG__) && passed;
+				passed = context.are_equal(token->item, abc::json::item::string, 0x102ad, "%u") && passed;
+				passed = context.are_equal(token->value.string, "foo", 0x102ae) && passed;
 
 			json.get_token(token, sizeof(buffer));
-			passed = context.are_equal(token->item, abc::json::item::end_object, __TAG__, "%u") && passed;
+			passed = context.are_equal(token->item, abc::json::item::end_object, 0x102af, "%u") && passed;
 		}
 
 		// Send response

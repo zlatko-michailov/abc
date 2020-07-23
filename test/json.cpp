@@ -57,7 +57,7 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::null, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::null, istream, 0x10123, "%x", size) && passed;
 
 		return passed;
 	}
@@ -77,8 +77,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(bool);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.boolean, false, istream, __TAG__, "%u", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x10124, "%x", size) && passed;
+		passed = verify_value(context, token->value.boolean, false, istream, 0x10125, "%u", size) && passed;
 
 		return passed;
 	}
@@ -98,8 +98,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(bool);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.boolean, true, istream, __TAG__, "%u", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x10126, "%x", size) && passed;
+		passed = verify_value(context, token->value.boolean, true, istream, 0x10127, "%u", size) && passed;
 
 		return passed;
 	}
@@ -119,8 +119,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, 42.0, istream, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10128, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, 42.0, istream, 0x10129, "%f", size) && passed;
 
 		return passed;
 	}
@@ -140,8 +140,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, 1234.567, istream, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream, 0x1012a, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, 1234.567, istream, 0x1012b, "%f", size) && passed;
 
 		return passed;
 	}
@@ -161,8 +161,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, -56.0, istream, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream, 0x1012c, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, -56.0, istream, 0x1012d, "%f", size) && passed;
 
 		return passed;
 	}
@@ -182,8 +182,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, -67.899e23, istream, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream, 0x1012e, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, -67.899e23, istream, 0x1012f, "%f", size) && passed;
 
 		return passed;
 	}
@@ -203,8 +203,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, -88776655443322.999E-5, istream, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10130, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, -88776655443322.999E-5, istream, 0x10131, "%f", size) && passed;
 
 		return passed;
 	}
@@ -224,8 +224,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("");
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-		passed = verify_string(context, token->value.string, "", istream, __TAG__) && passed;
+		passed = verify_value(context, token->item, abc::json::item::string, istream, 0x10132, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "", istream, 0x10133) && passed;
 
 		return passed;
 	}
@@ -245,8 +245,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("abc xyz");
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-		passed = verify_string(context, token->value.string, "abc xyz", istream, __TAG__) && passed;
+		passed = verify_value(context, token->item, abc::json::item::string, istream, 0x10134, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "abc xyz", istream, 0x10135) && passed;
 
 		return passed;
 	}
@@ -266,8 +266,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("a\nb\rc\txyz");
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-		passed = verify_string(context, token->value.string, "a\nb\rc\txyz", istream, __TAG__) && passed;
+		passed = verify_value(context, token->item, abc::json::item::string, istream, 0x10136, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "a\nb\rc\txyz", istream, 0x10137) && passed;
 
 		return passed;
 	}
@@ -287,8 +287,8 @@ namespace abc { namespace test { namespace json {
 		const std::size_t size = sizeof(abc::json::item_t) + std::strlen("абв юя");
 
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-		passed = verify_string(context, token->value.string, "абв юя", istream, __TAG__) && passed;
+		passed = verify_value(context, token->item, abc::json::item::string, istream, 0x10138, "%x", size) && passed;
+		passed = verify_string(context, token->value.string, "абв юя", istream, 0x10139) && passed;
 
 		return passed;
 	}
@@ -309,11 +309,11 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1013a, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x1013b, "%x", size) && passed;
 
 		return passed;
 	}
@@ -334,30 +334,30 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1013c, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 12.34, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x1013d, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 12.34, istream, 0x1013e, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::null, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::null, istream, 0x1013f, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(bool);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.boolean, true, istream, __TAG__, "%u", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x10140, "%x", size) && passed;
+			passed = verify_value(context, token->value.boolean, true, istream, 0x10141, "%u", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("abc");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.string, "abc", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::string, istream, 0x10142, "%x", size) && passed;
+			passed = verify_string(context, token->value.string, "abc", istream, 0x10143) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x10144, "%x", size) && passed;
 
 		return passed;
 	}
@@ -378,84 +378,84 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x10145, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 1.0, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10146, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 1.0, istream, 0x10147, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 2.0, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10148, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 2.0, istream, 0x10149, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1014a, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1014b, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 3.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x1014c, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 3.0, istream, 0x1014d, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x1014e, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1014f, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 4.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10150, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 4.0, istream, 0x10151, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x10152, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x10153, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x10154, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x10155, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x10156, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(double);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.number, 5.0, istream, __TAG__, "%f", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10157, "%x", size) && passed;
+						passed = verify_value(context, token->value.number, 5.0, istream, 0x10158, "%f", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x10159, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x1015a, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x1015b, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x1015c, "%x", size) && passed;
 
 		return passed;
 	}
@@ -476,11 +476,11 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1015d, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1015e, "%x", size) && passed;
 
 		return passed;
 	}
@@ -510,50 +510,50 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1015f, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10160, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a", istream, 0x10161) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 12.34, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10162, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 12.34, istream, 0x10163, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("bb");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "bb", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10164, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "bb", istream, 0x10165) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::null, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::null, istream, 0x10166, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("ccc");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "ccc", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10167, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "ccc", istream, 0x10168) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(bool);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.boolean, true, istream, __TAG__, "%u", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x10169, "%x", size) && passed;
+			passed = verify_value(context, token->value.boolean, true, istream, 0x1016a, "%u", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("dddd");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "dddd", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x1016b, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "dddd", istream, 0x1016c) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("abc");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.string, "abc", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::string, istream, 0x1016d, "%x", size) && passed;
+			passed = verify_string(context, token->value.string, "abc", istream, 0x1016e) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1016f, "%x", size) && passed;
 
 		return passed;
 	}
@@ -593,139 +593,139 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x10170, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a1");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a1", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10171, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a1", istream, 0x10172) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 1.0, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10173, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 1.0, istream, 0x10174, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a2");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a2", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10175, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a2", istream, 0x10176) && passed;
 
 			size = sizeof(abc::json::item_t) + sizeof(double);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-			passed = verify_value(context, token->value.number, 2.0, istream, __TAG__, "%f", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10177, "%x", size) && passed;
+			passed = verify_value(context, token->value.number, 2.0, istream, 0x10178, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a3");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a3", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10179, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a3", istream, 0x1017a) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1017b, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a31");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a31", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x1017c, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a31", istream, 0x1017d) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1017e, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a313");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a313", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x1017f, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a313", istream, 0x10180) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 3.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10181, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 3.0, istream, 0x10182, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x10183, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a32");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a32", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10184, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a32", istream, 0x10185) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x10186, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a324");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a324", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10187, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a324", istream, 0x10188) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 4.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10189, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 4.0, istream, 0x1018a, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1018b, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1018c, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a5");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a5", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x1018d, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a5", istream, 0x1018e) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1018f, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a51");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a51", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10190, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a51", istream, 0x10191) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x10192, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a512");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a512", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10193, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a512", istream, 0x10194) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x10195, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t) + std::strlen("a5123");
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-						passed = verify_string(context, token->value.property, "a5123", istream, __TAG__) && passed;
+						passed = verify_value(context, token->item, abc::json::item::property, istream, 0x10196, "%x", size) && passed;
+						passed = verify_string(context, token->value.property, "a5123", istream, 0x10197) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(double);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.number, 5.0, istream, __TAG__, "%f", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::number, istream, 0x10198, "%x", size) && passed;
+						passed = verify_value(context, token->value.number, 5.0, istream, 0x10199, "%f", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1019a, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1019b, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1019c, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x1019d, "%x", size) && passed;
 
 		return passed;
 	}
@@ -758,126 +758,126 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x1019e, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x1019f, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a11");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a11", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101a0, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a11", istream, 0x101a1) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101a2, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 1.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101a3, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 1.0, istream, 0x101a4, "%f", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(bool);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.boolean, true, istream, __TAG__, "%d", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x101a5, "%x", size) && passed;
+					passed = verify_value(context, token->value.boolean, true, istream, 0x101a6, "%d", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101a7, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a12");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a12", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101a8, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a12", istream, 0x101a9) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101aa, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("abc");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.string, "abc", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::string, istream, 0x101ab, "%x", size) && passed;
+					passed = verify_string(context, token->value.string, "abc", istream, 0x101ac) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 2.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101ad, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 2.0, istream, 0x101ae, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101af, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101b0, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101b1, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x101b2, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a211");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a211", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101b3, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a211", istream, 0x101b4) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101b5, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(double);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.number, 4.0, istream, __TAG__, "%f", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101b6, "%x", size) && passed;
+						passed = verify_value(context, token->value.number, 4.0, istream, 0x101b7, "%f", size) && passed;
 
 						size = sizeof(abc::json::item_t) + std::strlen("def");
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-						passed = verify_string(context, token->value.string, "def", istream, __TAG__) && passed;
+						passed = verify_value(context, token->item, abc::json::item::string, istream, 0x101b8, "%x", size) && passed;
+						passed = verify_string(context, token->value.string, "def", istream, 0x101b9) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(bool);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.boolean, false, istream, __TAG__, "%d", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x101ba, "%x", size) && passed;
+						passed = verify_value(context, token->value.boolean, false, istream, 0x101bb, "%d", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101bc, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a212");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a212", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101bd, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a212", istream, 0x101be) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101bf, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::null, istream, __TAG__, "%x", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::null, istream, 0x101c0, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101c1, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101c2, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101c3, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101c4, "%x", size) && passed;
 
 		return passed;
 	}
@@ -910,136 +910,136 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x101c5, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a1");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a1", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101c6, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a1", istream, 0x101c7) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x101c8, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a11");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a11", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101c9, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a11", istream, 0x101ca) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101cb, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 1.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101cc, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 1.0, istream, 0x101cd, "%f", size) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(bool);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.boolean, true, istream, __TAG__, "%d", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x101ce, "%x", size) && passed;
+					passed = verify_value(context, token->value.boolean, true, istream, 0x101cf, "%d", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101d0, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + std::strlen("a12");
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-				passed = verify_string(context, token->value.property, "a12", istream, __TAG__) && passed;
+				passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101d1, "%x", size) && passed;
+				passed = verify_string(context, token->value.property, "a12", istream, 0x101d2) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101d3, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("abc");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.string, "abc", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::string, istream, 0x101d4, "%x", size) && passed;
+					passed = verify_string(context, token->value.string, "abc", istream, 0x101d5) && passed;
 
 					size = sizeof(abc::json::item_t) + sizeof(double);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-					passed = verify_value(context, token->value.number, 2.0, istream, __TAG__, "%f", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101d6, "%x", size) && passed;
+					passed = verify_value(context, token->value.number, 2.0, istream, 0x101d7, "%f", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101d8, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101d9, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a2");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a2", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101da, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a2", istream, 0x101db) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101dc, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x101dd, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a211");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a211", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101de, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a211", istream, 0x101df) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101e0, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(double);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.number, 4.0, istream, __TAG__, "%f", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101e1, "%x", size) && passed;
+						passed = verify_value(context, token->value.number, 4.0, istream, 0x101e2, "%f", size) && passed;
 
 						size = sizeof(abc::json::item_t) + std::strlen("def");
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::string, istream, __TAG__, "%x", size) && passed;
-						passed = verify_string(context, token->value.string, "def", istream, __TAG__) && passed;
+						passed = verify_value(context, token->item, abc::json::item::string, istream, 0x101e3, "%x", size) && passed;
+						passed = verify_string(context, token->value.string, "def", istream, 0x101e4) && passed;
 
 						size = sizeof(abc::json::item_t) + sizeof(bool);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::boolean, istream, __TAG__, "%x", size) && passed;
-						passed = verify_value(context, token->value.boolean, false, istream, __TAG__, "%d", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::boolean, istream, 0x101e5, "%x", size) && passed;
+						passed = verify_value(context, token->value.boolean, false, istream, 0x101e6, "%d", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101e7, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t) + std::strlen("a212");
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-					passed = verify_string(context, token->value.property, "a212", istream, __TAG__) && passed;
+					passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101e8, "%x", size) && passed;
+					passed = verify_string(context, token->value.property, "a212", istream, 0x101e9) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101ea, "%x", size) && passed;
 
 						size = sizeof(abc::json::item_t);
 						istream.get_token(token, sizeof(buffer));
-						passed = verify_value(context, token->item, abc::json::item::null, istream, __TAG__, "%x", size) && passed;
+						passed = verify_value(context, token->item, abc::json::item::null, istream, 0x101eb, "%x", size) && passed;
 
 					size = sizeof(abc::json::item_t);
 					istream.get_token(token, sizeof(buffer));
-					passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+					passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101ec, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101ed, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101ee, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101ef, "%x", size) && passed;
 
 		return passed;
 	}
@@ -1074,42 +1074,42 @@ namespace abc { namespace test { namespace json {
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::begin_object, istream, 0x101f0, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a1");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a1", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101f1, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a1", istream, 0x101f2) && passed;
 
 				size = sizeof(abc::json::item_t);
 				item = istream.skip_value();
-				passed = verify_value(context, item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, item, abc::json::item::end_object, istream, 0x101f3, "%x", size) && passed;
 
 			size = sizeof(abc::json::item_t) + std::strlen("a2");
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::property, istream, __TAG__, "%x", size) && passed;
-			passed = verify_string(context, token->value.property, "a2", istream, __TAG__) && passed;
+			passed = verify_value(context, token->item, abc::json::item::property, istream, 0x101f4, "%x", size) && passed;
+			passed = verify_string(context, token->value.property, "a2", istream, 0x101f5) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::begin_array, istream, 0x101f6, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t);
 				item = istream.skip_value();
-				passed = verify_value(context, item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+				passed = verify_value(context, item, abc::json::item::end_object, istream, 0x101f7, "%x", size) && passed;
 
 				size = sizeof(abc::json::item_t) + sizeof(double);
 				istream.get_token(token, sizeof(buffer));
-				passed = verify_value(context, token->item, abc::json::item::number, istream, __TAG__, "%x", size) && passed;
-				passed = verify_value(context, token->value.number, 42.0, istream, __TAG__, "%f", size) && passed;
+				passed = verify_value(context, token->item, abc::json::item::number, istream, 0x101f8, "%x", size) && passed;
+				passed = verify_value(context, token->value.number, 42.0, istream, 0x101f9, "%f", size) && passed;
 
 			size = sizeof(abc::json::item_t);
 			istream.get_token(token, sizeof(buffer));
-			passed = verify_value(context, token->item, abc::json::item::end_array, istream, __TAG__, "%x", size) && passed;
+			passed = verify_value(context, token->item, abc::json::item::end_array, istream, 0x101fa, "%x", size) && passed;
 
 		size = sizeof(abc::json::item_t);
 		istream.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::end_object, istream, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::end_object, istream, 0x101fb, "%x", size) && passed;
 
 		return passed;
 	}
@@ -1134,30 +1134,30 @@ namespace abc { namespace test { namespace json {
 		bool passed = true;
 
 		ostream.put_space();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x101fc) && passed;
 		ostream.put_cr();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x101fd) && passed;
 		ostream.put_tab();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x101fe) && passed;
 		ostream.put_lf();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x101ff) && passed;
 		ostream.put_space();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10200) && passed;
 
 		token->item = abc::json::item::null;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10201) && passed;
 
 		ostream.put_space();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10202) && passed;
 		ostream.put_tab();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10203) && passed;
 		ostream.put_cr();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10204) && passed;
 		ostream.put_lf();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10205) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10206) && passed;
 
 		return passed;
 	}
@@ -1179,21 +1179,21 @@ namespace abc { namespace test { namespace json {
 		bool passed = true;
 
 		ostream.put_lf();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10207) && passed;
 		ostream.put_lf();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10208) && passed;
 
 		token->item = abc::json::item::boolean;
 		token->value.boolean = false;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10209) && passed;
 
 		ostream.put_cr();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1020a) && passed;
 		ostream.put_lf();
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1020b) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x1020c) && passed;
 
 		return passed;
 	}
@@ -1217,9 +1217,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::boolean;
 		token->value.boolean = true;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1020d) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x1020e) && passed;
 
 		return passed;
 	}
@@ -1243,9 +1243,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::number;
 		token->value.number = 42;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1020f) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10210) && passed;
 
 		return passed;
 	}
@@ -1269,9 +1269,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::number;
 		token->value.number = 12345.6789012345;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10211) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10212) && passed;
 
 		return passed;
 	}
@@ -1295,9 +1295,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::number;
 		token->value.number = -8.87766554433221e-10;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10213) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10214) && passed;
 
 		return passed;
 	}
@@ -1321,9 +1321,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::string;
 		std::strcpy(token->value.string, "");
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10215) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10216) && passed;
 
 		return passed;
 	}
@@ -1347,9 +1347,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::string;
 		std::strcpy(token->value.string, "qwerty");
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10217) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10218) && passed;
 
 		return passed;
 	}
@@ -1372,13 +1372,13 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10219) && passed;
 
 		token->item = abc::json::item::end_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1021a) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x1021b) && passed;
 
 		return passed;
 	}
@@ -1401,34 +1401,34 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1021c) && passed;
 		ostream.put_space();
 
 			token->item = abc::json::item::number;
 			token->value.number = 12.34;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1021d) && passed;
 
 			token->item = abc::json::item::null;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1021e) && passed;
 
 			token->item = abc::json::item::boolean;
 			token->value.boolean = true;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1021f) && passed;
 
 			token->item = abc::json::item::string;
 			std::strcpy(token->value.string, "abc");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10220) && passed;
 
 		ostream.put_space();
 		token->item = abc::json::item::end_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10221) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10222) && passed;
 
 		return passed;
 	}
@@ -1451,88 +1451,88 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10223) && passed;
 		ostream.put_space();
 
 			token->item = abc::json::item::number;
 			token->value.number = 1;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10224) && passed;
 
 			token->item = abc::json::item::number;
 			token->value.number = 2;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10225) && passed;
 
 			token->item = abc::json::item::begin_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10226) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10227) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 3;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10228) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10229) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1022a) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 4;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1022b) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1022c) && passed;
 
 			token->item = abc::json::item::end_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1022d) && passed;
 
 			token->item = abc::json::item::begin_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1022e) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1022f) && passed;
 
 					token->item = abc::json::item::begin_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10230) && passed;
 
 						token->item = abc::json::item::number;
 						token->value.number = 5;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10231) && passed;
 
 					token->item = abc::json::item::end_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10232) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10233) && passed;
 
 			token->item = abc::json::item::end_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10234) && passed;
 
 		ostream.put_space();
 		token->item = abc::json::item::end_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10235) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10236) && passed;
 
 		return passed;
 	}
@@ -1555,13 +1555,13 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10237) && passed;
 
 		token->item = abc::json::item::end_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10238) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10239) && passed;
 
 		return passed;
 	}
@@ -1589,52 +1589,52 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1023a) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1023b) && passed;
 
 			token->item = abc::json::item::number;
 			token->value.number = 12.34;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1023c) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "bb");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1023d) && passed;
 
 			token->item = abc::json::item::null;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1023e) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "ccc");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1023f) && passed;
 
 			token->item = abc::json::item::boolean;
 			token->value.boolean = true;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10240) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "dddd");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10241) && passed;
 
 			token->item = abc::json::item::string;
 			std::strcpy(token->value.string, "abc");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10242) && passed;
 
 		token->item = abc::json::item::end_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10243) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10244) && passed;
 
 		return passed;
 	}
@@ -1675,141 +1675,141 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10245) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a1");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10246) && passed;
 
 			token->item = abc::json::item::number;
 			token->value.number = 1;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10247) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a2");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10248) && passed;
 
 			token->item = abc::json::item::number;
 			token->value.number = 2;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10249) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a3");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1024a) && passed;
 
 			token->item = abc::json::item::begin_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1024b) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a31");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1024c) && passed;
 
 				token->item = abc::json::item::begin_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1024d) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a313");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1024e) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 3;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1024f) && passed;
 
 				token->item = abc::json::item::end_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10250) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a32");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10251) && passed;
 
 				token->item = abc::json::item::begin_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10252) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a324");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10253) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 4;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10254) && passed;
 
 				token->item = abc::json::item::end_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10255) && passed;
 
 			token->item = abc::json::item::end_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10256) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a5");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10257) && passed;
 
 			token->item = abc::json::item::begin_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10258) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a51");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10259) && passed;
 
 				token->item = abc::json::item::begin_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1025a) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a512");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1025b) && passed;
 
 					token->item = abc::json::item::begin_object;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1025c) && passed;
 
 						token->item = abc::json::item::property;
 						std::strcpy(token->value.property, "a5123");
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x1025d) && passed;
 
 						token->item = abc::json::item::number;
 						token->value.number = 5;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x1025e) && passed;
 
 					token->item = abc::json::item::end_object;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1025f) && passed;
 
 				token->item = abc::json::item::end_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10260) && passed;
 
 			token->item = abc::json::item::end_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10261) && passed;
 
 		token->item = abc::json::item::end_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10262) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10263) && passed;
 
 		return passed;
 	}
@@ -1843,128 +1843,128 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10264) && passed;
 
 			token->item = abc::json::item::begin_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10265) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a11");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10266) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10267) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 1;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10268) && passed;
 
 					token->item = abc::json::item::boolean;
 					token->value.boolean = true;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10269) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1026a) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a12");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1026b) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1026c) && passed;
 
 					token->item = abc::json::item::string;
 					std::strcpy(token->value.string, "abc");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1026d) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 2;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1026e) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1026f) && passed;
 
 			token->item = abc::json::item::end_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10270) && passed;
 
 			token->item = abc::json::item::begin_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10271) && passed;
 
 				token->item = abc::json::item::begin_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10272) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a211");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10273) && passed;
 
 					token->item = abc::json::item::begin_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10274) && passed;
 
 						token->item = abc::json::item::number;
 						token->value.number = 4;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10275) && passed;
 
 						token->item = abc::json::item::string;
 						std::strcpy(token->value.string, "def");
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10276) && passed;
 
 						token->item = abc::json::item::boolean;
 						token->value.boolean = false;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10277) && passed;
 
 					token->item = abc::json::item::end_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10278) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a212");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10279) && passed;
 
 					token->item = abc::json::item::begin_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1027a) && passed;
 
 						token->item = abc::json::item::null;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x1027b) && passed;
 
 					token->item = abc::json::item::end_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1027c) && passed;
 
 				token->item = abc::json::item::end_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1027d) && passed;
 
 			token->item = abc::json::item::end_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1027e) && passed;
 
 		token->item = abc::json::item::end_array;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1027f) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10280) && passed;
 
 		return passed;
 	}
@@ -1998,138 +1998,138 @@ namespace abc { namespace test { namespace json {
 
 		token->item = abc::json::item::begin_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x10281) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a1");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10282) && passed;
 
 			token->item = abc::json::item::begin_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10283) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a11");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10284) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10285) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 1;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10286) && passed;
 
 					token->item = abc::json::item::boolean;
 					token->value.boolean = true;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10287) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10288) && passed;
 
 				token->item = abc::json::item::property;
 				std::strcpy(token->value.property, "a12");
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10289) && passed;
 
 				token->item = abc::json::item::begin_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1028a) && passed;
 
 					token->item = abc::json::item::string;
 					std::strcpy(token->value.string, "abc");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1028b) && passed;
 
 					token->item = abc::json::item::number;
 					token->value.number = 2;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1028c) && passed;
 
 				token->item = abc::json::item::end_array;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1028d) && passed;
 
 			token->item = abc::json::item::end_object;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1028e) && passed;
 
 			token->item = abc::json::item::property;
 			std::strcpy(token->value.property, "a2");
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1028f) && passed;
 
 			token->item = abc::json::item::begin_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x10290) && passed;
 
 				token->item = abc::json::item::begin_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x10291) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a211");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10292) && passed;
 
 					token->item = abc::json::item::begin_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10293) && passed;
 
 						token->item = abc::json::item::number;
 						token->value.number = 4;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10294) && passed;
 
 						token->item = abc::json::item::string;
 						std::strcpy(token->value.string, "def");
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10295) && passed;
 
 						token->item = abc::json::item::boolean;
 						token->value.boolean = false;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x10296) && passed;
 
 					token->item = abc::json::item::end_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10297) && passed;
 
 					token->item = abc::json::item::property;
 					std::strcpy(token->value.property, "a212");
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10298) && passed;
 
 					token->item = abc::json::item::begin_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x10299) && passed;
 
 						token->item = abc::json::item::null;
 						ostream.put_token(token);
-						passed = verify_stream(context, ostream, __TAG__) && passed;
+						passed = verify_stream(context, ostream, 0x1029a) && passed;
 
 					token->item = abc::json::item::end_array;
 					ostream.put_token(token);
-					passed = verify_stream(context, ostream, __TAG__) && passed;
+					passed = verify_stream(context, ostream, 0x1029b) && passed;
 
 				token->item = abc::json::item::end_object;
 				ostream.put_token(token);
-				passed = verify_stream(context, ostream, __TAG__) && passed;
+				passed = verify_stream(context, ostream, 0x1029c) && passed;
 
 			token->item = abc::json::item::end_array;
 			ostream.put_token(token);
-			passed = verify_stream(context, ostream, __TAG__) && passed;
+			passed = verify_stream(context, ostream, 0x1029d) && passed;
 
 		token->item = abc::json::item::end_object;
 		ostream.put_token(token);
-		passed = verify_stream(context, ostream, __TAG__) && passed;
+		passed = verify_stream(context, ostream, 0x1029e) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x1029f) && passed;
 
 		return passed;
 	}
