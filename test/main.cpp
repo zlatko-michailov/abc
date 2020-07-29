@@ -29,6 +29,8 @@ SOFTWARE.
 #include "../src/test.h"
 #include "../src/log.h"
 
+#include "../src/table.h" 
+
 #include "timestamp.h"
 #include "streambuf.h"
 #include "socket.h"
@@ -125,6 +127,30 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
+
+	abc::table_ostream table(std::cout.rdbuf());
+	{
+		abc::line_ostream line(&table);
+		line.put_any("|%22s", "timestamp");
+		line.put_any("|%5s", "n");
+		line.put_any("|%5s", "s");
+		line.put_any("| %16s ", "thread id");
+		line.put_any("| binary");
+	}
+
+	char binary[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	std::size_t binary_offset = 0;
+	std::size_t pcount = 1;
+
+	while (pcount != 0)
+	{
+		abc::line_ostream<200> line(&table);
+		line.put_timestamp(abc::timestamp<>(), abc::log_view::format::datetime::friendly);
+		line.put_any("|%5u", 42);
+		line.put_any("|%5s", "foo");
+		line.put_thread_id(std::this_thread::get_id(), "| %16s | ");
+		pcount = line.put_binary(binary, sizeof(binary), binary_offset);
+	}
 
 	return passed ? 0 : 1;
 }

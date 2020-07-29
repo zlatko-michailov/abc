@@ -93,11 +93,14 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## To Do
-- Make `log` a stream.
+- Make `log` an ostream.
+- Make all `*sb` SbPtr.
+- Define a `base` in each type, and replace `this->` with `base::`.
 - README
   - Try It - step-by-step instructions
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
+  - Remove forward class declarations.
 
 
 ---
