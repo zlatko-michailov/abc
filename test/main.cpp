@@ -42,7 +42,7 @@ SOFTWARE.
 int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream()),
-		std::move(abc::log_view::test<>(abc::severity::important)),
+		std::move(abc::log_view::debug<>()),
 		std::move(abc::log_filter::severity(abc::severity::critical)));
 
 	abc::test_suite<> test_suite ( {
@@ -150,6 +150,20 @@ int main() {
 		line.put_any("|%5s", "foo");
 		line.put_thread_id(std::this_thread::get_id(), "| %16s | ");
 		pcount = line.put_binary(binary, sizeof(binary), binary_offset);
+	}
+
+	table.put_blank_line();
+	{
+		abc::debug_line_ostream line(&table);
+		line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
+	}
+	{
+		abc::debug_line_ostream line(&table);
+		line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
+	}
+	{
+		abc::debug_line_ostream line(&table);
+		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
 	}
 
 	return passed ? 0 : 1;

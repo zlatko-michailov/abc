@@ -34,22 +34,13 @@ SOFTWARE.
 
 #include "tag.h"
 #include "timestamp.i.h"
+#include "table.i.h"
 
 
 namespace abc {
 
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	class log;
-
-
-	namespace size {
-		constexpr std::size_t strlen = -1;
-
-		constexpr std::size_t k1 = 1024;
-		constexpr std::size_t k2 = 2 * k1;
-		constexpr std::size_t k4 = 4 * k1;
-		constexpr std::size_t k8 = 8 * k1;
-	}
 
 
 	namespace color {
@@ -99,6 +90,8 @@ namespace abc {
 		}
 	}
 
+
+	//// begin delete
 
 	namespace log_container {
 		class ostream;
@@ -168,6 +161,30 @@ namespace abc {
 		class none;
 		class severity;
 	}
+
+	//// end delete
+
+
+	// --------------------------------------------------------------
+
+
+	template <std::size_t Size = size::k2>
+	class debug_line_ostream : public line_ostream<Size> {
+		using base = line_ostream<Size>;
+
+	public:
+		debug_line_ostream();
+		debug_line_ostream(table_ostream* table);
+		debug_line_ostream(debug_line_ostream&& other) = default;
+
+	public:
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+
+	protected:
+		void put_props(category_t category, severity_t severity, tag_t tag);
+	};
 
 
 	// --------------------------------------------------------------

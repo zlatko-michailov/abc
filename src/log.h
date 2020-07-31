@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdarg>
 #include <cstring>
 #include <stdexcept>
 
@@ -32,9 +33,69 @@ SOFTWARE.
 #include "timestamp.h"
 #include "buffer_streambuf.h"
 #include "exception.h"
-
+#include "table.h"
 
 namespace abc {
+
+	template <std::size_t Size>
+	inline debug_line_ostream<Size>::debug_line_ostream()
+		: base() {
+	}
+
+
+	template <std::size_t Size>
+	inline debug_line_ostream<Size>::debug_line_ostream(table_ostream* table)
+		: base(table) {
+	}
+
+
+	template <std::size_t Size>
+	inline void debug_line_ostream<Size>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+		va_list vlist;
+		va_start(vlist, format);
+
+		put_anyv(category, severity, tag, format, vlist);
+
+		va_end(vlist);
+	}
+
+
+	template <std::size_t Size>
+	inline void debug_line_ostream<Size>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		put_props(category, severity, tag);
+
+		base::put_anyv(format, vlist);
+	}
+
+
+	template <std::size_t Size>
+	inline void debug_line_ostream<Size>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+		std::size_t buffer_offset = 0;
+		std::size_t pcount = 1;
+
+		while (pcount != 0) {
+			if (buffer_offset != 0) {
+				base::flush();
+			}
+
+			put_props(category, severity, tag);
+
+			pcount = base::put_binary(buffer, buffer_size, buffer_offset);
+		}
+	}
+
+	template <std::size_t Size>
+	inline void debug_line_ostream<Size>::put_props(category_t category, severity_t severity, tag_t tag) {
+		base::put_timestamp(timestamp<>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
+		base::put_thread_id(std::this_thread::get_id(), " %16s |");
+		base::put_any(" %4.4x |", category);
+		base::put_any(" %1.1x |", severity);
+		base::put_any(" %16llx | ", tag);
+	}
+
+
+	// --------------------------------------------------------------
+
 
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	inline log<LineSize, Container, View, Filter>::log(Container&& container, View&& view, Filter&& filter) noexcept

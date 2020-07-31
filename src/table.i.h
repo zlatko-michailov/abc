@@ -35,6 +35,19 @@ SOFTWARE.
 
 namespace abc {
 
+	namespace size {
+		constexpr std::size_t strlen = -1;
+
+		constexpr std::size_t k1 = 1024;
+		constexpr std::size_t k2 = 2 * k1;
+		constexpr std::size_t k4 = 4 * k1;
+		constexpr std::size_t k8 = 8 * k1;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	class table_ostream : protected std::ostream {
 		using base = std::ostream;
 
@@ -52,7 +65,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size = 2000 /*= size::k2*/> ////
+	template <std::size_t Size = size::k2>
 	class line_ostream : protected std::ostream {
 		using base = std::ostream;
 
@@ -65,6 +78,8 @@ namespace abc {
 		~line_ostream();
 
 	public:
+		void		flush();
+
 		void 		put_any(const char* format, ...);
 		void 		put_anyv(const char* format, va_list vlist);
 

@@ -25,8 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdarg>
 #include <cstring>
-#include <stdexcept>
 
 #include "table.i.h"
 
@@ -34,7 +34,7 @@ SOFTWARE.
 namespace abc {
 
 	inline table_ostream::table_ostream(std::streambuf* sb)
-		: std::ostream(sb) {
+		: base(sb) {
 	}
 
 
@@ -59,7 +59,7 @@ namespace abc {
 
 	template <std::size_t Size>
 	inline line_ostream<Size>::line_ostream(table_ostream* table)
-		: std::ostream(nullptr)
+		: base(nullptr)
 		, _table(table)
 		, _pcount(0) {
 	}
@@ -67,6 +67,12 @@ namespace abc {
 
 	template <std::size_t Size>
 	inline line_ostream<Size>::~line_ostream() {
+		flush();
+	}
+
+
+	template <std::size_t Size>
+	inline void line_ostream<Size>::flush() {
 		if (0 <= _pcount && _pcount <= Size) {
 			_buffer[_pcount] = ends;
 		}
@@ -74,6 +80,8 @@ namespace abc {
 		if (_table != nullptr) {
 			_table->put_line(_buffer);
 		}
+
+		_pcount = 0;
 	}
 
 

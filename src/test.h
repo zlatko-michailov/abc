@@ -44,7 +44,7 @@ namespace abc {
 	}
 
 
-	using test_log = log<size::k4, log_container::ostream, abc::log_view::test<>, abc::log_filter::severity>;
+	using test_log = log<size::k4, log_container::ostream, abc::log_view::debug<>, abc::log_filter::severity>;
 	using test_log_ptr = test_log*;
 
 
