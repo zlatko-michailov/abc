@@ -180,5 +180,19 @@ int main() {
 		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
 	}
 
+	table.put_blank_line();
+	{
+		abc::test_line_ostream line(&table);
+		line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
+	}
+	{
+		abc::test_line_ostream line(&table);
+		line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
+	}
+	{
+		abc::test_line_ostream line(&table);
+		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
+	}
+
 	return passed ? 0 : 1;
 }
