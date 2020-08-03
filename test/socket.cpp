@@ -35,7 +35,7 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace socket {
 
-	bool test_udp_sync_socket(test_context<abc::test_log_ptr>& context) {
+	bool test_udp_sync_socket(test_context<abc::test::log_ptr>& context) {
 		const char server_port[] = "31234";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
@@ -89,7 +89,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_sync_socket(test_context<abc::test_log_ptr>& context) {
+	bool test_tcp_sync_socket(test_context<abc::test::log_ptr>& context) {
 		const char server_port[] = "31235";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
@@ -143,7 +143,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_socket_stream(test_context<abc::test_log_ptr>& context) {
+	bool test_tcp_socket_stream(test_context<abc::test::log_ptr>& context) {
 		const char server_port[] = "31236";
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
@@ -193,7 +193,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_http_json_socket_stream(test_context<abc::test_log_ptr>& context) {
+	bool test_http_json_socket_stream(test_context<abc::test::log_ptr>& context) {
 		const char server_port[] = "31237";
 		const char protocol[] = "HTTP/1.1";
 		const char request_method[] = "POST";

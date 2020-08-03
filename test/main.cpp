@@ -36,12 +36,12 @@ SOFTWARE.
 
 
 int main() {
-	abc::test_log test_log(
+	abc::test::log test_log(
 		std::move(abc::log_container::ostream()),
-		std::move(abc::test_log_view()),
+		std::move(abc::test::log_view()),
 		std::move(abc::log_filter::severity(abc::severity::critical)));
 
-	abc::test_suite<abc::test_log*> test_suite( {
+	abc::test_suite<abc::test::log*> test_suite( {
 			{ "pre-tests", {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },

@@ -30,44 +30,44 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace json {
 
-	bool test_json_istream_null(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_boolean_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_boolean_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_number_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_number_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_number_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_number_04(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_number_05(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_string_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_string_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_string_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_string_04(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_array_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_array_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_array_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_object_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_object_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_object_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_mixed_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_mixed_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_istream_skip(test_context<abc::test_log_ptr>& context);
+	bool test_json_istream_null(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_boolean_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_boolean_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_number_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_number_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_number_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_number_04(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_number_05(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_string_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_string_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_string_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_string_04(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_array_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_array_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_array_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_object_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_object_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_object_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_mixed_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_mixed_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_istream_skip(test_context<abc::test::log_ptr>& context);
 
-	bool test_json_ostream_null(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_boolean_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_boolean_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_number_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_number_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_number_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_string_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_string_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_array_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_array_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_array_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_object_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_object_02(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_object_03(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_mixed_01(test_context<abc::test_log_ptr>& context);
-	bool test_json_ostream_mixed_02(test_context<abc::test_log_ptr>& context);
+	bool test_json_ostream_null(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_boolean_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_boolean_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_number_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_number_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_number_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_string_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_string_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_array_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_array_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_array_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_object_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_object_02(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_object_03(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_mixed_01(test_context<abc::test::log_ptr>& context);
+	bool test_json_ostream_mixed_02(test_context<abc::test::log_ptr>& context);
 
 }}}
 

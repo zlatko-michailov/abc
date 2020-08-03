@@ -31,9 +31,9 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace heap {
 
-	bool start_heap_allocation(test_context<abc::test_log_ptr>& context);
-	bool test_heap_allocation(test_context<abc::test_log_ptr>& context);
-	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag);
+	bool start_heap_allocation(test_context<abc::test::log_ptr>& context);
+	bool test_heap_allocation(test_context<abc::test::log_ptr>& context);
+	bool ignore_heap_allocation(test_context<abc::test::log_ptr>& context, tag_t tag);
 
 }}}
 

@@ -26,11 +26,11 @@ SOFTWARE.
 #include "../src/test.h"
 
 
-namespace abc {
+namespace abc { namespace test {
 
-	using test_log_view = abc::log_view::test<>;
-	using test_log = log<size::k4, log_container::ostream, test_log_view, abc::log_filter::severity>;
-	using test_log_ptr = test_log*;
+	using log_view = abc::log_view::test<>;
+	using log = abc::log<abc::size::k4, abc::log_container::ostream, log_view, abc::log_filter::severity>;
+	using log_ptr = log*;
 
-}
+}}
 

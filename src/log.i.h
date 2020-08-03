@@ -234,6 +234,24 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	template <typename LineStream, typename FilterPtr>
+	class log_ostream : public table_ostream {
+		using base = table_ostream;
+
+	public:
+		log_ostream(std::streambuf* sb, const FilterPtr& filter_ptr);
+		log_ostream(log_ostream&& other) = default;
+
+	public:
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+	};
+
+
+	// --------------------------------------------------------------
+
+
 	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag<>, typename Filter = log_filter::none>
 	class log {
 	public:
