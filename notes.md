@@ -93,7 +93,6 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## To Do
-- Implement a test clock to test log lines.
 - Log lines to take Clock template parameter.
 - Make `log` an ostream.
 - Define a `base` in each type, and replace `this->` with `base::`.

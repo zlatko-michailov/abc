@@ -33,6 +33,7 @@ SOFTWARE.
 #include "http.h"
 #include "json.h"
 #include "heap.h"
+#include "clock.h"
 
 
 int main() {
@@ -123,6 +124,10 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
+
+
+	abc::timestamp<abc::test::clock> ts;
+	std::cout << ts.year() << "-" << ts.month() << "-" << ts.day() << " " << ts.hours() << ":" << ts.minutes() << ":" << ts.seconds() << "." << ts.milliseconds() << std::endl << std::endl;
 
 	abc::table_ostream table(std::cout.rdbuf());
 	{
