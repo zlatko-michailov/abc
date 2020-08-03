@@ -23,8 +23,9 @@ SOFTWARE.
 */
 
 
-#include "../src/test.h"
 #include "../src/http.h"
+
+#include "test.h"
 
 
 namespace abc { namespace test { namespace http {

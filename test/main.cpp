@@ -26,11 +26,7 @@ SOFTWARE.
 #include <iostream>
 #include <mutex>
 
-#include "../src/test.h"
-#include "../src/log.h"
-
-#include "../src/table.h" 
-
+#include "test.h"
 #include "timestamp.h"
 #include "streambuf.h"
 #include "socket.h"
@@ -42,10 +38,10 @@ SOFTWARE.
 int main() {
 	abc::test_log test_log(
 		std::move(abc::log_container::ostream()),
-		std::move(abc::log_view::debug<>()),
+		std::move(abc::test_log_view()),
 		std::move(abc::log_filter::severity(abc::severity::critical)));
 
-	abc::test_suite<> test_suite ( {
+	abc::test_suite<abc::test_log*> test_suite( {
 			{ "pre-tests", {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },

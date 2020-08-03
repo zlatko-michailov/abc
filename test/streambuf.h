@@ -23,8 +23,9 @@ SOFTWARE.
 */
 
 
-#include "../src/test.h"
 #include "../src/buffer_streambuf.h"
+
+#include "test.h"
 
 
 namespace abc { namespace test { namespace streambuf {

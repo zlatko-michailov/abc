@@ -77,7 +77,7 @@ namespace abc {
 
 
 	template <typename Clock>
-	inline timestamp<Clock>::timestamp(nullptr_t) noexcept {
+	inline timestamp<Clock>::timestamp(std::nullptr_t) noexcept {
 		reset_date(0);
 		reset_time(0);
 	}

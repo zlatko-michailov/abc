@@ -23,17 +23,14 @@ SOFTWARE.
 */
 
 
-#include "../src/exception.h"
-#include "../src/tag.h"
-
-#include "test.h"
+#include "../src/test.h"
 
 
-namespace abc { namespace test { namespace heap {
+namespace abc {
 
-	bool start_heap_allocation(test_context<abc::test_log_ptr>& context);
-	bool test_heap_allocation(test_context<abc::test_log_ptr>& context);
-	bool ignore_heap_allocation(test_context<abc::test_log_ptr>& context, tag_t tag);
+	using test_log_view = abc::log_view::test<>;
+	using test_log = log<size::k4, log_container::ostream, test_log_view, abc::log_filter::severity>;
+	using test_log_ptr = test_log*;
 
-}}}
+}
 

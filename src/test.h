@@ -44,23 +44,19 @@ namespace abc {
 	}
 
 
-	using test_log = log<size::k4, log_container::ostream, abc::log_view::debug<>, abc::log_filter::severity>;
-	using test_log_ptr = test_log*;
-
-
 	template <typename LogPtr>
 	struct test_context;
 
-	template <typename LogPtr = test_log_ptr>
+	template <typename LogPtr>
 	using test_method = std::function<bool(test_context<LogPtr>&)>;
 
-	template <typename LogPtr = test_log_ptr>
+	template <typename LogPtr>
 	using named_test_method = std::pair<std::string, test_method<LogPtr>>;
 
-	template <typename LogPtr = test_log_ptr>
+	template <typename LogPtr>
 	using test_category = std::vector<named_test_method<LogPtr>>;
 
-	template <typename LogPtr = test_log_ptr>
+	template <typename LogPtr>
 	using named_test_category = std::pair<std::string, test_category<LogPtr>>;
 
 	template <typename LogPtr>
@@ -70,7 +66,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = test_log_ptr>
+	template <typename LogPtr>
 	struct test_context {
 		test_context(const char* category_name, const char* method_name, const LogPtr& log_ptr, seed_t seed = seed::random) noexcept;
 
@@ -86,7 +82,10 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr = test_log_ptr>
+	// --------------------------------------------------------------
+
+
+	template <typename LogPtr>
 	struct test_suite {
 		test_suite() noexcept = default;
 		test_suite(std::vector<named_test_category<LogPtr>>&& categories, const LogPtr& log_ptr, seed_t seed) noexcept;

@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <chrono>
 
@@ -55,7 +56,7 @@ namespace abc {
 	template <typename Clock = std::chrono::system_clock>
 	class timestamp {
 	public:
-		timestamp(nullptr_t) noexcept;
+		timestamp(std::nullptr_t) noexcept;
 		timestamp() noexcept;
 		timestamp(std::chrono::time_point<Clock> tp) noexcept;
 

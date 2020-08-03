@@ -23,8 +23,9 @@ SOFTWARE.
 */
 
 
-#include "../src/test.h"
 #include "../src/timestamp.h"
+
+#include "test.h"
 
 
 namespace abc { namespace test { namespace timestamp {
