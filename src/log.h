@@ -37,20 +37,20 @@ SOFTWARE.
 
 namespace abc {
 
-	template <std::size_t Size>
-	inline debug_line_ostream<Size>::debug_line_ostream()
+	template <std::size_t Size, typename Clock>
+	inline debug_line_ostream<Size, Clock>::debug_line_ostream()
 		: base() {
 	}
 
 
-	template <std::size_t Size>
-	inline debug_line_ostream<Size>::debug_line_ostream(table_ostream* table)
+	template <std::size_t Size, typename Clock>
+	inline debug_line_ostream<Size, Clock>::debug_line_ostream(table_ostream* table)
 		: base(table) {
 	}
 
 
-	template <std::size_t Size>
-	inline void debug_line_ostream<Size>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+	template <std::size_t Size, typename Clock>
+	inline void debug_line_ostream<Size, Clock>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
 		va_list vlist;
 		va_start(vlist, format);
 
@@ -60,16 +60,16 @@ namespace abc {
 	}
 
 
-	template <std::size_t Size>
-	inline void debug_line_ostream<Size>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+	template <std::size_t Size, typename Clock>
+	inline void debug_line_ostream<Size, Clock>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 		put_props(category, severity, tag);
 
 		base::put_anyv(format, vlist);
 	}
 
 
-	template <std::size_t Size>
-	inline void debug_line_ostream<Size>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+	template <std::size_t Size, typename Clock>
+	inline void debug_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
 		std::size_t buffer_offset = 0;
 		std::size_t pcount = 1;
 
@@ -84,9 +84,9 @@ namespace abc {
 		}
 	}
 
-	template <std::size_t Size>
-	inline void debug_line_ostream<Size>::put_props(category_t category, severity_t severity, tag_t tag) {
-		base::put_timestamp(timestamp<>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
+	template <std::size_t Size, typename Clock>
+	inline void debug_line_ostream<Size, Clock>::put_props(category_t category, severity_t severity, tag_t tag) {
+		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
 		base::put_thread_id(std::this_thread::get_id(), " %16s |");
 		base::put_any(" %4.4x |", category);
 		base::put_any(" %1.1x |", severity);
@@ -97,20 +97,20 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size>
-	inline diag_line_ostream<Size>::diag_line_ostream()
+	template <std::size_t Size, typename Clock>
+	inline diag_line_ostream<Size, Clock>::diag_line_ostream()
 		: base() {
 	}
 
 
-	template <std::size_t Size>
-	inline diag_line_ostream<Size>::diag_line_ostream(table_ostream* table)
+	template <std::size_t Size, typename Clock>
+	inline diag_line_ostream<Size, Clock>::diag_line_ostream(table_ostream* table)
 		: base(table) {
 	}
 
 
-	template <std::size_t Size>
-	inline void diag_line_ostream<Size>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+	template <std::size_t Size, typename Clock>
+	inline void diag_line_ostream<Size, Clock>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
 		va_list vlist;
 		va_start(vlist, format);
 
@@ -120,16 +120,16 @@ namespace abc {
 	}
 
 
-	template <std::size_t Size>
-	inline void diag_line_ostream<Size>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+	template <std::size_t Size, typename Clock>
+	inline void diag_line_ostream<Size, Clock>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 		put_props(category, severity, tag);
 
 		base::put_anyv(format, vlist);
 	}
 
 
-	template <std::size_t Size>
-	inline void diag_line_ostream<Size>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+	template <std::size_t Size, typename Clock>
+	inline void diag_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
 		std::size_t buffer_offset = 0;
 		std::size_t pcount = 1;
 
@@ -144,9 +144,9 @@ namespace abc {
 		}
 	}
 
-	template <std::size_t Size>
-	inline void diag_line_ostream<Size>::put_props(category_t category, severity_t severity, tag_t tag) {
-		base::put_timestamp(timestamp<>(), "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ,");
+	template <std::size_t Size, typename Clock>
+	inline void diag_line_ostream<Size, Clock>::put_props(category_t category, severity_t severity, tag_t tag) {
+		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ,");
 		base::put_thread_id(std::this_thread::get_id(), "%s,");
 		base::put_any("%.4x,", category);
 		base::put_any("%.1x,", severity);
@@ -157,20 +157,20 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size>
-	inline test_line_ostream<Size>::test_line_ostream()
+	template <std::size_t Size, typename Clock>
+	inline test_line_ostream<Size, Clock>::test_line_ostream()
 		: base() {
 	}
 
 
-	template <std::size_t Size>
-	inline test_line_ostream<Size>::test_line_ostream(table_ostream* table)
+	template <std::size_t Size, typename Clock>
+	inline test_line_ostream<Size, Clock>::test_line_ostream(table_ostream* table)
 		: base(table) {
 	}
 
 
-	template <std::size_t Size>
-	inline void test_line_ostream<Size>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+	template <std::size_t Size, typename Clock>
+	inline void test_line_ostream<Size, Clock>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
 		va_list vlist;
 		va_start(vlist, format);
 
@@ -180,16 +180,16 @@ namespace abc {
 	}
 
 
-	template <std::size_t Size>
-	inline void test_line_ostream<Size>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+	template <std::size_t Size, typename Clock>
+	inline void test_line_ostream<Size, Clock>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
 		put_props(category, severity, tag);
 
 		base::put_anyv(format, vlist);
 	}
 
 
-	template <std::size_t Size>
-	inline void test_line_ostream<Size>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+	template <std::size_t Size, typename Clock>
+	inline void test_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
 		std::size_t buffer_offset = 0;
 		std::size_t pcount = 1;
 
@@ -204,9 +204,9 @@ namespace abc {
 		}
 	}
 
-	template <std::size_t Size>
-	inline void test_line_ostream<Size>::put_props(category_t category, severity_t severity, tag_t tag) {
-		base::put_timestamp(timestamp<>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
+	template <std::size_t Size, typename Clock>
+	inline void test_line_ostream<Size, Clock>::put_props(category_t category, severity_t severity, tag_t tag) {
+		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
 		char buf_severity[2 * severity::abc + 1];
 		severity = severity <= severity::abc ? severity : severity::abc;

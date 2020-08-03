@@ -168,7 +168,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size = size::k2>
+	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class debug_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 
@@ -190,7 +190,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size = size::k2>
+	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class diag_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 
@@ -212,7 +212,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <std::size_t Size = size::k2>
+	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class test_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 

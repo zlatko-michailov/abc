@@ -93,8 +93,8 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## To Do
-- Log lines to take Clock template parameter.
 - Make `log` an ostream.
+- Test log lines.
 - Define a `base` in each type, and replace `this->` with `base::`.
 - Add a base `_stream<StdStream>` that exposes the state getters.
 - README
