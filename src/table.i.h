@@ -52,12 +52,13 @@ namespace abc {
 		using base = std::ostream;
 
 		static constexpr char endl = '\n';
+
 	public:
 		table_ostream(std::streambuf* sb);
 		table_ostream(table_ostream&& other) = default;
 
 	public:
-		void put_line(const char* line);
+		void put_line(const char* line, std::size_t line_size = size::strlen);
 		void put_blank_line();
 	};
 
@@ -69,6 +70,7 @@ namespace abc {
 	class line_ostream : protected std::ostream {
 		using base = std::ostream;
 
+		static constexpr char endl = '\n';
 		static constexpr char ends = '\0';
 
 	public:
@@ -78,6 +80,7 @@ namespace abc {
 		~line_ostream();
 
 	public:
+		const char* get();
 		void		flush();
 
 		void 		put_any(const char* format, ...);
@@ -91,7 +94,7 @@ namespace abc {
 
 	private:
 		table_ostream*	_table;
-		char			_buffer[Size + 1];
+		char			_buffer[Size + 2];
 		std::size_t		_pcount;
 	};
 

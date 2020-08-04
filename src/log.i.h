@@ -25,12 +25,12 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
+#include <chrono>
 #include <iostream>
 #include <fstream>
-#include <chrono>
 #include <cstdarg>
 #include <thread>
-#include <mutex>
 
 #include "tag.h"
 #include "timestamp.i.h"
@@ -38,10 +38,6 @@ SOFTWARE.
 
 
 namespace abc {
-
-	template <std::size_t LineSize, typename Container, typename View, typename Filter>
-	class log;
-
 
 	namespace color {
 		constexpr const char* begin			= "\x1b[";
@@ -91,8 +87,8 @@ namespace abc {
 	}
 
 
+#ifdef REMOVE
 	//// begin delete
-
 	namespace log_container {
 		class ostream;
 		
@@ -161,8 +157,8 @@ namespace abc {
 		class none;
 		class severity;
 	}
-
 	//// end delete
+#endif
 
 
 	// --------------------------------------------------------------
@@ -253,6 +249,52 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
+
+
+#ifdef REMOVE
+	//// begin delete
+	namespace log_filter {
+		class none {
+		public:
+			none() noexcept = default;
+			none(none&& other) noexcept = default;
+
+			none& operator=(none&& other) noexcept = default;
+
+		public:
+			bool is_enabled(category_t category, severity_t severity) const noexcept;
+		};
+
+
+		class off {
+		public:
+			off() noexcept = default;
+			off(off&& other) noexcept = default;
+
+			off& operator=(off&& other) noexcept = default;
+
+		public:
+			bool is_enabled(category_t category, severity_t severity) const noexcept;
+		};
+
+
+		class severity {
+		public:
+			severity() noexcept = default;
+			severity(severity&& other) noexcept = default;
+
+			severity& operator=(severity&& other) noexcept = default;
+
+		public:
+			severity(severity_t min_severity) noexcept;
+
+		public:
+			bool is_enabled(category_t category, severity_t severity) const noexcept;
+
+		private:
+			severity_t	_min_severity;
+		};
+	}
 
 
 	template <std::size_t LineSize = size::k4, typename Container = log_container::ostream, typename View = log_view::diag<>, typename Filter = log_filter::none>
@@ -391,54 +433,40 @@ namespace abc {
 	}
 
 
-	namespace log_filter {
-		class none {
-		public:
-			none() noexcept = default;
-			none(none&& other) noexcept = default;
-
-			none& operator=(none&& other) noexcept = default;
-
-		public:
-			bool is_enabled(category_t category, severity_t severity) const noexcept;
-		};
+	//// end delete
+#endif
 
 
-		class off {
-		public:
-			off() noexcept = default;
-			off(off&& other) noexcept = default;
+	class severity_log_filter {
+	public:
+		severity_log_filter() noexcept = default;
+		severity_log_filter(severity_log_filter&& other) noexcept = default;
 
-			off& operator=(off&& other) noexcept = default;
+	public:
+		severity_log_filter(severity_t min_severity) noexcept;
 
-		public:
-			bool is_enabled(category_t category, severity_t severity) const noexcept;
-		};
+	public:
+		bool is_enabled(category_t category, severity_t severity) const noexcept;
+
+	private:
+		severity_t	_min_severity;
+	};
 
 
-		class severity {
-		public:
-			severity() noexcept = default;
-			severity(severity&& other) noexcept = default;
+	class null_log_filter {
+	public:
+		null_log_filter() noexcept = default;
+		null_log_filter(null_log_filter&& other) noexcept = default;
 
-			severity& operator=(severity&& other) noexcept = default;
-
-		public:
-			severity(severity_t min_severity) noexcept;
-
-		public:
-			bool is_enabled(category_t category, severity_t severity) const noexcept;
-
-		private:
-			severity_t	_min_severity;
-		};
-	}
+	public:
+		bool is_enabled(category_t category, severity_t severity) const noexcept;
+	};
 
 
 	// --------------------------------------------------------------
 
 
-	using null_log = log<1, log_container::ostream, abc::log_view::blank, abc::log_filter::off>;
+	using null_log = log_ostream<diag_line_ostream<0>, null_log_filter>;
 	using null_log_ptr = null_log*;
 
 }

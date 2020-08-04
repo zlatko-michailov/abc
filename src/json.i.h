@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
 #include <streambuf>
 #include <istream>
 #include <ostream>
@@ -123,7 +124,7 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr, std::size_t MaxLevels = 64>
+	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_istream : public _json_stream<std::istream, LogPtr, MaxLevels> {
 	public:
 		json_istream(std::streambuf* sb, const LogPtr& log_ptr);
@@ -158,7 +159,7 @@ namespace abc {
 	};
 
 
-	template <typename LogPtr, std::size_t MaxLevels = 64>
+	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_ostream : public _json_stream<std::ostream, LogPtr, MaxLevels> {
 	public:
 		json_ostream(std::streambuf* sb, const LogPtr& log_ptr);

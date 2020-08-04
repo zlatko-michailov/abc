@@ -102,6 +102,7 @@ __PENDING QUESTIONS__
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
   - Remove forward class declarations.
+- `severity_log_filter` per category
 
 
 ---

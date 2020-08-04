@@ -38,8 +38,12 @@ namespace abc {
 	}
 
 
-	inline void table_ostream::put_line(const char* line) {
-		*this << line << endl;
+	inline void table_ostream::put_line(const char* line, std::size_t line_size) {
+		if (line_size == size::strlen) {
+			line_size = std::strlen(line);
+		}
+
+		base::write(line, line_size);
 	}
 
 
@@ -72,13 +76,24 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline void line_ostream<Size>::flush() {
+	inline const char* line_ostream<Size>::get() {
 		if (0 <= _pcount && _pcount <= Size) {
 			_buffer[_pcount] = ends;
 		}
 
+		return _buffer;
+	}
+
+
+	template <std::size_t Size>
+	inline void line_ostream<Size>::flush() {
+		if (0 <= _pcount && _pcount <= Size) {
+			_buffer[_pcount++] = endl;
+			_buffer[_pcount] = ends;
+		}
+
 		if (_table != nullptr) {
-			_table->put_line(_buffer);
+			_table->put_line(_buffer, _pcount);
 		}
 
 		_pcount = 0;

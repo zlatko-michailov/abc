@@ -159,22 +159,24 @@ namespace abc {
 		for (;;) {
 			std::size_t original_offset = offset;
 
-			char line_actual[size::k1];
-			if (log_view::format_binary(line_actual, sizeof(line_actual) / sizeof(char), actual, size, offset) == 0) {
+			////char line_actual[size::k1];
+			line_ostream<size::k1> line_actual;
+			if (line_actual.put_binary(actual, size, offset) == 0) {
 				break;
 			};
 
-			char line_expected[size::k1];
-			log_view::format_binary(line_expected, sizeof(line_expected) / sizeof(char), expected, size, original_offset);
+			////char line_expected[size::k1];
+			line_ostream<size::k1> line_expected;
+			line_expected.put_binary(expected, size, original_offset);
 
 			char line_format[size::k1];
 			if (!are_equal) {
 				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-				log_ptr->put_any(category::any, severity::important, tag, line_format, line_actual, line_expected);
+				log_ptr->put_any(category::any, severity::important, tag, line_format, line_actual.get(), line_expected.get());
 			}
 			else {
 				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-				log_ptr->put_any(category::any, severity::optional, tag, line_format, line_actual, line_expected);
+				log_ptr->put_any(category::any, severity::optional, tag, line_format, line_actual.get(), line_expected.get());
 			}
 		}
 

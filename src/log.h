@@ -258,6 +258,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+#ifdef REMOVE
+	//// begin delete
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	inline log<LineSize, Container, View, Filter>::log(Container&& container, View&& view, Filter&& filter) noexcept
 		: _container(std::move(container))
@@ -704,14 +706,34 @@ namespace abc {
 		}
 
 
-		inline severity::severity(severity_t min_severity) noexcept
-			: _min_severity(min_severity) {
-		}
-
-		inline bool severity::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
-			return abc::severity::is_higher_or_equal(severity, _min_severity);
-		}
 	}
+
+
+	//// end delete
+#endif
+
+
+	// --------------------------------------------------------------
+
+
+	inline severity_log_filter::severity_log_filter(severity_t min_severity) noexcept
+		: _min_severity(min_severity) {
+	}
+
+	inline bool severity_log_filter::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
+		return abc::severity::is_higher_or_equal(severity, _min_severity);
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	inline bool null_log_filter::is_enabled(category_t /*category*/, severity_t /*severity*/) const noexcept {
+		return false;
+	}
+
+
+	// --------------------------------------------------------------
 
 
 	inline bool severity::is_higher(severity_t severity, severity_t other) noexcept {
