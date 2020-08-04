@@ -247,17 +247,6 @@ namespace abc {
 		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
 
-		//// begin remove
-		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
-			va_list vlist;
-			va_start(vlist, format);
-
-			put_anyv(category, severity, tag, format, vlist);
-
-			va_end(vlist);
-		}
-		//// begin remove
-
 	private:
 		FilterPtr	_filter_ptr;
 	};

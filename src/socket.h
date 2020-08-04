@@ -57,7 +57,7 @@ namespace abc {
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10006, "_basic_socket::_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x10006, "_basic_socket::_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -73,7 +73,7 @@ namespace abc {
 		other._handle = socket::handle::invalid;
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10007, "_basic_socket::_basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x10007, "_basic_socket::_basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -83,7 +83,7 @@ namespace abc {
 		close();
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10008, "_basic_socket::~_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x10008, "_basic_socket::~_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace abc {
 	inline void _basic_socket<LogPtr>::close() noexcept {
 		if (is_open()) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->push_back(category::abc::socket, severity::abc, 0x10009, "_basic_socket::close()");
+				_log_ptr->put_any(category::abc::socket, severity::abc, 0x10009, "_basic_socket::close()");
 			}
 
 			::close(_handle);
@@ -111,7 +111,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline void _basic_socket<LogPtr>::open() {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000a, "_basic_socket::open() start");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x1000a, "_basic_socket::open() start");
 		}
 
 		close();
@@ -123,7 +123,7 @@ namespace abc {
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000c, "_basic_socket::open() done");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x1000c, "_basic_socket::open() done");
 		}
 	}
 
@@ -156,7 +156,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline void _basic_socket<LogPtr>::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x1000d, "_basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x1000d, "_basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 
 		if (!is_open()) {
@@ -200,7 +200,7 @@ namespace abc {
 		}
 
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::socket, severity::abc, 0x10011, "_basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log_ptr->put_any(category::abc::socket, severity::abc, 0x10011, "_basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 	}
 
@@ -304,7 +304,7 @@ namespace abc {
 	inline void _client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10016, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10016, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
 		}
 
 		if (!this->is_open()) {
@@ -332,7 +332,7 @@ namespace abc {
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_binary(category::abc::socket, severity::abc, 0x10066, buffer, size);
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
 
@@ -341,7 +341,7 @@ namespace abc {
 	inline void _client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x1001c, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x1001c, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
 		}
 
 		if (!this->is_open()) {
@@ -369,7 +369,7 @@ namespace abc {
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_binary(category::abc::socket, severity::abc, 0x10067, buffer, size);
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
 		}
 	}
 
@@ -429,7 +429,7 @@ namespace abc {
 	inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10022, "tcp_server_socket::listen() >>>");
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10022, "tcp_server_socket::listen() >>>");
 		}
 
 		socket::error_t err = ::listen(this->handle(), backlog_size);
@@ -439,7 +439,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10024, "tcp_server_socket::listen() <<<");
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10024, "tcp_server_socket::listen() <<<");
 		}
 	}
 
@@ -448,7 +448,7 @@ namespace abc {
 	inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10025, "tcp_server_socket::accept() >>>");
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10025, "tcp_server_socket::accept() >>>");
 		}
 
 		socket::handle_t hnd = ::accept(this->handle(), nullptr, nullptr);
@@ -458,7 +458,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::socket, severity::abc, 0x10027, "tcp_server_socket::accept() <<<");
+			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10027, "tcp_server_socket::accept() <<<");
 		}
 
 		return tcp_client_socket<LogPtr>(hnd, this->family(), this->log_ptr());

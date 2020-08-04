@@ -62,7 +62,7 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x10028) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e6) && passed; // Lambda closure
@@ -117,7 +117,7 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x1002b) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e7) && passed; // Lambda closure
@@ -170,7 +170,7 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x10037) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e8) && passed; // Lambda closure
@@ -287,7 +287,7 @@ namespace abc { namespace test { namespace socket {
 				}
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->push_back(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
+				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100f1) && passed; // Lambda closure

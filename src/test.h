@@ -122,11 +122,11 @@ namespace abc {
 		char line_format[size::k1];
 		if (!are_equal) {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%s, expected=%s)", format, format);
-			log_ptr->push_back(category::any, severity::important, tag, line_format, actual, expected);
+			log_ptr->put_any(category::any, severity::important, tag, line_format, actual, expected);
 		}
 		else {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%s, expected=%s)", format, format);
-			log_ptr->push_back(category::any, severity::optional, tag, line_format, actual, expected);
+			log_ptr->put_any(category::any, severity::optional, tag, line_format, actual, expected);
 		}
 
 		return are_equal;
@@ -140,11 +140,11 @@ namespace abc {
 		char line_format[size::k1];
 		if (!are_equal) {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-			log_ptr->push_back(category::any, severity::important, tag, line_format, actual, expected);
+			log_ptr->put_any(category::any, severity::important, tag, line_format, actual, expected);
 		}
 		else {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-			log_ptr->push_back(category::any, severity::optional, tag, line_format, actual, expected);
+			log_ptr->put_any(category::any, severity::optional, tag, line_format, actual, expected);
 		}
 
 		return are_equal;
@@ -170,11 +170,11 @@ namespace abc {
 			char line_format[size::k1];
 			if (!are_equal) {
 				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-				log_ptr->push_back(category::any, severity::important, tag, line_format, line_actual, line_expected);
+				log_ptr->put_any(category::any, severity::important, tag, line_format, line_actual, line_expected);
 			}
 			else {
 				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-				log_ptr->push_back(category::any, severity::optional, tag, line_format, line_actual, line_expected);
+				log_ptr->put_any(category::any, severity::optional, tag, line_format, line_actual, line_expected);
 			}
 		}
 
@@ -210,13 +210,13 @@ namespace abc {
 		for (auto category_it = categories.begin(); category_it != categories.end(); category_it++) {
 			bool category_passed = true;
 
-			log_ptr->push_back(category::any, severity::critical, tag::none, ">>   %s%s%s%s", color::begin, color::cyan, category_it->first.c_str(), color::end);
+			log_ptr->put_any(category::any, severity::critical, tag::none, ">>   %s%s%s%s", color::begin, color::cyan, category_it->first.c_str(), color::end);
 
 			// Method
 			for (auto method_it = category_it->second.begin(); method_it != category_it->second.end(); method_it++) {
 				bool method_passed = true;
 
-				log_ptr->push_back(category::any, severity::warning, tag::none, ">>   %s", method_it->first.c_str());
+				log_ptr->put_any(category::any, severity::warning, tag::none, ">>   %s", method_it->first.c_str());
 
 				try {
 					test_context<LogPtr> context(category_it->first.c_str(), method_it->first.c_str(), log_ptr, seed);
@@ -224,24 +224,24 @@ namespace abc {
 				}
 				catch(const std::exception& ex) {
 					method_passed = false;
-					log_ptr->push_back(category::any, severity::critical, tag::none, "    %s%sEXCEPTION%s %s", color::begin, color::red, color::end, ex.what());
+					log_ptr->put_any(category::any, severity::critical, tag::none, "    %s%sEXCEPTION%s %s", color::begin, color::red, color::end, ex.what());
 				}
 
 				if (method_passed) {
-					log_ptr->push_back(category::any, severity::critical, tag::none, "  %s%sPASS%s %s", color::begin, color::green, color::end, method_it->first.c_str());
+					log_ptr->put_any(category::any, severity::critical, tag::none, "  %s%sPASS%s %s", color::begin, color::green, color::end, method_it->first.c_str());
 				}
 				else {
-					log_ptr->push_back(category::any, severity::critical, tag::none, "  %s%sFAIL%s %s", color::begin, color::red, color::end, method_it->first.c_str());
+					log_ptr->put_any(category::any, severity::critical, tag::none, "  %s%sFAIL%s %s", color::begin, color::red, color::end, method_it->first.c_str());
 				}
 
 				category_passed = category_passed && method_passed;
 			} // method
 
 			if (category_passed) {
-				log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sPASS%s %s%s%s%s", color::begin, color::green, color::end, color::begin, color::cyan, category_it->first.c_str(), color::end);
+				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sPASS%s %s%s%s%s", color::begin, color::green, color::end, color::begin, color::cyan, category_it->first.c_str(), color::end);
 			}
 			else {
-				log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s %s%s%s%s", color::begin, color::red, color::end, color::begin, color::cyan, category_it->first.c_str(), color::end);
+				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sFAIL%s %s%s%s%s", color::begin, color::red, color::end, color::begin, color::cyan, category_it->first.c_str(), color::end);
 			}
 
 			log_ptr->put_blank_line();
@@ -249,10 +249,10 @@ namespace abc {
 		} // category
 
 		if (all_passed) {
-			log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sPASS%s seed=%u", color::begin, color::green, color::end, seed);
+			log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sPASS%s seed=%u", color::begin, color::green, color::end, seed);
 		}
 		else {
-			log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
+			log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
 		}
 
 		log_ptr->put_blank_line();

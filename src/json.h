@@ -43,7 +43,7 @@ namespace abc {
 		, _gcount(0)
 		, _log_ptr(log_ptr) {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::json, severity::abc, 0x100f9, "_json_stream::_json_stream()");
+			_log_ptr->put_any(category::abc::json, severity::abc, 0x100f9, "_json_stream::_json_stream()");
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace abc {
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	inline void _json_stream<StdStream, LogPtr, MaxLevels>::reset() {
 		if (_log_ptr != nullptr) {
-			_log_ptr->push_back(category::abc::json, severity::abc, 0x100fa, "_json_stream::reset()");
+			_log_ptr->put_any(category::abc::json, severity::abc, 0x100fa, "_json_stream::reset()");
 		}
 
 		StdStream::clear(StdStream::goodbit);
@@ -137,7 +137,7 @@ namespace abc {
 	inline void _json_stream<StdStream, LogPtr, MaxLevels>::push_level(json::level_t level) noexcept {
 		if (_level_top + 1 >= MaxLevels) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->push_back(category::abc::json, severity::important, 0x100fb, "_json_stream::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fb, "_json_stream::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
 			}
 
 			set_bad();
@@ -152,7 +152,7 @@ namespace abc {
 	inline void _json_stream<StdStream, LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
 		if (_level_top + 1 <= 0) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->push_back(category::abc::json, severity::important, 0x100fc, "_json_stream::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fc, "_json_stream::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
 			}
 
 			set_bad();
@@ -161,7 +161,7 @@ namespace abc {
 
 		if (_level_stack[_level_top] != level) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->push_back(category::abc::json, severity::important, 0x100fd, "_json_stream::pop_level() levels='%lu', top=%lu, pop=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)_level_stack[_level_top], (std::uint32_t)level);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fd, "_json_stream::pop_level() levels='%lu', top=%lu, pop=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)_level_stack[_level_top], (std::uint32_t)level);
 			}
 
 			set_bad();
@@ -210,7 +210,7 @@ namespace abc {
 		: _json_stream<std::istream, LogPtr, MaxLevels>(sb, log_ptr) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x100fe, "json_istream::json_istream()");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x100fe, "json_istream::json_istream()");
 		}
 	}
 
@@ -244,7 +244,7 @@ namespace abc {
 	inline json::item_t json_istream<LogPtr, MaxLevels>::skip_value() {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10101, "json_istream::skip_value() >>>");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10101, "json_istream::skip_value() >>>");
 		}
 
 		std::size_t base_levels = this->levels();
@@ -255,7 +255,7 @@ namespace abc {
 		while (this->levels() > base_levels);
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
 		}
 
 		return item;
@@ -266,7 +266,7 @@ namespace abc {
 	inline json::item_t json_istream<LogPtr, MaxLevels>::get_or_skip_token(json::token_t* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10103, "json_istream::get_or_skip_token() >>>");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10103, "json_istream::get_or_skip_token() >>>");
 		}
 
 		json::item_t item = json::item::none;
@@ -292,7 +292,7 @@ namespace abc {
 					}
 					else {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::important, 0x10104, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
+							log_ptr_local->put_any(category::abc::json, severity::important, 0x10104, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -312,7 +312,7 @@ namespace abc {
 			}
 			else {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, 0x10105, "json_istream::get_or_skip_token() ch='%c' (\\u%4.4x). Expected='\"' or '}'.", ch, ch);
+					log_ptr_local->put_any(category::abc::json, severity::important, 0x10105, "json_istream::get_or_skip_token() ch='%c' (\\u%4.4x). Expected='\"' or '}'.", ch, ch);
 				}
 
 				this->set_bad();
@@ -378,7 +378,7 @@ namespace abc {
 			}
 			else {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, 0x10106, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x)", ch, ch);
+					log_ptr_local->put_any(category::abc::json, severity::important, 0x10106, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x)", ch, ch);
 				}
 				this->set_bad();
 			}
@@ -398,7 +398,7 @@ namespace abc {
 				if (this->expect_property()) {
 					if (ch != '}') {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::important, 0x10107, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
+							log_ptr_local->put_any(category::abc::json, severity::important, 0x10107, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -407,7 +407,7 @@ namespace abc {
 				else {
 					if (ch != ']') {
 						if (log_ptr_local != nullptr) {
-							log_ptr_local->push_back(category::abc::json, severity::important, 0x10108, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
+							log_ptr_local->put_any(category::abc::json, severity::important, 0x10108, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
 						}
 
 						this->set_bad();
@@ -419,7 +419,7 @@ namespace abc {
 		this->set_gcount(gcount);
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10109, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x) <<<", ch, ch);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10109, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x) <<<", ch, ch);
 		}
 
 		if (buffer != nullptr) {
@@ -434,7 +434,7 @@ namespace abc {
 	inline std::size_t json_istream<LogPtr, MaxLevels>::get_or_skip_string(char* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1010a, "json_istream::get_or_skip_string() >>>");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x1010a, "json_istream::get_or_skip_string() >>>");
 		}
 
 		std::size_t gcount = 0;
@@ -465,7 +465,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1010b, "json_istream::get_or_skip_string() string='%s' <<<", buffer);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x1010b, "json_istream::get_or_skip_string() string='%s' <<<", buffer);
 		}
 
 		return gcount;
@@ -476,7 +476,7 @@ namespace abc {
 	inline void json_istream<LogPtr, MaxLevels>::get_or_skip_number(double* buffer) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1010c, "json_istream::get_or_skip_number() >>>");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x1010c, "json_istream::get_or_skip_number() >>>");
 		}
 
 		std::size_t gcount = 0;
@@ -517,7 +517,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1010d, "json_istream::get_or_skip_number() number=%lf (%s) <<<", number, digits);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x1010d, "json_istream::get_or_skip_number() number=%lf (%s) <<<", number, digits);
 		}
 	}
 
@@ -526,14 +526,14 @@ namespace abc {
 	inline void json_istream<LogPtr, MaxLevels>::get_literal(const char* literal) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
 		}
 
 		for (const char* it = literal; *it != '\0'; it++) {
 			char ch = this->get_char();
 			if (ch != *it) {
 				if (log_ptr_local != nullptr) {
-					log_ptr_local->push_back(category::abc::json, severity::important, 0x1010f, "json_istream::get_literal() ch='%c' (\\u%4.4x). Expected='%c' (\\u%4.4x)", ch, ch, *it, *it);
+					log_ptr_local->put_any(category::abc::json, severity::important, 0x1010f, "json_istream::get_literal() ch='%c' (\\u%4.4x). Expected='%c' (\\u%4.4x)", ch, ch, *it, *it);
 				}
 
 				this->set_bad();
@@ -542,7 +542,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10110, "json_istream::get_literal() <<<");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10110, "json_istream::get_literal() <<<");
 		}
 	}
 
@@ -589,7 +589,7 @@ namespace abc {
 
 				if (gcount != 4) {
 					if (log_ptr_local != nullptr) {
-						log_ptr_local->push_back(category::abc::json, severity::important, 0x10111, "json_istream::get_escaped_char() gcount=%lu", gcount);
+						log_ptr_local->put_any(category::abc::json, severity::important, 0x10111, "json_istream::get_escaped_char() gcount=%lu", gcount);
 					}
 
 					this->set_bad();
@@ -600,7 +600,7 @@ namespace abc {
 				}
 				else {
 					if (log_ptr_local != nullptr) {
-						log_ptr_local->push_back(category::abc::json, severity::important, 0x10112, "json_istream::get_escaped_char() Wide chars not supported.");
+						log_ptr_local->put_any(category::abc::json, severity::important, 0x10112, "json_istream::get_escaped_char() Wide chars not supported.");
 					}
 
 					this->set_bad();
@@ -610,7 +610,7 @@ namespace abc {
 		}
 		else {
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x10113, "json_istream::get_escaped_char() ch='%c' (\\u%4.4x). Unexpected.", ch, ch);
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x10113, "json_istream::get_escaped_char() ch='%c' (\\u%4.4x). Unexpected.", ch, ch);
 			}
 
 			this->set_bad();
@@ -720,7 +720,7 @@ namespace abc {
 		: _json_stream<std::ostream, LogPtr, MaxLevels>(sb, log_ptr) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10114, "json_ostream::json_ostream()");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10114, "json_ostream::json_ostream()");
 		}
 	}
 
@@ -729,7 +729,7 @@ namespace abc {
 	inline void json_ostream<LogPtr, MaxLevels>::put_token(const json::token_t* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
 		}
 
 		switch (buffer->item)
@@ -772,7 +772,7 @@ namespace abc {
 
 		default:
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x10116, "json_ostream::put_token() Unexpected item=%4.4x <<<", buffer->item);
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x10116, "json_ostream::put_token() Unexpected item=%4.4x <<<", buffer->item);
 			}
 
 			this->set_bad();
@@ -780,7 +780,7 @@ namespace abc {
 		}
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10117, "json_ostream::put_token() <<<");
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10117, "json_ostream::put_token() <<<");
 		}
 	}
 
@@ -814,7 +814,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x10118, "json_ostream::put_null() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x10118, "json_ostream::put_null() Expected a property.");
 			}
 
 			this->set_bad();
@@ -837,7 +837,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x10119, "json_ostream::put_boolean() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x10119, "json_ostream::put_boolean() Expected a property.");
 			}
 
 			this->set_bad();
@@ -865,7 +865,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011a, "json_ostream::put_number() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011a, "json_ostream::put_number() Expected a property.");
 			}
 
 			this->set_bad();
@@ -891,7 +891,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011b, "json_ostream::put_string() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011b, "json_ostream::put_string() Expected a property.");
 			}
 
 			this->set_bad();
@@ -920,7 +920,7 @@ namespace abc {
 		if (!this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011c, "json_ostream::put_property() Expected a value.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011c, "json_ostream::put_property() Expected a value.");
 			}
 
 			this->set_bad();
@@ -949,7 +949,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011d, "json_ostream::put_begin_array() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011d, "json_ostream::put_begin_array() Expected a property.");
 			}
 
 			this->set_bad();
@@ -974,7 +974,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011e, "json_ostream::put_end_array() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011e, "json_ostream::put_end_array() Expected a property.");
 			}
 
 			this->set_bad();
@@ -995,7 +995,7 @@ namespace abc {
 		if (this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x1011f, "json_ostream::put_begin_object() Expected a property.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011f, "json_ostream::put_begin_object() Expected a property.");
 			}
 
 			this->set_bad();
@@ -1020,7 +1020,7 @@ namespace abc {
 		if (!this->expect_property()) {
 			LogPtr log_ptr_local = this->log_ptr();
 			if (log_ptr_local != nullptr) {
-				log_ptr_local->push_back(category::abc::json, severity::important, 0x10120, "json_ostream::put_null() Expected a value.");
+				log_ptr_local->put_any(category::abc::json, severity::important, 0x10120, "json_ostream::put_null() Expected a value.");
 			}
 
 			this->set_bad();
@@ -1040,7 +1040,7 @@ namespace abc {
 	inline std::size_t json_ostream<LogPtr, MaxLevels>::put_chars(const char* buffer, std::size_t size) {
 		LogPtr log_ptr_local = this->log_ptr();
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
 		}
 
 		std::size_t pcount = 0;
@@ -1056,7 +1056,7 @@ namespace abc {
 		this->flush();
 
 		if (log_ptr_local != nullptr) {
-			log_ptr_local->push_back(category::abc::json, severity::abc, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", pcount);
+			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", pcount);
 		}
 
 		return pcount;
