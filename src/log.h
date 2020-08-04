@@ -219,6 +219,45 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	template <typename LineStream, typename FilterPtr>
+	inline log_ostream<LineStream, FilterPtr>::log_ostream(std::streambuf* sb, const FilterPtr& filter_ptr)
+		: base(sb)
+		, _filter_ptr(filter_ptr) {
+	}
+
+
+	template <typename LineStream, typename FilterPtr>
+	inline void log_ostream<LineStream, FilterPtr>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
+		va_list vlist;
+		va_start(vlist, format);
+
+		put_anyv(category, severity, tag, format, vlist);
+
+		va_end(vlist);
+	}
+
+
+	template <typename LineStream, typename FilterPtr>
+	inline void log_ostream<LineStream, FilterPtr>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) {
+		if (_filter_ptr->is_enabled(category, severity)) {
+			LineStream line(this);
+			line.put_anyv(category, severity, tag, format, vlist);
+		}
+	}
+
+
+	template <typename LineStream, typename FilterPtr>
+	inline void log_ostream<LineStream, FilterPtr>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
+		if (_filter_ptr->is_enabled(category, severity)) {
+			LineStream line(this);
+			line.put_binary(category, severity, tag, buffer, buffer_size);
+		}
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	template <std::size_t LineSize, typename Container, typename View, typename Filter>
 	inline log<LineSize, Container, View, Filter>::log(Container&& container, View&& view, Filter&& filter) noexcept
 		: _container(std::move(container))

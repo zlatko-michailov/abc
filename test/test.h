@@ -28,8 +28,9 @@ SOFTWARE.
 
 namespace abc { namespace test {
 
-	using log_view = abc::log_view::test<>;
-	using log = abc::log<abc::size::k4, abc::log_container::ostream, log_view, abc::log_filter::severity>;
+	using log_line = abc::test_line_ostream<>;
+	using log_filter = abc::log_filter::severity;
+	using log = abc::log_ostream<log_line, log_filter*>;
 	using log_ptr = log*;
 
 }}

@@ -24,7 +24,6 @@ SOFTWARE.
 
 
 #include <iostream>
-#include <mutex>
 
 #include "test.h"
 #include "timestamp.h"
@@ -37,10 +36,8 @@ SOFTWARE.
 
 
 int main() {
-	abc::test::log test_log(
-		std::move(abc::log_container::ostream()),
-		std::move(abc::test::log_view()),
-		std::move(abc::log_filter::severity(abc::severity::critical)));
+	abc::test::log_filter filter(abc::severity::critical);
+	abc::test::log log(std::cout.rdbuf(), &filter);
 
 	abc::test_suite<abc::test::log*> test_suite( {
 			{ "pre-tests", {
@@ -120,14 +117,17 @@ int main() {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
 			} },
 		},
-		&test_log,
+		&log,
 		0);
 
 	bool passed = test_suite.run();
 
 
+#ifdef REMOVE
+	//// begin remove
 	abc::timestamp<abc::test::clock> ts;
 	std::cout << ts.year() << "-" << ts.month() << "-" << ts.day() << " " << ts.hours() << ":" << ts.minutes() << ":" << ts.seconds() << "." << ts.milliseconds() << std::endl << std::endl;
+
 
 	abc::table_ostream table(std::cout.rdbuf());
 	{
@@ -194,6 +194,8 @@ int main() {
 		abc::test_line_ostream line(&table);
 		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
 	}
+	//// end remove
+#endif
 
 	return passed ? 0 : 1;
 }
