@@ -248,9 +248,6 @@ namespace abc {
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
 
 		//// begin remove
-		void push_back_blank(category_t category, severity_t severity) {
-		}
-
 		void push_back(category_t category, severity_t severity, tag_t tag, const char* format, ...) {
 			va_list vlist;
 			va_start(vlist, format);
@@ -258,10 +255,6 @@ namespace abc {
 			put_anyv(category, severity, tag, format, vlist);
 
 			va_end(vlist);
-		}
-
-		void push_back_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) {
-			put_binary(category, severity, tag, buffer, buffer_size);
 		}
 		//// begin remove
 

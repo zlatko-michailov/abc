@@ -203,8 +203,8 @@ namespace abc {
 
 		bool all_passed = true;
 
-		log_ptr->push_back_blank(category::any, severity::critical);
-		log_ptr->push_back_blank(category::any, severity::critical);
+		log_ptr->put_blank_line();
+		log_ptr->put_blank_line();
 
 		// Category
 		for (auto category_it = categories.begin(); category_it != categories.end(); category_it++) {
@@ -244,7 +244,7 @@ namespace abc {
 				log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s %s%s%s%s", color::begin, color::red, color::end, color::begin, color::cyan, category_it->first.c_str(), color::end);
 			}
 
-			log_ptr->push_back_blank(category::any, severity::critical);
+			log_ptr->put_blank_line();
 			all_passed = all_passed && category_passed;
 		} // category
 
@@ -255,8 +255,8 @@ namespace abc {
 			log_ptr->push_back(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
 		}
 
-		log_ptr->push_back_blank(category::any, severity::critical);
-		log_ptr->push_back_blank(category::any, severity::critical);
+		log_ptr->put_blank_line();
+		log_ptr->put_blank_line();
 
 		return all_passed;
 	}
