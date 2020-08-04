@@ -29,12 +29,6 @@ SOFTWARE.
 
 
 namespace abc {
-	template <typename Crc, typename ConstIterator>
-	Crc crc(ConstIterator begin, ConstIterator end, const Crc table[], Crc init, Crc xorOut) noexcept;
-
-
-	// --------------------------------------------------------------
-
 
 	template <typename Crc, typename ConstIterator>
 	Crc crc(ConstIterator begin, ConstIterator end, const Crc table[], Crc init, Crc xorOut) noexcept {

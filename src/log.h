@@ -268,14 +268,6 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline bool null_log_filter::is_enabled(category_t /*category*/, severity_t /*severity*/) const noexcept {
-		return false;
-	}
-
-
-	// --------------------------------------------------------------
-
-
 	inline bool severity::is_higher(severity_t severity, severity_t other) noexcept {
 		return severity < other;
 	}

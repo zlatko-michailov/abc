@@ -36,13 +36,6 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename LogPtr, std::size_t MaxLevels>
-	class json_istream;
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	class json_ostream;
-
-
 	namespace json {
 		using item_t = std::uint16_t;
 
@@ -124,10 +117,13 @@ namespace abc {
 	};
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_istream : public _json_stream<std::istream, LogPtr, MaxLevels> {
 	public:
-		json_istream(std::streambuf* sb, const LogPtr& log_ptr);
+		json_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		json_istream(json_istream&& other) = default;
 
 	public:
@@ -159,10 +155,13 @@ namespace abc {
 	};
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_ostream : public _json_stream<std::ostream, LogPtr, MaxLevels> {
 	public:
-		json_ostream(std::streambuf* sb, const LogPtr& log_ptr);
+		json_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		json_ostream(json_ostream&& other) = default;
 
 	public:
@@ -190,9 +189,6 @@ namespace abc {
 	private:
 		bool				_skip_comma;
 	};
-
-
-	// --------------------------------------------------------------
 
 }
 

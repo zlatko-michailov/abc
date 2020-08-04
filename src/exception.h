@@ -33,9 +33,6 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Exception, typename LogPtr>
-	class exception;
-
 	// logic_error
 	// runtime_error
 

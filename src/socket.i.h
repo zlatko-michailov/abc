@@ -38,20 +38,6 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename LogPtr>
-	class udp_socket;
-
-	template <typename LogPtr>
-	class tcp_client_socket;
-
-	template <typename LogPtr>
-	class tcp_server_socket;
-
-
-	template <typename SocketPtr, typename LogPtr>
-	class socket_streambuf;
-
-
 	namespace socket {
 		using kind_t = int;
 
@@ -154,6 +140,9 @@ namespace abc {
 	};
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename LogPtr>
 	class _client_socket : public _basic_socket<LogPtr> {
 	protected:
@@ -171,6 +160,9 @@ namespace abc {
 	};
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename LogPtr = null_log_ptr>
 	class udp_socket : public _client_socket<LogPtr> {
 	public:
@@ -179,6 +171,13 @@ namespace abc {
 		udp_socket(udp_socket&& other) noexcept = default;
 		udp_socket(const udp_socket& other) = delete;
 	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename LogPtr>
+	class tcp_server_socket;
 
 
 	template <typename LogPtr = null_log_ptr>
@@ -195,6 +194,9 @@ namespace abc {
 	};
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename LogPtr = null_log_ptr>
 	class tcp_server_socket : public _basic_socket<LogPtr> {
 	public:
@@ -207,6 +209,9 @@ namespace abc {
 		void						listen(socket::backlog_size_t backlog_size);
 		tcp_client_socket<LogPtr>	accept() const;
 	};
+
+
+	// --------------------------------------------------------------
 
 
 	template <typename SocketPtr, typename LogPtr = null_log_ptr>

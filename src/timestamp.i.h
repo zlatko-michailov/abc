@@ -32,10 +32,6 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Clock>
-	class timestamp;
-
-
 	using date_count_t	= std::int32_t;
 	using time_count_t	= std::int64_t;
 
