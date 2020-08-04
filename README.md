@@ -139,6 +139,18 @@ Keep an eye on the `abc` [repo](https://github.com/zlatko-michailov/abc) for upd
 
 
 ## 6. Release Notes
+### 0.8.0
+- Breaking changes.
+  - Refactored `log` and its related entities. Construction and usage are similar, but not the same.
+  - The `test_log` shortcut was moved from the product to the test project.
+- `log_ostream` is now based on any `std::streambuf`, and thus can send content to any medium for which there is a `std::streambuf`.
+`log_ostream` is now a specialization of `table_ostream`.
+- `table_ostream` is a generic stream of lines.
+- `line_ostream` is a stream over a fixed char buffer that can fluch to a `table_ostream`.
+`log_ostream` is one specialization of `table_ostream` and `line_ostream`.
+Other tabular streams can be created in user space.
+- Internal code cleanup.
+
 ### 0.7.0
 - Breaking changes.
   - Removed method `gcount()` from `http_request_ostream` and `http_response_ostream`.

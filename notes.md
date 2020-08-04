@@ -93,16 +93,17 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## To Do
-- Make `log` an ostream.
-- Test log lines.
+- Remove forward class declarations.
 - Define a `base` in each type, and replace `this->` with `base::`.
 - Add a base `_stream<StdStream>` that exposes the state getters.
+  - Derive `table_` and `line_` from that base class.
+- `severity_log_filter` per category.
+- `timelimited_file_streambuf`
+- Test log lines.
 - README
   - Try It - step-by-step instructions
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
-  - Remove forward class declarations.
-- `severity_log_filter` per category
 
 
 ---

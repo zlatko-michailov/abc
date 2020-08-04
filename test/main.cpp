@@ -36,7 +36,7 @@ SOFTWARE.
 
 
 int main() {
-	abc::test::log_filter filter(abc::severity::important);
+	abc::test::log_filter filter(abc::severity::critical);
 	abc::test::log log(std::cout.rdbuf(), &filter);
 
 	abc::test_suite<abc::test::log*> test_suite( {
