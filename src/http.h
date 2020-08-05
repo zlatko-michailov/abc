@@ -166,7 +166,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline _http_istream<LogPtr>::_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
 		: _http_stream<std::istream, LogPtr>(sb, next, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1003e, "_http_istream::_http_istream()");
 		}
@@ -181,61 +181,61 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::set_gstate(std::size_t gcount, http::item_t next) {
-		this->set_state(gcount, next);
+		base::set_state(gcount, next);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1003f, "_http_istream::get_protocol() >>>");
 		}
 
-		this->assert_next(http::item::protocol);
+		base::assert_next(http::item::protocol);
 
-		std::size_t gcount = this->get_alphas(buffer, size);
+		std::size_t gcount = get_alphas(buffer, size);
 		if (gcount != 4 || std::strncmp("HTTP", buffer, 4) != 0) {
-			this->set_bad();
+			base::set_bad();
 		}
 
 		if (gcount == size - 1) {
-			this->set_fail();
+			base::set_fail();
 		}
 
-		if (this->is_good()) {
-			char ch = this->get_char();
+		if (base::is_good()) {
+			char ch = get_char();
 			if (ch == '/') {
 				buffer[gcount++] = '/';
 			}
 			else {
-				this->set_bad();
+				base::set_bad();
 			}
 		}
 
-		if (this->is_good()) {
-			gcount += this->get_digits(buffer + gcount, size - gcount);
+		if (base::is_good()) {
+			gcount += get_digits(buffer + gcount, size - gcount);
 		}
 
 		if (gcount == size - 1) {
-			this->set_fail();
+			base::set_fail();
 		}
 
-		if (this->is_good()) {
-			char ch = this->get_char();
+		if (base::is_good()) {
+			char ch = get_char();
 			if (ch == '.') {
 				buffer[gcount++] = '.';
 			}
 			else {
-				this->set_bad();
+				base::set_bad();
 			}
 		}
 
-		if (this->is_good()) {
-			gcount += this->get_digits(buffer + gcount, size - gcount);
+		if (base::is_good()) {
+			gcount += get_digits(buffer + gcount, size - gcount);
 		}
 
-		this->skip_spaces();
+		skip_spaces();
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10040, "_http_istream::get_protocol() <<< protocol='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -247,33 +247,33 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_header_name(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10041, "_http_istream::get_header_name() >>>");
 		}
 
-		this->assert_next(http::item::header_name);
+		base::assert_next(http::item::header_name);
 
-		std::size_t gcount = this->get_token(buffer, size);
-		this->skip_spaces();
+		std::size_t gcount = get_token(buffer, size);
+		skip_spaces();
 
 		if (gcount == 0) {
-			this->skip_crlf();
+			skip_crlf();
 
-			this->set_gstate(gcount, http::item::body);
+			set_gstate(gcount, http::item::body);
 			return;
 		}
 
-		if (this->is_good()) {
-			char ch = this->get_char();
+		if (base::is_good()) {
+			char ch = get_char();
 			if (ch != ':') {
-				this->set_bad();
+				base::set_bad();
 			}
 		}
 
-		this->skip_spaces();
+		skip_spaces();
 
-		this->set_gstate(gcount, http::item::header_value);
+		set_gstate(gcount, http::item::header_value);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10042, "_http_istream::get_header_name() <<< header_name='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -283,40 +283,40 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_header_value(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10043, "_http_istream::get_header_value() >>>");
 		}
 
-		this->assert_next(http::item::header_value);
+		base::assert_next(http::item::header_value);
 
 		std::size_t gcount = 0;
 		std::size_t gcount_local;
 
 		do {
 			do {
-				std::size_t sp = this->skip_spaces();
-				if (gcount > 0 && sp > 0 && ascii::is_abcprint(this->peek_char())) {
+				std::size_t sp = skip_spaces();
+				if (gcount > 0 && sp > 0 && ascii::is_abcprint(peek_char())) {
 					if (gcount == size - 1) {
-						this->set_fail();
-						this->set_gstate(gcount, http::item::header_value);
+						base::set_fail();
+						set_gstate(gcount, http::item::header_value);
 						return;
 					}
 
 					buffer[gcount++] = ' ';
 				}
 
-				gcount_local = this->get_prints(buffer + gcount, size - gcount);
+				gcount_local = get_prints(buffer + gcount, size - gcount);
 				gcount += gcount_local;
 			}
-			while (this->is_good() && gcount_local > 0);
-			this->skip_crlf();
+			while (base::is_good() && gcount_local > 0);
+			skip_crlf();
 		}
-		while (this->is_good() && ascii::is_space(this->peek_char()));
+		while (base::is_good() && ascii::is_space(peek_char()));
 
-		this->skip_spaces();
+		skip_spaces();
 
-		this->set_gstate(gcount, http::item::header_name);
+		set_gstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10044, "_http_istream::get_header_value() <<< header_value='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -326,16 +326,16 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_body(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10045, "_http_istream::get_body() >>>");
 		}
 
-		this->assert_next(http::item::body);
+		base::assert_next(http::item::body);
 
-		std::size_t gcount = this->get_bytes(buffer, size);
+		std::size_t gcount = get_bytes(buffer, size);
 
-		this->set_gstate(gcount, http::item::body);
+		set_gstate(gcount, http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10046, "_http_istream::get_body() <<< body='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -383,13 +383,13 @@ namespace abc {
 	inline std::size_t _http_istream<LogPtr>::skip_crlf() {
 		char ch = get_char();
 		if (ch != '\r') {
-			this->set_fail();
+			base::set_fail();
 			return 0;
 		}
 
 		ch = get_char();
 		if (ch != '\n') {
-			this->set_fail();
+			base::set_fail();
 			return 1;
 		}
 
@@ -401,8 +401,8 @@ namespace abc {
 	inline std::size_t _http_istream<LogPtr>::get_bytes(char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
-		while (this->is_good() && gcount < size) {
-			buffer[gcount++] = this->get();
+		while (base::is_good() && gcount < size) {
+			buffer[gcount++] = base::get();
 		}
 
 		return gcount;
@@ -414,13 +414,13 @@ namespace abc {
 	inline std::size_t _http_istream<LogPtr>::get_chars(Predicate&& predicate, char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
-		while (this->is_good() && predicate(peek_char())) {
+		while (base::is_good() && predicate(peek_char())) {
 			if (gcount == size - 1) {
-				this->set_fail();
+				base::set_fail();
 				break;
 			}
 
-			buffer[gcount++] = this->get();
+			buffer[gcount++] = base::get();
 		}
 		buffer[gcount] = '\0';
 
@@ -433,8 +433,8 @@ namespace abc {
 	inline std::size_t _http_istream<LogPtr>::skip_chars(Predicate&& predicate) {
 		std::size_t gcount = 0;
 		
-		while (this->is_good() && predicate(peek_char())) {
-			this->get();
+		while (base::is_good() && predicate(peek_char())) {
+			base::get();
 			gcount++;
 		}
 
@@ -446,8 +446,8 @@ namespace abc {
 	inline char _http_istream<LogPtr>::get_char() {
 		char ch = peek_char();
 
-		if (this->is_good()) {
-			this->get();
+		if (base::is_good()) {
+			base::get();
 		}
 
 		return ch;
@@ -456,10 +456,10 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline char _http_istream<LogPtr>::peek_char() {
-		char ch = this->peek();
+		char ch = base::peek();
 
 		if (!ascii::is_ascii(ch)) {
-			this->set_bad();
+			base::set_bad();
 			ch = '\0';
 		}
 
@@ -473,7 +473,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline _http_ostream<LogPtr>::_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
 		: _http_stream<std::ostream, LogPtr>(sb, next, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10047, "_http_ostream::_http_ostream()");
 		}
@@ -482,19 +482,19 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::set_pstate(http::item_t next) {
-		this->flush();
-		this->set_state(0, next);
+		base::flush();
+		base::set_state(0, next);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10048, "_http_ostream::put_protocol() >>>");
 		}
 
-		this->assert_next(http::item::protocol);
+		base::assert_next(http::item::protocol);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
@@ -503,44 +503,44 @@ namespace abc {
 		std::size_t gcount = 0;	
 
 		if (size < 5 || std::strncmp(buffer, "HTTP/", 5) != 0) {
-			this->set_bad();
+			base::set_bad();
 		}
 		else {
-			gcount = this->put_bytes("HTTP/", 5);
+			gcount = put_bytes("HTTP/", 5);
 		}
 
-		if (this->is_good() && gcount < size) {
-			std::size_t gcount_local = this->put_digits(buffer + gcount, size - gcount);
+		if (base::is_good() && gcount < size) {
+			std::size_t gcount_local = put_digits(buffer + gcount, size - gcount);
 			if (gcount_local == 0) {
-				this->set_bad();
+				base::set_bad();
 			}
 			else {
 				gcount += gcount_local;
 			}
 		}
 
-		if (this->is_good() && gcount < size) {
+		if (base::is_good() && gcount < size) {
 			if (buffer[gcount] != '.') {
-				this->set_bad();
+				base::set_bad();
 			}
 			else {
-				this->put('.');
+				base::put('.');
 				gcount++;
 			}
 		}
 
-		if (this->is_good() && gcount < size) {
-			std::size_t gcount_local = this->put_digits(buffer + gcount, size - gcount);
+		if (base::is_good() && gcount < size) {
+			std::size_t gcount_local = put_digits(buffer + gcount, size - gcount);
 			if (gcount_local == 0) {
-				this->set_bad();
+				base::set_bad();
 			}
 			else {
 				gcount += gcount_local;
 			}
 		}
 
-		if (this->is_good() && gcount < size) {
-			this->set_bad();
+		if (base::is_good() && gcount < size) {
+			base::set_bad();
 		}
 
 		if (log_ptr_local != nullptr) {
@@ -553,31 +553,31 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_header_name(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004a, "_http_ostream::put_header_name() >>>");
 		}
 
-		this->assert_next(http::item::header_name);
+		base::assert_next(http::item::header_name);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
 		}
 
-		std::size_t pcount = this->put_token(buffer, size);
+		std::size_t pcount = put_token(buffer, size);
 
-		if (this->is_good()) {
+		if (base::is_good()) {
 			if (pcount < size) {
-				this->set_bad();
+				base::set_bad();
 			}
 		}
 
-		if (this->is_good()) {
-			this->put(':');
-			this->put_space();
+		if (base::is_good()) {
+			base::put(':');
+			put_space();
 		}
 
-		this->set_pstate(http::item::header_value);
+		set_pstate(http::item::header_value);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004b, "_http_ostream::put_header_name() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -587,12 +587,12 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_header_value(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004c, "_http_ostream::put_header_value() >>>");
 		}
 
-		this->assert_next(http::item::header_value);
+		base::assert_next(http::item::header_value);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
@@ -600,28 +600,28 @@ namespace abc {
 
 		std::size_t pcount = 0;
 		do {
-			std::size_t sp = this->skip_spaces_in_header_value(buffer + pcount, size - pcount);
+			std::size_t sp = skip_spaces_in_header_value(buffer + pcount, size - pcount);
 
 			if (pcount > 0 && sp > 0 && pcount + sp < size) {
-				this->put_space();
+				put_space();
 			}
 
 			pcount += sp;
 
 			if (pcount < size) {
 				if (ascii::is_abcprint(buffer[pcount])) {
-					pcount += this->put_prints(buffer + pcount, size - pcount);
+					pcount += put_prints(buffer + pcount, size - pcount);
 				}
 				else {
-					this->set_bad();
+					base::set_bad();
 				}
 			}
 		}
-		while (this->is_good() && pcount < size);
+		while (base::is_good() && pcount < size);
 
-		this->put_crlf();
+		put_crlf();
 
-		this->set_pstate(http::item::header_name);
+		set_pstate(http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004d, "_http_ostream::put_header_value() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -631,16 +631,16 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::end_headers() {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004e, "_http_ostream::end_headers() >>>");
 		}
 
-		this->assert_next(http::item::header_name);
+		base::assert_next(http::item::header_name);
 
-		this->put_crlf();
+		put_crlf();
 
-		this->set_pstate(http::item::body);
+		set_pstate(http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004f, "_http_ostream::end_headers() <<<");
@@ -650,20 +650,20 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_body(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10050, "_http_ostream::put_body() >>>");
 		}
 
-		this->assert_next(http::item::body);
+		base::assert_next(http::item::body);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
 		}
 
-		std::size_t pcount = this->put_bytes(buffer, size);
+		std::size_t pcount = put_bytes(buffer, size);
 
-		this->set_pstate(http::item::body);
+		set_pstate(http::item::body);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10051, "_http_ostream::put_body() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -673,43 +673,43 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_crlf() {
-		return this->put_char('\r') + this->put_char('\n');
+		return put_char('\r') + put_char('\n');
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_space() {
-		return this->put_char(' ');
+		return put_char(' ');
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_token(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::http::is_token, buffer, size);
+		return put_chars(ascii::http::is_token, buffer, size);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_prints(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_abcprint, buffer, size);
+		return put_chars(ascii::is_abcprint, buffer, size);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_prints_and_spaces(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_abcprint_or_space, buffer, size);
+		return put_chars(ascii::is_abcprint_or_space, buffer, size);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_alphas(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_alpha, buffer, size);
+		return put_chars(ascii::is_alpha, buffer, size);
 	}
 
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_digits(const char* buffer, std::size_t size) {
-		return this->put_chars(ascii::is_digit, buffer, size);
+		return put_chars(ascii::is_digit, buffer, size);
 	}
 
 
@@ -717,8 +717,8 @@ namespace abc {
 	inline std::size_t _http_ostream<LogPtr>::put_bytes(const char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
-		while (this->is_good() && gcount < size) {
-			this->put(buffer[gcount++]);
+		while (base::is_good() && gcount < size) {
+			base::put(buffer[gcount++]);
 		}
 
 		return gcount;
@@ -730,8 +730,8 @@ namespace abc {
 	inline std::size_t _http_ostream<LogPtr>::put_chars(Predicate&& predicate, const char* buffer, std::size_t size) {
 		std::size_t pcount = 0;
 
-		while (this->is_good() && pcount < size && predicate(buffer[pcount])) {
-			this->put(buffer[pcount++]);
+		while (base::is_good() && pcount < size && predicate(buffer[pcount])) {
+			base::put(buffer[pcount++]);
 		}
 
 		return pcount;
@@ -740,11 +740,11 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_char(char ch) {
-		if (this->is_good()) {
-			this->put(ch);
+		if (base::is_good()) {
+			base::put(ch);
 		}
 
-		return this->is_good() ? 1 : 0;;
+		return base::is_good() ? 1 : 0;;
 	}
 
 
@@ -786,7 +786,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline http_request_istream<LogPtr>::http_request_istream(std::streambuf* sb, const LogPtr& log_ptr)
 		: _http_istream<LogPtr>(sb, http::item::method, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10052, "http_request_istream::http_request_istream()");
 		}
@@ -801,18 +801,18 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_method(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10053, "http_request_istream::get_method() >>>");
 		}
 
-		this->assert_next(http::item::method);
+		base::assert_next(http::item::method);
 
-		std::size_t gcount = this->get_token(buffer, size);
+		std::size_t gcount = base::get_token(buffer, size);
 
-		this->skip_spaces();
+		base::skip_spaces();
 
-		this->set_gstate(gcount, http::item::resource);
+		base::set_gstate(gcount, http::item::resource);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10054, "http_request_istream::get_method() <<< method='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -822,18 +822,18 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_istream<LogPtr>::get_resource(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10055, "http_request_istream::get_resource() >>>");
 		}
 
-		this->assert_next(http::item::resource);
+		base::assert_next(http::item::resource);
 
-		std::size_t gcount = this->get_prints(buffer, size);
+		std::size_t gcount = base::get_prints(buffer, size);
 
-		this->skip_spaces();
+		base::skip_spaces();
 
-		this->set_gstate(gcount, http::item::protocol);
+		base::set_gstate(gcount, http::item::protocol);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10056, "http_request_istream::get_resource() <<< resource='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -845,9 +845,9 @@ namespace abc {
 	inline void http_request_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
 		std::size_t gcount = _http_istream<LogPtr>::get_protocol(buffer, size);
 
-		this->skip_crlf();
+		base::skip_crlf();
 
-		this->set_gstate(gcount, http::item::header_name);
+		base::set_gstate(gcount, http::item::header_name);
 	}
 
 
@@ -857,7 +857,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline http_request_ostream<LogPtr>::http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr)
 		: _http_ostream<LogPtr>(sb, http::item::method, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10057, "http_request_ostream::http_request_ostream()");
 		}
@@ -872,22 +872,22 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_ostream<LogPtr>::put_method(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10058, "_http_ostream::put_method() >>>");
 		}
 
-		this->assert_next(http::item::method);
+		base::assert_next(http::item::method);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
 		}
 
-		std::size_t pcount = this->put_token(buffer, size);
+		std::size_t pcount = base::put_token(buffer, size);
 
-		this->put_space();
+		base::put_space();
 
-		this->set_pstate(http::item::resource);
+		base::set_pstate(http::item::resource);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10059, "_http_ostream::put_method() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -897,22 +897,22 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_request_ostream<LogPtr>::put_resource(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005a, "_http_ostream::put_resource() >>>");
 		}
 
-		this->assert_next(http::item::resource);
+		base::assert_next(http::item::resource);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
 		}
 
-		std::size_t pcount = this->put_prints(buffer, size);
+		std::size_t pcount = base::put_prints(buffer, size);
 
-		this->put_space();
+		base::put_space();
 
-		this->set_pstate(http::item::protocol);
+		base::set_pstate(http::item::protocol);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005b, "_http_ostream::put_resource() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -924,9 +924,9 @@ namespace abc {
 	inline void http_request_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
 		_http_ostream<LogPtr>::put_protocol(buffer, size);
 
-		this->put_crlf();
+		base::put_crlf();
 
-		this->set_pstate(http::item::header_name);
+		base::set_pstate(http::item::header_name);
 	}
 
 
@@ -936,7 +936,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline http_response_istream<LogPtr>::http_response_istream(std::streambuf* sb, const LogPtr& log_ptr)
 		: _http_istream<LogPtr>(sb, http::item::protocol, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005c, "http_response_istream::http_response_istream()");
 		}
@@ -953,23 +953,23 @@ namespace abc {
 	inline void http_response_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
 		std::size_t gcount = _http_istream<LogPtr>::get_protocol(buffer, size);
 
-		this->set_gstate(gcount, http::item::status_code);
+		base::set_gstate(gcount, http::item::status_code);
 	}
 
 	template <typename LogPtr>
 	inline void http_response_istream<LogPtr>::get_status_code(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005d, "http_response_istream::get_status_code() >>>");
 		}
 
-		this->assert_next(http::item::status_code);
+		base::assert_next(http::item::status_code);
 
-		std::size_t gcount = this->get_digits(buffer, size);
+		std::size_t gcount = base::get_digits(buffer, size);
 
-		this->skip_spaces();
+		base::skip_spaces();
 
-		this->set_gstate(gcount, http::item::reason_phrase);
+		base::set_gstate(gcount, http::item::reason_phrase);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005e, "http_response_istream::get_status_code() <<< status_code='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -979,19 +979,19 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_response_istream<LogPtr>::get_reason_phrase(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1005f, "http_response_istream::get_reason_phrase() >>>");
 		}
 
-		this->assert_next(http::item::reason_phrase);
+		base::assert_next(http::item::reason_phrase);
 
-		std::size_t gcount = this->get_prints_and_spaces(buffer, size);
+		std::size_t gcount = base::get_prints_and_spaces(buffer, size);
 
-		this->skip_spaces();
-		this->skip_crlf();
+		base::skip_spaces();
+		base::skip_crlf();
 
-		this->set_gstate(gcount, http::item::header_name);
+		base::set_gstate(gcount, http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10060, "http_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%lu", buffer, (std::uint32_t)gcount);
@@ -1005,7 +1005,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline http_response_ostream<LogPtr>::http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr)
 		: _http_ostream<LogPtr>(sb, http::item::protocol, log_ptr) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10061, "http_response_ostream::http_response_ostream()");
 		}
@@ -1022,30 +1022,30 @@ namespace abc {
 	inline void http_response_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
 		_http_ostream<LogPtr>::put_protocol(buffer, size);
 
-		this->put_space();
+		base::put_space();
 
-		this->set_pstate(http::item::status_code);
+		base::set_pstate(http::item::status_code);
 	}
 
 
 	template <typename LogPtr>
 	inline void http_response_ostream<LogPtr>::put_status_code(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10062, "http_response_ostream::put_status_code() >>>");
 		}
 
-		this->assert_next(http::item::status_code);
+		base::assert_next(http::item::status_code);
 
 		if (size == size::strlen) {
 			size = std::strlen(buffer);
 		}
 
-		std::size_t pcount = this->put_digits(buffer, size);
+		std::size_t pcount = base::put_digits(buffer, size);
 
-		this->put_space();
+		base::put_space();
 
-		this->set_pstate(http::item::reason_phrase);
+		base::set_pstate(http::item::reason_phrase);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10063, "http_response_ostream::put_status_code() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (std::uint32_t)size, (std::uint32_t)pcount);
@@ -1055,12 +1055,12 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void http_response_ostream<LogPtr>::put_reason_phrase(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10064, "http_response_ostream::put_reason_phrase() >>>");
 		}
 
-		this->assert_next(http::item::reason_phrase);
+		base::assert_next(http::item::reason_phrase);
 
 		std::size_t pcount = 0;
 		if (buffer != nullptr) {
@@ -1068,12 +1068,12 @@ namespace abc {
 				size = std::strlen(buffer);
 			}
 
-			pcount = this->put_prints_and_spaces(buffer, size);
+			pcount = base::put_prints_and_spaces(buffer, size);
 		}
 
-		this->put_crlf();
+		base::put_crlf();
 
-		this->set_pstate(http::item::header_name);
+		base::set_pstate(http::item::header_name);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10065, "http_response_ostream::put_reason_phrase() <<< buffer='%s', size=%lu, pcount=%lu", buffer != nullptr ? buffer : "<nullptr>", (std::uint32_t)size, (std::uint32_t)pcount);

@@ -80,6 +80,8 @@ namespace abc {
 
 	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
 	class _json_stream : protected StdStream {
+		using base = StdStream;
+
 	protected:
 		_json_stream(std::streambuf* sb, const LogPtr& log_ptr);
 		_json_stream(_json_stream&& other) = default;
@@ -122,6 +124,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_istream : public _json_stream<std::istream, LogPtr, MaxLevels> {
+		using base = _json_stream<std::istream, LogPtr, MaxLevels>;
+
 	public:
 		json_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		json_istream(json_istream&& other) = default;
@@ -160,6 +164,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
 	class json_ostream : public _json_stream<std::ostream, LogPtr, MaxLevels> {
+		using base = _json_stream<std::ostream, LogPtr, MaxLevels>;
+
 	public:
 		json_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		json_ostream(json_ostream&& other) = default;

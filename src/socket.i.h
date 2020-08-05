@@ -145,6 +145,8 @@ namespace abc {
 
 	template <typename LogPtr>
 	class _client_socket : public _basic_socket<LogPtr> {
+		using base = _basic_socket<LogPtr>;
+
 	protected:
 		_client_socket(socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
 		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
@@ -165,6 +167,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class udp_socket : public _client_socket<LogPtr> {
+		using base = _client_socket<LogPtr>;
+
 	public:
 		udp_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
 		udp_socket(const LogPtr& log_ptr);
@@ -182,6 +186,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class tcp_client_socket : public _client_socket<LogPtr> {
+		using base = _client_socket<LogPtr>;
+
 	public:
 		tcp_client_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
 		tcp_client_socket(const LogPtr& log_ptr);
@@ -199,6 +205,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class tcp_server_socket : public _basic_socket<LogPtr> {
+		using base = _basic_socket<LogPtr>;
+
 	public:
 		tcp_server_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
 		tcp_server_socket(const LogPtr& log_ptr);
@@ -216,6 +224,8 @@ namespace abc {
 
 	template <typename SocketPtr, typename LogPtr = null_log_ptr>
 	class socket_streambuf : public std::streambuf {
+		using base = std::streambuf;
+
 	public:
 		socket_streambuf(const SocketPtr& socket_ptr, const LogPtr& log_ptr = nullptr);
 

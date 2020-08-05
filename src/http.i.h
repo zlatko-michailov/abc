@@ -55,6 +55,8 @@ namespace abc {
 
 	template <typename StdStream, typename LogPtr>
 	class _http_stream : protected StdStream {
+		using base = StdStream;
+
 	protected:
 		_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_stream(_http_stream&& other) = default;
@@ -94,6 +96,8 @@ namespace abc {
 
 	template <typename LogPtr>
 	class _http_istream : public _http_stream<std::istream, LogPtr> {
+		using base = _http_stream<std::istream, LogPtr>;
+
 	protected:
 		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_istream(_http_istream&& other) = default;
@@ -135,6 +139,8 @@ namespace abc {
 
 	template <typename LogPtr>
 	class _http_ostream : public _http_stream<std::ostream, LogPtr> {
+		using base = _http_stream<std::ostream, LogPtr>;
+
 	protected:
 		_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_ostream(_http_ostream&& other) = default;
@@ -173,6 +179,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_request_istream : public _http_istream<LogPtr> {
+		using base = _http_istream<LogPtr>;
+
 	public:
 		http_request_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		http_request_istream(http_request_istream&& other) = default;
@@ -191,6 +199,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_request_ostream : public _http_ostream<LogPtr> {
+		using base = _http_ostream<LogPtr>;
+
 	public:
 		http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		http_request_ostream(http_request_ostream&& other) = default;
@@ -209,6 +219,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_response_istream : public _http_istream<LogPtr> {
+		using base = _http_istream<LogPtr>;
+
 	public:
 		http_response_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		http_response_istream(http_response_istream&& other) = default;
@@ -227,6 +239,8 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_response_ostream : public _http_ostream<LogPtr> {
+		using base = _http_ostream<LogPtr>;
+
 	public:
 		http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		http_response_ostream(http_response_ostream&& other) = default;

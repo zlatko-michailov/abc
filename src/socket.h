@@ -290,37 +290,37 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _client_socket<LogPtr>::connect(const char* host, const char* port) {
-		this->tie(host, port, socket::tie::connect);
+		base::tie(host, port, socket::tie::connect);
 	}
 
 
 	template <typename LogPtr>
 	inline void _client_socket<LogPtr>::connect(const socket::address& address) {
-		this->tie(address, socket::tie::connect);
+		base::tie(address, socket::tie::connect);
 	}
 
 
 	template <typename LogPtr>
 	inline void _client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10016, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
 		}
 
-		if (!this->is_open()) {
+		if (!base::is_open()) {
 			throw exception<std::logic_error, LogPtr>("!is_open()", 0x10017, log_ptr_local);
 		}
 
 		ssize_t sent_size;
 		if (address != nullptr) {
-			if (this->kind() != socket::kind::dgram) {
+			if (base::kind() != socket::kind::dgram) {
 				throw exception<std::logic_error, LogPtr>("!dgram", 0x10018, log_ptr_local);
 			}
 
-			sent_size = ::sendto(this->handle(), buffer, size, 0, &address->value, address->size);
+			sent_size = ::sendto(base::handle(), buffer, size, 0, &address->value, address->size);
 		}
 		else {
-			sent_size = ::send(this->handle(), buffer, size, 0);
+			sent_size = ::send(base::handle(), buffer, size, 0);
 		}
 
 		if (sent_size < 0) {
@@ -339,25 +339,25 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x1001c, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
 		}
 
-		if (!this->is_open()) {
+		if (!base::is_open()) {
 			throw exception<std::logic_error, LogPtr>("!is_open()", 0x1001d, log_ptr_local);
 		}
 
 		ssize_t received_size;
 		if (address != nullptr) {
-			if (this->kind() != socket::kind::dgram) {
+			if (base::kind() != socket::kind::dgram) {
 				throw exception<std::logic_error, LogPtr>("!dgram", 0x1001e, log_ptr_local);
 			}
 
-			 received_size = ::recvfrom(this->handle(), buffer, size, 0, &address->value, &address->size);
+			 received_size = ::recvfrom(base::handle(), buffer, size, 0, &address->value, &address->size);
 		}
 		else {
-			 received_size = ::recv(this->handle(), buffer, size, 0);
+			 received_size = ::recv(base::handle(), buffer, size, 0);
 		}
 
 		if (received_size < 0) {
@@ -427,12 +427,12 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10022, "tcp_server_socket::listen() >>>");
 		}
 
-		socket::error_t err = ::listen(this->handle(), backlog_size);
+		socket::error_t err = ::listen(base::handle(), backlog_size);
 
 		if (err != socket::error::none) {
 			throw exception<std::runtime_error, LogPtr>("::listen()", 0x10023, log_ptr_local);
@@ -446,12 +446,12 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
-		LogPtr log_ptr_local = this->log_ptr();
+		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10025, "tcp_server_socket::accept() >>>");
 		}
 
-		socket::handle_t hnd = ::accept(this->handle(), nullptr, nullptr);
+		socket::handle_t hnd = ::accept(base::handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
 			throw exception<std::runtime_error, LogPtr>("::accept()", 0x10026, log_ptr_local);
@@ -461,7 +461,7 @@ namespace abc {
 			log_ptr_local->put_any(category::abc::socket, severity::abc, 0x10027, "tcp_server_socket::accept() <<<");
 		}
 
-		return tcp_client_socket<LogPtr>(hnd, this->family(), this->log_ptr());
+		return tcp_client_socket<LogPtr>(hnd, base::family(), base::log_ptr());
 	}
 
 
