@@ -35,9 +35,9 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline _json_stream<StdStream, LogPtr, MaxLevels>::_json_stream(std::streambuf* sb, const LogPtr& log_ptr)
-		: StdStream(sb)
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline _json_stream<Stream, LogPtr, MaxLevels>::_json_stream(std::streambuf* sb, const LogPtr& log_ptr)
+		: Stream(sb)
 		, _expect_property(false)
 		, _level_top(-1)
 		, _gcount(0)
@@ -48,75 +48,75 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::reset() {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::reset() {
 		if (_log_ptr != nullptr) {
 			_log_ptr->put_any(category::abc::json, severity::abc, 0x100fa, "_json_stream::reset()");
 		}
 
-		StdStream::clear(StdStream::goodbit);
+		Stream::clear(Stream::goodbit);
 		_expect_property = false;
 		_level_top = -1;
 		_gcount = 0;
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_stream<StdStream, LogPtr, MaxLevels>::levels() const noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline std::size_t _json_stream<Stream, LogPtr, MaxLevels>::levels() const noexcept {
 		return _level_top + 1;
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline json::level_t _json_stream<StdStream, LogPtr, MaxLevels>::top_level() const noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline json::level_t _json_stream<Stream, LogPtr, MaxLevels>::top_level() const noexcept {
 		return 0 <= _level_top ? _level_stack[_level_top] : json::level::array;
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_stream<StdStream, LogPtr, MaxLevels>::gcount() const noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline std::size_t _json_stream<Stream, LogPtr, MaxLevels>::gcount() const noexcept {
 		return _gcount;
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::eof() const {
-		return StdStream::eof();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::eof() const {
+		return Stream::eof();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::good() const {
-		return StdStream::good();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::good() const {
+		return Stream::good();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::bad() const {
-		return StdStream::bad();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::bad() const {
+		return Stream::bad();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::fail() const {
-		return StdStream::fail();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::fail() const {
+		return Stream::fail();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::operator!() const {
-		return StdStream::operator!();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::operator!() const {
+		return Stream::operator!();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline _json_stream<StdStream, LogPtr, MaxLevels>::operator bool() const {
-		return StdStream::operator bool();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline _json_stream<Stream, LogPtr, MaxLevels>::operator bool() const {
+		return Stream::operator bool();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::expect_property() const noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::expect_property() const noexcept {
 		return
 			_expect_property
 			&& _level_top >= 0
@@ -124,8 +124,8 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_expect_property(bool expect) noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_expect_property(bool expect) noexcept {
 		_expect_property =
 			expect
 			&& _level_top >= 0
@@ -133,8 +133,8 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::push_level(json::level_t level) noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::push_level(json::level_t level) noexcept {
 		if (_level_top + 1 >= MaxLevels) {
 			if (_log_ptr != nullptr) {
 				_log_ptr->put_any(category::abc::json, severity::important, 0x100fb, "_json_stream::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
@@ -148,8 +148,8 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
 		if (_level_top + 1 <= 0) {
 			if (_log_ptr != nullptr) {
 				_log_ptr->put_any(category::abc::json, severity::important, 0x100fc, "_json_stream::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
@@ -172,32 +172,32 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_gcount(std::size_t gcount) noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_gcount(std::size_t gcount) noexcept {
 		_gcount = gcount;
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<StdStream, LogPtr, MaxLevels>::is_good() const {
-		return StdStream::good() && !StdStream::eof();
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_stream<Stream, LogPtr, MaxLevels>::is_good() const {
+		return Stream::good() && !Stream::eof();
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_bad() {
-		StdStream::clear(StdStream::badbit | StdStream::failbit);
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_bad() {
+		Stream::clear(Stream::badbit | Stream::failbit);
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<StdStream, LogPtr, MaxLevels>::set_fail() {
-		StdStream::setstate(StdStream::failbit);
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_fail() {
+		Stream::setstate(Stream::failbit);
 	}
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	inline const LogPtr& _json_stream<StdStream, LogPtr, MaxLevels>::log_ptr() const noexcept {
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	inline const LogPtr& _json_stream<Stream, LogPtr, MaxLevels>::log_ptr() const noexcept {
 		return _log_ptr;
 	}
 

@@ -34,9 +34,9 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename StdStream, typename LogPtr>
-	inline _http_stream<StdStream, LogPtr>::_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
-		: StdStream(sb)
+	template <typename Stream, typename LogPtr>
+	inline _http_stream<Stream, LogPtr>::_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
+		: Stream(sb)
 		, _next(next)
 		, _gcount(0)
 		, _log_ptr(log_ptr) {
@@ -46,68 +46,68 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::reset(http::item_t next) {
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::reset(http::item_t next) {
 		if (_log_ptr != nullptr) {
 			_log_ptr->put_any(category::abc::http, severity::abc, 0x1003c, "_http_stream::reset() next=%lu", (std::uint32_t)next);
 		}
 
-		StdStream::clear(StdStream::goodbit);
+		Stream::clear(Stream::goodbit);
 		_next = next;
 		_gcount = 0;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline http::item_t _http_stream<StdStream, LogPtr>::next() const noexcept {
+	template <typename Stream, typename LogPtr>
+	inline http::item_t _http_stream<Stream, LogPtr>::next() const noexcept {
 		return _next;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline std::size_t _http_stream<StdStream, LogPtr>::gcount() const noexcept {
+	template <typename Stream, typename LogPtr>
+	inline std::size_t _http_stream<Stream, LogPtr>::gcount() const noexcept {
 		return _gcount;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::eof() const {
-		return StdStream::eof();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::eof() const {
+		return Stream::eof();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::good() const {
-		return StdStream::good();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::good() const {
+		return Stream::good();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::bad() const {
-		return StdStream::bad();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::bad() const {
+		return Stream::bad();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::fail() const {
-		return StdStream::fail();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::fail() const {
+		return Stream::fail();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::operator!() const {
-		return StdStream::operator!();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::operator!() const {
+		return Stream::operator!();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline _http_stream<StdStream, LogPtr>::operator bool() const {
-		return StdStream::operator bool();
+	template <typename Stream, typename LogPtr>
+	inline _http_stream<Stream, LogPtr>::operator bool() const {
+		return Stream::operator bool();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::assert_next(http::item_t item) {
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::assert_next(http::item_t item) {
 		if (_next != item) {
 			char buffer[100];
 			std::snprintf(buffer, sizeof(buffer), "_next: actual=%u, expected=%u", _next, item);
@@ -117,45 +117,45 @@ namespace abc {
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::set_state(std::size_t gcount, http::item_t next) noexcept {
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::set_state(std::size_t gcount, http::item_t next) noexcept {
 		_gcount	= gcount;
 		_next	= next;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::set_next(http::item_t item) noexcept {
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::set_next(http::item_t item) noexcept {
 		_next = item;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::set_gcount(std::size_t gcount) noexcept {
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::set_gcount(std::size_t gcount) noexcept {
 		_gcount = gcount;
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline bool _http_stream<StdStream, LogPtr>::is_good() const {
-		return StdStream::good() && !StdStream::eof();
+	template <typename Stream, typename LogPtr>
+	inline bool _http_stream<Stream, LogPtr>::is_good() const {
+		return Stream::good() && !Stream::eof();
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::set_bad() {
-		StdStream::clear(StdStream::badbit | StdStream::failbit);
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::set_bad() {
+		Stream::clear(Stream::badbit | Stream::failbit);
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline void _http_stream<StdStream, LogPtr>::set_fail() {
-		StdStream::setstate(StdStream::failbit);
+	template <typename Stream, typename LogPtr>
+	inline void _http_stream<Stream, LogPtr>::set_fail() {
+		Stream::setstate(Stream::failbit);
 	}
 
 
-	template <typename StdStream, typename LogPtr>
-	inline const LogPtr& _http_stream<StdStream, LogPtr>::log_ptr() const noexcept {
+	template <typename Stream, typename LogPtr>
+	inline const LogPtr& _http_stream<Stream, LogPtr>::log_ptr() const noexcept {
 		return _log_ptr;
 	}
 

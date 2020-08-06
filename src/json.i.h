@@ -78,9 +78,9 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename StdStream, typename LogPtr, std::size_t MaxLevels>
-	class _json_stream : protected StdStream {
-		using base = StdStream;
+	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
+	class _json_stream : protected Stream {
+		using base = Stream;
 
 	protected:
 		_json_stream(std::streambuf* sb, const LogPtr& log_ptr);

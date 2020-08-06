@@ -53,9 +53,9 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename StdStream, typename LogPtr>
-	class _http_stream : protected StdStream {
-		using base = StdStream;
+	template <typename Stream, typename LogPtr>
+	class _http_stream : protected Stream {
+		using base = Stream;
 
 	protected:
 		_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
