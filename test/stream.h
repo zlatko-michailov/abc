@@ -25,18 +25,35 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/timestamp.h"
+#include "../src/stream.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace timestamp {
+namespace abc { namespace test {
 
-	bool test_null_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
+	template <typename Stream>
+	inline bool verify_stream(test_context<abc::test::log_ptr>& context, const Stream& stream, tag_t tag) {
+		bool passed = true;
 
-}}}
+		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
+		passed = context.are_equal(stream.eof(), false, tag, "%u") && passed;
+		passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;
+		passed = context.are_equal(stream.bad(), false, tag, "%u") && passed;
+
+		return passed;
+	}
+
+
+	template <typename Stream>
+	inline bool verify_stream(test_context<abc::test::log_ptr>& context, const Stream& stream, std::size_t expected_gcount, tag_t tag) {
+		bool passed = true;
+
+		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;
+		passed = verify_stream(context, stream, tag) && passed;
+
+		return passed;
+	}
+
+}}
 

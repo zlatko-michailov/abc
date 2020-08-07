@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include "../src/buffer_streambuf.h"
 
 #include "test.h"

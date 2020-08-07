@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include <cstdint>
 #include <chrono>
 #include <ratio>

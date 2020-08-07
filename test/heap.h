@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include "../src/exception.h"
 #include "../src/tag.h"
 

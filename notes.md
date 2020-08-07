@@ -94,7 +94,7 @@ __PENDING QUESTIONS__
 # v0.8
 ## Done
 ## To Do
-- Add a base `_stream<StdStream>` that exposes the state getters.
+- Add a base `_stream<Stream>` that exposes the state getters.
   - Derive `table_` and `line_` from that base class.
   - Implement a single set of stream state verification methods.
 - `severity_log_filter` per category. Rename to just `log_filter`?

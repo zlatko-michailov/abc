@@ -36,12 +36,6 @@ namespace abc { namespace test { namespace json {
 	template <typename JsonStream, typename Value>
 	static bool verify_value(test_context<abc::test::log_ptr>& context, const Value& actual, const Value& expected, const JsonStream& stream, tag_t tag, const char* format, std::size_t expected_gcount);
 
-	template <std::size_t MaxLevels>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const abc::json_istream<abc::test::log_ptr, MaxLevels>& stream, std::size_t expected_gcount, tag_t tag);
-
-	template <typename JsonStream>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const JsonStream& stream, tag_t tag);
-
 
 	bool test_json_istream_null(test_context<abc::test::log_ptr>& context) {
 		char content[] =
@@ -2155,29 +2149,6 @@ namespace abc { namespace test { namespace json {
 
 		passed = context.are_equal(actual, expected, tag, format) && passed;
 		passed = verify_stream(context, stream, expected_gcount, tag) && passed;
-
-		return passed;
-	}
-
-
-	template <std::size_t MaxLevels>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const abc::json_istream<abc::test::log_ptr, MaxLevels>& stream, std::size_t expected_gcount, tag_t tag) {
-		bool passed = true;
-
-		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;
-		passed = verify_stream(context, stream, tag) && passed;
-
-		return passed;
-	}
-
-	template <typename JsonStream>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const JsonStream& stream, tag_t tag) {
-		bool passed = true;
-
-		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
-		passed = context.are_equal(stream.eof(), false, tag, "%u") && passed;
-		passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;
-		passed = context.are_equal(stream.bad(), false, tag, "%u") && passed;
 
 		return passed;
 	}

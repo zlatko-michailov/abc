@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include "../src/socket.h"
 
 #include "test.h"

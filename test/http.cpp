@@ -34,11 +34,6 @@ namespace abc { namespace test { namespace http {
 	template <typename HttpStream>
 	static bool verify_binary(test_context<abc::test::log_ptr>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag);
 
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const abc::_http_istream<abc::test::log_ptr>& stream, std::size_t expected_gcount, tag_t tag);
-
-	template <typename HttpStream>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const HttpStream& stream, tag_t tag);
-
 
 	bool test_http_request_istream_extraspaces(test_context<abc::test::log_ptr>& context) {
 		char content[] =
@@ -683,29 +678,6 @@ namespace abc { namespace test { namespace http {
 
 		passed = context.are_equal(actual, expected, size, tag) && passed;
 		passed = verify_stream(context, stream, size, tag) && passed;
-
-		return passed;
-	}
-
-
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const abc::_http_istream<abc::test::log_ptr>& stream, std::size_t expected_gcount, tag_t tag) {
-		bool passed = true;
-
-		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;
-		passed = verify_stream(context, stream, tag) && passed;
-
-		return passed;
-	}
-
-
-	template <typename HttpStream>
-	static bool verify_stream(test_context<abc::test::log_ptr>& context, const HttpStream& stream, tag_t tag) {
-		bool passed = true;
-
-		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
-		passed = context.are_equal(stream.eof(), false, tag, "%u") && passed;
-		passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;
-		passed = context.are_equal(stream.bad(), false, tag, "%u") && passed;
 
 		return passed;
 	}

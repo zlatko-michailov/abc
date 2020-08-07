@@ -23,9 +23,12 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include "../src/http.h"
 
 #include "test.h"
+#include "stream.h"
 
 
 namespace abc { namespace test { namespace http {
