@@ -100,8 +100,24 @@ namespace abc {
 
 
 	template <typename Stream, typename LogPtr>
+	inline void _stream<Stream, LogPtr>::set_bad_if(bool condition) {
+		if (condition) {
+			set_bad();
+		}
+	}
+
+
+	template <typename Stream, typename LogPtr>
 	inline void _stream<Stream, LogPtr>::set_fail() {
 		base::setstate(base::failbit);
+	}
+
+
+	template <typename Stream, typename LogPtr>
+	inline void _stream<Stream, LogPtr>::set_fail_if(bool condition) {
+		if (condition) {
+			set_fail();
+		}
 	}
 
 
@@ -117,7 +133,7 @@ namespace abc {
 	template <typename LogPtr>
 	inline _istream<LogPtr>::_istream(std::streambuf* sb, const LogPtr& log_ptr)
 		: base(sb, log_ptr)
-		, _gcount(gcount) {
+		, _gcount(0) {
 		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::stream, severity::abc, __TAG__, "_istream::_istream()");

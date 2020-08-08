@@ -52,7 +52,9 @@ namespace abc {
 		void			reset();
 		bool			is_good() const;
 		void			set_bad();
+		void			set_bad_if(bool condition);
 		void			set_fail();
+		void			set_fail_if(bool condition);
 
 		const LogPtr&	log_ptr() const noexcept;
 
@@ -65,7 +67,7 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _istream : protected _stream<std::istream, LogPtr> {
+	class _istream : public _stream<std::istream, LogPtr> {
 		using base = _stream<std::istream, LogPtr>;
 
 	protected:

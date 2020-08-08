@@ -35,88 +35,42 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline _json_stream<Stream, LogPtr, MaxLevels>::_json_stream(std::streambuf* sb, const LogPtr& log_ptr)
-		: Stream(sb)
-		, _expect_property(false)
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline _json_state<LogPtr, MaxLevels>::_json_state(const LogPtr& log_ptr)
+		: _expect_property(false)
 		, _level_top(-1)
-		, _gcount(0)
 		, _log_ptr(log_ptr) {
 		if (_log_ptr != nullptr) {
-			_log_ptr->put_any(category::abc::json, severity::abc, 0x100f9, "_json_stream::_json_stream()");
+			_log_ptr->put_any(category::abc::json, severity::abc, 0x100f9, "_json_state::_json_state()");
 		}
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::reset() {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void _json_state<LogPtr, MaxLevels>::reset() {
 		if (_log_ptr != nullptr) {
-			_log_ptr->put_any(category::abc::json, severity::abc, 0x100fa, "_json_stream::reset()");
+			_log_ptr->put_any(category::abc::json, severity::abc, 0x100fa, "_json_state::reset()");
 		}
 
-		Stream::clear(Stream::goodbit);
 		_expect_property = false;
 		_level_top = -1;
-		_gcount = 0;
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_stream<Stream, LogPtr, MaxLevels>::levels() const noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline std::size_t _json_state<LogPtr, MaxLevels>::levels() const noexcept {
 		return _level_top + 1;
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline json::level_t _json_stream<Stream, LogPtr, MaxLevels>::top_level() const noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline json::level_t _json_state<LogPtr, MaxLevels>::top_level() const noexcept {
 		return 0 <= _level_top ? _level_stack[_level_top] : json::level::array;
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t _json_stream<Stream, LogPtr, MaxLevels>::gcount() const noexcept {
-		return _gcount;
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::eof() const {
-		return Stream::eof();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::good() const {
-		return Stream::good();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::bad() const {
-		return Stream::bad();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::fail() const {
-		return Stream::fail();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::operator!() const {
-		return Stream::operator!();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline _json_stream<Stream, LogPtr, MaxLevels>::operator bool() const {
-		return Stream::operator bool();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::expect_property() const noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_state<LogPtr, MaxLevels>::expect_property() const noexcept {
 		return
 			_expect_property
 			&& _level_top >= 0
@@ -124,8 +78,8 @@ namespace abc {
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_expect_property(bool expect) noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline void _json_state<LogPtr, MaxLevels>::set_expect_property(bool expect) noexcept {
 		_expect_property =
 			expect
 			&& _level_top >= 0
@@ -133,72 +87,41 @@ namespace abc {
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::push_level(json::level_t level) noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_state<LogPtr, MaxLevels>::push_level(json::level_t level) noexcept {
 		if (_level_top + 1 >= MaxLevels) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->put_any(category::abc::json, severity::important, 0x100fb, "_json_stream::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fb, "_json_state::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
 			}
 
-			set_bad();
-			return;
+			return false;
 		}
 
 		_level_stack[++_level_top] = level;
+		return true;
 	}
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
+	template <typename LogPtr, std::size_t MaxLevels>
+	inline bool _json_state<LogPtr, MaxLevels>::pop_level(json::level_t level) noexcept {
 		if (_level_top + 1 <= 0) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->put_any(category::abc::json, severity::important, 0x100fc, "_json_stream::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fc, "_json_state::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
 			}
 
-			set_bad();
-			return;
+			return false;
 		}
 
 		if (_level_stack[_level_top] != level) {
 			if (_log_ptr != nullptr) {
-				_log_ptr->put_any(category::abc::json, severity::important, 0x100fd, "_json_stream::pop_level() levels='%lu', top=%lu, pop=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)_level_stack[_level_top], (std::uint32_t)level);
+				_log_ptr->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%lu', top=%lu, pop=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)_level_stack[_level_top], (std::uint32_t)level);
 			}
 
-			set_bad();
-			return;
+			return false;
 		}
 
 		_level_top--;
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_gcount(std::size_t gcount) noexcept {
-		_gcount = gcount;
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline bool _json_stream<Stream, LogPtr, MaxLevels>::is_good() const {
-		return Stream::good() && !Stream::eof();
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_bad() {
-		Stream::clear(Stream::badbit | Stream::failbit);
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline void _json_stream<Stream, LogPtr, MaxLevels>::set_fail() {
-		Stream::setstate(Stream::failbit);
-	}
-
-
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	inline const LogPtr& _json_stream<Stream, LogPtr, MaxLevels>::log_ptr() const noexcept {
-		return _log_ptr;
+		return true;
 	}
 
 
@@ -207,17 +130,12 @@ namespace abc {
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline json_istream<LogPtr, MaxLevels>::json_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _json_stream<std::istream, LogPtr, MaxLevels>(sb, log_ptr) {
+		: base(sb, log_ptr)
+		, state(log_ptr) {
 		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::json, severity::abc, 0x100fe, "json_istream::json_istream()");
 		}
-	}
-
-
-	template <typename LogPtr, std::size_t MaxLevels>
-	inline std::size_t json_istream<LogPtr, MaxLevels>::gcount() const noexcept {
-		return _json_stream<std::istream, LogPtr, MaxLevels>::gcount();
 	}
 
 
@@ -247,12 +165,12 @@ namespace abc {
 			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10101, "json_istream::skip_value() >>>");
 		}
 
-		std::size_t base_levels = base::levels();
+		std::size_t base_levels = state::levels();
 		json::item_t item = json::item::none;
 		do {
 			item = get_or_skip_token(nullptr, 0);
 		}
-		while (base::levels() > base_levels);
+		while (state::levels() > base_levels);
 
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
@@ -278,7 +196,7 @@ namespace abc {
 
 		char ch = peek_char();
 
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			if (ch == '"') {
 				gcount += get_or_skip_string(buffer != nullptr ? buffer->value.property : nullptr, size - gcount);
 				if (base::is_good()) {
@@ -299,16 +217,16 @@ namespace abc {
 					}
 				}
 
-				base::set_expect_property(false);
+				state::set_expect_property(false);
 				trail_comma = false;
 			}
 			else if (ch == '}') {
 				base::get();
 
 				item = json::item::end_object;
-				base::pop_level(json::level::object);
+				base::set_bad_if(!state::pop_level(json::level::object));
 
-				base::set_expect_property(true);
+				state::set_expect_property(true);
 			}
 			else {
 				if (log_ptr_local != nullptr) {
@@ -360,20 +278,20 @@ namespace abc {
 				base::get();
 
 				item = json::item::begin_array;
-				base::push_level(json::level::array);
+				base::set_bad_if(!state::push_level(json::level::array));
 				trail_comma = false;
 			}
 			else if (ch == ']') {
 				base::get();
 
 				item = json::item::end_array;
-				base::pop_level(json::level::array);
+				base::set_bad_if(!state::pop_level(json::level::array));
 			}
 			else if (ch == '{') {
 				base::get();
 
 				item = json::item::begin_object;
-				base::push_level(json::level::object);
+				base::set_bad_if(!state::push_level(json::level::object));
 				trail_comma = false;
 			}
 			else {
@@ -383,11 +301,11 @@ namespace abc {
 				base::set_bad();
 			}
 
-			base::set_expect_property(true);
+			state::set_expect_property(true);
 		}
 
 
-		if (trail_comma && base::levels() > 0) {
+		if (trail_comma && state::levels() > 0) {
 			skip_spaces();
 
 			ch = peek_char();
@@ -395,7 +313,7 @@ namespace abc {
 				base::get();
 			}
 			else {
-				if (base::expect_property()) {
+				if (state::expect_property()) {
 					if (ch != '}') {
 						if (log_ptr_local != nullptr) {
 							log_ptr_local->put_any(category::abc::json, severity::important, 0x10107, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
@@ -717,7 +635,8 @@ namespace abc {
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline json_ostream<LogPtr, MaxLevels>::json_ostream(std::streambuf* sb, const LogPtr& log_ptr)
-		: _json_stream<std::ostream, LogPtr, MaxLevels>(sb, log_ptr) {
+		: base(sb, log_ptr)
+		, state(log_ptr) {
 		LogPtr log_ptr_local = base::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::json, severity::abc, 0x10114, "json_ostream::json_ostream()");
@@ -811,7 +730,7 @@ namespace abc {
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_null() {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x10118, "json_ostream::put_null() Expected a property.");
@@ -821,20 +740,20 @@ namespace abc {
 			return;
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
 		put_chars("null", 4);
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_boolean(bool value) {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x10119, "json_ostream::put_boolean() Expected a property.");
@@ -844,7 +763,7 @@ namespace abc {
 			return;
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
@@ -856,13 +775,13 @@ namespace abc {
 		}
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_number(double value) {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011a, "json_ostream::put_number() Expected a property.");
@@ -872,7 +791,7 @@ namespace abc {
 			return;
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
@@ -882,13 +801,13 @@ namespace abc {
 		put_chars(literal, size);
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_string(const char* buffer, std::size_t size) {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011b, "json_ostream::put_string() Expected a property.");
@@ -902,7 +821,7 @@ namespace abc {
 			size = std::strlen(buffer);
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
@@ -911,13 +830,13 @@ namespace abc {
 		put_chars("\"", 1);
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_property(const char* buffer, std::size_t size) {
-		if (!base::expect_property()) {
+		if (!state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011c, "json_ostream::put_property() Expected a value.");
@@ -931,7 +850,7 @@ namespace abc {
 			size = std::strlen(buffer);
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::object && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::object && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
@@ -940,13 +859,13 @@ namespace abc {
 		put_chars("\":", 2);
 
 		_skip_comma = true;
-		base::set_expect_property(false);
+		state::set_expect_property(false);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_begin_array() {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011d, "json_ostream::put_begin_array() Expected a property.");
@@ -956,22 +875,22 @@ namespace abc {
 			return;
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
 		put_chars("[", 1);
 
-		base::push_level(json::level::array);
+		base::set_bad_if(!state::push_level(json::level::array));
 
 		_skip_comma = true;
-		base::set_expect_property(false);
+		state::set_expect_property(false);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_end_array() {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011e, "json_ostream::put_end_array() Expected a property.");
@@ -983,16 +902,16 @@ namespace abc {
 
 		put_chars("]", 1);
 
-		base::pop_level(json::level::array);
+		base::set_bad_if(!state::pop_level(json::level::array));
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_begin_object() {
-		if (base::expect_property()) {
+		if (state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x1011f, "json_ostream::put_begin_object() Expected a property.");
@@ -1002,22 +921,22 @@ namespace abc {
 			return;
 		}
 
-		if (base::levels() > 0 && base::top_level() == json::level::array && !_skip_comma) {
+		if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
 			put_chars(",", 1);
 		}
 
 		put_chars("{", 1);
 
-		base::push_level(json::level::object);
+		base::set_bad_if(!state::push_level(json::level::object));
 
 		_skip_comma = true;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
 	inline void json_ostream<LogPtr, MaxLevels>::put_end_object() {
-		if (!base::expect_property()) {
+		if (!state::expect_property()) {
 			LogPtr log_ptr_local = base::log_ptr();
 			if (log_ptr_local != nullptr) {
 				log_ptr_local->put_any(category::abc::json, severity::important, 0x10120, "json_ostream::put_null() Expected a value.");
@@ -1029,10 +948,10 @@ namespace abc {
 
 		put_chars("}", 1);
 
-		base::pop_level(json::level::object);
+		base::set_bad_if(!state::pop_level(json::level::object));
 
 		_skip_comma = false;
-		base::set_expect_property(true);
+		state::set_expect_property(true);
 	}
 
 

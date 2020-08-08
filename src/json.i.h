@@ -31,6 +31,7 @@ SOFTWARE.
 #include <ostream>
 #include <bitset>
 
+#include "stream.i.h"
 #include "log.i.h"
 
 
@@ -78,43 +79,27 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Stream, typename LogPtr, std::size_t MaxLevels>
-	class _json_stream : protected Stream {
-		using base = Stream;
-
+	template <typename LogPtr, std::size_t MaxLevels>
+	class _json_state {
 	protected:
-		_json_stream(std::streambuf* sb, const LogPtr& log_ptr);
-		_json_stream(_json_stream&& other) = default;
+		_json_state(const LogPtr& log_ptr);
+		_json_state(_json_state&& other) = default;
 
 	public:
-		std::size_t			levels() const noexcept;
-		json::level_t		top_level() const noexcept;
-
-		bool				eof() const;
-		bool				good() const;
-		bool				bad() const;
-		bool				fail() const;
-		bool				operator!() const;
-							operator bool() const;
+		std::size_t		levels() const noexcept;
+		json::level_t	top_level() const noexcept;
 
 	protected:
-		std::size_t			gcount() const noexcept;
-		void				reset();
-		bool				expect_property() const noexcept;
-		void				set_expect_property(bool expect) noexcept;
-		void				push_level(json::level_t level) noexcept;
-		void				pop_level(json::level_t level) noexcept;
-		void				set_gcount(std::size_t gcount) noexcept;
-		bool				is_good() const;
-		void				set_bad();
-		void				set_fail();
-		const LogPtr&		log_ptr() const noexcept;
+		void			reset();
+		bool			expect_property() const noexcept;
+		void			set_expect_property(bool expect) noexcept;
+		bool			push_level(json::level_t level) noexcept;
+		bool			pop_level(json::level_t level) noexcept;
 
 	private:
 		bool					_expect_property;
 		std::size_t				_level_top;
 		std::bitset<MaxLevels>	_level_stack;
-		std::size_t				_gcount;
 		LogPtr					_log_ptr;
 	};
 
@@ -123,39 +108,37 @@ namespace abc {
 
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_istream : public _json_stream<std::istream, LogPtr, MaxLevels> {
-		using base = _json_stream<std::istream, LogPtr, MaxLevels>;
+	class json_istream : public _istream<LogPtr>, public _json_state<LogPtr, MaxLevels> {
+		using base  = _istream<LogPtr>;
+		using state = _json_state<LogPtr, MaxLevels>;
 
 	public:
 		json_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
 		json_istream(json_istream&& other) = default;
 
 	public:
-		std::size_t			gcount() const noexcept;
-
-	public:
-		void				get_token(json::token_t* buffer, std::size_t size);
-		json::item_t		skip_value();
+		void			get_token(json::token_t* buffer, std::size_t size);
+		json::item_t	skip_value();
 
 	protected:
-		json::item_t		get_or_skip_token(json::token_t* buffer, std::size_t size);
-		void				get_or_skip_number(double* buffer);
-		std::size_t			get_or_skip_string(char* buffer, std::size_t size);
+		json::item_t	get_or_skip_token(json::token_t* buffer, std::size_t size);
+		void			get_or_skip_number(double* buffer);
+		std::size_t		get_or_skip_string(char* buffer, std::size_t size);
 
 	protected:
-		void				get_literal(const char* literal);
-		char				get_escaped_char();
-		std::size_t			get_or_skip_string_content(char* buffer, std::size_t size);
-		std::size_t			get_hex(char* buffer, std::size_t size);
-		std::size_t			get_digits(char* buffer, std::size_t size);
-		std::size_t			skip_spaces();
+		void			get_literal(const char* literal);
+		char			get_escaped_char();
+		std::size_t		get_or_skip_string_content(char* buffer, std::size_t size);
+		std::size_t		get_hex(char* buffer, std::size_t size);
+		std::size_t		get_digits(char* buffer, std::size_t size);
+		std::size_t		skip_spaces();
 
 		template <typename Predicate>
-		std::size_t			get_chars(Predicate&& predicate, char* buffer, std::size_t size);
+		std::size_t		get_chars(Predicate&& predicate, char* buffer, std::size_t size);
 		template <typename Predicate>
-		std::size_t			skip_chars(Predicate&& predicate);
-		char				get_char();
-		char				peek_char();
+		std::size_t		skip_chars(Predicate&& predicate);
+		char			get_char();
+		char			peek_char();
 	};
 
 
@@ -163,8 +146,9 @@ namespace abc {
 
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_ostream : public _json_stream<std::ostream, LogPtr, MaxLevels> {
-		using base = _json_stream<std::ostream, LogPtr, MaxLevels>;
+	class json_ostream : public _ostream<LogPtr>, public _json_state<LogPtr, MaxLevels> {
+		using base  = _ostream<LogPtr>;
+		using state = _json_state<LogPtr, MaxLevels>;
 
 	public:
 		json_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
