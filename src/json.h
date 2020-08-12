@@ -31,6 +31,7 @@ SOFTWARE.
 #include "ascii.h"
 #include "exception.h"
 #include "json.i.h"
+#include "stream.h"
 
 
 namespace abc {

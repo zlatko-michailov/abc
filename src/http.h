@@ -30,6 +30,7 @@ SOFTWARE.
 #include "ascii.h"
 #include "exception.h"
 #include "http.i.h"
+#include "stream.h"
 
 
 namespace abc {
