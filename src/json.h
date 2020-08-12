@@ -47,7 +47,7 @@ namespace abc {
 
 
 	template <typename LogPtr, std::size_t MaxLevels>
-	inline void _json_state<LogPtr, MaxLevels>::reset() {
+	inline void _json_state<LogPtr, MaxLevels>::reset() noexcept {
 		if (_log_ptr != nullptr) {
 			_log_ptr->put_any(category::abc::json, severity::abc, 0x100fa, "_json_state::reset()");
 		}

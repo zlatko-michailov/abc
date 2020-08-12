@@ -101,12 +101,12 @@ namespace abc {
 		debug_line_ostream(debug_line_ostream&& other) = default;
 
 	public:
-		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
-		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
-		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
-		void put_props(category_t category, severity_t severity, tag_t tag);
+		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
 
@@ -123,12 +123,12 @@ namespace abc {
 		diag_line_ostream(diag_line_ostream&& other) = default;
 
 	public:
-		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
-		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
-		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
-		void put_props(category_t category, severity_t severity, tag_t tag);
+		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
 
@@ -145,12 +145,12 @@ namespace abc {
 		test_line_ostream(test_line_ostream&& other) = default;
 
 	public:
-		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
-		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
-		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
-		void put_props(category_t category, severity_t severity, tag_t tag);
+		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
 
@@ -166,9 +166,9 @@ namespace abc {
 		log_ostream(log_ostream&& other) = default;
 
 	public:
-		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...);
-		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist);
-		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size);
+		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	private:
 		FilterPtr	_filter_ptr;

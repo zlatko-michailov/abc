@@ -38,17 +38,25 @@ namespace abc {
 	}
 
 
-	inline void table_ostream::put_line(const char* line, std::size_t line_size) {
+	inline void table_ostream::put_line(const char* line, std::size_t line_size) noexcept {
 		if (line_size == size::strlen) {
 			line_size = std::strlen(line);
 		}
 
-		base::write(line, line_size);
+		try {
+			base::write(line, line_size);
+		}
+		catch (...) {
+		}
 	}
 
 
-	inline void table_ostream::put_blank_line() {
-		*this << endl;
+	inline void table_ostream::put_blank_line() noexcept {
+		try {
+			*this << endl;
+		}
+		catch (...) {
+		}
 	}
 
 
@@ -70,13 +78,13 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline line_ostream<Size>::~line_ostream() {
+	inline line_ostream<Size>::~line_ostream() noexcept {
 		flush();
 	}
 
 
 	template <std::size_t Size>
-	inline const char* line_ostream<Size>::get() {
+	inline const char* line_ostream<Size>::get() noexcept {
 		if (0 <= _pcount && _pcount <= Size) {
 			_buffer[_pcount] = ends;
 		}
@@ -86,7 +94,7 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline void line_ostream<Size>::flush() {
+	inline void line_ostream<Size>::flush() noexcept {
 		if (0 <= _pcount && _pcount <= Size) {
 			_buffer[_pcount++] = endl;
 			_buffer[_pcount] = ends;
@@ -101,7 +109,7 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline void line_ostream<Size>::put_any(const char* format, ...) {
+	inline void line_ostream<Size>::put_any(const char* format, ...) noexcept {
 		va_list vlist;
 		va_start(vlist, format);
 
@@ -112,7 +120,7 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline void line_ostream<Size>::put_anyv(const char* format, va_list vlist) {
+	inline void line_ostream<Size>::put_anyv(const char* format, va_list vlist) noexcept {
 		int pc = std::vsnprintf(_buffer + _pcount, Size - _pcount, format, vlist);
 		_pcount += pc;
 	}
@@ -120,24 +128,30 @@ namespace abc {
 
 	template <std::size_t Size>
 	template <typename Clock>
-	inline void line_ostream<Size>::put_timestamp(const timestamp<Clock>& ts, const char* format) {
+	inline void line_ostream<Size>::put_timestamp(const timestamp<Clock>& ts, const char* format) noexcept {
 		put_any(format, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds(), ts.milliseconds());
 	}
 
 
 	template <std::size_t Size>
-	inline void line_ostream<Size>::put_thread_id(std::thread::id thread_id, const char* format) {
+	inline void line_ostream<Size>::put_thread_id(std::thread::id thread_id, const char* format) noexcept {
 		char buf[17];
 		buffer_streambuf sb(nullptr, 0, 0, buf, 0, sizeof(buf) - 1);
-		std::ostream stream(&sb);
-		stream << std::hex << thread_id << ends;
+
+		try {
+			std::ostream stream(&sb);
+			stream << std::hex << thread_id << ends;
+		}
+		catch (...) {
+			buf[0] = '\0';
+		}
 
 		put_any(format, buf);
 	}
 
 
 	template <std::size_t Size>
-	inline std::size_t line_ostream<Size>::put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) {
+	inline std::size_t line_ostream<Size>::put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept {
 		// 0000: 00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  abcdefghijklmnop
 		constexpr std::size_t half_chunk_size = 8;
 		constexpr std::size_t chunk_size = half_chunk_size * 2;

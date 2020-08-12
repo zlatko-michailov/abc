@@ -90,7 +90,7 @@ namespace abc {
 		json::level_t	top_level() const noexcept;
 
 	protected:
-		void			reset();
+		void			reset() noexcept;
 		bool			expect_property() const noexcept;
 		void			set_expect_property(bool expect) noexcept;
 		bool			push_level(json::level_t level) noexcept;

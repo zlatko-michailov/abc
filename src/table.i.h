@@ -58,8 +58,8 @@ namespace abc {
 		table_ostream(table_ostream&& other) = default;
 
 	public:
-		void put_line(const char* line, std::size_t line_size = size::strlen);
-		void put_blank_line();
+		void put_line(const char* line, std::size_t line_size = size::strlen) noexcept;
+		void put_blank_line() noexcept;
 	};
 
 
@@ -77,20 +77,20 @@ namespace abc {
 		line_ostream();
 		line_ostream(table_ostream* table);
 		line_ostream(line_ostream&& other) = default;
-		~line_ostream();
+		~line_ostream() noexcept;
 
 	public:
-		const char* get();
-		void		flush();
+		const char* get() noexcept;
+		void		flush() noexcept;
 
-		void 		put_any(const char* format, ...);
-		void 		put_anyv(const char* format, va_list vlist);
+		void 		put_any(const char* format, ...) noexcept;
+		void 		put_anyv(const char* format, va_list vlist) noexcept;
 
 		template <typename Clock>
-		void		put_timestamp(const timestamp<Clock>& ts, const char* format);
+		void		put_timestamp(const timestamp<Clock>& ts, const char* format) noexcept;
 
-		void		put_thread_id(std::thread::id thread_id, const char* format = "%s");
-		std::size_t	put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset);
+		void		put_thread_id(std::thread::id thread_id, const char* format = "%s") noexcept;
+		std::size_t	put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
 
 	private:
 		table_ostream*	_table;
