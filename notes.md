@@ -93,33 +93,39 @@ __PENDING QUESTIONS__
 ---
 # v0.8
 ## Done
+- Add a base `_stream<Stream>` that exposes the state getters.
+  - Implement a single set of stream state verification methods.
+  - Derive `http_` streams from the base `_stream`.
 ## To Do
 - Add a base `_stream<Stream>` that exposes the state getters.
-  - Derive `table_` and `line_` from that base class.
-  - Implement a single set of stream state verification methods.
+  - Derive `table_` and `line_` from the base `_stream`.
 - `severity_log_filter` per category. Rename to just `log_filter`?
 - `timelimited_file_streambuf`
+- Convert `LogPtr` to `Log*` for all classes.
 - Test log lines.
 - Tag.
 - README
   - Try It - step-by-step instructions
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
+- Improve style
 
-# v0.9
-## Done
-## To Do
-- Internationalization
-
-# v1.9
+# v1.8
 ## Done
 ## To Do
 - Samples
 
-# v1.10
+# v1.9
 ## Done
 ## To Do
 - WebSocket (SHA-1, base64)
+
+# v1.10
+## Done
+## To Do
+- Internationalization
+- ring - single writer, multiple readers
+- file-backed buffer
 
 ---
 

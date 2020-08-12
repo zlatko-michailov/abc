@@ -29,6 +29,7 @@ SOFTWARE.
 #include <istream>
 #include <ostream>
 
+#include "stream.i.h"
 #include "log.i.h"
 
 
@@ -53,40 +54,22 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Stream, typename LogPtr>
-	class _http_stream : protected Stream {
-		using base = Stream;
-
+	template <typename LogPtr>
+	class _http_state {
 	protected:
-		_http_stream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
-		_http_stream(_http_stream&& other) = default;
+		_http_state(http::item_t next, const LogPtr& log_ptr);
+		_http_state(_http_state&& other) = default;
 
 	public:
 		http::item_t	next() const noexcept;
 
-		bool			eof() const;
-		bool			good() const;
-		bool			bad() const;
-		bool			fail() const;
-		bool			operator!() const;
-						operator bool() const;
-
 	protected:
-		std::size_t		gcount() const noexcept;
-
 		void			reset(http::item_t next);
 		void			assert_next(http::item_t item);
-		void			set_state(std::size_t gcount, http::item_t next) noexcept;
 		void			set_next(http::item_t item) noexcept;
-		void			set_gcount(std::size_t gcount) noexcept;
-		bool			is_good() const;
-		void			set_bad();
-		void			set_fail();
-		const LogPtr&	log_ptr() const noexcept;
 
 	private:
 		http::item_t	_next;
-		std::size_t		_gcount;
 		LogPtr			_log_ptr;
 	};
 
@@ -95,15 +78,13 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_istream : public _http_stream<std::istream, LogPtr> {
-		using base = _http_stream<std::istream, LogPtr>;
+	class _http_istream : public _istream<LogPtr>, public _http_state<LogPtr> {
+		using base  = _istream<LogPtr>;
+		using state = _http_state<LogPtr>;
 
 	protected:
 		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
 		_http_istream(_http_istream&& other) = default;
-
-	public:
-		std::size_t		gcount() const noexcept;
 
 	public:
 		void		get_header_name(char* buffer, std::size_t size);
@@ -138,8 +119,9 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_ostream : public _http_stream<std::ostream, LogPtr> {
-		using base = _http_stream<std::ostream, LogPtr>;
+	class _http_ostream : public _ostream<LogPtr>, public _http_state<LogPtr> {
+		using base  = _ostream<LogPtr>;
+		using state = _http_state<LogPtr>;
 
 	protected:
 		_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
@@ -179,7 +161,7 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_request_istream : public _http_istream<LogPtr> {
-		using base = _http_istream<LogPtr>;
+		using base  = _http_istream<LogPtr>;
 
 	public:
 		http_request_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
@@ -199,7 +181,7 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_request_ostream : public _http_ostream<LogPtr> {
-		using base = _http_ostream<LogPtr>;
+		using base  = _http_ostream<LogPtr>;
 
 	public:
 		http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
@@ -219,7 +201,7 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_response_istream : public _http_istream<LogPtr> {
-		using base = _http_istream<LogPtr>;
+		using base  = _http_istream<LogPtr>;
 
 	public:
 		http_response_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
@@ -239,7 +221,7 @@ namespace abc {
 
 	template <typename LogPtr = null_log_ptr>
 	class http_response_ostream : public _http_ostream<LogPtr> {
-		using base = _http_ostream<LogPtr>;
+		using base  = _http_ostream<LogPtr>;
 
 	public:
 		http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
