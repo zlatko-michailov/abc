@@ -29,6 +29,7 @@ SOFTWARE.
 #include <ostream>
 #include <thread>
 
+#include "stream.i.h"
 #include "buffer_streambuf.h"
 #include "timestamp.i.h"
 

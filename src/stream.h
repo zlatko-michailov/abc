@@ -31,136 +31,109 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Stream, typename LogPtr>
-	inline _stream<Stream, LogPtr>::_stream(std::streambuf* sb, const LogPtr& log_ptr)
-		: base(sb)
-		, _log_ptr(log_ptr) {
-		if (_log_ptr != nullptr) {
-			_log_ptr->put_any(category::abc::stream, severity::abc, __TAG__, "_stream::_stream()");
-		}
+	template <typename Stream>
+	inline _stream<Stream>::_stream(std::streambuf* sb)
+		: base(sb) {
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline void _stream<Stream, LogPtr>::reset() {
-		if (_log_ptr != nullptr) {
-			_log_ptr->put_any(category::abc::stream, severity::abc, __TAG__, "_stream::reset()");
-		}
-
+	template <typename Stream>
+	inline void _stream<Stream>::reset() {
 		base::clear(base::goodbit);
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::eof() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::eof() const {
 		return base::eof();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::good() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::good() const {
 		return base::good();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::bad() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::bad() const {
 		return base::bad();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::fail() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::fail() const {
 		return base::fail();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::operator!() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::operator!() const {
 		return base::operator!();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline _stream<Stream, LogPtr>::operator bool() const {
+	template <typename Stream>
+	inline _stream<Stream>::operator bool() const {
 		return base::operator bool();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline bool _stream<Stream, LogPtr>::is_good() const {
+	template <typename Stream>
+	inline bool _stream<Stream>::is_good() const {
 		return base::good() && !Stream::eof();
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline void _stream<Stream, LogPtr>::set_bad() {
+	template <typename Stream>
+	inline void _stream<Stream>::set_bad() {
 		base::clear(base::badbit | base::failbit);
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline void _stream<Stream, LogPtr>::set_bad_if(bool condition) {
+	template <typename Stream>
+	inline void _stream<Stream>::set_bad_if(bool condition) {
 		if (condition) {
 			set_bad();
 		}
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline void _stream<Stream, LogPtr>::set_fail() {
+	template <typename Stream>
+	inline void _stream<Stream>::set_fail() {
 		base::setstate(base::failbit);
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline void _stream<Stream, LogPtr>::set_fail_if(bool condition) {
+	template <typename Stream>
+	inline void _stream<Stream>::set_fail_if(bool condition) {
 		if (condition) {
 			set_fail();
 		}
 	}
 
 
-	template <typename Stream, typename LogPtr>
-	inline const LogPtr& _stream<Stream, LogPtr>::log_ptr() const noexcept {
-		return _log_ptr;
-	}
-
-
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	inline _istream<LogPtr>::_istream(std::streambuf* sb, const LogPtr& log_ptr)
-		: base(sb, log_ptr)
+	inline _istream::_istream(std::streambuf* sb)
+		: base(sb)
 		, _gcount(0) {
-		LogPtr log_ptr_local = base::log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->put_any(category::abc::stream, severity::abc, __TAG__, "_istream::_istream()");
-		}
 	}
 
 
-	template <typename LogPtr>
-	inline void _istream<LogPtr>::reset() {
-		LogPtr log_ptr_local = base::log_ptr();
-		if (log_ptr_local != nullptr) {
-			log_ptr_local->put_any(category::abc::stream, severity::abc, __TAG__, "_stream::reset()");
-		}
-
+	inline void _istream::reset() {
 		base::reset();
 		_gcount = 0;
 	}
 
 
-	template <typename LogPtr>
-	inline std::size_t _istream<LogPtr>::gcount() const noexcept {
+	inline std::size_t _istream::gcount() const noexcept {
 		return _gcount;
 	}
 
 
-	template <typename LogPtr>
-	inline void _istream<LogPtr>::set_gcount(std::size_t gcount) noexcept {
+	inline void _istream::set_gcount(std::size_t gcount) noexcept {
 		_gcount = gcount;
 	}
 

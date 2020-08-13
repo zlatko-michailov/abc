@@ -32,12 +32,12 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Stream, typename LogPtr>
+	template <typename Stream>
 	class _stream : protected Stream {
 		using base = Stream;
 
 	protected:
-		_stream(std::streambuf* sb, const LogPtr& log_ptr);
+		_stream(std::streambuf* sb);
 		_stream(_stream&& other) = default;
 
 	public:
@@ -55,23 +55,17 @@ namespace abc {
 		void			set_bad_if(bool condition);
 		void			set_fail();
 		void			set_fail_if(bool condition);
-
-		const LogPtr&	log_ptr() const noexcept;
-
-	private:
-		LogPtr			_log_ptr;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	class _istream : public _stream<std::istream, LogPtr> {
-		using base = _stream<std::istream, LogPtr>;
+	class _istream : public _stream<std::istream> {
+		using base = _stream<std::istream>;
 
 	protected:
-		_istream(std::streambuf* sb, const LogPtr& log_ptr);
+		_istream(std::streambuf* sb);
 		_istream(_istream&& other) = default;
 
 	public:
@@ -88,8 +82,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	using _ostream = _stream<std::ostream, LogPtr>;
+	using _ostream = _stream<std::ostream>;
 
 }
 

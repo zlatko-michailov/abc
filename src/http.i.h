@@ -68,6 +68,8 @@ namespace abc {
 		void			assert_next(http::item_t item);
 		void			set_next(http::item_t item) noexcept;
 
+		const LogPtr&	log_ptr() const noexcept;
+
 	private:
 		http::item_t	_next;
 		LogPtr			_log_ptr;
@@ -78,8 +80,8 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_istream : public _istream<LogPtr>, public _http_state<LogPtr> {
-		using base  = _istream<LogPtr>;
+	class _http_istream : public _istream, public _http_state<LogPtr> {
+		using base  = _istream;
 		using state = _http_state<LogPtr>;
 
 	protected:
@@ -119,8 +121,8 @@ namespace abc {
 
 
 	template <typename LogPtr>
-	class _http_ostream : public _ostream<LogPtr>, public _http_state<LogPtr> {
-		using base  = _ostream<LogPtr>;
+	class _http_ostream : public _ostream, public _http_state<LogPtr> {
+		using base  = _ostream;
 		using state = _http_state<LogPtr>;
 
 	protected:

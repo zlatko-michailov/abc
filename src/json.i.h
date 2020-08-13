@@ -96,6 +96,8 @@ namespace abc {
 		bool			push_level(json::level_t level) noexcept;
 		bool			pop_level(json::level_t level) noexcept;
 
+		const LogPtr&	log_ptr() const noexcept;
+
 	private:
 		bool					_expect_property;
 		std::size_t				_level_top;
@@ -108,8 +110,8 @@ namespace abc {
 
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_istream : public _istream<LogPtr>, public _json_state<LogPtr, MaxLevels> {
-		using base  = _istream<LogPtr>;
+	class json_istream : public _istream, public _json_state<LogPtr, MaxLevels> {
+		using base  = _istream;
 		using state = _json_state<LogPtr, MaxLevels>;
 
 	public:
@@ -146,8 +148,8 @@ namespace abc {
 
 
 	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_ostream : public _ostream<LogPtr>, public _json_state<LogPtr, MaxLevels> {
-		using base  = _ostream<LogPtr>;
+	class json_ostream : public _ostream, public _json_state<LogPtr, MaxLevels> {
+		using base  = _ostream;
 		using state = _json_state<LogPtr, MaxLevels>;
 
 	public:
@@ -155,29 +157,29 @@ namespace abc {
 		json_ostream(json_ostream&& other) = default;
 
 	public:
-		void				put_token(const json::token_t* buffer, std::size_t size = size::strlen);
+		void			put_token(const json::token_t* buffer, std::size_t size = size::strlen);
 
-		void				put_space();
-		void				put_tab();
-		void				put_cr();
-		void				put_lf();
+		void			put_space();
+		void			put_tab();
+		void			put_cr();
+		void			put_lf();
 
-		void				put_null();
-		void				put_boolean(bool value);
-		void				put_number(double value);
-		void				put_string(const char* buffer, std::size_t size = size::strlen);
-		void				put_property(const char* buffer, std::size_t size = size::strlen);
-		void				put_begin_array();
-		void				put_end_array();
-		void				put_begin_object();
-		void				put_end_object();
+		void			put_null();
+		void			put_boolean(bool value);
+		void			put_number(double value);
+		void			put_string(const char* buffer, std::size_t size = size::strlen);
+		void			put_property(const char* buffer, std::size_t size = size::strlen);
+		void			put_begin_array();
+		void			put_end_array();
+		void			put_begin_object();
+		void			put_end_object();
 
 	protected:
-		std::size_t			put_chars(const char* buffer, std::size_t size);
-		std::size_t			put_char(char ch);
+		std::size_t		put_chars(const char* buffer, std::size_t size);
+		std::size_t		put_char(char ch);
 
 	private:
-		bool				_skip_comma;
+		bool			_skip_comma;
 	};
 
 }

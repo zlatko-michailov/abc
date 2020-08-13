@@ -78,14 +78,20 @@ namespace abc {
 	}
 
 
+	template <typename LogPtr>
+	inline const LogPtr& _http_state<LogPtr>::log_ptr() const noexcept {
+		return _log_ptr;
+	}
+
+
 	// --------------------------------------------------------------
 
 
 	template <typename LogPtr>
 	inline _http_istream<LogPtr>::_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
-		: base(sb, log_ptr)
+		: base(sb)
 		, state(next, log_ptr) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1003e, "_http_istream::_http_istream()");
 		}
@@ -101,7 +107,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline std::size_t _http_istream<LogPtr>::get_protocol(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1003f, "_http_istream::get_protocol() >>>");
 		}
@@ -161,7 +167,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_header_name(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10041, "_http_istream::get_header_name() >>>");
 		}
@@ -197,7 +203,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_header_value(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10043, "_http_istream::get_header_value() >>>");
 		}
@@ -240,7 +246,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_istream<LogPtr>::get_body(char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10045, "_http_istream::get_body() >>>");
 		}
@@ -386,9 +392,9 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline _http_ostream<LogPtr>::_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr)
-		: base(sb, log_ptr)
+		: base(sb)
 		, state(next, log_ptr) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10047, "_http_ostream::_http_ostream()");
 		}
@@ -404,7 +410,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline std::size_t _http_ostream<LogPtr>::put_protocol(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10048, "_http_ostream::put_protocol() >>>");
 		}
@@ -468,7 +474,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_header_name(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004a, "_http_ostream::put_header_name() >>>");
 		}
@@ -502,7 +508,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_header_value(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004c, "_http_ostream::put_header_value() >>>");
 		}
@@ -546,7 +552,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::end_headers() {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x1004e, "_http_ostream::end_headers() >>>");
 		}
@@ -565,7 +571,7 @@ namespace abc {
 
 	template <typename LogPtr>
 	inline void _http_ostream<LogPtr>::put_body(const char* buffer, std::size_t size) {
-		LogPtr log_ptr_local = base::log_ptr();
+		LogPtr log_ptr_local = state::log_ptr();
 		if (log_ptr_local != nullptr) {
 			log_ptr_local->put_any(category::abc::http, severity::abc, 0x10050, "_http_ostream::put_body() >>>");
 		}
