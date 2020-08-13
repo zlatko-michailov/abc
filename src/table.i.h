@@ -49,8 +49,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	class table_ostream : protected std::ostream {
-		using base = std::ostream;
+	class table_ostream : protected _ostream {
+		using base = _ostream;
 
 		static constexpr char endl = '\n';
 
@@ -68,8 +68,8 @@ namespace abc {
 
 
 	template <std::size_t Size = size::k2>
-	class line_ostream : protected std::ostream {
-		using base = std::ostream;
+	class line_ostream : protected _ostream {
+		using base = _ostream;
 
 		static constexpr char endl = '\n';
 		static constexpr char ends = '\0';

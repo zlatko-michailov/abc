@@ -96,13 +96,14 @@ __PENDING QUESTIONS__
 - Add a base `_stream<Stream>` that exposes the state getters.
   - Implement a single set of stream state verification methods.
   - Derive `http_` streams from the base `_stream`.
-## To Do
-- Add a base `_stream<Stream>` that exposes the state getters.
   - Derive `table_` and `line_` from the base `_stream`.
-- `severity_log_filter` per category. Rename to just `log_filter`?
-- `timelimited_file_streambuf`
-- Convert `LogPtr` to `Log*` for all classes.
+## To Do
 - Test log lines.
+- Convert `LogPtr` to `Log*` for all classes.
+- Convert `LineStream` to `Line`.
+- Convert `FilterPtr` to `Filter`. 
+- `timelimited_file_streambuf`
+- `sizelimited_file_streambuf`
 - Tag.
 - README
   - Try It - step-by-step instructions
