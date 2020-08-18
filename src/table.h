@@ -151,7 +151,7 @@ namespace abc {
 
 
 	template <std::size_t Size>
-	inline std::size_t line_ostream<Size>::put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept {
+	inline bool line_ostream<Size>::put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept {
 		// 0000: 00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  abcdefghijklmnop
 		constexpr std::size_t half_chunk_size = 8;
 		constexpr std::size_t chunk_size = half_chunk_size * 2;
@@ -162,20 +162,21 @@ namespace abc {
 		constexpr char head = ':';
 
 		if (Size - _pcount < local_size) {
-			return 0;
+			return false;
 		}
 
 		if (buffer_size <= buffer_offset) {
-			return 0;
+			return false;
 		}
 
 		if ((buffer_offset % chunk_size) != 0) {
-			return 0;
+			return false;
 		}
 
 		const std::uint8_t* chunk = static_cast<const std::uint8_t*>(buffer) + buffer_offset;
 		std::size_t local_offset = 0;
 		char* line = _buffer + _pcount;
+		bool hasMore = true;
 
 		// 0000:
 		line[local_offset++] = hex[(buffer_offset >> 12) & 0xf];
@@ -198,6 +199,7 @@ namespace abc {
 				else {
 					line[local_offset++] = blank;
 					line[local_offset++] = blank;
+					hasMore = false;
 				}
 	
 				line[local_offset++] = blank;
@@ -223,9 +225,9 @@ namespace abc {
 
 		line[local_offset++] = ends;
 
-		_pcount += local_size;
+		_pcount += local_offset;
 		buffer_offset += chunk_size;
-		return static_cast<int>(chunk_size);
+		return hasMore;
 	}
 
 }

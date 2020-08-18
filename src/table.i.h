@@ -91,7 +91,7 @@ namespace abc {
 		void		put_timestamp(const timestamp<Clock>& ts, const char* format) noexcept;
 
 		void		put_thread_id(std::thread::id thread_id, const char* format = "%s") noexcept;
-		std::size_t	put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
+		bool		put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
 
 	private:
 		table_ostream*	_table;

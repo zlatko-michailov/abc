@@ -69,16 +69,16 @@ namespace abc {
 	template <std::size_t Size, typename Clock>
 	inline void debug_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
 		std::size_t buffer_offset = 0;
-		std::size_t pcount = 1;
+		bool hasMore = true;
 
-		while (pcount != 0) {
+		while (hasMore) {
 			if (buffer_offset != 0) {
 				base::flush();
 			}
 
 			put_props(category, severity, tag);
 
-			pcount = base::put_binary(buffer, buffer_size, buffer_offset);
+			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
 		}
 	}
 
@@ -129,16 +129,16 @@ namespace abc {
 	template <std::size_t Size, typename Clock>
 	inline void diag_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
 		std::size_t buffer_offset = 0;
-		std::size_t pcount = 1;
+		bool hasMore = true;
 
-		while (pcount != 0) {
+		while (hasMore) {
 			if (buffer_offset != 0) {
 				base::flush();
 			}
 
 			put_props(category, severity, tag);
 
-			pcount = base::put_binary(buffer, buffer_size, buffer_offset);
+			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
 		}
 	}
 
@@ -189,16 +189,16 @@ namespace abc {
 	template <std::size_t Size, typename Clock>
 	inline void test_line_ostream<Size, Clock>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
 		std::size_t buffer_offset = 0;
-		std::size_t pcount = 1;
+		bool hasMore = true;
 
-		while (pcount != 0) {
+		while (hasMore) {
 			if (buffer_offset != 0) {
 				base::flush();
 			}
 
 			put_props(category, severity, tag);
 
-			pcount = base::put_binary(buffer, buffer_size, buffer_offset);
+			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
 		}
 	}
 
