@@ -218,6 +218,7 @@ namespace abc {
 		if (log_ptr != nullptr) {
 			log_ptr->put_blank_line();
 			log_ptr->put_blank_line();
+			log_ptr->put_blank_line();
 		}
 
 		// Category
@@ -278,18 +279,26 @@ namespace abc {
 			all_passed = all_passed && category_passed;
 		} // category
 
+		// Summary
+		if (log_ptr != nullptr) {
+			log_ptr->put_blank_line();
+			log_ptr->put_any(category::any, severity::critical, tag::none, ">>   %s%ssummary%s", color::begin, color::cyan, color::end);
+			log_ptr->put_any(category::any, severity::warning, tag::none, "seed = %u", seed);
+		}
+
 		if (all_passed) {
 			if (log_ptr != nullptr) {
-				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sPASS%s seed=%u", color::begin, color::green, color::end, seed);
+				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sPASS%s %s%ssummary%s", color::begin, color::green, color::end, color::begin, color::cyan, color::end);
 			}
 		}
 		else {
 			if (log_ptr != nullptr) {
-				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sFAIL%s seed=%u", color::begin, color::red, color::end, seed);
+				log_ptr->put_any(category::any, severity::critical, tag::none, "%s%sFAIL%s %s%ssummary%s", color::begin, color::red, color::end, color::begin, color::cyan, color::end);
 			}
 		}
 
 		if (log_ptr != nullptr) {
+			log_ptr->put_blank_line();
 			log_ptr->put_blank_line();
 			log_ptr->put_blank_line();
 		}
