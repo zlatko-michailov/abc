@@ -157,12 +157,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Line, typename FilterPtr>
+	template <typename Line, typename Filter>
 	class log_ostream : public table_ostream {
 		using base = table_ostream;
 
 	public:
-		log_ostream(std::streambuf* sb, const FilterPtr& filter_ptr);
+		log_ostream(std::streambuf* sb, const Filter* filter);
 		log_ostream(log_ostream&& other) = default;
 
 	public:
@@ -171,7 +171,7 @@ namespace abc {
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	private:
-		FilterPtr	_filter_ptr;
+		const Filter*	_filter;
 	};
 
 

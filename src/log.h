@@ -217,15 +217,15 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Line, typename FilterPtr>
-	inline log_ostream<Line, FilterPtr>::log_ostream(std::streambuf* sb, const FilterPtr& filter_ptr)
+	template <typename Line, typename Filter>
+	inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, const Filter* filter)
 		: base(sb)
-		, _filter_ptr(filter_ptr) {
+		, _filter(filter) {
 	}
 
 
-	template <typename Line, typename FilterPtr>
-	inline void log_ostream<Line, FilterPtr>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+	template <typename Line, typename Filter>
+	inline void log_ostream<Line, Filter>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept {
 		va_list vlist;
 		va_start(vlist, format);
 
@@ -235,18 +235,18 @@ namespace abc {
 	}
 
 
-	template <typename Line, typename FilterPtr>
-	inline void log_ostream<Line, FilterPtr>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
-		if (_filter_ptr == nullptr || _filter_ptr->is_enabled(category, severity)) {
+	template <typename Line, typename Filter>
+	inline void log_ostream<Line, Filter>::put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+		if (_filter == nullptr || _filter->is_enabled(category, severity)) {
 			Line line(this);
 			line.put_anyv(category, severity, tag, format, vlist);
 		}
 	}
 
 
-	template <typename Line, typename FilterPtr>
-	inline void log_ostream<Line, FilterPtr>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
-		if (_filter_ptr == nullptr || _filter_ptr->is_enabled(category, severity)) {
+	template <typename Line, typename Filter>
+	inline void log_ostream<Line, Filter>::put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+		if (_filter == nullptr || _filter->is_enabled(category, severity)) {
 			Line line(this);
 			line.put_binary(category, severity, tag, buffer, buffer_size);
 		}

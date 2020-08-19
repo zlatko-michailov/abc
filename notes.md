@@ -99,9 +99,9 @@ __PENDING QUESTIONS__
   - Derive `table_` and `line_` from the base `_stream`.
 - Test log lines.
 - Convert `LineStream` to `Line`.
+- Convert `FilterPtr` to `Filter`. 
 ## To Do
 - Convert `LogPtr` to `Log*` for all classes.
-- Convert `FilterPtr` to `Filter`. 
 - `timelimited_file_streambuf`
 - `sizelimited_file_streambuf`
 - Tag.
