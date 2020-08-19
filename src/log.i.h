@@ -157,7 +157,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LineStream, typename FilterPtr>
+	template <typename Line, typename FilterPtr>
 	class log_ostream : public table_ostream {
 		using base = table_ostream;
 

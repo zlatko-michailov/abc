@@ -98,11 +98,9 @@ __PENDING QUESTIONS__
   - Derive `http_` streams from the base `_stream`.
   - Derive `table_` and `line_` from the base `_stream`.
 - Test log lines.
-## To Do
-- Make `line_ostream` use `_sb` instead of directly `_buffer`.
-- Make the inheritance from `std::ostream`/`std::istream` public, and don't implement `good()`, `bad()`, etc.
-- Convert `LogPtr` to `Log*` for all classes.
 - Convert `LineStream` to `Line`.
+## To Do
+- Convert `LogPtr` to `Log*` for all classes.
 - Convert `FilterPtr` to `Filter`. 
 - `timelimited_file_streambuf`
 - `sizelimited_file_streambuf`
