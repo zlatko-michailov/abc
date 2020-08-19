@@ -32,8 +32,8 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace streambuf {
 
-	bool test_buffer_streambuf_1_char(test_context<abc::test::log_ptr>& context);
-	bool test_buffer_streambuf_N_chars(test_context<abc::test::log_ptr>& context);
+	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context);
+	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context);
 
 }}}
 

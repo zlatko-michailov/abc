@@ -29,13 +29,13 @@ SOFTWARE.
 namespace abc { namespace test { namespace http {
 
 	template <typename HttpStream>
-	static bool verify_string(test_context<abc::test::log_ptr>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag);
+	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag);
 
 	template <typename HttpStream>
-	static bool verify_binary(test_context<abc::test::log_ptr>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag);
+	static bool verify_binary(test_context<abc::test::log>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag);
 
 
-	bool test_http_request_istream_extraspaces(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_istream_extraspaces(test_context<abc::test::log>& context) {
 		char content[] =
 			"GET   http://a.com/b?c=d    HTTP/12.345  \r\n"
 			"Name:Value\r\n"
@@ -48,7 +48,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_request_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_request_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		bool passed = true;
@@ -93,7 +93,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_request_istream_bodytext(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_istream_bodytext(test_context<abc::test::log>& context) {
 		char content[] =
 			"POST http://a.com/b?c=d HTTP/1.1\r\n"
 			"\r\n"
@@ -104,7 +104,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_request_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_request_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		bool passed = true;
@@ -140,7 +140,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_request_istream_bodybinary(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_istream_bodybinary(test_context<abc::test::log>& context) {
 		char content[] =
 			"POST http://a.com/b?c=d HTTP/1.1\r\n"
 			"\r\n"
@@ -148,7 +148,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_request_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_request_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		bool passed = true;
@@ -181,7 +181,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_request_istream_realworld_01(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_istream_realworld_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
 			"Host: en.cppreference.com\r\n"
@@ -197,7 +197,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_request_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_request_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[1024];
 		bool passed = true;
@@ -275,7 +275,7 @@ namespace abc { namespace test { namespace http {
 	// --------------------------------------------------------------
 
 
-	bool test_http_request_ostream_bodytext(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_ostream_bodytext(test_context<abc::test::log>& context) {
 		const char expected[] =
 			"POST http://a.com/b?c=d HTTP/1.1\r\n"
 			"Simple-Header-Name: Simple-Header-Value\r\n"
@@ -291,7 +291,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::http_request_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::http_request_ostream<abc::test::log> ostream(&sb, context.log);
 
 		bool passed = true;
 
@@ -342,7 +342,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_request_ostream_bodybinary(test_context<abc::test::log_ptr>& context) {
+	bool test_http_request_ostream_bodybinary(test_context<abc::test::log>& context) {
 		const char expected[] =
 			"GET http://a.com/b?c=d HTTP/1.1\r\n"
 			"Multi-Line: second line third line\r\n"
@@ -355,7 +355,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::http_request_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::http_request_ostream<abc::test::log> ostream(&sb, context.log);
 
 		bool passed = true;
 
@@ -394,7 +394,7 @@ namespace abc { namespace test { namespace http {
 	// --------------------------------------------------------------
 
 
-	bool test_http_response_istream_extraspaces(test_context<abc::test::log_ptr>& context) {
+	bool test_http_response_istream_extraspaces(test_context<abc::test::log>& context) {
 		char content[] =
 			"HTTP/12.345  789  \t  Something went wrong  \r\n"
 			"Header-Name:Header-Value\r\n"
@@ -402,7 +402,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_response_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_response_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		bool passed = true;
@@ -429,7 +429,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_response_istream_realworld_01(test_context<abc::test::log_ptr>& context) {
+	bool test_http_response_istream_realworld_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"HTTP/1.1 302\r\n"
 			"Set-Cookie: ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/\r\n"
@@ -441,7 +441,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_response_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_response_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[201];
 		bool passed = true;
@@ -492,7 +492,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_response_istream_realworld_02(test_context<abc::test::log_ptr>& context) {
+	bool test_http_response_istream_realworld_02(test_context<abc::test::log>& context) {
 		char content[] =
 			"HTTP/1.1 200 OK\r\n"
 			"Content-Type: application/json; charset=utf-8\r\n"
@@ -504,7 +504,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::http_response_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::http_response_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[201];
 		bool passed = true;
@@ -552,7 +552,7 @@ namespace abc { namespace test { namespace http {
 	// --------------------------------------------------------------
 
 
-	bool test_http_response_ostream_bodytext(test_context<abc::test::log_ptr>& context) {
+	bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context) {
 		const char expected[] =
 			"HTTP/1.1 200 OK\r\n"
 			"Simple: simple\r\n"
@@ -566,7 +566,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::http_response_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::http_response_ostream<abc::test::log> ostream(&sb, context.log);
 
 		bool passed = true;
 
@@ -608,7 +608,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_response_ostream_bodybinary(test_context<abc::test::log_ptr>& context) {
+	bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context) {
 		const char expected[] =
 			"HTTP/1.1 789 Something went wrong \r\n"
 			"Multi-Line-List: aaa bbbb ccc ddd\r\n"
@@ -621,7 +621,7 @@ namespace abc { namespace test { namespace http {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::http_response_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::http_response_ostream<abc::test::log> ostream(&sb, context.log);
 
 		bool passed = true;
 		const char* input;
@@ -662,7 +662,7 @@ namespace abc { namespace test { namespace http {
 
 
 	template <typename HttpStream>
-	static bool verify_string(test_context<abc::test::log_ptr>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag) {
+	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, tag) && passed;
@@ -673,7 +673,7 @@ namespace abc { namespace test { namespace http {
 
 
 	template <typename HttpStream>
-	static bool verify_binary(test_context<abc::test::log_ptr>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag) {
+	static bool verify_binary(test_context<abc::test::log>& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, size, tag) && passed;

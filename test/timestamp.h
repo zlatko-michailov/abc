@@ -32,11 +32,11 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace timestamp {
 
-	bool test_null_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
-	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log_ptr>& context);
+	bool test_null_timestamp(test_context<abc::test::log>& context);
+	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
 
 }}}
 

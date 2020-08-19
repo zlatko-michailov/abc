@@ -98,11 +98,11 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
+	template <typename Log>
 	class _basic_socket {
 	protected:
-		_basic_socket(socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
-		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
+		_basic_socket(socket::kind_t kind, socket::family_t family, Log* log);
+		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
 		_basic_socket(_basic_socket&& other) noexcept;
 		_basic_socket(const _basic_socket& other) = delete;
 
@@ -129,27 +129,27 @@ namespace abc {
 		socket::family_t	family() const noexcept;
 		socket::protocol_t	protocol() const noexcept;
 		socket::handle_t	handle() const noexcept;
-		const LogPtr&		log_ptr() const noexcept;
+		Log*				log() const noexcept;
 
 	private:
 		socket::kind_t		_kind;
 		socket::family_t	_family;
 		socket::protocol_t	_protocol;
 		socket::handle_t	_handle;
-		LogPtr				_log_ptr;
+		Log*				_log;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	class _client_socket : public _basic_socket<LogPtr> {
-		using base = _basic_socket<LogPtr>;
+	template <typename Log>
+	class _client_socket : public _basic_socket<Log> {
+		using base = _basic_socket<Log>;
 
 	protected:
-		_client_socket(socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
-		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, const LogPtr& log_ptr);
+		_client_socket(socket::kind_t kind, socket::family_t family, Log* log);
+		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
 		_client_socket(_client_socket&& other) noexcept = default;
 		_client_socket(const _client_socket& other) = delete;
 
@@ -165,13 +165,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class udp_socket : public _client_socket<LogPtr> {
-		using base = _client_socket<LogPtr>;
+	template <typename Log = null_log>
+	class udp_socket : public _client_socket<Log> {
+		using base = _client_socket<Log>;
 
 	public:
-		udp_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
-		udp_socket(const LogPtr& log_ptr);
+		udp_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		udp_socket(Log* log);
 		udp_socket(udp_socket&& other) noexcept = default;
 		udp_socket(const udp_socket& other) = delete;
 	};
@@ -180,54 +180,54 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
+	template <typename Log>
 	class tcp_server_socket;
 
 
-	template <typename LogPtr = null_log_ptr>
-	class tcp_client_socket : public _client_socket<LogPtr> {
-		using base = _client_socket<LogPtr>;
+	template <typename Log = null_log>
+	class tcp_client_socket : public _client_socket<Log> {
+		using base = _client_socket<Log>;
 
 	public:
-		tcp_client_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
-		tcp_client_socket(const LogPtr& log_ptr);
+		tcp_client_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		tcp_client_socket(Log* log);
 		tcp_client_socket(tcp_client_socket&& other) noexcept = default;
 		tcp_client_socket(const tcp_client_socket& other) = delete;
 
 	protected:
-		friend class tcp_server_socket<LogPtr>;
-		tcp_client_socket(socket::handle_t handle, socket::family_t family, const LogPtr& log_ptr);
+		friend class tcp_server_socket<Log>;
+		tcp_client_socket(socket::handle_t handle, socket::family_t family, Log* log);
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class tcp_server_socket : public _basic_socket<LogPtr> {
-		using base = _basic_socket<LogPtr>;
+	template <typename Log = null_log>
+	class tcp_server_socket : public _basic_socket<Log> {
+		using base = _basic_socket<Log>;
 
 	public:
-		tcp_server_socket(socket::family_t family = socket::family::ipv4, const LogPtr& log_ptr = nullptr);
-		tcp_server_socket(const LogPtr& log_ptr);
+		tcp_server_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		tcp_server_socket(Log* log);
 		tcp_server_socket(tcp_server_socket&& other) noexcept = default;
 		tcp_server_socket(const tcp_server_socket& other) = delete;
 
 	public:
-		void						listen(socket::backlog_size_t backlog_size);
-		tcp_client_socket<LogPtr>	accept() const;
+		void					listen(socket::backlog_size_t backlog_size);
+		tcp_client_socket<Log>	accept() const;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename SocketPtr, typename LogPtr = null_log_ptr>
+	template <typename SocketPtr, typename Log = null_log>
 	class socket_streambuf : public std::streambuf {
 		using base = std::streambuf;
 
 	public:
-		socket_streambuf(const SocketPtr& socket_ptr, const LogPtr& log_ptr = nullptr);
+		socket_streambuf(const SocketPtr& socket_ptr, Log* log = nullptr);
 
 	protected:
 		virtual int_type	underflow() override;
@@ -236,7 +236,7 @@ namespace abc {
 
 	private:
 		SocketPtr	_socket_ptr;
-		LogPtr		_log_ptr;
+		Log*		_log;
 		char		_get_ch;
 		char		_put_ch;
 	};

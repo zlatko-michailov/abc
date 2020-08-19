@@ -40,7 +40,7 @@ int main() {
 	abc::test::log_filter filter(abc::severity::critical);
 	abc::test::log log(std::cout.rdbuf(), &filter);
 
-	abc::test_suite<abc::test::log*> test_suite( {
+	abc::test_suite<abc::test::log> test_suite( {
 			{ "pre-tests", {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },

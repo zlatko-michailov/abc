@@ -198,6 +198,5 @@ namespace abc {
 
 
 	using null_log = log_ostream<diag_line_ostream<0>, log_filter>;
-	using null_log_ptr = null_log*;
 
 }

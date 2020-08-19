@@ -79,10 +79,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr, std::size_t MaxLevels>
+	template <typename Log, std::size_t MaxLevels>
 	class _json_state {
 	protected:
-		_json_state(const LogPtr& log_ptr);
+		_json_state(Log* log);
 		_json_state(_json_state&& other) = default;
 
 	public:
@@ -96,26 +96,26 @@ namespace abc {
 		bool			push_level(json::level_t level) noexcept;
 		bool			pop_level(json::level_t level) noexcept;
 
-		const LogPtr&	log_ptr() const noexcept;
+		Log*			log() const noexcept;
 
 	private:
 		bool					_expect_property;
 		std::size_t				_level_top;
 		std::bitset<MaxLevels>	_level_stack;
-		LogPtr					_log_ptr;
+		Log*					_log;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_istream : public _istream, public _json_state<LogPtr, MaxLevels> {
+	template <typename Log = null_log, std::size_t MaxLevels = 64>
+	class json_istream : public _istream, public _json_state<Log, MaxLevels> {
 		using base  = _istream;
-		using state = _json_state<LogPtr, MaxLevels>;
+		using state = _json_state<Log, MaxLevels>;
 
 	public:
-		json_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		json_istream(std::streambuf* sb, Log* log = nullptr);
 		json_istream(json_istream&& other) = default;
 
 	public:
@@ -147,13 +147,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr, std::size_t MaxLevels = 64>
-	class json_ostream : public _ostream, public _json_state<LogPtr, MaxLevels> {
+	template <typename Log = null_log, std::size_t MaxLevels = 64>
+	class json_ostream : public _ostream, public _json_state<Log, MaxLevels> {
 		using base  = _ostream;
-		using state = _json_state<LogPtr, MaxLevels>;
+		using state = _json_state<Log, MaxLevels>;
 
 	public:
-		json_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		json_ostream(std::streambuf* sb, Log* log = nullptr);
 		json_ostream(json_ostream&& other) = default;
 
 	public:

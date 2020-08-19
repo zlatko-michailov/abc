@@ -33,7 +33,6 @@ namespace abc { namespace test {
 	using log_line = abc::test_line_ostream<>;
 	using log_filter = abc::log_filter;
 	using log = abc::log_ostream<log_line, log_filter>;
-	using log_ptr = log*;
 
 }}
 

@@ -54,10 +54,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
+	template <typename Log>
 	class _http_state {
 	protected:
-		_http_state(http::item_t next, const LogPtr& log_ptr);
+		_http_state(http::item_t next, Log* log);
 		_http_state(_http_state&& other) = default;
 
 	public:
@@ -68,24 +68,24 @@ namespace abc {
 		void			assert_next(http::item_t item);
 		void			set_next(http::item_t item) noexcept;
 
-		const LogPtr&	log_ptr() const noexcept;
+		Log*			log() const noexcept;
 
 	private:
 		http::item_t	_next;
-		LogPtr			_log_ptr;
+		Log*			_log;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	class _http_istream : public _istream, public _http_state<LogPtr> {
+	template <typename Log>
+	class _http_istream : public _istream, public _http_state<Log> {
 		using base  = _istream;
-		using state = _http_state<LogPtr>;
+		using state = _http_state<Log>;
 
 	protected:
-		_http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
+		_http_istream(std::streambuf* sb, http::item_t next, Log* log);
 		_http_istream(_http_istream&& other) = default;
 
 	public:
@@ -120,13 +120,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr>
-	class _http_ostream : public _ostream, public _http_state<LogPtr> {
+	template <typename Log>
+	class _http_ostream : public _ostream, public _http_state<Log> {
 		using base  = _ostream;
-		using state = _http_state<LogPtr>;
+		using state = _http_state<Log>;
 
 	protected:
-		_http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log_ptr);
+		_http_ostream(std::streambuf* sb, http::item_t next, Log* log);
 		_http_ostream(_http_ostream&& other) = default;
 
 	public:
@@ -161,12 +161,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_request_istream : public _http_istream<LogPtr> {
-		using base  = _http_istream<LogPtr>;
+	template <typename Log = null_log>
+	class http_request_istream : public _http_istream<Log> {
+		using base  = _http_istream<Log>;
 
 	public:
-		http_request_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_request_istream(std::streambuf* sb, Log* log = nullptr);
 		http_request_istream(http_request_istream&& other) = default;
 
 		void	reset();
@@ -181,12 +181,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_request_ostream : public _http_ostream<LogPtr> {
-		using base  = _http_ostream<LogPtr>;
+	template <typename Log = null_log>
+	class http_request_ostream : public _http_ostream<Log> {
+		using base  = _http_ostream<Log>;
 
 	public:
-		http_request_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_request_ostream(std::streambuf* sb, Log* log = nullptr);
 		http_request_ostream(http_request_ostream&& other) = default;
 
 		void	reset();
@@ -201,12 +201,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_response_istream : public _http_istream<LogPtr> {
-		using base  = _http_istream<LogPtr>;
+	template <typename Log = null_log>
+	class http_response_istream : public _http_istream<Log> {
+		using base  = _http_istream<Log>;
 
 	public:
-		http_response_istream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_response_istream(std::streambuf* sb, Log* log = nullptr);
 		http_response_istream(http_response_istream&& other) = default;
 
 		void	reset();
@@ -221,12 +221,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_response_ostream : public _http_ostream<LogPtr> {
-		using base  = _http_ostream<LogPtr>;
+	template <typename Log = null_log>
+	class http_response_ostream : public _http_ostream<Log> {
+		using base  = _http_ostream<Log>;
 
 	public:
-		http_response_ostream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_response_ostream(std::streambuf* sb, Log* log = nullptr);
 		http_response_ostream(http_response_ostream&& other) = default;
 
 		void	reset();
@@ -241,10 +241,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_client_stream : public http_request_ostream<LogPtr>, public http_response_istream<LogPtr> {
+	template <typename Log = null_log>
+	class http_client_stream : public http_request_ostream<Log>, public http_response_istream<Log> {
 	public:
-		http_client_stream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_client_stream(std::streambuf* sb, Log* log = nullptr);
 		http_client_stream(http_client_stream&& other) = default;
 	};
 
@@ -252,10 +252,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename LogPtr = null_log_ptr>
-	class http_server_stream : public http_request_istream<LogPtr>, public http_response_ostream<LogPtr> {
+	template <typename Log = null_log>
+	class http_server_stream : public http_request_istream<Log>, public http_response_ostream<Log> {
 	public:
-		http_server_stream(std::streambuf* sb, const LogPtr& log_ptr = nullptr);
+		http_server_stream(std::streambuf* sb, Log* log = nullptr);
 		http_server_stream(http_server_stream&& other) = default;
 	};
 

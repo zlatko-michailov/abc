@@ -31,19 +31,19 @@ SOFTWARE.
 namespace abc { namespace test { namespace json {
 
 	template <typename JsonStream>
-	static bool verify_string(test_context<abc::test::log_ptr>& context, const char* actual, const char* expected, const JsonStream& stream, tag_t tag);
+	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const JsonStream& stream, tag_t tag);
 
 	template <typename JsonStream, typename Value>
-	static bool verify_value(test_context<abc::test::log_ptr>& context, const Value& actual, const Value& expected, const JsonStream& stream, tag_t tag, const char* format, std::size_t expected_gcount);
+	static bool verify_value(test_context<abc::test::log>& context, const Value& actual, const Value& expected, const JsonStream& stream, tag_t tag, const char* format, std::size_t expected_gcount);
 
 
-	bool test_json_istream_null(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_null(test_context<abc::test::log>& context) {
 		char content[] =
 			" \r \t \n  null \t \r \n";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -57,13 +57,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_boolean_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_boolean_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"false";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -78,13 +78,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_boolean_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_boolean_02(test_context<abc::test::log>& context) {
 		char content[] =
 			"\rtrue\n";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -99,13 +99,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_number_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_number_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"\t\t\t\t 42 \r\n";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -120,13 +120,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_number_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_number_02(test_context<abc::test::log>& context) {
 		char content[] =
 			" +1234.567 ";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -141,13 +141,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_number_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_number_03(test_context<abc::test::log>& context) {
 		char content[] =
 			"\t -56.0000 \t";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -162,13 +162,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_number_04(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_number_04(test_context<abc::test::log>& context) {
 		char content[] =
 			"\n\r -67.899e23 \r\n";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -183,13 +183,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_number_05(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_number_05(test_context<abc::test::log>& context) {
 		char content[] =
 			"\n\r -88776655443322.999E-5 \r\n";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -204,13 +204,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_string_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_string_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"\"\"";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -225,13 +225,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_string_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_string_02(test_context<abc::test::log>& context) {
 		char content[] =
 			" \r  \"abc xyz\" \n  ";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -246,13 +246,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_string_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_string_03(test_context<abc::test::log>& context) {
 		char content[] =
 			"\n\"a\\nb\\rc\\txyz\"";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -267,13 +267,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_string_04(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_string_04(test_context<abc::test::log>& context) {
 		char content[] =
 			"\n   \"абв\\u0020юя\"  ";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -288,13 +288,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_array_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_array_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"[]";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -313,13 +313,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_array_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_array_02(test_context<abc::test::log>& context) {
 		char content[] =
 			"\n[\n\t12.34,\r\n\tnull,\n    true,\r\n    \"abc\"]";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -357,13 +357,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_array_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_array_03(test_context<abc::test::log>& context) {
 		char content[] =
 			"[ 1, 2, [[3], [4]], [[[5]]] ]";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -455,13 +455,13 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_object_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_object_01(test_context<abc::test::log>& context) {
 		char content[] =
 			"{}";
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -480,7 +480,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_object_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_object_02(test_context<abc::test::log>& context) {
 		char content[] = R"####(
 
  { 
@@ -495,7 +495,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -553,7 +553,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_object_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_object_03(test_context<abc::test::log>& context) {
 		char content[] = R"####(
 {
 	"a1": 1,
@@ -578,7 +578,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -725,7 +725,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_mixed_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_mixed_01(test_context<abc::test::log>& context) {
 		char content[] = R"####(
 [
 	{
@@ -743,7 +743,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -877,7 +877,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_mixed_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_mixed_02(test_context<abc::test::log>& context) {
 		char content[] = R"####(
 {
 	"a1": {
@@ -895,7 +895,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -1039,7 +1039,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_istream_skip(test_context<abc::test::log_ptr>& context) {
+	bool test_json_istream_skip(test_context<abc::test::log>& context) {
 		char content[] = R"####(
 {
 	"a1": {
@@ -1058,7 +1058,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-		abc::json_istream<abc::test::log_ptr> istream(&sb, context.log_ptr);
+		abc::json_istream<abc::test::log> istream(&sb, context.log);
 
 		char buffer[101];
 		abc::json::token_t* token = (abc::json::token_t*)buffer;
@@ -1112,7 +1112,7 @@ namespace abc { namespace test { namespace json {
 	// --------------------------------------------------------------
 
 
-	bool test_json_ostream_null(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_null(test_context<abc::test::log>& context) {
 		char expected[] =
 			" \r\t\n null \t\r\n";
 
@@ -1120,7 +1120,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1157,7 +1157,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_boolean_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_boolean_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"\n\nfalse\r\n";
 
@@ -1165,7 +1165,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1193,7 +1193,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_boolean_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_boolean_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"true";
 
@@ -1201,7 +1201,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1219,7 +1219,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_number_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_number_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"42";
 
@@ -1227,7 +1227,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1245,7 +1245,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_number_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_number_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"12345.6789012345";
 
@@ -1253,7 +1253,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1271,7 +1271,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_number_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_number_03(test_context<abc::test::log>& context) {
 		char expected[] =
 			"-8.87766554433221e-10";
 
@@ -1279,7 +1279,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1297,7 +1297,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_string_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_string_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"\"\"";
 
@@ -1305,7 +1305,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1323,7 +1323,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_string_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_string_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"\"qwerty\"";
 
@@ -1331,7 +1331,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1349,7 +1349,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_array_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_array_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"[]";
 
@@ -1357,7 +1357,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1378,7 +1378,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_array_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_array_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"[ 12.34,null,true,\"abc\" ]";
 
@@ -1386,7 +1386,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1428,7 +1428,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_array_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_array_03(test_context<abc::test::log>& context) {
 		char expected[] =
 			"[ 1,2,[[3],[4]],[[[5]]] ]";
 
@@ -1436,7 +1436,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1532,7 +1532,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_object_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_object_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"{}";
 
@@ -1540,7 +1540,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1561,7 +1561,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_object_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_object_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"{"
 				"\"a\":12.34,"
@@ -1574,7 +1574,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1634,7 +1634,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_object_03(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_object_03(test_context<abc::test::log>& context) {
 		char expected[] = 
 			"{"
 				"\"a1\":1,"
@@ -1660,7 +1660,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1809,7 +1809,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_mixed_01(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_mixed_01(test_context<abc::test::log>& context) {
 		char expected[] =
 			"["
 				"{"
@@ -1828,7 +1828,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -1964,7 +1964,7 @@ namespace abc { namespace test { namespace json {
 	}
 
 
-	bool test_json_ostream_mixed_02(test_context<abc::test::log_ptr>& context) {
+	bool test_json_ostream_mixed_02(test_context<abc::test::log>& context) {
 		char expected[] =
 			"{"
 				"\"a1\":{"
@@ -1983,7 +1983,7 @@ namespace abc { namespace test { namespace json {
 
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
 
-		abc::json_ostream<abc::test::log_ptr> ostream(&sb, context.log_ptr);
+		abc::json_ostream<abc::test::log> ostream(&sb, context.log);
 
 		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
 		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
@@ -2133,7 +2133,7 @@ namespace abc { namespace test { namespace json {
 
 
 	template <typename JsonStream>
-	static bool verify_string(test_context<abc::test::log_ptr>& context, const char* actual, const char* expected, const JsonStream& stream, tag_t tag) {
+	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const JsonStream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, tag) && passed;
@@ -2144,7 +2144,7 @@ namespace abc { namespace test { namespace json {
 
 
 	template <typename JsonStream, typename Value>
-	static bool verify_value(test_context<abc::test::log_ptr>& context, const Value& actual, const Value& expected, const JsonStream& stream, tag_t tag, const char* format, std::size_t expected_gcount) {
+	static bool verify_value(test_context<abc::test::log>& context, const Value& actual, const Value& expected, const JsonStream& stream, tag_t tag, const char* format, std::size_t expected_gcount) {
 		bool passed = true;
 
 		passed = context.are_equal(actual, expected, tag, format) && passed;

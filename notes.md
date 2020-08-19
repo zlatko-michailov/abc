@@ -100,10 +100,11 @@ __PENDING QUESTIONS__
 - Test log lines.
 - Convert `LineStream` to `Line`.
 - Convert `FilterPtr` to `Filter`. 
-## To Do
 - Convert `LogPtr` to `Log*` for all classes.
-- `timelimited_file_streambuf`
-- `sizelimited_file_streambuf`
+## To Do
+- Convert `SocketPtr` to `Socket`.
+- `timebound_file_streambuf`
+- `sizebound_file_streambuf`
 - Tag.
 - README
   - Try It - step-by-step instructions
@@ -115,6 +116,7 @@ __PENDING QUESTIONS__
 ## Done
 ## To Do
 - Samples
+- Internationalization
 
 # v1.9
 ## Done
@@ -124,7 +126,6 @@ __PENDING QUESTIONS__
 # v1.10
 ## Done
 ## To Do
-- Internationalization
 - ring - single writer, multiple readers
 - file-backed buffer
 

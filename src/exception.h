@@ -40,11 +40,11 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Exception, typename LogPtr = null_log_ptr>
+	template <typename Exception, typename Log = null_log>
 	class exception : public Exception {
 
 	public:
-		exception(const char* message, tag_t tag, const LogPtr& log_ptr = nullptr);
+		exception(const char* message, tag_t tag, Log* log = nullptr);
 
 	public:
 		tag_t	tag() const noexcept;
@@ -57,18 +57,18 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Exception, typename LogPtr>
-	inline exception<Exception, LogPtr>::exception(const char* message, tag_t tag, const LogPtr& log_ptr)
+	template <typename Exception, typename Log>
+	inline exception<Exception, Log>::exception(const char* message, tag_t tag, Log* log)
 		: Exception(message)
 		, _tag(tag) {
-		if (log_ptr != nullptr) {
-			log_ptr->put_any(category::abc::exception, severity::warning, 0x10001, "Exception thrown! %s", message);
+		if (log != nullptr) {
+			log->put_any(category::abc::exception, severity::warning, 0x10001, "Exception thrown! %s", message);
 		}
 	}
 
 
-	template <typename Exception, typename LogPtr>
-	inline tag_t exception<Exception, LogPtr>::tag() const noexcept {
+	template <typename Exception, typename Log>
+	inline tag_t exception<Exception, Log>::tag() const noexcept {
 		return _tag;
 	}
 

@@ -36,7 +36,7 @@ namespace abc { namespace test { namespace table {
 	using timestamp_line_ostream = abc::line_ostream<60>;
 
 
-	bool test_table_line_debug(test_context<abc::test::log_ptr>& context) {
+	bool test_table_line_debug(test_context<abc::test::log>& context) {
 		thread_id_line_ostream thread_id;
 		thread_id.put_thread_id(std::this_thread::get_id());
 
@@ -99,7 +99,7 @@ namespace abc { namespace test { namespace table {
 	}
 
 
-	bool test_table_line_diag(test_context<abc::test::log_ptr>& context) {
+	bool test_table_line_diag(test_context<abc::test::log>& context) {
 		thread_id_line_ostream thread_id;
 		thread_id.put_thread_id(std::this_thread::get_id());
 
@@ -163,7 +163,7 @@ namespace abc { namespace test { namespace table {
 	}
 
 
-	bool test_table_line_test(test_context<abc::test::log_ptr>& context) {
+	bool test_table_line_test(test_context<abc::test::log>& context) {
 		timestamp_line_ostream timestamp;
 		timestamp.put_timestamp(abc::timestamp<clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u");
 

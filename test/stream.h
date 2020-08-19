@@ -33,7 +33,7 @@ SOFTWARE.
 namespace abc { namespace test {
 
 	template <typename Stream>
-	inline bool verify_stream(test_context<abc::test::log_ptr>& context, const Stream& stream, tag_t tag) {
+	inline bool verify_stream(test_context<abc::test::log>& context, const Stream& stream, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(stream.good(), true, tag, "%u") && passed;
@@ -46,7 +46,7 @@ namespace abc { namespace test {
 
 
 	template <typename Stream>
-	inline bool verify_stream(test_context<abc::test::log_ptr>& context, const Stream& stream, std::size_t expected_gcount, tag_t tag) {
+	inline bool verify_stream(test_context<abc::test::log>& context, const Stream& stream, std::size_t expected_gcount, tag_t tag) {
 		bool passed = true;
 
 		passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%u") && passed;

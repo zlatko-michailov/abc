@@ -28,20 +28,20 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace streambuf {
 
-	static bool test_buffer_streambuf(test_context<abc::test::log_ptr>& context, const char* text) ;
+	static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) ;
 
 
-	bool test_buffer_streambuf_1_char(test_context<abc::test::log_ptr>& context) {
+	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context) {
 		return test_buffer_streambuf(context, "x");
 	}
 
 
-	bool test_buffer_streambuf_N_chars(test_context<abc::test::log_ptr>& context) {
+	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context) {
 		return test_buffer_streambuf(context, "This is a slightly longer text");
 	}
 
 
-	bool test_buffer_streambuf(test_context<abc::test::log_ptr>& context, const char* text) {
+	bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) {
 		char expected[200];
 		std::strncpy(expected, text, sizeof(expected));
 

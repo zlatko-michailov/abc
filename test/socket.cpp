@@ -35,18 +35,18 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace socket {
 
-	bool test_udp_sync_socket(test_context<abc::test::log_ptr>& context) {
+	bool test_udp_sync_socket(test_context<abc::test::log>& context) {
 		const char server_port[] = "31234";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::udp_socket server(context.log_ptr);
+		abc::udp_socket server(context.log);
 		server.bind(server_port);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::udp_socket client(context.log_ptr);
+				abc::udp_socket client(context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -62,7 +62,7 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x10028) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
+				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x10029, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e6) && passed; // Lambda closure
@@ -89,19 +89,19 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_sync_socket(test_context<abc::test::log_ptr>& context) {
+	bool test_tcp_sync_socket(test_context<abc::test::log>& context) {
 		const char server_port[] = "31235";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log_ptr);
+		abc::tcp_server_socket server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket client(context.log_ptr);
+				abc::tcp_client_socket client(context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -117,7 +117,7 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x1002b) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
+				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e7) && passed; // Lambda closure
@@ -143,22 +143,22 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_socket_stream(test_context<abc::test::log_ptr>& context) {
+	bool test_tcp_socket_stream(test_context<abc::test::log>& context) {
 		const char server_port[] = "31236";
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log_ptr);
+		abc::tcp_server_socket server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket client(context.log_ptr);
+				abc::tcp_client_socket client(context.log);
 				client.connect("localhost", server_port);
 
-				abc::socket_streambuf sb(&client, context.log_ptr);
+				abc::socket_streambuf sb(&client, context.log);
 				std::istream client_in(&sb);
 				std::ostream client_out(&sb);
 
@@ -170,14 +170,14 @@ namespace abc { namespace test { namespace socket {
 				passed = context.are_equal(content, response_content, 0x10037) && passed;
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
+				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e8) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
-		abc::socket_streambuf sb(&client, context.log_ptr);
+		abc::socket_streambuf sb(&client, context.log);
 		std::istream client_in(&sb);
 		std::ostream client_out(&sb);
 
@@ -193,7 +193,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_http_json_socket_stream(test_context<abc::test::log_ptr>& context) {
+	bool test_http_json_socket_stream(test_context<abc::test::log>& context) {
 		const char server_port[] = "31237";
 		const char protocol[] = "HTTP/1.1";
 		const char request_method[] = "POST";
@@ -206,7 +206,7 @@ namespace abc { namespace test { namespace socket {
 		const char response_header_value[] = "Response-Header-Value";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log_ptr);
+		abc::tcp_server_socket server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
@@ -214,11 +214,11 @@ namespace abc { namespace test { namespace socket {
 								protocol, request_method, request_resource, request_header_name, request_header_value,
 								response_status_code, response_reason_phrase, response_header_name, response_header_value] () {
 			try {
-				abc::tcp_client_socket client(context.log_ptr);
+				abc::tcp_client_socket client(context.log);
 				client.connect("localhost", server_port);
 
-				abc::socket_streambuf sb(&client, context.log_ptr);
-				abc::http_client_stream http(&sb, context.log_ptr);
+				abc::socket_streambuf sb(&client, context.log);
+				abc::http_client_stream http(&sb, context.log);
 
 				// Send request
 				{
@@ -230,7 +230,7 @@ namespace abc { namespace test { namespace socket {
 					http.end_headers();
 
 					// Body (json)
-					abc::json_ostream json(&sb, context.log_ptr);
+					abc::json_ostream json(&sb, context.log);
 					json.put_begin_object();
 						json.put_property("param");
 						json.put_string("foo");
@@ -260,7 +260,7 @@ namespace abc { namespace test { namespace socket {
 					passed = context.are_equal(buffer, "", 0x100ee) && passed;
 
 					// Body (json)
-					abc::json_istream json(&sb, context.log_ptr);
+					abc::json_istream json(&sb, context.log);
 					abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 					json.get_token(token, sizeof(buffer));
@@ -287,15 +287,15 @@ namespace abc { namespace test { namespace socket {
 				}
 			}
 			catch (const std::exception& ex) {
-				context.log_ptr->put_any(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
+				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
 			}
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100f1) && passed; // Lambda closure
 
 		abc::tcp_client_socket client = std::move(server.accept());
 
-		abc::socket_streambuf sb(&client, context.log_ptr);
-		abc::http_server_stream http(&sb, context.log_ptr);
+		abc::socket_streambuf sb(&client, context.log);
+		abc::http_server_stream http(&sb, context.log);
 
 		// Receive request
 		{
@@ -320,7 +320,7 @@ namespace abc { namespace test { namespace socket {
 			passed = context.are_equal(buffer, "", 0x100f7) && passed;
 
 			// Body (json)
-			abc::json_istream json(&sb, context.log_ptr);
+			abc::json_istream json(&sb, context.log);
 			abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 			json.get_token(token, sizeof(buffer));
@@ -347,7 +347,7 @@ namespace abc { namespace test { namespace socket {
 		http.end_headers();
 
 		// Body (json)
-		abc::json_ostream json(&sb, context.log_ptr);
+		abc::json_ostream json(&sb, context.log);
 		json.put_begin_object();
 			json.put_property("n");
 			json.put_number(42.0);
