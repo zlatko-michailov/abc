@@ -28,6 +28,7 @@ SOFTWARE.
 #include "test.h"
 #include "timestamp.h"
 #include "streambuf.h"
+#include "table.h"
 #include "socket.h"
 #include "http.h"
 #include "json.h"
@@ -54,6 +55,11 @@ int main() {
 			{ "streambuf", {
 				{ "test_buffer_streambuf_1_char",					abc::test::streambuf::test_buffer_streambuf_1_char },
 				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
+			} },
+			{ "table", {
+				{ "test_table_line_debug",							abc::test::table::test_table_line_debug },
+				{ "test_table_line_diag",							abc::test::table::test_table_line_diag },
+				{ "test_table_line_test",							abc::test::table::test_table_line_test },
 			} },
 			{ "http", {
 				{ "test_http_request_istream_extraspaces",			abc::test::http::test_http_request_istream_extraspaces },
@@ -121,81 +127,6 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
-
-
-#ifdef REMOVE
-	//// begin remove
-	abc::timestamp<abc::test::clock> ts;
-	std::cout << ts.year() << "-" << ts.month() << "-" << ts.day() << " " << ts.hours() << ":" << ts.minutes() << ":" << ts.seconds() << "." << ts.milliseconds() << std::endl << std::endl;
-
-
-	abc::table_ostream table(std::cout.rdbuf());
-	{
-		abc::line_ostream line(&table);
-		line.put_any("|%22s", "timestamp");
-		line.put_any("|%5s", "n");
-		line.put_any("|%5s", "s");
-		line.put_any("| %16s ", "thread id");
-		line.put_any("| binary");
-	}
-
-	char binary[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	std::size_t binary_offset = 0;
-	std::size_t pcount = 1;
-
-	while (pcount != 0)
-	{
-		abc::line_ostream<200> line(&table);
-		line.put_timestamp(abc::timestamp<>(), abc::log_view::format::datetime::friendly);
-		line.put_any("|%5u", 42);
-		line.put_any("|%5s", "foo");
-		line.put_thread_id(std::this_thread::get_id(), "| %16s | ");
-		pcount = line.put_binary(binary, sizeof(binary), binary_offset);
-	}
-
-	table.put_blank_line();
-	{
-		abc::debug_line_ostream<abc::size::k2, abc::test::clock> line(&table);
-		line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-	}
-	{
-		abc::debug_line_ostream<abc::size::k2, abc::test::clock> line(&table);
-		line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-	}
-	{
-		abc::debug_line_ostream<abc::size::k2, abc::test::clock> line(&table);
-		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-	}
-
-	table.put_blank_line();
-	{
-		abc::diag_line_ostream line(&table);
-		line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-	}
-	{
-		abc::diag_line_ostream line(&table);
-		line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-	}
-	{
-		abc::diag_line_ostream line(&table);
-		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-	}
-
-	table.put_blank_line();
-	{
-		abc::test_line_ostream line(&table);
-		line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-	}
-	{
-		abc::test_line_ostream line(&table);
-		line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-	}
-	{
-		abc::test_line_ostream line(&table);
-		line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-	}
-	//// end remove
-#endif
 
 	return passed ? 0 : 1;
 }

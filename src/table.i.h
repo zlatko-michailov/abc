@@ -49,9 +49,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	class table_ostream : protected _ostream {
+	class table_ostream : public _ostream {
 		using base = _ostream;
 
+	public:
 		static constexpr char endl = '\n';
 
 	public:
@@ -68,9 +69,10 @@ namespace abc {
 
 
 	template <std::size_t Size = size::k2>
-	class line_ostream : protected _ostream {
+	class line_ostream : public _ostream {
 		using base = _ostream;
 
+	public:
 		static constexpr char endl = '\n';
 		static constexpr char ends = '\0';
 
@@ -94,9 +96,10 @@ namespace abc {
 		bool		put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
 
 	private:
-		table_ostream*	_table;
-		char			_buffer[Size + 2];
-		std::size_t		_pcount;
+		table_ostream*		_table;
+		char				_buffer[Size + 2];
+		buffer_streambuf	_sb;
+		std::size_t			_pcount;
 	};
 
 }

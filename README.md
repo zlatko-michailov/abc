@@ -189,14 +189,12 @@ Other tabular streams can be created in user space.
 - `log` becomes a stream, and takes a concrete `streambuf` instead of a Container abstraction.
 - Better class reference.
 
-### 0.9.0
+### 1.8.0
+- Sample(s).
+- Stabilization and polishing as needed.
 - Internationalization.
 
 ### 1.9.0
-- Sample(s).
-- Stabilization and polishing as needed.
-
-### 1.10.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)

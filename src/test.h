@@ -116,7 +116,7 @@ namespace abc {
 	inline bool test_context<LogPtr>::are_equal(const Value& actual, const Value& expected, tag_t tag, const char* format) {
 		bool are_equal = actual == expected;
 
-		char line_format[size::k1];
+		char line_format[size::k2];
 		if (!are_equal) {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%s, expected=%s)", format, format);
 			if (log_ptr != nullptr) {
@@ -138,7 +138,7 @@ namespace abc {
 	inline bool test_context<LogPtr>::are_equal(const char* actual, const char* expected, tag_t tag) {
 		bool are_equal = std::strcmp(actual, expected) == 0;
 
-		char line_format[size::k1];
+		char line_format[size::k2];
 		if (!are_equal) {
 			std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
 			if (log_ptr != nullptr) {
@@ -164,15 +164,15 @@ namespace abc {
 		for (;;) {
 			std::size_t original_offset = offset;
 
-			line_ostream<size::k1> line_actual;
+			line_ostream<size::k2> line_actual;
 			if (line_actual.put_binary(actual, size, offset) == 0) {
 				break;
 			};
 
-			line_ostream<size::k1> line_expected;
+			line_ostream<size::k2> line_expected;
 			line_expected.put_binary(expected, size, original_offset);
 
-			char line_format[size::k1];
+			char line_format[size::k2];
 			if (!are_equal) {
 				std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
 				if (log_ptr != nullptr) {

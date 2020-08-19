@@ -45,6 +45,7 @@ namespace abc {
 
 		try {
 			base::write(line, line_size);
+			base::flush();
 		}
 		catch (...) {
 		}
@@ -54,6 +55,7 @@ namespace abc {
 	inline void table_ostream::put_blank_line() noexcept {
 		try {
 			*this << endl;
+			base::flush();
 		}
 		catch (...) {
 		}
@@ -71,7 +73,8 @@ namespace abc {
 
 	template <std::size_t Size>
 	inline line_ostream<Size>::line_ostream(table_ostream* table)
-		: base(nullptr)
+		: base(&_sb)
+		, _sb(nullptr, 0, 0, _buffer, 0, Size)
 		, _table(table)
 		, _pcount(0) {
 	}
@@ -143,7 +146,7 @@ namespace abc {
 			stream << std::hex << thread_id << ends;
 		}
 		catch (...) {
-			buf[0] = '\0';
+			buf[0] = ends;
 		}
 
 		put_any(format, buf);
@@ -155,13 +158,13 @@ namespace abc {
 		// 0000: 00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  abcdefghijklmnop
 		constexpr std::size_t half_chunk_size = 8;
 		constexpr std::size_t chunk_size = half_chunk_size * 2;
-		constexpr std::size_t local_size = 5 + (chunk_size * 3) + 1 + 2 + chunk_size + 1;
+		constexpr std::size_t local_size = 5 + (chunk_size * 3) + 1 + 2 + chunk_size;
 		constexpr char hex[] = "0123456789abcdef";
 		constexpr char blank = ' ';
 		constexpr char nonprint = '.';
 		constexpr char head = ':';
 
-		if (Size - _pcount < local_size) {
+		if (Size - _pcount <= local_size) {
 			return false;
 		}
 
@@ -225,7 +228,7 @@ namespace abc {
 
 		line[local_offset++] = ends;
 
-		_pcount += local_offset;
+		_pcount += local_size;
 		buffer_offset += chunk_size;
 		return hasMore;
 	}
