@@ -256,11 +256,11 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline severity_log_filter::severity_log_filter(severity_t min_severity) noexcept
+	inline log_filter::log_filter(severity_t min_severity) noexcept
 		: _min_severity(min_severity) {
 	}
 
-	inline bool severity_log_filter::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
+	inline bool log_filter::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
 		return abc::severity::is_higher_or_equal(severity, _min_severity);
 	}
 

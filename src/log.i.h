@@ -178,13 +178,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	class severity_log_filter {
+	class log_filter {
 	public:
-		severity_log_filter() noexcept = default;
-		severity_log_filter(severity_log_filter&& other) noexcept = default;
+		log_filter() noexcept = default;
+		log_filter(log_filter&& other) noexcept = default;
 
 	public:
-		severity_log_filter(severity_t min_severity) noexcept;
+		log_filter(severity_t min_severity) noexcept;
 
 	public:
 		bool is_enabled(category_t category, severity_t severity) const noexcept;
@@ -197,7 +197,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using null_log = log_ostream<diag_line_ostream<0>, severity_log_filter>;
+	using null_log = log_ostream<diag_line_ostream<0>, log_filter>;
 	using null_log_ptr = null_log*;
 
 }
