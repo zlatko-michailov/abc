@@ -101,8 +101,8 @@ __PENDING QUESTIONS__
 - Convert `LineStream` to `Line`.
 - Convert `FilterPtr` to `Filter`. 
 - Convert `LogPtr` to `Log*` for all classes.
-## To Do
 - Convert `SocketPtr` to `Socket`.
+## To Do
 - `timebound_file_streambuf`
 - `sizebound_file_streambuf`
 - Tag.

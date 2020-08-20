@@ -222,12 +222,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename SocketPtr, typename Log = null_log>
+	template <typename Socket, typename Log = null_log>
 	class socket_streambuf : public std::streambuf {
 		using base = std::streambuf;
 
 	public:
-		socket_streambuf(const SocketPtr& socket_ptr, Log* log = nullptr);
+		socket_streambuf(Socket* socket, Log* log = nullptr);
 
 	protected:
 		virtual int_type	underflow() override;
@@ -235,7 +235,7 @@ namespace abc {
 		virtual int			sync() override;
 
 	private:
-		SocketPtr	_socket_ptr;
+		Socket*		_socket;
 		Log*		_log;
 		char		_get_ch;
 		char		_put_ch;

@@ -468,13 +468,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename SocketPtr, typename Log>
-	inline socket_streambuf<SocketPtr, Log>::socket_streambuf(const SocketPtr& socket_ptr, Log* log)
+	template <typename Socket, typename Log>
+	inline socket_streambuf<Socket, Log>::socket_streambuf(Socket* socket, Log* log)
 		: std::streambuf()
-		, _socket_ptr(socket_ptr)
+		, _socket(socket)
 		, _log(log) {
-		if (socket_ptr == nullptr) {
-			throw exception<std::logic_error, Log>("socket_ptr", 0x10068, _log);
+		if (socket == nullptr) {
+			throw exception<std::logic_error, Log>("socket", 0x10068, _log);
 		}
 
 		setg(&_get_ch, &_get_ch, &_get_ch);
@@ -482,9 +482,9 @@ namespace abc {
 	}
 
 
-	template <typename SocketPtr, typename Log>
-	inline std::streambuf::int_type socket_streambuf<SocketPtr, Log>::underflow() {
-		_socket_ptr->receive(&_get_ch, sizeof(char));
+	template <typename Socket, typename Log>
+	inline std::streambuf::int_type socket_streambuf<Socket, Log>::underflow() {
+		_socket->receive(&_get_ch, sizeof(char));
 
 		setg(&_get_ch, &_get_ch, &_get_ch + 1);
 
@@ -492,10 +492,10 @@ namespace abc {
 	}
 
 
-	template <typename SocketPtr, typename Log>
-	inline std::streambuf::int_type socket_streambuf<SocketPtr, Log>::overflow(std::streambuf::int_type ch) {
-		_socket_ptr->send(&_put_ch, sizeof(char));
-		_socket_ptr->send(&ch, sizeof(char));
+	template <typename Socket, typename Log>
+	inline std::streambuf::int_type socket_streambuf<Socket, Log>::overflow(std::streambuf::int_type ch) {
+		_socket->send(&_put_ch, sizeof(char));
+		_socket->send(&ch, sizeof(char));
 
 		setp(&_put_ch, &_put_ch + 1);
 
@@ -503,10 +503,10 @@ namespace abc {
 	}
 
 
-	template <typename SocketPtr, typename Log>
-	inline int socket_streambuf<SocketPtr, Log>::sync() {
+	template <typename Socket, typename Log>
+	inline int socket_streambuf<Socket, Log>::sync() {
 		if (pptr() != &_put_ch) {
-			_socket_ptr->send(&_put_ch, sizeof(char));
+			_socket->send(&_put_ch, sizeof(char));
 		}
 
 		setp(&_put_ch, &_put_ch + 1);
