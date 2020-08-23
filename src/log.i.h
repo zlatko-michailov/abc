@@ -84,6 +84,7 @@ namespace abc {
 			constexpr category_t socket		= base + 3;
 			constexpr category_t http		= base + 4;
 			constexpr category_t json		= base + 5;
+			constexpr category_t multifile	= base + 6;
 		}
 	}
 
