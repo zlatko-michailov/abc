@@ -79,7 +79,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log, std::size_t MaxLevels>
+	template <std::size_t MaxLevels, typename Log>
 	class _json_state {
 	protected:
 		_json_state(Log* log);
@@ -109,10 +109,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log = null_log, std::size_t MaxLevels = 64>
-	class json_istream : public _istream, public _json_state<Log, MaxLevels> {
+	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
+	class json_istream : public _istream, public _json_state<MaxLevels, Log> {
 		using base  = _istream;
-		using state = _json_state<Log, MaxLevels>;
+		using state = _json_state<MaxLevels, Log>;
 
 	public:
 		json_istream(std::streambuf* sb, Log* log = nullptr);
@@ -147,10 +147,10 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log = null_log, std::size_t MaxLevels = 64>
-	class json_ostream : public _ostream, public _json_state<Log, MaxLevels> {
+	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
+	class json_ostream : public _ostream, public _json_state<MaxLevels, Log> {
 		using base  = _ostream;
-		using state = _json_state<Log, MaxLevels>;
+		using state = _json_state<MaxLevels, Log>;
 
 	public:
 		json_ostream(std::streambuf* sb, Log* log = nullptr);

@@ -102,9 +102,13 @@ __PENDING QUESTIONS__
 - Convert `FilterPtr` to `Filter`. 
 - Convert `LogPtr` to `Log*` for all classes.
 - Convert `SocketPtr` to `Socket`.
+- `json` make <Log> the last template parameter.
 ## To Do
+- `multifile` make <Log> the last template parameter.
 - `timebound_file_streambuf`
 - `sizebound_file_streambuf`
+- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
+- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 - Tag.
 - README
   - Try It - step-by-step instructions
