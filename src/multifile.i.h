@@ -35,7 +35,7 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Log = null_log, std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock>
+	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
 	class multifile_streambuf : public std::filebuf {
 		using base = std::filebuf;
 

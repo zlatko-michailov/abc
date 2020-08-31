@@ -36,8 +36,8 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Log, std::size_t MaxPath, typename Clock>
-	inline multifile_streambuf<Log, MaxPath, Clock>::multifile_streambuf(const char* path, std::ios_base::openmode mode, Log* log)
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline multifile_streambuf<MaxPath, Clock, Log>::multifile_streambuf(const char* path, std::ios_base::openmode mode, Log* log)
 		: base()
 		, _mode(mode)
 		, _log(log) {
@@ -59,8 +59,8 @@ namespace abc {
 	}
 
 
-	template <typename Log, std::size_t MaxPath, typename Clock>
-	inline multifile_streambuf<Log, MaxPath, Clock>::multifile_streambuf(multifile_streambuf&& other) noexcept
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline multifile_streambuf<MaxPath, Clock, Log>::multifile_streambuf(multifile_streambuf&& other) noexcept
 		: base(std::move(other)) {
 		std::strncpy(_path, other._path, MaxPath);
 		_path_length = other._path_length;
@@ -73,8 +73,8 @@ namespace abc {
 	}
 
 
-	template <typename Log, std::size_t MaxPath, typename Clock>
-	inline void multifile_streambuf<Log, MaxPath, Clock>::reopen() {
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline void multifile_streambuf<MaxPath, Clock, Log>::reopen() {
 		if (base::is_open()) {
 			base::close();
 
