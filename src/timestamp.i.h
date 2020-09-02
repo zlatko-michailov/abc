@@ -50,11 +50,13 @@ namespace abc {
 
 
 	template <typename Clock = std::chrono::system_clock>
-	class timestamp {
+	class timestamp : public std::chrono::time_point<Clock> {
+		using base = std::chrono::time_point<Clock>;
+
 	public:
 		timestamp(std::nullptr_t) noexcept;
 		timestamp() noexcept;
-		timestamp(std::chrono::time_point<Clock> tp) noexcept;
+		timestamp(const std::chrono::time_point<Clock>& tp) noexcept;
 
 	public:
 		void reset(std::chrono::time_point<Clock> tp) noexcept;
@@ -82,9 +84,6 @@ namespace abc {
 		bool operator>=(const timestamp<Clock>& other) const noexcept;
 		bool operator< (const timestamp<Clock>& other) const noexcept;
 		bool operator<=(const timestamp<Clock>& other) const noexcept;
-
-	public:
-		timestamp<Clock> coerse_minutes(std::chrono::minutes::rep minutes) const noexcept;
 
 	private:
 		bool reset_date_if_done(date_count_t days_since_epoch, date_count_t& year, date_count_t& month, date_count_t& day, date_count_t& remaining_days, date_count_t days_in_1_month) noexcept;

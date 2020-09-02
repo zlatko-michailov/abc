@@ -77,7 +77,8 @@ namespace abc {
 
 
 	template <typename Clock>
-	inline timestamp<Clock>::timestamp(std::nullptr_t) noexcept {
+	inline timestamp<Clock>::timestamp(std::nullptr_t) noexcept
+		: base(Clock::duration::zero()) {
 		reset_date(0);
 		reset_time(0);
 	}
@@ -90,7 +91,8 @@ namespace abc {
 
 
 	template <typename Clock>
-	inline timestamp<Clock>::timestamp(std::chrono::time_point<Clock> tp) noexcept {
+	inline timestamp<Clock>::timestamp(const std::chrono::time_point<Clock>& tp) noexcept
+		: base(tp) {
 		reset(tp);
 	}
 
@@ -150,20 +152,6 @@ namespace abc {
 	template <typename Clock>
 	inline bool timestamp<Clock>::operator<=(const timestamp<Clock>& other) const noexcept {
 		return !operator>(other);
-	}
-
-
-	template <typename Clock>
-	inline timestamp<Clock> timestamp<Clock>::coerse_minutes(std::chrono::minutes::rep minutes) const noexcept {
-		time_count_t minutes_since_midnight = _nanoseconds_since_midnight / nanoseconds_per_minute;
-		time_count_t coersed_minutes_since_midnight = (minutes_since_midnight / minutes) * minutes;
-		time_count_t coersed_nanoseconds_since_midnight = coersed_minutes_since_midnight * nanoseconds_per_minute;
-
-		timestamp<Clock> copy;
-		copy.reset_date(_days_since_epoch, _year, _month, _day);
-		copy.reset_time(coersed_nanoseconds_since_midnight);
-
-		return copy;
 	}
 
 
