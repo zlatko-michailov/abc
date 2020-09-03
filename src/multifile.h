@@ -96,4 +96,82 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline duration_multifile_streambuf<MaxPath, Clock, Log>::duration_multifile_streambuf(typename Clock::duration duration, const char* path, std::ios_base::openmode mode, Log* log)
+		: base(path, mode, log)
+		, _duration(duration)
+		, _ts() {
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline void duration_multifile_streambuf<MaxPath, Clock, Log>::reopen() {
+		base::reopen();
+
+		_ts = std::move(timestamp<Clock>());
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline int duration_multifile_streambuf<MaxPath, Clock, Log>::sync() {
+		base::sync();
+
+		timestamp<Clock> ts;
+		if (ts - _ts >= _duration) {
+			reopen();
+		}
+
+		return 0;
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline size_multifile_streambuf<MaxPath, Clock, Log>::size_multifile_streambuf(std::size_t size, const char* path, std::ios_base::openmode mode, Log* log)
+		: base(path, mode, log)
+		, _size(size)
+		, _current_size(0) {
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline void size_multifile_streambuf<MaxPath, Clock, Log>::reopen() {
+		base::reopen();
+
+		_current_size = 0;
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline std::streamsize size_multifile_streambuf<MaxPath, Clock, Log>::xsputn(const char* s, std::streamsize count) {
+		_current_size += count;
+
+		return base::xsputn(s, count);
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline int size_multifile_streambuf<MaxPath, Clock, Log>::sync() {
+		_current_size += pcount();
+
+		base::sync();
+
+		if (_current_size >= _size) {
+			reopen();
+		}
+
+		return 0;
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline std::size_t size_multifile_streambuf<MaxPath, Clock, Log>::pcount() const noexcept {
+		return base::pptr() - base::pbase();
+	}
+
+
+	// --------------------------------------------------------------
 }

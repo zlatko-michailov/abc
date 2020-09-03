@@ -31,6 +31,7 @@ SOFTWARE.
 #include <ios>
 
 #include "log.i.h"
+#include "timestamp.i.h"
 
 
 namespace abc {
@@ -48,14 +49,7 @@ namespace abc {
 		multifile_streambuf(multifile_streambuf&& other) noexcept;
 
 	public:
-		void reopen();
-
-#ifdef REMOVE ////
-	protected:
-		virtual int_type	underflow() override;
-		virtual int_type	overflow(int_type ch) override;
-		virtual int			sync() override;
-#endif ////
+		void					reopen();
 
 	private:
 		char					_path[MaxPath + 1];
@@ -66,5 +60,52 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
+
+
+	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
+	class duration_multifile_streambuf : public multifile_streambuf<MaxPath, Clock, Log> {
+		using base = multifile_streambuf<MaxPath, Clock, Log>;
+
+	public:
+		duration_multifile_streambuf(typename Clock::duration duration, const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
+		duration_multifile_streambuf(duration_multifile_streambuf&& other) noexcept = default;
+
+	public:
+		void							reopen();
+
+	protected:
+		virtual int						sync() override;
+
+	private:
+		const typename Clock::duration	_duration;
+		timestamp<Clock>				_ts;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
+	class size_multifile_streambuf : public multifile_streambuf<MaxPath, Clock, Log> {
+		using base = multifile_streambuf<MaxPath, Clock, Log>;
+
+	public:
+		size_multifile_streambuf(std::size_t size, const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
+		size_multifile_streambuf(size_multifile_streambuf&& other) noexcept = default;
+
+	public:
+		void						reopen();
+
+	protected:
+		virtual std::streamsize		xsputn(const char* s, std::streamsize count) override;
+		virtual int					sync() override;
+
+	protected:
+		std::size_t					pcount() const noexcept;
+
+	private:
+		const std::size_t			_size;
+		std::size_t					_current_size;
+	};
 
 }

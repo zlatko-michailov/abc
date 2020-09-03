@@ -130,11 +130,5 @@ int main() {
 
 	bool passed = test_suite.run();
 
-	abc::multifile_streambuf mfsb("out/test");
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	mfsb.reopen();
-	std::this_thread::sleep_for(std::chrono::seconds(2));
-	mfsb.reopen();
-
 	return passed ? 0 : 1;
 }

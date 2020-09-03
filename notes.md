@@ -104,17 +104,20 @@ __PENDING QUESTIONS__
 - Convert `SocketPtr` to `Socket`.
 - `json` make <Log> the last template parameter.
 - `multifile` make <Log> the last template parameter.
+
 ## To Do
-- `timebound_file_streambuf`
-- `sizebound_file_streambuf`
-- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
-- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
+- `duration_multifile_streambuf`
+- `size_multifile_streambuf`
 - Tag.
 - README
   - Try It - step-by-step instructions
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
 - Improve style
+
+## Postponed
+- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
+- `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 
 # v1.8
 ## Done
