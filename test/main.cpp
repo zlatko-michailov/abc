@@ -35,8 +35,6 @@ SOFTWARE.
 #include "heap.h"
 #include "clock.h"
 
-#include "../src/multifile.h"
-
 
 int main() {
 	abc::test::log_filter filter(abc::severity::critical);
