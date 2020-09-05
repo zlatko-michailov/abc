@@ -24,7 +24,7 @@ Header-only library of essential utilities for C++ development that doesn't use 
 
 All classes are provided as headers, and must be compiled in client programs.
 There is no precompiled flavor of the library.
-That is because `abc` targets devices with pequliar architectures and small memory capacities.
+That is because `abc` targets devices with peculiar architectures and small memory capacities.
 
 
 ### No Dynamic Memory Allocation
@@ -39,7 +39,7 @@ It is just a measure to maintain performance and efficiency for apps that care a
 ### GCC
 The source code used C++ 17.
 The project is compiled using GCC 9.
-It may be possible to compile with an earlier version of GCC or even with a differnt compiler, but that hasn't been tried.
+It may be possible to compile with an earlier version of GCC or even with a different compiler, but that hasn't been tried.
 
 ### POSIX
 The socket classes use the BSD socket C API.
@@ -206,7 +206,7 @@ The app is responsible for checking the _semantic_ correctness of the stream as 
 These classes are not suitable for implementing a general-purpose web server.
 Their intent is to be used to implement REST end points or clients in a trusted network, e.g. communicating with a (IoT) device on a LAN.
 
-__Note:__ `abc` does not include a crypto ficility that implements TLS/https, nor is there any plan to implement such a facility.
+__Note:__ `abc` does not include a crypto facility that implements TLS/https, nor is there any plan to implement such a facility.
 
 There are four _core_ http stream classes whose names should be self-explanatory:
 - `http_request_istream`
@@ -271,7 +271,7 @@ This class is recommended for investigation of issues.
 
 ##### `diag_line_ostream`
 This is a specialization of `line_ostream` that also has the most fields, but there is no extra space to reduce volume.
-This class is recommended for automatic collectoin and shipment to a remote location.
+This class is recommended for automatic collection and shipment to a remote location.
 
 ##### `test_line_ostream`
 This is a specialization of `line_ostream` that has the minimum number of fields.
@@ -348,7 +348,7 @@ Tags are unique 64-bit integers that are used to correlate a log entry with the 
 - `log_ostream` is now based on any `std::streambuf`, and thus can send content to any medium for which there is a `std::streambuf`.
 `log_ostream` is now a specialization of `table_ostream`.
 - `table_ostream` is a generic stream of lines.
-- `line_ostream` is a stream over a fixed char buffer that can fluch to a `table_ostream`.
+- `line_ostream` is a stream over a fixed char buffer that can flush to a `table_ostream`.
 `log_ostream` is one specialization of `table_ostream` and `line_ostream`.
 Other tabular streams can be created in user space.
 - `multifile_streambuf` a derivate of `std::filebuf` that streams out to a sequence of files.
