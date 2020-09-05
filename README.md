@@ -126,8 +126,8 @@ You may be able to do the same from product classes too as most classes take a `
 #### Char Buffer
 Purpose          | File
 ---------------- | ----
-Include          | [__bufferstreambuf.h__](src/bufferstreambuf.h)
-Interface        | [bufferstreambuf.h](src/bufferstreambuf.h)
+Include          | [__buffer_streambuf.h__](src/buffer_streambuf.h)
+Interface        | [buffer_streambuf.h](src/buffer_streambuf.h)
 Tests / Examples | [test/streambuf.cpp](test/streambuf.cpp)
 
 ##### `buffer_streambuf`
