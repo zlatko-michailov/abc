@@ -42,12 +42,12 @@ namespace abc {
 		, _mode(mode)
 		, _log(log) {
 		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("path", __TAG__, log);
+			throw exception<std::logic_error, Log>("path", 0x102b0, log);
 		}
 
 		_path_length = std::strlen(path);
 		if (_path_length + 1 + filename_length > MaxPath) {
-			throw exception<std::logic_error, Log>("std::strlen(path)", __TAG__, log);
+			throw exception<std::logic_error, Log>("std::strlen(path)", 0x102b1, log);
 		}
 
 		std::strncpy(_path, path, _path_length);
@@ -79,7 +79,7 @@ namespace abc {
 			base::close();
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::multifile, severity::abc, __TAG__, "multifile_streambuf::reopen() Close path=%s", _path);
+				_log->put_any(category::abc::multifile, severity::abc, 0x102b2, "multifile_streambuf::reopen() Close path=%s", _path);
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace abc {
 		std::filebuf* op = base::open(_path, _mode);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::multifile, severity::abc, __TAG__, "multifile_streambuf::reopen() Open path=%s, succes=%u", _path, op != nullptr);
+			_log->put_any(category::abc::multifile, severity::abc, 0x102b3, "multifile_streambuf::reopen() Open path=%s, succes=%u", _path, op != nullptr);
 		}
 	}
 

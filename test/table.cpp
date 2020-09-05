@@ -73,27 +73,27 @@ namespace abc { namespace test { namespace table {
 		{
 			abc::debug_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102b4) && passed;
 
 			line.flush();
 			line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102b5) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102b6) && passed;
 		{
 			abc::debug_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102b7) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102b8) && passed;
 
 		std::ostream seal(&sb);
 		seal.put(abc::line_ostream<>::ends);
 		seal.flush();
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102b9) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), __TAG__, "%lu");
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102ba, "%lu");
+		passed = context.are_equal(actual, expected, 0x102bb) && passed;
 
 		return passed;
 	}
@@ -136,28 +136,28 @@ namespace abc { namespace test { namespace table {
 		{
 			abc::diag_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102bc) && passed;
 
 			line.flush();
 			line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102bd) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102be) && passed;
 		{
 			abc::diag_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-			passed = verify_stream(context, line, __TAG__) && passed;
-			passed = verify_stream(context, table, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102bf) && passed;
+			passed = verify_stream(context, table, 0x102c0) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102c1) && passed;
 
 		std::ostream seal(&sb);
 		seal.put(abc::line_ostream<>::ends);
 		seal.flush();
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102c2) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), __TAG__, "%lu");
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102c3, "%lu");
+		passed = context.are_equal(actual, expected, 0x102c4) && passed;
 
 		return passed;
 	}
@@ -197,27 +197,27 @@ namespace abc { namespace test { namespace table {
 		{
 			abc::test_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_any(abc::category::abc::socket, abc::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102c5) && passed;
 
 			line.flush();
 			line.put_any(abc::category::abc::http, abc::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102c6) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102c7) && passed;
 		{
 			abc::test_line_ostream<abc::size::k2, abc::test::clock> line(&table);
 			line.put_binary(abc::category::abc::json, abc::severity::optional, 0x3333, binary, sizeof(binary));
-			passed = verify_stream(context, line, __TAG__) && passed;
+			passed = verify_stream(context, line, 0x102c8) && passed;
 		}
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102c9) && passed;
 
 		std::ostream seal(&sb);
 		seal.put(abc::line_ostream<>::ends);
 		seal.flush();
-		passed = verify_stream(context, table, __TAG__) && passed;
+		passed = verify_stream(context, table, 0x102ca) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), __TAG__, "%lu");
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102cb, "%lu");
+		passed = context.are_equal(actual, expected, 0x102cc) && passed;
 
 		return passed;
 	}
