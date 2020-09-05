@@ -18,12 +18,11 @@
   - Try It - step-by-step instructions
   - Use It - step-by-step instructions
   - Organize class reference - Media, Streams, Utilities
-
-## To Do
 - Tag.
 - pack
   - Include bin/tag*
-  - Make a shell script?
+
+## To Do
 
 ## Postponed
 - Improve code style

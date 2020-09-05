@@ -32,6 +32,7 @@ SUBDIR_SRC = src
 SUBDIR_TEST = test
 SUBDIR_OUT = out
 SUBDIR_INCLUDE = include
+SUBDIR_BIN = bin
 PROG_TEST = $(PROJECT)_test
 
 
@@ -44,6 +45,7 @@ pack: test
 	cp $(CURDIR)/README.md  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
 	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
 	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
+	cp -r $(CURDIR)/$(SUBDIR_BIN)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
 	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
 	# ---------- Done packing ----------
 	#
@@ -78,6 +80,7 @@ clean:
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
 	# ---------- Done cleaning ----------
 	#
 

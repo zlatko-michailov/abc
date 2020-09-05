@@ -25,7 +25,7 @@
 
 show_usage_and_exit() {
 	echo
-	echo tag.h \[ --reset \| --no-reset \] \[ --commit \| --no-commit \] -c \| --conf path/to/conf/file
+	echo tag.h \[ --reset \| --no-reset \] \[ --commit \| --no-commit \] -c \| --conf \| --config path/to/conf/file
 	echo tag.h -? \| -h \| --help
 	echo
 	echo  \ \ \ \ --reset\ \ \ \ \ \ - resets the repo to the last commit, which reverts any uncommited changes. 
@@ -92,7 +92,7 @@ init_options() {
 					show_usage_and_exit
 				fi
 			;;
-			-c|--conf)
+			-c|--conf|--config)
 				if test -z $OPT_CONF
 				then
 					OPT_CONF=$2
