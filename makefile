@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 0.8.0
+VERSION = 0.9.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++17 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so
@@ -33,10 +33,20 @@ SUBDIR_TEST = test
 SUBDIR_OUT = out
 SUBDIR_INCLUDE = include
 SUBDIR_BIN = bin
+SUBDIR_SAMPLES = samples
+SUBDIR_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
+PROG_TICTACTOE = tictactoe
 
 
-all: pack
+all: build_samples
+
+build_samples: pack
+	#
+	# ---------- Begin building samples ----------
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(PROG_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SUBDIR_TICTACTOE)/*.cpp $(LINKOPTIONS)
+	# ----------Done building samples ----------
+	#
 
 pack: test
 	#
@@ -77,6 +87,7 @@ clean:
 	rm -fdr $(CURDIR)/$(SUBDIR_OUT)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
