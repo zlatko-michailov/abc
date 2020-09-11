@@ -40,20 +40,27 @@ namespace abc { namespace samples { namespace tictactoe {
 		player_t get_move(rowcol_t row, rowcol_t col) const noexcept;
 		bool make_move(rowcol_t row, rowcol_t col, player_t player) noexcept;
 
-		bool is_winner(player_t player) const noexcept;
+		bool is_game_over() const noexcept;
 
 	public:
 		void print() const noexcept; ////
 
 	private:
-		player_t _cells[rowcol::max_rows][rowcol::max_cols];
+		player_t	_cells[rowcol::max_rows][rowcol::max_cols];
+
+		rowcol_t	_last_row;
+		rowcol_t	_last_col;
+		player_t	_last_player;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	inline board::board() noexcept {
+	inline board::board() noexcept
+		: _last_row(0)
+		, _last_col(0)
+		, _last_player(player::empty) {
 		for (rowcol_t row = 0; row < rowcol::max_rows; row++) {
 			for (rowcol_t col = 0; col < rowcol::max_cols; col++) {
 				_cells[row][col] = player::empty;
@@ -78,7 +85,85 @@ namespace abc { namespace samples { namespace tictactoe {
 		}
 
 		_cells[row][col] = player;
+
+		_last_row = row;
+		_last_col = col;
+		_last_player = player;
+
 		return true;
+	}
+
+
+	inline bool board::is_game_over() const noexcept {
+		if (player::is_empty(_last_player)) {
+			return false;
+		}
+
+		// Check the row
+		{
+			rowcol_t count = 0;
+			for (rowcol_t col = 0; col < rowcol::max_cols; col++) {
+				if (get_move(_last_row, col) != _last_player) {
+					break;
+				}
+
+				count++;
+			}
+
+			if (count == rowcol::max_cols) {
+				return true;
+			}
+		}
+
+		// Check the col
+		{
+			rowcol_t count = 0;
+			for (rowcol_t row = 0; row < rowcol::max_rows; row++) {
+				if (get_move(row, _last_col) != _last_player) {
+					break;
+				}
+
+				count++;
+			}
+
+			if (count == rowcol::max_rows) {
+				return true;
+			}
+		}
+
+		// Check the main diagonal if applicable
+		if (_last_row == _last_col) {
+			rowcol_t count = 0;
+			for (rowcol_t row = 0; row < rowcol::max_rows; row++) {
+				if (get_move(row, row) != _last_player) {
+					break;
+				}
+
+				count++;
+			}
+
+			if (count == rowcol::max_rows) {
+				return true;
+			}
+		}
+
+		// Check the second diagonal if applicable
+		if (_last_row + _last_col == rowcol::max_rows - 1) {
+			rowcol_t count = 0;
+			for (rowcol_t row = 0; row < rowcol::max_rows; row++) {
+				if (get_move(row, rowcol::max_rows - 1 - row) != _last_player) {
+					break;
+				}
+
+				count++;
+			}
+
+			if (count == rowcol::max_rows) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -91,6 +176,10 @@ namespace abc { namespace samples { namespace tictactoe {
 			}
 
 			std::cout << std::endl;
+		}
+
+		if (is_game_over()) {
+			std::cout << "Player " << player::symbol[_last_player] << " wins!" << std::endl;
 		}
 
 		std::cout << std::endl;

@@ -28,13 +28,15 @@ SOFTWARE.
 
 
 
-int main(int argc, const char* const argv[]) {
+int main() {
 	abc::samples::tictactoe::board board;
 	board.print();
 
 	abc::samples::tictactoe::player_t player = abc::samples::tictactoe::player::me;
 
-	for (int i = 0; i < 9; i++) {
+	while (!board.is_game_over()) {
+		std::cout << "Player " << abc::samples::tictactoe::player::symbol[player] << ": " << std::endl;
+
 		abc::samples::tictactoe::rowcol_t row;
 		std::cout << "Enter row: ";
 		std::cin >> row;
