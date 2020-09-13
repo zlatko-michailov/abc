@@ -137,5 +137,18 @@ namespace abc {
 		_gcount = gcount;
 	}
 
+
+	// --------------------------------------------------------------
+
+
+	inline _ostream::_ostream(std::streambuf* sb)
+		: base(sb) {
+	}
+
+
+	inline void _ostream::flush() {
+		base::flush();
+	}
+
 }
 

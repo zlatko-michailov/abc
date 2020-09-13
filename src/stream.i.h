@@ -82,7 +82,16 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using _ostream = _stream<std::ostream>;
+	class _ostream : public _stream<std::ostream> {
+		using base = _stream<std::ostream>;
+
+	protected:
+		_ostream(std::streambuf* sb);
+		_ostream(_ostream&& other) = default;
+
+	public:
+		void			flush();
+	};
 
 }
 
