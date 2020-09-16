@@ -1,0 +1,179 @@
+<html>
+	<head>
+		<title>Web Server (abc Samples)</title>
+		<style>
+			.readonly
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(60, 60, 60);
+				color: rgb(210, 210, 210);
+			}
+
+			.edit
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(210, 210, 210);
+				color: rgb(60, 60, 60);
+			}
+
+			.title
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 36;
+				text-align: center;
+			}
+
+			.copyright
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 14;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body class="readonly">
+		<table>
+			<tr>
+				<td colspan="2">
+					<div class="title">Web Server (abc Samples)</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">This is a simple web server with the following functions:
+						<ol>
+							<li>Fetch static files
+								<br />
+								<b>GET /resources/&lt;file&gt;</b>
+								<br />
+								Streams down the chosen file. Other methods to /resources/... are not allowed.</li>
+							<li>Make REST requests
+								<br />
+								<b>GET | POST | PUT | DELETE &lt;resource&gt;</b>
+								<br />
+								Returns a JSON response that wraps the original request.</li>
+						</ol>
+					</div>
+				</td>
+				<td>
+					<div class="readonly">Examples:
+						<ul>
+							<li>GET /resources/index.html</li>
+							<li>POST /people<br />
+								Content-Type: application/json<br />
+								Accept: application/json<br />
+								{<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;"id": 123456,<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;"name": "John Doe",<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;"birthYear": 1980<br />
+								}
+							</li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td colspan="2">
+					<br />
+					<br />
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">Server:</div>
+					<textarea rows="1" cols="100" class="edit">http://localhost:30301</textarea>
+					<br />
+					<br />
+				</td>
+				<td>
+					<br />
+					<button id="send" class="edit">&nbsp;&nbsp;&nbsp; Send &nbsp;&nbsp;&nbsp;</button>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<select id="method" class="edit">
+						<option value="GET">GET</option>
+						<option value="POST">POST</option>
+						<option value="PUT">PUT</option>
+						<option value="DELETE">DELETE</option>
+					</select>
+					<br />
+					<textarea rows="1" cols="100" class="edit"></textarea>
+					<br />
+					<br />
+				</td>
+				<td rowspan="3">
+					<div class="readonly">Response:</div>
+					<textarea rows="35" cols="100" readonly class="readonly"></textarea>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">Headers:</div>
+					<textarea rows="10" cols="100" class="edit"></textarea>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">Body (JSON):</div>
+					<textarea rows="20" cols="100" class="edit"></textarea>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td colspan="2">
+					<br />
+					<br />
+					<div class="copyright">Version 0.9</div>
+					<br />
+					<div class="copyright">Copyright (c) 2018-2020 by Zlatko Michailov</div>
+				</td>
+			</tr>
+		</table>
+
+
+		<script>
+			var player = 0;
+
+			function start(startButton) {
+				if (player === 0) {
+					player = 1;
+				}
+			}
+
+			function onCellClick(cell) {
+				if (cell.firstChild.innerText === "X" || cell.firstChild.innerText === "O") {
+					return;
+				}
+
+				if (player === 1) {
+					cell.firstChild.innerText = "X";
+				}
+				else if (player === 2) {
+					cell.firstChild.innerText = "O";
+				}
+
+				player = 3 - player;
+			}
+		</script>
+	</body>
+</html>

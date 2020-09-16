@@ -85,6 +85,7 @@ namespace abc {
 			constexpr category_t http		= base + 4;
 			constexpr category_t json		= base + 5;
 			constexpr category_t multifile	= base + 6;
+			constexpr category_t samples	= base + 7;
 		}
 	}
 
