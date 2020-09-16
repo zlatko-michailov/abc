@@ -32,10 +32,11 @@ namespace abc {
 
 	using tag_t = std::uint64_t;
 
-	constexpr tag_t __TAG__ = 0;
-
 	namespace tag {
 		constexpr tag_t none = 0;
 	}
 
 }
+
+
+constexpr abc::tag_t __TAG__ = 0;
