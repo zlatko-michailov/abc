@@ -42,9 +42,9 @@ int main() {
 	// Create a webserver.
 	abc::samples::webserver::webserver webserver(&log);
 
-	// The webserver takes over.
-	// To stop it, terminate the process, e.g. by pressing Ctrl+C.
-	webserver.take_over();
+	// Let the webserver listen in a separate thread.
+	std::future done = webserver.start_async();
+	done.wait();
 
 	return 0;
 }

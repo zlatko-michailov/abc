@@ -28,6 +28,8 @@ SOFTWARE.
 #include <filesystem>
 #include <system_error>
 #include <future>
+#include <thread>
+#include <atomic>
 #include <exception>
 #include <cstring>
 
@@ -58,15 +60,19 @@ namespace abc { namespace samples { namespace webserver {
 		webserver(Log* log);
 
 	public:
-		void take_over();
+		std::future<void>	start_async();
+		void				start();
 
 	protected:
 		void process_request(tcp_client_socket<Log>&& socket);
 		void process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* path);
-		void process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* path, const char* protocol);
+		void process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 
 	private:
-		Log* _log;
+		Log*				_log;
+		std::promise<void>	_promise;
+		std::atomic_int32_t	_requests_in_progress;
+		std::atomic_bool	_is_shutdown_requested;
 	};
 
 
@@ -74,7 +80,9 @@ namespace abc { namespace samples { namespace webserver {
 
 	template <typename Log>
 	inline webserver<Log>::webserver(Log* log)
-		: _log(log) {
+		: _log(log)
+		, _requests_in_progress(0)
+		, _is_shutdown_requested(false) {
 		if (log == nullptr) {
 			throw abc::exception<std::logic_error>("Running a web server without logging is a bad idea.", __TAG__);
 		}
@@ -82,12 +90,20 @@ namespace abc { namespace samples { namespace webserver {
 
 
 	template <typename Log>
-	inline void webserver<Log>::take_over() {
+	inline std::future<void> webserver<Log>::start_async() {
+		// We can't use std::async() here because we want to detach and return our own std::future.
+		std::thread(&webserver<Log>::start, this).detach();
+
+		// Therefore, we return our own future.
+		return _promise.get_future();
+	}
+
+
+	template <typename Log>
+	inline void webserver<Log>::start() {
 		_log->put_blank_line();
-		_log->put_line("--------------------\n");
-		_log->put_line("Press Ctrl+C to exit\n");
-		_log->put_line("--------------------\n");
 		_log->put_blank_line();
+		_log->put_line("Running...\n");
 		_log->put_blank_line();
 
 		// Create a listener, bind to a port, and start listening.
@@ -97,10 +113,8 @@ namespace abc { namespace samples { namespace webserver {
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
-			abc::tcp_client_socket client = std::move(listener.accept());
-			std::future future = std::async([this, socket = std::move(client)]() mutable {
-				process_request(std::move(socket));
-			});
+			abc::tcp_client_socket client = listener.accept();
+			std::thread(&webserver<Log>::process_request, this, std::move(client)).detach();
 		}
 	}
 
@@ -130,6 +144,13 @@ namespace abc { namespace samples { namespace webserver {
 		http.get_protocol(protocol, sizeof(protocol));
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Protocol = '%s'", protocol);
 
+		// It's OK to read a request as long as we don't return a broken response.
+		if (_is_shutdown_requested.load()) {
+			return;
+		}
+
+		++_requests_in_progress;
+
 		// This sample web server supports two kinds of requests:
 		//    a) requests for static files
 		//    b) REST requests
@@ -137,7 +158,7 @@ namespace abc { namespace samples { namespace webserver {
 			process_file_request(http, method, path);
 		}
 		else {
-			process_rest_request(http, method, resource, protocol);
+			process_rest_request(http, method, resource);
 		}
 
 		// Don't forget to flush!
@@ -145,6 +166,15 @@ namespace abc { namespace samples { namespace webserver {
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Response sent");
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "<<< Request");
 		_log->put_blank_line();
+
+		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
+			_promise.set_value();
+
+			_log->put_blank_line();
+			_log->put_line("Down.\n");
+			_log->put_blank_line();
+			_log->put_blank_line();
+		}
 	}
 
 
@@ -192,6 +222,8 @@ namespace abc { namespace samples { namespace webserver {
 		// The file was opened, return 200.
 		char fsize_buffer[30 + 1];
 		std::sprintf(fsize_buffer, "%llu", fsize);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "File size = %s", fsize_buffer);
+
 		std::ifstream file(path);
 
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
@@ -211,8 +243,13 @@ namespace abc { namespace samples { namespace webserver {
 
 
 	template <typename Log>
-	inline void webserver<Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* path, const char* protocol) {
+	inline void webserver<Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received REST");
+
+		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
+			_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "--- Shutdown requested ---");
+			_is_shutdown_requested.store(true);
+		}
 
 		// The request buffer will have to be able to hold a single token - resource, header name, header value.
 		//// char request_buffer[request_buffer_size + 1];
