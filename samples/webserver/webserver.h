@@ -64,9 +64,10 @@ namespace abc { namespace samples { namespace webserver {
 		void				start();
 
 	protected:
-		void process_request(tcp_client_socket<Log>&& socket);
-		void process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* path);
-		void process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
+		void				process_request(tcp_client_socket<Log>&& socket);
+		void				process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* path);
+		void				process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
+		const char*			get_content_type_from_path(const char* path);
 
 	private:
 		Log*				_log;
@@ -223,17 +224,23 @@ namespace abc { namespace samples { namespace webserver {
 		char fsize_buffer[30 + 1];
 		std::sprintf(fsize_buffer, "%llu", fsize);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "File size = %s", fsize_buffer);
-
-		std::ifstream file(path);
-
+		
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
 		http.put_protocol("HTTP/1.1");
 		http.put_status_code("200");
 		http.put_reason_phrase("OK");
+
+		const char* content_type = get_content_type_from_path(path);
+		if (content_type != nullptr) {
+			http.put_header_name("Content-Type");
+			http.put_header_value(content_type);
+		}
+
 		http.put_header_name("Content-Length");
 		http.put_header_value(fsize_buffer);
 		http.end_headers();
 
+		std::ifstream file(path);
 		char file_chunk[file_chunk_size];
 		for (std::uintmax_t sent_size = 0; sent_size < fsize; sent_size += file_chunk_size) {
 			file.read(file_chunk, sizeof(file_chunk));
@@ -268,6 +275,51 @@ namespace abc { namespace samples { namespace webserver {
 		http.put_header_value("28");
 		http.end_headers();
 		http.put_body("TODO: Echo the REST request.");
+	}
+
+
+	template <typename Log>
+	inline const char* webserver<Log>::get_content_type_from_path(const char* path) {
+		const char* ext = std::strrchr(path, '.');
+		if (ext == nullptr) {
+			return nullptr;
+		}
+
+		if (std::strcmp(ext, ".html") == 0) {
+			return "text/html; charset=utf-8";
+		}
+		else if (std::strcmp(ext, ".css") == 0) {
+			return "text/css; charset=utf-8";
+		}
+		else if (std::strcmp(ext, ".js") == 0) {
+			return "text/javascript; charset=utf-8";
+		}
+		else if (std::strcmp(ext, ".txt") == 0) {
+			return "text/plain; charset=utf-8";
+		}
+		else if (std::strcmp(ext, ".xml") == 0) {
+			return "text/xml; charset=utf-8";
+		}
+		else if (std::strcmp(ext, ".png") == 0) {
+			return "image/png";
+		}
+		else if (std::strcmp(ext, ".jpeg") == 0) {
+			return "image/jpeg";
+		}
+		else if (std::strcmp(ext, ".jpg") == 0) {
+			return "image/jpeg";
+		}
+		else if (std::strcmp(ext, ".gif") == 0) {
+			return "image/gif";
+		}
+		else if (std::strcmp(ext, ".bmp") == 0) {
+			return "image/bmp";
+		}
+		else if (std::strcmp(ext, ".svg") == 0) {
+			return "image/svg+xml";
+		}
+		
+		return nullptr;
 	}
 
 }}}
