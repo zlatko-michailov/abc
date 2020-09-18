@@ -41,35 +41,46 @@ SOFTWARE.
 
 namespace abc { namespace samples { namespace webserver {
 
+	struct webserver_config {
+		const char* root_dir			= "out/samples/webserver"; // No trailing slash!
+		std::size_t root_dir_len		= std::strlen(root_dir);
+		const char* port				= "30301";
+		const char* files_prefix		= "/resources/";
+		std::size_t files_prefix_len	= std::strlen(files_prefix);
+		std::size_t listen_queue_size	= 5;
+	};
+
+
+	// --------------------------------------------------------------
+
+
 	template <typename Log>
 	class webserver {
-	private:
-		// Server parameters:
-		static constexpr const char* root_dir			= "out/samples/webserver"; // No trailing slash!
-		static const     std::size_t root_dir_len		= std::strlen(root_dir);
-		static constexpr const char* port				= "30301";
-		static constexpr const char* resources			= "/resources/";
-		static const     std::size_t resources_len		= std::strlen(resources);
-		static constexpr std::size_t queue_size			= 5;
 		static constexpr std::size_t method_size		= abc::size::_16;
 		static constexpr std::size_t resource_size		= abc::size::_512;
 		static constexpr std::size_t protocol_size		= abc::size::_16;
 		static constexpr std::size_t file_chunk_size	= abc::size::k1;
+		static constexpr std::size_t fsize_size			= abc::size::_16;
 
 	public:
-		webserver(Log* log);
+		webserver(webserver_config* config, Log* log);
 
 	public:
 		std::future<void>	start_async();
 		void				start();
 
 	protected:
+		virtual void		process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
+		virtual void		process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
+		virtual bool		is_file_request(const char* method, const char* resource);
+		virtual const char*	get_content_type_from_path(const char* path);
+
+	protected:
 		void				process_request(tcp_client_socket<Log>&& socket);
-		void				process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* path);
-		void				process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
-		const char*			get_content_type_from_path(const char* path);
+		void				set_shutdown_requested();
 
 	private:
+		webserver_config*	_config;
 		Log*				_log;
 		std::promise<void>	_promise;
 		std::atomic_int32_t	_requests_in_progress;
@@ -79,9 +90,11 @@ namespace abc { namespace samples { namespace webserver {
 
 	// --------------------------------------------------------------
 
+
 	template <typename Log>
-	inline webserver<Log>::webserver(Log* log)
-		: _log(log)
+	inline webserver<Log>::webserver(webserver_config* config, Log* log)
+		: _config(config)
+		, _log(log)
 		, _requests_in_progress(0)
 		, _is_shutdown_requested(false) {
 		if (log == nullptr) {
@@ -109,8 +122,8 @@ namespace abc { namespace samples { namespace webserver {
 
 		// Create a listener, bind to a port, and start listening.
 		abc::tcp_server_socket listener(_log);
-		listener.bind(port);
-		listener.listen(queue_size);
+		listener.bind(_config->port);
+		listener.listen(_config->listen_queue_size);
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
@@ -136,9 +149,9 @@ namespace abc { namespace samples { namespace webserver {
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Method   = '%s'", method);
 
 		char path[resource_size + 1];
-		std::strcpy(path, root_dir);
-		char* resource = path + root_dir_len;
-		http.get_resource(resource, sizeof(path) - root_dir_len);
+		std::strcpy(path, _config->root_dir);
+		char* resource = path + _config->root_dir_len;
+		http.get_resource(resource, sizeof(path) - _config->root_dir_len);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Resource = '%s'", resource);
 
 		char protocol[protocol_size + 1];
@@ -155,8 +168,8 @@ namespace abc { namespace samples { namespace webserver {
 		// This sample web server supports two kinds of requests:
 		//    a) requests for static files
 		//    b) REST requests
-		if (std::strncmp(resource, resources, resources_len) == 0) {
-			process_file_request(http, method, path);
+		if (is_file_request(method, resource)) {
+			process_file_request(http, method, resource, path);
 		}
 		else {
 			process_rest_request(http, method, resource);
@@ -169,18 +182,18 @@ namespace abc { namespace samples { namespace webserver {
 		_log->put_blank_line();
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
-			_promise.set_value();
-
 			_log->put_blank_line();
 			_log->put_line("Down.\n");
 			_log->put_blank_line();
 			_log->put_blank_line();
+
+			_promise.set_value();
 		}
 	}
 
 
 	template <typename Log>
-	inline void webserver<Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* path) {
+	inline void webserver<Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received File Path = '%s'", path);
 
 		// If the method is not GET, return 400.
@@ -221,8 +234,8 @@ namespace abc { namespace samples { namespace webserver {
 		}
 
 		// The file was opened, return 200.
-		char fsize_buffer[30 + 1];
-		std::sprintf(fsize_buffer, "%llu", fsize);
+		char fsize_buffer[fsize_size + 1];
+		std::snprintf(fsize_buffer, fsize_size, "%llu", fsize);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "File size = %s", fsize_buffer);
 		
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
@@ -254,8 +267,7 @@ namespace abc { namespace samples { namespace webserver {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received REST");
 
 		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
-			_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "--- Shutdown requested ---");
-			_is_shutdown_requested.store(true);
+			set_shutdown_requested();
 		}
 
 		// The request buffer will have to be able to hold a single token - resource, header name, header value.
@@ -320,6 +332,20 @@ namespace abc { namespace samples { namespace webserver {
 		}
 		
 		return nullptr;
+	}
+
+
+	template <typename Log>
+	inline bool webserver<Log>::is_file_request(const char* method, const char* resource) {
+		return std::strncmp(resource, _config->files_prefix, _config->files_prefix_len) == 0
+			|| (std::strcmp(method, "GET") == 0 && std::strcmp(resource, "/favicon.ico") == 0);
+	}
+
+
+	template <typename Log>
+	inline void webserver<Log>::set_shutdown_requested() {
+		_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "--- Shutdown requested ---");
+		_is_shutdown_requested.store(true);
 	}
 
 }}}

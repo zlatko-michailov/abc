@@ -40,7 +40,8 @@ int main() {
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a webserver.
-	abc::samples::webserver::webserver webserver(&log);
+	abc::samples::webserver::webserver_config config;
+	abc::samples::webserver::webserver webserver(&config, &log);
 
 	// Let the webserver listen in a separate thread.
 	std::future done = webserver.start_async();
