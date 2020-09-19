@@ -28,7 +28,7 @@ SOFTWARE.
 #include <atomic>
 #include <exception>
 
-#include "webserver.h"
+#include "equations.h"
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
@@ -40,8 +40,13 @@ int main() {
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a webserver.
-	abc::samples::webserver::webserver_config config;
-	abc::samples::webserver::webserver webserver(&config, &log);
+	abc::samples::webserver_config config(
+		"30301",					// port
+		5,							// listen_queue_size
+		"out/samples/webserver",	// root_dir (Note: No trailing slash!)
+		"/resources/"				// files_prefix
+	);
+	abc::samples::equations_webserver webserver(&config, &log);
 
 	// Let the webserver listen in a separate thread.
 	std::future done = webserver.start_async();

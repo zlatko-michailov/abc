@@ -39,16 +39,44 @@ SOFTWARE.
 #include "../../src/http.h"
 
 
-namespace abc { namespace samples { namespace webserver {
+namespace abc { namespace samples {
 
 	struct webserver_config {
-		const char* root_dir			= "out/samples/webserver"; // No trailing slash!
-		std::size_t root_dir_len		= std::strlen(root_dir);
-		const char* port				= "30301";
-		const char* files_prefix		= "/resources/";
-		std::size_t files_prefix_len	= std::strlen(files_prefix);
-		std::size_t listen_queue_size	= 5;
+		webserver_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix);
+
+		const char* const	port;
+
+		const std::size_t	listen_queue_size;
+
+		const char* const	root_dir; 
+		const std::size_t	root_dir_len; // Computed
+
+		const char* const	files_prefix;
+		const std::size_t	files_prefix_len; // Computed
 	};
+
+
+	// --------------------------------------------------------------
+
+
+	namespace protocol {
+		constexpr const char* http_11		= "HTTP/1.1";
+	}
+
+
+	namespace content_type {
+		constexpr const char* text			= "text/plain; charset=utf-8";
+		constexpr const char* html			= "text/html; charset=utf-8";
+		constexpr const char* css			= "text/css; charset=utf-8";
+		constexpr const char* javascript	= "text/javascript; charset=utf-8";
+		constexpr const char* xml			= "text/xml; charset=utf-8";
+
+		constexpr const char* png			= "image/png";
+		constexpr const char* jpeg			= "image/jpeg";
+		constexpr const char* gif			= "image/gif";
+		constexpr const char* bmp			= "image/bmp";
+		constexpr const char* svg			= "image/svg+xml";
+	}
 
 
 	// --------------------------------------------------------------
@@ -73,15 +101,19 @@ namespace abc { namespace samples { namespace webserver {
 		virtual void		process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
 		virtual void		process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 		virtual bool		is_file_request(const char* method, const char* resource);
+		virtual void		send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body);
 		virtual const char*	get_content_type_from_path(const char* path);
+		virtual const char*	get_reason_phrase_from_status_code(const char* status_code);
 
 	protected:
 		void				process_request(tcp_client_socket<Log>&& socket);
 		void				set_shutdown_requested();
 
-	private:
+	protected:
 		webserver_config*	_config;
 		Log*				_log;
+
+	private:
 		std::promise<void>	_promise;
 		std::atomic_int32_t	_requests_in_progress;
 		std::atomic_bool	_is_shutdown_requested;
@@ -196,19 +228,11 @@ namespace abc { namespace samples { namespace webserver {
 	inline void webserver<Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received File Path = '%s'", path);
 
-		// If the method is not GET, return 400.
+		// If the method is not GET, return 405.
 		if (std::strcmp(method, "GET") != 0) {
 			_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Error: Invalid method '%s' in a static file request. Must be 'GET'.", method);
 
-			_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 400");
-			http.put_protocol("HTTP/1.1");
-			http.put_status_code("400");
-			http.put_reason_phrase("Bad Request");
-			http.put_header_name("Content-Length");
-			http.put_header_value("50");
-			http.end_headers();
-			http.put_body("GET is the only supported method for static files.");
-
+			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.");
 			return;
 		}
 
@@ -221,15 +245,7 @@ namespace abc { namespace samples { namespace webserver {
 		if (ec) {
 			_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Error: File not found");
 
-			_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 404");
-			http.put_protocol("HTTP/1.1");
-			http.put_status_code("404");
-			http.put_reason_phrase("Not Found");
-			http.put_header_name("Content-Length");
-			http.put_header_value("37");
-			http.end_headers();
-			http.put_body("The requested resource was not found.");
-
+			send_simple_response(http, "404", content_type::text, "The requested resource was not found.");
 			return;
 		}
 
@@ -270,23 +286,30 @@ namespace abc { namespace samples { namespace webserver {
 			set_shutdown_requested();
 		}
 
-		// The request buffer will have to be able to hold a single token - resource, header name, header value.
-		//// char request_buffer[request_buffer_size + 1];
+		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().");
+	}
 
-		// The response buffer will have to be able to hold the entire response body.
-		// That is because we need to know its size, which we should return as the Content-Length header before we return the body itself.
-		//// char response_buffer[response_buffer_size + 1];
 
-		// Read the request and write the response body at the same time.
+	template <typename Log>
+	inline void webserver<Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body) {
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Sending simple response");
 
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response");
-		http.put_protocol("HTTP/1.1");
-		http.put_status_code("200");
-		http.put_reason_phrase("OK");
+		char content_length[fsize_size + 1];
+		std::snprintf(content_length, fsize_size, "%llu", std::strlen(body));
+
+		http.put_protocol(protocol::http_11);
+		http.put_status_code(status_code);
+		http.put_reason_phrase(get_reason_phrase_from_status_code(status_code));
+		http.put_header_name("Content-Type");
+		http.put_header_value(content_type);
 		http.put_header_name("Content-Length");
-		http.put_header_value("28");
+		http.put_header_value(content_length);
 		http.end_headers();
-		http.put_body("TODO: Echo the REST request.");
+		http.put_body(body);
+
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Status Code    = %s", status_code);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Content-Type   = %s", content_type);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Content-Length = %s", content_length);
 	}
 
 
@@ -298,37 +321,95 @@ namespace abc { namespace samples { namespace webserver {
 		}
 
 		if (std::strcmp(ext, ".html") == 0) {
-			return "text/html; charset=utf-8";
+			return content_type::html;
 		}
 		else if (std::strcmp(ext, ".css") == 0) {
-			return "text/css; charset=utf-8";
+			return content_type::css;
 		}
 		else if (std::strcmp(ext, ".js") == 0) {
-			return "text/javascript; charset=utf-8";
+			return content_type::javascript;
 		}
 		else if (std::strcmp(ext, ".txt") == 0) {
-			return "text/plain; charset=utf-8";
+			return content_type::text;
 		}
 		else if (std::strcmp(ext, ".xml") == 0) {
-			return "text/xml; charset=utf-8";
+			return content_type::xml;
 		}
 		else if (std::strcmp(ext, ".png") == 0) {
-			return "image/png";
+			return content_type::png;
 		}
 		else if (std::strcmp(ext, ".jpeg") == 0) {
-			return "image/jpeg";
+			return content_type::jpeg;
 		}
 		else if (std::strcmp(ext, ".jpg") == 0) {
-			return "image/jpeg";
+			return content_type::jpeg;
 		}
 		else if (std::strcmp(ext, ".gif") == 0) {
-			return "image/gif";
+			return content_type::gif;
 		}
 		else if (std::strcmp(ext, ".bmp") == 0) {
-			return "image/bmp";
+			return content_type::bmp;
 		}
 		else if (std::strcmp(ext, ".svg") == 0) {
-			return "image/svg+xml";
+			return content_type::svg;
+		}
+		
+		return nullptr;
+	}
+
+
+	template <typename Log>
+	inline const char* webserver<Log>::get_reason_phrase_from_status_code(const char* status_code) {
+		if (std::strcmp(status_code, "200") == 0) {
+			return "OK";
+		}
+		else if (std::strcmp(status_code, "201") == 0) {
+			return "Created";
+		}
+		else if (std::strcmp(status_code, "202") == 0) {
+			return "Accepted";
+		}
+
+		else if (std::strcmp(status_code, "301") == 0) {
+			return "Moved Permanently";
+		}
+		else if (std::strcmp(status_code, "302") == 0) {
+			return "Found";
+		}
+
+		else if (std::strcmp(status_code, "400") == 0) {
+			return "Bad Request";
+		}
+		else if (std::strcmp(status_code, "401") == 0) {
+			return "Unauthorized";
+		}
+		else if (std::strcmp(status_code, "403") == 0) {
+			return "Forbidden";
+		}
+		else if (std::strcmp(status_code, "404") == 0) {
+			return "Not Found";
+		}
+		else if (std::strcmp(status_code, "405") == 0) {
+			return "Method Not Allowed";
+		}
+		else if (std::strcmp(status_code, "413") == 0) {
+			return "Payload Too Large";
+		}
+		else if (std::strcmp(status_code, "414") == 0) {
+			return "URI Too Long";
+		}
+		else if (std::strcmp(status_code, "429") == 0) {
+			return "Too Many Requests";
+		}
+
+		else if (std::strcmp(status_code, "500") == 0) {
+			return "Internal Server Error";
+		}
+		else if (std::strcmp(status_code, "501") == 0) {
+			return "Not Implemented";
+		}
+		else if (std::strcmp(status_code, "503") == 0) {
+			return "Service Unavailable";
 		}
 		
 		return nullptr;
@@ -348,6 +429,25 @@ namespace abc { namespace samples { namespace webserver {
 		_is_shutdown_requested.store(true);
 	}
 
-}}}
+
+	// --------------------------------------------------------------
+
+
+	inline webserver_config::webserver_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix)
+		: port(port)
+
+		, listen_queue_size(listen_queue_size)
+
+		, root_dir(root_dir)
+		, root_dir_len(root_dir != nullptr ? std::strlen(root_dir) : 0)
+
+		, files_prefix(files_prefix)
+		, files_prefix_len(files_prefix != nullptr ? std::strlen(files_prefix) : 0) {
+	}
+
+
+	// --------------------------------------------------------------
+
+}}
 
 
