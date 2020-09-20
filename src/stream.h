@@ -44,6 +44,12 @@ namespace abc {
 
 
 	template <typename Stream>
+	inline std::streambuf* _stream<Stream>::rdbuf() const {
+		return base::rdbuf();
+	}
+
+
+	template <typename Stream>
 	inline bool _stream<Stream>::eof() const {
 		return base::eof();
 	}

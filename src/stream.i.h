@@ -41,6 +41,8 @@ namespace abc {
 		_stream(_stream&& other) = default;
 
 	public:
+		std::streambuf*	rdbuf() const;
+
 		bool			eof() const;
 		bool			good() const;
 		bool			bad() const;
