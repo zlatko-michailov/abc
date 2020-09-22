@@ -34,18 +34,30 @@ SUBDIR_OUT = out
 SUBDIR_INCLUDE = include
 SUBDIR_BIN = bin
 SUBDIR_SAMPLES = samples
-SUBDIR_TICTACTOE = tictactoe
+SUBDIR_RESOURCES = resources
+SAMPLE_WEBSERVER = webserver
+SAMPLE_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
-PROG_TICTACTOE = tictactoe
 
 
-all: build_samples
+all: samples
 
-build_samples: pack
+samples: pack
 	#
 	# ---------- Begin building samples ----------
-	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(PROG_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SUBDIR_TICTACTOE)/*.cpp $(LINKOPTIONS)
-	# ----------Done building samples ----------
+	# ---------- Begin building webserver ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SAMPLE_WEBSERVER) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/*.cpp $(LINKOPTIONS)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)
+	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)
+	# ---------- Done building webserver ----------
+	# ---------- Begin building tictactoe ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(LINKOPTIONS)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
+	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
+	# ---------- Done building tictactoe ----------
+	# ---------- Done building samples ----------
 	#
 
 pack: test
@@ -56,6 +68,7 @@ pack: test
 	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
 	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
 	cp -r $(CURDIR)/$(SUBDIR_BIN)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
+	cp -r $(CURDIR)/$(SUBDIR_SAMPLES)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
 	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
 	# ---------- Done packing ----------
 	#
@@ -71,7 +84,7 @@ build_test: build_product
 	#
 	# ---------- Begin building tests ----------
 	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) $(CURDIR)/$(SUBDIR_TEST)/*.cpp $(LINKOPTIONS)
-	# ----------Done building tests ----------
+	# ---------- Done building tests ----------
 	#
 
 build_product: clean
@@ -92,6 +105,7 @@ clean:
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
 	# ---------- Done cleaning ----------
 	#
 

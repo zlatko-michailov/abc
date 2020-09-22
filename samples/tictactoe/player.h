@@ -37,26 +37,18 @@ namespace abc { namespace samples { namespace tictactoe {
 		static constexpr player_t	me			= 1;
 		static constexpr player_t	opponent	= 2;
 
+
+		static constexpr char		symbol[]	= { ' ', 'X', 'O' };
+
+
 		inline player_t is_empty(player_t player) noexcept {
 			return player == empty;
 		}
 
+
 		inline player_t other(player_t player) noexcept {
 			return (me + opponent) - player;
 		}
-
-		static constexpr char		symbol[] = { ' ', 'X', 'O' };
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	using rowcol_t = std::uint8_t;
-
-	namespace rowcol {
-		static constexpr rowcol_t	max_rows		= 3;
-		static constexpr rowcol_t	max_cols		= 3;
 	}
 
 }}}

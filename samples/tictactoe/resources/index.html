@@ -1,0 +1,146 @@
+<html>
+	<head>
+		<title>Tic Tac Toe</title>
+		<style>
+			body
+			{
+				background-color: #404040;
+				color: rgb(200, 200, 200);
+			}
+
+			.text
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 16;
+				text-align: center;
+				width: 330px;
+			}
+
+			.title
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 30;
+				text-align: center;
+				width: 330px;
+			}
+
+			.copyright
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 14;
+				text-align: center;
+				width: 330px;
+			}
+
+			.grid
+			{
+				border-style: solid;
+				border-width: 3px;
+			}
+
+			.cell
+			{
+				width: 100px;
+				height: 100px;
+				border-style: solid;
+				border-width: 2px;
+				color: black;
+				text-align: center;
+			}
+
+			.symbol
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 50;
+				color: rgb(200, 200, 200);
+			}
+
+			.symbol-header
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-weight: bold;
+				border-style: solid;
+				border-width: 1px;
+				border-color: rgb(150, 150, 150);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="title">Tic Tac Toe</div>
+		<br />
+		<br />
+
+		<div class="text">
+			<span class="symbol-header">&nbsp;X&nbsp;</span>
+			&nbsp;
+
+			<select id="player_1">
+				<option value="User">User</option>
+				<option value="Computer">Computer</option>
+			</select>
+			&nbsp; vs. &nbsp;
+			<select id="player_2">
+				<option value="User">User</option>
+				<option value="Computer">Computer</option>
+			</select>
+			
+			&nbsp;
+			<span class="symbol-header">&nbsp;O&nbsp;</span>
+
+			<br />
+			<br />
+			<button id="startButton" onclick="start(this)">Start</button>
+		</div>
+		<br />
+		<br />
+
+		<table id="grid" class="grid">
+			<tr>
+				<td id="cell_0_0" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_0_1" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_0_2" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+			</tr>
+			<tr>
+				<td id="cell_1_0" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_1_1" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_1_2" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+			</tr>
+			<tr>
+				<td id="cell_2_0" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_2_1" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+				<td id="cell_2_2" class="cell" onclick="onCellClick(this)"><span class="symbol">&nbsp;</span></td>
+			</tr>
+		</table>
+		
+		<br />
+		<br />
+		<div class="copyright">Version 0.9</div>
+		<br />
+		<div class="copyright">Copyright (c) 2018-2020 by Zlatko Michailov</div>
+
+		<script>
+			var player = 0;
+
+			function start(startButton) {
+				if (player === 0) {
+					player = 1;
+				}
+			}
+
+			function onCellClick(cell) {
+				if (cell.firstChild.innerText === "X" || cell.firstChild.innerText === "O") {
+					return;
+				}
+
+				if (player === 1) {
+					cell.firstChild.innerText = "X";
+				}
+				else if (player === 2) {
+					cell.firstChild.innerText = "O";
+				}
+
+				player = 3 - player;
+			}
+		</script>
+	</body>
+</html>

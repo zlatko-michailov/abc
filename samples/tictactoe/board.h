@@ -26,19 +26,32 @@ SOFTWARE.
 #pragma once
 
 #include <iostream> ////
-#include "base.h"
+#include "player.h"
 
 
 namespace abc { namespace samples { namespace tictactoe {
 
+	using rowcol_t = std::uint8_t;
+
+	namespace rowcol {
+		static constexpr rowcol_t	max_rows	= 3;
+		static constexpr rowcol_t	max_cols	= 3;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	class board {
 	public:
 		board() noexcept;
+		board(const board& other) noexcept = default;
 
 	public:
 		bool is_cell_empty(rowcol_t row, rowcol_t col) const noexcept;
 		player_t get_move(rowcol_t row, rowcol_t col) const noexcept;
 		bool make_move(rowcol_t row, rowcol_t col, player_t player) noexcept;
+		bool clear_move(rowcol_t row, rowcol_t col) noexcept;
 
 		bool is_game_over() const noexcept;
 
@@ -89,6 +102,21 @@ namespace abc { namespace samples { namespace tictactoe {
 		_last_row = row;
 		_last_col = col;
 		_last_player = player;
+
+		return true;
+	}
+
+
+	inline bool board::clear_move(rowcol_t row, rowcol_t col) noexcept {
+		if (is_cell_empty(row, col)) {
+			return false;
+		}
+
+		_cells[row][col] = player::empty;
+
+		_last_row = 0;
+		_last_col = 0;
+		_last_player = player::empty;
 
 		return true;
 	}

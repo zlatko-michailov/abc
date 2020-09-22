@@ -24,30 +24,63 @@ SOFTWARE.
 
 
 #include <iostream> ////
+#include "../../src/socket.h"
+#include "../../src/http.h"
+#include "player.h"
 #include "board.h"
 
 
 
 int main() {
+	{
+		abc::tcp_server_socket listener;
+		listener.bind("30303");
+		listener.listen(2);
+		abc::tcp_client_socket client = std::move(listener.accept());
+		abc::socket_streambuf sb(&client);
+		abc::http_server_stream http(&sb);
+
+		char buffer[abc::size::k1 + 1];
+		http.get_method(buffer, sizeof(buffer));
+		std::cout << "Method  =" << buffer << std::endl;
+		http.get_resource(buffer, sizeof(buffer));
+		std::cout << "Resource=" << buffer << std::endl;
+		http.get_protocol(buffer, sizeof(buffer));
+		std::cout << "Protocol=" << buffer << std::endl;
+
+		http.put_protocol("HTTP/1.1");
+		http.put_status_code("200");
+		http.put_reason_phrase("OK");
+		http.put_header_name("Content-Length");
+		http.put_header_value("10");
+		http.end_headers();
+		http.put_body("1234567890");
+		http.flush();
+	}
+
 	abc::samples::tictactoe::board board;
 	board.print();
 
 	abc::samples::tictactoe::player_t player = abc::samples::tictactoe::player::me;
 
 	while (!board.is_game_over()) {
-		std::cout << "Player " << abc::samples::tictactoe::player::symbol[player] << ": " << std::endl;
+		bool made_move = false;
+		while (!made_move) {
+			std::cout << "Player " << abc::samples::tictactoe::player::symbol[player] << ": " << std::endl;
 
-		abc::samples::tictactoe::rowcol_t row;
-		std::cout << "Enter row: ";
-		std::cin >> row;
-		row -= '0';
+			abc::samples::tictactoe::rowcol_t row;
+			std::cout << "Enter row: ";
+			std::cin >> row;
+			row -= '0';
 
-		abc::samples::tictactoe::rowcol_t col;
-		std::cout << "Enter col: ";
-		std::cin >> col;
-		col -= '0';
+			abc::samples::tictactoe::rowcol_t col;
+			std::cout << "Enter col: ";
+			std::cin >> col;
+			col -= '0';
 
-		board.make_move(row, col, player);
+			made_move = board.make_move(row, col, player);
+		}
+
 		board.print();
 
 		player = abc::samples::tictactoe::player::other(player);
