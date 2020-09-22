@@ -71,6 +71,8 @@ namespace abc { namespace samples {
 		constexpr const char* javascript	= "text/javascript; charset=utf-8";
 		constexpr const char* xml			= "text/xml; charset=utf-8";
 
+		constexpr const char* json			= "application/json";
+
 		constexpr const char* png			= "image/png";
 		constexpr const char* jpeg			= "image/jpeg";
 		constexpr const char* gif			= "image/gif";
@@ -101,7 +103,7 @@ namespace abc { namespace samples {
 		virtual void		process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
 		virtual void		process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 		virtual bool		is_file_request(const char* method, const char* resource);
-		virtual void		send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body);
+		virtual void		send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag);
 		virtual const char*	get_content_type_from_path(const char* path);
 		virtual const char*	get_reason_phrase_from_status_code(const char* status_code);
 
@@ -230,9 +232,7 @@ namespace abc { namespace samples {
 
 		// If the method is not GET, return 405.
 		if (std::strcmp(method, "GET") != 0) {
-			_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Error: Invalid method '%s' in a static file request. Must be 'GET'.", method);
-
-			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.");
+			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.", __TAG__);
 			return;
 		}
 
@@ -243,9 +243,7 @@ namespace abc { namespace samples {
 
 		// If the file was not opened, return 404.
 		if (ec) {
-			_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Error: File not found");
-
-			send_simple_response(http, "404", content_type::text, "The requested resource was not found.");
+			send_simple_response(http, "404", content_type::text, "Error: The requested resource was not found.", __TAG__);
 			return;
 		}
 
@@ -286,12 +284,12 @@ namespace abc { namespace samples {
 			set_shutdown_requested();
 		}
 
-		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().");
+		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().", __TAG__);
 	}
 
 
 	template <typename Log>
-	inline void webserver<Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body) {
+	inline void webserver<Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Sending simple response");
 
 		char content_length[fsize_size + 1];
@@ -307,9 +305,10 @@ namespace abc { namespace samples {
 		http.end_headers();
 		http.put_body(body);
 
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Status Code    = %s", status_code);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Content-Type   = %s", content_type);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sent Content-Length = %s", content_length);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Status Code    = %s", status_code);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Content-Type   = %s", content_type);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Content-Length = %s", content_length);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Body           = %s", body);
 	}
 
 
