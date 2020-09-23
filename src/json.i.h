@@ -174,7 +174,7 @@ namespace abc {
 		void			put_begin_object();
 		void			put_end_object();
 
-	protected:
+	public:
 		std::size_t		put_chars(const char* buffer, std::size_t size);
 		std::size_t		put_char(char ch);
 
