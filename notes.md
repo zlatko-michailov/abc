@@ -1,11 +1,16 @@
 # v0.9
 ## Done
+- json - put_eof()
 
 ## To Do
+- endpoint
 - Samples
-- Internationalization
+  - basic
+  - tictactoe
+
 
 ## Postponed
+- Internationalization
 - Improve code style
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.

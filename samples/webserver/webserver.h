@@ -132,7 +132,7 @@ namespace abc { namespace samples {
 		, _requests_in_progress(0)
 		, _is_shutdown_requested(false) {
 		if (log == nullptr) {
-			throw abc::exception<std::logic_error>("Running a web server without logging is a bad idea.", __TAG__);
+			throw abc::exception<std::logic_error>("Running a web server without logging is a bad idea.", 0x102dd);
 		}
 	}
 
@@ -169,7 +169,7 @@ namespace abc { namespace samples {
 
 	template <typename Log>
 	inline void webserver<Log>::process_request(tcp_client_socket<Log>&& socket) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, ">>> Request");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102de, ">>> Request");
 
 		// Create a socket_streambuf over the tcp_client_socket.
 		abc::socket_streambuf sb(&socket);
@@ -180,17 +180,17 @@ namespace abc { namespace samples {
 		// Read the request line.
 		char method[method_size + 1];
 		http.get_method(method, sizeof(method));
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Method   = '%s'", method);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102df, "Received Method   = '%s'", method);
 
 		char path[resource_size + 1];
 		std::strcpy(path, _config->root_dir);
 		char* resource = path + _config->root_dir_len;
 		http.get_resource(resource, sizeof(path) - _config->root_dir_len);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Resource = '%s'", resource);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e0, "Received Resource = '%s'", resource);
 
 		char protocol[protocol_size + 1];
 		http.get_protocol(protocol, sizeof(protocol));
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Received Protocol = '%s'", protocol);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e1, "Received Protocol = '%s'", protocol);
 
 		// It's OK to read a request as long as we don't return a broken response.
 		if (_is_shutdown_requested.load()) {
@@ -211,8 +211,8 @@ namespace abc { namespace samples {
 
 		// Don't forget to flush!
 		http.flush();
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Response sent");
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "<<< Request");
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e2, "Response sent");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e3, "<<< Request");
 		_log->put_blank_line();
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
@@ -228,31 +228,31 @@ namespace abc { namespace samples {
 
 	template <typename Log>
 	inline void webserver<Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received File Path = '%s'", path);
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e4, "Received File Path = '%s'", path);
 
 		// If the method is not GET, return 405.
 		if (std::strcmp(method, "GET") != 0) {
-			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.", __TAG__);
+			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.", 0x102e5);
 			return;
 		}
 
 		// Check if the file exists.
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "CWD = %s", std::filesystem::current_path().c_str());
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e6, "CWD = %s", std::filesystem::current_path().c_str());
 		std::error_code ec;
 		std::uintmax_t fsize = std::filesystem::file_size(path, ec);
 
 		// If the file was not opened, return 404.
 		if (ec) {
-			send_simple_response(http, "404", content_type::text, "Error: The requested resource was not found.", __TAG__);
+			send_simple_response(http, "404", content_type::text, "Error: The requested resource was not found.", 0x102e7);
 			return;
 		}
 
 		// The file was opened, return 200.
 		char fsize_buffer[fsize_size + 1];
 		std::snprintf(fsize_buffer, fsize_size, "%llu", fsize);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "File size = %s", fsize_buffer);
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e8, "File size = %s", fsize_buffer);
 		
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e9, "Sending response 200");
 		http.put_protocol("HTTP/1.1");
 		http.put_status_code("200");
 		http.put_reason_phrase("OK");
@@ -278,19 +278,19 @@ namespace abc { namespace samples {
 
 	template <typename Log>
 	inline void webserver<Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Received REST");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ea, "Received REST");
 
 		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
 			set_shutdown_requested();
 		}
 
-		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().", __TAG__);
+		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().", 0x102eb);
 	}
 
 
 	template <typename Log>
 	inline void webserver<Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Sending simple response");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ec, "Sending simple response");
 
 		char content_length[fsize_size + 1];
 		std::snprintf(content_length, fsize_size, "%llu", std::strlen(body));
@@ -424,7 +424,7 @@ namespace abc { namespace samples {
 
 	template <typename Log>
 	inline void webserver<Log>::set_shutdown_requested() {
-		_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "--- Shutdown requested ---");
+		_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102ed, "--- Shutdown requested ---");
 		_is_shutdown_requested.store(true);
 	}
 
