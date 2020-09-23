@@ -160,7 +160,7 @@ namespace abc { namespace samples {
 					}
 
 					for (std::size_t i = 0; i < 2; i++) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing a[%llu]", i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%llu]", i);
 
 						if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, a[i])) {
 							return;
@@ -268,7 +268,7 @@ namespace abc { namespace samples {
 			}
 
 			arr[i] = token->value.number;
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "array[%llu]=%g", i, arr[i]);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%llu]=%g", i, arr[i]);
 		}
 
 		json.get_token(token, buffer_size);
