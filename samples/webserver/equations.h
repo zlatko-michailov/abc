@@ -31,9 +31,9 @@ SOFTWARE.
 
 namespace abc { namespace samples {
 
-	template <typename Log>
-	class equations_webserver : public webserver<Log> {
-		using base = webserver<Log>;
+	template <typename Limits, typename Log>
+	class equations_webserver : public webserver<Limits, Log> {
+		using base = webserver<Limits, Log>;
 
 	public:
 		equations_webserver(webserver_config* config, Log* log);
@@ -49,14 +49,14 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
-	inline equations_webserver<Log>::equations_webserver(webserver_config* config, Log* log)
+	template <typename Limits, typename Log>
+	inline equations_webserver<Limits, Log>::equations_webserver(webserver_config* config, Log* log)
 		: base(config, log) {
 	}
 
 
-	template <typename Log>
-	inline void equations_webserver<Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	template <typename Limits, typename Log>
+	inline void equations_webserver<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102cd, "Start REST processing");
 
 		// Support a graceful shutdown.
@@ -251,8 +251,8 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline bool equations_webserver<Log>::parse_array_2(abc::http_server_stream<Log>& http, abc::json_istream<abc::size::_64, Log>& json, abc::json::token_t* token, std::size_t buffer_size, const char* invalid_json, double arr[]) {
+	template <typename Limits, typename Log>
+	inline bool equations_webserver<Limits, Log>::parse_array_2(abc::http_server_stream<Log>& http, abc::json_istream<abc::size::_64, Log>& json, abc::json::token_t* token, std::size_t buffer_size, const char* invalid_json, double arr[]) {
 		json.get_token(token, buffer_size);
 
 		if (token->item != abc::json::item::begin_array) {

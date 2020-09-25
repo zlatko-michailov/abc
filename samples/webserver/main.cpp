@@ -32,6 +32,7 @@ SOFTWARE.
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
+using limits = abc::samples::webserver_limits;
 
 
 int main() {
@@ -46,7 +47,7 @@ int main() {
 		"out/samples/webserver",	// root_dir (Note: No trailing slash!)
 		"/resources/"				// files_prefix
 	);
-	abc::samples::equations_webserver webserver(&config, &log);
+	abc::samples::equations_webserver<limits, log_ostream> webserver(&config, &log);
 
 	// Let the webserver listen in a separate thread.
 	std::future done = webserver.start_async();

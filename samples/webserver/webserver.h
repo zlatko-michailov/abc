@@ -59,6 +59,18 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	struct webserver_limits {
+		static constexpr std::size_t method_size		= abc::size::_32;
+		static constexpr std::size_t resource_size		= abc::size::k2;
+		static constexpr std::size_t protocol_size		= abc::size::_16;
+		static constexpr std::size_t file_chunk_size	= abc::size::k1;
+		static constexpr std::size_t fsize_size			= abc::size::_32;
+	};
+
+
+	// --------------------------------------------------------------
+
+
 	namespace protocol {
 		constexpr const char* http_11		= "HTTP/1.1";
 	}
@@ -84,14 +96,8 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
+	template <typename Limits, typename Log>
 	class webserver {
-		static constexpr std::size_t method_size		= abc::size::_16;
-		static constexpr std::size_t resource_size		= abc::size::_512;
-		static constexpr std::size_t protocol_size		= abc::size::_16;
-		static constexpr std::size_t file_chunk_size	= abc::size::k1;
-		static constexpr std::size_t fsize_size			= abc::size::_16;
-
 	public:
 		webserver(webserver_config* config, Log* log);
 
@@ -125,8 +131,8 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
-	inline webserver<Log>::webserver(webserver_config* config, Log* log)
+	template <typename Limits, typename Log>
+	inline webserver<Limits, Log>::webserver(webserver_config* config, Log* log)
 		: _config(config)
 		, _log(log)
 		, _requests_in_progress(0)
@@ -137,18 +143,18 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline std::future<void> webserver<Log>::start_async() {
+	template <typename Limits, typename Log>
+	inline std::future<void> webserver<Limits, Log>::start_async() {
 		// We can't use std::async() here because we want to detach and return our own std::future.
-		std::thread(&webserver<Log>::start, this).detach();
+		std::thread(&webserver<Limits, Log>::start, this).detach();
 
 		// Therefore, we return our own future.
 		return _promise.get_future();
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::start() {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::start() {
 		_log->put_blank_line();
 		_log->put_blank_line();
 		_log->put_line("Running...\n");
@@ -162,13 +168,13 @@ namespace abc { namespace samples {
 		while (true) {
 			// Accept the next request and process it asynchronously.
 			abc::tcp_client_socket client = listener.accept();
-			std::thread(&webserver<Log>::process_request, this, std::move(client)).detach();
+			std::thread(&webserver<Limits, Log>::process_request, this, std::move(client)).detach();
 		}
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::process_request(tcp_client_socket<Log>&& socket) {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::process_request(tcp_client_socket<Log>&& socket) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102de, ">>> Request");
 
 		// Create a socket_streambuf over the tcp_client_socket.
@@ -178,17 +184,17 @@ namespace abc { namespace samples {
 		abc::http_server_stream<Log> http(&sb);
 
 		// Read the request line.
-		char method[method_size + 1];
+		char method[Limits::method_size + 1];
 		http.get_method(method, sizeof(method));
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102df, "Received Method   = '%s'", method);
 
-		char path[resource_size + 1];
+		char path[Limits::resource_size + 1];
 		std::strcpy(path, _config->root_dir);
 		char* resource = path + _config->root_dir_len;
 		http.get_resource(resource, sizeof(path) - _config->root_dir_len);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e0, "Received Resource = '%s'", resource);
 
-		char protocol[protocol_size + 1];
+		char protocol[Limits::protocol_size + 1];
 		http.get_protocol(protocol, sizeof(protocol));
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e1, "Received Protocol = '%s'", protocol);
 
@@ -226,8 +232,8 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e4, "Received File Path = '%s'", path);
 
 		// If the method is not GET, return 405.
@@ -248,8 +254,8 @@ namespace abc { namespace samples {
 		}
 
 		// The file was opened, return 200.
-		char fsize_buffer[fsize_size + 1];
-		std::snprintf(fsize_buffer, fsize_size, "%llu", fsize);
+		char fsize_buffer[Limits::fsize_size + 1];
+		std::snprintf(fsize_buffer, Limits::fsize_size, "%llu", fsize);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e8, "File size = %s", fsize_buffer);
 		
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e9, "Sending response 200");
@@ -268,16 +274,16 @@ namespace abc { namespace samples {
 		http.end_headers();
 
 		std::ifstream file(path);
-		char file_chunk[file_chunk_size];
-		for (std::uintmax_t sent_size = 0; sent_size < fsize; sent_size += file_chunk_size) {
+		char file_chunk[Limits::file_chunk_size];
+		for (std::uintmax_t sent_size = 0; sent_size < fsize; sent_size += Limits::file_chunk_size) {
 			file.read(file_chunk, sizeof(file_chunk));
 			http.put_body(file_chunk, file.gcount());
 		}
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ea, "Received REST");
 
 		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
@@ -288,12 +294,12 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag) {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ec, "Sending simple response");
 
-		char content_length[fsize_size + 1];
-		std::snprintf(content_length, fsize_size, "%llu", std::strlen(body));
+		char content_length[Limits::fsize_size + 1];
+		std::snprintf(content_length, Limits::fsize_size, "%llu", std::strlen(body));
 
 		http.put_protocol(protocol::http_11);
 		http.put_status_code(status_code);
@@ -312,8 +318,8 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline const char* webserver<Log>::get_content_type_from_path(const char* path) {
+	template <typename Limits, typename Log>
+	inline const char* webserver<Limits, Log>::get_content_type_from_path(const char* path) {
 		const char* ext = std::strrchr(path, '.');
 		if (ext == nullptr) {
 			return nullptr;
@@ -357,8 +363,8 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline const char* webserver<Log>::get_reason_phrase_from_status_code(const char* status_code) {
+	template <typename Limits, typename Log>
+	inline const char* webserver<Limits, Log>::get_reason_phrase_from_status_code(const char* status_code) {
 		if (std::strcmp(status_code, "200") == 0) {
 			return "OK";
 		}
@@ -415,15 +421,15 @@ namespace abc { namespace samples {
 	}
 
 
-	template <typename Log>
-	inline bool webserver<Log>::is_file_request(const char* method, const char* resource) {
+	template <typename Limits, typename Log>
+	inline bool webserver<Limits, Log>::is_file_request(const char* method, const char* resource) {
 		return std::strncmp(resource, _config->files_prefix, _config->files_prefix_len) == 0
 			|| (std::strcmp(method, "GET") == 0 && std::strcmp(resource, "/favicon.ico") == 0);
 	}
 
 
-	template <typename Log>
-	inline void webserver<Log>::set_shutdown_requested() {
+	template <typename Limits, typename Log>
+	inline void webserver<Limits, Log>::set_shutdown_requested() {
 		_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102ed, "--- Shutdown requested ---");
 		_is_shutdown_requested.store(true);
 	}
