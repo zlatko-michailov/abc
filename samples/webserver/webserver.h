@@ -217,13 +217,15 @@ namespace abc { namespace samples {
 	inline void webserver<Limits, Log>::start() {
 		_log->put_blank_line();
 		_log->put_blank_line();
-		_log->put_line("Running...\n");
-		_log->put_blank_line();
+		_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Started endpoint (%s)", _config->port);
 
 		// Create a listener, bind to a port, and start listening.
 		abc::tcp_server_socket listener(_log);
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
+
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Listening (%s)", _config->port);
+		_log->put_blank_line();
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
@@ -235,7 +237,7 @@ namespace abc { namespace samples {
 
 	template <typename Limits, typename Log>
 	inline void webserver<Limits, Log>::process_request(tcp_client_socket<Log>&& socket) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102de, ">>> Request");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102de, "Begin handling request (%s)", _config->port);
 
 		// Create a socket_streambuf over the tcp_client_socket.
 		abc::socket_streambuf sb(&socket);
@@ -278,12 +280,12 @@ namespace abc { namespace samples {
 		// Don't forget to flush!
 		http.flush();
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e2, "Response sent");
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e3, "<<< Request");
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e3, "End handling request (%s)", _config->port);
 		_log->put_blank_line();
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
 			_log->put_blank_line();
-			_log->put_line("Down.\n");
+			_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Stopped endpoint (%s)", _config->port);
 			_log->put_blank_line();
 			_log->put_blank_line();
 

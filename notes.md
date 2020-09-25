@@ -1,9 +1,8 @@
 # v0.9
 ## Done
-- json - put_eof()
+- json - put_char()
 
 ## To Do
-- ttl_thread
 - endpoint
 - Samples
   - basic
@@ -11,6 +10,7 @@
 
 
 ## Postponed
+- ttl_thread
 - Internationalization
 - Improve code style
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
