@@ -72,24 +72,85 @@ namespace abc { namespace samples {
 
 
 	namespace protocol {
-		constexpr const char* http_11		= "HTTP/1.1";
+		constexpr const char* HTTP_11					= "HTTP/1.1";
+	}
+
+
+	namespace method {
+		constexpr const char* GET						= "GET";
+		constexpr const char* POST						= "POST";
+		constexpr const char* PUT						= "PUT";
+		constexpr const char* DELETE					= "DELETE";
+		constexpr const char* HEAD						= "HEAD";
+	}
+
+
+	namespace status_code {
+		constexpr const char* OK						= "200";
+		constexpr const char* Created					= "201";
+		constexpr const char* Accepted					= "202";
+
+		constexpr const char* Moved_Permanently			= "301";
+		constexpr const char* Found						= "302";
+
+		constexpr const char* Bad_Request				= "400";
+		constexpr const char* Unauthorized				= "401";
+		constexpr const char* Forbidden					= "403";
+		constexpr const char* Not_Found					= "404";
+		constexpr const char* Method_Not_Allowed		= "405";
+		constexpr const char* Payload_Too_Large			= "413";
+		constexpr const char* URI_Too_Long				= "414";
+		constexpr const char* Too_Many_Requests			= "429";
+
+		constexpr const char* Internal_Server_Error		= "500";
+		constexpr const char* Not_Implemented			= "501";
+		constexpr const char* Service_Unavailable		= "503";
+	}
+
+
+	namespace reason_phrase {
+		constexpr const char* OK						= "OK";
+		constexpr const char* Created					= "Created";
+		constexpr const char* Accepted					= "Accepted";
+
+		constexpr const char* Moved_Permanently			= "Moved Permanently";
+		constexpr const char* Found						= "Found";
+
+		constexpr const char* Bad_Request				= "Bad Request";
+		constexpr const char* Unauthorized				= "Unauthorized";
+		constexpr const char* Forbidden					= "Forbidden";
+		constexpr const char* Not_Found					= "Not Found";
+		constexpr const char* Method_Not_Allowed		= "Method Not Allowed";
+		constexpr const char* Payload_Too_Large			= "Payload Too Large";
+		constexpr const char* URI_Too_Long				= "URI Too Long";
+		constexpr const char* Too_Many_Requests			= "Too Many Requests";
+
+		constexpr const char* Internal_Server_Error		= "Internal Server Error";
+		constexpr const char* Not_Implemented			= "Not Implemented";
+		constexpr const char* Service_Unavailable		= "Service Unavailable";
+	}
+
+
+	namespace header {
+		constexpr const char* Content_Type				= "Content-Type";
+		constexpr const char* Content_Length			= "Content-Length";
 	}
 
 
 	namespace content_type {
-		constexpr const char* text			= "text/plain; charset=utf-8";
-		constexpr const char* html			= "text/html; charset=utf-8";
-		constexpr const char* css			= "text/css; charset=utf-8";
-		constexpr const char* javascript	= "text/javascript; charset=utf-8";
-		constexpr const char* xml			= "text/xml; charset=utf-8";
+		constexpr const char* text						= "text/plain; charset=utf-8";
+		constexpr const char* html						= "text/html; charset=utf-8";
+		constexpr const char* css						= "text/css; charset=utf-8";
+		constexpr const char* javascript				= "text/javascript; charset=utf-8";
+		constexpr const char* xml						= "text/xml; charset=utf-8";
 
-		constexpr const char* json			= "application/json";
+		constexpr const char* json						= "application/json";
 
-		constexpr const char* png			= "image/png";
-		constexpr const char* jpeg			= "image/jpeg";
-		constexpr const char* gif			= "image/gif";
-		constexpr const char* bmp			= "image/bmp";
-		constexpr const char* svg			= "image/svg+xml";
+		constexpr const char* png						= "image/png";
+		constexpr const char* jpeg						= "image/jpeg";
+		constexpr const char* gif						= "image/gif";
+		constexpr const char* bmp						= "image/bmp";
+		constexpr const char* svg						= "image/svg+xml";
 	}
 
 
@@ -109,9 +170,8 @@ namespace abc { namespace samples {
 		virtual void		process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
 		virtual void		process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 		virtual bool		is_file_request(const char* method, const char* resource);
-		virtual void		send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag);
+		virtual void		send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag);
 		virtual const char*	get_content_type_from_path(const char* path);
-		virtual const char*	get_reason_phrase_from_status_code(const char* status_code);
 
 	protected:
 		void				process_request(tcp_client_socket<Log>&& socket);
@@ -237,8 +297,8 @@ namespace abc { namespace samples {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e4, "Received File Path = '%s'", path);
 
 		// If the method is not GET, return 405.
-		if (std::strcmp(method, "GET") != 0) {
-			send_simple_response(http, "405", content_type::text, "GET is the only supported method for static files.", 0x102e5);
+		if (std::strcmp(method, method::GET) != 0) {
+			send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "GET is the only supported method for static files.", 0x102e5);
 			return;
 		}
 
@@ -249,27 +309,27 @@ namespace abc { namespace samples {
 
 		// If the file was not opened, return 404.
 		if (ec) {
-			send_simple_response(http, "404", content_type::text, "Error: The requested resource was not found.", 0x102e7);
+			send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "Error: The requested resource was not found.", 0x102e7);
 			return;
 		}
 
 		// The file was opened, return 200.
 		char fsize_buffer[Limits::fsize_size + 1];
-		std::snprintf(fsize_buffer, Limits::fsize_size, "%llu", fsize);
+		std::snprintf(fsize_buffer, Limits::fsize_size, "%lu", fsize);
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e8, "File size = %s", fsize_buffer);
 		
 		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e9, "Sending response 200");
-		http.put_protocol("HTTP/1.1");
-		http.put_status_code("200");
-		http.put_reason_phrase("OK");
+		http.put_protocol(protocol::HTTP_11);
+		http.put_status_code(status_code::OK);
+		http.put_reason_phrase(reason_phrase::OK);
 
 		const char* content_type = get_content_type_from_path(path);
 		if (content_type != nullptr) {
-			http.put_header_name("Content-Type");
+			http.put_header_name(header::Content_Type);
 			http.put_header_value(content_type);
 		}
 
-		http.put_header_name("Content-Length");
+		http.put_header_name(header::Content_Length);
 		http.put_header_value(fsize_buffer);
 		http.end_headers();
 
@@ -286,27 +346,27 @@ namespace abc { namespace samples {
 	inline void webserver<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ea, "Received REST");
 
-		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
+		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
 			set_shutdown_requested();
 		}
 
-		send_simple_response(http, "200", content_type::text, "TODO: Override process_rest_request().", 0x102eb);
+		send_simple_response(http, status_code::OK, status_code::OK, content_type::text, "TODO: Override process_rest_request().", 0x102eb);
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* content_type, const char* body, abc::tag_t tag) {
+	inline void webserver<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag) {
 		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ec, "Sending simple response");
 
 		char content_length[Limits::fsize_size + 1];
-		std::snprintf(content_length, Limits::fsize_size, "%llu", std::strlen(body));
+		std::snprintf(content_length, Limits::fsize_size, "%lu", std::strlen(body));
 
-		http.put_protocol(protocol::http_11);
+		http.put_protocol(protocol::HTTP_11);
 		http.put_status_code(status_code);
-		http.put_reason_phrase(get_reason_phrase_from_status_code(status_code));
-		http.put_header_name("Content-Type");
+		http.put_reason_phrase(reason_phrase);
+		http.put_header_name(header::Content_Type);
 		http.put_header_value(content_type);
-		http.put_header_name("Content-Length");
+		http.put_header_name(header::Content_Length);
 		http.put_header_value(content_length);
 		http.end_headers();
 		http.put_body(body);
@@ -364,67 +424,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline const char* webserver<Limits, Log>::get_reason_phrase_from_status_code(const char* status_code) {
-		if (std::strcmp(status_code, "200") == 0) {
-			return "OK";
-		}
-		else if (std::strcmp(status_code, "201") == 0) {
-			return "Created";
-		}
-		else if (std::strcmp(status_code, "202") == 0) {
-			return "Accepted";
-		}
-
-		else if (std::strcmp(status_code, "301") == 0) {
-			return "Moved Permanently";
-		}
-		else if (std::strcmp(status_code, "302") == 0) {
-			return "Found";
-		}
-
-		else if (std::strcmp(status_code, "400") == 0) {
-			return "Bad Request";
-		}
-		else if (std::strcmp(status_code, "401") == 0) {
-			return "Unauthorized";
-		}
-		else if (std::strcmp(status_code, "403") == 0) {
-			return "Forbidden";
-		}
-		else if (std::strcmp(status_code, "404") == 0) {
-			return "Not Found";
-		}
-		else if (std::strcmp(status_code, "405") == 0) {
-			return "Method Not Allowed";
-		}
-		else if (std::strcmp(status_code, "413") == 0) {
-			return "Payload Too Large";
-		}
-		else if (std::strcmp(status_code, "414") == 0) {
-			return "URI Too Long";
-		}
-		else if (std::strcmp(status_code, "429") == 0) {
-			return "Too Many Requests";
-		}
-
-		else if (std::strcmp(status_code, "500") == 0) {
-			return "Internal Server Error";
-		}
-		else if (std::strcmp(status_code, "501") == 0) {
-			return "Not Implemented";
-		}
-		else if (std::strcmp(status_code, "503") == 0) {
-			return "Service Unavailable";
-		}
-		
-		return nullptr;
-	}
-
-
-	template <typename Limits, typename Log>
 	inline bool webserver<Limits, Log>::is_file_request(const char* method, const char* resource) {
 		return std::strncmp(resource, _config->files_prefix, _config->files_prefix_len) == 0
-			|| (std::strcmp(method, "GET") == 0 && std::strcmp(resource, "/favicon.ico") == 0);
+			|| (std::strcmp(method, method::GET) == 0 && std::strcmp(resource, "/favicon.ico") == 0);
 	}
 
 

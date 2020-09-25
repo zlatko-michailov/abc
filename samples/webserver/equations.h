@@ -60,22 +60,22 @@ namespace abc { namespace samples {
 		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102cd, "Start REST processing");
 
 		// Support a graceful shutdown.
-		if (std::strcmp(method, "POST") == 0 && std::strcmp(resource, "/shutdown") == 0) {
+		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
 			base::set_shutdown_requested();
 
-			base::send_simple_response(http, "200", content_type::text, "Server is shuting down...", 0x102ce);
+			base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x102ce);
 			return;
 		}
 
 		// If the resource is not /problem, return 404.
 		if (std::strcmp(resource, "/problem") != 0) {
-			base::send_simple_response(http, "404", content_type::text, "The requested resource was not found.", 0x102cf);
+			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", 0x102cf);
 			return;
 		}
 
 		// If the method is not POST, return 405.
-		if (std::strcmp(method, "POST") != 0) {
-			base::send_simple_response(http, "405", content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
+		if (std::strcmp(method, method::POST) != 0) {
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
 			return;
 		}
 
@@ -89,13 +89,13 @@ namespace abc { namespace samples {
 				break;
 			}
 
-			if (std::strcmp(header, "Content-Type") == 0) {
+			if (std::strcmp(header, header::Content_Type) == 0) {
 				http.get_header_value(header, sizeof(header));
 
 				// If the Content-Type is not json, return 400.
 				static const std::size_t content_type_json_len = std::strlen(content_type::json);
 				if (std::strncmp(header, content_type::json, content_type_json_len) != 0) {
-					base::send_simple_response(http, "400", content_type::text, "'application/json' is the only supported Content-Type.", 0x102d1);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x102d1);
 					return;
 				}
 
@@ -103,7 +103,7 @@ namespace abc { namespace samples {
 			}
 			else if (has_valid_content_type) {
 				// We've already received a Content-Type header, return 400.
-				base::send_simple_response(http, "400", content_type::text, "The Content-Type header was supplied more than once.", 0x102d2);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x102d2);
 				return;
 			}
 			else {
@@ -129,7 +129,7 @@ namespace abc { namespace samples {
 			// If body is not a JSON object, return 400.
 			json.get_token(token, sizeof(buffer));
 			if (token->item != abc::json::item::begin_object) {
-				base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102d3);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102d3);
 				return;
 			}
 
@@ -145,7 +145,7 @@ namespace abc { namespace samples {
 
 				// If we got anything but a property, error out.
 				if (token->item != abc::json::item::property) {
-					base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102d4);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102d4);
 					return;
 				}
 
@@ -155,12 +155,12 @@ namespace abc { namespace samples {
 					json.get_token(token, sizeof(buffer));
 
 					if (token->item != abc::json::item::begin_array) {
-						base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102d5);
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102d5);
 						return;
 					}
 
 					for (std::size_t i = 0; i < 2; i++) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%llu]", i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%lu]", i);
 
 						if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, a[i])) {
 							return;
@@ -169,7 +169,7 @@ namespace abc { namespace samples {
 
 					json.get_token(token, sizeof(buffer));
 					if (token->item != abc::json::item::end_array) {
-						base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102d6);
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102d6);
 						return;
 					}
 
@@ -177,6 +177,8 @@ namespace abc { namespace samples {
 				}
 				else if (std::strcmp(token->value.property, "b") == 0) {
 					// Parse array [2].
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing b");
+
 					if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, b)) {
 						return;
 					}
@@ -190,7 +192,7 @@ namespace abc { namespace samples {
 			}
 
 			if (!has_a || !has_b) {
-				base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102d7);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102d7);
 				return;
 			}
 		}
@@ -235,14 +237,16 @@ namespace abc { namespace samples {
 		json.flush();
 
 		char content_length[abc::size::_32 + 1];
-		std::snprintf(content_length, sizeof(content_length), "%llu", std::strlen(body));
+		std::snprintf(content_length, sizeof(content_length), "%lu", std::strlen(body));
 
 		// Send the http response
 		base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102d8, "Sending response 200");
-		http.put_protocol("HTTP/1.1");
-		http.put_status_code("200");
-		http.put_reason_phrase("OK");
-		http.put_header_name("Content-Length");
+		http.put_protocol(protocol::HTTP_11);
+		http.put_status_code(status_code::OK);
+		http.put_reason_phrase(reason_phrase::OK);
+		http.put_header_name(header::Content_Type);
+		http.put_header_value(content_type::json);
+		http.put_header_name(header::Content_Length);
 		http.put_header_value(content_length);
 		http.end_headers();
 		http.put_body(body);
@@ -256,24 +260,24 @@ namespace abc { namespace samples {
 		json.get_token(token, buffer_size);
 
 		if (token->item != abc::json::item::begin_array) {
-			base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102da);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102da);
 			return false;
 		}
 
 		for (std::size_t i = 0; i < 2; i++) {
 			json.get_token(token, buffer_size);
 			if (token->item != abc::json::item::number) {
-				base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102db);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102db);
 				return false;
 			}
 
 			arr[i] = token->value.number;
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%llu]=%g", i, arr[i]);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%lu]=%g", i, arr[i]);
 		}
 
 		json.get_token(token, buffer_size);
 		if (token->item != abc::json::item::end_array) {
-			base::send_simple_response(http, "400", content_type::text, invalid_json, 0x102dc);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x102dc);
 			return false;
 		}
 
