@@ -217,14 +217,14 @@ namespace abc { namespace samples {
 	inline void webserver<Limits, Log>::start() {
 		_log->put_blank_line();
 		_log->put_blank_line();
-		_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Started endpoint (%s)", _config->port);
+		_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102f1, "Started endpoint (%s)", _config->port);
 
 		// Create a listener, bind to a port, and start listening.
 		abc::tcp_server_socket listener(_log);
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
 
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Listening (%s)", _config->port);
+		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102f2, "Listening (%s)", _config->port);
 		_log->put_blank_line();
 
 		while (true) {
@@ -285,7 +285,7 @@ namespace abc { namespace samples {
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
 			_log->put_blank_line();
-			_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Stopped endpoint (%s)", _config->port);
+			_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102f3, "Stopped endpoint (%s)", _config->port);
 			_log->put_blank_line();
 			_log->put_blank_line();
 

@@ -177,7 +177,7 @@ namespace abc { namespace samples {
 				}
 				else if (std::strcmp(token->value.property, "b") == 0) {
 					// Parse array [2].
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing b");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102f0, "Parsing b");
 
 					if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, b)) {
 						return;
