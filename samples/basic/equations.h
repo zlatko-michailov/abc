@@ -23,10 +23,9 @@ SOFTWARE.
 */
 
 
+#include "../../src/endpoint.h"
 #include "../../src/http.h"
 #include "../../src/json.h"
-
-#include "endpoint.h"
 
 
 namespace abc { namespace samples {
