@@ -26,17 +26,17 @@ SOFTWARE.
 #include "../../src/http.h"
 #include "../../src/json.h"
 
-#include "webserver.h"
+#include "endpoint.h"
 
 
 namespace abc { namespace samples {
 
 	template <typename Limits, typename Log>
-	class equations_webserver : public webserver<Limits, Log> {
-		using base = webserver<Limits, Log>;
+	class equations_endpoint : public endpoint<Limits, Log> {
+		using base = endpoint<Limits, Log>;
 
 	public:
-		equations_webserver(webserver_config* config, Log* log);
+		equations_endpoint(endpoint_config* config, Log* log);
 
 	protected:
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
@@ -50,13 +50,13 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline equations_webserver<Limits, Log>::equations_webserver(webserver_config* config, Log* log)
+	inline equations_endpoint<Limits, Log>::equations_endpoint(endpoint_config* config, Log* log)
 		: base(config, log) {
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void equations_webserver<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	inline void equations_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102cd, "Start REST processing");
 
 		// Support a graceful shutdown.
@@ -256,7 +256,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool equations_webserver<Limits, Log>::parse_array_2(abc::http_server_stream<Log>& http, abc::json_istream<abc::size::_64, Log>& json, abc::json::token_t* token, std::size_t buffer_size, const char* invalid_json, double arr[]) {
+	inline bool equations_endpoint<Limits, Log>::parse_array_2(abc::http_server_stream<Log>& http, abc::json_istream<abc::size::_64, Log>& json, abc::json::token_t* token, std::size_t buffer_size, const char* invalid_json, double arr[]) {
 		json.get_token(token, buffer_size);
 
 		if (token->item != abc::json::item::begin_array) {

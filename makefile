@@ -35,7 +35,7 @@ SUBDIR_INCLUDE = include
 SUBDIR_BIN = bin
 SUBDIR_SAMPLES = samples
 SUBDIR_RESOURCES = resources
-SAMPLE_WEBSERVER = webserver
+SAMPLE_BASIC = basic
 SAMPLE_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
 
@@ -45,18 +45,21 @@ all: samples
 samples: pack
 	#
 	# ---------- Begin building samples ----------
-	# ---------- Begin building webserver ----------
-	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)
-	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SAMPLE_WEBSERVER) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/*.cpp $(LINKOPTIONS)
-	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)
-	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_WEBSERVER)/$(SUBDIR_RESOURCES)
-	# ---------- Done building webserver ----------
+	#
+	# ---------- Begin building basic ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SAMPLE_BASIC) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/*.cpp $(LINKOPTIONS)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
+	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
+	# ---------- Done building basic ----------
+	#
 	# ---------- Begin building tictactoe ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
 	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(LINKOPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	# ---------- Done building tictactoe ----------
+	#
 	# ---------- Done building samples ----------
 	#
 

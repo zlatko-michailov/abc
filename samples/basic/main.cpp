@@ -32,7 +32,7 @@ SOFTWARE.
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-using limits = abc::samples::webserver_limits;
+using limits = abc::endpoint_limits;
 
 
 int main() {
@@ -40,17 +40,17 @@ int main() {
 	abc::log_filter filter(abc::severity::debug);
 	log_ostream log(std::cout.rdbuf(), &filter);
 
-	// Create a webserver.
-	abc::samples::webserver_config config(
+	// Create a endpoint.
+	abc::endpoint_config config(
 		"30301",					// port
 		5,							// listen_queue_size
-		"out/samples/webserver",	// root_dir (Note: No trailing slash!)
+		"out/samples/basic",		// root_dir (Note: No trailing slash!)
 		"/resources/"				// files_prefix
 	);
-	abc::samples::equations_webserver<limits, log_ostream> webserver(&config, &log);
+	abc::samples::equations_endpoint<limits, log_ostream> endpoint(&config, &log);
 
-	// Let the webserver listen in a separate thread.
-	std::future done = webserver.start_async();
+	// Let the endpoint listen in a separate thread.
+	std::future done = endpoint.start_async();
 	done.wait();
 
 	return 0;

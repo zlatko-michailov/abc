@@ -39,10 +39,10 @@ SOFTWARE.
 #include "../../src/http.h"
 
 
-namespace abc { namespace samples {
+namespace abc {
 
-	struct webserver_config {
-		webserver_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix);
+	struct endpoint_config {
+		endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix);
 
 		const char* const	port;
 
@@ -59,7 +59,7 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	struct webserver_limits {
+	struct endpoint_limits {
 		static constexpr std::size_t method_size		= abc::size::_32;
 		static constexpr std::size_t resource_size		= abc::size::k2;
 		static constexpr std::size_t protocol_size		= abc::size::_16;
@@ -158,9 +158,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	class webserver {
+	class endpoint {
 	public:
-		webserver(webserver_config* config, Log* log);
+		endpoint(endpoint_config* config, Log* log);
 
 	public:
 		std::future<void>	start_async();
@@ -178,7 +178,7 @@ namespace abc { namespace samples {
 		void				set_shutdown_requested();
 
 	protected:
-		webserver_config*	_config;
+		endpoint_config*	_config;
 		Log*				_log;
 
 	private:
@@ -192,7 +192,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline webserver<Limits, Log>::webserver(webserver_config* config, Log* log)
+	inline endpoint<Limits, Log>::endpoint(endpoint_config* config, Log* log)
 		: _config(config)
 		, _log(log)
 		, _requests_in_progress(0)
@@ -204,9 +204,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline std::future<void> webserver<Limits, Log>::start_async() {
+	inline std::future<void> endpoint<Limits, Log>::start_async() {
 		// We can't use std::async() here because we want to detach and return our own std::future.
-		std::thread(&webserver<Limits, Log>::start, this).detach();
+		std::thread(&endpoint<Limits, Log>::start, this).detach();
 
 		// Therefore, we return our own future.
 		return _promise.get_future();
@@ -214,30 +214,31 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::start() {
+	inline void endpoint<Limits, Log>::start() {
 		_log->put_blank_line();
 		_log->put_blank_line();
-		_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102f1, "Started endpoint (%s)", _config->port);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::important, 0x102f1, "Started endpoint (%s)", _config->port);
 
 		// Create a listener, bind to a port, and start listening.
 		abc::tcp_server_socket listener(_log);
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
 
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102f2, "Listening (%s)", _config->port);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102f2, "Listening (%s)", _config->port);
+		_log->put_blank_line();
 		_log->put_blank_line();
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
 			abc::tcp_client_socket client = listener.accept();
-			std::thread(&webserver<Limits, Log>::process_request, this, std::move(client)).detach();
+			std::thread(&endpoint<Limits, Log>::process_request, this, std::move(client)).detach();
 		}
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::process_request(tcp_client_socket<Log>&& socket) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102de, "Begin handling request (%s)", _config->port);
+	inline void endpoint<Limits, Log>::process_request(tcp_client_socket<Log>&& socket) {
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102de, "Begin handling request (%s)", _config->port);
 
 		// Create a socket_streambuf over the tcp_client_socket.
 		abc::socket_streambuf sb(&socket);
@@ -248,17 +249,17 @@ namespace abc { namespace samples {
 		// Read the request line.
 		char method[Limits::method_size + 1];
 		http.get_method(method, sizeof(method));
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102df, "Received Method   = '%s'", method);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102df, "Received Method   = '%s'", method);
 
 		char path[Limits::resource_size + 1];
 		std::strcpy(path, _config->root_dir);
 		char* resource = path + _config->root_dir_len;
 		http.get_resource(resource, sizeof(path) - _config->root_dir_len);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e0, "Received Resource = '%s'", resource);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e0, "Received Resource = '%s'", resource);
 
 		char protocol[Limits::protocol_size + 1];
 		http.get_protocol(protocol, sizeof(protocol));
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e1, "Received Protocol = '%s'", protocol);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e1, "Received Protocol = '%s'", protocol);
 
 		// It's OK to read a request as long as we don't return a broken response.
 		if (_is_shutdown_requested.load()) {
@@ -267,7 +268,7 @@ namespace abc { namespace samples {
 
 		++_requests_in_progress;
 
-		// This sample web server supports two kinds of requests:
+		// This endpoint supports two kinds of requests:
 		//    a) requests for static files
 		//    b) REST requests
 		if (is_file_request(method, resource)) {
@@ -279,13 +280,13 @@ namespace abc { namespace samples {
 
 		// Don't forget to flush!
 		http.flush();
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e2, "Response sent");
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e3, "End handling request (%s)", _config->port);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e2, "Response sent");
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102e3, "End handling request (%s)", _config->port);
 		_log->put_blank_line();
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
 			_log->put_blank_line();
-			_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102f3, "Stopped endpoint (%s)", _config->port);
+			_log->put_any(abc::category::abc::endpoint, abc::severity::important, 0x102f3, "Stopped endpoint (%s)", _config->port);
 			_log->put_blank_line();
 			_log->put_blank_line();
 
@@ -295,8 +296,8 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102e4, "Received File Path = '%s'", path);
+	inline void endpoint<Limits, Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102e4, "Received File Path = '%s'", path);
 
 		// If the method is not GET, return 405.
 		if (std::strcmp(method, method::GET) != 0) {
@@ -305,7 +306,7 @@ namespace abc { namespace samples {
 		}
 
 		// Check if the file exists.
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e6, "CWD = %s", std::filesystem::current_path().c_str());
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e6, "CWD = %s", std::filesystem::current_path().c_str());
 		std::error_code ec;
 		std::uintmax_t fsize = std::filesystem::file_size(path, ec);
 
@@ -318,9 +319,9 @@ namespace abc { namespace samples {
 		// The file was opened, return 200.
 		char fsize_buffer[Limits::fsize_size + 1];
 		std::snprintf(fsize_buffer, Limits::fsize_size, "%lu", fsize);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e8, "File size = %s", fsize_buffer);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e8, "File size = %s", fsize_buffer);
 		
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102e9, "Sending response 200");
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, 0x102e9, "Sending response 200");
 		http.put_protocol(protocol::HTTP_11);
 		http.put_status_code(status_code::OK);
 		http.put_reason_phrase(reason_phrase::OK);
@@ -345,8 +346,8 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ea, "Received REST");
+	inline void endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102ea, "Received REST");
 
 		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
 			set_shutdown_requested();
@@ -357,8 +358,8 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag) {
-		_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102ec, "Sending simple response");
+	inline void endpoint<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag) {
+		_log->put_any(abc::category::abc::endpoint, abc::severity::optional, 0x102ec, "Sending simple response");
 
 		char content_length[Limits::fsize_size + 1];
 		std::snprintf(content_length, Limits::fsize_size, "%lu", std::strlen(body));
@@ -373,15 +374,15 @@ namespace abc { namespace samples {
 		http.end_headers();
 		http.put_body(body);
 
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Status Code    = %s", status_code);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Content-Type   = %s", content_type);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Content-Length = %s", content_length);
-		_log->put_any(abc::category::abc::samples, abc::severity::debug, tag, "Sent Body           = %s", body);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, tag, "Sent Status Code    = %s", status_code);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, tag, "Sent Content-Type   = %s", content_type);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, tag, "Sent Content-Length = %s", content_length);
+		_log->put_any(abc::category::abc::endpoint, abc::severity::debug, tag, "Sent Body           = %s", body);
 	}
 
 
 	template <typename Limits, typename Log>
-	inline const char* webserver<Limits, Log>::get_content_type_from_path(const char* path) {
+	inline const char* endpoint<Limits, Log>::get_content_type_from_path(const char* path) {
 		const char* ext = std::strrchr(path, '.');
 		if (ext == nullptr) {
 			return nullptr;
@@ -426,15 +427,15 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool webserver<Limits, Log>::is_file_request(const char* method, const char* resource) {
+	inline bool endpoint<Limits, Log>::is_file_request(const char* method, const char* resource) {
 		return std::strncmp(resource, _config->files_prefix, _config->files_prefix_len) == 0
 			|| (std::strcmp(method, method::GET) == 0 && std::strcmp(resource, "/favicon.ico") == 0);
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void webserver<Limits, Log>::set_shutdown_requested() {
-		_log->put_any(abc::category::abc::samples, abc::severity::important, 0x102ed, "--- Shutdown requested ---");
+	inline void endpoint<Limits, Log>::set_shutdown_requested() {
+		_log->put_any(abc::category::abc::endpoint, abc::severity::important, 0x102ed, "--- Shutdown requested ---");
 		_is_shutdown_requested.store(true);
 	}
 
@@ -442,7 +443,7 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	inline webserver_config::webserver_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix)
+	inline endpoint_config::endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix)
 		: port(port)
 
 		, listen_queue_size(listen_queue_size)
@@ -457,6 +458,6 @@ namespace abc { namespace samples {
 
 	// --------------------------------------------------------------
 
-}}
+}
 
 
