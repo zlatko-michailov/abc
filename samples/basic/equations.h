@@ -56,7 +56,9 @@ namespace abc { namespace samples {
 
 	template <typename Limits, typename Log>
 	inline void equations_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102cd, "Start REST processing");
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102cd, "Start REST processing");
+		}
 
 		// Support a graceful shutdown.
 		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
@@ -159,7 +161,9 @@ namespace abc { namespace samples {
 					}
 
 					for (std::size_t i = 0; i < 2; i++) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%lu]", i);
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%lu]", i);
+						}
 
 						if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, a[i])) {
 							return;
@@ -176,7 +180,9 @@ namespace abc { namespace samples {
 				}
 				else if (std::strcmp(token->value.property, "b") == 0) {
 					// Parse array [2].
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102f0, "Parsing b");
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102f0, "Parsing b");
+					}
 
 					if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, b)) {
 						return;
@@ -239,7 +245,10 @@ namespace abc { namespace samples {
 		std::snprintf(content_length, sizeof(content_length), "%lu", std::strlen(body));
 
 		// Send the http response
-		base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102d8, "Sending response 200");
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102d8, "Sending response 200");
+		}
+
 		http.put_protocol(protocol::HTTP_11);
 		http.put_status_code(status_code::OK);
 		http.put_reason_phrase(reason_phrase::OK);
@@ -250,7 +259,9 @@ namespace abc { namespace samples {
 		http.end_headers();
 		http.put_body(body);
 
-		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102d9, "Finish REST processing");
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x102d9, "Finish REST processing");
+		}
 	}
 
 
@@ -271,7 +282,9 @@ namespace abc { namespace samples {
 			}
 
 			arr[i] = token->value.number;
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%lu]=%g", i, arr[i]);
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%lu]=%g", i, arr[i]);
+			}
 		}
 
 		json.get_token(token, buffer_size);

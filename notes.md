@@ -44,3 +44,26 @@
 
 PID PPID PS
 ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$/\1 \2 \3/'
+
+
+-----------------------------------------
+POST /game
+-----------------------------------------
+
+human vs human
+{
+  "play": false
+}
+
+human vs this (computer)
+{
+  "play": true,
+  "start": false
+}
+
+remote (computer) vs this (computer)
+{
+  "play": true,
+  "start": false
+  "notify": "http://..."
+}
