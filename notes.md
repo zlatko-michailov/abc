@@ -1,11 +1,12 @@
 # v0.9
 ## Done
 - json - put_char()
-
-## To Do
 - endpoint
 - Samples
   - basic
+
+## To Do
+- Samples
   - tictactoe
 
 

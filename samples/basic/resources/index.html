@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Web Server (abc Samples)</title>
+		<title>Basic (abc Samples)</title>
 		<style>
 			.readonly
 			{
@@ -25,6 +25,13 @@
 				text-align: center;
 			}
 
+			.subtitle
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 26;
+				text-align: center;
+			}
+
 			.copyright
 			{
 				font-family: Arial, Helvetica, sans-serif;
@@ -37,18 +44,8 @@
 		<table>
 			<tr>
 				<td>
-					<div class="title">Web Server (abc Samples)</div>
-				</td>
-			</tr>
-
-			<tr>
-				<td>
-					<div class="readonly">This is a simple web server that solves a system of 2 linear equations of 2 variables.</div>
-				</td>
-			</tr>
-
-			<tr>
-				<td>
+					<div class="title">Basic</div>
+					<div class="subtitle">abc Samples</div>
 					<br />
 					<br />
 				</td>
@@ -56,14 +53,7 @@
 
 			<tr>
 				<td>
-					<hr />
-					<br />
-
-					<div class="readonly">Server:</div>
-					<input id="serverBox" type="text" value="http://localhost:30301" size="40" class="edit"></input>
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<button id="shutdownButton" class="edit">&nbsp; Shutdown &nbsp;</button>
+					<div class="readonly">This is a C++ program that solves a system of 2 linear equations of 2 variables.</div>
 					<br />
 					<br />
 				</td>
@@ -75,24 +65,33 @@
 					<br />
 
 					<div class="readonly">Equations:</div>
-					<input id="x1Box" type="text" size="1" class="edit"></input>
+					<input id="a00" type="text" size="1" class="edit"></input>
 					x&nbsp&nbsp+&nbsp;
-					<input id="y1Box" type="text" size="1" class="edit"></input>
+					<input id="a01" type="text" size="1" class="edit"></input>
 					y&nbsp&nbsp=&nbsp;
-					<input id="b1Box" type="text" size="1" class="edit"></input>
+					<input id="b0" type="text" size="1" class="edit"></input>
 
 					<br />
 
-					<input id="x2Box" type="text" size="1" class="edit"></input>
+					<input id="a10" type="text" size="1" class="edit"></input>
 					x&nbsp&nbsp+&nbsp;
-					<input id="y2Box" type="text" size="1" class="edit"></input>
+					<input id="a11" type="text" size="1" class="edit"></input>
 					y&nbsp&nbsp=&nbsp;
-					<input id="b2Box" type="text" size="1" class="edit"></input>
+					<input id="b1" type="text" size="1" class="edit"></input>
 
 					<br />
 					<br />
 					<br />
-					<button id="solveButton" class="edit">&nbsp; Solve &nbsp;</button>
+					<button id="solveButton" class="edit" onclick="postProblem()">&nbsp; Solve &nbsp;</button>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">Solution:</div>
+					<textarea id="solutionArea" rows="2" cols="70" readonly class="readonly"></textarea>
 					<br />
 					<br />
 				</td>
@@ -102,18 +101,7 @@
 				<td>
 					<hr />
 					<br />
-
-					<div class="readonly">Request body:</div>
-					<textarea rows="15" cols="70" readonly class="readonly"></textarea>
-					<br />
-					<br />
-				</td>
-			</tr>
-
-			<tr>
-				<td>
-					<div class="readonly">Response body:</div>
-					<textarea rows="15" cols="70" readonly class="readonly"></textarea>
+					<button id="shutdownButton" class="edit" onclick="shutdown()">&nbsp; Shutdown &nbsp;</button>
 					<br />
 					<br />
 				</td>
@@ -132,27 +120,83 @@
 
 
 		<script>
-			var player = 0;
+			var isRunning = true;
+			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
-			function start(startButton) {
-				if (player === 0) {
-					player = 1;
-				}
-			}
-
-			function onCellClick(cell) {
-				if (cell.firstChild.innerText === "X" || cell.firstChild.innerText === "O") {
+			function postProblem() {
+				if (!isRunning) {
+					document.getElementById("solutionArea").innerText = remoteIsDown;
 					return;
 				}
 
-				if (player === 1) {
-					cell.firstChild.innerText = "X";
-				}
-				else if (player === 2) {
-					cell.firstChild.innerText = "O";
+				let a = [ [], [] ];
+				a[0][0] = parseFloat(document.getElementById("a00").value);
+				a[0][1] = parseFloat(document.getElementById("a01").value);
+				a[1][0] = parseFloat(document.getElementById("a10").value);
+				a[1][1] = parseFloat(document.getElementById("a11").value);
+				
+				let b = [];
+				b[0] = parseFloat(document.getElementById("b0").value);
+				b[1] = parseFloat(document.getElementById("b1").value);
+
+				if (isNaN(a[0][0]) || isNaN(a[0][1]) || isNaN(a[1][0]) || isNaN(a[1][1]) || isNaN(b[0]) || isNaN(b[1])) {
+					document.getElementById("solutionArea").innerText = "Client error: Invalid input. Enter all required numbers, and try again.";
+					return;
 				}
 
-				player = 3 - player;
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
+				let requestInit = {
+					method: "POST",
+					headers: requestHeaders,
+					mode: "same-origin",
+					body: JSON.stringify({
+ 						a: a,
+						b: b
+					})
+				};
+
+				let request = new Request("/problem");
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+
+						if (result.status === 1) {
+							document.getElementById("solutionArea").innerText = "Solution: x=" + result.x + ", y=" + result.y;
+						}
+						else if (result.status === 0) {
+							document.getElementById("solutionArea").innerText = "This system has no solution.";
+						}
+						else {
+							document.getElementById("solutionArea").innerText = "These equations are equivalent.";
+						}
+					});
+			}
+
+			function shutdown() {
+				let requestInit = {
+					method: "POST",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/shutdown");
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+
+						if (response.ok) {
+							isRunning = false;
+							document.getElementById("solutionArea").innerText = remoteIsDown;
+						}
+						else {
+							document.getElementById("solutionArea").innerText = "Received status " + response.status + ": " + response.statusText;
+						}
+					});
 			}
 		</script>
 	</body>

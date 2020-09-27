@@ -211,7 +211,7 @@ namespace abc { namespace samples {
 			x = det_x / det;
 			y = det_y / det;
 		}
-		else if (det_x != 0 || det_y == 0) {
+		else if (det_x != 0 || det_y != 0) {
 			// 0 solutions
 			status = 0;
 		}
