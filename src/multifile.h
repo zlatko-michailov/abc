@@ -79,7 +79,7 @@ namespace abc {
 			base::close();
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::multifile, severity::abc, 0x102b2, "multifile_streambuf::reopen() Close path=%s", _path);
+				_log->put_any(category::abc::multifile, severity::abc::debug, 0x102b2, "multifile_streambuf::reopen() Close path=%s", _path);
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace abc {
 		std::filebuf* op = base::open(_path, _mode);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::multifile, severity::abc, 0x102b3, "multifile_streambuf::reopen() Open path=%s, succes=%u", _path, op != nullptr);
+			_log->put_any(category::abc::multifile, severity::abc::optional, 0x102b3, "multifile_streambuf::reopen() Open path=%s, succes=%u", _path, op != nullptr);
 		}
 	}
 

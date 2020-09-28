@@ -59,13 +59,18 @@ namespace abc {
 	using severity_t = std::uint8_t;
 
 	namespace severity {
-		constexpr severity_t off		= 0x0;
-		constexpr severity_t critical	= 0x1;
-		constexpr severity_t warning	= 0x2;
-		constexpr severity_t important	= 0x3;
-		constexpr severity_t optional	= 0x4;
-		constexpr severity_t debug		= 0x5;
-		constexpr severity_t abc		= 0x6;
+		constexpr severity_t off			= 0x0;
+		constexpr severity_t critical		= 0x1;
+		constexpr severity_t warning		= 0x2;
+		constexpr severity_t important		= 0x3;
+		constexpr severity_t optional		= 0x4;
+		constexpr severity_t debug			= 0x5;
+
+		namespace abc {
+			constexpr severity_t important	= 0x6;
+			constexpr severity_t optional	= 0x7;
+			constexpr severity_t debug		= 0x8;
+		}
 
 		bool is_higher(severity_t severity, severity_t other) noexcept;
 		bool is_higher_or_equal(severity_t severity, severity_t other) noexcept;

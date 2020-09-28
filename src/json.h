@@ -42,7 +42,7 @@ namespace abc {
 		, _level_top(-1)
 		, _log(log) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::json, severity::abc, 0x100f9, "_json_state::_json_state()");
+			_log->put_any(category::abc::json, severity::abc::debug, 0x100f9, "_json_state::_json_state()");
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace abc {
 	template <std::size_t MaxLevels, typename Log>
 	inline void _json_state<MaxLevels, Log>::reset() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::json, severity::abc, 0x100fa, "_json_state::reset()");
+			_log->put_any(category::abc::json, severity::abc::debug, 0x100fa, "_json_state::reset()");
 		}
 
 		_expect_property = false;
@@ -141,7 +141,7 @@ namespace abc {
 		, state(log) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x100fe, "json_istream::json_istream()");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x100fe, "json_istream::json_istream()");
 		}
 	}
 
@@ -169,7 +169,7 @@ namespace abc {
 	inline json::item_t json_istream<MaxLevels, Log>::skip_value() {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10101, "json_istream::skip_value() >>>");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x10101, "json_istream::skip_value() >>>");
 		}
 
 		std::size_t base_levels = state::levels();
@@ -180,7 +180,7 @@ namespace abc {
 		while (state::levels() > base_levels);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
 		}
 
 		return item;
@@ -191,7 +191,7 @@ namespace abc {
 	inline json::item_t json_istream<MaxLevels, Log>::get_or_skip_token(json::token_t* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10103, "json_istream::get_or_skip_token() >>>");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x10103, "json_istream::get_or_skip_token() >>>");
 		}
 
 		json::item_t item = json::item::none;
@@ -344,7 +344,7 @@ namespace abc {
 		base::set_gcount(gcount);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10109, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x) <<<", ch, ch);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10109, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x) <<<", ch, ch);
 		}
 
 		if (buffer != nullptr) {
@@ -359,7 +359,7 @@ namespace abc {
 	inline std::size_t json_istream<MaxLevels, Log>::get_or_skip_string(char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x1010a, "json_istream::get_or_skip_string() >>>");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x1010a, "json_istream::get_or_skip_string() >>>");
 		}
 
 		std::size_t gcount = 0;
@@ -390,7 +390,7 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x1010b, "json_istream::get_or_skip_string() string='%s' <<<", buffer);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x1010b, "json_istream::get_or_skip_string() string='%s' <<<", buffer);
 		}
 
 		return gcount;
@@ -401,7 +401,7 @@ namespace abc {
 	inline void json_istream<MaxLevels, Log>::get_or_skip_number(double* buffer) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x1010c, "json_istream::get_or_skip_number() >>>");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x1010c, "json_istream::get_or_skip_number() >>>");
 		}
 
 		std::size_t gcount = 0;
@@ -442,7 +442,7 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x1010d, "json_istream::get_or_skip_number() number=%lf (%s) <<<", number, digits);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x1010d, "json_istream::get_or_skip_number() number=%lf (%s) <<<", number, digits);
 		}
 	}
 
@@ -451,7 +451,7 @@ namespace abc {
 	inline void json_istream<MaxLevels, Log>::get_literal(const char* literal) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
 		}
 
 		for (const char* it = literal; *it != '\0'; it++) {
@@ -467,7 +467,7 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10110, "json_istream::get_literal() <<<");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x10110, "json_istream::get_literal() <<<");
 		}
 	}
 
@@ -646,7 +646,7 @@ namespace abc {
 		, state(log) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10114, "json_ostream::json_ostream()");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x10114, "json_ostream::json_ostream()");
 		}
 	}
 
@@ -655,7 +655,7 @@ namespace abc {
 	inline void json_ostream<MaxLevels, Log>::put_token(const json::token_t* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
 		}
 
 		switch (buffer->item)
@@ -706,7 +706,7 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10117, "json_ostream::put_token() <<<");
+			log_local->put_any(category::abc::json, severity::abc::debug, 0x10117, "json_ostream::put_token() <<<");
 		}
 	}
 
@@ -966,7 +966,7 @@ namespace abc {
 	inline std::size_t json_ostream<MaxLevels, Log>::put_chars(const char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
 		}
 
 		std::size_t pcount = 0;
@@ -982,7 +982,7 @@ namespace abc {
 		base::flush();
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", pcount);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", pcount);
 		}
 
 		return pcount;

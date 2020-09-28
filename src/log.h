@@ -206,8 +206,8 @@ namespace abc {
 	inline void test_line_ostream<Size, Clock>::put_props(category_t category, severity_t severity, tag_t tag) noexcept {
 		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
-		char buf_severity[2 * severity::abc + 1];
-		severity = severity <= severity::abc ? severity : severity::abc;
+		char buf_severity[2 * severity::abc::debug + 1];
+		severity = severity <= severity::abc::debug ? severity : severity::abc::debug;
 		std::memset(buf_severity, ' ', 2 * severity);
 		buf_severity[2 * (severity - 1)] = '\0';
 		base::put_any(buf_severity);
