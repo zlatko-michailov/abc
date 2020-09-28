@@ -40,9 +40,33 @@ SAMPLE_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
 
 
-all: samples
+all: test
+	#
+	# ---------- Done all ----------
+	#
+	#
 
-samples: pack
+test: pack
+	#
+	# ---------- Begin testing ----------
+	$(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST)
+	# ---------- Done testing ----------
+	#
+
+pack: build_product build_test build_samples
+	#
+	# ---------- Begin packing ----------
+	cp $(CURDIR)/LICENSE  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
+	cp $(CURDIR)/README.md  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
+	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
+	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
+	cp -r $(CURDIR)/$(SUBDIR_BIN)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
+	cp -r $(CURDIR)/$(SUBDIR_SAMPLES)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
+	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
+	# ---------- Done packing ----------
+	#
+
+build_samples: build_product
 	#
 	# ---------- Begin building samples ----------
 	#
@@ -61,26 +85,6 @@ samples: pack
 	# ---------- Done building tictactoe ----------
 	#
 	# ---------- Done building samples ----------
-	#
-
-pack: test
-	#
-	# ---------- Begin packing ----------
-	cp $(CURDIR)/LICENSE  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
-	cp $(CURDIR)/README.md  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
-	cp -r $(CURDIR)/$(SUBDIR_SRC)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_INCLUDE)
-	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
-	cp -r $(CURDIR)/$(SUBDIR_BIN)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
-	cp -r $(CURDIR)/$(SUBDIR_SAMPLES)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
-	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
-	# ---------- Done packing ----------
-	#
-
-test: build_test
-	#
-	# ---------- Begin testing ----------
-	$(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST)
-	# ---------- Done testing ----------
 	#
 
 build_test: build_product
