@@ -280,6 +280,19 @@ This class is recommended for test suites.
 
 ### Utilities
 
+#### `endpoint`
+Purpose          | File
+---------------- | ----
+Include          | [__endpoint.h__](src/endpoint.h)
+Interface        | [endpoint.i.h](src/endpoint.i.h)
+Tests / Examples | [samples/basic/*](sample/basic/main.cpp)
+
+This class implements a simple web server using `socket`, `http`, and `json`.
+It can serve both file resources as well as REST.
+This way, every `abc` app can be interacted with using a web browser.
+
+
+
 #### `test`
 Purpose          | File
 ---------------- | ----
@@ -339,6 +352,14 @@ Tags are unique 64-bit integers that are used to correlate a log entry with the 
 
 
 ## Release Notes
+### 0.9.0
+- No breaking changes.
+- `endpoint`
+  - A simple web server.
+- Basic sample
+  - A simple app that solves systems of two linear equations of two variables.
+  - The app is interacted with using a web browser.
+
 ### 0.8.0
 - Breaking changes.
   - Refactored `log` and its related entities. Construction and usage are similar, but not the same.
@@ -359,14 +380,14 @@ Other tabular streams can be created in user space.
 - Breaking changes.
   - Removed method `gcount()` from `http_request_ostream` and `http_response_ostream`.
 - `json`
-  - Introduce json streams.
+  - JSON streams.
 
 ### 0.6.0
 - No breaking changes.
 - `http`
-  - Introduce _syntactic_ http streams.
+  - _Syntactic_ http streams.
 - `ascii`
-  - Introduce basic character predicates.
+  - Basic character predicates.
 
 ### 0.5.0
 - Breaking changes.
@@ -390,9 +411,13 @@ Other tabular streams can be created in user space.
 
 
 ## Roadmap
-### 0.9.0
-- Sample(s).
-- Stabilization and polishing as needed.
+### 0.10.0
+- Tic Tac Toe sample.
+
+### 0.11.0
+- Connect Four sample.
+
+### 0.12.0
 - Internationalization, if needed.
 
 ### 1.9.0
