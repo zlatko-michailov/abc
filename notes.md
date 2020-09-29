@@ -6,6 +6,9 @@
   - basic
 
 ## To Do
+- resource
+  - path
+  - parameter
 - Samples
   - tictactoe
 
@@ -49,6 +52,7 @@ ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$
 -----------------------------------------
 POST /game
 -----------------------------------------
+Request
 
 human vs human
 {
@@ -66,4 +70,23 @@ remote (computer) vs this (computer)
   "play": true,
   "start": false
   "notify": "http://..."
+}
+
+-----------------------------------------
+POST /move
+-----------------------------------------
+Response
+
+{
+  "delay": 0 | n (seconds)
+}
+
+-----------------------------------------
+GET /moves?since=stamp
+-----------------------------------------
+Response
+
+{
+  "stamp": "...",
+  "moves": [ ... ]
 }
