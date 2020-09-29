@@ -420,7 +420,7 @@ Other tabular streams can be created in user space.
 ### 0.12.0
 - Internationalization, if needed.
 
-### 1.9.0
+### 1.12.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)

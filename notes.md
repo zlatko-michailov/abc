@@ -1,9 +1,5 @@
-# v0.9
+# v0.10
 ## Done
-- json - put_char()
-- endpoint
-- Samples
-  - basic
 
 ## To Do
 - resource
@@ -22,14 +18,14 @@
 
 
 
-# v1.9
+# v1.12
 ## Done
 ## To Do
 - WebSocket (SHA-1, base64)
 
 
 
-# v1.10
+# v1.13
 ## Done
 ## To Do
 - ring - single writer, multiple readers
