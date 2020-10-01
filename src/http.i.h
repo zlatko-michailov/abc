@@ -175,6 +175,10 @@ namespace abc {
 		void	get_method(char* buffer, std::size_t size);
 		void	get_resource(char* buffer, std::size_t size);
 		void	get_protocol(char* buffer, std::size_t size);
+
+	public:
+		static void			split_resource(char* buffer, std::size_t size);
+		static const char*	get_resource_parameter(char* buffer, std::size_t size, const char* parameter_name);
 	};
 
 

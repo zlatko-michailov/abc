@@ -1,10 +1,10 @@
 # v0.10
 ## Done
+- resource
+  - split
+  - parameter
 
 ## To Do
-- resource
-  - path
-  - parameter
 - Samples
   - tictactoe
 

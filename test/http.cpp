@@ -275,6 +275,58 @@ namespace abc { namespace test { namespace http {
 	// --------------------------------------------------------------
 
 
+	bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* parameter_name, const char* expected_parameter_value, abc::tag_t tag);
+
+
+	bool test_http_request_istream_resource_01(test_context<abc::test::log>& context) {
+		return test_http_request_istream_resource(context, "/path", "/path", "p3", nullptr, __TAG__);
+	}
+
+
+	bool test_http_request_istream_resource_02(test_context<abc::test::log>& context) {
+		return test_http_request_istream_resource(context, "/path?", "/path", "p3", nullptr, __TAG__);
+	}
+
+
+	bool test_http_request_istream_resource_03(test_context<abc::test::log>& context) {
+		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", "p3", "42", __TAG__);
+	}
+
+
+	bool test_http_request_istream_resource_04(test_context<abc::test::log>& context) {
+		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", "p3", "42", __TAG__);
+	}
+
+
+	bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* parameter_name, const char* expected_parameter_value, abc::tag_t tag) {
+		constexpr std::size_t buffer_size = 200;
+		char buffer[buffer_size + 1];
+		std::memset(buffer, 'x', buffer_size);
+
+
+		const std::size_t resource_len = std::strlen(resource);
+		std::memcpy(buffer, resource, resource_len + 1);
+		buffer[resource_len + 1] = '\0';
+
+		bool passed = true;
+		abc::http_request_istream<abc::test::log>::split_resource(buffer, buffer_size);
+		passed = context.are_equal(buffer, path, __TAG__) && passed;
+
+		const char* parameter_value = abc::http_request_istream<abc::test::log>::get_resource_parameter(buffer, buffer_size, "p3");
+		if (expected_parameter_value != nullptr) {
+			passed = context.are_equal(parameter_value, expected_parameter_value, __TAG__) && passed;
+		}
+		else {
+			passed = context.are_equal<void*>((void*)parameter_value, (void*)nullptr, __TAG__, "%p") && passed;
+		}
+
+		return passed;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	bool test_http_request_ostream_bodytext(test_context<abc::test::log>& context) {
 		const char expected[] =
 			"POST http://a.com/b?c=d HTTP/1.1\r\n"

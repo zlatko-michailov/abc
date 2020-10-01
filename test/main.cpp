@@ -66,6 +66,10 @@ int main() {
 				{ "test_http_request_istream_bodytext",				abc::test::http::test_http_request_istream_bodytext },
 				{ "test_http_request_istream_bodybinary",			abc::test::http::test_http_request_istream_bodybinary },
 				{ "test_http_request_istream_realworld_01",			abc::test::http::test_http_request_istream_realworld_01 },
+				{ "test_http_request_istream_resource_01",			abc::test::http::test_http_request_istream_resource_01 },
+				{ "test_http_request_istream_resource_02",			abc::test::http::test_http_request_istream_resource_02 },
+				{ "test_http_request_istream_resource_03",			abc::test::http::test_http_request_istream_resource_03 },
+				{ "test_http_request_istream_resource_04",			abc::test::http::test_http_request_istream_resource_04 },
 				{ "test_http_request_ostream_bodytext",				abc::test::http::test_http_request_ostream_bodytext },
 				{ "test_http_request_ostream_bodybinary",			abc::test::http::test_http_request_ostream_bodybinary },
 				{ "test_http_response_istream_extraspaces",			abc::test::http::test_http_response_istream_extraspaces },
@@ -118,7 +122,6 @@ int main() {
 				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
 				{ "test_http_json_socket_stream",					abc::test::socket::test_http_json_socket_stream },
 			} },
-
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
 			} },

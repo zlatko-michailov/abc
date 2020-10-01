@@ -37,6 +37,10 @@ namespace abc { namespace test { namespace http {
 	bool test_http_request_istream_bodytext(test_context<abc::test::log>& context);
 	bool test_http_request_istream_bodybinary(test_context<abc::test::log>& context);
 	bool test_http_request_istream_realworld_01(test_context<abc::test::log>& context);
+	bool test_http_request_istream_resource_01(test_context<abc::test::log>& context);
+	bool test_http_request_istream_resource_02(test_context<abc::test::log>& context);
+	bool test_http_request_istream_resource_03(test_context<abc::test::log>& context);
+	bool test_http_request_istream_resource_04(test_context<abc::test::log>& context);
 
 	bool test_http_request_ostream_bodytext(test_context<abc::test::log>& context);
 	bool test_http_request_ostream_bodybinary(test_context<abc::test::log>& context);

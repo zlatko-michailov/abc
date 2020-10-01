@@ -750,7 +750,9 @@ namespace abc {
 
 		base::assert_next(http::item::resource);
 
-		std::size_t gcount = base::get_prints(buffer, size);
+		// The resource is terminated by an extra '\0', so it could be split.
+		std::size_t gcount = base::get_prints(buffer, size - 1);
+		buffer[gcount + 1] = '\0';
 
 		base::skip_spaces();
 
@@ -769,6 +771,45 @@ namespace abc {
 		base::skip_crlf();
 
 		base::set_gstate(gcount, http::item::header_name);
+	}
+
+
+	template <typename Log>
+	inline void http_request_istream<Log>::split_resource(char* buffer, std::size_t size) {
+		const char* const end = buffer + size;
+ 
+		// path?param1=...&param2=...
+		char* param = std::strchr(buffer, '?');
+
+		while (param < end && param != nullptr) {
+			*param++ = '\0';
+
+			if (param < end && *param != '\0') {
+				param = std::strchr(param, '&');
+			}
+		}
+	}
+
+
+	template <typename Log>
+	inline const char* http_request_istream<Log>::get_resource_parameter(char* buffer, std::size_t size, const char* parameter_name) {
+		const char* const end = buffer + size;
+		const std::size_t parameter_name_len = std::strlen(parameter_name);
+ 
+		// path\0param1=...\0param2=...\0\0
+		char* param = buffer + std::strlen(buffer) + 1;
+
+		while (param < end && *param != '\0') {
+			if (std::strncmp(param, parameter_name, parameter_name_len) == 0 && param[parameter_name_len] == '=') {
+				return param + parameter_name_len + 1;
+			}
+
+			if (param < end && *param != '\0') {
+				param += std::strlen(param) + 1;
+			}
+		}
+
+		return nullptr;
 	}
 
 
