@@ -5,6 +5,12 @@
   - parameter
 
 ## To Do
+- page_file
+  - page
+- db
+  - db_index
+  - db_data
+
 - Samples
   - tictactoe
 
@@ -44,6 +50,22 @@
 PID PPID PS
 ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$/\1 \2 \3/'
 
+
+-----------------------------------------
+when to unload pages?
+-----------------------------------------
+
+page_file<Record, MaxPages, FreePercent = 25> {
+  page<Record> create_page()
+  page<Record> get_page(i)
+}
+
+page<Record> {
+  ~page()
+  Record* get()
+}
+
+meta | free pages list + index b-tree + heap
 
 -----------------------------------------
 POST /game

@@ -34,6 +34,7 @@ SOFTWARE.
 #include "json.h"
 #include "heap.h"
 #include "clock.h"
+#include "../src/vmem.h"
 
 
 int main() {
@@ -130,6 +131,9 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
+
+
+	abc::vmem_pool<abc::size::_64, abc::test::log>("out/test/test1.vmem", &log);
 
 	return passed ? 0 : 1;
 }
