@@ -78,7 +78,7 @@ namespace abc {
 	public:
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
-	private:
+	public: //// public or private?
 		friend class _vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 		friend class _vmem_ptr<vmem_pool<MaxMappedPages, Log>, Log>;
 

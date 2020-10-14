@@ -106,10 +106,11 @@ namespace abc {
 
 	template <std::size_t MaxMappedPages, typename Log>
 	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::create_page() {
-		vmem_page_pos_t page_pos = lseek(_fd, 0, SEEK_END);
+		off_t page_off = lseek(_fd, 0, SEEK_END);
+		vmem_page_pos_t page_pos = page_off / vmem_page_size;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() pos=%llu", page_pos);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() pos=%llu off=%llu", page_pos, page_off);
 		}
 
 		std::uint8_t blank_page[vmem_page_size] = { 0 };
@@ -135,8 +136,8 @@ namespace abc {
 
 	template <std::size_t MaxMappedPages, typename Log>
 	inline void* vmem_pool<MaxMappedPages, Log>::lock_page(vmem_page_pos_t page_pos) {
-		off_t page_offset = static_cast<off_t>(page_pos * vmem_page_size);
-		void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_offset);
+		off_t page_off = static_cast<off_t>(page_pos * vmem_page_size);
+		void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() pos=%llu, ptr=%p, errno=%d", page_pos, ptr, errno);
@@ -182,7 +183,8 @@ namespace abc {
 				// To enforce some fairness, we subtract the avg_keep_count from the keep_count of each page that will be kept.
 				vmem_page_hit_count_t avg_keep_count = _mapped_page_totals.keep_count / _mapped_page_count;
 				for (std::size_t attempt = 0; attempt < 2; attempt++) {
-					std::size_t e = -1; // Index of the first empty slot
+					bool has_empty_pos = false;
+					std::size_t empty_pos = MaxMappedPages;
 					for (i = 0; i < _mapped_page_count; i++) {
 						// IMPORTANT: Skip locked pages!
 						if (_mapped_pages[i].lock_count > 0) {
@@ -216,12 +218,12 @@ namespace abc {
 							}
 
 							// If there is an empty slot, we move this elemet there.
-							if (e >= 0) {
+							if (has_empty_pos) {
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Moving page e=%lu, i=%lu", e, i);
+									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Moving page empty_pos=%lu, i=%lu", empty_pos, i);
 								}
 
-								_mapped_pages[e++] = _mapped_pages[i];
+								_mapped_pages[empty_pos++] = _mapped_pages[i];
 							}
 						}
 						else {
@@ -230,20 +232,26 @@ namespace abc {
 								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Unmapping page i=%lu, keep_count=%lu, avg_keep_count=%lu", i, _mapped_pages[i].keep_count, avg_keep_count);
 							}
 
-							if (e < 0) {
+							if (!has_empty_pos) {
 								if (_log != nullptr) {
 									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() First empty slot i=%lu", i);
 								}
 
-								e = i;
+								has_empty_pos = true;
+								empty_pos = i;
 							}
 						}
 					} // for (i)
 
-					// e is the position of the first empty slot, i.e. the new _mapped_page_count.
-					if (e >= 0) {
+					// empty_pos is the new _mapped_page_count.
+					if (has_empty_pos) {
 						// The first attempt was successful - we were able to free up some capacity.
-						_mapped_page_count = e;
+						_mapped_page_count = empty_pos;
+
+						if (_log != nullptr) {
+							_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Compacted. _mapped_page_count=%lu", _mapped_page_count);
+						}
+
 						break;
 					}
 					else {
@@ -252,28 +260,28 @@ namespace abc {
 						avg_keep_count = _mapped_page_totals.keep_count + 1;
 					}
 				} // for (attempts)
-
-				if (_mapped_page_count < MaxMappedPages) {
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Not found. Capacity _mapped_page_count=%lu", _mapped_page_count);
-					}
-
-					_vmem_mapped_page& mapped_page = _mapped_pages[_mapped_page_count++];
-					mapped_page.pos = page_pos;
-					mapped_page.ptr = ptr;
-					mapped_page.lock_count = 1;
-					mapped_page.keep_count = 1;
-
-					_mapped_page_totals.keep_count++;
-					_mapped_page_totals.miss_count++;
-					_mapped_page_totals.check_count += _mapped_page_count;
-				}
-				else {
-					// All the maped pages are locked. We cannot find a slot for the new page.
-					// We have to let the caller know.
-					throw exception<std::runtime_error, Log>("Insufficient mapped page capacity", __TAG__, _log);
-				}
 			} // No capacity
+
+			if (_mapped_page_count < MaxMappedPages) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Capacity _mapped_page_count=%lu", _mapped_page_count);
+				}
+
+				_vmem_mapped_page& mapped_page = _mapped_pages[_mapped_page_count++];
+				mapped_page.pos = page_pos;
+				mapped_page.ptr = ptr;
+				mapped_page.lock_count = 1;
+				mapped_page.keep_count = 1;
+
+				_mapped_page_totals.keep_count++;
+				_mapped_page_totals.miss_count++;
+				_mapped_page_totals.check_count += _mapped_page_count;
+			}
+			else {
+				// All the maped pages are locked. We cannot find a slot for the new page.
+				// We have to let the caller know.
+				throw exception<std::runtime_error, Log>("Insufficient mapped page capacity", __TAG__, _log);
+			}
 		} // Not found
 
 		return ptr;

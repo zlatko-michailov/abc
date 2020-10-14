@@ -133,7 +133,14 @@ int main() {
 	bool passed = test_suite.run();
 
 
-	abc::vmem_pool<abc::size::_64, abc::test::log>("out/test/test1.vmem", &log);
+	abc::vmem_pool<3, abc::test::log> pool("out/test/test1.vmem", &log);
+	abc::vmem_page_pos_t page1_pos = pool.create_page();
+	pool.lock_page(page1_pos);
+	abc::vmem_page_pos_t page2_pos = pool.create_page();
+	pool.lock_page(page2_pos);
+	abc::vmem_page_pos_t page3_pos = pool.create_page();
+	pool.unlock_page(page2_pos);
+	pool.lock_page(page3_pos);
 
 	return passed ? 0 : 1;
 }
