@@ -97,7 +97,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::get_free_page() {
+	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::get_free_page() noexcept {
 		// TODO: Implement get_free_page()
 
 		return vmem_page_pos_nil;
@@ -105,7 +105,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::create_page() {
+	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::create_page() noexcept {
 		off_t page_off = lseek(_fd, 0, SEEK_END);
 		vmem_page_pos_t page_pos = page_off / vmem_page_size;
 
@@ -129,18 +129,16 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::delete_page(vmem_page_pos_t page_pos) {
+	inline bool vmem_pool<MaxMappedPages, Log>::delete_page(vmem_page_pos_t page_pos) noexcept {
 		// TODO: Implement delete_page()
+		return true;
 	}
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void* vmem_pool<MaxMappedPages, Log>::lock_page(vmem_page_pos_t page_pos) {
-		off_t page_off = static_cast<off_t>(page_pos * vmem_page_size);
-		void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
-
+	inline void* vmem_pool<MaxMappedPages, Log>::lock_page(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() pos=%llu, ptr=%p, errno=%d", page_pos, ptr, errno);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Start pos=%llu", page_pos);
 		}
 
 		// Try to find the page among the mapped pages.
@@ -151,21 +149,7 @@ namespace abc {
 			}
 		}
 
-		if (i < _mapped_page_count) {
-			// The page was found.
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Found at i=%lu", i);
-			}
-
-			_vmem_mapped_page& mapped_page = _mapped_pages[i];
-			mapped_page.lock_count++;
-			mapped_page.keep_count++;
-
-			_mapped_page_totals.keep_count++;
-			_mapped_page_totals.hit_count++;
-			_mapped_page_totals.check_count += i;
-		}
-		else {
+		if (i >= _mapped_page_count) {
 			// The page was not found.
 
 			// Check if there is capacity for one more mapped page.
@@ -267,29 +251,59 @@ namespace abc {
 					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Capacity _mapped_page_count=%lu", _mapped_page_count);
 				}
 
-				_vmem_mapped_page& mapped_page = _mapped_pages[_mapped_page_count++];
-				mapped_page.pos = page_pos;
-				mapped_page.ptr = ptr;
-				mapped_page.lock_count = 1;
-				mapped_page.keep_count = 1;
-
-				_mapped_page_totals.keep_count++;
-				_mapped_page_totals.miss_count++;
-				_mapped_page_totals.check_count += _mapped_page_count;
+				i = _mapped_page_count;
 			}
 			else {
 				// All the maped pages are locked. We cannot find a slot for the new page.
-				// We have to let the caller know.
-				throw exception<std::runtime_error, Log>("Insufficient mapped page capacity", __TAG__, _log);
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::lock_page() Insufficient capacity. MaxedMappedPages=%lu", MaxMappedPages);
+				}
+
+				return nullptr;
 			}
 		} // Not found
 
-		return ptr;
+		_vmem_mapped_page& mapped_page = _mapped_pages[i];
+		if (i < _mapped_page_count) {
+			// The page is already mapped. Only re-lock it.
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Found at i=%lu", i);
+			}
+
+			mapped_page.lock_count++;
+			mapped_page.keep_count++;
+
+			_mapped_page_totals.keep_count++;
+			_mapped_page_totals.hit_count++;
+			_mapped_page_totals.check_count += i;
+		}
+		else {
+			// The page is not mapped. Map it. Then lock it.
+			off_t page_off = static_cast<off_t>(page_pos * vmem_page_size);
+			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Map pos=%llu, ptr=%p, errno=%d", page_pos, ptr, errno);
+			}
+
+			_mapped_page_count++;
+
+			mapped_page.pos = page_pos;
+			mapped_page.ptr = ptr;
+			mapped_page.lock_count = 1;
+			mapped_page.keep_count = 1;
+
+			_mapped_page_totals.keep_count++;
+			_mapped_page_totals.miss_count++;
+			_mapped_page_totals.check_count += i;
+		}
+
+		return mapped_page.ptr;
 	}
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::unlock_page(vmem_page_pos_t page_pos) {
+	inline bool vmem_pool<MaxMappedPages, Log>::unlock_page(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::unlock_page() pos=%llu", page_pos);
 		}
@@ -317,9 +331,14 @@ namespace abc {
 		}
 		else {
 			// The page was not found. This is a logic error.
-			throw exception<std::logic_error, Log>("Supposedly locked page is not mapped", __TAG__, _log);
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::unlock_page() Trying to unlock a page that is not locked. page_pos=%llu", page_pos);
+			}
+
+			return false;
 		}
 
+		return true;
 	}
 
 

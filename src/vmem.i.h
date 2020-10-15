@@ -82,12 +82,12 @@ namespace abc {
 		friend class _vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 		friend class _vmem_ptr<vmem_pool<MaxMappedPages, Log>, Log>;
 
-		vmem_page_pos_t				get_free_page();
-		vmem_page_pos_t				create_page();
-		void						delete_page(vmem_page_pos_t page_pos);
+		vmem_page_pos_t				get_free_page() noexcept;
+		vmem_page_pos_t				create_page() noexcept;
+		bool						delete_page(vmem_page_pos_t page_pos) noexcept;
 
-		void*						lock_page(vmem_page_pos_t page_pos);
-		void						unlock_page(vmem_page_pos_t page_pos);
+		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
+		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
 
 	private:
 		int							_fd;
