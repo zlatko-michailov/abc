@@ -170,31 +170,14 @@ namespace abc {
 					bool has_empty_pos = false;
 					std::size_t empty_pos = MaxMappedPages;
 					for (i = 0; i < _mapped_page_count; i++) {
-						// IMPORTANT: Skip locked pages!
-						if (_mapped_pages[i].lock_count > 0) {
-							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Skipping locked page i=%lu", i);
-							}
-
-							// Reduce the keep_count for fairness.
-							if (attempt == 0 && _mapped_pages[i].keep_count > avg_keep_count) {
-								_mapped_pages[i].keep_count -= avg_keep_count;
-							}
-							else {
-								_mapped_pages[i].keep_count = 0;
-							}
-
-							continue;
-						}
-
-						if (_mapped_pages[i].keep_count > avg_keep_count) {
+						if (_mapped_pages[i].lock_count > 0 || _mapped_pages[i].keep_count > avg_keep_count) {
 							// This page will be kept.
 							if (_log != nullptr) {
 								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Keeping page i=%lu, keep_count=%lu, avg_keep_count=%lu", i, _mapped_pages[i].keep_count, avg_keep_count);
 							}
 
 							// Reduce the keep_count for fairness.
-							if (attempt == 0) {
+							if (attempt == 0 && _mapped_pages[i].keep_count > avg_keep_count) {
 								_mapped_pages[i].keep_count -= avg_keep_count;
 							}
 							else {
@@ -214,6 +197,12 @@ namespace abc {
 							// This page will be unmapped.
 							if (_log != nullptr) {
 								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Unmapping page i=%lu, keep_count=%lu, avg_keep_count=%lu", i, _mapped_pages[i].keep_count, avg_keep_count);
+							}
+
+							int um = munmap(_mapped_pages[i].ptr, vmem_page_size);
+
+							if (_log != nullptr) {
+								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Unmap i=%lu, ptr=%p, um=%d, errno=%d", i, _mapped_pages[i].ptr, um, errno);
 							}
 
 							if (!has_empty_pos) {
@@ -263,9 +252,12 @@ namespace abc {
 			}
 		} // Not found
 
+		// We have a slot where we should lock the page.
 		_vmem_mapped_page& mapped_page = _mapped_pages[i];
+
 		if (i < _mapped_page_count) {
 			// The page is already mapped. Only re-lock it.
+
 			if (_log != nullptr) {
 				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Found at i=%lu", i);
 			}
@@ -279,11 +271,12 @@ namespace abc {
 		}
 		else {
 			// The page is not mapped. Map it. Then lock it.
+
 			off_t page_off = static_cast<off_t>(page_pos * vmem_page_size);
 			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Map pos=%llu, ptr=%p, errno=%d", page_pos, ptr, errno);
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Map i=%lu, pos=%llu, ptr=%p, errno=%d", i, page_pos, ptr, errno);
 			}
 
 			_mapped_page_count++;
@@ -296,6 +289,22 @@ namespace abc {
 			_mapped_page_totals.keep_count++;
 			_mapped_page_totals.miss_count++;
 			_mapped_page_totals.check_count += i;
+		}
+
+		// Optimization: Swap this page forward (once) to keep them sorted by keep_count.
+		for (std::size_t j = 0; j < i; j++) {
+			if (_mapped_pages[j].keep_count < _mapped_pages[i].keep_count) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Swapping j=%lu, i=%lu", j, i);
+				}
+
+				// Swap.
+				_vmem_mapped_page temp = _mapped_pages[j];
+				_mapped_pages[j] = _mapped_pages[i];
+				_mapped_pages[i] = temp;
+
+				break;
+			}
 		}
 
 		return mapped_page.ptr;
