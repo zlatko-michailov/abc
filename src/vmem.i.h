@@ -39,6 +39,8 @@ namespace abc {
 
 
 	constexpr std::size_t		vmem_page_size		= size::k4;
+	constexpr vmem_page_pos_t	vmem_page_pos_root	= 0;
+	constexpr vmem_page_pos_t	vmem_page_pos_start	= 1;
 	constexpr vmem_page_pos_t	vmem_page_pos_nil	= static_cast<vmem_page_pos_t>(-1);
 	constexpr vmem_item_pos_t	vmem_item_pos_nil	= static_cast<vmem_item_pos_t>(-1);
 
@@ -82,12 +84,14 @@ namespace abc {
 		friend class _vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 		friend class _vmem_ptr<vmem_pool<MaxMappedPages, Log>, Log>;
 
-		vmem_page_pos_t				get_free_page() noexcept;
-		vmem_page_pos_t				create_page() noexcept;
-		bool						delete_page(vmem_page_pos_t page_pos) noexcept;
+		vmem_page_pos_t				alloc_page() noexcept;
+		bool						free_page(vmem_page_pos_t page_pos) noexcept;
 
 		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
 		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
+
+	private:
+		vmem_page_pos_t				create_page() noexcept;
 
 	private:
 		int							_fd;
@@ -198,14 +202,29 @@ namespace abc {
 	#pragma pack(push, 1)
 
 
+	template <typename T>
+	struct _vmem_deque_node {
+		vmem_page_pos_t		prev				= vmem_page_pos_nil;
+		vmem_page_pos_t		next				= vmem_page_pos_nil;
+		vmem_item_pos_t		item_count			= 0;
+		T					items[1]			= { 0 };
+	};
+
+
+	struct _vmem_deque {
+		vmem_page_pos_t		front				= vmem_page_pos_nil;
+		vmem_page_pos_t		back				= vmem_page_pos_nil;
+		vmem_page_pos_t		total_item_count	= 0;
+	};
+
+
 	struct _vmem_root_page {
 		vmem_version_t		version				= 1;
 		char				signature[10]		= "abc::vmem";
 		vmem_item_pos_t		page_size			= vmem_page_size;
-		vmem_page_pos_t		total_page_count	= 1;
-		vmem_page_pos_t		free_page_pos		= vmem_page_pos_nil;
-		vmem_page_pos_t		value_page_pos		= vmem_page_pos_nil;
-		vmem_page_pos_t		key_page_pos		= vmem_page_pos_nil;
+		std::uint16_t		unused1				= 0xcccc;
+		_vmem_deque			free_pages;
+		std::uint8_t		unused2				= 0xcc;
 	};
 
 

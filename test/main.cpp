@@ -133,29 +133,29 @@ int main() {
 	bool passed = test_suite.run();
 
 
-	abc::vmem_pool<3, abc::test::log> pool("out/test/test1.vmem", &log);
+	abc::vmem_pool<4, abc::test::log> pool("out/test/test1.vmem", &log);
 
-	abc::vmem_page_pos_t page1_pos = pool.create_page();
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page1 pos=%llu", page1_pos);
-	void* ptr = pool.lock_page(page1_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page1 ptr=%p", ptr);
-
-	abc::vmem_page_pos_t page2_pos = pool.create_page();
+	abc::vmem_page_pos_t page2_pos = pool.alloc_page();
 	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 pos=%llu", page2_pos);
-	ptr = pool.lock_page(page2_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 ptr=%p", ptr);
-	ptr = pool.lock_page(page2_pos);
+	void* ptr = pool.lock_page(page2_pos);
 	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 ptr=%p", ptr);
 
-	bool ok = pool.unlock_page(page2_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 ok=%s", (ok ? "true" : "false"));
-	ok = pool.unlock_page(page2_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 ok=%s", (ok ? "true" : "false"));
-
-	abc::vmem_page_pos_t page3_pos = pool.create_page();
+	abc::vmem_page_pos_t page3_pos = pool.alloc_page();
 	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 pos=%llu", page3_pos);
 	ptr = pool.lock_page(page3_pos);
 	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ptr=%p", ptr);
+	ptr = pool.lock_page(page3_pos);
+	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ptr=%p", ptr);
+
+	bool ok = pool.unlock_page(page3_pos);
+	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ok=%s", (ok ? "true" : "false"));
+	ok = pool.unlock_page(page3_pos);
+	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ok=%s", (ok ? "true" : "false"));
+
+	abc::vmem_page_pos_t page4_pos = pool.alloc_page();
+	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page4 pos=%llu", page4_pos);
+	ptr = pool.lock_page(page4_pos);
+	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page4 ptr=%p", ptr);
 
 	return passed ? 0 : 1;
 }

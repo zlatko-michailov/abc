@@ -64,43 +64,70 @@ namespace abc {
 			throw exception<std::runtime_error, Log>("Corrupt vmem file - size", __TAG__, _log);
 		}
 
-		// Create and init the root page if the file is empty.
+		// Create and init the root and the start pages if the file is empty.
 		if (file_size == 0) {
-			vmem_page_pos_t root_page_pos = create_page();
+			for (vmem_page_pos_t page_pos = vmem_page_pos_root; page_pos <= vmem_page_pos_start; page_pos++) {
+				vmem_page_pos_t created_page_pos = create_page();
 
-			if (root_page_pos != 0) {
-				throw exception<std::runtime_error, Log>("Couldn't init vmem file - root page", __TAG__, _log);
+				if (created_page_pos != page_pos) {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Created page mismatch: actual=%llu, expected=%llu", created_page_pos, page_pos);
+					}
+
+					throw exception<std::runtime_error, Log>("Couldn't init vmem file", __TAG__, _log);
+				}
+
+				// Materialize the page in memory.
+				void* page_ptr = lock_page(page_pos);
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() New page pos=%llu, ptr=%p", page_pos, page_ptr);
+				}
+
+				// Init the content of the page.
+				memset(page_ptr, 0, vmem_page_size);
+
+				if (page_pos == vmem_page_pos_root) {
+					_vmem_root_page init;
+					memmove(page_ptr, &init, sizeof(init));
+				}
 			}
-
-			// Materialize the page in memory.
-			void* root_page = lock_page(0);
-
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() New root page ptr=%p", root_page);
-			}
-
-			// Init the content of the page.
-			memset(root_page, 0, vmem_page_size);
-
-			_vmem_root_page init;
-			memmove(root_page, &init, sizeof(init));
 		}
 		else {
-			// Load the root page.
-			void* root_page = lock_page(0);
+			// Load the root and start pages.
+			for (vmem_page_pos_t page_pos = vmem_page_pos_root; page_pos <= vmem_page_pos_start; page_pos++) {
+				void* page_ptr = lock_page(page_pos);
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Loaded root ptr=%p", root_page);
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Loaded page pos=%llu, ptr=%p", page_pos, page_ptr);
+				}
 			}
 		}
 	}
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::get_free_page() noexcept {
-		// TODO: Implement get_free_page()
+	inline vmem_page_pos_t vmem_pool<MaxMappedPages, Log>::alloc_page() noexcept {
+		vmem_page_pos_t page_pos;
 
-		return vmem_page_pos_nil;
+		// TODO: First, check the free pages.
+		page_pos = vmem_page_pos_nil;
+
+		if (page_pos == vmem_page_pos_nil) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::alloc_page() No free pages. Creating...");
+			}
+
+			page_pos = create_page();
+		}
+
+		if (page_pos == vmem_page_pos_nil) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::alloc_page() Could not create a page on the file.");
+			}
+		}
+
+		return page_pos;
 	}
 
 
@@ -129,8 +156,8 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline bool vmem_pool<MaxMappedPages, Log>::delete_page(vmem_page_pos_t page_pos) noexcept {
-		// TODO: Implement delete_page()
+	inline bool vmem_pool<MaxMappedPages, Log>::free_page(vmem_page_pos_t page_pos) noexcept {
+		// TODO: Add to the list of free pages.
 		return true;
 	}
 
@@ -178,9 +205,11 @@ namespace abc {
 
 							// Reduce the keep_count for fairness.
 							if (attempt == 0 && _mapped_pages[i].keep_count > avg_keep_count) {
+								_mapped_page_totals.keep_count -= avg_keep_count;
 								_mapped_pages[i].keep_count -= avg_keep_count;
 							}
 							else {
+								_mapped_page_totals.keep_count -= _mapped_pages[i].keep_count;
 								_mapped_pages[i].keep_count = 0;
 							}
 
