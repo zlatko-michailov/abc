@@ -336,6 +336,8 @@ namespace abc {
 			}
 		}
 
+		log_totals();
+
 		return mapped_page.ptr;
 	}
 
@@ -376,7 +378,24 @@ namespace abc {
 			return false;
 		}
 
+		log_totals();
+
 		return true;
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::log_totals() noexcept {
+		if (_log != nullptr) {
+			vmem_page_hit_count_t total = _mapped_page_totals.hit_count + _mapped_page_totals.miss_count;
+			vmem_page_hit_count_t hit_percent = (_mapped_page_totals.hit_count * 100) / total;
+			vmem_page_hit_count_t miss_percent = (_mapped_page_totals.miss_count * 100) / total;
+			vmem_page_hit_count_t check_factor = _mapped_page_totals.check_count / total;
+			vmem_page_hit_count_t check_factor_percent = (check_factor * 100) / MaxMappedPages;
+
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Totals hits=%lu (%lu%%), misses=%lu (%lu%%), checks=%lu (%lu, %lu%%)", 
+				_mapped_page_totals.hit_count, hit_percent, _mapped_page_totals.miss_count, miss_percent, _mapped_page_totals.check_count, check_factor, check_factor_percent);
+		}
 	}
 
 
