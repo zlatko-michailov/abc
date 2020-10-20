@@ -304,7 +304,7 @@ namespace abc {
 	inline void _client_socket<Log>::send(const void* buffer, std::size_t size, socket::address* address) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10016, "_client_socket::send() >>> size=%lu", (std::uint32_t)size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10016, "_client_socket::send() >>> size=%lu", (unsigned long)size);
 		}
 
 		if (!base::is_open()) {
@@ -332,7 +332,7 @@ namespace abc {
 
 		if (log_local != nullptr) {
 			log_local->put_binary(category::abc::socket, severity::abc::optional, 0x10066, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::optional, 0x1001b, "_client_socket::send() <<< size=%lu", (std::uint32_t)size);
+			log_local->put_any(category::abc::socket, severity::abc::optional, 0x1001b, "_client_socket::send() <<< size=%lu", (unsigned long)size);
 		}
 	}
 
@@ -341,7 +341,7 @@ namespace abc {
 	inline void _client_socket<Log>::receive(void* buffer, std::size_t size, socket::address* address) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001c, "_client_socket::receive() >>> size=%lu", (std::uint32_t)size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001c, "_client_socket::receive() >>> size=%lu", (unsigned long)size);
 		}
 
 		if (!base::is_open()) {
@@ -369,7 +369,7 @@ namespace abc {
 
 		if (log_local != nullptr) {
 			log_local->put_binary(category::abc::socket, severity::abc::optional, 0x10067, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::optional, 0x10021, "_client_socket::receive() <<< size=%lu", (std::uint32_t)size);
+			log_local->put_any(category::abc::socket, severity::abc::optional, 0x10021, "_client_socket::receive() <<< size=%lu", (unsigned long)size);
 		}
 	}
 

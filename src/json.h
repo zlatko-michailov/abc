@@ -92,7 +92,7 @@ namespace abc {
 	inline bool _json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
 		if (_level_top + 1 >= MaxLevels) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fb, "_json_state::push_level() levels='%lu', MaxLevels=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)MaxLevels);
+				_log->put_any(category::abc::json, severity::important, 0x100fb, "_json_state::push_level() levels='%lu', MaxLevels=%lu", (unsigned long)(_level_top + 1), (unsigned long)MaxLevels);
 			}
 
 			return false;
@@ -107,7 +107,7 @@ namespace abc {
 	inline bool _json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
 		if (_level_top + 1 <= 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fc, "_json_state::pop_level() levels='%lu'", (std::uint32_t)_level_top + 1);
+				_log->put_any(category::abc::json, severity::important, 0x100fc, "_json_state::pop_level() levels='%lu'", (unsigned long)(_level_top + 1));
 			}
 
 			return false;
@@ -115,7 +115,7 @@ namespace abc {
 
 		if (_level_stack[_level_top] != level) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%lu', top=%lu, pop=%lu", (std::uint32_t)_level_top + 1, (std::uint32_t)_level_stack[_level_top], (std::uint32_t)level);
+				_log->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%lu', top=%lu, pop=%lu", (unsigned long)(_level_top + 1), (unsigned long)_level_stack[_level_top], (unsigned long)level);
 			}
 
 			return false;
@@ -156,7 +156,7 @@ namespace abc {
 
 		if (size < sizeof(json::token_t)) {
 			char buffer[100];
-			std::snprintf(buffer, sizeof(buffer), "json_istream::get_token() size=%ld (< %ld) ", (std::int32_t)size, (std::int32_t)sizeof(json::token_t));
+			std::snprintf(buffer, sizeof(buffer), "json_istream::get_token() size=%ld (< %ld) ", (unsigned long)size, (unsigned long)sizeof(json::token_t));
 
 			throw exception<std::logic_error, Log>(buffer, 0x10100, log_local);
 		}
@@ -514,7 +514,7 @@ namespace abc {
 
 				if (gcount != 4) {
 					if (log_local != nullptr) {
-						log_local->put_any(category::abc::json, severity::important, 0x10111, "json_istream::get_escaped_char() gcount=%lu", gcount);
+						log_local->put_any(category::abc::json, severity::important, 0x10111, "json_istream::get_escaped_char() gcount=%lu", (unsigned long)gcount);
 					}
 
 					base::set_bad();
@@ -982,7 +982,7 @@ namespace abc {
 		base::flush();
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::json, severity::abc::optional, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", pcount);
+			log_local->put_any(category::abc::json, severity::abc::optional, 0x10122, "json_ostream::put_chars() pcount=%lu <<<", (unsigned long)pcount);
 		}
 
 		return pcount;

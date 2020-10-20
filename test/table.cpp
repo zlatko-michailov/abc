@@ -92,7 +92,7 @@ namespace abc { namespace test { namespace table {
 		seal.flush();
 		passed = verify_stream(context, table, 0x102b9) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102ba, "%lu");
+		passed = context.are_equal((unsigned long)std::strlen(actual), (unsigned long)std::strlen(expected), 0x102ba, "%lu");
 		passed = context.are_equal(actual, expected, 0x102bb) && passed;
 
 		return passed;
@@ -156,7 +156,7 @@ namespace abc { namespace test { namespace table {
 		seal.flush();
 		passed = verify_stream(context, table, 0x102c2) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102c3, "%lu");
+		passed = context.are_equal((unsigned long)std::strlen(actual), (unsigned long)std::strlen(expected), 0x102c3, "%lu");
 		passed = context.are_equal(actual, expected, 0x102c4) && passed;
 
 		return passed;
@@ -216,7 +216,7 @@ namespace abc { namespace test { namespace table {
 		seal.flush();
 		passed = verify_stream(context, table, 0x102ca) && passed;
 
-		passed = context.are_equal((std::uint32_t)std::strlen(actual), (std::uint32_t)std::strlen(expected), 0x102cb, "%lu");
+		passed = context.are_equal((unsigned long)std::strlen(actual), (unsigned long)std::strlen(expected), 0x102cb, "%lu");
 		passed = context.are_equal(actual, expected, 0x102cc) && passed;
 
 		return passed;

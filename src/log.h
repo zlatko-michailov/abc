@@ -148,7 +148,7 @@ namespace abc {
 		base::put_thread_id(std::this_thread::get_id(), "%s,");
 		base::put_any("%.4x,", category);
 		base::put_any("%.1x,", severity);
-		base::put_any("%llx,", tag);
+		base::put_any("%llx,", (unsigned long long)tag);
 	}
 
 

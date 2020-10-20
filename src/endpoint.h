@@ -182,7 +182,7 @@ namespace abc {
 
 		// The file was opened, return 200.
 		char fsize_buffer[Limits::fsize_size + 1];
-		std::snprintf(fsize_buffer, Limits::fsize_size, "%lu", fsize);
+		std::snprintf(fsize_buffer, Limits::fsize_size, "%lu", (unsigned long)fsize);
 
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102e8, "File size = %s", fsize_buffer);
@@ -233,7 +233,7 @@ namespace abc {
 		}
 
 		char content_length[Limits::fsize_size + 1];
-		std::snprintf(content_length, Limits::fsize_size, "%lu", std::strlen(body));
+		std::snprintf(content_length, Limits::fsize_size, "%lu", (unsigned long)std::strlen(body));
 
 		http.put_protocol(protocol::HTTP_11);
 		http.put_status_code(status_code);
