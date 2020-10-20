@@ -57,7 +57,7 @@ namespace abc {
 		vmem_page_pos_t file_size = lseek(_fd, 0, SEEK_END);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() size=%llu", file_size);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() size=%llu", (unsigned long long)file_size);
 		}
 
 		if ((file_size & (vmem_page_size - 1)) != 0) {
@@ -71,7 +71,7 @@ namespace abc {
 
 				if (created_page_pos != page_pos) {
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Created page mismatch: actual=%llu, expected=%llu", created_page_pos, page_pos);
+						_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Created page mismatch: actual=%llu, expected=%llu", (unsigned long long)created_page_pos, (unsigned long long)page_pos);
 					}
 
 					throw exception<std::runtime_error, Log>("Couldn't init vmem file", __TAG__, _log);
@@ -81,7 +81,7 @@ namespace abc {
 				void* page_ptr = lock_page(page_pos);
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() New page pos=%llu, ptr=%p", page_pos, page_ptr);
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() New page pos=%llu, ptr=%p", (unsigned long long)page_pos, page_ptr);
 				}
 
 				// Init the content of the page.
@@ -99,7 +99,7 @@ namespace abc {
 				void* page_ptr = lock_page(page_pos);
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Loaded page pos=%llu, ptr=%p", page_pos, page_ptr);
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::vmem_pool() Loaded page pos=%llu, ptr=%p", (unsigned long long)page_pos, page_ptr);
 				}
 			}
 		}
@@ -137,7 +137,7 @@ namespace abc {
 		vmem_page_pos_t page_pos = page_off / vmem_page_size;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() pos=%llu off=%llu", page_pos, page_off);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() pos=%llu off=%llu", (unsigned long long)page_pos, (unsigned long long)page_off);
 		}
 
 		std::uint8_t blank_page[vmem_page_size] = { 0 };
@@ -147,7 +147,7 @@ namespace abc {
 			page_pos = vmem_page_pos_nil;
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() wb=%ld, errno=%d", wb, errno);
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::create_page() wb=%ld, errno=%d", (long)wb, errno);
 			}
 		}
 
@@ -165,7 +165,7 @@ namespace abc {
 	template <std::size_t MaxMappedPages, typename Log>
 	inline void* vmem_pool<MaxMappedPages, Log>::lock_page(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Start pos=%llu", page_pos);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Start pos=%llu", (unsigned long long)page_pos);
 		}
 
 		// Try to find the page among the mapped pages.
@@ -200,7 +200,7 @@ namespace abc {
 						if (_mapped_pages[i].lock_count > 0 || _mapped_pages[i].keep_count > avg_keep_count) {
 							// This page will be kept.
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Keeping page i=%lu, keep_count=%lu, avg_keep_count=%lu", i, _mapped_pages[i].keep_count, avg_keep_count);
+								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Keeping page i=%lu, keep_count=%lu, avg_keep_count=%lu", (unsigned long)i, (unsigned long)_mapped_pages[i].keep_count, (unsigned long)avg_keep_count);
 							}
 
 							// Reduce the keep_count for fairness.
@@ -216,7 +216,7 @@ namespace abc {
 							// If there is an empty slot, we move this elemet there.
 							if (has_empty_pos) {
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Moving page empty_pos=%lu, i=%lu", empty_pos, i);
+									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Moving page empty_pos=%lu, i=%lu", (unsigned long)empty_pos, (unsigned long)i);
 								}
 
 								_mapped_pages[empty_pos++] = _mapped_pages[i];
@@ -231,12 +231,12 @@ namespace abc {
 							int um = munmap(_mapped_pages[i].ptr, vmem_page_size);
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Unmap i=%lu, ptr=%p, um=%d, errno=%d", i, _mapped_pages[i].ptr, um, errno);
+								_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Unmap i=%lu, ptr=%p, um=%d, errno=%d", (unsigned long)i, _mapped_pages[i].ptr, um, errno);
 							}
 
 							if (!has_empty_pos) {
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() First empty slot i=%lu", i);
+									_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() First empty slot i=%lu", (unsigned long)i);
 								}
 
 								has_empty_pos = true;
@@ -251,7 +251,7 @@ namespace abc {
 						_mapped_page_count = empty_pos;
 
 						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Compacted. _mapped_page_count=%lu", _mapped_page_count);
+							_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Compacted. _mapped_page_count=%lu", (unsigned long)_mapped_page_count);
 						}
 
 						break;
@@ -266,7 +266,7 @@ namespace abc {
 
 			if (_mapped_page_count < MaxMappedPages) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Capacity _mapped_page_count=%lu", _mapped_page_count);
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Capacity _mapped_page_count=%lu", (unsigned long)_mapped_page_count);
 				}
 
 				i = _mapped_page_count;
@@ -274,7 +274,7 @@ namespace abc {
 			else {
 				// All the maped pages are locked. We cannot find a slot for the new page.
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::lock_page() Insufficient capacity. MaxedMappedPages=%lu", MaxMappedPages);
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::lock_page() Insufficient capacity. MaxedMappedPages=%lu", (unsigned long)MaxMappedPages);
 				}
 
 				return nullptr;
@@ -288,7 +288,7 @@ namespace abc {
 			// The page is already mapped. Only re-lock it.
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Found at i=%lu", i);
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Found at i=%lu", (unsigned long)i);
 			}
 
 			mapped_page.lock_count++;
@@ -305,7 +305,7 @@ namespace abc {
 			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Map i=%lu, pos=%llu, ptr=%p, errno=%d", i, page_pos, ptr, errno);
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Map i=%lu, pos=%llu, ptr=%p, errno=%d", (unsigned long)i, (unsigned long long)page_pos, ptr, errno);
 			}
 
 			_mapped_page_count++;
@@ -324,7 +324,7 @@ namespace abc {
 		for (std::size_t j = 0; j < i; j++) {
 			if (_mapped_pages[j].keep_count < _mapped_pages[i].keep_count) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Swapping j=%lu, i=%lu", j, i);
+					_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Swapping j=%lu, i=%lu", (unsigned long)j, (unsigned long)i);
 				}
 
 				// Swap.
@@ -345,7 +345,7 @@ namespace abc {
 	template <std::size_t MaxMappedPages, typename Log>
 	inline bool vmem_pool<MaxMappedPages, Log>::unlock_page(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::unlock_page() pos=%llu", page_pos);
+			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::unlock_page() pos=%llu", (unsigned long long)page_pos);
 		}
 
 		// Try to find the page among the mapped pages.
@@ -366,13 +366,13 @@ namespace abc {
 			int um = munmap(mapped_page.ptr, vmem_page_size);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::unlock_page() Found at i=%lu, ptr=%p, um=%d, errno=%d", i, mapped_page.ptr, um, errno);
+				_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::unlock_page() Found at i=%lu, ptr=%p, um=%d, errno=%d", (unsigned long)i, mapped_page.ptr, um, errno);
 			}
 		}
 		else {
 			// The page was not found. This is a logic error.
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::unlock_page() Trying to unlock a page that is not locked. page_pos=%llu", page_pos);
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::unlock_page() Trying to unlock a page that is not locked. page_pos=%llu", (unsigned long long)page_pos);
 			}
 
 			return false;
@@ -394,7 +394,9 @@ namespace abc {
 			vmem_page_hit_count_t check_factor_percent = (check_factor * 100) / MaxMappedPages;
 
 			_log->put_any(category::abc::vmem, severity::critical, __TAG__, "vmem_pool::lock_page() Totals hits=%lu (%lu%%), misses=%lu (%lu%%), checks=%lu (%lu, %lu%%)", 
-				_mapped_page_totals.hit_count, hit_percent, _mapped_page_totals.miss_count, miss_percent, _mapped_page_totals.check_count, check_factor, check_factor_percent);
+				(unsigned long)_mapped_page_totals.hit_count, (unsigned long)hit_percent,
+				(unsigned long)_mapped_page_totals.miss_count, (unsigned long)miss_percent,
+				(unsigned long)_mapped_page_totals.check_count, (unsigned long)check_factor, (unsigned long)check_factor_percent);
 		}
 	}
 
