@@ -171,8 +171,11 @@ namespace abc {
 		using base = table_ostream;
 
 	public:
-		log_ostream(std::streambuf* sb, const Filter* filter);
+		log_ostream(std::streambuf* sb, Filter* filter);
 		log_ostream(log_ostream&& other) = default;
+
+	public:
+		Filter*	filter() noexcept;
 
 	public:
 		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
@@ -180,7 +183,7 @@ namespace abc {
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	private:
-		const Filter*	_filter;
+		Filter*	_filter;
 	};
 
 
@@ -194,6 +197,10 @@ namespace abc {
 
 	public:
 		log_filter(severity_t min_severity) noexcept;
+
+	public:
+		severity_t	min_severity() const noexcept;
+		severity_t	min_severity(severity_t min_severity) noexcept;
 
 	public:
 		bool is_enabled(category_t category, severity_t severity) const noexcept;

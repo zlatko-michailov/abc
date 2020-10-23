@@ -218,9 +218,15 @@ namespace abc {
 
 
 	template <typename Line, typename Filter>
-	inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, const Filter* filter)
+	inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, Filter* filter)
 		: base(sb)
 		, _filter(filter) {
+	}
+
+
+	template <typename Line, typename Filter>
+	inline Filter* log_ostream<Line, Filter>::filter() noexcept {
+		return _filter;
 	}
 
 
@@ -259,6 +265,19 @@ namespace abc {
 	inline log_filter::log_filter(severity_t min_severity) noexcept
 		: _min_severity(min_severity) {
 	}
+
+
+	inline severity_t log_filter::min_severity() const noexcept {
+		return _min_severity;
+	}
+
+
+	inline severity_t log_filter::min_severity(severity_t min_severity) noexcept {
+		severity_t old_min_severity = _min_severity;
+		_min_severity = min_severity;
+		return old_min_severity;
+	}
+
 
 	inline bool log_filter::is_enabled(category_t /*category*/, severity_t severity) const noexcept {
 		return abc::severity::is_higher_or_equal(severity, _min_severity);
