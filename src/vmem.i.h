@@ -60,6 +60,7 @@ namespace abc {
 		vmem_page_hit_count_t	keep_count;
 		vmem_page_hit_count_t	hit_count;
 		vmem_page_hit_count_t	miss_count;
+		vmem_page_hit_count_t	unlock_count;
 		vmem_page_hit_count_t	check_count;
 		vmem_page_hit_count_t	unmap_count;
 	};
@@ -69,10 +70,7 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	class _vmem_page;
-
-	template <typename Pool, typename Log>
-	class _vmem_ptr;
+	class vmem_page;
 
 
 	template <std::size_t MaxMappedPages, typename Log = null_log>
@@ -80,9 +78,8 @@ namespace abc {
 	public:
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
-	public: //// public or private?
-		friend class _vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
-		friend class _vmem_ptr<vmem_pool<MaxMappedPages, Log>, Log>;
+	private:
+		friend class vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 
 		vmem_page_pos_t				alloc_page() noexcept;
 		bool						free_page(vmem_page_pos_t page_pos) noexcept;
@@ -106,55 +103,43 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
-	class vmem_ptr;
-
-
 	template <typename Pool, typename Log>
-	class _vmem_page {
+	class vmem_page {
 	public:
-		_vmem_page<Pool, Log>(Pool* pool, Log* = nullptr);
-		_vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		_vmem_page<Pool, Log>(const _vmem_page<Pool, Log>& other) = default;
-		_vmem_page<Pool, Log>(_vmem_page<Pool, Log>&& other) = default;
+		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
+		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
+		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other);
+		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other);
+
+		~vmem_page<Pool, Log>() noexcept;
 
 	public:
 		Pool*								pool() const noexcept;
 		vmem_page_pos_t						pos() const noexcept;
+		void*								ptr() noexcept;
+		const void*							ptr() const noexcept;
 
-		vmem_ptr<void, Pool, Log>&&			front() noexcept;
-		const vmem_ptr<void, Pool, Log>&&	front() const noexcept;
-		vmem_ptr<void, Pool, Log>&&			back() noexcept;
-		const vmem_ptr<void, Pool, Log>&&	back() const noexcept;
+	public:
+		void								free() noexcept;
 
-		void								erase();
+	private:
+		bool								alloc() noexcept;
+		bool								lock() noexcept;
+		void								unlock() noexcept;
+		void								invalidate() noexcept;
 
 	protected:
 		Pool*								_pool;
 		vmem_page_pos_t						_pos;
+		void*								_ptr;
 		Log*								_log;
-	};
-
-
-	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_page : public _vmem_page<Pool, Log> {
-		using base = _vmem_page<Pool, Log>;
-
-	public:
-		vmem_page<T, Pool, Log>(Pool* pool, Log* log = nullptr);
-		vmem_page<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		vmem_page<T, Pool, Log>(const vmem_page<T, Pool, Log>& other) = default;
-		vmem_page<T, Pool, Log>(vmem_page<T, Pool, Log>&& other) = default;
-
-	public:
-		vmem_ptr<T, Pool, Log>&&			operator[](vmem_item_pos_t item_pos);
-		const vmem_ptr<T, Pool, Log>&&		operator[](vmem_item_pos_t item_pos) const;
 	};
 
 
 	// --------------------------------------------------------------
 
 
+#ifdef REMOVE ////
 	template <typename Pool, typename Log>
 	class _vmem_ptr {
 	public:
@@ -181,7 +166,7 @@ namespace abc {
 		using base = _vmem_ptr<Pool, Log>;
 
 	private:
-		friend class vmem_page<T, Pool, Log>;
+		friend class vmem_page<Pool, Log>;
 
 		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
 
@@ -194,6 +179,7 @@ namespace abc {
 		T*							get();
 		const T*					get() const;
 	};
+#endif
 
 
 	// --------------------------------------------------------------
@@ -262,35 +248,9 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+
 	template <typename T, typename Pool, typename Log>
-	class _vmem_deque;
-
-
-	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_deque_iterator {
-	private:
-		friend class _vmem_deque<T, Pool, Log>;
-
-		vmem_deque_iterator<T, Pool, Log>(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, bool is_valid);
-
-	public:
-		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other);
-
-	public:
-		const vmem_deque_iterator<T, Pool, Log>&	operator =(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
-		vmem_deque_iterator<T, Pool, Log>&			operator ++() noexcept;
-		vmem_deque_iterator<T, Pool, Log>&			operator --() noexcept;
-		T*											operator ->() noexcept;
-		bool										operator !=(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
-
-	private:
-		Pool*				_pool;
-		Log*				_log;
-
-		vmem_page_pos_t		_current_page_pos;
-		vmem_item_pos_t		_current_item_pos;
-		bool				_is_valid;
-	};
+	class vmem_deque_iterator;
 
 
 	template <typename T, typename Pool, typename Log = null_log>
@@ -303,21 +263,18 @@ namespace abc {
 		std::size_t			size() const noexcept;
 
 	protected:
-		const vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	end() noexcept;
-
-		const vmem_deque_iterator<T, Pool, Log>&	rbegin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	rend() noexcept;
-
-	protected:
-		T*					front() noexcept;
-		T*					back() noexcept;
-
 		bool				push_back(const T& item) noexcept;
 		bool				pop_back() noexcept;
 
 		bool				push_front(const T& item) noexcept;
 		bool				pop_front() noexcept;
+
+	protected:
+		const vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
+		const vmem_deque_iterator<T, Pool, Log>&	end() noexcept;
+
+		const vmem_deque_iterator<T, Pool, Log>&	rbegin() noexcept;
+		const vmem_deque_iterator<T, Pool, Log>&	rend() noexcept;
 
 	protected:
 		vmem_deque_state*					_state;
@@ -387,5 +344,31 @@ namespace abc {
 		bool		pop() noexcept;
 	};
 
+
+	template <typename T, typename Pool, typename Log = null_log>
+	class vmem_deque_iterator {
+	private:
+		friend class _vmem_deque<T, Pool, Log>;
+
+		vmem_deque_iterator<T, Pool, Log>(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, bool is_valid);
+
+	public:
+		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other);
+
+	public:
+		const vmem_deque_iterator<T, Pool, Log>&	operator =(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
+		vmem_deque_iterator<T, Pool, Log>&			operator ++() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&			operator --() noexcept;
+		T*											operator ->() noexcept;
+		bool										operator !=(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
+
+	private:
+		Pool*				_pool;
+		Log*				_log;
+
+		vmem_page_pos_t		_current_page_pos;
+		vmem_item_pos_t		_current_item_pos;
+		bool				_is_valid;
+	};
 
 }

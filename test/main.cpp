@@ -132,30 +132,31 @@ int main() {
 
 	bool passed = test_suite.run();
 
+	log.filter()->min_severity(abc::severity::abc::debug);
 
-	abc::vmem_pool<4, abc::test::log> pool("out/test/test1.vmem", &log);
+	abc::vmem_pool<2 + 3, abc::test::log> pool("out/test/test1.vmem", &log);
 
-	abc::vmem_page_pos_t page2_pos = pool.alloc_page();
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 pos=%llu", page2_pos);
-	void* ptr = pool.lock_page(page2_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page2 ptr=%p", ptr);
+	{
+		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");
+		abc::vmem_page page2(&pool, &log);
+		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2 pos=%llu, ptr=%p", page2.pos(), page2.ptr());
 
-	abc::vmem_page_pos_t page3_pos = pool.alloc_page();
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 pos=%llu", page3_pos);
-	ptr = pool.lock_page(page3_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ptr=%p", ptr);
-	ptr = pool.lock_page(page3_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ptr=%p", ptr);
+		{
+			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a");
+			abc::vmem_page page3a(&pool, &log);
+			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a pos=%llu, ptr=%p", page3a.pos(), page3a.ptr());
 
-	bool ok = pool.unlock_page(page3_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ok=%s", (ok ? "true" : "false"));
-	ok = pool.unlock_page(page3_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page3 ok=%s", (ok ? "true" : "false"));
+			{
+				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b");
+				abc::vmem_page page3b(&pool, page3a.pos(), &log);
+				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b pos=%llu, ptr=%p", page3b.pos(), page3b.ptr());
+			}
+		}
 
-	abc::vmem_page_pos_t page4_pos = pool.alloc_page();
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page4 pos=%llu", page4_pos);
-	ptr = pool.lock_page(page4_pos);
-	log.put_any(abc::category::abc::vmem, abc::severity::critical, __TAG__, "--- page4 ptr=%p", ptr);
+		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
+		abc::vmem_page page4(&pool, &log);
+		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
+	}
 
 	return passed ? 0 : 1;
 }
