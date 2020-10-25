@@ -581,12 +581,60 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+	template <typename T, typename Pool, typename Log>
+	inline vmem_deque_iterator<T, Pool, Log>::vmem_deque_iterator(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_deque_iterator_flag_t flags) 
+		: _pool(pool)
+		, _log(log)
+		, _page_pos(page_pos)
+		, _item_pos(item_pos)
+		, _flags(flags) {
+
+	}
+
+
+
+#ifdef REMOVE ////
+	template <typename T, typename Pool, typename Log = null_log>
+	class vmem_deque_iterator {
+	private:
+		friend class _vmem_deque<T, Pool, Log>;
+
+		vmem_deque_iterator<T, Pool, Log>(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, bool is_valid);
+
+	public:
+		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other);
+
+	public:
+		const vmem_deque_iterator<T, Pool, Log>&	operator =(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
+		vmem_deque_iterator<T, Pool, Log>&			operator ++() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&			operator --() noexcept;
+		T*											operator ->() noexcept;
+		T											operator *() noexcept;
+		bool										operator !=(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
+
+	private:
+		vmem_page<Pool, Log>&& 		front_page() noexcept;
+		vmem_page<Pool, Log>&& 		back_page() noexcept;
+
+	private:
+		Pool*				_pool;
+		Log*				_log;
+
+		vmem_page_pos_t		_page_pos;
+		vmem_item_pos_t		_item_pos;
+		bool				_is_valid;
+	};
+#endif
+
+	// --------------------------------------------------------------
+
 
 	template <typename T, typename Pool, typename Log>
 	inline _vmem_deque<T, Pool, Log>::_vmem_deque(vmem_deque_state* state, Pool* pool, Log* log)
 		: _state(state)
 		, _pool(pool)
 		, _log(log) {
+
 		if (state == nullptr) {
 			throw exception<std::logic_error, Log>("state", __TAG__);
 		}
@@ -609,14 +657,29 @@ namespace abc {
 	}
 
 
+	template <typename T, typename Pool, typename Log>
+	inline T _vmem_deque<T, Pool, Log>::front() const noexcept {
+		return *begin();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline T _vmem_deque<T, Pool, Log>::back() const noexcept {
+		return *rend();
+	}
+
+
 
 #ifdef REMOVE ////
 	protected:
+		T					front() const noexcept;
+		T					back() const noexcept;
+
 		bool				push_back(const T& item) noexcept;
-		bool				pop_back() noexcept;
+		T					pop_back() noexcept;
 
 		bool				push_front(const T& item) noexcept;
-		bool				pop_front() noexcept;
+		T					pop_front() noexcept;
 
 	protected:
 		const vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
