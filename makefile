@@ -62,7 +62,7 @@ pack: build_product build_test build_samples
 	ln --symbolic $(VERSION)/$(SUBDIR_INCLUDE) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_INCLUDE)
 	cp -r $(CURDIR)/$(SUBDIR_BIN)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
 	cp -r $(CURDIR)/$(SUBDIR_SAMPLES)/*  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
-	pushd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); popd
+	cd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); cd $(CURDIR)
 	# ---------- Done packing ----------
 	#
 
