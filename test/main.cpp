@@ -134,7 +134,7 @@ int main() {
 
 	log.filter()->min_severity(abc::severity::abc::debug);
 
-	abc::vmem_pool<2 + 3, abc::test::log> pool("out/test/test1.vmem", &log);
+	abc::vmem_pool<3, abc::test::log> pool("out/test/test1.vmem", &log);
 
 	{
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");

@@ -108,8 +108,8 @@ namespace abc {
 	public:
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other);
-		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other);
+		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
+		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
 
 		~vmem_page<Pool, Log>() noexcept;
 
@@ -248,7 +248,7 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-
+#ifdef REMOVE ////
 	using vmem_deque_iterator_flag_t = std::uint8_t;
 
 	namespace vmem_deque_iterator_flag {
@@ -258,7 +258,7 @@ namespace abc {
 		constexpr vmem_deque_iterator_flag_t	move_forward	= 0x04;
 		constexpr vmem_deque_iterator_flag_t	move_backward	= 0x08;
 	}
-
+#endif
 
 	template <typename T, typename Pool, typename Log>
 	class _vmem_deque;
@@ -269,10 +269,11 @@ namespace abc {
 	private:
 		friend class _vmem_deque<T, Pool, Log>;
 
-		vmem_deque_iterator<T, Pool, Log>(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_deque_iterator_flag_t falgs);
+		vmem_deque_iterator<T, Pool, Log>(_vmem_deque<T, Pool, Log>* deque, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos);
 
 	public:
-		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other);
+		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other) = default;
+		vmem_deque_iterator<T, Pool, Log>(vmem_deque_iterator<T, Pool, Log>&& other) noexcept = default;
 
 	public:
 		const vmem_deque_iterator<T, Pool, Log>&	operator =(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
@@ -281,20 +282,13 @@ namespace abc {
 		vmem_deque_iterator<T, Pool, Log>&			operator ++() noexcept;
 		vmem_deque_iterator<T, Pool, Log>&			operator --() noexcept;
 		T*											operator ->() noexcept;
-		T											operator *() noexcept;
+		T											operator *();
 		bool										operator !=(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
 
 	private:
-		bool										push(const T& item) noexcept;
-		T											pop() noexcept;
-
-	private:
-		Pool*										_pool;
-		Log*										_log;
-
+		_vmem_deque<T, Pool, Log>*					_deque;
 		vmem_page_pos_t								_page_pos;
 		vmem_item_pos_t								_item_pos;
-		vmem_deque_iterator_flag_t					_flags;
 	};
 
 
@@ -311,8 +305,8 @@ namespace abc {
 		std::size_t			size() const noexcept;
 
 	protected:
-		T					front() const noexcept;
-		T					back() const noexcept;
+		T*					front() const noexcept;
+		T*					back() const noexcept;
 
 		bool				push_back(const T& item) noexcept;
 		T					pop_back() noexcept;
@@ -322,21 +316,16 @@ namespace abc {
 
 
 	protected:
-		const vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	end() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&	end() noexcept;
 
-		const vmem_deque_iterator<T, Pool, Log>&	rbegin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	rend() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&	rbegin() noexcept;
+		vmem_deque_iterator<T, Pool, Log>&	rend() noexcept;
 
 	protected:
 		vmem_deque_state*					_state;
 		Pool*								_pool;
 		Log*								_log;
-
-		vmem_deque_iterator<T, Pool, Log>	_begin;
-		vmem_deque_iterator<T, Pool, Log>	_end;
-		vmem_deque_iterator<T, Pool, Log>	_rbegin;
-		vmem_deque_iterator<T, Pool, Log>	_rend;
 	};
 
 
