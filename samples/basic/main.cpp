@@ -37,7 +37,7 @@ using limits = abc::endpoint_limits;
 
 int main() {
 	// Create a log.
-	abc::log_filter filter(abc::severity::debug);
+	abc::log_filter filter(abc::severity::abc::important);
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a endpoint.

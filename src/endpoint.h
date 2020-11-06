@@ -161,7 +161,7 @@ namespace abc {
 		}
 
 		// If the method is not GET, return 405.
-		if (std::strcmp(method, method::GET) != 0) {
+		if (!ascii::are_equal_i(method, method::GET)) {
 			send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "GET is the only supported method for static files.", 0x102e5);
 			return;
 		}
@@ -218,7 +218,7 @@ namespace abc {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102ea, "Received REST");
 		}
 
-		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
+		if (ascii::are_equal_i(method, method::POST) && ascii::are_equal_i(resource, "/shutdown")) {
 			set_shutdown_requested();
 		}
 
@@ -261,37 +261,37 @@ namespace abc {
 			return nullptr;
 		}
 
-		if (std::strcmp(ext, ".html") == 0) {
+		if (ascii::are_equal_i(ext, ".html")) {
 			return content_type::html;
 		}
-		else if (std::strcmp(ext, ".css") == 0) {
+		else if (ascii::are_equal_i(ext, ".css")) {
 			return content_type::css;
 		}
-		else if (std::strcmp(ext, ".js") == 0) {
+		else if (ascii::are_equal_i(ext, ".js")) {
 			return content_type::javascript;
 		}
-		else if (std::strcmp(ext, ".txt") == 0) {
+		else if (ascii::are_equal_i(ext, ".txt")) {
 			return content_type::text;
 		}
-		else if (std::strcmp(ext, ".xml") == 0) {
+		else if (ascii::are_equal_i(ext, ".xml")) {
 			return content_type::xml;
 		}
-		else if (std::strcmp(ext, ".png") == 0) {
+		else if (ascii::are_equal_i(ext, ".png")) {
 			return content_type::png;
 		}
-		else if (std::strcmp(ext, ".jpeg") == 0) {
+		else if (ascii::are_equal_i(ext, ".jpeg")) {
 			return content_type::jpeg;
 		}
-		else if (std::strcmp(ext, ".jpg") == 0) {
+		else if (ascii::are_equal_i(ext, ".jpg")) {
 			return content_type::jpeg;
 		}
-		else if (std::strcmp(ext, ".gif") == 0) {
+		else if (ascii::are_equal_i(ext, ".gif")) {
 			return content_type::gif;
 		}
-		else if (std::strcmp(ext, ".bmp") == 0) {
+		else if (ascii::are_equal_i(ext, ".bmp")) {
 			return content_type::bmp;
 		}
-		else if (std::strcmp(ext, ".svg") == 0) {
+		else if (ascii::are_equal_i(ext, ".svg")) {
 			return content_type::svg;
 		}
 		
@@ -301,8 +301,8 @@ namespace abc {
 
 	template <typename Limits, typename Log>
 	inline bool endpoint<Limits, Log>::is_file_request(const char* method, const char* resource) {
-		return std::strncmp(resource, _config->files_prefix, _config->files_prefix_len) == 0
-			|| (std::strcmp(method, method::GET) == 0 && std::strcmp(resource, "/favicon.ico") == 0);
+		return ascii::are_equal_i_n(resource, _config->files_prefix, _config->files_prefix_len)
+			|| (ascii::are_equal_i(method, method::GET) && ascii::are_equal_i(resource, "/favicon.ico"));
 	}
 
 
