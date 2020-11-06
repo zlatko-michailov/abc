@@ -143,7 +143,7 @@ namespace abc {
 
 	template <typename Log>
 	inline void _basic_socket<Log>::bind(const char* port) {
-		bind(nullptr, port);
+		bind(any_host(), port);
 	}
 
 
@@ -240,6 +240,21 @@ namespace abc {
 		}
 
 		return socket::error::any;
+	}
+
+
+	template <typename Log>
+	inline const char* _basic_socket<Log>::any_host() const noexcept {
+		switch (_family) {
+			case socket::family::ipv4:
+				return "0.0.0.0";
+
+			case socket::family::ipv6:
+				return "::";
+
+			default:
+				return nullptr;
+		}
 	}
 
 
