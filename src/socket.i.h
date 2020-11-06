@@ -125,6 +125,7 @@ namespace abc {
 		socket::error_t		tie(const sockaddr& addr, socklen_t addr_length, socket::tie_t tt);
 
 	protected:
+		const char*			any_host() const noexcept;
 		socket::kind_t		kind() const noexcept;
 		socket::family_t	family() const noexcept;
 		socket::protocol_t	protocol() const noexcept;
