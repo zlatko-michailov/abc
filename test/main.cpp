@@ -26,6 +26,7 @@ SOFTWARE.
 #include <iostream>
 
 #include "test.h"
+#include "ascii.h"
 #include "timestamp.h"
 #include "streambuf.h"
 #include "table.h"
@@ -46,6 +47,12 @@ int main() {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },
 
+			{ "ascii", {
+				{ "test_ascii_equal",								abc::test::ascii::test_ascii_equal },
+				{ "test_ascii_equal_n",								abc::test::ascii::test_ascii_equal_n },
+				{ "test_ascii_equal_i",								abc::test::ascii::test_ascii_equal_i },
+				{ "test_ascii_equal_i_n",							abc::test::ascii::test_ascii_equal_i_n },
+			} },
 			{ "timestamp", {
 				{ "test_null_timestamp",							abc::test::timestamp::test_null_timestamp },
 				{ "test_before_year_2000_before_mar_1_timestamp",	abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },

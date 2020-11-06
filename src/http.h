@@ -115,7 +115,7 @@ namespace abc {
 		state::assert_next(http::item::protocol);
 
 		std::size_t gcount = get_alphas(buffer, size);
-		if (gcount != 4 || std::strncmp("HTTP", buffer, 4) != 0) {
+		if (gcount != 4 || !ascii::are_equal_i_n("HTTP", buffer, 4)) {
 			base::set_bad();
 		}
 
@@ -423,7 +423,7 @@ namespace abc {
 
 		std::size_t gcount = 0;	
 
-		if (size < 5 || std::strncmp(buffer, "HTTP/", 5) != 0) {
+		if (size < 5 || !ascii::are_equal_i_n(buffer, "HTTP/", 5)) {
 			base::set_bad();
 		}
 		else {

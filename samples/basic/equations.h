@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 
+#include "../../src/ascii.h"
 #include "../../src/endpoint.h"
 #include "../../src/http.h"
 #include "../../src/json.h"
@@ -61,7 +62,7 @@ namespace abc { namespace samples {
 		}
 
 		// Support a graceful shutdown.
-		if (std::strcmp(method, method::POST) == 0 && std::strcmp(resource, "/shutdown") == 0) {
+		if (ascii::are_equal_i(method, method::POST) && ascii::are_equal_i(resource, "/shutdown")) {
 			base::set_shutdown_requested();
 
 			base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x102ce);
@@ -69,13 +70,13 @@ namespace abc { namespace samples {
 		}
 
 		// If the resource is not /problem, return 404.
-		if (std::strcmp(resource, "/problem") != 0) {
+		if (!ascii::are_equal_i(resource, "/problem")) {
 			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", 0x102cf);
 			return;
 		}
 
 		// If the method is not POST, return 405.
-		if (std::strcmp(method, method::POST) != 0) {
+		if (!ascii::are_equal_i(method, method::POST)) {
 			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
 			return;
 		}
@@ -90,22 +91,23 @@ namespace abc { namespace samples {
 				break;
 			}
 
-			if (std::strcmp(header, header::Content_Type) == 0) {
+			if (ascii::are_equal_i(header, header::Content_Type)) {
+				if (has_valid_content_type) {
+					// We've already received a Content-Type header, return 400.
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x102d2);
+					return;
+				}
+
 				http.get_header_value(header, sizeof(header));
 
 				// If the Content-Type is not json, return 400.
 				static const std::size_t content_type_json_len = std::strlen(content_type::json);
-				if (std::strncmp(header, content_type::json, content_type_json_len) != 0) {
+				if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
 					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x102d1);
 					return;
 				}
 
 				has_valid_content_type = true;
-			}
-			else if (has_valid_content_type) {
-				// We've already received a Content-Type header, return 400.
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x102d2);
-				return;
 			}
 			else {
 				// Future-proof: Ignore unknown headers.
@@ -151,7 +153,7 @@ namespace abc { namespace samples {
 				}
 
 				// We expect 2 properties - "a" and "b".
-				if (std::strcmp(token->value.property, "a") == 0) {
+				if (ascii::are_equal(token->value.property, "a")) {
 					// Parse array [2][2].
 					json.get_token(token, sizeof(buffer));
 
@@ -178,7 +180,7 @@ namespace abc { namespace samples {
 
 					has_a = true;
 				}
-				else if (std::strcmp(token->value.property, "b") == 0) {
+				else if (ascii::are_equal(token->value.property, "b")) {
 					// Parse array [2].
 					if (base::_log != nullptr) {
 						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102f0, "Parsing b");

@@ -23,35 +23,30 @@ SOFTWARE.
 */
 
 
-#include <iostream>
-#include <future>
-#include <atomic>
-#include <exception>
+#pragma once
 
-#include "equations.h"
+#include <cstdint>
 
 
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-using limits = abc::endpoint_limits;
+namespace abc {
 
+	namespace size {
+		constexpr std::size_t strlen = -1;
 
-int main() {
-	// Create a log.
-	abc::log_filter filter(abc::severity::abc::important);
-	log_ostream log(std::cout.rdbuf(), &filter);
+		constexpr std::size_t _16  =  16;
+		constexpr std::size_t _32  =  32;
+		constexpr std::size_t _64  =  64;
+		constexpr std::size_t _128 = 128;
+		constexpr std::size_t _256 = 256;
+		constexpr std::size_t _512 = 512;
 
-	// Create a endpoint.
-	abc::endpoint_config config(
-		"30301",					// port
-		5,							// listen_queue_size
-		"out/samples/basic",		// root_dir (Note: No trailing slash!)
-		"/resources/"				// files_prefix
-	);
-	abc::samples::equations_endpoint<limits, log_ostream> endpoint(&config, &log);
+		constexpr std::size_t k1   = 1024;
+		constexpr std::size_t k2   =  2 * k1;
+		constexpr std::size_t k4   =  4 * k1;
+		constexpr std::size_t k8   =  8 * k1;
+		constexpr std::size_t k16  = 16 * k1;
+		constexpr std::size_t k32  = 32 * k1;
+		constexpr std::size_t k64  = 64 * k1;
+	}
 
-	// Let the endpoint listen in a separate thread.
-	std::future done = endpoint.start_async();
-	done.wait();
-
-	return 0;
 }

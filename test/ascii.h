@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018-2020 Zlatko Michailov 
+Copyright (c) 2018 Zlatko Michailov 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +23,19 @@ SOFTWARE.
 */
 
 
-#include <iostream>
-#include <future>
-#include <atomic>
-#include <exception>
+#pragma once
 
-#include "equations.h"
+#include "../src/ascii.h"
 
-
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-using limits = abc::endpoint_limits;
+#include "test.h"
 
 
-int main() {
-	// Create a log.
-	abc::log_filter filter(abc::severity::abc::important);
-	log_ostream log(std::cout.rdbuf(), &filter);
+namespace abc { namespace test { namespace ascii {
 
-	// Create a endpoint.
-	abc::endpoint_config config(
-		"30301",					// port
-		5,							// listen_queue_size
-		"out/samples/basic",		// root_dir (Note: No trailing slash!)
-		"/resources/"				// files_prefix
-	);
-	abc::samples::equations_endpoint<limits, log_ostream> endpoint(&config, &log);
+	bool test_ascii_equal(test_context<abc::test::log>& context);
+	bool test_ascii_equal_n(test_context<abc::test::log>& context);
+	bool test_ascii_equal_i(test_context<abc::test::log>& context);
+	bool test_ascii_equal_i_n(test_context<abc::test::log>& context);
 
-	// Let the endpoint listen in a separate thread.
-	std::future done = endpoint.start_async();
-	done.wait();
+}}}
 
-	return 0;
-}

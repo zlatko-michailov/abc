@@ -28,7 +28,7 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace streambuf {
 
-	static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) ;
+	static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text);
 
 
 	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context) {
