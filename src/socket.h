@@ -101,6 +101,7 @@ namespace abc {
 				_log->put_any(category::abc::socket, severity::abc::debug, 0x10009, "_basic_socket::close()");
 			}
 
+			::shutdown(_handle, SHUT_RDWR);
 			::close(_handle);
 
 			_handle = socket::handle::invalid;
