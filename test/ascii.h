@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018-2020 Zlatko Michailov 
+Copyright (c) 2018 Zlatko Michailov 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,45 +23,19 @@ SOFTWARE.
 */
 
 
-#include "streambuf.h"
+#pragma once
+
+#include "../src/ascii.h"
+
+#include "test.h"
 
 
-namespace abc { namespace test { namespace streambuf {
+namespace abc { namespace test { namespace ascii {
 
-	static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text);
-
-
-	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context) {
-		return test_buffer_streambuf(context, "x");
-	}
-
-
-	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context) {
-		return test_buffer_streambuf(context, "This is a slightly longer text");
-	}
-
-
-	bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) {
-		char expected[200];
-		std::strncpy(expected, text, sizeof(expected));
-
-		char actual[200];
-		std::memset(actual, 0, sizeof(actual));
-
-		abc::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
-
-		std::istream in(&sb);
-		std::ostream out(&sb);
-
-		while (!in.eof()) {
-			char ch = in.get();
-			if (!in.eof()) {
-				out.put(ch);
-			}
-		}
-
-		return context.are_equal(actual, expected, 0x1003a);
-	}
+	bool test_ascii_equal(test_context<abc::test::log>& context);
+	bool test_ascii_equal_n(test_context<abc::test::log>& context);
+	bool test_ascii_equal_i(test_context<abc::test::log>& context);
+	bool test_ascii_equal_i_n(test_context<abc::test::log>& context);
 
 }}}
 

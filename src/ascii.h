@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstdint>
+#include "size.h"
 
 
 namespace abc {
@@ -113,6 +113,54 @@ namespace abc {
 			}
 
 			return 0;
+		}
+
+
+		inline bool are_equal(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+			if (s1 == nullptr) {
+				return s2 == nullptr;
+			}
+			
+			if (s2 == nullptr) {
+				return false;
+			}
+
+			for (std::size_t i = 0; i < max_chars; i++) {
+				const char& ch1 = s1[i];
+				const char& ch2 = s2[i];
+
+				bool are_ch_equal = case_sensitive ? ch1 == ch2 : to_lower(ch1) == to_lower(ch2);
+
+				if (!are_ch_equal) {
+					return false;
+				}
+
+				if (ch1 == '\0' && ch2 == '\0') {
+					return true;
+				}
+			}
+
+			return true;
+		}
+
+
+		inline bool are_equal(const char* s1, const char* s2) {
+			return are_equal(s1, s2, true, size::strlen);
+		}
+
+
+		inline bool are_equal_i(const char* s1, const char* s2) {
+			return are_equal(s1, s2, false, size::strlen);
+		}
+
+
+		inline bool are_equal_n(const char* s1, const char* s2, std::size_t max_chars) {
+			return are_equal(s1, s2, true, max_chars);
+		}
+
+
+		inline bool are_equal_i_n(const char* s1, const char* s2, std::size_t max_chars) {
+			return are_equal(s1, s2, false, max_chars);
 		}
 
 
