@@ -51,7 +51,7 @@ int main(int argc, const char* argv[]) {
 	if (last_separator != nullptr) {
 		std::size_t path_len = last_separator - argv[0];
 		if (path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
+			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x102f4,
 				"This samples allows paths up to %lu chars. The path to this process is %lu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
 				(unsigned long)max_path, (unsigned long)path_len);
 
@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]) {
 	);
 	abc::samples::equations_endpoint<limits, log_ostream> endpoint(&config, &log);
 
-	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30301/resources/index.html.");
+	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x102f5, "Open a browser and navigate to http://<host>:30301/resources/index.html.");
 	log.put_blank_line();
 
 	// Let the endpoint listen in a separate thread.
