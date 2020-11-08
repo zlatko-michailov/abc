@@ -81,6 +81,7 @@
 		"bitset": "cpp",
 		"compare": "cpp",
 		"ranges": "cpp",
-		"stop_token": "cpp"
+		"stop_token": "cpp",
+		"codecvt": "cpp"
 	}
 }

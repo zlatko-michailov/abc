@@ -41,12 +41,12 @@ namespace abc { namespace test { namespace socket {
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::udp_socket server(context.log);
+		abc::udp_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::udp_socket client(context.log);
+				abc::udp_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -95,13 +95,13 @@ namespace abc { namespace test { namespace socket {
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log);
+		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket client(context.log);
+				abc::tcp_client_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -122,7 +122,7 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e7) && passed; // Lambda closure
 
-		abc::tcp_client_socket client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
 
 		std::uint16_t content_length;
 		client.receive(&content_length, sizeof(std::uint16_t));
@@ -149,16 +149,16 @@ namespace abc { namespace test { namespace socket {
 		const char response_content[] = "The corresponding response line.";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log);
+		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket client(context.log);
+				abc::tcp_client_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
-				abc::socket_streambuf sb(&client, context.log);
+				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
 				std::istream client_in(&sb);
 				std::ostream client_out(&sb);
 
@@ -175,9 +175,9 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e8) && passed; // Lambda closure
 
-		abc::tcp_client_socket client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
 
-		abc::socket_streambuf sb(&client, context.log);
+		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
 		std::istream client_in(&sb);
 		std::ostream client_out(&sb);
 
@@ -206,7 +206,7 @@ namespace abc { namespace test { namespace socket {
 		const char response_header_value[] = "Response-Header-Value";
 		bool passed = true;
 
-		abc::tcp_server_socket server(context.log);
+		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
@@ -214,11 +214,11 @@ namespace abc { namespace test { namespace socket {
 								protocol, request_method, request_resource, request_header_name, request_header_value,
 								response_status_code, response_reason_phrase, response_header_name, response_header_value] () {
 			try {
-				abc::tcp_client_socket client(context.log);
+				abc::tcp_client_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
-				abc::socket_streambuf sb(&client, context.log);
-				abc::http_client_stream http(&sb, context.log);
+				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
+				abc::http_client_stream<abc::test::log> http(&sb, context.log);
 
 				// Send request
 				{
@@ -230,7 +230,7 @@ namespace abc { namespace test { namespace socket {
 					http.end_headers();
 
 					// Body (json)
-					abc::json_ostream json(&sb, context.log);
+					abc::json_ostream<abc::size::_64, abc::test::log> json(&sb, context.log);
 					json.put_begin_object();
 						json.put_property("param");
 						json.put_string("foo");
@@ -260,7 +260,7 @@ namespace abc { namespace test { namespace socket {
 					passed = context.are_equal(buffer, "", 0x100ee) && passed;
 
 					// Body (json)
-					abc::json_istream json(&sb, context.log);
+					abc::json_istream<abc::size::_64, abc::test::log> json(&sb, context.log);
 					abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 					json.get_token(token, sizeof(buffer));
@@ -292,10 +292,10 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100f1) && passed; // Lambda closure
 
-		abc::tcp_client_socket client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
 
-		abc::socket_streambuf sb(&client, context.log);
-		abc::http_server_stream http(&sb, context.log);
+		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
+		abc::http_server_stream<abc::test::log> http(&sb, context.log);
 
 		// Receive request
 		{
@@ -320,7 +320,7 @@ namespace abc { namespace test { namespace socket {
 			passed = context.are_equal(buffer, "", 0x100f7) && passed;
 
 			// Body (json)
-			abc::json_istream json(&sb, context.log);
+			abc::json_istream<abc::size::_64, abc::test::log> json(&sb, context.log);
 			abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 			json.get_token(token, sizeof(buffer));
@@ -347,7 +347,7 @@ namespace abc { namespace test { namespace socket {
 		http.end_headers();
 
 		// Body (json)
-		abc::json_ostream json(&sb, context.log);
+		abc::json_ostream<abc::size::_64, abc::test::log> json(&sb, context.log);
 		json.put_begin_object();
 			json.put_property("n");
 			json.put_number(42.0);

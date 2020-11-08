@@ -25,13 +25,15 @@ SOFTWARE.
 
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 #include <system_error>
 #include <future>
 #include <thread>
 #include <atomic>
 #include <exception>
 #include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "endpoint.i.h"
 #include "exception.h"
@@ -68,7 +70,7 @@ namespace abc {
 		}
 
 		// Create a listener, bind to a port, and start listening.
-		abc::tcp_server_socket listener(_log);
+		abc::tcp_server_socket<Log> listener(_log);
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
 
@@ -79,7 +81,7 @@ namespace abc {
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
-			abc::tcp_client_socket client = listener.accept();
+			abc::tcp_client_socket<Log> client = listener.accept();
 			std::thread(&endpoint<Limits, Log>::process_request, this, std::move(client)).detach();
 		}
 	}
@@ -92,7 +94,7 @@ namespace abc {
 		}
 
 		// Create a socket_streambuf over the tcp_client_socket.
-		abc::socket_streambuf sb(&socket);
+		abc::socket_streambuf<tcp_client_socket<Log>, Log> sb(&socket);
 
 		// Create an hhtp_server_stream, which combines http_request_istream and http_response_ostream.
 		abc::http_server_stream<Log> http(&sb);
@@ -168,21 +170,22 @@ namespace abc {
 
 		// Check if the file exists.
 		if (_log != nullptr) {
-			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102e6, "CWD = %s", std::filesystem::current_path().c_str());
+			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102e6, "Root dir = '%s'", _config->root_dir);
 		}
 
-		std::error_code ec;
-		std::uintmax_t fsize = std::filesystem::file_size(path, ec);
+		struct stat st;
+		int err = ::stat(path, &st);
 
 		// If the file was not opened, return 404.
-		if (ec) {
+		if (err != 0) {
 			send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "Error: The requested resource was not found.", 0x102e7);
 			return;
 		}
 
 		// The file was opened, return 200.
+		std::size_t fsize = static_cast<std::size_t>(st.st_size);
 		char fsize_buffer[Limits::fsize_size + 1];
-		std::snprintf(fsize_buffer, Limits::fsize_size, "%lu", (unsigned long)fsize);
+		std::snprintf(fsize_buffer, Limits::fsize_size, "%zu", fsize);
 
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102e8, "File size = %s", fsize_buffer);
@@ -208,7 +211,7 @@ namespace abc {
 
 		std::ifstream file(path);
 		char file_chunk[Limits::file_chunk_size];
-		for (std::uintmax_t sent_size = 0; sent_size < fsize; sent_size += Limits::file_chunk_size) {
+		for (std::size_t sent_size = 0; sent_size < fsize; sent_size += Limits::file_chunk_size) {
 			file.read(file_chunk, sizeof(file_chunk));
 			http.put_body(file_chunk, file.gcount());
 		}

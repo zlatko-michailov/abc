@@ -156,7 +156,7 @@ namespace abc {
 
 		if (size < sizeof(json::token_t)) {
 			char buffer[100];
-			std::snprintf(buffer, sizeof(buffer), "json_istream::get_token() size=%ld (< %ld) ", (unsigned long)size, (unsigned long)sizeof(json::token_t));
+			std::snprintf(buffer, sizeof(buffer), "json_istream::get_token() size=%zu (< %zu) ", size, sizeof(json::token_t));
 
 			throw exception<std::logic_error, Log>(buffer, 0x10100, log_local);
 		}
