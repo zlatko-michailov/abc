@@ -34,7 +34,7 @@ namespace abc { namespace test { namespace timestamp {
 
 
 	bool test_null_timestamp(test_context<abc::test::log>& context) {
-		abc::timestamp ts(nullptr);
+		abc::timestamp<> ts(nullptr);
 
 		return test_timestamp_properties(context, ts, 1970, 1, 1, 0, 0, 0, 0, 0, 0);
 	}
@@ -42,7 +42,7 @@ namespace abc { namespace test { namespace timestamp {
 
 	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context) {
 		time_count_t date_1995_1_31 = (25 * 365 + 6 + 30) * nanoseconds_per_day;
-		abc::timestamp ts(nullptr);
+		abc::timestamp<> ts(nullptr);
 		ts.reset(date_1995_1_31);
 
 		return test_timestamp_properties(context, ts, 1995, 1, 31, 0, 0, 0, 0, 0, 0);
@@ -51,7 +51,7 @@ namespace abc { namespace test { namespace timestamp {
 
 	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context) {
 		time_count_t date_1995_3_10 = (25 * 365 + 6 + 31 + 28 + 9) * nanoseconds_per_day;
-		abc::timestamp ts(nullptr);
+		abc::timestamp<> ts(nullptr);
 		ts.reset(date_1995_3_10);
 
 		return test_timestamp_properties(context, ts, 1995, 3, 10, 0, 0, 0, 0, 0, 0);
@@ -60,7 +60,7 @@ namespace abc { namespace test { namespace timestamp {
 
 	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context) {
 		time_count_t date_2010_2_16 = (40 * 365 + 10 + 31 + 15) * nanoseconds_per_day;
-		abc::timestamp ts(nullptr);
+		abc::timestamp<> ts(nullptr);
 		ts.reset(date_2010_2_16);
 
 		return test_timestamp_properties(context, ts, 2010, 2, 16, 0, 0, 0, 0, 0, 0);
@@ -69,7 +69,7 @@ namespace abc { namespace test { namespace timestamp {
 
 	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context) {
 		time_count_t date_2010_4_15 = (40 * 365 + 10 + 31 + 28 + 31 + 14) * nanoseconds_per_day;
-		abc::timestamp ts(nullptr);
+		abc::timestamp<> ts(nullptr);
 		ts.reset(date_2010_4_15);
 
 		return test_timestamp_properties(context, ts, 2010, 4, 15, 0, 0, 0, 0, 0, 0);

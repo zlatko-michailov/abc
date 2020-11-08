@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <memory>
 #include <atomic>
+#include <new>
 
 #include "heap.h"
 
@@ -112,31 +113,41 @@ void* operator new(std::size_t size) {
 	return abc::test::heap::alloc_throw(size, abc::test::heap::instance_unaligned_throw_count);
 }
 
+#if (__cplusplus >= 201700L)
 void* operator new(std::size_t size, std::align_val_t) {
 	return abc::test::heap::alloc_throw(size, abc::test::heap::instance_aligned_throw_count);
 }
+#endif
+
 
 void* operator new(std::size_t size, const std::nothrow_t&) noexcept {
 	return abc::test::heap::alloc_nothrow(size, abc::test::heap::instance_unaligned_nothrow_count);
 }
 
+#if (__cplusplus >= 201700L)
 void* operator new(std::size_t size, std::align_val_t, const std::nothrow_t&) noexcept {
 	return abc::test::heap::alloc_nothrow(size, abc::test::heap::instance_aligned_nothrow_count);
 }
+#endif
+
 
 void* operator new[](std::size_t size) {
 	return abc::test::heap::alloc_throw(size, abc::test::heap::array_unaligned_throw_count);
 }
 
+#if (__cplusplus >= 201700L)
 void* operator new[](std::size_t size, std::align_val_t) {
 	return abc::test::heap::alloc_throw(size, abc::test::heap::array_aligned_throw_count);
 }
+#endif
+
 
 void* operator new[](std::size_t size, const std::nothrow_t&) noexcept {
 	return abc::test::heap::alloc_nothrow(size, abc::test::heap::array_unaligned_nothrow_count);
 }
 
+#if (__cplusplus >= 201700L)
 void* operator new[](std::size_t size, std::align_val_t, const std::nothrow_t&) noexcept {
 	return abc::test::heap::alloc_nothrow(size, abc::test::heap::array_aligned_nothrow_count);
 }
-
+#endif
