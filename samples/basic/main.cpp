@@ -75,7 +75,7 @@ int main(int argc, const char* argv[]) {
 	log.put_blank_line();
 
 	// Let the endpoint listen in a separate thread.
-	std::future done = endpoint.start_async();
+	std::future<void> done = endpoint.start_async();
 	done.wait();
 
 	return 0;

@@ -33,12 +33,12 @@ SOFTWARE.
 
 int main() {
 	{
-		abc::tcp_server_socket listener;
+		abc::tcp_server_socket<> listener;
 		listener.bind("30303");
 		listener.listen(2);
-		abc::tcp_client_socket client = std::move(listener.accept());
-		abc::socket_streambuf sb(&client);
-		abc::http_server_stream http(&sb);
+		abc::tcp_client_socket<> client = std::move(listener.accept());
+		abc::socket_streambuf<abc::tcp_client_socket<>> sb(&client);
+		abc::http_server_stream<> http(&sb);
 
 		char buffer[abc::size::k1 + 1];
 		http.get_method(buffer, sizeof(buffer));
