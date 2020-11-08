@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <string>
 #include <functional>
+#include <vector>
 #include <map>
 #include <utility>
 #include <initializer_list>
