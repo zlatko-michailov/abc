@@ -37,9 +37,8 @@ It is just a measure to maintain performance and efficiency for apps that care a
 
 ## Toolchain and Platform Dependencies
 ### GCC
-The source code used C++ 17.
-The project is compiled using GCC 9.
-It may be possible to compile with an earlier version of GCC or even with a different compiler, but that hasn't been tried.
+The source code uses C++ 11.
+The project should be compilable using GCC 4.8.1 or later. It has been tested with GCC 9.
 
 ### POSIX
 The socket classes use the BSD socket C API.

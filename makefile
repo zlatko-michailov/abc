@@ -26,7 +26,7 @@
 PROJECT = abc
 VERSION = 0.9.1
 DEBUG = -ggdb
-CPPOPTIONS = $(DEBUG) --std=c++17 -Wpedantic
+CPPOPTIONS = $(DEBUG) --std=c++11 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so
 SUBDIR_SRC = src
 SUBDIR_TEST = test
