@@ -1,7 +1,27 @@
 # abc
-For a complete information on `abc`, please visit the [__Documentation__](doc) page.
 
-`abc` is a header-only library that contains classes that complement the `std` library. The key entities are:
+- [MIT License](../LICENSE)
+- [Overview](Overview.md)
+
+- [Getting Started](GettingStarted.md)
+  - [Dependencies](GettingStarted_Dependencies.md)
+  - [Just Trying](GettingStarted_Trying.md)
+  - [Adopting](GettingStarted_Adopting.md)
+
+- [How To](HowTo.md)
+  - [Get Diagnostics](HowTo_Diagnostics.md)
+  - [Communicate](HowTo_Endpoint.md)
+  - [Create GUI](HowTo_GUI.md)
+  - [Troubleshoot](HowTo_Troubleshoot.md)
+
+- [__Class Reference__](Reference.md)
+
+- [Release Notes](ReleaseNotes.md)
+- [Roadmap](Roadmap.md)
+
+
+## Summary
+`abc` is a header-only library that contains a few classes that are missing in the `std` library. The key entities are:
 - socket (TCP and UDP)
 - HTTP I/O streams
 - JSON I/O streams
@@ -13,17 +33,6 @@ For a complete information on `abc`, please visit the [__Documentation__](doc) p
 All classes are provided as headers, and must be compiled in client programs.
 There is no precompiled flavor of the library.
 That is because `abc` targets devices with peculiar architectures and small memory capacities.
-
-
-
-[Summary](#Summary)  
-[Toolchain and Platform Dependencies](#Toolchain-and-Platform-Dependencies)  
-[Try It](#Try-It)  
-[Use It](#Use-It)  
-[Troubleshoot](#Troubleshoot)  
-[__Class Reference__](#Class-Reference)  
-[Release Notes](#Release-Notes)  
-[Roadmap](#Roadmap)  
 
 
 ### No Dynamic Memory Allocation
