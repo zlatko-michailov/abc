@@ -239,7 +239,7 @@ namespace abc {
 		}
 
 		char content_length[Limits::fsize_size + 1];
-		std::snprintf(content_length, Limits::fsize_size, "%lu", (unsigned long)std::strlen(body));
+		std::snprintf(content_length, Limits::fsize_size, "%zu", std::strlen(body));
 
 		http.put_protocol(protocol::HTTP_11);
 		http.put_status_code(status_code);

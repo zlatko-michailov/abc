@@ -164,7 +164,7 @@ namespace abc { namespace samples {
 
 					for (std::size_t i = 0; i < 2; i++) {
 						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%lu]", (unsigned long)i);
+							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ee, "Parsing a[%zu]", i);
 						}
 
 						if (!parse_array_2(http, json, token, sizeof(buffer), invalid_json, a[i])) {
@@ -244,7 +244,7 @@ namespace abc { namespace samples {
 		json.flush();
 
 		char content_length[abc::size::_32 + 1];
-		std::snprintf(content_length, sizeof(content_length), "%lu", (unsigned long)std::strlen(body));
+		std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
 
 		// Send the http response
 		if (base::_log != nullptr) {
@@ -289,7 +289,7 @@ namespace abc { namespace samples {
 
 			arr[i] = token->value.number;
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%lu]=%g", (unsigned long)i, arr[i]);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x102ef, "array[%zu]=%g", i, arr[i]);
 			}
 		}
 

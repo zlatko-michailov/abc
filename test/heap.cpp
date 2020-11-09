@@ -76,14 +76,14 @@ namespace abc { namespace test { namespace heap {
 	bool verify_heap_allocation(test_context<abc::test::log>& context, tag_t tag) {
 		bool passed = true;
 
-		passed = context.are_equal(instance_unaligned_throw_count,		0, tag, "%ld") && passed;
-		passed = context.are_equal(instance_aligned_throw_count,		0, tag, "%ld") && passed;
-		passed = context.are_equal(instance_unaligned_nothrow_count,	0, tag, "%ld") && passed;
-		passed = context.are_equal(instance_aligned_nothrow_count,		0, tag, "%ld") && passed;
-		passed = context.are_equal(array_unaligned_throw_count,			0, tag, "%ld") && passed;
-		passed = context.are_equal(array_aligned_throw_count,			0, tag, "%ld") && passed;
-		passed = context.are_equal(array_unaligned_nothrow_count,		0, tag, "%ld") && passed;
-		passed = context.are_equal(array_aligned_nothrow_count,			0, tag, "%ld") && passed;
+		passed = context.are_equal((int)instance_unaligned_throw_count,		0, tag, "%d") && passed;
+		passed = context.are_equal((int)instance_aligned_throw_count,		0, tag, "%d") && passed;
+		passed = context.are_equal((int)instance_unaligned_nothrow_count,	0, tag, "%d") && passed;
+		passed = context.are_equal((int)instance_aligned_nothrow_count,		0, tag, "%d") && passed;
+		passed = context.are_equal((int)array_unaligned_throw_count,		0, tag, "%d") && passed;
+		passed = context.are_equal((int)array_aligned_throw_count,			0, tag, "%d") && passed;
+		passed = context.are_equal((int)array_unaligned_nothrow_count,		0, tag, "%d") && passed;
+		passed = context.are_equal((int)array_aligned_nothrow_count,		0, tag, "%d") && passed;
 
 		return passed;
 	}

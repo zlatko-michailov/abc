@@ -48,7 +48,7 @@ namespace abc {
 	template <typename Log>
 	inline void _http_state<Log>::reset(http::item_t next) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::http, severity::abc::debug, 0x1003c, "_http_state::reset() next=%lu", (unsigned long)next);
+			_log->put_any(category::abc::http, severity::abc::debug, 0x1003c, "_http_state::reset() next=%u", next);
 		}
 
 		_next = next;
@@ -158,7 +158,7 @@ namespace abc {
 		skip_spaces();
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10040, "_http_istream::get_protocol() <<< protocol='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10040, "_http_istream::get_protocol() <<< protocol='%s', gcount=%zu", buffer, gcount);
 		}
 
 		return gcount;
@@ -196,7 +196,7 @@ namespace abc {
 		set_gstate(gcount, http::item::header_value);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10042, "_http_istream::get_header_name() <<< header_name='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10042, "_http_istream::get_header_name() <<< header_name='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -239,7 +239,7 @@ namespace abc {
 		set_gstate(gcount, http::item::header_name);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10044, "_http_istream::get_header_value() <<< header_value='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10044, "_http_istream::get_header_value() <<< header_value='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -258,7 +258,7 @@ namespace abc {
 		set_gstate(gcount, http::item::body);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10046, "_http_istream::get_body() <<< body='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10046, "_http_istream::get_body() <<< body='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -465,7 +465,7 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10049, "_http_ostream::put_protocol() <<< buffer='%s', size=%lu, gcount=%lu", buffer, (unsigned long)size, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10049, "_http_ostream::put_protocol() <<< buffer='%s', size=%zu, gcount=%zu", buffer, size, gcount);
 		}
 
 		return gcount;
@@ -501,7 +501,7 @@ namespace abc {
 		set_pstate(http::item::header_value);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x1004b, "_http_ostream::put_header_name() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x1004b, "_http_ostream::put_header_name() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -545,7 +545,7 @@ namespace abc {
 		set_pstate(http::item::header_name);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x1004d, "_http_ostream::put_header_value() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x1004d, "_http_ostream::put_header_value() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -587,7 +587,7 @@ namespace abc {
 		set_pstate(http::item::body);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10051, "_http_ostream::put_body() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10051, "_http_ostream::put_body() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -736,7 +736,7 @@ namespace abc {
 		base::set_gstate(gcount, http::item::resource);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10054, "http_request_istream::get_method() <<< method='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10054, "http_request_istream::get_method() <<< method='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -759,7 +759,7 @@ namespace abc {
 		base::set_gstate(gcount, http::item::protocol);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10056, "http_request_istream::get_resource() <<< resource='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10056, "http_request_istream::get_resource() <<< resource='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -852,7 +852,7 @@ namespace abc {
 		base::set_pstate(http::item::resource);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10059, "_http_ostream::put_method() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10059, "_http_ostream::put_method() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -877,7 +877,7 @@ namespace abc {
 		base::set_pstate(http::item::protocol);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x1005b, "_http_ostream::put_resource() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x1005b, "_http_ostream::put_resource() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -934,7 +934,7 @@ namespace abc {
 		base::set_gstate(gcount, http::item::reason_phrase);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x1005e, "http_response_istream::get_status_code() <<< status_code='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x1005e, "http_response_istream::get_status_code() <<< status_code='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -956,7 +956,7 @@ namespace abc {
 		base::set_gstate(gcount, http::item::header_name);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10060, "http_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%lu", buffer, (unsigned long)gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10060, "http_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
@@ -1010,7 +1010,7 @@ namespace abc {
 		base::set_pstate(http::item::reason_phrase);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10063, "http_response_ostream::put_status_code() <<< buffer='%s', size=%lu, pcount=%lu", buffer, (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10063, "http_response_ostream::put_status_code() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
 		}
 	}
 
@@ -1038,7 +1038,7 @@ namespace abc {
 		base::set_pstate(http::item::header_name);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10065, "http_response_ostream::put_reason_phrase() <<< buffer='%s', size=%lu, pcount=%lu", buffer != nullptr ? buffer : "<nullptr>", (unsigned long)size, (unsigned long)pcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10065, "http_response_ostream::put_reason_phrase() <<< buffer='%s', size=%zu, pcount=%zu", buffer != nullptr ? buffer : "<nullptr>", size, pcount);
 		}
 	}
 

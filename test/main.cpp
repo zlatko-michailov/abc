@@ -141,27 +141,29 @@ int main() {
 
 	log.filter()->min_severity(abc::severity::abc::debug);
 
-	abc::vmem_pool<3, abc::test::log> pool("out/test/test1.vmem", &log);
+	using Log = abc::test::log;
+	using Pool = abc::vmem_pool<3, abc::test::log>;
+	Pool pool("out/test/test1.vmem", &log);
 
 	{
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");
-		abc::vmem_page page2(&pool, &log);
+		abc::vmem_page<Pool, Log> page2(&pool, &log);
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2 pos=%llu, ptr=%p", page2.pos(), page2.ptr());
 
 		{
 			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a");
-			abc::vmem_page page3a(&pool, &log);
+			abc::vmem_page<Pool, Log> page3a(&pool, &log);
 			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a pos=%llu, ptr=%p", page3a.pos(), page3a.ptr());
 
 			{
 				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b");
-				abc::vmem_page page3b(&pool, page3a.pos(), &log);
+				abc::vmem_page<Pool, Log> page3b(&pool, page3a.pos(), &log);
 				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b pos=%llu, ptr=%p", page3b.pos(), page3b.ptr());
 			}
 		}
 
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
-		abc::vmem_page page4(&pool, &log);
+		abc::vmem_page<Pool, Log> page4(&pool, &log);
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
 	}
 
