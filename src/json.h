@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <cstdio>
 
+#include "size.h"
 #include "ascii.h"
 #include "exception.h"
 #include "json.i.h"
@@ -39,7 +40,7 @@ namespace abc {
 	template <std::size_t MaxLevels, typename Log>
 	inline _json_state<MaxLevels, Log>::_json_state(Log* log)
 		: _expect_property(false)
-		, _level_top(-1)
+		, _level_top(size::invalid)
 		, _log(log) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::json, severity::abc::debug, 0x100f9, "_json_state::_json_state()");
@@ -54,7 +55,7 @@ namespace abc {
 		}
 
 		_expect_property = false;
-		_level_top = -1;
+		_level_top = size::invalid;
 	}
 
 
@@ -66,7 +67,7 @@ namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
 	inline json::level_t _json_state<MaxLevels, Log>::top_level() const noexcept {
-		return 0 <= _level_top ? _level_stack[_level_top] : json::level::array;
+		return 0 <= _level_top && _level_top < MaxLevels ? _level_stack[_level_top] : json::level::array;
 	}
 
 
@@ -74,7 +75,8 @@ namespace abc {
 	inline bool _json_state<MaxLevels, Log>::expect_property() const noexcept {
 		return
 			_expect_property
-			&& _level_top >= 0
+			&& 0 <= _level_top
+			&& _level_top < MaxLevels
 			&& _level_stack[_level_top] == json::level::object;
 	}
 
@@ -83,14 +85,15 @@ namespace abc {
 	inline void _json_state<MaxLevels, Log>::set_expect_property(bool expect) noexcept {
 		_expect_property =
 			expect
-			&& _level_top >= 0
+			&& 0 <= _level_top
+			&& _level_top < MaxLevels
 			&& _level_stack[_level_top] == json::level::object;
 	}
 
 
 	template <std::size_t MaxLevels, typename Log>
 	inline bool _json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
-		if (_level_top + 1 >= MaxLevels) {
+		if (_level_top + 1 < 0 || _level_top + 1 >= MaxLevels) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::json, severity::important, 0x100fb, "_json_state::push_level() levels='%zu', MaxLevels=%zu", _level_top + 1, MaxLevels);
 			}
@@ -105,7 +108,7 @@ namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
 	inline bool _json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
-		if (_level_top + 1 <= 0) {
+		if (_level_top < 0 || _level_top >= MaxLevels) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::json, severity::important, 0x100fc, "_json_state::pop_level() levels='%zu'", _level_top + 1);
 			}
