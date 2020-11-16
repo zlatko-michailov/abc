@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 0.9.1
+VERSION = 0.10.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++11 -Wpedantic
 LINKOPTIONS = -l:libstdc++.so.6 -l:libgcc_s.so.1 -l:libpthread.so
@@ -36,7 +36,6 @@ SUBDIR_BIN = bin
 SUBDIR_SAMPLES = samples
 SUBDIR_RESOURCES = resources
 SAMPLE_BASIC = basic
-SAMPLE_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
 
 
@@ -76,13 +75,6 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	# ---------- Done building basic ----------
-	#
-	# ---------- Begin building tictactoe ----------
-	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
-	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(LINKOPTIONS)
-	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
-	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
-	# ---------- Done building tictactoe ----------
 	#
 	# ---------- Done building samples ----------
 	#
