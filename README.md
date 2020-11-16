@@ -351,6 +351,23 @@ Tags are unique 64-bit integers that are used to correlate a log entry with the 
 
 
 ## Release Notes
+### 0.10.0
+- No breaking changes.
+- Stabilization:
+  - socket
+    - bind to any host.
+    - shutdown() before close().
+  - http
+    - Support ignore-case.
+  - Sample basic:
+    - Resource dir usability.
+    - Closing connection.
+  - Language and build
+    - Support Ubuntu.
+    - Support 32-bit.
+    - Remove warnings.
+    - Remove dependency on C++ 17. Only C++ 11 is required.
+
 ### 0.9.0
 - No breaking changes.
 - `endpoint`
@@ -410,17 +427,23 @@ Other tabular streams can be created in user space.
 
 
 ## Roadmap
-### 0.10.0
-- Tic Tac Toe sample.
+### 1.10.0
+- Improve documentation.
 
-### 0.11.0
-- Connect Four sample.
-
-### 0.12.0
-- Internationalization, if needed.
+### 1.11.0
+- Virtual memory.
 
 ### 1.12.0
+- Tic Tac Toe sample.
+
+### 1.13.0
+- Connect Four sample.
+
+### 1.14.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)
+
+### 1.15.0
+- Internationalization, if needed.
 
