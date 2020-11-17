@@ -1,20 +1,28 @@
 # abc
-For a complete information on `abc`, please visit the [__Documentation__](doc) page.
+> For the most complete and up-to-date information on `abc`, please visit the [Documentation](doc) folder.
 
-`abc` is a header-only library that contains classes that complement the `std` library. The key entities are:
+`abc` is a `C++` header-only library that contains classes that complement the `std` library. The most notable `abc` entities are:
 - socket (TCP and UDP)
-- HTTP I/O streams
-- JSON I/O streams
+- HTTP streams
+- JSON streams
+
+Those entitied enable a `C++` daemon running on remote device to have GUI as well as a control API surface.
+
+Additionally, `abc` provides:
 - generic table output stream
-- log
+- diagnostic log
 - test framework
 - timestamp
 
-All classes are provided as headers, and must be compiled in client programs.
-There is no precompiled flavor of the library.
-That is because `abc` targets devices with peculiar architectures and small memory capacities.
+All classes are provided as headers.
+The needed ones must be included and compiled in client programs.
+There is no precompiled flavor of the library that needs to be linked.
 
+> To get started, please visit the [Documentation](doc) folder.
 
+___
+DELETE EVERYTHING FROM HERE DOWN
+___
 
 [Summary](#Summary)  
 [Toolchain and Platform Dependencies](#Toolchain-and-Platform-Dependencies)  
@@ -350,6 +358,23 @@ Tags are unique 64-bit integers that are used to correlate a log entry with the 
 
 
 ## Release Notes
+### 0.10.0
+- No breaking changes.
+- Stabilization:
+  - socket
+    - bind to any host.
+    - shutdown() before close().
+  - http
+    - Support ignore-case.
+  - Sample basic:
+    - Resource dir usability.
+    - Closing connection.
+  - Language and build
+    - Support Ubuntu.
+    - Support 32-bit.
+    - Remove warnings.
+    - Remove dependency on C++ 17. Only C++ 11 is required.
+
 ### 0.9.0
 - No breaking changes.
 - `endpoint`
@@ -409,17 +434,23 @@ Other tabular streams can be created in user space.
 
 
 ## Roadmap
-### 0.10.0
+### 1.10.0
+- Improve documentation.
+
+### 1.11.0
+- Virtual memory.
+
+### 1.12.0
 - Tic Tac Toe sample.
 
-### 0.11.0
+### 1.13.0
 - Connect Four sample.
 
-### 0.12.0
-- Internationalization, if needed.
-
-### 1.9.0
+### 1.14.0
 - Introduce `WebSocket` client and server.
 - Introduce `base64` encoding and decoding. (Required for WebSocket.)
 - Introduce `SHA-1` hashing. (Required for WebSocket.)
+
+### 1.15.0
+- Internationalization, if needed.
 

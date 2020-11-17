@@ -1,23 +1,55 @@
 # abc
 
+> If you find a bug on any page, please file an issue at [Issues](../issues).
+Please provide the title and link to the page along with as much information as you find relevant.
+___
+
 - [MIT License](../LICENSE)
-- [Overview](Overview.md)
-
-- [Getting Started](GettingStarted.md)
-  - [Dependencies](GettingStarted_Dependencies.md)
-  - [Just Trying](GettingStarted_Trying.md)
-  - [Adopting](GettingStarted_Adopting.md)
-
-- [How To](HowTo.md)
-  - [Get Diagnostics](HowTo_Diagnostics.md)
-  - [Communicate](HowTo_Endpoint.md)
-  - [Create GUI](HowTo_GUI.md)
-  - [Troubleshoot](HowTo_Troubleshoot.md)
-
-- [__Class Reference__](Reference.md)
-
+- [Learn](../LICENSE)
+  - [Basics](Overview.md)
+    - [What functionality abc provides](Overview.md)
+    - [For what purposes can abc be used](Overview.md)
+    - [How abc integrates in programs](Overview.md)
+  - [Concepts](HowTo.md)
+    - [Media and streams](MediaAndStreams.md)
+    - [Tagging](HowTo_Troubleshoot.md)
+    - [Diagnostics - log](HowTo_Diagnostics.md)
+    - [GUI and REST endpoint](HowTo_GUI.md)
+- [Experience](GettingStarted.md)
+  - [Dependencies - prepare your dev box](GettingStarted_Dependencies.md)
+  - [How to try it - build and examine a clone of the repo](GettingStarted_Trying.md)
+  - [How to adopt it - include abc in a bigger program, .i.h files](GettingStarted_Adopting.md)
+- [Create](HowTo.md)
+  - [GUI and REST endpoint](HowTo_GUI.md)
+  - [Troubleshoot - log filter and log lines](HowTo_Troubleshoot.md)
+  - [Tagging](HowTo_Troubleshoot.md)
+- [Class Reference](Reference.md)
+  - [ascii](ref/ascii.md)
+  - [buffer_streambuf](ref/buffer_streambuf.md)
+  - [endpoint](ref/endpoint.md)
+  - [exception](ref/exception.md)
+  - [http streams](ref/http.md)
+    - [http_request_istream](ref/http.md)
+    - [http_request_ostream](ref/http.md)
+    - [http_response_istream](ref/http.md)
+    - [http_response_ostresm](ref/http.md)
+    - [http_client_stream](ref/http.md)
+    - [http_server_stream](ref/http.md)
+  - [json streams](ref/json.md)
+    - [json_istream](ref/json.md)
+    - [json_ostream](ref/json.md)
+  - [log streams ***](ref/log.md)
+  - [multifile ***](ref/multifile.md)
+  - [size](ref/size.md)
+  - [sockets ***](ref/socket.md)
+  - [streams ***](ref/stream.md)
+  - [table ***](ref/table.md)
+  - [tag](ref/tag.md)
+  - [test](ref/test.md)
+  - [timestamp](ref/timestamp.md)
 - [Release Notes](ReleaseNotes.md)
 - [Roadmap](Roadmap.md)
+
 
 
 ## Summary
