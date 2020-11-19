@@ -1,29 +1,27 @@
-# abc
+# Documentation
 
-> If you find a bug on any page, please file an issue at [Issues](../issues).
-Please provide the title and link to the page along with as much information as you find relevant.
-___
+> If you find a bug on any page, please file an issue at the project's [Issues](../issues).
+Provide the title and the link to the page along with as much information as you consider relevant.
 
 - [MIT License](../LICENSE)
-- [Learn](../LICENSE)
-  - [Basics](Overview.md)
-    - [What functionality abc provides](Overview.md)
-    - [For what purposes can abc be used](Overview.md)
-    - [How abc integrates in programs](Overview.md)
-  - [Concepts](HowTo.md)
-    - [Media and streams](MediaAndStreams.md)
-    - [Tagging](HowTo_Troubleshoot.md)
-    - [Diagnostics - log](HowTo_Diagnostics.md)
-    - [GUI and REST endpoint](HowTo_GUI.md)
-- [Experience](GettingStarted.md)
+- Fundamentals
+  - [Features](fund/features.md)
+  - [Intent](fund/intent.md)
+  - [Principles - collisions with std, exceptions](fund/principles.md)
+- Concepts
+  - [Media and streams](MediaAndStreams.md)
+  - [Tagging](HowTo_Troubleshoot.md)
+  - [Diagnostics - log](HowTo_Diagnostics.md)
+  - [GUI and REST endpoint](HowTo_GUI.md)
+- Getting Started
   - [Dependencies - prepare your dev box](GettingStarted_Dependencies.md)
   - [How to try it - build and examine a clone of the repo](GettingStarted_Trying.md)
   - [How to adopt it - include abc in a bigger program, .i.h files](GettingStarted_Adopting.md)
-- [Create](HowTo.md)
+- Tutorials
   - [GUI and REST endpoint](HowTo_GUI.md)
   - [Troubleshoot - log filter and log lines](HowTo_Troubleshoot.md)
   - [Tagging](HowTo_Troubleshoot.md)
-- [Class Reference](Reference.md)
+- Class Reference
   - [ascii](ref/ascii.md)
   - [buffer_streambuf](ref/buffer_streambuf.md)
   - [endpoint](ref/endpoint.md)
@@ -50,6 +48,9 @@ ___
 - [Release Notes](ReleaseNotes.md)
 - [Roadmap](Roadmap.md)
 
+___
+DELETE EVERYTHING FROM HERE DOWN
+___
 
 
 ## Summary
