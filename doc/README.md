@@ -5,9 +5,9 @@ Provide the title and the link to the page along with as much information as you
 
 - [MIT License](../LICENSE)
 - Fundamentals
-  - [Features](fund/features.md)
-  - [Intent](fund/intent.md)
-  - [Principles - collisions with std, exceptions](fund/principles.md)
+  - [Features](fundamentals/features.md)
+  - [Intent](fundamentals/intent.md)
+  - [Principles](fundamentals/principles.md)
 - Concepts
   - [Media and streams](MediaAndStreams.md)
   - [Tagging](HowTo_Troubleshoot.md)
