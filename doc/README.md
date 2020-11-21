@@ -9,8 +9,8 @@ Provide the title and the link to the page along with as much information as you
   - [Intent](fundamentals/intent.md)
   - [Principles](fundamentals/principles.md)
 - Concepts
-  - [Media and streams](MediaAndStreams.md)
-  - [Tagging](HowTo_Troubleshoot.md)
+  - [Media and Streams](concepts/media_and_streams.md)
+  - [Tagging](concepts/tagging.md)
   - [Diagnostics - log](HowTo_Diagnostics.md)
   - [GUI and REST endpoint](HowTo_GUI.md)
 - Getting Started
