@@ -11,8 +11,8 @@ Provide the title and the link to the page along with as much information as you
 - Concepts
   - [Media and Streams](concepts/media_and_streams.md)
   - [Tagging](concepts/tagging.md)
-  - [Diagnostics - log](HowTo_Diagnostics.md)
-  - [GUI and REST endpoint](HowTo_GUI.md)
+  - [Diagnostics](concepts/diagnostics.md)
+  - [HTTP endpoint](concepts/endpoint.md)
 - Getting Started
   - [Dependencies - prepare your dev box](GettingStarted_Dependencies.md)
   - [How to try it - build and examine a clone of the repo](GettingStarted_Trying.md)
