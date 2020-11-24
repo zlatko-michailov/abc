@@ -17,7 +17,7 @@ Additionally, a `socket_streambuf` is provided, which allows `std::istream`, `st
 ## HTTP Protocol
 A group of stream classes that parse and generate HTTP requests and HTTP responses.
 While these streams primarily target `abc::socket_streambuf`, they can also work with any class that derives from `std::streambuf`.
-This way, you can implement HTTP communication over other meadia, e.g. a third-party TLS streambuf.
+This way, you can implement HTTP communication over other media, e.g. a third-party TLS streambuf.
 
 ## JSON Serialization
 Similarly to HTTP, a pair of streams is provided that can read and write JSON content to and from any streambuf.

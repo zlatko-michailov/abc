@@ -6,7 +6,7 @@ The `std` library provides a nice separation between media and streams.
 Streams are stateless formatters, while media are the actual containers.
 The idea is that any stream can operate on any medium.
 
-The notion of media is not easily noticable, because there are only two concrete implementations with unclear names - `stringbuf` and `filebuf`.
+The notion of media is not easily noticeable, because there are only two concrete implementations with unclear names - `stringbuf` and `filebuf`.
 The really important class, though, is the semi-abstract `streambuf`.
 There a three small methods that a medium may have to override to become operational.
 
@@ -17,7 +17,7 @@ Follow the links to read more about each class.
 - [`buffer_streambuf`](../ref/buffer_streambuf.md) - a char buffer of a fixed length.
 - [`socket_streambuf`](../ref/socket_streambuf.md) - a TCP or UDP socket.
 - [`multifile_streambuf`](../ref/multifile_streambuf.md) - a file that when reopened creates a new file with a timestamp in the name. There two specializations:
-  - [`dusration_multifile_streambuf`](../ref/duration_multifile_streambuf.md) - automatically reopens at a given time interval.
+  - [`duration_multifile_streambuf`](../ref/duration_multifile_streambuf.md) - automatically reopens at a given time interval.
   - [`size_multifile_streambuf`](../ref/size_multifile_streambuf.md) - automatically reopens when the file's size exceed a given limit.
 
 ## Streams

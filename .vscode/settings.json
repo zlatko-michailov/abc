@@ -83,5 +83,19 @@
 		"ranges": "cpp",
 		"stop_token": "cpp",
 		"codecvt": "cpp"
-	}
+	},
+	"cSpell.enabled": true,
+	"cSpell.words": [
+		"chrono",
+		"filebuf",
+		"istream",
+		"michailov",
+		"multifile",
+		"ostream",
+		"precompiled",
+		"roadmap",
+		"streambuf",
+		"stringbuf",
+		"zlatko"
+	]
 }

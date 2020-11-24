@@ -12,7 +12,7 @@ While certain `std` concepts may not be perfect, it is better to wait for the C+
 An example of this is `std::future` - the only async token that is not continuable.
 
 ## Exceptions
-`abc` is exception-nutral.
+`abc` is exception-neutral.
 
 In general, an `abc` method that calls into a potentially throwing `std` method doesn't catch exceptions, and is also potentially throwing.
 An exception to this principle are the `abc::line_ostream:put_*` methods - they catch any exception that may come from the underlying `std` calls, because a program developer should not worry about exceptions coming from diagnostic logging.
