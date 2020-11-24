@@ -19,7 +19,7 @@ Provide the title and the link to the page along with as much information as you
   - [How to adopt it - include abc in a bigger program, .i.h files](GettingStarted_Adopting.md)
 - Tutorials
   - [GUI and REST endpoint](HowTo_GUI.md)
-  - [Troubleshoot - log filter and log lines](HowTo_Troubleshoot.md)
+  - [Diagnose - log filter and log lines](HowTo_Troubleshoot.md)
   - [Tagging](HowTo_Troubleshoot.md)
 - Class Reference
   - [ascii](ref/ascii.md)
