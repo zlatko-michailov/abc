@@ -59,4 +59,4 @@ Tag is an unsigned integer of type [tag_t](../ref/tag.md).
 For more information, visit the [Tagging](tagging.md) concept.
 
 ## Further Reading
-For guidance and examples on how to code diagnostic calls throughout your program, visit the [Diagnostics](../tutorials/diagnostics.md) tutorial.
+For guidance and examples on how to code diagnostic calls throughout your program, visit tutorial [How to Enable Diagnostics in Your Program](../tutorials/diagnostics.md).
