@@ -27,4 +27,8 @@ According to the [GCC documentation](https://gcc.gnu.org/projects/cxx-status.htm
 ## Package `zip`
 `zip` is an optional package.
 It is not used by the library itself.
-It is only used by the `makefile` for packaging a release.
+It is only used for packaging a release.
+
+## Package `git`
+`git` is another optional package.
+It is not used by the library, but it may be needed during development.
