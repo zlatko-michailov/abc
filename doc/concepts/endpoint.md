@@ -12,4 +12,4 @@ In most cases, programs do not need to override the `process_file_request()` met
 
 If the resource path does not start with the configured prefix, the request has to be handled by the `process_request_request()` method, i.e. the program has to derive a class from [`endpoint`](../ref/endpoint.md) and to override the `process_request_request()` method.
 
-For a complete end-to-end guide on how to stand up an endpoint to enable GUI and/or REST, visit tutorial [How to Enable GUI and REST Endpoint](../tutorials/endpoint.md).
+For a complete end-to-end guide on how to stand up an endpoint to enable GUI and/or REST, visit tutorial [How to Enable GUI and REST](../tutorials/endpoint.md).

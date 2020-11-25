@@ -14,13 +14,13 @@ Provide the title and the link to the page along with as much information as you
   - [Diagnostics](concepts/diagnostics.md)
   - [HTTP Endpoint](concepts/endpoint.md)
 - Getting Started
-  - [Dependencies - prepare your dev box](GettingStarted_Dependencies.md)
-  - [How to try it - build and examine a clone of the repo](GettingStarted_Trying.md)
-  - [How to adopt it - include abc in a bigger program, .i.h files](GettingStarted_Adopting.md)
+  - [Dependencies](start/dependencies.md)
+  - [Clone and Build the Repo](start/clone_and_build.md)
+  - [Adopt the Library](start/adopt.md)
 - Tutorials
-  - [How to Enable GUI and REST Endpoint](HowTo_GUI.md)
-  - [How to Enable Diagnostics in Your Program](HowTo_Troubleshoot.md)
-  - [Tagging](HowTo_Troubleshoot.md)
+  - [How to Enable GUI and REST](tutorials/endpoint.md)
+  - [How to Log Diagnostics](tutorials/diagnostics.md)
+  - [How to Use Tag Code](tutorials/tagging.md)
 - Samples
   - [Basic](samples/basic.md)
 - Class Reference
