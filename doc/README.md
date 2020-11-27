@@ -1,6 +1,6 @@
 # Documentation
 
-> If you find a bug on any page, please file an issue at the project's [Issues](../issues).
+> If you find a bug on any page, please file an [issue](../issues).
 Provide the title and the link to the page along with as much information as you consider relevant.
 
 - [MIT License](../LICENSE)
@@ -20,35 +20,35 @@ Provide the title and the link to the page along with as much information as you
 - Tutorials
   - [How to Enable GUI and REST](tutorials/endpoint.md)
   - [How to Log Diagnostics](tutorials/diagnostics.md)
-  - [How to Use Tag Code](tutorials/tagging.md)
-- Samples
-  - [Basic](samples/basic.md)
-- Class Reference
-  - [ascii](ref/ascii.md)
-  - [buffer_streambuf](ref/buffer_streambuf.md)
-  - [endpoint](ref/endpoint.md)
-  - [exception](ref/exception.md)
-  - [http streams](ref/http.md)
-    - [http_request_istream](ref/http.md)
-    - [http_request_ostream](ref/http.md)
-    - [http_response_istream](ref/http.md)
-    - [http_response_ostresm](ref/http.md)
-    - [http_client_stream](ref/http.md)
-    - [http_server_stream](ref/http.md)
-  - [json streams](ref/json.md)
-    - [json_istream](ref/json.md)
-    - [json_ostream](ref/json.md)
-  - [log streams ***](ref/log.md)
-  - [multifile ***](ref/multifile.md)
-  - [size](ref/size.md)
-  - [sockets ***](ref/socket.md)
-  - [streams ***](ref/stream.md)
-  - [table ***](ref/table.md)
-  - [tag](ref/tag.md)
-  - [test](ref/test.md)
-  - [timestamp](ref/timestamp.md)
+  - [How to Tag Your Code](tutorials/tagging.md)
+- [Contribute](contribute.md)
 - [Release Notes](ReleaseNotes.md)
 - [Roadmap](Roadmap.md)
+
+## Class Reference
+- [ascii](ref/ascii.md)
+- [buffer_streambuf](ref/buffer_streambuf.md)
+- [endpoint](ref/endpoint.md)
+- [exception](ref/exception.md)
+- [http streams](ref/http.md)
+  - [http_request_istream](ref/http.md)
+  - [http_request_ostream](ref/http.md)
+  - [http_response_istream](ref/http.md)
+  - [http_response_ostresm](ref/http.md)
+  - [http_client_stream](ref/http.md)
+  - [http_server_stream](ref/http.md)
+- [json streams](ref/json.md)
+  - [json_istream](ref/json.md)
+  - [json_ostream](ref/json.md)
+- [log streams ***](ref/log.md)
+- [multifile ***](ref/multifile.md)
+- [size](ref/size.md)
+- [sockets ***](ref/socket.md)
+- [streams ***](ref/stream.md)
+- [table ***](ref/table.md)
+- [tag](ref/tag.md)
+- [test](ref/test.md)
+- [timestamp](ref/timestamp.md)
 
 ___
 DELETE EVERYTHING FROM HERE DOWN
