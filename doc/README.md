@@ -22,8 +22,8 @@ Provide the title and the link to the page along with as much information as you
   - [How to Log Diagnostics](tutorials/diagnostics.md)
   - [How to Tag Your Code](tutorials/tagging.md)
 - [Contribute](contribute.md)
-- [Release Notes](ReleaseNotes.md)
-- [Roadmap](Roadmap.md)
+- [Release Notes](releases.md)
+- [Roadmap](roadmap.md)
 
 ## Class Reference
 - [ascii](ref/ascii.md)
