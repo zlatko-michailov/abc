@@ -18,8 +18,8 @@ Provide the title and the link to the page along with as much information as you
   - [Clone and Build the Repo](start/clone_and_build.md)
   - [Adopt the Library](start/adopt.md)
 - Tutorials
-  - [How to Enable GUI and REST](tutorials/endpoint.md)
   - [How to Log Diagnostics](tutorials/diagnostics.md)
+  - [How to Enable GUI and REST](tutorials/endpoint.md)
 - [Contribute](contribute.md)
 - [Release Notes](releases.md)
 - [Roadmap](roadmap.md)

@@ -1,6 +1,6 @@
 # Contribute
 
-Up to [Documentation](../README.md).
+Up to [Documentation](README.md).
 
 ## Possibilities
 The following are just a few possible ways to contribute.

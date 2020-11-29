@@ -1,6 +1,6 @@
 # Release Notes
 
-Up to [Documentation](../README.md).
+Up to [Documentation](README.md).
 
 ## 0.10.0
 - No breaking changes.

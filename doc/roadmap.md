@@ -1,6 +1,6 @@
 # Roadmap
 
-Up to [Documentation](../README.md).
+Up to [Documentation](README.md).
 
 ## 0.11.0
 - Documentation.
