@@ -3,8 +3,8 @@
 Up to [Documentation](../README.md).
 
 > A prerequisite to this tutorial is becoming familiar with these concepts:
->- [Diagnostics](../concepts/diagnostics.md).
->- [Tagging](../concepts/tagging.md).
+>- [Diagnostics](../concepts/diagnostics.md)
+>- [Tagging](../concepts/tagging.md)
 
 ## Creating a `log_filter` and a `log_ostream`
 The `log_ostream` instance must be constructed before and destroyed after any class instance that uses it.
@@ -63,7 +63,7 @@ The value may be priceless.
 You can always filter entries in or out, but you can get entries unless you logged them.
 
 ``` c++
-log.put_any(abc::category::startup, abc::severity::optional, __TAG__, "path='%s'", path);
+log->put_any(abc::category::my, abc::severity::optional, __TAG__, "REST: Sending status=%s", status);
 ```
 
 ### Choosing a Category
