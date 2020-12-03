@@ -17,6 +17,7 @@ Provide the title and the link to the page along with as much information as you
   - [Dependencies](start/dependencies.md)
   - [Clone and Build the Repo](start/clone_and_build.md)
   - [Adopt the Library](start/adopt.md)
+  - [Use the Headers](start/use.md)
 - Tutorials
   - [How to Log Diagnostics](tutorials/diagnostics.md)
   - [How to Enable GUI and REST](tutorials/endpoint.md)
