@@ -15,7 +15,7 @@ Feel free to do your own thing.
 ## Issues
 The most common way to contribute is to file issues.
 Whether you have cloned and built the repo, or whether you have just read the code online, you may find something that doesn't seem right.
-[File it](../issues).
+[File it](../../../issues).
 
 ### Filing
 When you file an issue, keep in mind that the issue must contain enough information so that it can be reproduced, categorized, and ultimately - triaged.

@@ -1,6 +1,6 @@
 # Documentation
 
-> If you find a bug on any page, please file an [issue](../issues).
+> If you find a bug on any page, please file an [issue](../../../issues).
 Provide the title and the link to the page along with as much information as you consider relevant.
 
 - [MIT License](../LICENSE)

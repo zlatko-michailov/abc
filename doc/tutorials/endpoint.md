@@ -63,7 +63,7 @@ If the provided `endpoint_limits` doesn't work for you, feel free to define your
 It is flexible - it allows for quite a few methods to be overridden.
 However, you may be able to get away with overriding just `process_rest_request()`.
 
-See [equations.h](../../samples/equations.h) from Basic Sample for how to override `endpoint`.
+See [equations.h](../../samples/basic/equations.h) from Basic Sample for how to override `endpoint`.
 
 ## Creating an `endpoint`
 Now that you have everything, constructing the endpoint is simple:

@@ -3,7 +3,7 @@
 Up to [Documentation](../README.md).
 
 ## Get a Release
-> The recommended way to get `abc` is to download the `abc_xx.xx.xx.zip` file from the latest [release](../../releases).
+> The recommended way to get `abc` is to download the `abc_xx.xx.xx.zip` file from the latest [release](../../../../releases).
 
 Releases are cut from the `master` (stable) branch, and the latest of them should be the most suitable one.
 
