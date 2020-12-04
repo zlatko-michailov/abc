@@ -21,7 +21,7 @@ Visit the [How to Log Diagnostics](diagnostics.md) tutorial if needed.
 
 ## Creating an `endpoint_config`
 An `endpoint` takes quite a few parameters and constants, and more may be added in future.
-All of those parameters are bundled in a class - `endpoint_config`, and constants are budled in a template parameter, which the `endpoit` keeps referencing.
+All of those parameters are bundled in a class - `endpoint_config`, and constants are bundled in a template parameter, which the `endpoint` keeps referencing.
 
 > It is important that the `endpoint_config` outlives the `endpoint`. 
 
@@ -33,7 +33,7 @@ endpoint_config(
     const char* root_dir,
     const char* files_prefix);
 ```
-- `port` - The port on which the enpoint will listen.
+- `port` - The port on which the endpoint will listen.
 While the port is a number, it is accepted as a `const char*`.
 The reason for that is that the underlying POSIX socket API, specifically the `getaddrinfo()` expects this as a `const char*`.
 - `listen_queue_size` - This parameter is also required by the underlying POSIX socket API.
@@ -59,8 +59,8 @@ The `Limits` template parameter contains a set of `static constexpr` definitions
 If the provided `endpoint_limits` doesn't work for you, feel free to define your own struct or namespace with those named constants.
 
 ## Deriving Your Own Class from `endpoint`
-`ednpoint` is the only class from the `abc` library that needs to be overriden.
-It is flexible - it allows for quite a few methods to be overriden.
+`endpoint` is the only class from the `abc` library that needs to be overridden.
+It is flexible - it allows for quite a few methods to be overridden.
 However, you may be able to get away with overriding just `process_rest_request()`.
 
 See [equations.h](../../samples/equations.h) from Basic Sample for how to override `endpoint`.

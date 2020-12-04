@@ -86,6 +86,7 @@
 	},
 	"cSpell.enabled": true,
 	"cSpell.words": [
+		"bitness",
 		"chrono",
 		"filebuf",
 		"istream",
@@ -98,6 +99,9 @@
 		"roadmap",
 		"streambuf",
 		"stringbuf",
+		"struct",
+		"subfolders",
+		"triaged",
 		"zlatko"
 	]
 }

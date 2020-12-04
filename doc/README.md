@@ -34,7 +34,7 @@ Provide the title and the link to the page along with as much information as you
   - [http_request_istream](ref/http.md)
   - [http_request_ostream](ref/http.md)
   - [http_response_istream](ref/http.md)
-  - [http_response_ostresm](ref/http.md)
+  - [http_response_ostream](ref/http.md)
   - [http_client_stream](ref/http.md)
   - [http_server_stream](ref/http.md)
 - [json streams](ref/json.md)

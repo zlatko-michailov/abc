@@ -53,7 +53,7 @@ For questions, feel encouraged to provide as much context as you are willing to 
 The first step of the triage process is reproducing the issue.
 Be prepared to make your case.
 
-If the issue is reproducable, it will be labeled with one of the three labels referenced above - bug, enhancement, or question.
+If the issue is reproducible, it will be labeled with one of the three labels referenced above - bug, enhancement, or question.
 Otherwise, it will be closed.
 
 If the issue is accepted, but there are more important issues to be addressed in the near future, the issue will be also be labeled with "help needed".

@@ -12,7 +12,7 @@ You will find an `abc_xx.xx.xx.zip` file in the `out` folder.
 
 ## Integrate with Your Project
 Designate a subfolder in your project for dependencies.
-For the purpose of this tutorial, let's assumme that subfolder is `deps`.
+For the purpose of this tutorial, let's assume that subfolder is `deps`.
 
 Unzip the release under `deps`:
 ```

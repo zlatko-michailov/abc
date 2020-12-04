@@ -74,7 +74,7 @@ It is up to you to decide what constitutes a category - a single class, a part o
 ### Choosing a Severity
 Severity is also an integer, but the set of allowed values is very small and already defined.
 
-Filtering log entries by severity is very useful when investigating an issue - start with a value of `severity::critical` and lower it until you find the thread where the issue occured.
+Filtering log entries by severity is very useful when investigating an issue - start with a value of `severity::critical` and lower it until you find the thread where the issue occurred.
 So spend some time to devise a severity strategy, and stick to it throughout your program.
 
 ### Tagging
