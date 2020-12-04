@@ -1,4 +1,4 @@
-# `buffer_streambuf`
+# buffer_streambuf
 
 Up to [Documentation](../README.md).
 
@@ -8,7 +8,6 @@ Include          | [buffer_streambuf.h](../../src/buffer_streambuf.h)
 Interface        | [buffer_streambuf.h](../../src/buffer_streambuf.h)
 Tests / Examples | [test/streambuf.cpp](../../test/streambuf.cpp)
 
-## `buffer_streambuf`
 This is a `std::streambuf` specialization that reads from and writes to a fixed `char` buffer.
 
 This class is heavily used for testing streams.
