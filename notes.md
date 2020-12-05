@@ -1,5 +1,3 @@
-# v0.10
-## Done
 - resource
   - split
   - parameter
@@ -16,7 +14,6 @@
 
 
 ## Postponed
-- ttl_thread
 - Internationalization
 - Improve code style
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
