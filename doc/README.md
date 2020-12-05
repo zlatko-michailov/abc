@@ -1,0 +1,62 @@
+# Documentation
+
+> If you find a bug on any page, please file an [issue](../../../issues).
+Provide the title and the link to the page along with as much information as you consider relevant.
+
+- [MIT License](../LICENSE)
+- Fundamentals
+  - [Features](fundamentals/features.md)
+  - [Intent](fundamentals/intent.md)
+  - [Principles](fundamentals/principles.md)
+- Concepts
+  - [Media and Streams](concepts/media_and_streams.md)
+  - [Tagging](concepts/tagging.md)
+  - [Diagnostics](concepts/diagnostics.md)
+  - [HTTP Endpoint](concepts/endpoint.md)
+- Getting Started
+  - [Dependencies](start/dependencies.md)
+  - [Clone and Build the Repo](start/clone_and_build.md)
+  - [Adopt the Library](start/adopt.md)
+  - [Use the Headers](start/use.md)
+- Tutorials
+  - [How to Log Diagnostics](tutorials/diagnostics.md)
+  - [How to Enable GUI and REST](tutorials/endpoint.md)
+- [Contribute](contribute.md)
+- [Release Notes](releases.md)
+- [Roadmap](roadmap.md)
+
+## Class Reference
+- [ascii](ref/ascii.md)
+- [buffer_streambuf](ref/buffer_streambuf.md)
+- [endpoint](ref/endpoint.md)
+- [exception](ref/exception.md)
+- [http](ref/http.md)
+  - [http_request_istream](ref/http.md)
+  - [http_request_ostream](ref/http.md)
+  - [http_response_istream](ref/http.md)
+  - [http_response_ostream](ref/http.md)
+  - [http_client_stream](ref/http.md)
+  - [http_server_stream](ref/http.md)
+- [json](ref/json.md)
+  - [json_istream](ref/json.md)
+  - [json_ostream](ref/json.md)
+- [log](ref/log.md)
+  - [log_ostream](ref/log.md)
+  - [debug_line_ostream](ref/log.md)
+  - [diag_line_ostream](ref/log.md)
+  - [test_line_ostream](ref/log.md)
+- [multifile](ref/multifile.md)
+  - [multifile_streambuf](ref/multifile.md)
+  - [duration_multifile_streambuf](ref/multifile.md)
+  - [size_multifile_streambuf](ref/multifile.md)
+- [size](ref/size.md)
+- [sockets](ref/socket.md)
+  - [socket_streambuf](ref/socket.md)
+  - [udp_socket](ref/socket.md)
+  - [tcp_server_socket](ref/socket.md)
+  - [tcp_client_socket](ref/socket.md)
+- [table](ref/table.md)
+  - [table_ostream](ref/table.md)
+  - [line_ostream](ref/table.md)
+- [test](ref/test.md)
+- [timestamp](ref/timestamp.md)
