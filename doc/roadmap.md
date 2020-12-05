@@ -2,9 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 0.11.0
-- Documentation.
-
 ## 1.11.0
 - Public verification.
 

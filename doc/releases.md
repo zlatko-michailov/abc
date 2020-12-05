@@ -2,6 +2,10 @@
 
 Up to [Documentation](README.md).
 
+## 0.11.0
+- No breaking changes.
+- Improved documentation.
+
 ## 0.10.0
 - No breaking changes.
 - Reduce the C++ requirement from 17 to 11.
