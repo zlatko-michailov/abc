@@ -15,20 +15,36 @@ The following `abc` features use POSIX API:
   - openSUSE arm64
   - Raspbian (Debian) arm32
 - Windows 10 x64 on PC, with [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) enabled.
+  - openSUSE x64
+  - Ubuntu x64
 
-## Package `gcc-c++`
-`abc` has only been compiled with GCC C++.
-It may be possible to compile it with other compilers, but that has not been tested, nor is it planned.
-
-`abc` only uses C++ 11 features.
+## Packages
+The library itself doesn't need anything beyond the `std` C++ 11 headers and the POSIX-specific headers mentioned above.
 According to the [GCC documentation](https://gcc.gnu.org/projects/cxx-status.html#cxx11), GCC C++ 4.8.1 or later should suffice.
 `abc` has been compiled with GCC C++ 9 and GCC C++ 10.
 
-## Package `zip`
-`zip` is an optional package.
-It is not used by the library itself.
-It is only used for packaging a release.
+To build the tests and the samples, some essential packages are needed, which your system may already have.
 
-## Package `git`
-`git` is another optional package.
-It is not used by the library, but it may be needed during development.
+### Refresh Repos
+Refresh your repos, before trying to install any packages.
+
+openSUSE
+```
+sudo zypper refresh
+```
+
+Ubuntu
+```
+sudo apt update
+```
+
+### Install Packages
+openSUSE
+```
+sudo zypper install gcc-c++ make git zip unzip
+```
+
+Ubuntu
+```
+sudo apt install g++ make git zip unzip
+```

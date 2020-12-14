@@ -97,6 +97,7 @@
 		"posix",
 		"precompiled",
 		"raspbian",
+		"repos",
 		"roadmap",
 		"streambuf",
 		"stringbuf",
