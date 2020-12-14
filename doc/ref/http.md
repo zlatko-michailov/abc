@@ -14,7 +14,8 @@ The program is responsible for checking the _semantic_ correctness of the stream
 These classes are not suitable for implementing a general-purpose web server.
 Their intent is to be used to implement REST endpoints or clients in a trusted network, e.g. for communicating with a (IoT) device within a LAN.
 
-__Note:__ `abc` does not include a crypto facility that implements TLS/https, nor is there any plan to implement such a facility.
+__Note:__ `abc` does not include a crypto facility that implements TLS/https.
+In future, it may provide `streambuf` adapter for a third-party crypto library.
 
 There are four _core_ http stream classes whose names should be self-explanatory:
 - `http_request_istream`
