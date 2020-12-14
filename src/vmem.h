@@ -635,54 +635,122 @@ namespace abc {
 	// --------------------------------------------------------------
 
 	template <typename T, typename Pool, typename Log>
-	inline vmem_deque_iterator<T, Pool, Log>::vmem_deque_iterator(_vmem_deque<T, Pool, Log>* deque, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos) 
-		: _deque(deque)
+	inline vmem_list_iterator<T, Pool, Log>::vmem_list_iterator(const vmem_list<T, Pool, Log>* list, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log)
+		: _list(list)
 		, _page_pos(page_pos)
-		, _item_pos(item_pos) {
+		, _item_pos(item_pos)
+		, _log(log) {
 
+		if (list == nullptr) {
+			throw exception<std::logic_error, Log>("list", __TAG__);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::vmem_list_iterator() _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
 	}
 
 
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log>& vmem_list_iterator<T, Pool, Log>::operator =(const vmem_list_iterator<T, Pool, Log>& other) noexcept {
+		_list = other._list;
+		_page_pos = other._page_pos;
+		_item_pos = other._item_pos;
+		_log = other._log;
 
-#ifdef REMOVE ////
-	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_deque_iterator {
-	private:
-		friend class _vmem_deque<T, Pool, Log>;
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::operator =() _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
 
-		vmem_deque_iterator<T, Pool, Log>(Pool* pool, Log* log, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, bool is_valid);
+		return *this;
+	}
 
-	public:
-		vmem_deque_iterator<T, Pool, Log>(const vmem_deque_iterator<T, Pool, Log>& other);
 
-	public:
-		const vmem_deque_iterator<T, Pool, Log>&	operator =(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
-		vmem_deque_iterator<T, Pool, Log>&			operator ++() noexcept;
-		vmem_deque_iterator<T, Pool, Log>&			operator --() noexcept;
-		T*											operator ->() noexcept;
-		T											operator *() noexcept;
-		bool										operator !=(const vmem_deque_iterator<T, Pool, Log>& other) noexcept;
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list_iterator<T, Pool, Log>::operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept {
+		return _list != other._list
+			|| _page_pos != other._page_pos
+			|| _item_pos != other._item_pos;
+	}
 
-	private:
-		vmem_page<Pool, Log>&& 		front_page() noexcept;
-		vmem_page<Pool, Log>&& 		back_page() noexcept;
 
-	private:
-		Pool*				_pool;
-		Log*				_log;
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log>& vmem_list_iterator<T, Pool, Log>::operator ++() noexcept {
+		//// TODO: Move this logging into list::move_next() and list::move_prev()
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::operator ++() Before _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
 
-		vmem_page_pos_t		_page_pos;
-		vmem_item_pos_t		_item_pos;
-		bool				_is_valid;
-	};
-#endif
+		_list->move_next(this);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::operator ++() After _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
+
+		return *this;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log>& vmem_list_iterator<T, Pool, Log>::operator --() noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::operator --() Before _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
+
+		_list->move_prev(this);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list_iterator::operator --() After _page_pos=%llu, _item_pos=%u", (unsigned long long)_page_pos, (unsigned)_item_pos);
+		}
+
+		return *this;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline T* vmem_list_iterator<T, Pool, Log>::operator ->() noexcept {
+		return _list->at(this);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const T* vmem_list_iterator<T, Pool, Log>::operator ->() const noexcept {
+		return _list->at(this);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline T& vmem_list_iterator<T, Pool, Log>::operator *() {
+		T* t = operator ->();
+
+		if (t == nullptr) {
+			throw exception<std::runtime_error, Log>("Dereferencing invalid iterator", __TAG__);
+		}
+
+		return *t;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const T& vmem_list_iterator<T, Pool, Log>::operator *() const {
+		T* t = operator ->();
+
+		if (t == nullptr) {
+			throw exception<std::runtime_error, Log>("Dereferencing invalid iterator", __TAG__);
+		}
+
+		return *t;
+	}
+
 
 	// --------------------------------------------------------------
 
 
 	template <typename T, typename Pool, typename Log>
-	inline _vmem_deque<T, Pool, Log>::_vmem_deque(vmem_deque_state* state, Pool* pool, Log* log)
+	inline vmem_list<T, Pool, Log>::vmem_list(vmem_list_state* state, Pool* pool, Log* log)
 		: _state(state)
+		, _front_item_pos(vmem_item_pos_nil)
+		, _back_item_pos(vmem_item_pos_nil)
 		, _pool(pool)
 		, _log(log) {
 
@@ -693,75 +761,115 @@ namespace abc {
 		if (pool == nullptr) {
 			throw exception<std::logic_error, Log>("pool", __TAG__);
 		}
+
+		if (_state->front_page_pos != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> page(_pool, _state->front_page_pos, _log);
+			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+			if (list_page->item_count > 0) {
+				_front_item_pos = 0;
+			}
+		}
+
+		if (_state->back_page_pos != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
+			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+			_back_item_pos = list_page->item_count - 1;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::vmem_list() front_page_pos=%llu, front_item_pos=%u, front_page_pos=%llu, front_item_pos=%u",
+				(unsigned long long)_state->front_page_pos, (unsigned)_front_item_pos, (unsigned long long)_state->back_page_pos, (unsigned)_back_item_pos);
+		}
 	}
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool _vmem_deque<T, Pool, Log>::empty() const noexcept {
+	inline void vmem_list<T, Pool, Log>::begin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept {
+		page_pos = _state->front_page_pos;
+		item_pos = _front_item_pos;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::begin_pos() page_pos=%llu, item_pos=%u", (unsigned long long)page_pos, (unsigned)item_pos);
+		}
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::rbegin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept {
+		page_pos = _state->front_page_pos;
+		item_pos = vmem_item_pos_nil;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::rbegin_pos() page_pos=%llu, item_pos=%u", (unsigned long long)page_pos, (unsigned)item_pos);
+		}
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::end_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept {
+		page_pos = _state->back_page_pos;
+		item_pos = _back_item_pos + 1;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::end_pos() page_pos=%llu, item_pos=%u", (unsigned long long)page_pos, (unsigned)item_pos);
+		}
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::rend_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept {
+		page_pos = _state->back_page_pos;
+		item_pos = _back_item_pos;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::rend_pos() page_pos=%llu, item_pos=%u", (unsigned long long)page_pos, (unsigned)item_pos);
+		}
+	}
+
+
+
+
+
+///////////////////////////////////////
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::empty() const noexcept {
 		return _state->total_item_count == 0;
 	}
 
 
 	template <typename T, typename Pool, typename Log>
-	inline std::size_t _vmem_deque<T, Pool, Log>::size() const noexcept {
+	inline std::size_t vmem_list<T, Pool, Log>::size() const noexcept {
 		return _state->total_item_count;
 	}
 
 
+#ifdef TEMP ////
 	template <typename T, typename Pool, typename Log>
-	inline T* _vmem_deque<T, Pool, Log>::front() const noexcept {
+	inline T vmem_list<T, Pool, Log>::front() const noexcept {
 		if (empty()) {
 			return nullptr;
 		}
 
 		vmem_page<Pool, Log> page(_pool, _state->front_page_pos, _log);
-		_vmem_deque_page<T>* deque_page = reinterpret_cast<_vmem_deque_page<T>*>(page.ptr());
-		return &deque_page->items[0];
+		_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+		return &list_page->items[0];
 	}
 
 
 	template <typename T, typename Pool, typename Log>
-	inline T* _vmem_deque<T, Pool, Log>::back() const noexcept {
+	inline T vmem_list<T, Pool, Log>::back() const noexcept {
 		if (empty()) {
 			return nullptr;
 		}
 
 		vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
-		_vmem_deque_page<T>* deque_page = reinterpret_cast<_vmem_deque_page<T>*>(page.ptr());
-		return &deque_page->items[deque_page->item_count - 1];
+		_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+		return &list_page->items[list_page->item_count - 1];
 	}
-
-
-
-#ifdef REMOVE ////
-	protected:
-		T					front() const noexcept;
-		T					back() const noexcept;
-
-		bool				push_back(const T& item) noexcept;
-		T					pop_back() noexcept;
-
-		bool				push_front(const T& item) noexcept;
-		T					pop_front() noexcept;
-
-	protected:
-		const vmem_deque_iterator<T, Pool, Log>&	begin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	end() noexcept;
-
-		const vmem_deque_iterator<T, Pool, Log>&	rbegin() noexcept;
-		const vmem_deque_iterator<T, Pool, Log>&	rend() noexcept;
-
-	protected:
-		vmem_deque_state*					_state;
-		Pool*								_pool;
-		Log*								_log;
-
-		vmem_deque_iterator<T, Pool, Log>	_begin;
-		vmem_deque_iterator<T, Pool, Log>	_end;
-		vmem_deque_iterator<T, Pool, Log>	_rbegin;
-		vmem_deque_iterator<T, Pool, Log>	_rend;
-	};
 #endif
+
+
 
 
 }
