@@ -2,6 +2,10 @@
 
 Up to [Documentation](README.md).
 
+## 1.11.0
+- No breaking changes.
+- Public verification.
+
 ## 0.11.0
 - No breaking changes.
 - Improved documentation.

@@ -2,9 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.11.0
-- Public verification.
-
 ## 1.12.0
 - Virtual memory:
   - `vmem_pool`
