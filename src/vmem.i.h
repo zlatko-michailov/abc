@@ -141,47 +141,34 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-#ifdef REMOVE ////
-	template <typename Pool, typename Log>
-	class _vmem_ptr {
+	template <typename T, typename Pool, typename Log>
+	class vmem_ptr {
 	public:
-		_vmem_ptr<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos);
-		_vmem_ptr<Pool, Log>(const _vmem_ptr<Pool, Log>& other) = default;
-		_vmem_ptr<Pool, Log>(_vmem_ptr<Pool, Log>&& other) = default;
-		~_vmem_ptr<Pool, Log>();
+		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
+		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
+		vmem_ptr<T, Pool, Log>(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
+		~vmem_ptr<T, Pool, Log>() = default;
 
 	public:
 		Pool*						pool() const noexcept;
 		vmem_page_pos_t				page_pos() const noexcept;
 		vmem_item_pos_t				item_pos() const noexcept;
+									operator T*() noexcept;
+									operator const T*() const noexcept;
+		T*							operator ->() noexcept;
+		const T*					operator ->() const noexcept;
+		T&							operator *();
+		const T&					operator *() const;
+
+	private:
+		T*							ptr() const noexcept;
+		T&							deref() const;
 
 	protected:
-		Pool*						_pool;
-		vmem_page_pos_t				_page_pos;
+		vmem_page<Pool, Log>		_page;
 		vmem_item_pos_t				_item_pos;
 		Log*						_log;
 	};
-
-
-	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_ptr : public _vmem_ptr<Pool, Log> {
-		using base = _vmem_ptr<Pool, Log>;
-
-	private:
-		friend class vmem_page<Pool, Log>;
-
-		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
-
-	public:
-		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) = default;
-		vmem_ptr<T, Pool, Log>(vmem_ptr<T, Pool, Log>&& other) = default;
-		~vmem_ptr<T, Pool, Log>();
-
-	public:
-		T*							get();
-		const T*					get() const;
-	};
-#endif
 
 
 	// --------------------------------------------------------------
@@ -268,6 +255,13 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log = null_log>
 	class vmem_list_iterator {
+	public:
+		using value_type				= T;
+		using pointer					= vmem_ptr<T, Pool, Log>;
+		using const_pointer				= const pointer;
+		using reference					= T&;
+		using const_reference			= const T&;
+
 	private:
 		friend class vmem_list<T, Pool, Log>;
 
@@ -284,10 +278,14 @@ namespace abc {
 		bool								operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator ++() noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator --() noexcept;
-		T*									operator ->() noexcept;
-		const T*							operator ->() const noexcept;
-		T&									operator *();
-		const T&							operator *() const;
+		pointer								operator ->() noexcept;
+		const_pointer						operator ->() const noexcept;
+		reference							operator *();
+		const_reference						operator *() const;
+
+	private:
+		pointer								ptr() noexcept;
+		reference							deref();
 
 	private:
 		const vmem_list<T, Pool, Log>*		_list;
@@ -304,10 +302,10 @@ namespace abc {
 	class vmem_list {
 	public:
 		using value_type				= T;
-		using pointer					= T*;
+		using pointer					= vmem_ptr<T, Pool, Log>;
 		using const_pointer				= const pointer;
 		using reference					= T&;
-		using const_reference			= const reference;
+		using const_reference			= const T&;
 		using iterator					= vmem_list_iterator<T, Pool, Log>;
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
@@ -362,7 +360,7 @@ namespace abc {
 
 		bool					move_next(iterator* itr) const noexcept;
 		bool					move_prev(iterator* itr) const noexcept;
-		T*						at(const iterator* itr) const noexcept;
+		pointer					at(const iterator* itr) const noexcept;
 
 	private:
 		void					begin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
