@@ -237,7 +237,7 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-#ifdef REMOVE ////
+#ifdef REMOVE //// vmem_list_iterator_flag
 	using vmem_list_iterator_flag_t = std::uint8_t;
 
 	namespace vmem_list_iterator_flag {
@@ -284,6 +284,8 @@ namespace abc {
 		const_reference						operator *() const;
 
 	private:
+		friend class vmem_list<T, Pool, Log>;
+
 		pointer								ptr() noexcept;
 		reference							deref();
 
@@ -338,21 +340,29 @@ namespace abc {
 		bool					empty() const noexcept;
 		std::size_t				size() const noexcept;
 
-		pointer					front() noexcept;
-		const_pointer			front() const noexcept;
+		pointer					frontptr() noexcept;
+		const_pointer			frontptr() const noexcept;
 
-		pointer					back() noexcept;
-		const_pointer			back() const noexcept;
+		reference				front();
+		const_reference			front() const;
 
-		bool					push_back(const_reference item) noexcept;
-		bool					pop_back() noexcept;
+		pointer					backptr() noexcept;
+		const_pointer			backptr() const noexcept;
 
-		bool					push_front(const_reference item) noexcept;
-		bool					pop_front() noexcept;
+		reference				back();
+		const_reference			back() const;
+
+		void					push_back(const_reference item) noexcept;
+		void					pop_back() noexcept;
+
+		void					push_front(const_reference item) noexcept;
+		void					pop_front() noexcept;
 
 		bool					insert(const_iterator itr, const_reference item) noexcept;
-		bool					erase(const_iterator itr) noexcept;
-		bool					erase(const_iterator first, const_iterator last) noexcept;
+		template <typename InputItr>
+		std::size_t				insert(const_iterator itr, InputItr first, InputItr last) noexcept;
+		iterator				erase(const_iterator itr) noexcept;
+		iterator				erase(const_iterator first, const_iterator last) noexcept;
 		void					clear() noexcept;
 
 	private:

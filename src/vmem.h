@@ -863,18 +863,237 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::begin() noexcept {
+		return cbegin();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::begin() const noexcept {
+		return cbegin();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::cbegin() const noexcept {
+		vmem_page_pos_t page_pos;
+		vmem_item_pos_t item_pos;
+		begin_pos(page_pos, item_pos);
+
+		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, _log);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::end() noexcept {
+		return cend();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::end() const noexcept {
+		return cend();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::cend() const noexcept {
+		vmem_page_pos_t page_pos;
+		vmem_item_pos_t item_pos;
+		end_pos(page_pos, item_pos);
+
+		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, _log);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::rbegin() noexcept {
+		return crbegin();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::rbegin() const noexcept {
+		return crbegin();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::crbegin() const noexcept {
+		vmem_page_pos_t page_pos;
+		vmem_item_pos_t item_pos;
+		rbegin_pos(page_pos, item_pos);
+
+		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, _log);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::rend() noexcept {
+		return crend();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::rend() const noexcept {
+		return crend();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::crend() const noexcept {
+		vmem_page_pos_t page_pos;
+		vmem_item_pos_t item_pos;
+		rend_pos(page_pos, item_pos);
+
+		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, _log);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::empty() const noexcept {
+		return _state->total_item_count == 0;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline std::size_t vmem_list<T, Pool, Log>::size() const noexcept {
+		return _state->total_item_count;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_ptr<T, Pool, Log> vmem_list<T, Pool, Log>::frontptr() noexcept {
+		return begin().ptr();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_ptr<T, Pool, Log> vmem_list<T, Pool, Log>::frontptr() const noexcept {
+		return begin().ptr();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline T& vmem_list<T, Pool, Log>::front() {
+		return begin().deref();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const T& vmem_list<T, Pool, Log>::front() const {
+		return begin().deref();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_ptr<T, Pool, Log> vmem_list<T, Pool, Log>::backptr() noexcept {
+		return rend().ptr();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const vmem_ptr<T, Pool, Log> vmem_list<T, Pool, Log>::backptr() const noexcept {
+		return rend().ptr();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline T& vmem_list<T, Pool, Log>::back() {
+		return rend().deref();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline const T& vmem_list<T, Pool, Log>::back() const {
+		return rend().deref();
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::push_back(const_reference item) noexcept {
+		insert(end(), item);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::pop_back() noexcept {
+		erase(rend());
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::push_front(const_reference item) noexcept {
+		insert(begin(), item);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::pop_front() noexcept {
+		erase(begin());
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::insert(const_iterator itr, const_reference item) noexcept {
+		return false; //// TODO: list::insert()
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	template <typename InputItr>
+	inline std::size_t vmem_list<T, Pool, Log>::insert(const_iterator itr, InputItr first, InputItr last) noexcept {
+		std::size_t n = 0;
+
+		for (InputItr item = first; item != last; item++) {
+			if (!insert(itr++, *item)) {
+				return n;
+			}
+
+			n++;
+		}
+
+		return n;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::erase(const_iterator itr) noexcept {
+		return end(); //// TODO: list::erase()
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_list_iterator<T, Pool, Log> vmem_list<T, Pool, Log>::erase(const_iterator first, const_iterator last) noexcept {
+		const_iterator item = first;
+
+		while (item.ptr() == nullptr && item != last) {
+			item = erase(item);
+		}
+
+		return item;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline void vmem_list<T, Pool, Log>::clear() noexcept {
+		erase(begin(), end());
+	}
+
+
+	template <typename T, typename Pool, typename Log>
 	inline bool vmem_list<T, Pool, Log>::move_next(iterator* itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() Before _page_pos=%llu, _item_pos=%u", (unsigned long long)itr->_page_pos, (unsigned)itr->_item_pos);
 		}
 
-		//// TODO:
+		//// TODO: list::move_next()
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() After _page_pos=%llu, _item_pos=%u", (unsigned long long)itr->_page_pos, (unsigned)itr->_item_pos);
 		}
 
-		return false; //// TODO:
+		return false; //// TODO: list::move_next()
 	}
 
 
@@ -884,13 +1103,13 @@ namespace abc {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() Before _page_pos=%llu, _item_pos=%u", (unsigned long long)itr->_page_pos, (unsigned)itr->_item_pos);
 		}
 
-		//// TODO:
+		//// TODO: list::move_prev()
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() After _page_pos=%llu, _item_pos=%u", (unsigned long long)itr->_page_pos, (unsigned)itr->_item_pos);
 		}
 
-		return false; //// TODO:
+		return false; //// TODO: list::move_prev()
 	}
 
 
@@ -942,51 +1161,5 @@ namespace abc {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::rend_pos() page_pos=%llu, item_pos=%u", (unsigned long long)page_pos, (unsigned)item_pos);
 		}
 	}
-
-
-
-
-
-///////////////////////////////////////
-
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::empty() const noexcept {
-		return _state->total_item_count == 0;
-	}
-
-
-	template <typename T, typename Pool, typename Log>
-	inline std::size_t vmem_list<T, Pool, Log>::size() const noexcept {
-		return _state->total_item_count;
-	}
-
-
-#ifdef TEMP ////
-	template <typename T, typename Pool, typename Log>
-	inline T vmem_list<T, Pool, Log>::front() const noexcept {
-		if (empty()) {
-			return nullptr;
-		}
-
-		vmem_page<Pool, Log> page(_pool, _state->front_page_pos, _log);
-		_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
-		return &list_page->items[0];
-	}
-
-
-	template <typename T, typename Pool, typename Log>
-	inline T vmem_list<T, Pool, Log>::back() const noexcept {
-		if (empty()) {
-			return nullptr;
-		}
-
-		vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
-		_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
-		return &list_page->items[list_page->item_count - 1];
-	}
-#endif
-
-
-
 
 }
