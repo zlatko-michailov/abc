@@ -181,6 +181,7 @@ namespace abc {
 	struct vmem_list_state {
 		vmem_page_pos_t		front_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		back_page_pos		= vmem_page_pos_nil;
+		vmem_item_pos_t		item_size			= 0;
 		vmem_page_pos_t		total_item_count	= 0;
 	};
 
@@ -283,11 +284,13 @@ namespace abc {
 		reference							operator *();
 		const_reference						operator *() const;
 
+		bool								can_deref() const noexcept;
+
 	private:
 		friend class vmem_list<T, Pool, Log>;
 
-		pointer								ptr() noexcept;
-		reference							deref();
+		pointer								ptr() const noexcept;
+		reference							deref() const;
 
 	private:
 		const vmem_list<T, Pool, Log>*		_list;
@@ -312,6 +315,11 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
+
+	public:
+		static constexpr std::size_t	max_item_size() noexcept;
+		static constexpr std::size_t	page_capacity() noexcept;
+		static constexpr bool			is_uninit(const vmem_list_state* state) noexcept;
 
 	public:
 		vmem_list<T, Pool, Log>(vmem_list_state* state, Pool* pool, Log* log);
@@ -352,17 +360,17 @@ namespace abc {
 		reference				back();
 		const_reference			back() const;
 
-		void					push_back(const_reference item) noexcept;
-		void					pop_back() noexcept;
+		void					push_back(const_reference item);
+		void					pop_back();
 
-		void					push_front(const_reference item) noexcept;
-		void					pop_front() noexcept;
+		void					push_front(const_reference item);
+		void					pop_front();
 
-		bool					insert(const_iterator itr, const_reference item) noexcept;
+		iterator				insert(const_iterator itr, const_reference item);
 		template <typename InputItr>
-		std::size_t				insert(const_iterator itr, InputItr first, InputItr last) noexcept;
-		iterator				erase(const_iterator itr) noexcept;
-		iterator				erase(const_iterator first, const_iterator last) noexcept;
+		iterator				insert(const_iterator itr, InputItr first, InputItr last);
+		iterator				erase(const_iterator itr);
+		iterator				erase(const_iterator first, const_iterator last);
 		void					clear() noexcept;
 
 	private:
@@ -370,7 +378,8 @@ namespace abc {
 
 		bool					move_next(iterator* itr) const noexcept;
 		bool					move_prev(iterator* itr) const noexcept;
-		pointer					at(const iterator* itr) const noexcept;
+		pointer					at(const_iterator* itr) const noexcept;
+		bool					is_mine(const_iterator* itr) const noexcept;
 
 	private:
 		void					begin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;

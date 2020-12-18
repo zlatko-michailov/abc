@@ -167,5 +167,9 @@ int main() {
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
 	}
 
+	abc::vmem_list_state list_state;
+	abc::vmem_list<std::uint16_t, Pool, Log> list(&list_state, &pool, &log);
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "max_item_size=%zu page_capacity=%zu", abc::vmem_list<std::uint32_t, Pool, Log>::max_item_size(), abc::vmem_list<std::uint32_t, Pool, Log>::page_capacity());
+
 	return passed ? 0 : 1;
 }
