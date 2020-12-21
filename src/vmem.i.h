@@ -110,7 +110,7 @@ namespace abc {
 	public:
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
+		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other);
 		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
 
 		~vmem_page<Pool, Log>() noexcept;

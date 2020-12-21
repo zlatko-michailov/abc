@@ -482,23 +482,29 @@ namespace abc {
 			throw exception<std::logic_error, Log>("pool", __TAG__);
 		}
 
-		if (page_pos == vmem_page_pos_nil && !alloc()) {
-			return;
+		if (page_pos == vmem_page_pos_nil) {
+			if (!alloc()) {
+				throw exception<std::runtime_error, Log>("alloc()", __TAG__);
+			}
 		}
 
-		lock();
+		if (!lock()) {
+			throw exception<std::runtime_error, Log>("lock()", __TAG__);
+		}
 	}
 
 
 	template <typename Pool, typename Log>
-	inline vmem_page<Pool, Log>::vmem_page(const vmem_page<Pool, Log>& other) noexcept
+	inline vmem_page<Pool, Log>::vmem_page(const vmem_page<Pool, Log>& other)
 		: _pool(other._pool)
 		, _pos(other._pos)
 		, _ptr(other._ptr)
 		, _log(other._log) {
 
 		if (_pool != nullptr && _pos != vmem_page_pos_nil) {
-			lock();
+			if (!lock()) {
+				throw exception<std::runtime_error, Log>("lock()", __TAG__);
+			}
 		}
 	}
 
@@ -561,7 +567,7 @@ namespace abc {
 	inline bool vmem_page<Pool, Log>::lock() noexcept {
 		_ptr = _pool->lock_page(_pos);
 
-		if (_pos == vmem_page_pos_nil) {
+		if (_ptr == nullptr) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_page::lock() _pos=%llu, _ptr=nullptr", (unsigned long long)_pos);
 			}
