@@ -238,17 +238,18 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
-#ifdef REMOVE //// vmem_list_iterator_flag
-	using vmem_list_iterator_flag_t = std::uint8_t;
 
-	namespace vmem_list_iterator_flag {
-		constexpr vmem_list_iterator_flag_t	none			= 0x00;
-		constexpr vmem_list_iterator_flag_t	read_data		= 0x01;
-		constexpr vmem_list_iterator_flag_t	write_date		= 0x02;
-		constexpr vmem_list_iterator_flag_t	move_forward	= 0x04;
-		constexpr vmem_list_iterator_flag_t	move_backward	= 0x08;
+	using vmem_iterator_edge_t = std::uint8_t;
+
+	namespace vmem_iterator_edge {
+		constexpr vmem_iterator_edge_t	none	= 0;
+		constexpr vmem_iterator_edge_t	rbegin	= 1; // before front
+		constexpr vmem_iterator_edge_t	end		= 2; // after back
 	}
-#endif
+
+
+	// --------------------------------------------------------------
+
 
 	template <typename T, typename Pool, typename Log>
 	class vmem_list;
@@ -266,7 +267,7 @@ namespace abc {
 	private:
 		friend class vmem_list<T, Pool, Log>;
 
-		vmem_list_iterator<T, Pool, Log>(const vmem_list<T, Pool, Log>* list, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log);
+		vmem_list_iterator<T, Pool, Log>(const vmem_list<T, Pool, Log>* list, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log);
 
 	public:
 		vmem_list_iterator<T, Pool, Log>(const vmem_list_iterator<T, Pool, Log>& other) = default;
@@ -296,6 +297,7 @@ namespace abc {
 		const vmem_list<T, Pool, Log>*		_list;
 		vmem_page_pos_t						_page_pos;
 		vmem_item_pos_t						_item_pos;
+		vmem_iterator_edge_t				_edge;
 		Log*								_log;
 	};
 
@@ -336,13 +338,13 @@ namespace abc {
 		const_iterator			end() const noexcept;
 		const_iterator			cend() const noexcept;
 
-		reverse_iterator		rbegin() noexcept;
-		const_reverse_iterator	rbegin() const noexcept;
-		const_reverse_iterator	crbegin() const noexcept;
-
 		reverse_iterator		rend() noexcept;
 		const_reverse_iterator	rend() const noexcept;
 		const_reverse_iterator	crend() const noexcept;
+
+		reverse_iterator		rbegin() noexcept;
+		const_reverse_iterator	rbegin() const noexcept;
+		const_reverse_iterator	crbegin() const noexcept;
 
 	public:
 		bool					empty() const noexcept;
@@ -389,8 +391,6 @@ namespace abc {
 
 	private:
 		vmem_list_state*		_state;
-		vmem_item_pos_t			_front_item_pos;
-		vmem_item_pos_t			_back_item_pos;
 		Pool*					_pool;
 		Log*					_log;
 	};
