@@ -279,7 +279,9 @@ namespace abc {
 	public:
 		bool								operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator ++() noexcept;
+		vmem_list_iterator<T, Pool, Log>&	operator ++(int) noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator --() noexcept;
+		vmem_list_iterator<T, Pool, Log>&	operator --(int) noexcept;
 		pointer								operator ->() noexcept;
 		const_pointer						operator ->() const noexcept;
 		reference							operator *();
@@ -378,10 +380,9 @@ namespace abc {
 	private:
 		friend class vmem_list_iterator<T, Pool, Log>;
 
-		bool					move_next(iterator* itr) const noexcept;
-		bool					move_prev(iterator* itr) const noexcept;
-		pointer					at(const_iterator* itr) const noexcept;
-		bool					is_mine(const_iterator* itr) const noexcept;
+		void					move_next(iterator& itr) const noexcept;
+		void					move_prev(iterator& itr) const noexcept;
+		pointer					at(const_iterator& itr) const noexcept;
 
 	private:
 		void					begin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
