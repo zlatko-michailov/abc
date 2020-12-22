@@ -167,8 +167,7 @@ int main() {
 		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
 	}
 
-	log.put_blank_line();
-
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- list stats");
 	using Item = std::array<std::uint8_t, 900>;
 	abc::vmem_list_state list_state;
 
@@ -176,8 +175,7 @@ int main() {
 	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "max_item_size=%zu page_capacity=%zu", abc::vmem_list<Item, Pool, Log>::max_item_size(), abc::vmem_list<Item, Pool, Log>::page_capacity());
 	Item item;
 
-	log.put_blank_line();
-
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- list insert");
 	item.fill(5);
 	list.insert(list.end(), item);
 	item.fill(6);

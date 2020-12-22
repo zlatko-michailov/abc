@@ -249,7 +249,8 @@ namespace abc {
 						if (_mapped_pages[i].lock_count > 0 || _mapped_pages[i].keep_count > avg_keep_count) {
 							// This page will be kept.
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Keeping page i=%zu, keep_count=%u, avg_keep_count=%u", i, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
+								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Keeping page i=%zu, pos=%llu, keep_count=%u, avg_keep_count=%u",
+									i, (unsigned long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
 							}
 
 							// Reduce the keep_count for fairness.
@@ -269,18 +270,24 @@ namespace abc {
 								}
 
 								_mapped_pages[empty_pos++] = _mapped_pages[i];
+
+								_mapped_pages[i] = { 0 };
+								empty_pos = i;
 							}
 						}
 						else {
 							// This page will be unmapped.
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::lock_page() Unmapping page i=%zu, keep_count=%u, avg_keep_count=%u", i, _mapped_pages[i].keep_count, avg_keep_count);
+								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::lock_page() Unmapping page i=%zu, pos=%llu, keep_count=%u, avg_keep_count=%u",
+									i, (unsigned long long)_mapped_pages[i].pos, _mapped_pages[i].keep_count, avg_keep_count);
 							}
 
 							int um = munmap(_mapped_pages[i].ptr, vmem_page_size);
+							void* ptr = _mapped_pages[i].ptr;
+							_mapped_pages[i] = { 0 };
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() Unmap i=%u, ptr=%p, um=%d, errno=%d", i, _mapped_pages[i].ptr, um, errno);
+								_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() Unmap i=%u, ptr=%p, um=%d, errno=%d", i, ptr, um, errno);
 							}
 
 							if (!has_empty_pos) {
