@@ -175,22 +175,23 @@ int main() {
 	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "max_item_size=%zu page_capacity=%zu", abc::vmem_list<Item, Pool, Log>::max_item_size(), abc::vmem_list<Item, Pool, Log>::page_capacity());
 	Item item;
 
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- list insert");
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list insert");
 	item.fill(0x71);
 	list.insert(list.end(), item);
 	item.fill(0x72);
 	list.insert(list.end(), item);
 	item.fill(0x73);
 	list.insert(list.end(), item);
-	item.fill(0x70);
+	item.fill(0x74);
 	list.insert(list.begin(), item);
 
-	item.fill(0x60);
+	item.fill(0x75);
 	list.insert(list.end(), item);
 
-	item.fill(0x50);
+	item.fill(0x76);
 	list.insert(list.begin(), item);
 
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse");
 	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.begin(); itr != list.end(); itr++) {
 		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
 	}

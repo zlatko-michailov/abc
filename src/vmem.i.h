@@ -321,6 +321,7 @@ namespace abc {
 		using const_reverse_iterator	= const_iterator;
 
 	public:
+		static constexpr std::size_t	items_pos() noexcept;
 		static constexpr std::size_t	max_item_size() noexcept;
 		static constexpr std::size_t	page_capacity() noexcept;
 		static constexpr bool			is_uninit(const vmem_list_state* state) noexcept;

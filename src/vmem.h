@@ -856,8 +856,14 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
+	inline constexpr std::size_t vmem_list<T, Pool, Log>::items_pos() noexcept {
+		return sizeof(_vmem_list_page<std::uint8_t>) - sizeof(std::uint8_t);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
 	inline constexpr std::size_t vmem_list<T, Pool, Log>::max_item_size() noexcept {
-		return vmem_page_size - (sizeof(_vmem_list_page<std::uint8_t>) - sizeof(std::uint8_t));
+		return vmem_page_size - items_pos();
 	}
 
 
@@ -1387,7 +1393,12 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline vmem_ptr<T, Pool, Log> vmem_list<T, Pool, Log>::at(const_iterator& itr) const noexcept {
-		return vmem_ptr<T, Pool, Log>(_pool, itr._page_pos, itr._item_pos, _log);
+		vmem_item_pos_t item_pos =
+			itr._item_pos == vmem_item_pos_nil ?
+				vmem_item_pos_nil :
+				items_pos() + (itr._item_pos * sizeof(T));
+
+		return vmem_ptr<T, Pool, Log>(_pool, itr._page_pos, item_pos, _log);
 	}
 
 
