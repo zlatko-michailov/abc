@@ -191,8 +191,13 @@ int main() {
 	item.fill(0x76);
 	list.insert(list.begin(), item);
 
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse");
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse forward");
 	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.begin(); itr != list.end(); itr++) {
+		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
+	}
+
+	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse reverse");
+	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.rend(); itr != list.rbegin(); itr--) {
 		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
 	}
 

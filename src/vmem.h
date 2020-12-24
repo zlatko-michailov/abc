@@ -1452,7 +1452,7 @@ namespace abc {
 			item_pos = vmem_item_pos_nil;
 		}
 		else {
-			vmem_page<Pool, Log> page(this, _state->back_page_pos, _log);
+			vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
 			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
 			item_pos = list_page->item_count - 1;
 		}
