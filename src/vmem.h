@@ -1116,6 +1116,7 @@ namespace abc {
 			vmem_page<Pool, Log> page(_pool, _log);
 			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
 
+			// Insert page - only one.
 			list_page->next_page_pos = vmem_page_pos_nil;
 			list_page->prev_page_pos = vmem_page_pos_nil;
 			list_page->item_count = 0;
@@ -1123,7 +1124,7 @@ namespace abc {
 			_state->front_page_pos = page.pos();
 			_state->back_page_pos = page.pos();
 
-			// Insert here:
+			// Insert item - first/only one.
 			page_pos = page.pos();
 			item_pos = 0;
 			page_item_count = ++list_page->item_count;
@@ -1153,13 +1154,21 @@ namespace abc {
 				vmem_page<Pool, Log> new_page(_pool, _log);
 				_vmem_list_page<T>* new_list_page = reinterpret_cast<_vmem_list_page<T>*>(new_page.ptr());
 
+				// Insert page - after.
 				new_list_page->next_page_pos = list_page->next_page_pos;
 				new_list_page->prev_page_pos = itr._page_pos;
 				new_list_page->item_count = 0;
 
+				if (list_page->next_page_pos != vmem_page_pos_nil) {
+					vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
+					_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
+
+					next_list_page->prev_page_pos = new_page.pos();
+				}
+
 				list_page->next_page_pos = new_page.pos();
 
-				if (_state->back_page_pos == itr._page_pos) {
+				if (_state->back_page_pos == page.pos()) {
 					_state->back_page_pos = new_page.pos();
 				}
 
@@ -1177,7 +1186,7 @@ namespace abc {
 					new_list_page->item_count = move_item_count;
 					list_page->item_count -= move_item_count;
 
-					// Insert here:
+					// Insert item - middle.
 					page_pos = itr._page_pos;
 					item_pos = itr._item_pos;
 					page_item_count = ++list_page->item_count;
@@ -1195,7 +1204,7 @@ namespace abc {
 						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::insert() No capacity. End.");
 					}
 
-					// Insert here:
+					// Insert item - first/only one.
 					page_pos = new_page.pos();
 					item_pos = 0;
 					page_item_count = ++new_list_page->item_count;
@@ -1222,9 +1231,9 @@ namespace abc {
 
 					// Shift the items from the insertion position to free up a slot.
 					std::size_t move_item_count = list_page->item_count - itr._item_pos;
-					std::memmove(&list_page->items[itr._item_pos], &list_page->items[itr._item_pos + 1], move_item_count * sizeof(T));
+					std::memmove(&list_page->items[itr._item_pos + 1], &list_page->items[itr._item_pos], move_item_count * sizeof(T));
 
-					// Insert here:
+					// Insert item - middle.
 					page_pos = itr._page_pos;
 					item_pos = itr._item_pos;
 					page_item_count = ++list_page->item_count;
@@ -1241,7 +1250,7 @@ namespace abc {
 						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::insert() Capacity. End.");
 					}
 
-					// Insert here:
+					// Insert item - last one.
 					page_pos = itr._page_pos;
 					item_pos = list_page->item_count;
 					page_item_count = ++list_page->item_count;

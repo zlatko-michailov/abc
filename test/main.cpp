@@ -142,7 +142,7 @@ int main() {
 	log.filter()->min_severity(abc::severity::abc::debug);
 
 	using Log = abc::test::log;
-	using Pool = abc::vmem_pool<3, abc::test::log>;
+	using Pool = abc::vmem_pool<30, abc::test::log>;
 	Pool pool("out/test/test1.vmem", &log);
 
 	{
