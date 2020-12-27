@@ -35,7 +35,7 @@ SOFTWARE.
 #include "json.h"
 #include "heap.h"
 #include "clock.h"
-#include "../src/vmem.h"
+#include "vmem.h"
 
 
 int main() {
@@ -130,6 +130,10 @@ int main() {
 				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
 				{ "test_http_json_socket_stream",					abc::test::socket::test_http_json_socket_stream },
 			} },
+			{ "vmem", {
+				{ "test_vmem_pool_fit",								abc::test::vmem::test_vmem_pool_fit },
+				{ "test_vmem_pool_exceed",							abc::test::vmem::test_vmem_pool_exceed },
+			} },
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
 			} },
@@ -139,6 +143,7 @@ int main() {
 
 	bool passed = test_suite.run();
 
+#ifdef REMOVE ////
 	log.filter()->min_severity(abc::severity::abc::debug);
 
 	using Log = abc::test::log;
@@ -200,6 +205,7 @@ int main() {
 	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.rend(); itr != list.rbegin(); itr--) {
 		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
 	}
+#endif 
 
 	return passed ? 0 : 1;
 }

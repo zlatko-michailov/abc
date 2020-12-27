@@ -284,7 +284,7 @@ namespace abc {
 							// This page will be unmapped.
 							if (_log != nullptr) {
 								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::lock_page() Unmapping page i=%zu, pos=%llu, keep_count=%u, avg_keep_count=%u",
-									i, (unsigned long long)_mapped_pages[i].pos, _mapped_pages[i].keep_count, avg_keep_count);
+									i, (unsigned long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
 							}
 
 							int um = munmap(_mapped_pages[i].ptr, vmem_page_size);
@@ -364,7 +364,8 @@ namespace abc {
 			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_LOCKED, _fd, page_off);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() Map i=%zu, pos=%zu, ptr=%p, errno=%d", i, page_pos, ptr, errno);
+				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() Map i=%zu, pos=%llu, ptr=%p, errno=%d",
+					i, (unsigned long long)page_pos, ptr, errno);
 			}
 
 			_mapped_page_count++;
@@ -435,19 +436,22 @@ namespace abc {
 				int sn = msync(mapped_page.ptr, vmem_page_size, MS_ASYNC);
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Sync i=%zu, ptr=%p, sn=%d, errno=%d", i, mapped_page.ptr, sn, errno);
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Sync i=%zu, ptr=%p, sn=%d, errno=%d",
+						i, mapped_page.ptr, sn, errno);
 				}
 			}
 			else {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Found at i=%zu, ptr=%p, locks=%u", i, mapped_page.ptr, (unsigned)mapped_page.lock_count);
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Found at i=%zu, ptr=%p, locks=%u",
+						i, mapped_page.ptr, (unsigned)mapped_page.lock_count);
 				}
 			}
 		}
 		else {
 			// The page was not found. This is a logic error.
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::unlock_page() Trying to unlock a page that is not locked. page_pos=%llu", (unsigned long long)page_pos);
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::unlock_page() Trying to unlock a page that is not locked. page_pos=%llu",
+					(unsigned long long)page_pos);
 			}
 
 			return false;
