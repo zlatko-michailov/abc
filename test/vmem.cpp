@@ -34,7 +34,84 @@ namespace abc { namespace test { namespace vmem {
 
 
 	template <typename Pool>
-	bool test_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit) {
+	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit);
+
+	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b);
+
+
+	bool test_vmem_pool_fit(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		abc::vmem_pool<3, Log> pool("out/test/pool_fit.vmem", context.log);
+		passed = create_vmem_pool(context, &pool, true) && passed;
+
+		return passed;
+	}
+
+
+	bool test_vmem_pool_exceed(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		abc::vmem_pool<2, Log> pool("out/test/pool_exceed.vmem", context.log);
+		passed = create_vmem_pool(context, &pool, false) && passed;
+
+		return passed;
+	}
+
+
+	bool test_vmem_pool_reopen(test_context<abc::test::log>& context) {
+		using Pool = abc::vmem_pool<3, Log>;
+
+		bool passed = true;
+
+		{
+			Pool pool("out/test/pool_reopen.vmem", context.log);
+			passed = create_vmem_pool(context, &pool, true) && passed;
+		}
+
+		Pool pool("out/test/pool_reopen.vmem", context.log);
+
+		// Page 0 (root page)
+		{
+			abc::vmem_page<Pool, Log> page(&pool, 0, context.log);
+			{
+				_vmem_root_page expected;
+				int cmp = std::memcmp(&expected, page.ptr(), sizeof(_vmem_root_page));
+				passed = context.are_equal(cmp, 0, __TAG__, "%d") && passed;
+			}
+			passed = verify_bytes(context, page.ptr(), sizeof(_vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+		}
+
+		// Page 1 (start page)
+		{
+			abc::vmem_page<Pool, Log> page(&pool, 1, context.log);
+			passed = verify_bytes(context, page.ptr(), sizeof(_vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+		}
+
+		// Page 2
+		{
+			abc::vmem_page<Pool, Log> page(&pool, 2, context.log);
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x22) && passed;
+		}
+
+		// Page 3
+		{
+			abc::vmem_page<Pool, Log> page(&pool, 3, context.log);
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x33) && passed;
+		}
+
+		// Page 4
+		{
+			abc::vmem_page<Pool, Log> page(&pool, 4, context.log);
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x44) && passed;
+		}
+
+		return passed;
+	}
+
+
+	template <typename Pool>
+	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit) {
 		bool passed = true;
 
 		context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");
@@ -74,23 +151,16 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
-	bool test_vmem_pool_fit(test_context<abc::test::log>& context) {
+	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b) {
 		bool passed = true;
 
-		abc::vmem_pool<3, abc::test::log> pool("out/test/pool_fit.vmem", context.log);
-
-		passed = test_vmem_pool(context, &pool, true) && passed;
-
-		return passed;
-	}
-
-
-	bool test_vmem_pool_exceed(test_context<abc::test::log>& context) {
-		bool passed = true;
-
-		abc::vmem_pool<2, abc::test::log> pool("out/test/pool_exceed.vmem", context.log);
-
-		passed = test_vmem_pool(context, &pool, false) && passed;
+		const std::uint8_t* byte_buffer = reinterpret_cast<const std::uint8_t*>(buffer);
+		for (std::size_t i = begin_pos; i < end_pos; i++) {
+			if (byte_buffer[i] != b) {
+				context.log->put_any(abc::category::any, abc::severity::optional, __TAG__, "i = %zu", i);
+				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, __TAG__, "%d") && passed;
+			}
+		}
 
 		return passed;
 	}
