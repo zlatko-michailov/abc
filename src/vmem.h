@@ -776,10 +776,16 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list_iterator<T, Pool, Log>::operator ==(const vmem_list_iterator<T, Pool, Log>& other) const noexcept {
+		return _list == other._list
+			&& _page_pos == other._page_pos
+			&& _item_pos == other._item_pos;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
 	inline bool vmem_list_iterator<T, Pool, Log>::operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept {
-		return _list != other._list
-			|| _page_pos != other._page_pos
-			|| _item_pos != other._item_pos;
+		return !operator ==(other);
 	}
 
 

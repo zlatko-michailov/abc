@@ -30,7 +30,21 @@ SOFTWARE.
 namespace abc { namespace test { namespace vmem {
 
 	using Log = abc::test::log;
+	using Pool = abc::vmem_pool<3, Log>;
+	using PoolExceed = abc::vmem_pool<2, Log>;
 	using Item = std::array<std::uint8_t, 900>;
+	using List = abc::vmem_list<Item, Pool, Log>;
+	using Iterator = abc::vmem_list_iterator<Item, Pool, Log>;
+
+
+	// IMPORTANT: Ensure a predictable layout of the data on disk!
+	#pragma pack(push, 1)
+
+	struct test_start_page {
+		abc::vmem_list_state list_state;
+	};
+
+	#pragma pack(pop)
 
 
 	template <typename Pool>
@@ -42,7 +56,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_pool_fit(test_context<abc::test::log>& context) {
 		bool passed = true;
 
-		abc::vmem_pool<3, Log> pool("out/test/pool_fit.vmem", context.log);
+		Pool pool("out/test/pool_fit.vmem", context.log);
 		passed = create_vmem_pool(context, &pool, true) && passed;
 
 		return passed;
@@ -52,7 +66,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_pool_exceed(test_context<abc::test::log>& context) {
 		bool passed = true;
 
-		abc::vmem_pool<2, Log> pool("out/test/pool_exceed.vmem", context.log);
+		PoolExceed pool("out/test/pool_exceed.vmem", context.log);
 		passed = create_vmem_pool(context, &pool, false) && passed;
 
 		return passed;
@@ -60,8 +74,6 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_pool_reopen(test_context<abc::test::log>& context) {
-		using Pool = abc::vmem_pool<3, Log>;
-
 		bool passed = true;
 
 		{
@@ -105,6 +117,73 @@ namespace abc { namespace test { namespace vmem {
 			abc::vmem_page<Pool, Log> page(&pool, 4, context.log);
 			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x44) && passed;
 		}
+
+		return passed;
+	}
+
+
+	bool test_vmem_list_insert(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		Pool pool("out/test/list_insert.vmem", context.log);
+
+		abc::vmem_list_state list_state;
+		List list(&list_state, &pool, context.log);
+		Item item;
+
+		item.fill(0x21);
+		Iterator itr21 = list.insert(list.end(), item);
+		// | 21 __ __ __ |
+
+		item.fill(0x22);
+		list.insert(list.end(), item);
+		// | 21 22 __ __ |
+
+		item.fill(0x23);
+		list.insert(itr21, item);
+		// | 23 21 22 __ |
+
+		item.fill(0x24);
+		list.insert(list.begin(), item);
+		// | 24 23 21 22 |
+
+		itr21 = list.begin();
+		itr21++;
+		itr21++;
+		item.fill(0x25);
+		list.insert(itr21, item);
+		// | 24 23 25 __ | 21 22 __ __ |
+
+		item.fill(0x26);
+		list.insert(list.end(), item);
+		// | 24 23 25 __ | 21 22 26 __ |
+
+		item.fill(0x27);
+		list.insert(list.begin(), item);
+		// | 27 24 23 25 | 21 22 26 __ |
+
+		item.fill(0x28);
+		list.insert(list.begin(), item);
+		// | 28 __ __ __ | 27 24 23 25 | 21 22 26 __ |
+
+		std::uint8_t b[] = { 0x28, 0x27, 0x24, 0x23, 0x25, 0x21, 0x22, 0x26 };
+		constexpr std::size_t b_len = sizeof(b) / sizeof(std::uint8_t); 
+
+		// Iterate forward.
+		Iterator itr = list.cbegin();
+		for (std::size_t i = 0; i < b_len; i++) {
+			passed = verify_bytes(context, itr->data(), 0, sizeof(Item), b[i]) && passed;
+			itr++;
+		}
+		passed = context.are_equal(itr == list.cend(), true, __TAG__, "%d") && passed;
+
+		// Iterate backwards.
+		itr = list.crend();
+		for (std::size_t i = 0; i < b_len; i++) {
+			passed = verify_bytes(context, itr->data(), 0, sizeof(Item), b[b_len - i - 1]) && passed;
+			itr--;
+		}
+		passed = context.are_equal(itr == list.crbegin(), true, __TAG__, "%d") && passed;
 
 		return passed;
 	}
@@ -160,6 +239,10 @@ namespace abc { namespace test { namespace vmem {
 				context.log->put_any(abc::category::any, abc::severity::optional, __TAG__, "i = %zu", i);
 				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, __TAG__, "%d") && passed;
 			}
+		}
+
+		if (passed) {
+			context.log->put_any(abc::category::any, abc::severity::debug, __TAG__, "Verified bytes for 0x%x", b);
 		}
 
 		return passed;

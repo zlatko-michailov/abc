@@ -277,6 +277,7 @@ namespace abc {
 		const vmem_list_iterator<T, Pool, Log>&	operator =(const vmem_list_iterator<T, Pool, Log>& other) noexcept;
 
 	public:
+		bool								operator ==(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
 		bool								operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator ++() noexcept;
 		vmem_list_iterator<T, Pool, Log>&	operator ++(int) noexcept;
