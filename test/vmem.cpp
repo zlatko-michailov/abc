@@ -132,47 +132,57 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_list_state list_state;
 		List list(&list_state, &pool, context.log);
 		Item item;
-
+		
 		item.fill(0x21);
-		Iterator itr21 = list.insert(list.end(), item);
+		Iterator itr = list.insert(list.end(), item);
+		Iterator itr21 = itr;
+		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
 		// | 21 __ __ __ |
 
 		item.fill(0x22);
-		list.insert(list.end(), item);
+		itr = list.insert(list.end(), item);
+		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
 		// | 21 22 __ __ |
 
 		item.fill(0x23);
-		list.insert(itr21, item);
+		itr = list.insert(itr21, item);
+		passed = context.are_equal(itr == itr21, true, __TAG__, "%d") && passed;
 		// | 23 21 22 __ |
 
 		item.fill(0x24);
-		list.insert(list.begin(), item);
+		itr = list.insert(list.begin(), item);
+		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
 		// | 24 23 21 22 |
 
 		itr21 = list.begin();
 		itr21++;
 		itr21++;
 		item.fill(0x25);
-		list.insert(itr21, item);
+		itr = list.insert(itr21, item);
+		passed = context.are_equal(itr == itr21, true, __TAG__, "%d") && passed;
 		// | 24 23 25 __ | 21 22 __ __ |
 
 		item.fill(0x26);
-		list.insert(list.end(), item);
+		itr = list.insert(list.end(), item);
+		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
 		// | 24 23 25 __ | 21 22 26 __ |
 
 		item.fill(0x27);
-		list.insert(list.begin(), item);
+		itr = list.insert(list.begin(), item);
+		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
 		// | 27 24 23 25 | 21 22 26 __ |
 
 		item.fill(0x28);
-		list.insert(list.begin(), item);
+		itr = list.insert(list.begin(), item);
+		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
 		// | 28 __ __ __ | 27 24 23 25 | 21 22 26 __ |
 
 		std::uint8_t b[] = { 0x28, 0x27, 0x24, 0x23, 0x25, 0x21, 0x22, 0x26 };
 		constexpr std::size_t b_len = sizeof(b) / sizeof(std::uint8_t); 
 
 		// Iterate forward.
-		Iterator itr = list.cbegin();
+		itr = list.cbegin();
 		for (std::size_t i = 0; i < b_len; i++) {
 			passed = verify_bytes(context, itr->data(), 0, sizeof(Item), b[i]) && passed;
 			itr++;
