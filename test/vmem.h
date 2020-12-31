@@ -38,6 +38,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_pool_reopen(test_context<abc::test::log>& context);
 
 	bool test_vmem_list_insert(test_context<abc::test::log>& context);
+	bool test_vmem_list_insertmany(test_context<abc::test::log>& context);
 	bool test_vmem_list_erase(test_context<abc::test::log>& context);
 
 }}}

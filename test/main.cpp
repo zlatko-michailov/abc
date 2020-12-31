@@ -135,6 +135,7 @@ int main() {
 				{ "test_vmem_pool_exceed",							abc::test::vmem::test_vmem_pool_exceed },
 				{ "test_vmem_pool_reopen",							abc::test::vmem::test_vmem_pool_reopen },
 				{ "test_vmem_list_insert",							abc::test::vmem::test_vmem_list_insert },
+				{ "test_vmem_list_insertmany",						abc::test::vmem::test_vmem_list_insertmany },
 			} },
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },

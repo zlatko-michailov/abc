@@ -31,10 +31,6 @@ namespace abc { namespace test { namespace vmem {
 
 	using Log = abc::test::log;
 	using Pool = abc::vmem_pool<3, Log>;
-	using PoolExceed = abc::vmem_pool<2, Log>;
-	using Item = std::array<std::uint8_t, 900>;
-	using List = abc::vmem_list<Item, Pool, Log>;
-	using Iterator = abc::vmem_list_iterator<Item, Pool, Log>;
 
 
 	// IMPORTANT: Ensure a predictable layout of the data on disk!
@@ -64,6 +60,8 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_pool_exceed(test_context<abc::test::log>& context) {
+		using PoolExceed = abc::vmem_pool<2, Log>;
+
 		bool passed = true;
 
 		PoolExceed pool("out/test/pool_exceed.vmem", context.log);
@@ -123,6 +121,10 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_list_insert(test_context<abc::test::log>& context) {
+		using Item = std::array<std::uint8_t, 900>;
+		using List = abc::vmem_list<Item, Pool, Log>;
+		using Iterator = abc::vmem_list_iterator<Item, Pool, Log>;
+
 		bool passed = true;
 
 		Pool pool("out/test/list_insert.vmem", context.log);
@@ -189,6 +191,48 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_list_insertmany(test_context<abc::test::log>& context) {
+		struct ItemMany {
+			std::uint64_t					data;
+			std::array<std::uint8_t, 900>	dummy;
+		};
+		using List = abc::vmem_list<ItemMany, Pool, Log>;
+		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
+		constexpr std::size_t many = 4000;
+
+		bool passed = true;
+
+		Pool pool("out/test/list_insertmany.vmem", context.log);
+
+		abc::vmem_list_state list_state;
+		List list(&list_state, &pool, context.log);
+
+		// Insert.
+		for (std::size_t i = 0; i < many; i++) {
+			ItemMany item = { i, { 0 } };
+			list.insert(list.end(), item);
+		}
+
+		// Iterate forward.
+		Iterator itr = list.cbegin();
+		for (std::size_t i = 0; i < many; i++) {
+			passed = context.are_equal<unsigned long long>(itr->data, i, __TAG__, "%llu") && passed;
+			itr++;
+		}
+		passed = context.are_equal(itr == list.cend(), true, __TAG__, "%d") && passed;
+
+		// Iterate backwards.
+		itr = list.crend();
+		for (std::size_t i = 0; i < many; i++) {
+			passed = context.are_equal<unsigned long long>(itr->data, many - i - 1, __TAG__, "%llu") && passed;
+			itr--;
+		}
+		passed = context.are_equal(itr == list.crbegin(), true, __TAG__, "%d") && passed;
+
+		return passed;
+	}
+
+
 	template <typename Pool>
 	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit) {
 		bool passed = true;
@@ -236,13 +280,13 @@ namespace abc { namespace test { namespace vmem {
 		const std::uint8_t* byte_buffer = reinterpret_cast<const std::uint8_t*>(buffer);
 		for (std::size_t i = begin_pos; i < end_pos; i++) {
 			if (byte_buffer[i] != b) {
+				if (i == begin_pos) {
+					context.log->put_any(abc::category::any, abc::severity::debug, __TAG__, "Verifying 0x%x", b);
+				}
+
 				context.log->put_any(abc::category::any, abc::severity::optional, __TAG__, "i = %zu", i);
 				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, __TAG__, "%d") && passed;
 			}
-		}
-
-		if (passed) {
-			context.log->put_any(abc::category::any, abc::severity::debug, __TAG__, "Verified bytes for 0x%x", b);
 		}
 
 		return passed;
