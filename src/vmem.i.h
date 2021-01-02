@@ -379,6 +379,10 @@ namespace abc {
 		iterator				erase(const_iterator first, const_iterator last);
 		void					clear() noexcept;
 
+	public: //// TODO: check_integrity() and repair_integrity()
+		bool					check_integrity() const noexcept;
+		bool					repair_integrity() noexcept;
+
 	private:
 		friend class vmem_list_iterator<T, Pool, Log>;
 

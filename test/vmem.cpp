@@ -33,6 +33,12 @@ namespace abc { namespace test { namespace vmem {
 	using Pool = abc::vmem_pool<3, Log>;
 
 
+	struct ItemMany {
+		std::uint64_t					data;
+		std::array<std::uint8_t, 900>	dummy;
+	};
+
+
 	// IMPORTANT: Ensure a predictable layout of the data on disk!
 	#pragma pack(push, 1)
 
@@ -42,6 +48,9 @@ namespace abc { namespace test { namespace vmem {
 
 	#pragma pack(pop)
 
+
+	template <typename List>
+	bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count);
 
 	template <typename Pool>
 	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit);
@@ -138,21 +147,25 @@ namespace abc { namespace test { namespace vmem {
 		Iterator itr21 = itr;
 		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
 		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 1, __TAG__, "%zu") && passed;
 		// | 21 __ __ __ |
 
 		item.fill(0x22);
 		itr = list.insert(list.end(), item);
 		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 2, __TAG__, "%zu") && passed;
 		// | 21 22 __ __ |
 
 		item.fill(0x23);
 		itr = list.insert(itr21, item);
 		passed = context.are_equal(itr == itr21, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 3, __TAG__, "%zu") && passed;
 		// | 23 21 22 __ |
 
 		item.fill(0x24);
 		itr = list.insert(list.begin(), item);
 		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 4, __TAG__, "%zu") && passed;
 		// | 24 23 21 22 |
 
 		itr21 = list.begin();
@@ -161,21 +174,25 @@ namespace abc { namespace test { namespace vmem {
 		item.fill(0x25);
 		itr = list.insert(itr21, item);
 		passed = context.are_equal(itr == itr21, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 5, __TAG__, "%zu") && passed;
 		// | 24 23 25 __ | 21 22 __ __ |
 
 		item.fill(0x26);
 		itr = list.insert(list.end(), item);
 		passed = context.are_equal(itr == list.rend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 6, __TAG__, "%zu") && passed;
 		// | 24 23 25 __ | 21 22 26 __ |
 
 		item.fill(0x27);
 		itr = list.insert(list.begin(), item);
 		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 7, __TAG__, "%zu") && passed;
 		// | 27 24 23 25 | 21 22 26 __ |
 
 		item.fill(0x28);
 		itr = list.insert(list.begin(), item);
 		passed = context.are_equal(itr == list.begin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 8, __TAG__, "%zu") && passed;
 		// | 28 __ __ __ | 27 24 23 25 | 21 22 26 __ |
 
 		std::uint8_t b[] = { 0x28, 0x27, 0x24, 0x23, 0x25, 0x21, 0x22, 0x26 };
@@ -202,13 +219,7 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_list_insertmany(test_context<abc::test::log>& context) {
-		struct ItemMany {
-			std::uint64_t					data;
-			std::array<std::uint8_t, 900>	dummy;
-		};
 		using List = abc::vmem_list<ItemMany, Pool, Log>;
-		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
-		constexpr std::size_t many = 4000;
 
 		bool passed = true;
 
@@ -217,15 +228,82 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_list_state list_state;
 		List list(&list_state, &pool, context.log);
 
+		passed = insert_vmem_list_items(context, list, 4000) && passed;
+
+		return passed;
+	}
+
+
+	bool test_vmem_list_erase(test_context<abc::test::log>& context) {
+		using List = abc::vmem_list<ItemMany, Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/list_erase.vmem", context.log);
+
+		abc::vmem_list_state list_state;
+		List list(&list_state, &pool, context.log);
+
+		passed = insert_vmem_list_items(context, list, 12) && passed;
+		// | 00 01 02 03 | 04 05 06 07 | 08 09 0a 0b |
+
+		typename List::iterator itr = list.begin();
+		itr++; itr++; itr++; itr++;
+
+		for (std::size_t i = 0; i < 4; i++) {
+			itr = list.erase(itr);
+			passed = context.are_equal<unsigned long long>(itr->data, 0x05 + i, __TAG__, "%llu") && passed;
+			passed = context.are_equal<std::size_t>(list.size(), 11 - i, __TAG__, "%zu") && passed;
+		}
+		// | 00 01 02 03 | 08 09 0a 0b |
+
+		for (std::size_t i = 0; i < 3; i++) {
+			itr = list.erase(list.rend());
+			passed = context.are_equal<bool>(itr == list.end(), true, __TAG__, "%d") && passed;
+			itr--;
+			passed = context.are_equal<unsigned long long>(itr->data, 0x0a - i, __TAG__, "%llu") && passed;
+			passed = context.are_equal<std::size_t>(list.size(), 7 - i, __TAG__, "%zu") && passed;
+		}
+		// | 00 01 02 03 | 08 __ __ __ |
+
+		itr = list.erase(list.rend());
+		itr--;
+		passed = context.are_equal<unsigned long long>(itr->data, 0x03, __TAG__, "%llu") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 4, __TAG__, "%zu") && passed;
+		// | 00 01 02 03 |
+
+		for (std::size_t i = 0; i < 3; i++) {
+			itr = list.erase(list.rend());
+			itr--;
+			passed = context.are_equal<unsigned long long>(itr->data, 0x02 - i, __TAG__, "%llu") && passed;
+			passed = context.are_equal<std::size_t>(list.size(), 3 - i, __TAG__, "%zu") && passed;
+		}
+		// | 00 __ __ __ |
+
+		itr = list.erase(list.rend());
+		passed = context.are_equal<std::size_t>(list.size(), 0, __TAG__, "%zu") && passed;
+		// <empty>
+
+		passed = context.are_equal<bool>(list.begin() == list.end(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<bool>(list.rend() == list.rbegin(), true, __TAG__, "%d") && passed;
+
+		return passed;
+	}
+
+
+	template <typename List>
+	bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count) {
+		bool passed = true;
+
 		// Insert.
-		for (std::size_t i = 0; i < many; i++) {
+		for (std::size_t i = 0; i < count; i++) {
 			ItemMany item = { i, { 0 } };
 			list.insert(list.end(), item);
 		}
 
 		// Iterate forward.
-		Iterator itr = list.cbegin();
-		for (std::size_t i = 0; i < many; i++) {
+		typename List::iterator itr = list.cbegin();
+		for (std::size_t i = 0; i < count; i++) {
 			passed = context.are_equal<unsigned long long>(itr->data, i, __TAG__, "%llu") && passed;
 			itr++;
 		}
@@ -233,8 +311,8 @@ namespace abc { namespace test { namespace vmem {
 
 		// Iterate backwards.
 		itr = list.crend();
-		for (std::size_t i = 0; i < many; i++) {
-			passed = context.are_equal<unsigned long long>(itr->data, many - i - 1, __TAG__, "%llu") && passed;
+		for (std::size_t i = 0; i < count; i++) {
+			passed = context.are_equal<unsigned long long>(itr->data, count - i - 1, __TAG__, "%llu") && passed;
 			itr--;
 		}
 		passed = context.are_equal(itr == list.crbegin(), true, __TAG__, "%d") && passed;

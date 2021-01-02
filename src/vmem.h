@@ -571,11 +571,11 @@ namespace abc {
 	inline void vmem_page<Pool, Log>::free() noexcept {
 		unlock();
 
-		if (_pos == vmem_page_pos_nil) {
-			_pos = _pool->free_page();
+		if (_pos != vmem_page_pos_nil) {
+			bool freed = _pool->free_page(_pos);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_page::free() _pos=%llu", (unsigned long long)_pos);
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_page::free() freed=%d", freed);
 			}
 		}
 
@@ -765,6 +765,7 @@ namespace abc {
 		_list = other._list;
 		_page_pos = other._page_pos;
 		_item_pos = other._item_pos;
+		_edge = other._edge;
 		_log = other._log;
 
 		if (_log != nullptr) {
@@ -780,6 +781,7 @@ namespace abc {
 		return _list == other._list
 			&& _page_pos == other._page_pos
 			&& _item_pos == other._item_pos;
+			// Do not include _edge. Otherwise begin() != end() on an empty list.
 	}
 
 
@@ -1313,9 +1315,105 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline typename vmem_list<T, Pool, Log>::iterator vmem_list<T, Pool, Log>::erase(const_iterator itr) {
-		iterator ret(itr);
+		if (!itr.can_deref()) {
+			throw exception<std::logic_error, Log>("itr", __TAG__);
+		}
 
-		return ret; //// TODO: list::erase()
+		// IMPORTANT: There must be no exceptions from here to the end of the method!
+
+		vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
+		_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+
+		vmem_page_pos_t page_pos = itr._page_pos;
+		vmem_item_pos_t item_pos = itr._item_pos;
+		vmem_iterator_edge_t edge = vmem_iterator_edge::none;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase() Start. page_pos=%zu, item_pos=%u, page_item_count=%u, total_item_count=%zu",
+				(std::size_t)page_pos, item_pos, list_page->item_count, (std::size_t)_state->total_item_count);
+		}
+
+		if (list_page->item_count > 1) {
+			// The page has multiple items.
+
+			// To delete an item, bring up the remaining elements, if there are any.
+			if (itr._item_pos < list_page->item_count - 1) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Multiple. Middle.");
+				}
+
+				std::size_t move_item_count = list_page->item_count - itr._item_pos - 1;
+				std::memmove(&list_page->items[itr._item_pos], &list_page->items[itr._item_pos + 1], move_item_count * sizeof(T));
+			}
+			else {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Multiple. Last.");
+				}
+
+				// If we are deleting the last item on a page, the next item is item 0 on the next page or end().
+				if (list_page->next_page_pos != vmem_page_pos_nil) {
+					page_pos = list_page->next_page_pos;
+					item_pos = 0;
+				}
+				else {
+					end_pos(page_pos, item_pos);
+					edge = vmem_iterator_edge::end;
+				}
+			}
+
+			list_page->item_count--;
+		}
+		else {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Only.");
+			}
+
+			// The page has no other items.
+
+			// We can free the current page now.
+			vmem_page_pos_t prev_page_pos = list_page->prev_page_pos;
+			vmem_page_pos_t next_page_pos = list_page->next_page_pos;
+			list_page = nullptr;
+			page.free();
+
+			// Connect the two adjaceent pages, and free this page.
+			// The next item is item 0 on the next page or end().
+			if (prev_page_pos != vmem_page_pos_nil) {
+				vmem_page<Pool, Log> prev_page(_pool, prev_page_pos, _log);
+				_vmem_list_page<T>* prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
+
+				prev_list_page->next_page_pos = next_page_pos;
+			}
+			else {
+				_state->front_page_pos = next_page_pos;
+			}
+
+			if (next_page_pos != vmem_page_pos_nil) {
+				vmem_page<Pool, Log> next_page(_pool, next_page_pos, _log);
+				_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
+
+				next_list_page->prev_page_pos = prev_page_pos;
+
+				page_pos = next_page_pos;
+				item_pos = 0;
+			}
+			else {
+				_state->back_page_pos = prev_page_pos;
+
+				end_pos(page_pos, item_pos);
+				edge = vmem_iterator_edge::end;
+			}
+		}
+
+		// Update the total item count.
+		_state->total_item_count--;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase() Done. page_pos=%zu, item_pos=%u, total_item_count=%zu",
+				(std::size_t)page_pos, item_pos, (std::size_t)_state->total_item_count);
+		}
+
+		return iterator(this, page_pos, item_pos, edge, _log);
 	}
 
 
@@ -1354,6 +1452,7 @@ namespace abc {
 
 		if (itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::rbegin) {
 			begin_pos(itr._page_pos, itr._item_pos);
+			itr._edge = vmem_iterator_edge::none;
 		}
 		else if (itr._page_pos != vmem_page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
@@ -1365,6 +1464,7 @@ namespace abc {
 			else {
 				if (list_page->next_page_pos == vmem_page_pos_nil) {
 					end_pos(itr._page_pos, itr._item_pos);
+					itr._edge = vmem_iterator_edge::end;
 				}
 				else {
 					itr._page_pos = list_page->next_page_pos;
@@ -1383,12 +1483,13 @@ namespace abc {
 	template <typename T, typename Pool, typename Log>
 	inline void vmem_list<T, Pool, Log>::move_prev(iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() Before _page_pos=%lld, _item_pos=%d, _edge=%d",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_prev() Before _page_pos=%lld, _item_pos=%d, _edge=%d",
 				(long long)itr._page_pos, (short)itr._item_pos, itr._edge);
 		}
 
 		if (itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::end) {
 			rend_pos(itr._page_pos, itr._item_pos);
+			itr._edge = vmem_iterator_edge::none;
 		}
 		else if (itr._page_pos != vmem_page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
@@ -1400,6 +1501,7 @@ namespace abc {
 			else {
 				if (list_page->prev_page_pos == vmem_page_pos_nil) {
 					rbegin_pos(itr._page_pos, itr._item_pos);
+					itr._edge = vmem_iterator_edge::rbegin;
 				}
 				else {
 					vmem_page<Pool, Log> prev_page(_pool, list_page->prev_page_pos, _log);
@@ -1412,7 +1514,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_next() After _page_pos=%lld, _item_pos=%d, _edge=%d",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::move_prev() After _page_pos=%lld, _item_pos=%d, _edge=%d",
 				(long long)itr._page_pos, (short)itr._item_pos, itr._edge);
 		}
 	}

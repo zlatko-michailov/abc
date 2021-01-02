@@ -136,6 +136,7 @@ int main() {
 				{ "test_vmem_pool_reopen",							abc::test::vmem::test_vmem_pool_reopen },
 				{ "test_vmem_list_insert",							abc::test::vmem::test_vmem_list_insert },
 				{ "test_vmem_list_insertmany",						abc::test::vmem::test_vmem_list_insertmany },
+				{ "test_vmem_list_erase",							abc::test::vmem::test_vmem_list_erase },
 			} },
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
@@ -145,70 +146,6 @@ int main() {
 		0);
 
 	bool passed = test_suite.run();
-
-#ifdef REMOVE ////
-	log.filter()->min_severity(abc::severity::abc::debug);
-
-	using Log = abc::test::log;
-	using Pool = abc::vmem_pool<3, abc::test::log>;
-	Pool pool("out/test/test1.vmem", &log);
-
-	{
-		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");
-		abc::vmem_page<Pool, Log> page2(&pool, &log);
-		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2 pos=%llu, ptr=%p", page2.pos(), page2.ptr());
-
-		{
-			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a");
-			abc::vmem_page<Pool, Log> page3a(&pool, &log);
-			log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a pos=%llu, ptr=%p", page3a.pos(), page3a.ptr());
-
-			{
-				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b");
-				abc::vmem_page<Pool, Log> page3b(&pool, page3a.pos(), &log);
-				log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b pos=%llu, ptr=%p", page3b.pos(), page3b.ptr());
-			}
-		}
-
-		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
-		abc::vmem_page<Pool, Log> page4(&pool, &log);
-		log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
-	}
-
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- list stats");
-	using Item = std::array<std::uint8_t, 900>;
-	abc::vmem_list_state list_state;
-
-	abc::vmem_list<Item, Pool, Log> list(&list_state, &pool, &log);
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "max_item_size=%zu page_capacity=%zu", abc::vmem_list<Item, Pool, Log>::max_item_size(), abc::vmem_list<Item, Pool, Log>::page_capacity());
-	Item item;
-
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list insert");
-	item.fill(0x71);
-	list.insert(list.end(), item);
-	item.fill(0x72);
-	list.insert(list.end(), item);
-	item.fill(0x73);
-	list.insert(list.end(), item);
-	item.fill(0x74);
-	list.insert(list.begin(), item);
-
-	item.fill(0x75);
-	list.insert(list.end(), item);
-
-	item.fill(0x76);
-	list.insert(list.begin(), item);
-
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse forward");
-	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.begin(); itr != list.end(); itr++) {
-		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
-	}
-
-	log.put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--------------------------------------------------------------- list traverse reverse");
-	for (abc::vmem_list_iterator<Item, Pool, Log> itr = list.rend(); itr != list.rbegin(); itr--) {
-		log.put_binary(abc::category::abc::vmem, abc::severity::abc::debug, __TAG__, itr->data(), std::min(sizeof(Item), (std::size_t)16));
-	}
-#endif 
 
 	return passed ? 0 : 1;
 }
