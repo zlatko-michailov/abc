@@ -361,10 +361,10 @@ namespace abc {
 			// The page is not mapped. Map it. Then lock it.
 
 			off_t page_off = static_cast<off_t>(page_pos * vmem_page_size);
-			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_LOCKED, _fd, page_off);
+			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() Map i=%zu, pos=%llu, ptr=%p, errno=%d",
+				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() mmap i=%zu, pos=%llu, ptr=%p, errno=%d",
 					i, (unsigned long long)page_pos, ptr, errno);
 			}
 
@@ -429,21 +429,21 @@ namespace abc {
 
 		if (i < _mapped_page_count) {
 			// The page was found.
-			_vmem_mapped_page& mapped_page = _mapped_pages[i];
-			mapped_page.lock_count--;
 
-			if (mapped_page.lock_count == 0) {
-				int sn = msync(mapped_page.ptr, vmem_page_size, MS_ASYNC);
+			_mapped_pages[i].lock_count--;
+
+			if (_mapped_pages[i].lock_count == 0) {
+				int sn = msync(_mapped_pages[i].ptr, vmem_page_size, MS_ASYNC);
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Sync i=%zu, ptr=%p, sn=%d, errno=%d",
-						i, mapped_page.ptr, sn, errno);
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() msync i=%zu, ptr=%p, sn=%d, errno=%d",
+						i, _mapped_pages[i].ptr, sn, errno);
 				}
 			}
 			else {
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::unlock_page() Found at i=%zu, ptr=%p, locks=%u",
-						i, mapped_page.ptr, (unsigned)mapped_page.lock_count);
+						i, _mapped_pages[i].ptr, (unsigned)_mapped_pages[i].lock_count);
 				}
 			}
 		}
