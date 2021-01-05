@@ -63,7 +63,7 @@ namespace abc {
 		vmem_page_pos_t file_size = lseek(_fd, 0, SEEK_END);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() size=%llu", (unsigned long long)file_size);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() size=0x%llx", (long long)file_size);
 		}
 
 		if ((file_size & (vmem_page_size - 1)) != 0) {
@@ -116,8 +116,8 @@ namespace abc {
 			_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() Root page integrity pos=%llu, ptr=%p, version=%u, signature='%s', page_size=%u",
-					(unsigned long long)page.pos(), page.ptr(), root_page->version, root_page->signature, root_page->page_size);
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() Root page integrity pos=0x%llx, ptr=%p, version=%u, signature='%s', page_size=%u",
+					(long long)page.pos(), page.ptr(), root_page->version, root_page->signature, root_page->page_size);
 			}
 
 			_vmem_root_page init;
@@ -144,7 +144,8 @@ namespace abc {
 			vmem_page<Pool, Log> page(this, vmem_page_pos_start, _log);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() Start page integrity pos=%llu, ptr=%p", (unsigned long long)page.pos(), page.ptr());
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::vmem_pool() Start page integrity pos=0x%llx, ptr=%p",
+					(long long)page.pos(), page.ptr());
 			}
 		}
 
@@ -210,7 +211,8 @@ namespace abc {
 		vmem_page_pos_t page_pos = page_off / vmem_page_size;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::create_page() pos=%llu off=%llu", (unsigned long long)page_pos, (unsigned long long)page_off);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::create_page() pos=0x%llx off=0x%llx",
+				(long long)page_pos, (long long)page_off);
 		}
 
 		std::uint8_t blank_page[vmem_page_size] = { 0 };
@@ -293,8 +295,8 @@ namespace abc {
 						if (_mapped_pages[i].lock_count > 0 || _mapped_pages[i].keep_count > avg_keep_count) {
 							// This page will be kept.
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Keeping page i=%zu, pos=%llu, keep_count=%u, avg_keep_count=%u",
-									i, (unsigned long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
+								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Keeping page i=%zu, pos=0x%llx, keep_count=%u, avg_keep_count=%u",
+									i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
 							}
 
 							// Reduce the keep_count for fairness.
@@ -322,8 +324,8 @@ namespace abc {
 						else {
 							// This page will be unmapped.
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::lock_page() Unmapping page i=%zu, pos=%llu, keep_count=%u, avg_keep_count=%u",
-									i, (unsigned long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
+								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::lock_page() Unmapping page i=%zu, pos=0x%llx, keep_count=%u, avg_keep_count=%u",
+									i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)avg_keep_count);
 							}
 
 							int um = munmap(_mapped_pages[i].ptr, vmem_page_size);
@@ -403,8 +405,8 @@ namespace abc {
 			void* ptr = mmap(NULL, vmem_page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() mmap i=%zu, pos=%llu, ptr=%p, errno=%d",
-					i, (unsigned long long)page_pos, ptr, errno);
+				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::lock_page() mmap i=%zu, pos=0x%llx, ptr=%p, errno=%d",
+					i, (long long)page_pos, ptr, errno);
 			}
 
 			_mapped_page_count++;
@@ -424,8 +426,8 @@ namespace abc {
 		for (std::size_t j = 0; j < i; j++) {
 			if (_mapped_pages[j].keep_count < _mapped_pages[i].keep_count) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Swapping j=%zu (pos=%llu), i=%zu (pos=%llu)",
-						j, (unsigned long long)_mapped_pages[j].pos, i, (unsigned long long)_mapped_pages[i].pos);
+					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Swapping j=%zu (pos=0x%llx), i=%zu (pos=0x%llx)",
+						j, (long long)_mapped_pages[j].pos, i, (long long)_mapped_pages[i].pos);
 				}
 
 				// Swap.
@@ -434,8 +436,8 @@ namespace abc {
 				_mapped_pages[i] = temp;
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Swapped  j=%zu (pos=%llu), i=%zu (pos=%llu)",
-						j, (unsigned long long)_mapped_pages[j].pos, i, (unsigned long long)_mapped_pages[i].pos);
+					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::lock_page() Swapped  j=%zu (pos=0x%llx), i=%zu (pos=0x%llx)",
+						j, (long long)_mapped_pages[j].pos, i, (long long)_mapped_pages[i].pos);
 				}
 
 				break;
@@ -601,7 +603,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_page::alloc() _pos=%llu", (unsigned long long)_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_page::alloc() _pos=0x%llx", (long long)_pos);
 		}
 
 		return true;

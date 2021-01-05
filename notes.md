@@ -5,12 +5,12 @@
   - vmem_list
 
 ## To Do
-- vmem_pool
-  - test the free_pages list
-
 - vmem_page
   - check operator bool() everywhere
   
+- vmem_pool
+  - test the free_pages list
+
 - vmem_list
   - check
     - No data loss
