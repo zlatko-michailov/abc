@@ -93,11 +93,12 @@ namespace abc { namespace test { namespace vmem {
 		// Page 0 (root page)
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 0, context.log);
-			{
-				_vmem_root_page expected;
-				int cmp = std::memcmp(&expected, page.ptr(), sizeof(_vmem_root_page));
-				passed = context.are_equal(cmp, 0, __TAG__, "%d") && passed;
-			}
+
+			_vmem_root_page expected;
+			expected.free_pages.item_size = static_cast<vmem_item_pos_t>(sizeof(vmem_page_pos_t));
+			int cmp = std::memcmp(&expected, page.ptr(), sizeof(_vmem_root_page));
+			passed = context.are_equal<int>(cmp, 0, __TAG__, "%d") && passed;
+
 			passed = verify_bytes(context, page.ptr(), sizeof(_vmem_root_page), abc::vmem_page_size, 0x00) && passed;
 		}
 
@@ -327,34 +328,29 @@ namespace abc { namespace test { namespace vmem {
 
 		context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2");
 		abc::vmem_page<Pool, Log> page2(pool, context.log);
-		context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2 pos=%llu, ptr=%p", (unsigned long long)page2.pos(), page2.ptr());
-		passed = context.are_equal(2ULL, (unsigned long long)page2.pos(), __TAG__, "%llu") && passed;
+		context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page2 pos=0x%llx, ptr=%p", (long long)page2.pos(), page2.ptr());
+		passed = context.are_equal(2LL, (long long)page2.pos(), __TAG__, "0x%llx") && passed;
 		std::memset(page2.ptr(), 0x22, abc::vmem_page_size);
 
 		{
 			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a");
 			abc::vmem_page<Pool, Log> page3a(pool, context.log);
-			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a pos=%llu, ptr=%p", (unsigned long long)page3a.pos(), page3a.ptr());
-			passed = context.are_equal(3ULL, (unsigned long long)page3a.pos(), __TAG__, "%llu") && passed;
+			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3a pos=0x%llx, ptr=%p", (long long)page3a.pos(), page3a.ptr());
+			passed = context.are_equal(3LL, (long long)page3a.pos(), __TAG__, "0x%llx") && passed;
 			std::memset(page3a.ptr(), 0x33, abc::vmem_page_size);
 
 			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b");
 			abc::vmem_page<Pool, Log> page3b(pool, page3a.pos(), context.log);
-			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b pos=%llu, ptr=%p", page3b.pos(), page3b.ptr());
-			passed = context.are_equal(3ULL, (unsigned long long)page3b.pos(), __TAG__, "%llu") && passed;
+			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page3b pos=0x%llx, ptr=%p", (long long)page3b.pos(), page3b.ptr());
+			passed = context.are_equal(3LL, (long long)page3b.pos(), __TAG__, "0x%llx") && passed;
 
-			try {
-				context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
-				abc::vmem_page<Pool, Log> page4(pool, context.log);
-				context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=%llu, ptr=%p", page4.pos(), page4.ptr());
-				passed = context.are_equal(4ULL, (unsigned long long)page4.pos(), __TAG__, "%llu") && passed;
+			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
+			abc::vmem_page<Pool, Log> page4(pool, context.log);
+			passed = context.are_equal<bool>(page4, fit, __TAG__, "%d") && passed;
+			if (page4) {
+				context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4 pos=0x%llx, ptr=%p", (long long)page4.pos(), page4.ptr());
+				passed = context.are_equal(4LL, (long long)page4.pos(), __TAG__, "0x%llx") && passed;
 				std::memset(page4.ptr(), 0x44, abc::vmem_page_size);
-
-				passed = context.are_equal(true, fit, __TAG__, "%d") && passed;
-			}
-			catch (abc::exception<std::runtime_error, Log>& ex) {
-				passed = context.are_equal(false, fit, __TAG__, "%d") && passed;
-				passed = abc::test::heap::ignore_heap_allocation(context, __TAG__) && passed; // std::exception allocates state
 			}
 		}
 

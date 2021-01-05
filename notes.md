@@ -1,18 +1,47 @@
+## Done
+- vmem
+  - vmem_pool
+  - vmem_page
+  - vmem_list
+
 ## To Do
--vmem_list
-  - check_integrity
-  - repair_integrity
+- vmem_pool
+  - test the free_pages list
+
+- vmem_page
+  - check operator bool() everywhere
+  
+- vmem_list
+  - check
+    - No data loss
+      - State total count
+      - State front page
+      - State back page
+      - Semi-broken chain
+    - Possible data loss
+      - Broken chain
+  - repair
 
 - vmem_pool
-  - vmem_list of free pages
+  - check
+  - repair
+
+- Split headers
+
+- vmem docs
 
 - vmem_map
 
-----------
+---
 
 - Samples
   - tictactoe
 
+---
+
+- tls_streambuf
+
+---
 
 ## Postponed
 - Internationalization

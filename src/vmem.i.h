@@ -77,6 +77,8 @@ namespace abc {
 
 	template <std::size_t MaxMappedPages, typename Log = null_log>
 	class vmem_pool {
+		using Pool = vmem_pool<MaxMappedPages, Log>;
+
 	public:
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
@@ -84,7 +86,7 @@ namespace abc {
 		friend class vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 
 		vmem_page_pos_t				alloc_page() noexcept;
-		bool						free_page(vmem_page_pos_t page_pos) noexcept;
+		void						free_page(vmem_page_pos_t page_pos) noexcept;
 
 		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
 		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
@@ -94,6 +96,7 @@ namespace abc {
 		void						log_totals() noexcept;
 
 	private:
+		bool						_ready;
 		int							_fd;
 		std::size_t					_mapped_page_count;
 		_vmem_mapped_page			_mapped_pages[MaxMappedPages];
@@ -116,6 +119,7 @@ namespace abc {
 		~vmem_page<Pool, Log>() noexcept;
 
 	public:
+									operator bool() const noexcept;
 		Pool*						pool() const noexcept;
 		vmem_page_pos_t				pos() const noexcept;
 		void*						ptr() noexcept;
@@ -196,12 +200,12 @@ namespace abc {
 
 
 	struct _vmem_root_page {
-		vmem_version_t		version				= 1;
-		char				signature[10]		= "abc::vmem";
-		vmem_item_pos_t		page_size			= vmem_page_size;
-		std::uint16_t		unused1				= 0xcccc;
-		vmem_list_state		free_pages;
-		std::uint8_t		unused2				= 0xcc;
+		const vmem_version_t	version			= 1;
+		const char				signature[10]	= "abc::vmem";
+		const vmem_item_pos_t	page_size		= vmem_page_size;
+		const std::uint16_t		unused1			= 0xcccc;
+		vmem_list_state			free_pages;
+		const std::uint8_t		unused2			= 0xcc;
 	};
 
 
@@ -379,9 +383,9 @@ namespace abc {
 		iterator				erase(const_iterator first, const_iterator last);
 		void					clear() noexcept;
 
-	public: //// TODO: check_integrity() and repair_integrity()
-		bool					check_integrity() const noexcept;
-		bool					repair_integrity() noexcept;
+	public: //// TODO: check() and repair()
+		bool					check() const noexcept;
+		bool					repair() noexcept;
 
 	private:
 		friend class vmem_list_iterator<T, Pool, Log>;
