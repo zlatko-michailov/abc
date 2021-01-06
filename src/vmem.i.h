@@ -119,7 +119,6 @@ namespace abc {
 		~vmem_page<Pool, Log>() noexcept;
 
 	public:
-									operator bool() const noexcept;
 		Pool*						pool() const noexcept;
 		vmem_page_pos_t				pos() const noexcept;
 		void*						ptr() noexcept;

@@ -346,8 +346,8 @@ namespace abc { namespace test { namespace vmem {
 
 			context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "--- page4");
 			abc::vmem_page<Pool, Log> page4(pool, context.log);
-			passed = context.are_equal<bool>(page4, fit, __TAG__, "%d") && passed;
-			if (page4) {
+			passed = context.are_equal<bool>(page4.ptr() != nullptr, fit, __TAG__, "%d") && passed;
+			if (page4.ptr() != nullptr) {
 				context.log->put_any(abc::category::abc::vmem, abc::severity::abc::important, __TAG__, "page4 pos=0x%llx, ptr=%p", (long long)page4.pos(), page4.ptr());
 				passed = context.are_equal(4LL, (long long)page4.pos(), __TAG__, "0x%llx") && passed;
 				std::memset(page4.ptr(), 0x44, abc::vmem_page_size);

@@ -167,7 +167,7 @@ namespace abc {
 
 		if (_ready) {
 			vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
-			if (page) {
+			if (page.ptr() != nullptr) {
 				_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
 
 				vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
@@ -237,14 +237,12 @@ namespace abc {
 		}
 
 		if (page_pos != vmem_page_pos_nil && _ready) {
-			void* ptr = lock_page(vmem_page_pos_root);
-			if (ptr == nullptr) {
-				_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(ptr);
+			vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
+			if (page.ptr() != nullptr) {
+				_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
 
 				vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
 				free_pages_list.push_back(page_pos);
-
-				unlock_page(vmem_page_pos_root);
 			}
 		}
 	}
@@ -581,12 +579,6 @@ namespace abc {
 	inline vmem_page<Pool, Log>::~vmem_page() noexcept {
 		unlock();
 		invalidate();
-	}
-
-
-	template <typename Pool, typename Log>
-	inline vmem_page<Pool, Log>::operator bool() const noexcept {
-		return _ptr != nullptr;
 	}
 
 
