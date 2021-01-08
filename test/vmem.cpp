@@ -130,6 +130,67 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_pool_freepages(test_context<abc::test::log>& context) {
+		using PoolFree = abc::vmem_pool<5, Log>;
+
+		bool passed = true;
+
+		PoolFree pool("out/test/pool_freepages.vmem", context.log);
+
+		{
+			// Page 2
+			abc::vmem_page<PoolFree, Log> page2(&pool, context.log);
+			passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+
+			// Page 3
+			abc::vmem_page<PoolFree, Log> page3(&pool, context.log);
+			passed = context.are_equal(page3.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+
+			// Page 4
+			abc::vmem_page<PoolFree, Log> page4(&pool, context.log);
+			passed = context.are_equal(page4.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page4.pos(), 4LL, __TAG__, "0x%llx") && passed;
+
+			// Page 5
+			abc::vmem_page<PoolFree, Log> page5(&pool, context.log);
+			passed = context.are_equal(page5.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page5.pos(), 5LL, __TAG__, "0x%llx") && passed;
+
+			page2.free();
+			page3.free();
+			page4.free();
+			page5.free();
+		}
+
+		{
+			// Page 5
+			abc::vmem_page<PoolFree, Log> page5(&pool, context.log);
+			passed = context.are_equal(page5.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page5.pos(), 5LL, __TAG__, "0x%llx") && passed;
+
+			// Page 4
+			abc::vmem_page<PoolFree, Log> page4(&pool, context.log);
+			passed = context.are_equal(page4.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page4.pos(), 4LL, __TAG__, "0x%llx") && passed;
+
+			// Page 3
+			abc::vmem_page<PoolFree, Log> page3(&pool, context.log);
+			passed = context.are_equal(page3.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+
+			// Page 2
+			abc::vmem_page<PoolFree, Log> page2(&pool, context.log);
+			passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+		}
+
+		context.log->filter()->min_severity(abc::severity::critical);
+		return passed;
+	}
+
+
 	bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 		using Item = std::array<std::uint8_t, 900>;
 		using List = abc::vmem_list<Item, Pool, Log>;

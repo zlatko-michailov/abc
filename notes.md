@@ -5,11 +5,7 @@
   - vmem_list
 
 ## To Do
-- vmem_page
-  - check operator bool() everywhere
-  
-- vmem_pool
-  - test the free_pages list
+- Split headers
 
 - vmem_list
   - check
@@ -25,8 +21,6 @@
 - vmem_pool
   - check
   - repair
-
-- Split headers
 
 - vmem docs
 

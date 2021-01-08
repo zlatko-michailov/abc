@@ -134,6 +134,7 @@ int main() {
 				{ "test_vmem_pool_fit",								abc::test::vmem::test_vmem_pool_fit },
 				{ "test_vmem_pool_exceed",							abc::test::vmem::test_vmem_pool_exceed },
 				{ "test_vmem_pool_reopen",							abc::test::vmem::test_vmem_pool_reopen },
+				{ "test_vmem_pool_freepages",						abc::test::vmem::test_vmem_pool_freepages },
 				{ "test_vmem_list_insert",							abc::test::vmem::test_vmem_list_insert },
 				{ "test_vmem_list_insertmany",						abc::test::vmem::test_vmem_list_insertmany },
 				{ "test_vmem_list_erase",							abc::test::vmem::test_vmem_list_erase },
