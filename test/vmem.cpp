@@ -39,16 +39,6 @@ namespace abc { namespace test { namespace vmem {
 	};
 
 
-	// IMPORTANT: Ensure a predictable layout of the data on disk!
-	#pragma pack(push, 1)
-
-	struct test_start_page {
-		abc::vmem_list_state list_state;
-	};
-
-	#pragma pack(pop)
-
-
 	template <typename List>
 	bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count);
 

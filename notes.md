@@ -5,24 +5,25 @@
   - vmem_list
 
 ## To Do
-- Split headers
+- vmem docs
+
 
 - vmem_list
   - check
     - No data loss
-      - State total count
-      - State front page
-      - State back page
-      - Semi-broken chain
+      - State total count mismatch
+      - State front page mismatch
+      - State back page mismatch
+      - Forward iteration broken
+      - Reverse iteration broken
     - Possible data loss
-      - Broken chain
+      - Chain broken
   - repair
 
 - vmem_pool
   - check
   - repair
 
-- vmem docs
 
 - vmem_map
 
