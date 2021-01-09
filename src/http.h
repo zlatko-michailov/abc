@@ -29,8 +29,8 @@ SOFTWARE.
 
 #include "ascii.h"
 #include "exception.h"
-#include "http.i.h"
 #include "stream.h"
+#include "i/http.i.h"
 
 
 namespace abc {

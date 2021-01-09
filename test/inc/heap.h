@@ -25,18 +25,17 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/timestamp.h"
+#include "../../src/exception.h"
+#include "../../src/tag.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace timestamp {
+namespace abc { namespace test { namespace heap {
 
-	bool test_null_timestamp(test_context<abc::test::log>& context);
-	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
-	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
-	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
-	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool start_heap_allocation(test_context<abc::test::log>& context);
+	bool test_heap_allocation(test_context<abc::test::log>& context);
+	bool ignore_heap_allocation(test_context<abc::test::log>& context, tag_t tag);
 
 }}}
 

@@ -5,7 +5,7 @@ Up to [Documentation](../README.md).
 Purpose          | File
 ---------------- | ----
 Include          | [json.h](../../src/json.h)
-Interface        | [json.i.h](../../src/json.i.h)
+Interface        | [json.i.h](../../src/i/json.i.h)
 Tests / Examples | [test/json.cpp](../../test/json.cpp)
 
 These classes enable sequential parsing and generation of JSON payloads:

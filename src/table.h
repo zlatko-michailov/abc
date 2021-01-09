@@ -28,7 +28,7 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
-#include "table.i.h"
+#include "i/table.i.h"
 
 
 namespace abc {

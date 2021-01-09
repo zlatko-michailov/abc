@@ -5,7 +5,7 @@ Up to [Documentation](../README.md).
 Purpose          | File
 ---------------- | ----
 Include          | [socket.h](../../src/socket.h)
-Interface        | [socket.i.h](../../src/socket.i.h)
+Interface        | [socket.i.h](../../src/i/socket.i.h)
 Tests / Examples | [test/socket.cpp](../../test/socket.cpp)
 
 __Note__: This medium is only available on POSIX systems where the BSD socket C API is available.

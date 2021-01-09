@@ -23,8 +23,7 @@ SOFTWARE.
 */
 
 
-#include "vmem.h"
-#include "heap.h"
+#include "inc/vmem.h"
 
 
 namespace abc { namespace test { namespace vmem {

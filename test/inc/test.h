@@ -25,15 +25,14 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/buffer_streambuf.h"
-
-#include "test.h"
+#include "../../src/test.h"
 
 
-namespace abc { namespace test { namespace streambuf {
+namespace abc { namespace test {
 
-	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context);
-	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context);
+	using log_line = abc::test_line_ostream<>;
+	using log_filter = abc::log_filter;
+	using log = abc::log_ostream<log_line, log_filter>;
 
-}}}
+}}
 

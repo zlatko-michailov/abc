@@ -27,7 +27,7 @@ SOFTWARE.
 #include <atomic>
 #include <new>
 
-#include "heap.h"
+#include "inc/heap.h"
 
 
 namespace abc { namespace test { namespace heap {

@@ -28,9 +28,9 @@ SOFTWARE.
 #include <stdexcept>
 #include <memory>
 
-#include "socket.i.h"
 #include "exception.h"
 #include "tag.h"
+#include "i/socket.i.h"
 
 
 namespace abc {

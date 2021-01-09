@@ -26,9 +26,9 @@ SOFTWARE.
 #include <future>
 #include <atomic>
 
-#include "log.h"
-#include "socket.h"
-#include "http.h"
+#include "log.i.h"
+#include "socket.i.h"
+#include "http.i.h"
 
 
 namespace abc {

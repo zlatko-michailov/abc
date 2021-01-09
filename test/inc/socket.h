@@ -25,17 +25,18 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/ascii.h"
+#include "../../src/socket.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace ascii {
+namespace abc { namespace test { namespace socket {
 
-	bool test_ascii_equal(test_context<abc::test::log>& context);
-	bool test_ascii_equal_n(test_context<abc::test::log>& context);
-	bool test_ascii_equal_i(test_context<abc::test::log>& context);
-	bool test_ascii_equal_i_n(test_context<abc::test::log>& context);
+	bool test_udp_sync_socket(test_context<abc::test::log>& context);
+	bool test_tcp_sync_socket(test_context<abc::test::log>& context);
+
+	bool test_tcp_socket_stream(test_context<abc::test::log>& context);
+	bool test_http_json_socket_stream(test_context<abc::test::log>& context);
 
 }}}
 

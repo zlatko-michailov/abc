@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/stream.h"
+#include "../../src/stream.h"
 
 #include "test.h"
 

@@ -25,14 +25,22 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/test.h"
+#include "../../src/log.h"
+#include "../../src/vmem.h"
+
+#include "test.h"
 
 
-namespace abc { namespace test {
+namespace abc { namespace test { namespace vmem {
 
-	using log_line = abc::test_line_ostream<>;
-	using log_filter = abc::log_filter;
-	using log = abc::log_ostream<log_line, log_filter>;
+	bool test_vmem_pool_fit(test_context<abc::test::log>& context);
+	bool test_vmem_pool_exceed(test_context<abc::test::log>& context);
+	bool test_vmem_pool_reopen(test_context<abc::test::log>& context);
+	bool test_vmem_pool_freepages(test_context<abc::test::log>& context);
 
-}}
+	bool test_vmem_list_insert(test_context<abc::test::log>& context);
+	bool test_vmem_list_insertmany(test_context<abc::test::log>& context);
+	bool test_vmem_list_erase(test_context<abc::test::log>& context);
+
+}}}
 

@@ -25,9 +25,9 @@ SOFTWARE.
 
 #include <cstdio>
 
-#include "table.h"
-#include "clock.h"
-#include "stream.h"
+#include "inc/table.h"
+#include "inc/clock.h"
+#include "inc/stream.h"
 
 
 namespace abc { namespace test { namespace table {

@@ -32,7 +32,7 @@ SOFTWARE.
 #include <cstdarg>
 #include <thread>
 
-#include "tag.h"
+#include "../tag.h"
 #include "timestamp.i.h"
 #include "table.i.h"
 

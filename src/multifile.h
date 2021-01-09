@@ -28,10 +28,10 @@ SOFTWARE.
 #include <cstring>
 #include <cstdio>
 
-#include "multifile.i.h"
 #include "timestamp.h"
 #include "exception.h"
 #include "tag.h"
+#include "i/multifile.i.h"
 
 
 namespace abc {

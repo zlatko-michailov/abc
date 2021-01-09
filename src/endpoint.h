@@ -35,11 +35,11 @@ SOFTWARE.
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "endpoint.i.h"
 #include "exception.h"
 #include "log.h"
 #include "socket.h"
 #include "http.h"
+#include "i/endpoint.i.h"
 
 
 namespace abc {

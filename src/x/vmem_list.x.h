@@ -27,8 +27,8 @@ SOFTWARE.
 
 #include <cstring>
 
-#include "vmem.i.h"
-#include "exception.h"
+#include "../exception.h"
+#include "../i/vmem.i.h"
 
 
 namespace abc {

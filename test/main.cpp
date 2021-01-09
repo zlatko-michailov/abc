@@ -25,17 +25,17 @@ SOFTWARE.
 
 #include <iostream>
 
-#include "test.h"
-#include "ascii.h"
-#include "timestamp.h"
-#include "streambuf.h"
-#include "table.h"
-#include "socket.h"
-#include "http.h"
-#include "json.h"
-#include "heap.h"
-#include "clock.h"
-#include "vmem.h"
+#include "inc/test.h"
+#include "inc/heap.h"
+#include "inc/clock.h"
+#include "inc/ascii.h"
+#include "inc/timestamp.h"
+#include "inc/streambuf.h"
+#include "inc/table.h"
+#include "inc/socket.h"
+#include "inc/http.h"
+#include "inc/json.h"
+#include "inc/vmem.h"
 
 
 int main() {

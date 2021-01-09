@@ -28,10 +28,10 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
-#include "log.i.h"
 #include "timestamp.h"
 #include "buffer_streambuf.h"
 #include "table.h"
+#include "i/log.i.h"
 
 namespace abc {
 

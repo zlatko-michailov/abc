@@ -25,22 +25,18 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/log.h"
-#include "../src/vmem.h"
+#include "../../src/timestamp.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace vmem {
+namespace abc { namespace test { namespace timestamp {
 
-	bool test_vmem_pool_fit(test_context<abc::test::log>& context);
-	bool test_vmem_pool_exceed(test_context<abc::test::log>& context);
-	bool test_vmem_pool_reopen(test_context<abc::test::log>& context);
-	bool test_vmem_pool_freepages(test_context<abc::test::log>& context);
-
-	bool test_vmem_list_insert(test_context<abc::test::log>& context);
-	bool test_vmem_list_insertmany(test_context<abc::test::log>& context);
-	bool test_vmem_list_erase(test_context<abc::test::log>& context);
+	bool test_null_timestamp(test_context<abc::test::log>& context);
+	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context);
+	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context);
 
 }}}
 

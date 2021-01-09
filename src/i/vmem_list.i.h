@@ -28,8 +28,8 @@ SOFTWARE.
 #include <cstdint>
 #include <climits>
 
-#include "size.h"
-#include "log.h"
+#include "../size.h"
+#include "log.i.h"
 
 
 namespace abc {

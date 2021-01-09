@@ -29,10 +29,10 @@ SOFTWARE.
 #include <ostream>
 #include <thread>
 
-#include "size.h"
-#include "stream.i.h"
-#include "buffer_streambuf.h"
+#include "../size.h"
+#include "../buffer_streambuf.h"
 #include "timestamp.i.h"
+#include "stream.i.h"
 
 
 namespace abc {

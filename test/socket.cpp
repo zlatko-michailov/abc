@@ -26,11 +26,10 @@ SOFTWARE.
 #include <thread>
 #include <cctype>
 
-#include "../src/http.h"
-#include "../src/json.h"
-
-#include "socket.h"
-#include "heap.h"
+#include "inc/http.h"
+#include "inc/json.h"
+#include "inc/socket.h"
+#include "inc/heap.h"
 
 
 namespace abc { namespace test { namespace socket {

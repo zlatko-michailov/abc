@@ -25,18 +25,16 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/socket.h"
+#include "../../src/log.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace socket {
+namespace abc { namespace test { namespace table {
 
-	bool test_udp_sync_socket(test_context<abc::test::log>& context);
-	bool test_tcp_sync_socket(test_context<abc::test::log>& context);
-
-	bool test_tcp_socket_stream(test_context<abc::test::log>& context);
-	bool test_http_json_socket_stream(test_context<abc::test::log>& context);
+	bool test_table_line_debug(test_context<abc::test::log>& context);
+	bool test_table_line_diag(test_context<abc::test::log>& context);
+	bool test_table_line_test(test_context<abc::test::log>& context);
 
 }}}
 

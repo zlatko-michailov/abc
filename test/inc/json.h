@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/json.h"
+#include "../../src/json.h"
 
 #include "test.h"
 #include "stream.h"

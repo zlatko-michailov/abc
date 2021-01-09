@@ -25,17 +25,15 @@ SOFTWARE.
 
 #pragma once
 
-#include "../src/exception.h"
-#include "../src/tag.h"
+#include "../../src/buffer_streambuf.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace heap {
+namespace abc { namespace test { namespace streambuf {
 
-	bool start_heap_allocation(test_context<abc::test::log>& context);
-	bool test_heap_allocation(test_context<abc::test::log>& context);
-	bool ignore_heap_allocation(test_context<abc::test::log>& context, tag_t tag);
+	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context);
+	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context);
 
 }}}
 

@@ -26,7 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include "log.h"
-#include "stream.i.h"
+#include "i/stream.i.h"
 
 
 namespace abc {

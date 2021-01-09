@@ -5,7 +5,7 @@ Up to [Documentation](../README.md).
 Purpose          | File
 ---------------- | ----
 Include          | [endpoint.h](../../src/endpoint.h)
-Interface        | [endpoint.i.h](../../src/endpoint.i.h)
+Interface        | [endpoint.i.h](../../src/i/endpoint.i.h)
 Tests / Examples | [samples/basic/*](../../samples/basic/main.cpp)
 
 This class implements a simple web server using [`socket`](socket.md), [`http`](http.md), and [`json`](json.md).
