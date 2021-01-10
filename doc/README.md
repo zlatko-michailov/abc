@@ -13,6 +13,7 @@ Provide the title and the link to the page along with as much information as you
   - [Tagging](concepts/tagging.md)
   - [Diagnostics](concepts/diagnostics.md)
   - [HTTP Endpoint](concepts/endpoint.md)
+  - [Virtual Memory](concepts/vmem.md)
 - Getting Started
   - [Dependencies](start/dependencies.md)
   - [Clone and Build the Repo](start/clone_and_build.md)
@@ -60,3 +61,8 @@ Provide the title and the link to the page along with as much information as you
   - [line_ostream](ref/table.md)
 - [test](ref/test.md)
 - [timestamp](ref/timestamp.md)
+- [vmem](ref/vmem.md)
+  - [vmem_pool](ref/vmem.md)
+  - [vmem_page](ref/vmem.md)
+  - [vmem_ptr](ref/vmem.md)
+  - [vmem_list](ref/vmem.md)

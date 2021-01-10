@@ -22,6 +22,11 @@ This way, you can implement HTTP communication over other media, e.g. a third-pa
 ## JSON Serialization
 Similarly to HTTP, a pair of streams is provided that can read and write JSON content to and from any streambuf.
 
+## Virtual Memory
+Virtual memory enables programs to manipulate large data sets that don't fit in memory.
+It is implemented at two levels - at the lower level, there is a persistent `vmem_pool` that maps and unmaps `vmem_pages` to and from memory as they are needed.
+At the higher level, there are data structures - `vmem_list` and `vmem_map` (the latter is not yet available) that implement the corresponding functionality by abstracting away the mapping and unmapping of pages.
+
 ## Diagnostics
 Programs misbehave sometimes, and when they do, we learn about it later, eventually from users.
 To be able to find out what happened during the execution of a program, `abc` provides a `log` stream where methods can record relevant information.
