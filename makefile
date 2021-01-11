@@ -36,6 +36,7 @@ SUBDIR_BIN = bin
 SUBDIR_SAMPLES = samples
 SUBDIR_RESOURCES = resources
 SAMPLE_BASIC = basic
+SAMPLE_VMEM = vmem
 PROG_TEST = $(PROJECT)_test
 
 
@@ -76,6 +77,11 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	# ---------- Done building basic ----------
+	#
+	# ---------- Begin building vmem ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/$(SAMPLE_VMEM) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/*.cpp $(LINKOPTIONS)
+	# ---------- Done building vmem ----------
 	#
 	# ---------- Done building samples ----------
 	#

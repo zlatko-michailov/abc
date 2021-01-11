@@ -6,9 +6,9 @@
 
 - subfolders
 
-## To Do
 - vmem sample
 
+## To Do
 - vmem docs
   - (done) fundamentals/features.md
   - (done) concepts/vmem.md
