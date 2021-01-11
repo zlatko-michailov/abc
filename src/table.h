@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
+#include "stream.h"
 #include "i/table.i.h"
 
 
