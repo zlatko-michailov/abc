@@ -186,10 +186,22 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline constexpr bool vmem_list<T, Pool, Log>::is_uninit(const vmem_list_state* state) noexcept {
-		return state != nullptr
-			&& state->front_page_pos == vmem_page_pos_nil
-			&& state->back_page_pos == vmem_page_pos_nil
-			&& state->item_size == 0;
+		return
+			// nil
+			(
+				state != nullptr
+				&& state->front_page_pos == vmem_page_pos_nil
+				&& state->back_page_pos == vmem_page_pos_nil
+				&& state->item_size == 0
+			)
+			||
+			// zero
+			(
+				state != nullptr
+				&& state->front_page_pos == 0
+				&& state->back_page_pos == 0
+				&& state->item_size == 0
+			);
 	}
 
 
@@ -216,7 +228,9 @@ namespace abc {
 		}
 
 		if (is_uninit(state)) {
-			state->item_size = sizeof(T);
+			_state->front_page_pos = vmem_page_pos_nil;
+			_state->back_page_pos = vmem_page_pos_nil;
+			_state->item_size = sizeof(T);
 		}
 
 		if (sizeof(T) != _state->item_size) {
