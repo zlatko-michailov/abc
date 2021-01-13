@@ -6,7 +6,15 @@ Up to [Documentation](README.md).
 - Virtual memory:
   - `vmem_pool`
   - `vmem_list`
+
+## 1.12.1
+- Virtual memory:
   - `vmem_map`
+
+## 1.12.2
+- Virtual memory:
+  - `check`
+  - `repair`
 
 ## 1.13.0
 - Tic Tac Toe sample (thinking fast and slow).

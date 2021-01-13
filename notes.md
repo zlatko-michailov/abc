@@ -3,13 +3,13 @@
   - vmem_pool
   - vmem_page
   - vmem_list
-
 - subfolders
-
 - vmem sample
 
 ## To Do
-- vmem_list
+- vmem_map
+---
+- vmem:
   - check
     - No data loss
       - State total count mismatch
@@ -20,23 +20,12 @@
     - Possible data loss
       - Chain broken
   - repair
-
-- vmem_pool
-  - check
-  - repair
-
-
-- vmem_map
-
 ---
-
 - Samples
   - tictactoe
-
+  - connect four
 ---
-
 - tls_streambuf
-
 ---
 
 ## Postponed
