@@ -30,9 +30,10 @@ SOFTWARE.
 #include "../../src/vmem.h"
 
 
-using log_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
+using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
-using vmem_pool = abc::vmem_pool<8, log_ostream>; // Max 32KB mapped in memory.S
+// Max 8 pages = 32KB in memory.
+using vmem_pool = abc::vmem_pool<8, log_ostream>;
 
 using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
 

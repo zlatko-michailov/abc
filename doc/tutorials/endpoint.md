@@ -3,9 +3,9 @@
 Up to [Documentation](../README.md).
 
 > A prerequisite to this tutorial is becoming familiar with these concepts:
->- [Diagnostics](../concepts/diagnostics.md)
 >- [Endpoint](../concepts/Endpoint.md)
 >- [Media and Streams](../concepts/media_and_streams.md)
+>- [Diagnostics](../concepts/diagnostics.md)
 
 `abc` programs can show GUI by processing HTTP GET requests and sending down HTML.
 That HTML can contain JavaScript that can make HTTP REST requests back to the program, and can update the HTML DOM based on the responses.

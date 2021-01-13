@@ -9,12 +9,6 @@
 - vmem sample
 
 ## To Do
-- vmem docs
-  - (done) fundamentals/features.md
-  - (done) concepts/vmem.md
-  - (done) ref/vmem.md
-  - tutorials/vmem.md
-
 - vmem_list
   - check
     - No data loss

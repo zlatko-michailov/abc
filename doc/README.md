@@ -22,6 +22,7 @@ Provide the title and the link to the page along with as much information as you
 - Tutorials
   - [How to Log Diagnostics](tutorials/diagnostics.md)
   - [How to Enable GUI and REST](tutorials/endpoint.md)
+  - [How to Use Virtual Memory](tutorials/vmem.md)
 - [Contribute](contribute.md)
 - [Release Notes](releases.md)
 - [Roadmap](roadmap.md)
