@@ -2,11 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.12.0
-- Virtual memory:
-  - `vmem_pool`
-  - `vmem_list`
-
 ## 1.12.1
 - Virtual memory:
   - `vmem_map`

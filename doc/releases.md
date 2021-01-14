@@ -2,6 +2,14 @@
 
 Up to [Documentation](README.md).
 
+## 1.12.0
+- No breaking changes.
+- Virtual memory:
+  - `vmem_pool`
+  - `vmem_list`
+  - Sample
+- Move non-includable files to subfolders. 
+
 ## 1.11.0
 - No breaking changes.
 - Public verification.
