@@ -7,6 +7,10 @@
 - vmem sample
 
 ## To Do
+- MERGE into master
+- TAG
+- VERSION up in makefile
+
 - vmem_map
 ---
 - vmem:
