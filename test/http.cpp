@@ -279,22 +279,22 @@ namespace abc { namespace test { namespace http {
 
 
 	bool test_http_request_istream_resource_01(test_context<abc::test::log>& context) {
-		return test_http_request_istream_resource(context, "/path", "/path", "p3", nullptr, __TAG__);
+		return test_http_request_istream_resource(context, "/path", "/path", "p3", nullptr, 0x103b6);
 	}
 
 
 	bool test_http_request_istream_resource_02(test_context<abc::test::log>& context) {
-		return test_http_request_istream_resource(context, "/path?", "/path", "p3", nullptr, __TAG__);
+		return test_http_request_istream_resource(context, "/path?", "/path", "p3", nullptr, 0x103b7);
 	}
 
 
 	bool test_http_request_istream_resource_03(test_context<abc::test::log>& context) {
-		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", "p3", "42", __TAG__);
+		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", "p3", "42", 0x103b8);
 	}
 
 
 	bool test_http_request_istream_resource_04(test_context<abc::test::log>& context) {
-		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", "p3", "42", __TAG__);
+		return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", "p3", "42", 0x103b9);
 	}
 
 
@@ -310,14 +310,14 @@ namespace abc { namespace test { namespace http {
 
 		bool passed = true;
 		abc::http_request_istream<abc::test::log>::split_resource(buffer, buffer_size);
-		passed = context.are_equal(buffer, path, __TAG__) && passed;
+		passed = context.are_equal(buffer, path, 0x103ba) && passed;
 
 		const char* parameter_value = abc::http_request_istream<abc::test::log>::get_resource_parameter(buffer, buffer_size, "p3");
 		if (expected_parameter_value != nullptr) {
-			passed = context.are_equal(parameter_value, expected_parameter_value, __TAG__) && passed;
+			passed = context.are_equal(parameter_value, expected_parameter_value, 0x103bb) && passed;
 		}
 		else {
-			passed = context.are_equal<void*>((void*)parameter_value, (void*)nullptr, __TAG__, "%p") && passed;
+			passed = context.are_equal<void*>((void*)parameter_value, (void*)nullptr, 0x103bc, "%p") && passed;
 		}
 
 		return passed;

@@ -92,7 +92,7 @@ int main(int argc, const char* argv[]) {
 	}
 
 	std::strcpy(path + prog_path_len, pool_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "path='%s'", path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10340, "path='%s'", path);
 
 
 	// Construct a pool instance.
@@ -113,31 +113,31 @@ int main(int argc, const char* argv[]) {
 
 
 void work_with_list(abc::vmem_list_state* list_state, vmem_pool* pool, log_ostream* log, const char* list_name, std::size_t items_to_add) {
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "---------- %s ----------", list_name);
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10341, "---------- %s ----------", list_name);
 
 	// Construct a list for the given state.
 	vmem_list list(list_state, pool, log);
 
 	// Print the initial size of the list.
 	std::size_t size = list.size();
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Initial size=%zu", size);
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10342, "Initial size=%zu", size);
 
 	// Print the elements
 	for (vmem_list:: iterator itr = list.begin(); itr != list.end(); itr++) {
-		log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%lu", (long)itr->data);
+		log->put_any(abc::category::abc::samples, abc::severity::important, 0x10343, "%lu", (long)itr->data);
 	}
 
 	// Add more items.
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Adding...");
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10344, "Adding...");
 	for (std::size_t i = 0; i < items_to_add; i++) {
 		vmem_list_item item { (std::uint64_t)(size + i), { 0 } };
 
 		list.insert(list.end(), item);
-		log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%llu", (long long)item.data);
+		log->put_any(abc::category::abc::samples, abc::severity::important, 0x10345, "%llu", (long long)item.data);
 	}
 
 	// Print the final size of the list.
 	size = list.size();
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Final size=%zu", size);
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10346, "Final size=%zu", size);
 }
 
