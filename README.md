@@ -6,6 +6,7 @@
 - socket (TCP and UDP)
 - HTTP streams
 - JSON streams
+- virtual memory
 
 Those entities enable a C++ daemon running on remote device to have a GUI as well as a REST API surface.
 
