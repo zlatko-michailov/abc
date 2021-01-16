@@ -83,7 +83,7 @@ namespace abc {
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
 	private:
-		friend class vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
+		friend vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 
 		vmem_page_pos_t				alloc_page() noexcept;
 		void						free_page(vmem_page_pos_t page_pos) noexcept;

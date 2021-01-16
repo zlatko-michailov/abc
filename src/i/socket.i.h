@@ -196,7 +196,7 @@ namespace abc {
 		tcp_client_socket(const tcp_client_socket& other) = delete;
 
 	protected:
-		friend class tcp_server_socket<Log>;
+		friend tcp_server_socket<Log>;
 		tcp_client_socket(socket::handle_t handle, socket::family_t family, Log* log);
 	};
 

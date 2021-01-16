@@ -38,56 +38,6 @@ namespace abc {
 	template <typename T, typename Pool, typename Log = null_log>
 	using vmem_list_iterator = vmem_iterator<vmem_list<T, Pool, Log>, T, Pool, Log>;
 
-#ifdef REMOVE////
-	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_list_iterator {
-	public:
-		using value_type				= T;
-		using pointer					= vmem_ptr<T, Pool, Log>;
-		using const_pointer				= const pointer;
-		using reference					= T&;
-		using const_reference			= const T&;
-
-	private:
-		friend class vmem_list<T, Pool, Log>;
-
-		vmem_list_iterator<T, Pool, Log>(const vmem_list<T, Pool, Log>* list, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log);
-
-	public:
-		vmem_list_iterator<T, Pool, Log>(const vmem_list_iterator<T, Pool, Log>& other) = default;
-		vmem_list_iterator<T, Pool, Log>(vmem_list_iterator<T, Pool, Log>&& other) noexcept = default;
-
-	public:
-		const vmem_list_iterator<T, Pool, Log>&	operator =(const vmem_list_iterator<T, Pool, Log>& other) noexcept;
-
-	public:
-		bool								operator ==(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
-		bool								operator !=(const vmem_list_iterator<T, Pool, Log>& other) const noexcept;
-		vmem_list_iterator<T, Pool, Log>&	operator ++() noexcept;
-		vmem_list_iterator<T, Pool, Log>&	operator ++(int) noexcept;
-		vmem_list_iterator<T, Pool, Log>&	operator --() noexcept;
-		vmem_list_iterator<T, Pool, Log>&	operator --(int) noexcept;
-		pointer								operator ->() noexcept;
-		const_pointer						operator ->() const noexcept;
-		reference							operator *();
-		const_reference						operator *() const;
-
-		bool								can_deref() const noexcept;
-
-	private:
-		friend class vmem_list<T, Pool, Log>;
-
-		pointer								ptr() const noexcept;
-		reference							deref() const;
-
-	private:
-		const vmem_list<T, Pool, Log>*		_list;
-		vmem_page_pos_t						_page_pos;
-		vmem_item_pos_t						_item_pos;
-		vmem_iterator_edge_t				_edge;
-		Log*								_log;
-	};
-#endif
 
 	// --------------------------------------------------------------
 

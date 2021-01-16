@@ -1,7 +1,8 @@
 ## Done
+-vmem
+  - vmem_iterator
 
 ## To Do
-- vmem_iterator
 - vmem_map
 ---
 - vmem:
