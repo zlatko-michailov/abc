@@ -33,6 +33,7 @@ SOFTWARE.
 
 namespace abc {
 
+#ifdef REMOVE ////
 	template <typename T, typename Pool, typename Log>
 	inline vmem_list_iterator<T, Pool, Log>::vmem_list_iterator(const vmem_list<T, Pool, Log>* list, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log)
 		: _list(list)
@@ -161,7 +162,7 @@ namespace abc {
 
 		return *t;
 	}
-
+#endif
 
 	// --------------------------------------------------------------
 

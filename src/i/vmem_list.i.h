@@ -26,30 +26,19 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
-#include <climits>
 
-#include "../size.h"
 #include "log.i.h"
 
 
 namespace abc {
 
-	using vmem_iterator_edge_t = std::uint8_t;
-
-	namespace vmem_iterator_edge {
-		constexpr vmem_iterator_edge_t	none	= 0;
-		constexpr vmem_iterator_edge_t	rbegin	= 1; // before front
-		constexpr vmem_iterator_edge_t	end		= 2; // after back
-	}
-
-
-	// --------------------------------------------------------------
-
-
 	template <typename T, typename Pool, typename Log>
 	class vmem_list;
 
+	template <typename T, typename Pool, typename Log = null_log>
+	using vmem_list_iterator = vmem_iterator<vmem_list<T, Pool, Log>, T, Pool, Log>;
 
+#ifdef REMOVE////
 	template <typename T, typename Pool, typename Log = null_log>
 	class vmem_list_iterator {
 	public:
@@ -98,7 +87,7 @@ namespace abc {
 		vmem_iterator_edge_t				_edge;
 		Log*								_log;
 	};
-
+#endif
 
 	// --------------------------------------------------------------
 
@@ -175,7 +164,7 @@ namespace abc {
 		void					clear() noexcept;
 
 	private:
-		friend class vmem_list_iterator<T, Pool, Log>;
+		friend vmem_list_iterator<T, Pool, Log>;
 
 		void					move_next(iterator& itr) const noexcept;
 		void					move_prev(iterator& itr) const noexcept;
