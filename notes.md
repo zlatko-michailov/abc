@@ -16,6 +16,7 @@
     - Possible data loss
       - Chain broken
   - repair
+  - compact
 ---
 - Samples
   - tictactoe

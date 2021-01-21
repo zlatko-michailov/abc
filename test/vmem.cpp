@@ -192,7 +192,7 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_list_state list_state;
 		List list(&list_state, &pool, context.log);
 		Item item;
-		
+
 		item.fill(0x21);
 		Iterator itr = list.insert(list.end(), item);
 		Iterator itr21 = itr;
@@ -246,12 +246,14 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal<std::size_t>(list.size(), 8, 0x103de, "%zu") && passed;
 		// | 28 __ __ __ | 27 24 23 25 | 21 22 26 __ |
 
-		std::uint8_t b[] = { 0x28, 0x27, 0x24, 0x23, 0x25, 0x21, 0x22, 0x26 };
+		constexpr std::uint8_t b[] = { 0x28, 0x27, 0x24, 0x23, 0x25, 0x21, 0x22, 0x26 };
 		constexpr std::size_t b_len = sizeof(b) / sizeof(std::uint8_t); 
 
 		// Iterate forward.
 		itr = list.cbegin();
 		for (std::size_t i = 0; i < b_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::important, __TAG__, "forward[%zd]=0x%x", i, b[i]);
+	
 			passed = verify_bytes(context, itr->data(), 0, sizeof(Item), b[i]) && passed;
 			itr++;
 		}
@@ -260,6 +262,8 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate backwards.
 		itr = list.crend();
 		for (std::size_t i = 0; i < b_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::important, __TAG__, "bacwards[%zd]=0x%x", i, b[b_len - i - 1]);
+	
 			passed = verify_bytes(context, itr->data(), 0, sizeof(Item), b[b_len - i - 1]) && passed;
 			itr--;
 		}
@@ -419,7 +423,7 @@ namespace abc { namespace test { namespace vmem {
 				}
 
 				context.log->put_any(abc::category::any, abc::severity::optional, 0x103ff, "i = %zu", i);
-				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, 0x10400, "%d") && passed;
+				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, 0x10400, "0x%x") && passed;
 			}
 		}
 
