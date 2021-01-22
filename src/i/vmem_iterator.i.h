@@ -54,12 +54,8 @@ namespace abc {
 		using reference					= T&;
 		using const_reference			= const T&;
 
-	private:
-		friend Container;
-
-		vmem_iterator<Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log);
-
 	public:
+		vmem_iterator<Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log);
 		vmem_iterator<Container, T, Pool, Log>(const vmem_iterator<Container, T, Pool, Log>& other) = default;
 		vmem_iterator<Container, T, Pool, Log>(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
 
