@@ -401,12 +401,20 @@ namespace abc {
 								_state->back_page_pos = new_page.pos();
 							}
 
-							// Split the items evenly among the 2 pages.
-							constexpr std::size_t new_page_item_count = page_capacity() / 2;
-							page_item_count = page_capacity() - new_page_item_count;
-							std::memmove(&new_list_page->items[0], &list_page->items[page_item_count], new_page_item_count * sizeof(T));
-							new_list_page->item_count = new_page_item_count;
-							list_page->item_count = page_item_count;
+							if (new_list_page->next_page_pos != vmem_page_pos_nil || itr._item_pos != vmem_item_pos_nil) {
+								// Split the items evenly among the 2 pages unless we are inserting at the end.
+								// This exception fills up pages fully when items keep being added at the end.
+								if (_log != nullptr) {
+									_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::insert() No capacity. Balancing. page_pos=0x%llx, new_page_pos=0x%llx",
+										(long long)page.pos(), (long long)new_page.pos());
+								}
+
+								constexpr std::size_t new_page_item_count = page_capacity() / 2;
+								page_item_count = page_capacity() - new_page_item_count;
+								std::memmove(&new_list_page->items[0], &list_page->items[page_item_count], new_page_item_count * sizeof(T));
+								new_list_page->item_count = new_page_item_count;
+								list_page->item_count = page_item_count;
+							}
 
 							if (itr._item_pos == vmem_item_pos_nil) {
 								// Inserting to the end of a full page.
@@ -417,7 +425,7 @@ namespace abc {
 										(long long)new_page.pos(), (long long)new_list_page->item_count);
 								}
 
-								// Insert item - first/only one.
+								// Insert item.
 								page_pos = new_page.pos();
 								item_pos = new_list_page->item_count;
 								page_item_count = ++new_list_page->item_count;

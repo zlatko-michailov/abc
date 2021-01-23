@@ -269,6 +269,24 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (4)         | (3)
 		// | 28 27 24 __ | 23 25 __ __ | 21 22 26 __ |
 
+		item.fill(0x29);
+		actual_itr = list.insert(list.end(), item);
+		expected_itr = Iterator(&list, 3U, 3U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr == list.rend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 9, __TAG__, "%zu") && passed;
+		// | (2)         | (4)         | (3)
+		// | 28 27 24 __ | 23 25 __ __ | 21 22 26 29 |
+
+		item.fill(0x2a);
+		actual_itr = list.insert(list.end(), item);
+		expected_itr = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr == list.rend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 10, __TAG__, "%zu") && passed;
+		// | (2)         | (4)         | (3)         | (5)
+		// | 28 27 24 __ | 23 25 __ __ | 21 22 26 29 | 2a __ __ __ |
+
 		using Pair = std::pair<std::uint8_t, Iterator>;
 		const Pair exp[] = {
 			{ 0x28, Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log) },
@@ -279,6 +297,8 @@ namespace abc { namespace test { namespace vmem {
 			{ 0x21, Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log) },
 			{ 0x22, Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log) },
 			{ 0x26, Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x29, Iterator(&list, 3U, 3U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x2a, Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log) },
 		};
 		constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
@@ -326,6 +346,7 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_list_erase(test_context<abc::test::log>& context) {
 		using List = abc::vmem_list<ItemMany, Pool, Log>;
+		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
 
 		bool passed = true;
 
@@ -335,16 +356,16 @@ namespace abc { namespace test { namespace vmem {
 		List list(&list_state, &pool, context.log);
 
 		passed = insert_vmem_list_items(context, list, 12) && passed;
+		// | (2)         | (3)         | (4)
 		// | 00 01 02 03 | 04 05 06 07 | 08 09 0a 0b |
 
-		typename List::iterator itr = list.begin();
-		itr++; itr++; itr++; itr++;
-
+		typename List::iterator itr = Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
 		for (std::size_t i = 0; i < 4; i++) {
 			itr = list.erase(itr);
 			passed = context.are_equal<unsigned long long>(itr->data, 0x05 + i, 0x103e1, "%llu") && passed;
 			passed = context.are_equal<std::size_t>(list.size(), 11 - i, 0x103e2, "%zu") && passed;
 		}
+		// | (2)         | (4)
 		// | 00 01 02 03 | 08 09 0a 0b |
 
 		for (std::size_t i = 0; i < 3; i++) {
@@ -354,12 +375,14 @@ namespace abc { namespace test { namespace vmem {
 			passed = context.are_equal<unsigned long long>(itr->data, 0x0a - i, 0x103e4, "%llu") && passed;
 			passed = context.are_equal<std::size_t>(list.size(), 7 - i, 0x103e5, "%zu") && passed;
 		}
+		// | (2)         | (4)
 		// | 00 01 02 03 | 08 __ __ __ |
 
 		itr = list.erase(list.rend());
 		itr--;
 		passed = context.are_equal<unsigned long long>(itr->data, 0x03, 0x103e6, "%llu") && passed;
 		passed = context.are_equal<std::size_t>(list.size(), 4, 0x103e7, "%zu") && passed;
+		// | (2)
 		// | 00 01 02 03 |
 
 		for (std::size_t i = 0; i < 3; i++) {
@@ -368,6 +391,7 @@ namespace abc { namespace test { namespace vmem {
 			passed = context.are_equal<unsigned long long>(itr->data, 0x02 - i, 0x103e8, "%llu") && passed;
 			passed = context.are_equal<std::size_t>(list.size(), 3 - i, 0x103e9, "%zu") && passed;
 		}
+		// | (2)
 		// | 00 __ __ __ |
 
 		itr = list.erase(list.rend());
