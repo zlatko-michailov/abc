@@ -39,6 +39,12 @@ SOFTWARE.
 namespace abc {
 
 	template <std::size_t MaxMappedPages, typename Log>
+	inline constexpr std::size_t vmem_pool<MaxMappedPages, Log>::max_mapped_pages() noexcept {
+		return MaxMappedPages;
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
 	inline vmem_pool<MaxMappedPages, Log>::vmem_pool(const char* file_path, Log* log)
 		: _ready(false)
 		, _mapped_page_count(0)
@@ -261,7 +267,9 @@ namespace abc {
 			vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
 
 			if (page.ptr() == nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x1039a, "vmem_pool::free_page() Could not add to the free_pages list");
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::warning, 0x1039a, "vmem_pool::free_page() Could not add to the free_pages list");
+				}
 			}
 			else {
 				_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());

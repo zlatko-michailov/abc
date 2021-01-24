@@ -80,6 +80,9 @@ namespace abc {
 		using Pool = vmem_pool<MaxMappedPages, Log>;
 
 	public:
+		static constexpr std::size_t	max_mapped_pages() noexcept;
+
+	public:
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
 	private:
