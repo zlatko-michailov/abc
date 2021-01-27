@@ -116,10 +116,13 @@ namespace abc {
 	public:
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other);
+		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
 		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
 
 		~vmem_page<Pool, Log>() noexcept;
+
+	public:
+		vmem_page<Pool, Log>&		operator =(const vmem_page<Pool, Log>& other) noexcept;
 
 	public:
 		Pool*						pool() const noexcept;
@@ -154,6 +157,9 @@ namespace abc {
 		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
 		vmem_ptr<T, Pool, Log>(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
 		~vmem_ptr<T, Pool, Log>() = default;
+
+	public:
+		vmem_ptr<T, Pool, Log>&		operator =(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
 
 	public:
 		Pool*						pool() const noexcept;

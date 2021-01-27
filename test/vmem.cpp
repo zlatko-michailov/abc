@@ -188,7 +188,6 @@ namespace abc { namespace test { namespace vmem {
 			passed = context.are_equal((long long)page2.pos(), 2LL, 0x103cd, "0x%llx") && passed;
 		}
 
-		context.log->filter()->min_severity(abc::severity::critical);
 		return passed;
 	}
 
@@ -361,7 +360,7 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_list_erase(test_context<abc::test::log>& context) {
-		using Pool = PoolFit;
+		using Pool = PoolMin;
 		using List = abc::vmem_list<ItemMany, Pool, Log>;
 		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
 
@@ -372,11 +371,61 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_list_state list_state;
 		List list(&list_state, &pool, context.log);
 
-		passed = insert_vmem_list_items(context, list, 12) && passed;
-		// | (2)         | (3)         | (4)
-		// | 00 01 02 03 | 04 05 06 07 | 08 09 0a 0b |
+		passed = insert_vmem_list_items(context, list, 16) && passed;
+		// | (2)         | (3)         | (4)         | (5)
+		// | 00 01 02 03 | 04 05 06 07 | 08 09 0a 0b | 0c 0d 0e 0f
 
-		typename List::iterator itr = Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
+		context.log->filter()->min_severity(abc::severity::optional); ////
+
+		typename List::iterator itr_target = Iterator(&list, 4U, 3U, abc::vmem_iterator_edge::none, context.log);
+		typename List::iterator itr_expected = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+		typename List::iterator itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 15, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (4)         | (5)
+		// | 00 01 02 03 | 04 05 06 07 | 08 09 0a __ | 0c 0d 0e 0f
+
+		itr_target = Iterator(&list, 4U, 0U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 4U, 0U, abc::vmem_iterator_edge::none, context.log);
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 14, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (4)         | (5)
+		// | 00 01 02 03 | 04 05 06 07 | 09 0a __ __ | 0c 0d 0e 0f
+
+		itr_target = Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x07, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 13, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (4)         | (5)
+		// | 00 01 02 03 | 04 05 07 __ | 09 0a __ __ | 0c 0d 0e 0f
+
+		itr_target = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+		//// context.log->filter()->min_severity(abc::severity::abc::debug); ////
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x07, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 12, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (5)
+		// | 00 01 02 03 | 04 07 09 0a | 0c 0d 0e 0f
+
+		itr_target = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 11, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (5)
+		// | 00 01 02 03 | 04 09 0a __ | 0c 0d 0e 0f
+
+		context.log->filter()->min_severity(abc::severity::critical); ////
+
+#ifdef REMOVE ////
 		for (std::size_t i = 0; i < 4; i++) {
 			itr = list.erase(itr);
 			passed = context.are_equal<unsigned long long>(itr->data, 0x05 + i, 0x103e1, "%llu") && passed;
@@ -415,9 +464,9 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal<std::size_t>(list.size(), 0, 0x103ea, "%zu") && passed;
 		// <empty>
 
-		passed = context.are_equal<bool>(list.begin() == list.end(), true, 0x103eb, "%d") && passed;
-		passed = context.are_equal<bool>(list.rend() == list.rbegin(), true, 0x103ec, "%d") && passed;
-
+		//// passed = context.are_equal<bool>(list.begin() == list.end(), true, 0x103eb, "%d") && passed;
+		//// passed = context.are_equal<bool>(list.rend() == list.rbegin(), true, 0x103ec, "%d") && passed;
+#endif
 		return passed;
 	}
 

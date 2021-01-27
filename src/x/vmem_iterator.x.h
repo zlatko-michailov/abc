@@ -153,13 +153,13 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline T& vmem_iterator<Container, T, Pool, Log>::deref() const {
-		T* t = ptr();
+		vmem_ptr<T, Pool, Log> vp = ptr();
 
-		if (t == nullptr) {
+		if (vp == nullptr) {
 			throw exception<std::runtime_error, Log>("Dereferencing invalid iterator", 0x1034a);
 		}
 
-		return *t;
+		return *vp;
 	}
 
 }
