@@ -1,6 +1,8 @@
 ## Done
 -vmem
   - vmem_iterator
+  - vmem_pool fixe
+  - vmem_list balance on insert and on erase
 
 ## To Do
 - vmem_map
