@@ -2,11 +2,16 @@
 
 Up to [Documentation](README.md).
 
-## 1.12.1
+## 1.12.2
+- Virtual memory:
+  - Refactoring
+  - `vmem_linked`
+
+## 1.12.3
 - Virtual memory:
   - `vmem_map`
 
-## 1.12.2
+## 1.12.4
 - Virtual memory:
   - `check`
   - `repair`

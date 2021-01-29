@@ -2,6 +2,13 @@
 
 Up to [Documentation](README.md).
 
+## 1.12.1
+- No breaking changes.
+- Virtual memory:
+  - `vmem_pool` bug fix
+  - `vmem_iterator`
+  - `vmem_list` balance items on insert() and on erase()
+
 ## 1.12.0
 - No breaking changes.
 - Virtual memory:

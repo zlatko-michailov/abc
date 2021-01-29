@@ -1,7 +1,7 @@
 ## Done
 -vmem
   - vmem_iterator
-  - vmem_pool fixe
+  - vmem_pool bug fix
   - vmem_list balance on insert and on erase
 
 ## To Do
