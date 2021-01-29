@@ -95,7 +95,7 @@ namespace abc {
 		}
 
 		if (Pool::max_mapped_pages() < 3) {
-			throw exception<std::logic_error, Log>("pool<MaxMappedPages>", __TAG__);
+			throw exception<std::logic_error, Log>("pool<MaxMappedPages>", 0x10401);
 		}
 
 		if (is_uninit(state)) {
@@ -421,7 +421,7 @@ namespace abc {
 								// Split the items evenly among the 2 pages unless we are inserting at the end.
 								// This exception fills up pages fully when items keep being added at the end.
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::insert() No capacity. Balancing. page_pos=0x%llx, new_page_pos=0x%llx",
+									_log->put_any(category::abc::vmem, severity::abc::debug, 0x10402, "vmem_list::insert() No capacity. Balancing. page_pos=0x%llx, new_page_pos=0x%llx",
 										(long long)page.pos(), (long long)new_page.pos());
 								}
 
@@ -481,7 +481,7 @@ namespace abc {
 								item_pos = itr._item_pos - list_page->item_count;
 
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::insert() No capacity. Second half. page_pos=0x%llx, item_pos=0x%llx",
+									_log->put_any(category::abc::vmem, severity::abc::debug, 0x10403, "vmem_list::insert() No capacity. Second half. page_pos=0x%llx, item_pos=0x%llx",
 										(long long)new_page.pos(), (long long)item_pos);
 								}
 
@@ -498,7 +498,7 @@ namespace abc {
 								std::memmove(&new_list_page->items[item_pos], &item_copy, sizeof(T));
 
 								if (_log != nullptr) {
-									_log->put_binary(category::abc::vmem, severity::abc::debug, __TAG__, &new_list_page->items[item_pos], std::min(sizeof(T), (std::size_t)16));
+									_log->put_binary(category::abc::vmem, severity::abc::debug, 0x10404, &new_list_page->items[item_pos], std::min(sizeof(T), (std::size_t)16));
 								}
 							}
 						}
@@ -675,7 +675,7 @@ namespace abc {
 							ok_balance = false;
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Balance. Next. Could not load page pos=0x%llx",
+								_log->put_any(category::abc::vmem, severity::abc::debug, 0x10405, "vmem_list::erase() Balance. Next. Could not load page pos=0x%llx",
 									(long long)list_page->next_page_pos);
 							}
 						}
@@ -684,7 +684,7 @@ namespace abc {
 							next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Balance. Next. page_pos=0x%llx, page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
+								_log->put_any(category::abc::vmem, severity::abc::debug, 0x10406, "vmem_list::erase() Balance. Next. page_pos=0x%llx, page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
 									(long long)page.pos(), list_page->item_count, (long long)next_page.pos(), next_list_page->item_count);
 							}
 
@@ -695,7 +695,7 @@ namespace abc {
 
 						if (ok_balance) {
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase() Balance. Next. Go.");
+								_log->put_any(category::abc::vmem, severity::abc::optional, 0x10407, "vmem_list::erase() Balance. Next. Go.");
 							}
 
 							// Merge the items from the next page into this one.
@@ -720,7 +720,7 @@ namespace abc {
 
 								if (next_next_page.ptr() == nullptr) {
 									if (_log != nullptr) {
-										_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_list::erase() Balance. Next next. Could not load page pos=0x%llx",
+										_log->put_any(category::abc::vmem, severity::warning, 0x10408, "vmem_list::erase() Balance. Next next. Could not load page pos=0x%llx",
 											(long long)next_list_page->next_page_pos);
 									}
 								}
@@ -748,7 +748,7 @@ namespace abc {
 							ok_balance = false;
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Balance. Previous. Could not load page pos=0x%llx",
+								_log->put_any(category::abc::vmem, severity::abc::debug, 0x10409, "vmem_list::erase() Balance. Previous. Could not load page pos=0x%llx",
 									(long long)list_page->prev_page_pos);
 							}
 						}
@@ -757,7 +757,7 @@ namespace abc {
 							prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
 
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::erase() Balance. Previous. page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
+								_log->put_any(category::abc::vmem, severity::abc::debug, 0x1040a, "vmem_list::erase() Balance. Previous. page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
 									(long long)page.pos(), list_page->item_count, (long long)prev_page.pos(), prev_list_page->item_count);
 							}
 
@@ -768,7 +768,7 @@ namespace abc {
 
 						if (ok_balance) {
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase() Balance. Previous. Go.");
+								_log->put_any(category::abc::vmem, severity::abc::optional, 0x1040b, "vmem_list::erase() Balance. Previous. Go.");
 							}
 
 							// Merge the items from this page into the previous one.
@@ -791,7 +791,7 @@ namespace abc {
 
 								if (next_page.ptr() == nullptr) {
 									if (_log != nullptr) {
-										_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_list::erase() Balance. Previous next. Could not load page pos=0x%llx",
+										_log->put_any(category::abc::vmem, severity::warning, 0x1040c, "vmem_list::erase() Balance. Previous next. Could not load page pos=0x%llx",
 											(long long)list_page->next_page_pos);
 									}
 								}

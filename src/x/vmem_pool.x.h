@@ -507,7 +507,7 @@ namespace abc {
 		std::size_t i;
 		for (i = 0; i < _mapped_page_count; i++) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_pool::unlock_page() Examine i=%zu pos=0x%llx, lock_count=%d, keep_count=%d, ptr=%p",
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1040d, "vmem_pool::unlock_page() Examine i=%zu pos=0x%llx, lock_count=%d, keep_count=%d, ptr=%p",
 					i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].lock_count, (unsigned)_mapped_pages[i].keep_count, _mapped_pages[i].ptr);
 			}
 
