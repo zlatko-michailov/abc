@@ -42,7 +42,7 @@ namespace abc {
 		, _log(log) {
 
 		if (container == nullptr) {
-			throw exception<std::logic_error, Log>("container", 0x10347);
+			throw exception<std::logic_error, Log>("vmem_iterator::vmem_iterator(container)", 0x10347);
 		}
 
 		if (_log != nullptr) {
@@ -156,7 +156,7 @@ namespace abc {
 		vmem_ptr<T, Pool, Log> vp = ptr();
 
 		if (vp == nullptr) {
-			throw exception<std::runtime_error, Log>("Dereferencing invalid iterator", 0x1034a);
+			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", 0x1034a);
 		}
 
 		return *vp;

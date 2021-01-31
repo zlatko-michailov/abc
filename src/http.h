@@ -65,7 +65,7 @@ namespace abc {
 	inline void _http_state<Log>::assert_next(http::item_t item) {
 		if (_next != item) {
 			char buffer[100];
-			std::snprintf(buffer, sizeof(buffer), "_next: actual=%u, expected=%u", _next, item);
+			std::snprintf(buffer, sizeof(buffer), "_http_state::assert_next(): actual=%u, expected=%u", _next, item);
 
 			throw exception<std::logic_error, Log>(buffer, 0x1003d, _log);
 		}

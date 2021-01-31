@@ -120,7 +120,7 @@ namespace abc {
 		_handle = ::socket(_family, _kind, _protocol);
 
 		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("::socket()", 0x1000b, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::open() ::socket()", 0x1000b, _log);
 		}
 
 		if (_log != nullptr) {
@@ -164,7 +164,7 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("is_open()", 0x1000e, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() is_open()", 0x1000e, _log);
 		}
 
 		addrinfo hnt = hints();
@@ -177,7 +177,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("::getaddrinfo()", 0x1000f, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() ::getaddrinfo()", 0x1000f, _log);
 		}
 
 		bool is_done = false;
@@ -197,7 +197,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("connect()", 0x10010, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() connect()", 0x10010, _log);
 		}
 
 		if (_log != nullptr) {
@@ -212,13 +212,13 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("is_open()", 0x10012, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() is_open()", 0x10012, _log);
 		}
 
 		socket::error_t err = tie(address.value, address.size, tt);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, Log>("bind() / connect()", 0x10013, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() bind() / connect()", 0x10013, _log);
 		}
 	}
 
@@ -226,7 +226,7 @@ namespace abc {
 	template <typename Log>
 	inline socket::error_t _basic_socket<Log>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("!is_open()", 0x10014, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() !is_open()", 0x10014, _log);
 		}
 
 		switch(tt) {
@@ -467,7 +467,7 @@ namespace abc {
 		socket::error_t err = ::listen(base::handle(), backlog_size);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, Log>("::listen()", 0x10023, log_local);
+			throw exception<std::runtime_error, Log>("tcp_server_socket::listen() ::listen()", 0x10023, log_local);
 		}
 
 		if (log_local != nullptr) {
@@ -486,7 +486,7 @@ namespace abc {
 		socket::handle_t hnd = ::accept(base::handle(), nullptr, nullptr);
 
 		if (hnd == socket::handle::invalid) {
-			throw exception<std::runtime_error, Log>("::accept()", 0x10026, log_local);
+			throw exception<std::runtime_error, Log>("tcp_server_socket::accept() ::accept()", 0x10026, log_local);
 		}
 
 		if (log_local != nullptr) {

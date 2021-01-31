@@ -83,19 +83,19 @@ namespace abc {
 		}
 
 		if (state == nullptr) {
-			throw exception<std::logic_error, Log>("state", 0x1034c);
+			throw exception<std::logic_error, Log>("vmem_list::vmem_list(state)", 0x1034c);
 		}
 
 		if (pool == nullptr) {
-			throw exception<std::logic_error, Log>("pool", 0x1034d);
+			throw exception<std::logic_error, Log>("vmem_list::vmem_list(pool)", 0x1034d);
 		}
 
 		if (sizeof(T) > max_item_size()) {
-			throw exception<std::logic_error, Log>("size excess", 0x1034e);
+			throw exception<std::logic_error, Log>("vmem_list::vmem_list(size) excess", 0x1034e);
 		}
 
-		if (Pool::max_mapped_pages() < 3) {
-			throw exception<std::logic_error, Log>("pool<MaxMappedPages>", 0x10401);
+		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
+			throw exception<std::logic_error, Log>("vmem_list::vmem_list(pool<MaxMappedPages>)", 0x10401);
 		}
 
 		if (is_uninit(state)) {
@@ -105,7 +105,7 @@ namespace abc {
 		}
 
 		if (sizeof(T) != _state->item_size) {
-			throw exception<std::logic_error, Log>("size mismatch", 0x1034f);
+			throw exception<std::logic_error, Log>("vmem_list::vmem_list(size) mismatch", 0x1034f);
 		}
 
 		if (_log != nullptr) {
@@ -291,11 +291,11 @@ namespace abc {
 	template <typename T, typename Pool, typename Log>
 	inline typename vmem_list<T, Pool, Log>::iterator vmem_list<T, Pool, Log>::insert(const_iterator itr, const_reference item) {
 		if (itr._page_pos == vmem_page_pos_nil && (itr._item_pos != vmem_item_pos_nil || !empty())) {
-			throw exception<std::logic_error, Log>("itr.page", 0x10351);
+			throw exception<std::logic_error, Log>("vmem_list::insert(itr.page_pos)", 0x10351);
 		}
 
 		if (itr._item_pos == vmem_item_pos_nil && (itr._page_pos != _state->back_page_pos && itr._edge != vmem_iterator_edge::end)) {
-			throw exception<std::logic_error, Log>("itr.item", 0x10352);
+			throw exception<std::logic_error, Log>("vmem_list::insert(itr.item_pos)", 0x10352);
 		}
 
 		bool ok = true;
@@ -599,7 +599,7 @@ namespace abc {
 	template <typename T, typename Pool, typename Log>
 	inline typename vmem_list<T, Pool, Log>::iterator vmem_list<T, Pool, Log>::erase(const_iterator itr) {
 		if (!itr.can_deref()) {
-			throw exception<std::logic_error, Log>("itr", 0x10366);
+			throw exception<std::logic_error, Log>("vmem_list::erase(itr)", 0x10366);
 		}
 
 		bool ok = true;

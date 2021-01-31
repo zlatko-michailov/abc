@@ -40,11 +40,12 @@ namespace abc {
 	using vmem_page_hit_count_t	= std::uint32_t;
 
 
-	constexpr std::size_t		vmem_page_size		= size::k4;
-	constexpr vmem_page_pos_t	vmem_page_pos_root	= 0;
-	constexpr vmem_page_pos_t	vmem_page_pos_start	= 1;
-	constexpr vmem_page_pos_t	vmem_page_pos_nil	= static_cast<vmem_page_pos_t>(ULLONG_MAX);
-	constexpr vmem_item_pos_t	vmem_item_pos_nil	= static_cast<vmem_item_pos_t>(USHRT_MAX);
+	constexpr std::size_t		vmem_page_size			= size::k4;
+	constexpr vmem_page_pos_t	vmem_page_pos_root		= 0;
+	constexpr vmem_page_pos_t	vmem_page_pos_start		= 1;
+	constexpr vmem_page_pos_t	vmem_page_pos_nil		= static_cast<vmem_page_pos_t>(ULLONG_MAX);
+	constexpr vmem_item_pos_t	vmem_item_pos_nil		= static_cast<vmem_item_pos_t>(USHRT_MAX);
+	constexpr std::size_t		vmem_min_mapped_pages	= 3;
 
 
 	// --------------------------------------------------------------

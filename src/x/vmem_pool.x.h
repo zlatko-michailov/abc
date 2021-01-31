@@ -52,6 +52,14 @@ namespace abc {
 		, _mapped_page_totals{ 0 }
 		, _log(log) {
 
+		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
+			throw exception<std::logic_error, Log>("vmem_pool::vmem_pool<MaxMappedPages>", __TAG__);
+		}
+
+		if (file_path == nullptr) {
+			throw exception<std::logic_error, Log>("vmem_pool::vmem_pool(file_path)", __TAG__);
+		}
+
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037c, "vmem_pool::vmem_pool() Open path='%s'", file_path);
 		}
@@ -63,7 +71,7 @@ namespace abc {
 		}
 
 		if (_fd < 0) {
-			throw exception<std::runtime_error, Log>("Not found vmem file", 0x1037e, _log);
+			throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Not found vmem file", 0x1037e, _log);
 		}
 
 		vmem_page_pos_t file_size = lseek(_fd, 0, SEEK_END);
@@ -73,7 +81,7 @@ namespace abc {
 		}
 
 		if ((file_size & (vmem_page_size - 1)) != 0) {
-			throw exception<std::runtime_error, Log>("Corrupt vmem file - size", 0x10380, _log);
+			throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Corrupt vmem file - size", 0x10380, _log);
 		}
 
 		// The file is empty...
@@ -87,7 +95,7 @@ namespace abc {
 				vmem_page<Pool, Log> page(this, _log);
 
 				if (page.ptr() == nullptr) {
-					throw exception<std::runtime_error, Log>("Insufficient capacity", 0x10382, _log);
+					throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Insufficient capacity", 0x10382, _log);
 				}
 
 				std::memset(page.ptr(), 0, vmem_page_size);
@@ -109,7 +117,7 @@ namespace abc {
 				vmem_page<Pool, Log> page(this, _log);
 
 				if (page.ptr() == nullptr) {
-					throw exception<std::runtime_error, Log>("Insufficient capacity", 0x10385, _log);
+					throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Insufficient capacity", 0x10385, _log);
 				}
 
 				std::memset(page.ptr(), 0, vmem_page_size);
@@ -129,7 +137,7 @@ namespace abc {
 			vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
 
 			if (page.ptr() == nullptr) {
-				throw exception<std::runtime_error, Log>("Cannot verify root page", 0x10388, _log);
+				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Cannot verify root page", 0x10388, _log);
 			}
 
 			_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
@@ -142,15 +150,15 @@ namespace abc {
 			_vmem_root_page init;
 
 			if (root_page->version != init.version) {
-				throw exception<std::runtime_error, Log>("vmem file integrity - version", 0x1038a, _log);
+				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - version", 0x1038a, _log);
 			}
 
 			if (std::strcmp(root_page->signature, init.signature) != 0) {
-				throw exception<std::runtime_error, Log>("vmem file integrity - signature", 0x1038b, _log);
+				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - signature", 0x1038b, _log);
 			}
 
 			if (root_page->page_size != vmem_page_size) {
-				throw exception<std::runtime_error, Log>("vmem file integrity - page_size", 0x1038c, _log);
+				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - page_size", 0x1038c, _log);
 			}
 		}
 
@@ -163,7 +171,7 @@ namespace abc {
 			vmem_page<Pool, Log> page(this, vmem_page_pos_start, _log);
 
 			if (page.ptr() == nullptr) {
-				throw exception<std::runtime_error, Log>("Cannot verify start page", 0x1038e, _log);
+				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Cannot verify start page", 0x1038e, _log);
 			}
 
 			if (_log != nullptr) {
@@ -590,7 +598,7 @@ namespace abc {
 		, _log(log) {
 
 		if (pool == nullptr) {
-			throw exception<std::logic_error, Log>("pool", 0x103af);
+			throw exception<std::logic_error, Log>("vmem_page::vmem_page(pool)", 0x103af);
 		}
 
 		if (page_pos == vmem_page_pos_nil) {
@@ -830,7 +838,7 @@ namespace abc {
 		T* p = ptr();
 
 		if (p == nullptr) {
-			throw exception<std::runtime_error, Log>("Dereferencing invalid vmem_ptr", 0x103b5);
+			throw exception<std::runtime_error, Log>("vmem_ptr::deref() Dereferencing invalid vmem_ptr", 0x103b5);
 		}
 
 		return *p;

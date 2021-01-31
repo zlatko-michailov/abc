@@ -42,12 +42,12 @@ namespace abc {
 		, _mode(mode)
 		, _log(log) {
 		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("path", 0x102b0, log);
+			throw exception<std::logic_error, Log>("multifile_streambuf::multifile_streambuf(path)", 0x102b0, log);
 		}
 
 		_path_length = std::strlen(path);
 		if (_path_length + 1 + filename_length > MaxPath) {
-			throw exception<std::logic_error, Log>("std::strlen(path)", 0x102b1, log);
+			throw exception<std::logic_error, Log>("multifile_streambuf::multifile_streambuf(std::strlen(path))", 0x102b1, log);
 		}
 
 		std::strncpy(_path, path, _path_length);
