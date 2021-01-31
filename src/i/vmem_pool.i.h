@@ -100,6 +100,17 @@ namespace abc {
 		void						log_totals() noexcept;
 
 	private:
+		// Constructor helpers
+		void						verify_args_or_throw(const char* file_path);
+		void						open_pool_or_throw(const char* file_path, bool& is_empty);
+		void						init_pool_or_throw();
+		void						create_root_page_or_throw();
+		void						create_start_page_or_throw();
+		void						verify_pool_or_throw();
+		void						verify_root_page_or_throw();
+		void						verify_start_page_or_throw();
+
+	private:
 		bool						_ready;
 		int							_fd;
 		std::size_t					_mapped_page_count;

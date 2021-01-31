@@ -52,139 +52,26 @@ namespace abc {
 		, _mapped_page_totals{ 0 }
 		, _log(log) {
 
-		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
-			throw exception<std::logic_error, Log>("vmem_pool::vmem_pool<MaxMappedPages>", __TAG__);
-		}
-
-		if (file_path == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_pool::vmem_pool(file_path)", __TAG__);
-		}
-
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037c, "vmem_pool::vmem_pool() Open path='%s'", file_path);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::vmem_pool() Start");
 		}
 
-		_fd = open(file_path, O_CREAT | O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+		verify_args_or_throw(file_path);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037d, "vmem_pool::vmem_pool() Open fd=%d, errno=%d", _fd, errno);
+		bool is_empty;
+		open_pool_or_throw(file_path, is_empty);
+
+		if (is_empty) {
+			init_pool_or_throw();
 		}
 
-		if (_fd < 0) {
-			throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Not found vmem file", 0x1037e, _log);
-		}
-
-		vmem_page_pos_t file_size = lseek(_fd, 0, SEEK_END);
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037f, "vmem_pool::vmem_pool() size=0x%llx", (long long)file_size);
-		}
-
-		if ((file_size & (vmem_page_size - 1)) != 0) {
-			throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Corrupt vmem file - size", 0x10380, _log);
-		}
-
-		// The file is empty...
-		if (file_size == 0) {
-			// Create and init the root page (0).
-			{
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10381, "vmem_pool::vmem_pool() Creating root page");
-				}
-
-				vmem_page<Pool, Log> page(this, _log);
-
-				if (page.ptr() == nullptr) {
-					throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Insufficient capacity", 0x10382, _log);
-				}
-
-				std::memset(page.ptr(), 0, vmem_page_size);
-
-				_vmem_root_page init;
-				std::memmove(page.ptr(), &init, sizeof(init));
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10383, "vmem_pool::vmem_pool() Root page created");
-				}
-			}
-
-			// Create and init the start page (1).
-			{
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10384, "vmem_pool::vmem_pool() Creating start page");
-				}
-
-				vmem_page<Pool, Log> page(this, _log);
-
-				if (page.ptr() == nullptr) {
-					throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Insufficient capacity", 0x10385, _log);
-				}
-
-				std::memset(page.ptr(), 0, vmem_page_size);
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10386, "vmem_pool::vmem_pool() Start page created");
-				}
-			}
-		}
-
-		// Verify integrity of the root page (0).
-		{
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::optional, 0x10387, "vmem_pool::vmem_pool() Verifying root page integrity");
-			}
-
-			vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
-
-			if (page.ptr() == nullptr) {
-				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Cannot verify root page", 0x10388, _log);
-			}
-
-			_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
-
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10389, "vmem_pool::vmem_pool() Root page integrity pos=0x%llx, ptr=%p, version=%u, signature='%s', page_size=%u",
-					(long long)page.pos(), page.ptr(), root_page->version, root_page->signature, root_page->page_size);
-			}
-
-			_vmem_root_page init;
-
-			if (root_page->version != init.version) {
-				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - version", 0x1038a, _log);
-			}
-
-			if (std::strcmp(root_page->signature, init.signature) != 0) {
-				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - signature", 0x1038b, _log);
-			}
-
-			if (root_page->page_size != vmem_page_size) {
-				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() vmem file integrity - page_size", 0x1038c, _log);
-			}
-		}
-
-		// Verify the start page is loadable.
-		{
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::optional, 0x1038d, "vmem_pool::vmem_pool() Verifying start page integrity");
-			}
-
-			vmem_page<Pool, Log> page(this, vmem_page_pos_start, _log);
-
-			if (page.ptr() == nullptr) {
-				throw exception<std::runtime_error, Log>("vmem_pool::vmem_pool() Cannot verify start page", 0x1038e, _log);
-			}
-
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1038f, "vmem_pool::vmem_pool() Start page integrity pos=0x%llx, ptr=%p",
-					(long long)page.pos(), page.ptr());
-			}
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10390, "vmem_pool::vmem_pool() Verified");
-		}
+		verify_pool_or_throw();
 
 		_ready = true;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10390, "vmem_pool::vmem_pool() Done");
+		}
 	}
 
 
@@ -577,6 +464,171 @@ namespace abc {
 				(unsigned)_mapped_page_totals.hit_count, (unsigned)hit_percent,
 				(unsigned)_mapped_page_totals.miss_count, (unsigned)miss_percent,
 				(unsigned)_mapped_page_totals.check_count, (unsigned)(check_factor_x10 / 10), (unsigned)(check_factor_x10 % 10), (unsigned)check_factor_percent);
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::verify_args_or_throw(const char* file_path) {
+		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
+			throw exception<std::logic_error, Log>("vmem_pool::verify_args_or_throw<MaxMappedPages>", __TAG__);
+		}
+
+		if (file_path == nullptr) {
+			throw exception<std::logic_error, Log>("vmem_pool::verify_args_or_throw(file_path)", __TAG__);
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::open_pool_or_throw(const char* file_path, bool& is_empty) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1037c, "vmem_pool::open_pool_or_throw() Start path='%s'", file_path);
+		}
+
+		_fd = open(file_path, O_CREAT | O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037d, "vmem_pool::open_pool_or_throw() Open fd=%d, errno=%d", _fd, errno);
+		}
+
+		if (_fd < 0) {
+			throw exception<std::runtime_error, Log>("vmem_pool::open_pool_or_throw() Not found vmem file", 0x1037e, _log);
+		}
+
+		vmem_page_pos_t file_size = lseek(_fd, 0, SEEK_END);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1037f, "vmem_pool::open_pool_or_throw() size=0x%llx", (long long)file_size);
+		}
+
+		if ((file_size & (vmem_page_size - 1)) != 0) {
+			throw exception<std::runtime_error, Log>("vmem_pool::open_pool_or_throw() Corrupt vmem file - size", 0x10380, _log);
+		}
+
+		is_empty = (file_size == 0);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::open_pool_or_throw() Done");
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::init_pool_or_throw() {
+		// IMPORTANT! Keep this order:
+		// 0 - root
+		// 1 - start
+		create_root_page_or_throw();
+		create_start_page_or_throw();
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::create_root_page_or_throw() {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10381, "vmem_pool::create_root_page_or_throw() Start");
+		}
+
+		vmem_page<Pool, Log> page(this, _log);
+
+		if (page.ptr() == nullptr) {
+			throw exception<std::runtime_error, Log>("vmem_pool::create_root_page_or_throw() Insufficient capacity", 0x10382, _log);
+		}
+
+		std::memset(page.ptr(), 0, vmem_page_size);
+
+		_vmem_root_page init;
+		std::memmove(page.ptr(), &init, sizeof(init));
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10383, "vmem_pool::create_root_page_or_throw() Done");
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::create_start_page_or_throw() {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10384, "vmem_pool::create_start_page_or_throw() Start");
+		}
+
+		vmem_page<Pool, Log> page(this, _log);
+
+		if (page.ptr() == nullptr) {
+			throw exception<std::runtime_error, Log>("vmem_pool::create_start_page_or_throw() Insufficient capacity", 0x10385, _log);
+		}
+
+		std::memset(page.ptr(), 0, vmem_page_size);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10386, "vmem_pool::create_start_page_or_throw() Done");
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::verify_pool_or_throw() {
+		verify_root_page_or_throw();
+		verify_start_page_or_throw();
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::verify_root_page_or_throw() {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10387, "vmem_pool::verify_root_page_or_throw() Start");
+		}
+
+		vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
+
+		if (page.ptr() == nullptr) {
+			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() Cannot verify root page", 0x10388, _log);
+		}
+
+		_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10389, "vmem_pool::verify_root_page_or_throw() Root page integrity pos=0x%llx, ptr=%p, version=%u, signature='%s', page_size=%u",
+				(long long)page.pos(), page.ptr(), root_page->version, root_page->signature, root_page->page_size);
+		}
+
+		_vmem_root_page init;
+
+		if (root_page->version != init.version) {
+			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() vmem file integrity - version", 0x1038a, _log);
+		}
+
+		if (std::strcmp(root_page->signature, init.signature) != 0) {
+			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() vmem file integrity - signature", 0x1038b, _log);
+		}
+
+		if (root_page->page_size != vmem_page_size) {
+			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() vmem file integrity - page_size", 0x1038c, _log);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::verify_root_page_or_throw() Done");
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::verify_start_page_or_throw() {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1038d, "vmem_pool::verify_start_page_or_throw() Start");
+		}
+
+		vmem_page<Pool, Log> page(this, vmem_page_pos_start, _log);
+
+		if (page.ptr() == nullptr) {
+			throw exception<std::runtime_error, Log>("vmem_pool::verify_start_page_or_throw() Cannot verify start page", 0x1038e, _log);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1038f, "vmem_pool::verify_start_page_or_throw() Start page integrity pos=0x%llx, ptr=%p",
+				(long long)page.pos(), page.ptr());
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::verify_start_page_or_throw() Done");
 		}
 	}
 
