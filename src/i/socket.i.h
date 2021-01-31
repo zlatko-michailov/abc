@@ -158,8 +158,8 @@ namespace abc {
 		void connect(const char* host, const char* port);
 		void connect(const socket::address& address);
 
-		void send(const void* buffer, std::size_t size, socket::address* address = nullptr);
-		void receive(void* buffer, std::size_t size, socket::address* address = nullptr);
+		std::size_t send(const void* buffer, std::size_t size, socket::address* address = nullptr);
+		std::size_t receive(void* buffer, std::size_t size, socket::address* address = nullptr);
 	};
 
 
