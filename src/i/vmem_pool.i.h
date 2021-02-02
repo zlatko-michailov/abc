@@ -123,6 +123,7 @@ namespace abc {
 		void						keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*inout*/ std::size_t& empty_i) noexcept;
 		void						unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*out*/ std::size_t& empty_i, /*inout*/ std::size_t& unmapped_count) noexcept;
 		void*						lock_mapped_page(std::size_t i) noexcept;
+		void						unlock_mapped_page(std::size_t i) noexcept;
 		void*						map_new_page(std::size_t i, vmem_page_pos_t page_pos) noexcept;
 		void						optimize_mapped_page(std::size_t i) noexcept;
 		std::size_t					next_empty_i(std::size_t i, std::size_t empty_i) noexcept;

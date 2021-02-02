@@ -461,40 +461,11 @@ namespace abc {
 
 		_mapped_page_totals.unlock_count++;
 
-		// Try to find the page among the mapped pages.
 		std::size_t i;
-		for (i = 0; i < _mapped_page_count; i++) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1040d, "vmem_pool::unlock_page() Examine i=%zu pos=0x%llx, lock_count=%d, keep_count=%d, ptr=%p",
-					i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].lock_count, (unsigned)_mapped_pages[i].keep_count, _mapped_pages[i].ptr);
-			}
+		bool is_found = find_mapped_page(page_pos, /*out*/ i);
 
-			if (_mapped_pages[i].pos == page_pos) {
-				break;
-			}
-		}
-
-		_mapped_page_totals.check_count += i + 1;
-
-		if (i < _mapped_page_count) {
-			// The page was found.
-
-			_mapped_pages[i].lock_count--;
-
-			if (_mapped_pages[i].lock_count == 0) {
-				int sn = msync(_mapped_pages[i].ptr, vmem_page_size, MS_ASYNC);
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x103ab, "vmem_pool::unlock_page() Unlocked. msync i=%zu pos=0x%llx, ptr=%p, lock_count=%d, sn=%d, errno=%d",
-						i, (long long)page_pos, _mapped_pages[i].ptr, (unsigned)_mapped_pages[i].lock_count, sn, errno);
-				}
-			}
-			else {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x103ac, "vmem_pool::unlock_page() Unlocked. Found at i=%zu pos=0x%llx, ptr=%p, lock_count=%d",
-						i, (long long)page_pos, _mapped_pages[i].ptr, (unsigned)_mapped_pages[i].lock_count);
-				}
-			}
+		if (is_found) {
+			unlock_mapped_page(i);
 		}
 		else {
 			// The page was not found. This is a logic error.
@@ -720,6 +691,28 @@ namespace abc {
 		}
 
 		return ptr;
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::unlock_mapped_page(std::size_t i) noexcept {
+		_mapped_pages[i].lock_count--;
+
+		if (_mapped_pages[i].lock_count == 0) {
+			// When all locks on a page are released, we sync the OS page. 
+			int sn = msync(_mapped_pages[i].ptr, vmem_page_size, MS_ASYNC);
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::optional, 0x103ab, "vmem_pool::unlock_mapped_page() msync i=%zu pos=0x%llx, ptr=%p, lock_count=%d, sn=%d, errno=%d",
+					i, (long long)_mapped_pages[i].pos, _mapped_pages[i].ptr, (unsigned)_mapped_pages[i].lock_count, sn, errno);
+			}
+		}
+		else {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::optional, 0x103ac, "vmem_pool::unlock_mapped_page() Used. i=%zu pos=0x%llx, ptr=%p, lock_count=%d",
+					i, (long long)_mapped_pages[i].pos, _mapped_pages[i].ptr, (unsigned)_mapped_pages[i].lock_count);
+			}
+		}
 	}
 
 

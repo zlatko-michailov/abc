@@ -319,7 +319,7 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate forward.
 		actual_itr = list.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::important, 0x1041d, "forward[%zd]=0x%x", i, exp[i].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041d, "forward[%zd]=0x%x", i, exp[i].first);
 	
 			passed = context.are_equal(actual_itr == exp[i].second, true, 0x1041e, "%d") && passed;
 			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[i].first) && passed;
@@ -330,7 +330,7 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate backwards.
 		actual_itr = list.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::important, 0x1041f, "backward[%zd]=0x%x", i, exp[exp_len - i - 1].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041f, "backward[%zd]=0x%x", i, exp[exp_len - i - 1].first);
 	
 			passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, 0x10420, "%d") && passed;
 			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[exp_len - i - 1].first) && passed;
