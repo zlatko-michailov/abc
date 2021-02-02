@@ -79,6 +79,7 @@ namespace abc {
 	template <std::size_t MaxMappedPages, typename Log = null_log>
 	class vmem_pool {
 		using Pool = vmem_pool<MaxMappedPages, Log>;
+		using Page = vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 
 	public:
 		static constexpr std::size_t	max_mapped_pages() noexcept;
@@ -87,7 +88,7 @@ namespace abc {
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
 	private:
-		friend vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
+		friend Page;
 
 		vmem_page_pos_t				alloc_page() noexcept;
 		void						free_page(vmem_page_pos_t page_pos) noexcept;
@@ -95,13 +96,10 @@ namespace abc {
 		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
 		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
 
+	// Constructor helpers:
 	private:
-		void						log_totals() noexcept;
-
-	private:
-		// Constructor helpers:
 		void						verify_args_or_throw(const char* file_path);
-		void						open_pool_or_throw(const char* file_path, bool& is_empty);
+		void						open_pool_or_throw(const char* file_path, /*out*/ bool& is_empty);
 		void						init_pool_or_throw();
 		void						create_root_page_or_throw();
 		void						create_start_page_or_throw();
@@ -109,10 +107,26 @@ namespace abc {
 		void						verify_root_page_or_throw();
 		void						verify_start_page_or_throw();
 
-		// alloc_page / free_page helpers:
+	// alloc_page() / free_page() helpers:
+	private:
 		vmem_page_pos_t				pop_free_page_pos() noexcept;
 		void						push_free_page_pos(vmem_page_pos_t page_pos) noexcept;
 		vmem_page_pos_t				create_page() noexcept;
+
+	// lock_page() / unlock_page() helpers
+	private:
+		bool						find_mapped_page(vmem_page_pos_t page_pos, /*out*/ std::size_t& i) noexcept;
+		bool						has_mapping_capacity() noexcept;
+		std::size_t					make_mapping_capacity() noexcept;
+		std::size_t					make_mapping_capacity(vmem_page_hit_count_t min_keep_count) noexcept;
+		bool						should_keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count) noexcept;
+		void						keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*inout*/ std::size_t& empty_i) noexcept;
+		void						unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*out*/ std::size_t& empty_i, /*inout*/ std::size_t& unmapped_count) noexcept;
+		void*						lock_mapped_page(std::size_t i) noexcept;
+		void*						map_new_page(std::size_t i, vmem_page_pos_t page_pos) noexcept;
+		void						optimize_mapped_page(std::size_t i) noexcept;
+		std::size_t					next_empty_i(std::size_t i, std::size_t empty_i) noexcept;
+		void						log_totals() noexcept;
 
 	private:
 		bool						_ready;
