@@ -1,10 +1,13 @@
 ## Done
--vmem
+- Refactor
+  - vmem_pool
 
 ## To Do
 - Refactor
-  - vmem_pool
   - vmem_list
+    - insert()
+    - erase()
+    - clear()
 - vmem_linked
 - vmem_map
 ---

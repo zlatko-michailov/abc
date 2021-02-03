@@ -96,7 +96,7 @@ namespace abc {
 		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
 		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
 
-	// Constructor helpers:
+	// Constructor helpers
 	private:
 		void						verify_args_or_throw(const char* file_path);
 		void						open_pool_or_throw(const char* file_path, /*out*/ bool& is_empty);
@@ -107,7 +107,7 @@ namespace abc {
 		void						verify_root_page_or_throw();
 		void						verify_start_page_or_throw();
 
-	// alloc_page() / free_page() helpers:
+	// alloc_page() / free_page() helpers
 	private:
 		vmem_page_pos_t				pop_free_page_pos() noexcept;
 		void						push_free_page_pos(vmem_page_pos_t page_pos) noexcept;

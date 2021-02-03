@@ -113,8 +113,13 @@ namespace abc {
 		iterator				erase(const_iterator first, const_iterator last);
 		void					clear() noexcept;
 
+	// insert() helpers
 	private:
-		friend vmem_list_iterator<T, Pool, Log>;
+		bool					insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos);
+		bool					insert_nonempty(const_iterator itr, const_reference item, bool balance_all, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos);
+
+	private:
+		friend iterator;
 
 		void					move_next(iterator& itr) const noexcept;
 		void					move_prev(iterator& itr) const noexcept;
