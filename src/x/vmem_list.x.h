@@ -298,6 +298,11 @@ namespace abc {
 			throw exception<std::logic_error, Log>("vmem_list::insert(itr.item_pos)", 0x10352);
 		}
 
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_list::insert() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)itr._page_pos, itr._item_pos);
+		}
+
 		bool ok = true;
 		vmem_page_pos_t page_pos = vmem_page_pos_nil;
 		vmem_item_pos_t item_pos = vmem_item_pos_nil;
@@ -305,11 +310,9 @@ namespace abc {
 		// Copy the item to a local variable to make sure the reference is valid and copyable before we change any state.
 		T item_copy(item);
 
-		// IMPORTANT: There must be no exceptions from here to the end of the method!
-
 		if (itr._page_pos == vmem_page_pos_nil) {
-			ok = insert_empty(item_copy, /*out*/ page_pos);
 			item_pos = 0;
+			ok = insert_empty(item_copy, /*out*/ page_pos);
 
 			if (ok) {
 				_state->front_page_pos = page_pos;
@@ -406,8 +409,8 @@ namespace abc {
 								// Insert at the end of the new page.
 
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::abc::debug, 0x1035d, "vmem_list::insert() No capacity. End. page_pos=0x%llx, item_pos=0x%llx",
-										(long long)new_page.pos(), (long long)new_list_page->item_count);
+									_log->put_any(category::abc::vmem, severity::abc::debug, 0x1035d, "vmem_list::insert() No capacity. End. page_pos=0x%llx, item_pos=0x%x",
+										(long long)new_page.pos(), new_list_page->item_count);
 								}
 
 								// Insert item.
@@ -424,8 +427,8 @@ namespace abc {
 								// Inserting to the first half of a formerly full page.
 
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::abc::debug, 0x1035b, "vmem_list::insert() No capacity. First half. page_pos=0x%llx, item_pos=0x%llx",
-										(long long)page.pos(), (long long)itr._item_pos);
+									_log->put_any(category::abc::vmem, severity::abc::debug, 0x1035b, "vmem_list::insert() No capacity. First half. page_pos=0x%llx, item_pos=0x%x",
+										(long long)page.pos(), itr._item_pos);
 								}
 
 								// Shift the items from the insertion position to free up a slot if necessary.
@@ -450,8 +453,8 @@ namespace abc {
 								item_pos = itr._item_pos - list_page->item_count;
 
 								if (_log != nullptr) {
-									_log->put_any(category::abc::vmem, severity::abc::debug, 0x10403, "vmem_list::insert() No capacity. Second half. page_pos=0x%llx, item_pos=0x%llx",
-										(long long)new_page.pos(), (long long)item_pos);
+									_log->put_any(category::abc::vmem, severity::abc::debug, 0x10403, "vmem_list::insert() No capacity. Second half. page_pos=0x%llx, item_pos=0x%x",
+										(long long)new_page.pos(), item_pos);
 								}
 
 								// Shift the items from the insertion position to free up a slot if necessary.
@@ -476,48 +479,12 @@ namespace abc {
 				else {
 					// The page has capacity.
 
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, 0x1035f, "vmem_list::insert() Capacity");
-					}
+					// Set the out params.
+					page_pos = page.pos();
+					item_pos = itr._item_pos;
 
-					if (itr._item_pos != vmem_item_pos_nil) {
-						// Inserting to the middle of a page with capacity.
-
-						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::abc::debug, 0x10360, "vmem_list::insert() Capacity. Middle.");
-						}
-
-						// Shift the items from the insertion position to free up a slot.
-						std::size_t move_item_count = list_page->item_count - itr._item_pos;
-						std::memmove(&list_page->items[itr._item_pos + 1], &list_page->items[itr._item_pos], move_item_count * sizeof(T));
-
-						// Insert item - middle.
-						page_pos = itr._page_pos;
-						item_pos = itr._item_pos;
-						++list_page->item_count;
-						std::memmove(&list_page->items[item_pos], &item_copy, sizeof(T));
-
-						if (_log != nullptr) {
-							_log->put_binary(category::abc::vmem, severity::abc::debug, 0x10361, &list_page->items[item_pos], std::min(sizeof(T), (std::size_t)16));
-						}
-					}
-					else {
-						// Inserting to the end of a page with capacity.
-
-						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::abc::debug, 0x10362, "vmem_list::insert() Capacity. End.");
-						}
-
-						// Insert item - last one.
-						page_pos = itr._page_pos;
-						item_pos = list_page->item_count;
-						++list_page->item_count;
-						std::memmove(&list_page->items[item_pos], &item_copy, sizeof(T));
-
-						if (_log != nullptr) {
-							_log->put_binary(category::abc::vmem, severity::abc::debug, 0x10363, &list_page->items[item_pos], std::min(sizeof(T), (std::size_t)16));
-						}
-					}
+					// Insert the item into the page.
+					ok = insert_page_capacity(page, /*inout*/ item_pos, item_copy);
 				}
 			}
 		}
@@ -539,7 +506,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10364, "vmem_list::insert() Done. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10364, "vmem_list::insert() Done. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
 				(long long)page_pos, item_pos, edge, (std::size_t)_state->total_item_count);
 		}
 
@@ -566,45 +533,84 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) {
+	inline bool vmem_list<T, Pool, Log>::insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10353, "vmem_list::insert_empty() Start");
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_empty() Start");
+		}
+
+		// Create a new page.
+		vmem_page<Pool, Log> page(_pool, _log);
+
+		// Set out params.
+		page_pos = page.pos();
+		vmem_item_pos_t item_pos = 0;
+
+		// Insert the item into the page.
+		bool ok = insert_page_capacity(page, /*inout*/ item_pos, item);
+
+		// Link the page.
+		if (ok) {
+			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+
+			list_page->next_page_pos = vmem_page_pos_nil;
+			list_page->prev_page_pos = vmem_page_pos_nil;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_empty() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x",
+				ok, (long long)page_pos, item_pos);
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::insert_page_capacity(vmem_page<Pool, Log> page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_page_capacity() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page.pos(), item_pos);
 		}
 
 		bool ok = true;
-		vmem_page<Pool, Log> page(_pool, _log);
-		
+
 		if (page.ptr() == nullptr) {
 			ok = false;
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10354, "vmem_list::insert_empty() Could not create page");
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_list::insert_page_capacity() Could not load page");
 			}
 		}
-		
+
 		if (ok) {
 			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
 
-			// Init page.
-			list_page->next_page_pos = vmem_page_pos_nil;
-			list_page->prev_page_pos = vmem_page_pos_nil;
-			list_page->item_count = 1;
-
-			// Insert item.
-			std::memmove(&list_page->items[0], &item, sizeof(T));
-
-			if (_log != nullptr) {
-				_log->put_binary(category::abc::vmem, severity::abc::debug, 0x10355, &list_page->items[0], std::min(sizeof(T), (std::size_t)16));
+			// Set the out param.
+			if (item_pos == vmem_item_pos_nil) {
+				item_pos = list_page->item_count;
 			}
 
-			// Set out params.
-			page_pos = page.pos();
+			// Shift items from the insertion position to free up a slot.
+			std::size_t move_item_count = list_page->item_count - item_pos;
+			if (move_item_count > 0) {
+				std::memmove(&list_page->items[item_pos + 1], &list_page->items[item_pos], move_item_count * sizeof(T));
+			}
+
+			// Insert the item.
+			++list_page->item_count;
+			std::memmove(&list_page->items[item_pos], &item, sizeof(T));
+
+			if (_log != nullptr) {
+				_log->put_binary(category::abc::vmem, severity::abc::debug, __TAG__, &list_page->items[item_pos], std::min(sizeof(T), (std::size_t)16));
+			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_empty() Done. ok=%d, page_pos=0x%llx",
-				ok, (long long)page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_page_capacity() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x",
+				ok, (long long)page.pos(), item_pos);
 		}
+
+		return ok;
 	}
 
 
