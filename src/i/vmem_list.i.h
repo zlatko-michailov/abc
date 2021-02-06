@@ -122,6 +122,7 @@ namespace abc {
 		bool					insert_with_capacity(vmem_page<Pool, Log> page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
 		void					insert_with_capacity_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
 		void					balance(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept;
+		bool					insert_page_after(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ _vmem_list_page<T>*& new_list_page) noexcept;
 
 	private:
 		friend iterator;
