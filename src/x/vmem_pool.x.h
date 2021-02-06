@@ -855,6 +855,15 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
+	inline vmem_page<Pool, Log>::vmem_page(nullptr_t) noexcept
+		: _pool(nullptr)
+		, _pos(vmem_page_pos_nil)
+		, _ptr(nullptr)
+		, _log(nullptr) {
+	}
+
+
+	template <typename Pool, typename Log>
 	inline vmem_page<Pool, Log>::~vmem_page() noexcept {
 		unlock();
 		invalidate();
