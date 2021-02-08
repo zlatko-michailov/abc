@@ -342,45 +342,19 @@ namespace abc {
 				if (list_page->item_count == page_capacity()) {
 					// The page has no capacity.
 
-					vmem_page<Pool, Log> new_page(nullptr);
-					_vmem_list_page<T>* new_list_page = nullptr;
-					ok = insert_page_after(page.pos(), list_page, /*out*/ new_page, /*out*/ new_list_page);
+					// Preset the out params.
+					page_pos = page.pos();
+					item_pos = itr._item_pos;
+
+					// Balance unless inserting at the end of the last page.
+					bool balance = !(list_page->next_page_pos == vmem_page_pos_nil && itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::end);
+					vmem_page_pos_t new_page_pos = vmem_page_pos_nil;
+
+					ok = insert_with_overflow(/*inout*/ page_pos, list_page, /*inout*/ item_pos, item_copy, balance, /*out*/ new_page_pos);
 
 					if (ok) {
-						// Split the items evenly among the 2 pages unless we are inserting at the end.
-						// This exception fills up pages fully when items keep being added at the end.
-						if (new_list_page->next_page_pos != vmem_page_pos_nil || itr._item_pos != vmem_item_pos_nil) {
-							balance(page.pos(), list_page, new_page.pos(), new_list_page);
-						}
-
-						if (itr._item_pos != vmem_item_pos_nil && itr._item_pos <= list_page->item_count) {
-							// Inserting to the former page.
-
-							// Set the out params.
-							page_pos = page.pos();
-							item_pos = itr._item_pos;
-
-							// Insert the item into the page.
-							insert_with_capacity_safe(page.pos(), list_page, /*inout*/ item_pos, item_copy);
-						}
-						else {
-							// Inserting to the latter page.
-
-							// Set the out params.
-							page_pos = new_page.pos();
-							if (itr._item_pos == vmem_item_pos_nil) {
-								item_pos = new_list_page->item_count;
-							}
-							else {
-								item_pos = itr._item_pos - list_page->item_count;
-							}
-
-							// Insert the item into the page.
-							insert_with_capacity_safe(new_page.pos(), new_list_page, /*inout*/ item_pos, item_copy);
-						}
-
 						if (_state->back_page_pos == page.pos()) {
-							_state->back_page_pos = new_page.pos();
+							_state->back_page_pos = new_page_pos;
 						}
 					}
 				}
@@ -446,20 +420,33 @@ namespace abc {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_empty() Start");
 		}
 
+		bool ok = true;
+
 		// Create a new page.
 		vmem_page<Pool, Log> page(_pool, _log);
 
-		// Set out params.
-		page_pos = page.pos();
-		vmem_item_pos_t item_pos = 0;
+		if (page.ptr() == nullptr) {
+			ok = false;
 
-		// Insert the item into the page.
-		bool ok = insert_with_capacity(page, /*inout*/ item_pos, item);
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_list::insert_empty() Could not load page");
+			}
+		}
+
+		vmem_item_pos_t item_pos = 0;
+		_vmem_list_page<T>* list_page = nullptr;
+
+		if (ok) {
+			list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
+
+			insert_with_capacity_safe(page.pos(), list_page, /*inout*/ item_pos, item);
+
+			// Set out params.
+			page_pos = page.pos();
+		}
 
 		// Link the page.
 		if (ok) {
-			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
-
 			list_page->next_page_pos = vmem_page_pos_nil;
 			list_page->prev_page_pos = vmem_page_pos_nil;
 		}
@@ -474,37 +461,56 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::insert_with_overflow(vmem_page<Pool, Log> page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_page_pos_t& new_page_pos) noexcept {
-		return false; ////
-	}
-
-
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::insert_with_capacity(vmem_page<Pool, Log> page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept {
+	inline bool vmem_list<T, Pool, Log>::insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_with_capacity() Start. page_pos=0x%llx, item_pos=0x%x",
-				(long long)page.pos(), item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_with_overflow() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page_pos, item_pos);
 		}
 
 		bool ok = true;
 
-		if (page.ptr() == nullptr) {
-			ok = false;
+		vmem_page<Pool, Log> new_page(nullptr);
+		_vmem_list_page<T>* new_list_page = nullptr;
+		ok = insert_page_after(page_pos, list_page, /*out*/ new_page, /*out*/ new_list_page);
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_list::insert_with_capacity() Could not load page");
+		if (ok) {
+			new_page_pos = new_page.pos();
+
+			// Split the items evenly among the 2 pages unless we are inserting at the end.
+			// This exception fills up pages fully when items keep being added at the end.
+			if (balance) {
+				balance_split_safe(page_pos, list_page, new_page_pos, new_list_page);
+			}
+
+			if (item_pos != vmem_item_pos_nil && item_pos <= list_page->item_count) {
+				// Inserting to the former page.
+
+				// Set the out params.
+				// Nothing to do.
+
+				// Insert the item into the page.
+				insert_with_capacity_safe(page_pos, list_page, /*inout*/ item_pos, item);
+			}
+			else {
+				// Inserting to the latter page.
+
+				// Set the out params.
+				page_pos = new_page_pos;
+				if (item_pos == vmem_item_pos_nil) {
+					item_pos = new_list_page->item_count;
+				}
+				else {
+					item_pos -= list_page->item_count;
+				}
+
+				// Insert the item into the page.
+				insert_with_capacity_safe(new_page_pos, new_list_page, /*inout*/ item_pos, item);
 			}
 		}
 
-		if (ok) {
-			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
-
-			insert_with_capacity_safe(page.pos(), list_page, item_pos, item);
-		}
-
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_page_capacity() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x",
-				ok, (long long)page.pos(), item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_with_overflow() Done. page_pos=0x%llx, item_pos=0x%x, new_page_pos=0x%llx",
+				(long long)page_pos, item_pos, (long long)new_page_pos);
 		}
 
 		return ok;
@@ -545,7 +551,7 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline void vmem_list<T, Pool, Log>::balance(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept {
+	inline void vmem_list<T, Pool, Log>::balance_split_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_list::balance() Start. page_pos=0x%llx, new_page_pos=0x%llx",
 				(long long)page_pos, (long long)new_page_pos);
