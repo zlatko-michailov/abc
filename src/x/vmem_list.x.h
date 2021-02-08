@@ -306,6 +306,7 @@ namespace abc {
 		bool ok = true;
 		vmem_page_pos_t page_pos = vmem_page_pos_nil;
 		vmem_item_pos_t item_pos = vmem_item_pos_nil;
+		vmem_page_pos_t new_page_pos = vmem_page_pos_nil;
 
 		// Copy the item to a local variable to make sure the reference is valid and copyable before we change any state.
 		T item_copy(item);
@@ -313,11 +314,6 @@ namespace abc {
 		if (itr._page_pos == vmem_page_pos_nil) {
 			item_pos = 0;
 			ok = insert_empty(item_copy, /*out*/ page_pos);
-
-			if (ok) {
-				_state->front_page_pos = page_pos;
-				_state->back_page_pos = page_pos;
-			}
 		}
 		else {
 			// Non-empty list.
@@ -348,15 +344,9 @@ namespace abc {
 
 					// Balance unless inserting at the end of the last page.
 					bool balance = !(list_page->next_page_pos == vmem_page_pos_nil && itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::end);
-					vmem_page_pos_t new_page_pos = vmem_page_pos_nil;
 
+					// Insert the item into the page.
 					ok = insert_with_overflow(/*inout*/ page_pos, list_page, /*inout*/ item_pos, item_copy, balance, /*out*/ new_page_pos);
-
-					if (ok) {
-						if (_state->back_page_pos == page.pos()) {
-							_state->back_page_pos = new_page_pos;
-						}
-					}
 				}
 				else {
 					// The page has capacity.
@@ -375,6 +365,19 @@ namespace abc {
 
 		if (ok) {
 			// We have inserted successfully.
+
+			// Update the front page pos.
+			if (_state->front_page_pos == vmem_page_pos_nil) {
+				_state->front_page_pos = page_pos;
+			}
+
+			// Update the back page pos.
+			if (_state->back_page_pos == vmem_page_pos_nil) {
+				_state->back_page_pos = page_pos;
+			}
+			else if (_state->back_page_pos == itr._page_pos && new_page_pos != vmem_page_pos_nil) {
+				_state->back_page_pos = new_page_pos;
+			} 
 
 			// Update the total item count.
 			_state->total_item_count++;

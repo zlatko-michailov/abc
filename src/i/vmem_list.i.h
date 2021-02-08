@@ -117,7 +117,6 @@ namespace abc {
 	private:
 		bool					insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept;
 		//// bool					insert_nonempty(const_iterator itr, const_reference item, bool balance_all, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos) noexcept;
-		////bool					insert_page(vmem_page<Pool, Log> page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		bool					insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		void					insert_with_capacity_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
 		void					balance_split_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept;
