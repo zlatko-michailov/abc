@@ -303,27 +303,13 @@ namespace abc {
 				(long long)itr._page_pos, itr._item_pos);
 		}
 
-		bool ok = true;
-		vmem_page_pos_t page_pos = vmem_page_pos_nil;
-		vmem_item_pos_t item_pos = vmem_item_pos_nil;
+		vmem_page_pos_t page_pos = itr._page_pos;
+		vmem_item_pos_t item_pos = itr._item_pos;
 		vmem_page_pos_t new_page_pos = vmem_page_pos_nil;
 
-		// Copy the item to a local variable to make sure the reference is valid and copyable before we change any state.
-		T item_copy(item);
-
-		if (itr._page_pos == vmem_page_pos_nil) {
-			item_pos = 0;
-
-			ok = insert_empty(item_copy, /*out*/ page_pos);
-		}
-		else {
-			page_pos = itr._page_pos;
-			item_pos = itr._item_pos;
-
-			bool itr_end = itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::end;
-
-			ok = insert_nonempty(/*inout*/ page_pos, /*inout*/ item_pos, item_copy, false, itr_end, /*out*/ new_page_pos);
-		}
+		// Insert without changing the list state.
+		bool itr_end = itr._item_pos == vmem_item_pos_nil && itr._edge == vmem_iterator_edge::end;
+		bool ok = insert_nostate(/*inout*/ page_pos, /*inout*/ item_pos, item, false, itr_end, /*out*/ new_page_pos);
 
 		vmem_iterator_edge_t edge = vmem_iterator_edge::none;
 
@@ -378,6 +364,36 @@ namespace abc {
 		}
 
 		return ret;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::insert_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool always_balance, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_nostate() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page_pos, item_pos);
+		}
+
+		bool ok = true;
+
+		// Copy the item to a local variable to make sure the reference is valid and copyable before we change any page.
+		T item_copy(item);
+
+		if (page_pos == vmem_page_pos_nil) {
+			item_pos = 0;
+
+			ok = insert_empty(item_copy, /*out*/ page_pos);
+		}
+		else {
+			ok = insert_nonempty(/*inout*/ page_pos, /*inout*/ item_pos, item_copy, false, itr_end, /*out*/ new_page_pos);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::insert_nostate() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x, new_page_pos=0x%llx",
+				ok, (long long)page_pos, item_pos, (long long)new_page_pos);
+		}
+
+		return ok;
 	}
 
 
