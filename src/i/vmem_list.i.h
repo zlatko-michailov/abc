@@ -123,6 +123,10 @@ namespace abc {
 		void					balance_split_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept;
 		bool					insert_page_after(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ _vmem_list_page<T>*& new_list_page) noexcept;
 
+	// erase() helpers
+	private:
+		bool					erase_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*out*/ vmem_page_pos_t& front_page_pos, /*out*/ vmem_page_pos_t& back_page_pos) noexcept;
+
 	private:
 		friend iterator;
 

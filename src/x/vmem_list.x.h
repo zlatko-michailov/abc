@@ -690,42 +690,95 @@ namespace abc {
 			throw exception<std::logic_error, Log>("vmem_list::erase(itr)", 0x10366);
 		}
 
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_list::erase() Begin. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
+				(long long)itr._page_pos, itr._item_pos, itr._edge, (std::size_t)_state->total_item_count);
+		}
+
 		bool ok = true;
 		vmem_page_pos_t page_pos = itr._page_pos;
 		vmem_item_pos_t item_pos = itr._item_pos;
 		vmem_iterator_edge_t edge = vmem_iterator_edge::none;
+		vmem_page_pos_t front_page_pos = _state->front_page_pos;
+		vmem_page_pos_t back_page_pos = _state->back_page_pos;
 
-		// IMPORTANT: There must be no exceptions from here to the end of the method!
+		ok = erase_nostate(/*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
 
-		vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
+		if (ok) {
+			// Update the total item count.
+			_state->total_item_count--;
+
+			// Update the front and back pages.
+			_state->front_page_pos = front_page_pos;
+			_state->back_page_pos = back_page_pos;
+		}
+		else {
+			end_pos(page_pos, item_pos);
+			edge = vmem_iterator_edge::end;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_list::erase() Done. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
+				(long long)page_pos, item_pos, edge, (std::size_t)_state->total_item_count);
+		}
+
+		return iterator(this, page_pos, item_pos, edge, _log);
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline typename vmem_list<T, Pool, Log>::iterator vmem_list<T, Pool, Log>::erase(const_iterator first, const_iterator last) {
+		iterator item = first;
+
+		while (item != last) {
+			if (!item.can_deref()) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::important, 0x1036f, "vmem_list::erase() Breaking from the loop.");
+				}
+
+				break;
+			}
+
+			item = erase(item);
+		}
+
+		return item;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::erase_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*out*/ vmem_page_pos_t& front_page_pos, /*out*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_nostate() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page_pos, item_pos);
+		}
+
+		bool ok = true;
+
+		vmem_page<Pool, Log> page(_pool, page_pos, _log);
 
 		if (page.ptr() == nullptr) {
 			ok = false;
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10367, "vmem_list::erase() Could not load page pos=0x%llx", (long long)itr._page_pos);
+				_log->put_any(category::abc::vmem, severity::warning, 0x10367, "vmem_list::erase() Could not load page pos=0x%llx", (long long)page_pos);
 			}
 		}
 		else {
 			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::optional, 0x10368, "vmem_list::erase() Start. page_pos=0x%llx, item_pos=0x%x, page_item_count=%u, total_item_count=%zu",
-					(long long)page_pos, item_pos, list_page->item_count, (std::size_t)_state->total_item_count);
-			}
-
 			if (list_page->item_count > 1) {
 				// The page has multiple items.
 
-				if (itr._item_pos < list_page->item_count - 1) {
+				if (item_pos < list_page->item_count - 1) {
 					// To delete an item before the last one, pull up the remaining elements.
 	
 					if (_log != nullptr) {
 						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10369, "vmem_list::erase() Multiple. Middle.");
 					}
 
-					std::size_t move_item_count = list_page->item_count - itr._item_pos - 1;
-					std::memmove(&list_page->items[itr._item_pos], &list_page->items[itr._item_pos + 1], move_item_count * sizeof(T));
+					std::size_t move_item_count = list_page->item_count - item_pos - 1;
+					std::memmove(&list_page->items[item_pos], &list_page->items[item_pos + 1], move_item_count * sizeof(T));
 				}
 				else {
 					// To delete the last (back) item on a page, there is nothing to do.
@@ -801,7 +854,7 @@ namespace abc {
 							// Free the next page.
 							if (next_list_page->next_page_pos == vmem_page_pos_nil) {
 								list_page->next_page_pos = vmem_page_pos_nil;
-								_state->back_page_pos = page.pos();
+								back_page_pos = page.pos();
 							}
 							else {
 								vmem_page<Pool, Log> next_next_page(_pool, next_list_page->next_page_pos, _log);
@@ -874,7 +927,7 @@ namespace abc {
 							// Free this page.
 							if (list_page->next_page_pos == vmem_page_pos_nil) {
 								prev_list_page->next_page_pos = vmem_page_pos_nil;
-								_state->back_page_pos = prev_page.pos();
+								back_page_pos = prev_page.pos();
 							}
 							else {
 								vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
@@ -931,7 +984,7 @@ namespace abc {
 					}
 				}
 				else {
-					_state->front_page_pos = next_page_pos;
+					front_page_pos = next_page_pos;
 				}
 
 				if (ok) {
@@ -955,7 +1008,7 @@ namespace abc {
 						}
 					}
 					else {
-						_state->back_page_pos = prev_page_pos;
+						back_page_pos = prev_page_pos;
 
 						end_pos(page_pos, item_pos);
 						edge = vmem_iterator_edge::end;
@@ -964,41 +1017,12 @@ namespace abc {
 			}
 		}
 
-		if (ok) {
-			// Update the total item count.
-			_state->total_item_count--;
-		}
-		else {
-			end_pos(page_pos, item_pos);
-			edge = vmem_iterator_edge::end;
-		}
-
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1036e, "vmem_list::erase() Done. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
-				(long long)page_pos, item_pos, edge, (std::size_t)_state->total_item_count);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_nostate() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x, edge=%u, front_page_pos=0x%llx, back_page_pos=0x%llx",
+				ok, (long long)page_pos, item_pos, edge, front_page_pos, back_page_pos);
 		}
 
-		return iterator(this, page_pos, item_pos, edge, _log);
-	}
-
-
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_list<T, Pool, Log>::iterator vmem_list<T, Pool, Log>::erase(const_iterator first, const_iterator last) {
-		iterator item = first;
-
-		while (item != last) {
-			if (!item.can_deref()) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::important, 0x1036f, "vmem_list::erase() Breaking from the loop.");
-				}
-
-				break;
-			}
-
-			item = erase(item);
-		}
-
-		return item;
+		return ok;
 	}
 
 
