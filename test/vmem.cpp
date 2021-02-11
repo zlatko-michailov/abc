@@ -456,6 +456,32 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (5)
 		// | 01 02 09 __ | 0c 0d 0e 0f
 
+		itr_target = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, __TAG__, "0x%2.2llx") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 6, __TAG__, "%zu") && passed;
+		// | (2)         | (5)
+		// | 01 02 __ __ | 0c 0d 0e 0f
+
+		itr_target = Iterator(&list, 5U, 3U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = list.end();
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 5, __TAG__, "%zu") && passed;
+		// | (2)         | (5)
+		// | 01 02 __ __ | 0c 0d 0e __
+
+		itr_target = Iterator(&list, 5U, 2U, abc::vmem_iterator_edge::none, context.log);
+		itr_expected = Iterator(&list, 2U, abc::vmem_item_pos_nil, abc::vmem_iterator_edge::end, context.log);
+		itr_actual = list.erase(itr_target);
+		passed = context.are_equal<bool>(itr_actual == itr_expected, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<bool>(itr_actual == list.end(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(list.size(), 4, __TAG__, "%zu") && passed;
+		// | (2)
+		// | 01 02 0c 0d
+
 		return passed;
 	}
 

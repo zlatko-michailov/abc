@@ -3,11 +3,13 @@
   - vmem_pool
 
 ## To Do
+- vmem_list::erase() bug
 - Refactor
   - vmem_list
-    - insert()
+    + insert()
     - erase()
     - clear()
+- vmem_list::splice()
 - vmem_linked
 - vmem_map
 ---

@@ -728,7 +728,7 @@ namespace abc {
 					std::memmove(&list_page->items[itr._item_pos], &list_page->items[itr._item_pos + 1], move_item_count * sizeof(T));
 				}
 				else {
-					// To delete the last item on a page, there is nothing to do.
+					// To delete the last (back) item on a page, there is nothing to do.
 
 					if (_log != nullptr) {
 						_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036a, "vmem_list::erase() Multiple. Last.");
@@ -750,7 +750,7 @@ namespace abc {
 
 				if (2 * list_page->item_count <= page_capacity()) {
 					// This page is subject to balancing.
-					bool ok_balance = true;
+					bool ok_balance = false;
 
 					// Try the next page.
 					if (list_page->next_page_pos != vmem_page_pos_nil) {
@@ -864,7 +864,9 @@ namespace abc {
 
 							// Fix the next page and item.
 							page_pos = prev_page.pos();
-							item_pos += prev_list_page->item_count;
+							if (item_pos != vmem_item_pos_nil) {
+								item_pos += prev_list_page->item_count;
+							}
 
 							// Update the item count on the previous page.
 							prev_list_page->item_count += list_page->item_count;
@@ -1000,10 +1002,16 @@ namespace abc {
 	}
 
 
+	// ..............................................................
+
+
 	template <typename T, typename Pool, typename Log>
 	inline void vmem_list<T, Pool, Log>::clear() noexcept {
 		erase(begin(), end());
 	}
+
+
+	// ..............................................................
 
 
 	template <typename T, typename Pool, typename Log>
