@@ -747,7 +747,7 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::erase_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*out*/ vmem_page_pos_t& front_page_pos, /*out*/ vmem_page_pos_t& back_page_pos) noexcept {
+	inline bool vmem_list<T, Pool, Log>::erase_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_nostate() Start. page_pos=0x%llx, item_pos=0x%x",
 				(long long)page_pos, item_pos);
@@ -954,72 +954,132 @@ namespace abc {
 			}
 			else {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036b, "vmem_list::erase() Only.");
+					_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036b, "vmem_list::erase() Last item on page.");
 				}
 
 				// The page has no other items.
 
-				// We can free the current page now.
+				// Save prev_page_pos and next_page_pos.
 				vmem_page_pos_t prev_page_pos = list_page->prev_page_pos;
 				vmem_page_pos_t next_page_pos = list_page->next_page_pos;
+
+				// We can free the current page now.
 				list_page = nullptr;
 				page.free();
 
-				// Connect the two adjaceent pages, and free this page.
+				// Connect the two adjaceent pages.
 				// The next item is item 0 on the next page or end().
-				if (prev_page_pos != vmem_page_pos_nil) {
-					vmem_page<Pool, Log> prev_page(_pool, prev_page_pos, _log);
-
-					if (prev_page.ptr() == nullptr) {
-						ok = false;
-
-						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::warning, 0x1036c, "vmem_list::erase() Could not load prev page pos=0x%llx", (long long)prev_page_pos);
-						}
-					}
-					else {
-						_vmem_list_page<T>* prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
-
-						prev_list_page->next_page_pos = next_page_pos;
-					}
-				}
-				else {
-					front_page_pos = next_page_pos;
-				}
-
-				if (ok) {
-					if (next_page_pos != vmem_page_pos_nil) {
-						vmem_page<Pool, Log> next_page(_pool, next_page_pos, _log);
-
-						if (next_page.ptr() == nullptr) {
-							ok = false;
-
-							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::warning, 0x1036d, "vmem_list::erase() Could not load next page pos=0x%llx", (long long)next_page_pos);
-							}
-						}
-						else {
-							_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
-
-							next_list_page->prev_page_pos = prev_page_pos;
-
-							page_pos = next_page_pos;
-							item_pos = 0;
-						}
-					}
-					else {
-						back_page_pos = prev_page_pos;
-
-						end_pos(page_pos, item_pos);
-						edge = vmem_iterator_edge::end;
-					}
-				}
+				ok = link_pages(prev_page_pos, next_page_pos, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
 			}
 		}
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_nostate() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x, edge=%u, front_page_pos=0x%llx, back_page_pos=0x%llx",
 				ok, (long long)page_pos, item_pos, edge, front_page_pos, back_page_pos);
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::link_pages(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_pages() Start. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
+		}
+
+		bool ok = link_next_page(prev_page_pos, next_page_pos, /*inout*/ front_page_pos);
+
+		if (ok) {
+			ok = link_prev_page(prev_page_pos, next_page_pos, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ back_page_pos);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_pages() Done. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::link_next_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& front_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_next_page() Start. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
+		}
+
+		bool ok = true;
+
+		if (prev_page_pos != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> prev_page(_pool, prev_page_pos, _log);
+
+			if (prev_page.ptr() == nullptr) {
+				ok = false;
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::warning, 0x1036c, "vmem_list::link_next_page() Could not load prev page pos=0x%llx", (long long)prev_page_pos);
+				}
+			}
+			else {
+				_vmem_list_page<T>* prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
+
+				prev_list_page->next_page_pos = next_page_pos;
+			}
+		}
+		else {
+			front_page_pos = next_page_pos;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_next_page() Done. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::link_prev_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_prev_page() Start. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
+		}
+
+		bool ok = true;
+
+		if (next_page_pos != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> next_page(_pool, next_page_pos, _log);
+
+			if (next_page.ptr() == nullptr) {
+				ok = false;
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::warning, 0x1036d, "vmem_list::link_prev_page() Could not load next page pos=0x%llx", (long long)next_page_pos);
+				}
+			}
+			else {
+				_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
+
+				next_list_page->prev_page_pos = prev_page_pos;
+
+				page_pos = next_page_pos;
+				item_pos = 0;
+			}
+		}
+		else {
+			back_page_pos = prev_page_pos;
+
+			end_pos(page_pos, item_pos);
+			edge = vmem_iterator_edge::end;
+		}
+	
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::link_prev_page() Done. prev_page_pos=0x%llx, next_page_pos=0x%llx",
+				(long long)prev_page_pos, (long long)next_page_pos);
 		}
 
 		return ok;
