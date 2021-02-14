@@ -807,29 +807,40 @@ namespace abc {
 				}
 			}
 			else {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036b, "vmem_list::erase() Last item on page.");
-				}
-
-				// The page has no other items.
-
-				// Save prev_page_pos and next_page_pos.
-				vmem_page_pos_t prev_page_pos = list_page->prev_page_pos;
-				vmem_page_pos_t next_page_pos = list_page->next_page_pos;
-
-				// We can free the current page now.
-				list_page = nullptr;
-				page.free();
-
-				// Connect the two adjaceent pages.
-				// The next item is item 0 on the next page or end().
-				ok = link_pages(prev_page_pos, next_page_pos, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
+				ok = erase_last(page, list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
 			}
 		}
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_nostate() Done. ok=%d, page_pos=0x%llx, item_pos=0x%x, edge=%u, front_page_pos=0x%llx, back_page_pos=0x%llx",
 				ok, (long long)page_pos, item_pos, edge, front_page_pos, back_page_pos);
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::erase_last(vmem_page<Pool, Log>& page, _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_last() Start. page_pos=0x%llx",
+				(long long)page_pos);
+		}
+
+		// Save prev_page_pos and next_page_pos.
+		vmem_page_pos_t prev_page_pos = list_page->prev_page_pos;
+		vmem_page_pos_t next_page_pos = list_page->next_page_pos;
+
+		// We can free the current page now.
+		list_page = nullptr;
+		page.free();
+
+		// Connect the two adjaceent pages.
+		// The next item is item 0 on the next page or end().
+		bool ok = link_pages(prev_page_pos, next_page_pos, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_last() Done. ok=%d", ok);
 		}
 
 		return ok;
