@@ -768,46 +768,17 @@ namespace abc {
 			_vmem_list_page<T>* list_page = reinterpret_cast<_vmem_list_page<T>*>(page.ptr());
 
 			if (list_page->item_count > 1) {
-				// The page has multiple items.
-
-				if (item_pos < list_page->item_count - 1) {
-					// To delete an item before the last one, pull up the remaining elements.
-	
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10369, "vmem_list::erase() Multiple. Middle.");
-					}
-
-					std::size_t move_item_count = list_page->item_count - item_pos - 1;
-					std::memmove(&list_page->items[item_pos], &list_page->items[item_pos + 1], move_item_count * sizeof(T));
-				}
-				else {
-					// To delete the last (back) item on a page, there is nothing to do.
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036a, "vmem_list::erase() Multiple. Last.");
-					}
-
-					// If we are deleting the last item on a page, the next item is item 0 on the next page or end().
-					if (list_page->next_page_pos != vmem_page_pos_nil) {
-						page_pos = list_page->next_page_pos;
-						item_pos = 0;
-					}
-					else {
-						end_pos(page_pos, item_pos);
-						edge = vmem_iterator_edge::end;
-					}
-				}
-
-				// The main part of deleting an item from a page is decrementing the count.
-				list_page->item_count--;
+				// There are many items on the page.
+				erase_from_many_safe(list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge);
 
 				// Balance if item count drops below half of capacity.
 				if (2 * list_page->item_count <= page_capacity()) {
-					balance_merge_safe(/*inout*/ page, list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ back_page_pos);
+					balance_merge_safe(/*inout*/ page, /*inout*/ list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ back_page_pos);
 				}
 			}
 			else {
-				ok = erase_last(page, list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
+				// There is only one item on the page.
+				ok = erase_from_one(/*inout*/ page, /*inout*/ list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
 			}
 		}
 
@@ -821,7 +792,52 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_list<T, Pool, Log>::erase_last(vmem_page<Pool, Log>& page, _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+	inline void vmem_list<T, Pool, Log>::erase_from_many_safe(_vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_from_many_safe() Start. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page_pos, item_pos);
+		}
+
+		if (item_pos < list_page->item_count - 1) {
+			// To delete an item before the last one, pull up the remaining elements.
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10369, "vmem_list::erase_from_many_safe() Middle.");
+			}
+
+			std::size_t move_item_count = list_page->item_count - item_pos - 1;
+			std::memmove(&list_page->items[item_pos], &list_page->items[item_pos + 1], move_item_count * sizeof(T));
+		}
+		else {
+			// To delete the last (back) item on a page, there is nothing to do.
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1036a, "vmem_list::erase_from_many_safe() Last.");
+			}
+
+			// If we are deleting the last item on a page, the next item is item 0 on the next page or end().
+			if (list_page->next_page_pos != vmem_page_pos_nil) {
+				page_pos = list_page->next_page_pos;
+				item_pos = 0;
+			}
+			else {
+				end_pos(page_pos, item_pos);
+				edge = vmem_iterator_edge::end;
+			}
+		}
+
+		// The main part of deleting an item from a page is decrementing the count.
+		list_page->item_count--;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_from_many_safe() Done. page_pos=0x%llx, item_pos=0x%x",
+				(long long)page_pos, item_pos);
+		}
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::erase_from_one(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_last() Start. page_pos=0x%llx",
 				(long long)page_pos);
