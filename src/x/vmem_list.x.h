@@ -839,7 +839,7 @@ namespace abc {
 	template <typename T, typename Pool, typename Log>
 	inline bool vmem_list<T, Pool, Log>::erase_from_one(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_last() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_from_one() Start. page_pos=0x%llx",
 				(long long)page_pos);
 		}
 
@@ -856,7 +856,7 @@ namespace abc {
 		bool ok = link_pages(prev_page_pos, next_page_pos, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge, /*inout*/ front_page_pos, /*inout*/ back_page_pos);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_last() Done. ok=%d", ok);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::erase_from_one() Done. ok=%d", ok);
 		}
 
 		return ok;
@@ -864,7 +864,7 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline void vmem_list<T, Pool, Log>::balance_merge_safe(vmem_page<Pool, Log>& page, _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+	inline void vmem_list<T, Pool, Log>::balance_merge_safe(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
@@ -874,154 +874,190 @@ namespace abc {
 
 		// Try the next page.
 		if (list_page->next_page_pos != vmem_page_pos_nil) {
-			ok = true;
-
-			vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
-			_vmem_list_page<T>* next_list_page = nullptr;
-
-			if (next_page.ptr() == nullptr) {
-				ok = false;
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10405, "vmem_list::balance_merge_safe() Next. Could not load page pos=0x%llx",
-						(long long)list_page->next_page_pos);
-				}
-			}
-
-			if (ok) {
-				next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10406, "vmem_list::balance_merge_safe() Next. page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
-						list_page->item_count, (long long)next_page.pos(), next_list_page->item_count);
-				}
-
-				if (list_page->item_count + next_list_page->item_count > page_capacity()) {
-					ok = false;
-				}
-			}
-
-			if (ok) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10407, "vmem_list::balance_merge_safe() Next. Do.");
-				}
-
-				// Merge the items from the next page into this one.
-				std::memmove(&list_page->items[list_page->item_count], &next_list_page->items[0], next_list_page->item_count * sizeof(T));
-
-				// Fix the next item, if it was item[0] on the next page.
-				if (page_pos == next_page.pos()) {
-					page_pos = page.pos();
-					item_pos = list_page->item_count;
-				}
-
-				// Update the item count on this page.
-				list_page->item_count += next_list_page->item_count;
-
-				// Free the next page.
-				if (next_list_page->next_page_pos == vmem_page_pos_nil) {
-					list_page->next_page_pos = vmem_page_pos_nil;
-					back_page_pos = page.pos();
-				}
-				else {
-					vmem_page<Pool, Log> next_next_page(_pool, next_list_page->next_page_pos, _log);
-
-					if (next_next_page.ptr() == nullptr) {
-						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::warning, 0x10408, "vmem_list::balance_merge_safe() Next next. Could not load page pos=0x%llx",
-								(long long)next_list_page->next_page_pos);
-						}
-					}
-					else {
-						_vmem_list_page<T>* next_next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_next_page.ptr());
-
-						list_page->next_page_pos = next_list_page->next_page_pos;
-						next_next_list_page->prev_page_pos = page.pos();
-					}
-				}
-
-				next_list_page = nullptr;
-				next_page.free();
-			}
+			ok = balance_merge_next(page, list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ back_page_pos);
 		}
 
-		// Try the previous page.
+		// If the next page didn'twork out, try the previous page.
 		if (!ok && list_page->prev_page_pos != vmem_page_pos_nil) {
-			ok = true;
-
-			vmem_page<Pool, Log> prev_page(_pool, list_page->prev_page_pos, _log);
-			_vmem_list_page<T>* prev_list_page = nullptr;
-
-			if (prev_page.ptr() == nullptr) {
-				ok = false;
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10409, "vmem_list::balance_merge_safe() Previous. Could not load page pos=0x%llx",
-						(long long)list_page->prev_page_pos);
-				}
-			}
-
-			if (ok) {
-				prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x1040a, "vmem_list::balance_merge_safe() Previous. page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
-						(long long)page.pos(), list_page->item_count, (long long)prev_page.pos(), prev_list_page->item_count);
-				}
-
-				if (list_page->item_count + prev_list_page->item_count > page_capacity()) {
-					ok = false;
-				}
-			}
-
-			if (ok) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x1040b, "vmem_list::balance_merge_safe() Previous. Do.");
-				}
-
-				// Merge the items from this page into the previous one.
-				std::memmove(&prev_list_page->items[prev_list_page->item_count], &list_page->items[0], list_page->item_count * sizeof(T));
-
-				// Fix the next page and item.
-				page_pos = prev_page.pos();
-				if (item_pos != vmem_item_pos_nil) {
-					item_pos += prev_list_page->item_count;
-				}
-
-				// Update the item count on the previous page.
-				prev_list_page->item_count += list_page->item_count;
-
-				// Free this page.
-				if (list_page->next_page_pos == vmem_page_pos_nil) {
-					prev_list_page->next_page_pos = vmem_page_pos_nil;
-					back_page_pos = prev_page.pos();
-				}
-				else {
-					vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
-
-					if (next_page.ptr() == nullptr) {
-						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::warning, 0x1040c, "vmem_list::balance_merge_safe() Previous next. Could not load page pos=0x%llx",
-								(long long)list_page->next_page_pos);
-						}
-					}
-					else {
-						_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
-
-						prev_list_page->next_page_pos = list_page->next_page_pos;
-						next_list_page->prev_page_pos = prev_page.pos();
-					}
-				}
-
-				list_page = nullptr;
-				page.free();
-			}
+			ok = balance_merge_prev(/*inout*/ page, /*inout*/ list_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ back_page_pos);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_safe() Done. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_safe() Done. ok=%d, page_pos=0x%llx",
+				ok, (long long)page.pos());
+		}
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::balance_merge_next(vmem_page<Pool, Log>& page, _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_next_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
 		}
+
+		bool ok = true;
+
+		vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
+		_vmem_list_page<T>* next_list_page = nullptr;
+
+		if (next_page.ptr() == nullptr) {
+			ok = false;
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10405, "vmem_list::balance_merge_next_safe() Could not load page pos=0x%llx",
+					(long long)list_page->next_page_pos);
+			}
+		}
+
+		if (ok) {
+			next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10406, "vmem_list::balance_merge_next_safe() page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
+					list_page->item_count, (long long)next_page.pos(), next_list_page->item_count);
+			}
+
+			if (list_page->item_count + next_list_page->item_count > page_capacity()) {
+				ok = false;
+			}
+		}
+
+		if (ok) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::optional, 0x10407, "vmem_list::balance_merge_next_safe() Do.");
+			}
+
+			// Merge the items from the next page into this one.
+			std::memmove(&list_page->items[list_page->item_count], &next_list_page->items[0], next_list_page->item_count * sizeof(T));
+
+			// Fix the next item, if it was item[0] on the next page.
+			if (page_pos == next_page.pos()) {
+				page_pos = page.pos();
+				item_pos = list_page->item_count;
+			}
+
+			// Update the item count on this page.
+			list_page->item_count += next_list_page->item_count;
+
+			// Free the next page.
+			if (next_list_page->next_page_pos == vmem_page_pos_nil) {
+				list_page->next_page_pos = vmem_page_pos_nil;
+				back_page_pos = page.pos();
+			}
+			else {
+				vmem_page<Pool, Log> next_next_page(_pool, next_list_page->next_page_pos, _log);
+
+				if (next_next_page.ptr() == nullptr) {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::warning, 0x10408, "vmem_list::balance_merge_next_safe() Next next. Could not load page pos=0x%llx",
+							(long long)next_list_page->next_page_pos);
+					}
+				}
+				else {
+					_vmem_list_page<T>* next_next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_next_page.ptr());
+
+					list_page->next_page_pos = next_list_page->next_page_pos;
+					next_next_list_page->prev_page_pos = page.pos();
+				}
+			}
+
+			next_list_page = nullptr;
+			next_page.free();
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_next_safe() Done. ok=%d, page_pos=0x%llx",
+				ok, (long long)page.pos());
+		}
+
+		return ok;
+	}
+
+
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_list<T, Pool, Log>::balance_merge_prev(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_prev() Start. page_pos=0x%llx",
+				(long long)page.pos());
+		}
+
+		bool ok = true;
+
+		vmem_page<Pool, Log> prev_page(_pool, list_page->prev_page_pos, _log);
+		_vmem_list_page<T>* prev_list_page = nullptr;
+
+		if (prev_page.ptr() == nullptr) {
+			ok = false;
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10409, "vmem_list::balance_merge_prev() Could not load page pos=0x%llx",
+					(long long)list_page->prev_page_pos);
+			}
+		}
+
+		if (ok) {
+			prev_list_page = reinterpret_cast<_vmem_list_page<T>*>(prev_page.ptr());
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1040a, "vmem_list::balance_merge_prev() page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
+					(long long)page.pos(), list_page->item_count, (long long)prev_page.pos(), prev_list_page->item_count);
+			}
+
+			if (list_page->item_count + prev_list_page->item_count > page_capacity()) {
+				ok = false;
+			}
+		}
+
+		if (ok) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::optional, 0x1040b, "vmem_list::balance_merge_prev() Do.");
+			}
+
+			// Merge the items from this page into the previous one.
+			std::memmove(&prev_list_page->items[prev_list_page->item_count], &list_page->items[0], list_page->item_count * sizeof(T));
+
+			// Fix the next page and item.
+			page_pos = prev_page.pos();
+			if (item_pos != vmem_item_pos_nil) {
+				item_pos += prev_list_page->item_count;
+			}
+
+			// Update the item count on the previous page.
+			prev_list_page->item_count += list_page->item_count;
+
+			// Free this page.
+			if (list_page->next_page_pos == vmem_page_pos_nil) {
+				prev_list_page->next_page_pos = vmem_page_pos_nil;
+				back_page_pos = prev_page.pos();
+			}
+			else {
+				vmem_page<Pool, Log> next_page(_pool, list_page->next_page_pos, _log);
+
+				if (next_page.ptr() == nullptr) {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::warning, 0x1040c, "vmem_list::balance_merge_prev() Previous next. Could not load page pos=0x%llx",
+							(long long)list_page->next_page_pos);
+					}
+				}
+				else {
+					_vmem_list_page<T>* next_list_page = reinterpret_cast<_vmem_list_page<T>*>(next_page.ptr());
+
+					prev_list_page->next_page_pos = list_page->next_page_pos;
+					next_list_page->prev_page_pos = prev_page.pos();
+				}
+			}
+
+			list_page = nullptr;
+			page.free();
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_list::balance_merge_prev() Done. ok=%d, page_pos=0x%llx",
+				ok, (long long)page.pos());
+		}
+
+		return ok;
 	}
 
 
