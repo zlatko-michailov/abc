@@ -7,10 +7,13 @@
 - Refactor
   - vmem_list
     + insert()
-    - erase()
+    + erase()
     - clear()
-- vmem_list::splice()
 - vmem_linked
+- vmem_container
+- vmem_linked::splice()
+- free pages
+---
 - vmem_map
 ---
 - vmem:

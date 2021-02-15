@@ -222,24 +222,39 @@ namespace abc {
 	#pragma pack(push, 1)
 
 
-	struct vmem_list_state {
+	struct vmem_linked_state {
 		vmem_page_pos_t		front_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		back_page_pos		= vmem_page_pos_nil;
+	};
+
+
+	struct vmem_container_state : public vmem_linked_state {
 		vmem_item_pos_t		item_size			= 0;
 		vmem_page_pos_t		total_item_count	= 0;
 	};
 
 
-	template <typename T>
-	struct _vmem_list_page {
+	struct vmem_list_state : public vmem_container_state {
+	};
+
+
+	struct vmem_linked_page {
 		vmem_page_pos_t		prev_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		next_page_pos		= vmem_page_pos_nil;
+	};
+
+	template <typename T>
+	struct vmem_container_page : public vmem_linked_page {
 		vmem_item_pos_t		item_count			= 0;
 		T					items[1]			= { 0 };
 	};
 
+	template <typename T>
+	struct vmem_list_page : public vmem_container_page<T> {
+	};
 
-	struct _vmem_root_page {
+
+	struct vmem_root_page {
 		const vmem_version_t	version			= 1;
 		const char				signature[10]	= "abc::vmem";
 		const vmem_item_pos_t	page_size		= vmem_page_size;
@@ -250,7 +265,7 @@ namespace abc {
 
 
 	template <typename Key>
-	struct _vmem_key_item {
+	struct vmem_key_item {
 		Key					key;
 		vmem_page_pos_t		child_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		value_page_pos		= vmem_page_pos_nil;
@@ -259,22 +274,19 @@ namespace abc {
 
 
 	template <typename Key>
-	struct _vmem_key_page {
+	struct vmem_key_page {
 		vmem_item_pos_t		item_count			= 0;
 		vmem_page_pos_t		else_page_pos		= vmem_page_pos_nil;
-		_vmem_key_item<Key>	items[1]			= { 0 };
+		vmem_key_item<Key>	items[1]			= { 0 };
 	};
 
 
 	template <typename Value>
-	struct _vmem_value_page {
+	struct vmem_value_page {
 		vmem_page_pos_t		next_page_pos		= vmem_page_pos_nil;
 		vmem_item_pos_t		item_count			= 0;
 		Value				items[1]			= { 0 };
 	};
-
-
-	using _vmem_free_page = _vmem_value_page<vmem_page_pos_t>;
 
 
 	#pragma pack(pop)

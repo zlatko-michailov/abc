@@ -118,19 +118,19 @@ namespace abc {
 		bool					insert_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool always_balance, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		bool					insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept;
 		bool					insert_nonempty(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool always_balance, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
-		bool					insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
-		void					insert_with_capacity_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
-		void					balance_split_safe(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, _vmem_list_page<T>* new_list_page) noexcept;
-		bool					insert_page_after(vmem_page_pos_t page_pos, _vmem_list_page<T>* list_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ _vmem_list_page<T>*& new_list_page) noexcept;
+		bool					insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
+		void					insert_with_capacity_safe(vmem_page_pos_t page_pos, vmem_list_page<T>* list_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
+		void					balance_split_safe(vmem_page_pos_t page_pos, vmem_list_page<T>* list_page, vmem_page_pos_t new_page_pos, vmem_list_page<T>* new_list_page) noexcept;
+		bool					insert_page_after(vmem_page_pos_t page_pos, vmem_list_page<T>* list_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_list_page<T>*& new_list_page) noexcept;
 
 	// erase() helpers
 	private:
 		bool					erase_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
-		void					erase_from_many_safe(_vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge) noexcept;
-		bool					erase_from_one(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
-		void					balance_merge_safe(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
-		bool					balance_merge_next(vmem_page<Pool, Log>& page, _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
-		bool					balance_merge_prev(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ _vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
+		void					erase_from_many_safe(vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge) noexcept;
+		bool					erase_from_one(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
+		void					balance_merge_safe(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
+		bool					balance_merge_next(vmem_page<Pool, Log>& page, vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
+		bool					balance_merge_prev(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ vmem_list_page<T>* list_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
 		bool					link_pages(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
 		bool					link_next_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& front_page_pos) noexcept;
 		bool					link_prev_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;

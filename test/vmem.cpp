@@ -90,18 +90,18 @@ namespace abc { namespace test { namespace vmem {
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 0, context.log);
 
-			_vmem_root_page expected;
+			vmem_root_page expected;
 			expected.free_pages.item_size = static_cast<vmem_item_pos_t>(sizeof(vmem_page_pos_t));
-			int cmp = std::memcmp(&expected, page.ptr(), sizeof(_vmem_root_page));
+			int cmp = std::memcmp(&expected, page.ptr(), sizeof(vmem_root_page));
 			passed = context.are_equal<int>(cmp, 0, 0x103bd, "%d") && passed;
 
-			passed = verify_bytes(context, page.ptr(), sizeof(_vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00) && passed;
 		}
 
 		// Page 1 (start page)
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 1, context.log);
-			passed = verify_bytes(context, page.ptr(), sizeof(_vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00) && passed;
 		}
 
 		// Page 2

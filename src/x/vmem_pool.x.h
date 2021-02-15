@@ -148,7 +148,7 @@ namespace abc {
 
 		std::memset(page.ptr(), 0, vmem_page_size);
 
-		_vmem_root_page init;
+		vmem_root_page init;
 		std::memmove(page.ptr(), &init, sizeof(init));
 
 		if (_log != nullptr) {
@@ -196,14 +196,14 @@ namespace abc {
 			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() Cannot verify root page", 0x10388, _log);
 		}
 
-		_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
+		vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10389, "vmem_pool::verify_root_page_or_throw() Root page integrity pos=0x%llx, ptr=%p, version=%u, signature='%s', page_size=%u",
 				(long long)page.pos(), page.ptr(), root_page->version, root_page->signature, root_page->page_size);
 		}
 
-		_vmem_root_page init;
+		vmem_root_page init;
 
 		if (root_page->version != init.version) {
 			throw exception<std::runtime_error, Log>("vmem_pool::verify_root_page_or_throw() vmem file integrity - version", 0x1038a, _log);
@@ -307,7 +307,7 @@ namespace abc {
 			}
 		}
 		else {
-			_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
+			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
 			vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
 
@@ -347,7 +347,7 @@ namespace abc {
 			}
 		}
 		else {
-			_vmem_root_page* root_page = reinterpret_cast<_vmem_root_page*>(page.ptr());
+			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
 			vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
 
