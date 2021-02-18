@@ -36,7 +36,7 @@ namespace abc {
 	class vmem_linked;
 
 	template <typename Pool, typename Log = null_log>
-	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_page<Pool, Log>, Pool, Log>;
+	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_linked_page, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -46,7 +46,7 @@ namespace abc {
 	class vmem_linked {
 	public:
 		using value_type				= vmem_page<Pool, Log>;
-		using pointer					= vmem_ptr<vmem_page<Pool, Log>, Pool, Log>;
+		using pointer					= vmem_ptr<vmem_linked_page, Pool, Log>;
 		using const_pointer				= const pointer;
 		using reference					= vmem_page<Pool, Log>&;
 		using const_reference			= const vmem_page<Pool, Log>&;
@@ -96,7 +96,7 @@ namespace abc {
 		iterator				insert(const_iterator itr, reference page);
 		iterator				erase(const_iterator itr);
 		void					clear() noexcept;
-		void					splice(vmem_linked<Pool, Log>& other);
+		void					splice(vmem_linked<Pool, Log>& other); //// TODO:
 		void					splice(vmem_linked<Pool, Log>&& other);
 
 	private:
@@ -108,7 +108,7 @@ namespace abc {
 
 		void					move_next(iterator& itr) const noexcept;
 		void					move_prev(iterator& itr) const noexcept;
-		value_type				at(const_iterator& itr) const noexcept;
+		pointer					at(const_iterator& itr) const noexcept;
 
 	private:
 		vmem_linked_state*		_state;

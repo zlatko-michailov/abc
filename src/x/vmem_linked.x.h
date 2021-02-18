@@ -265,7 +265,7 @@ namespace abc {
 	inline bool vmem_linked<Pool, Log>::insert_nostate(const_iterator itr, reference page, vmem_page_pos_t back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_linked::insert_nostate() Start. itr.page_pos=0x%llx, page.pos()=0x%llx",
-				(long long)itr.page_pos, (long long)page.pos());
+				(long long)itr._page_pos, (long long)page.pos());
 		}
 
 		bool ok = true;
@@ -284,7 +284,7 @@ namespace abc {
 			if (empty()) {
 				// Nothing to do.
 			}
-			else if (itr.page_pos == vmem_page_pos_nil) {
+			else if (itr._page_pos == vmem_page_pos_nil) {
 				// Inserting at the end.
 
 				vmem_page<Pool, Log> back_page(_pool, back_page_pos, _log);
@@ -363,7 +363,7 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::erase(const_iterator itr) {
-		if (!itr.can_deref()) {
+		if (itr._page_pos == vmem_page_pos_nil || itr._edge != vmem_iterator_edge::none) {
 			throw exception<std::logic_error, Log>("vmem_linked::erase(itr)", __TAG__);
 		}
 
@@ -470,7 +470,7 @@ namespace abc {
 
 		if (ok) {
 			linked_page = nullptr;
-			page.erase();
+			page.free();
 		}
 
 		if (_log != nullptr) {
@@ -522,7 +522,7 @@ namespace abc {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
 
 				vmem_iterator_edge_t edge = linked_page->next_page_pos == vmem_page_pos_nil ? vmem_iterator_edge::end : vmem_iterator_edge::none;
-				itr = iterator(_pool, linked_page->next_page_pos, vmem_item_pos_nil, edge);
+				itr = iterator(this, linked_page->next_page_pos, vmem_item_pos_nil, edge, _log);
 			}
 		}
 
@@ -573,12 +573,8 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline vmem_page<Pool, Log> vmem_linked<Pool, Log>::at(const_iterator& itr) const noexcept {
-		if (itr._page_pos == vmem_page_pos_nil) {
-			return vmem_page<Pool, Log>(nullptr);
-		}
-
-		return vmem_page<Pool, Log>(_pool, itr._page_pos, _log);
+	inline typename vmem_linked<Pool, Log>::pointer vmem_linked<Pool, Log>::at(const_iterator& itr) const noexcept {
+		return pointer(_pool, itr._page_pos, 0, _log);
 	}
 
 }
