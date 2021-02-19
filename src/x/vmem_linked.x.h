@@ -233,17 +233,14 @@ namespace abc {
 			// We have inserted successfully.
 
 			// Update the front page pos.
-			if (_state->front_page_pos == vmem_page_pos_nil) {
+			if (_state->front_page_pos == vmem_page_pos_nil || _state->front_page_pos == itr._page_pos) {
 				_state->front_page_pos = page.pos();
 			}
 
 			// Update the back page pos.
-			if (_state->back_page_pos == vmem_page_pos_nil) {
+			if (_state->back_page_pos == vmem_page_pos_nil || itr._edge == vmem_iterator_edge::end) {
 				_state->back_page_pos = page.pos();
 			}
-			else if (itr._edge == vmem_iterator_edge::end) {
-				_state->back_page_pos = page.pos();
-			} 
 		}
 		else {
 			// We have failed to insert.
@@ -281,6 +278,10 @@ namespace abc {
 		}
 
 		if (ok) {
+			// Init the links.
+			linked_page->prev_page_pos = vmem_page_pos_nil;
+			linked_page->next_page_pos = vmem_page_pos_nil;
+
 			if (empty()) {
 				// Nothing to do.
 			}
@@ -376,7 +377,7 @@ namespace abc {
 		move_next(/*inout*/ result);
 
 		bool ok = true;
-		vmem_page_pos_t back_page_pos = _state->back_page_pos;
+		vmem_page_pos_t back_page_pos = vmem_page_pos_nil;
 
 		ok = erase_nostate(itr, /*out*/ back_page_pos);
 
@@ -407,7 +408,7 @@ namespace abc {
 	template <typename Pool, typename Log>
 	inline bool vmem_linked<Pool, Log>::erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Begin. itr.page_pos=0x%llx", (long long)itr._page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Start. itr.page_pos=0x%llx", (long long)itr._page_pos);
 		}
 
 		bool ok = true;
