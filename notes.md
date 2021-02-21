@@ -2,6 +2,7 @@
 - vmem_list::erase() bug
 - Refactor
   - vmem_pool
+- vmem_linked
 
 ## To Do
 - Refactor
@@ -9,12 +10,14 @@
     + insert()
     + erase()
     - clear()
-- vmem_linked
-- vmem_container
 - vmem_linked::splice()
-- free pages
+- vmem_linked test - refactor
+- free pages - BREAKING CHANGE
+- vmem_container
 ---
 - vmem_map
+---
+- Roadmap
 ---
 - vmem:
   - check
@@ -28,6 +31,8 @@
       - Chain broken
   - repair
   - compact
+---
+- GPIO
 ---
 - Samples
   - tictactoe

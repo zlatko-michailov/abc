@@ -95,8 +95,8 @@ namespace abc {
 
 		iterator				insert(const_iterator itr, reference page);
 		iterator				erase(const_iterator itr);
-		void					clear() noexcept;
-		void					splice(vmem_linked<Pool, Log>& other); //// TODO:
+		void					clear();
+		void					splice(vmem_linked<Pool, Log>& other);
 		void					splice(vmem_linked<Pool, Log>&& other);
 
 	private:

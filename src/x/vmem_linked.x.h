@@ -369,7 +369,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase() Begin. itr.page_pos=0x%llx", (long long)itr._page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase() Start. itr.page_pos=0x%llx", (long long)itr._page_pos);
 		}
 
 		// The result, upon success, is the next of itr.
@@ -487,8 +487,80 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::clear() noexcept {
+	inline void vmem_linked<Pool, Log>::clear() {
 		//// TODO: vmem_linked<Pool, Log>::clear()
+	}
+
+
+	// ..............................................................
+
+
+	template <typename Pool, typename Log>
+	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>& other) {
+		splice(std::move(other));
+	}
+
+
+	template <typename Pool, typename Log>
+	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>&& other) {
+		if (_state == other._state) {
+			throw exception<std::logic_error, Log>("vmem_linked::splice(other.state)", __TAG__);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::splice() Start. front_page_pos=0x%llx, back_page_pos=0x%llx",
+				(long long)_state->front_page_pos, (long long)_state->back_page_pos);
+		}
+
+		bool ok = true;
+
+		if (other.empty()) {
+			// Nothing to do.
+		}
+		else if (empty()) {
+			// Take over the other state.
+			*_state = *other._state;
+		}
+		else {
+			// Connect the back page of this and the front page of the other.
+			vmem_page<Pool, Log> back_page(_pool, _state->back_page_pos, _log);
+			vmem_linked_page* back_linked_page = reinterpret_cast<vmem_linked_page*>(back_page.ptr());
+
+			if (back_linked_page == nullptr) {
+				ok = false;
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::splice() Could not load back page.");
+				}
+			}
+
+			if (ok) {
+				vmem_page<Pool, Log> other_front_page(_pool, other._state->front_page_pos, _log);
+				vmem_linked_page* other_front_linked_page = reinterpret_cast<vmem_linked_page*>(other_front_page.ptr());
+
+				if (other_front_linked_page == nullptr) {
+					ok = false;
+
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::splice() Could not load other.front page.");
+					}
+				}
+
+				back_linked_page->next_page_pos = other._state->front_page_pos;
+				other_front_linked_page->prev_page_pos = _state->back_page_pos;
+			}
+		}
+
+		if (ok) {
+			// Empty other.
+			other._state->front_page_pos = vmem_page_pos_nil;
+			other._state->back_page_pos = vmem_page_pos_nil;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::splice() Done. ok=%d, front_page_pos=0x%llx, back_page_pos=0x%llx",
+				ok, (long long)_state->front_page_pos, (long long)_state->back_page_pos);
+		}
 	}
 
 
