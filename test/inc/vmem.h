@@ -40,6 +40,7 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_linked_mixedone(test_context<abc::test::log>& context);
 	bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context);
+	bool test_vmem_linked_splice(test_context<abc::test::log>& context);
 
 	bool test_vmem_list_insert(test_context<abc::test::log>& context);
 	bool test_vmem_list_insertmany(test_context<abc::test::log>& context);

@@ -69,10 +69,16 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline bool vmem_iterator<Container, T, Pool, Log>::operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_iterator::operator ==() _page_pos=0x%llx, _item_pos=0x%x, other._page_pos=0x%llx, other._item_pos=0x%x",
+				(long long)_page_pos, _item_pos, (long long)other._page_pos, other._item_pos);
+		}
+
 		return _container == other._container
 			&& _page_pos == other._page_pos
-			&& _item_pos == other._item_pos;
-			// Do not include _edge. Otherwise begin() != end() on an empty list.
+			&& _item_pos == other._item_pos
+			&& _edge == other._edge;
+			//// Do not include _edge. Otherwise begin() != end() on an empty list.
 	}
 
 

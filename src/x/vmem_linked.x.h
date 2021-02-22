@@ -613,7 +613,7 @@ namespace abc {
 				(long long)itr._page_pos, itr._edge);
 		}
 
-		else if (itr == rbegin()) {
+		if (itr == rbegin()) {
 			// Nothing to do.
 		}
 		else if (itr == begin()) {
@@ -634,7 +634,7 @@ namespace abc {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
 
 				vmem_iterator_edge_t edge = linked_page->prev_page_pos == vmem_page_pos_nil ? vmem_iterator_edge::rbegin : vmem_iterator_edge::none;
-				itr = iterator(_pool, linked_page->prev_page_pos, vmem_item_pos_nil, edge);
+				itr = iterator(this, linked_page->prev_page_pos, vmem_item_pos_nil, edge, _log);
 			}
 		}
 

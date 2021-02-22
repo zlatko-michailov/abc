@@ -52,7 +52,7 @@ namespace abc { namespace test { namespace vmem {
 	template <typename Pool>
 	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit);
 
-	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b);
+	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b, abc::tag_t tag);
 
 
 	bool test_vmem_pool_fit(test_context<abc::test::log>& context) {
@@ -100,37 +100,37 @@ namespace abc { namespace test { namespace vmem {
 			int cmp = std::memcmp(&expected, page.ptr(), sizeof(vmem_root_page));
 			passed = context.are_equal<int>(cmp, 0, 0x103bd, "%d") && passed;
 
-			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00, __TAG__) && passed;
 		}
 
 		// Page 1 (start page)
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 1, context.log);
-			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00) && passed;
+			passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00, __TAG__) && passed;
 		}
 
 		// Page 2
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 2, context.log);
-			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x22) && passed;
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x22, __TAG__) && passed;
 		}
 
 		// Page 3
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 3, context.log);
-			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x33) && passed;
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x33, __TAG__) && passed;
 		}
 
 		// Page 4
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 4, context.log);
-			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x44) && passed;
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x44, __TAG__) && passed;
 		}
 
 		// Page 5
 		{
 			abc::vmem_page<Pool, Log> page(&pool, 5, context.log);
-			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x55) && passed;
+			passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x55, __TAG__) && passed;
 		}
 
 		return passed;
@@ -248,6 +248,20 @@ namespace abc { namespace test { namespace vmem {
 				actual_itr++;
 			}
 			passed = context.are_equal(actual_itr == linked.cend(), true, __TAG__, "%d") && passed;
+
+			// Iterate backwards.
+			actual_itr = linked.crend();
+			for (std::size_t i = 0; i < exp_len; i++) {
+				context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
+		
+				LinkedPage* linked_page = static_cast<LinkedPage*>(actual_itr.operator->().operator->());
+
+				passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(linked_page->data, exp[exp_len - i - 1].first, __TAG__, "0x%llx") && passed;
+
+				actual_itr--;
+			}
+			passed = context.are_equal(actual_itr == linked.crbegin(), true, __TAG__, "%d") && passed;
 		}
 
 		// Erase
@@ -378,6 +392,20 @@ namespace abc { namespace test { namespace vmem {
 				actual_itr++;
 			}
 			passed = context.are_equal(actual_itr == linked.cend(), true, __TAG__, "%d") && passed;
+
+			// Iterate backwards.
+			actual_itr = linked.crend();
+			for (std::size_t i = 0; i < exp_len; i++) {
+				context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
+		
+				LinkedPage* linked_page = static_cast<LinkedPage*>(actual_itr.operator->().operator->());
+
+				passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(linked_page->data, exp[exp_len - i - 1].first, __TAG__, "0x%llx") && passed;
+
+				actual_itr--;
+			}
+			passed = context.are_equal(actual_itr == linked.rbegin(), true, __TAG__, "%d") && passed;
 		}
 
 		// 5 2 4 3
@@ -431,6 +459,20 @@ namespace abc { namespace test { namespace vmem {
 				actual_itr++;
 			}
 			passed = context.are_equal(actual_itr == linked.cend(), true, __TAG__, "%d") && passed;
+
+			// Iterate backward.
+			actual_itr = linked.crend();
+			for (std::size_t i = 0; i < exp_len; i++) {
+				context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
+		
+				LinkedPage* linked_page = static_cast<LinkedPage*>(actual_itr.operator->().operator->());
+
+				passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(linked_page->data, exp[exp_len - i - 1].first, __TAG__, "0x%llx") && passed;
+
+				actual_itr--;
+			}
+			passed = context.are_equal(actual_itr == linked.crbegin(), true, __TAG__, "%d") && passed;
 		}
 
 		// Allocate again
@@ -457,6 +499,28 @@ namespace abc { namespace test { namespace vmem {
 			passed = context.are_equal(linked_page2 != nullptr, true, __TAG__, "%d") && passed;
 			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
 		}
+
+		return passed;
+	}
+
+
+	bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+
+		using Linked = abc::vmem_linked<Pool, Log>;
+		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/linked_splice.vmem", context.log);
+
+		abc::vmem_linked_state linked_state;
+		Linked linked(&linked_state, &pool, context.log);
+
+		abc::vmem_linked_state other_linked_state;
+		Linked other_linked(&other_linked_state, &pool, context.log);
+
+		//// TODO: test_vmem_linked_splice()
 
 		return passed;
 	}
@@ -592,7 +656,7 @@ namespace abc { namespace test { namespace vmem {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041d, "forward[%zd]=0x%x", i, exp[i].first);
 	
 			passed = context.are_equal(actual_itr == exp[i].second, true, 0x1041e, "%d") && passed;
-			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[i].first) && passed;
+			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[i].first, __TAG__) && passed;
 			actual_itr++;
 		}
 		passed = context.are_equal(actual_itr == list.cend(), true, 0x103df, "%d") && passed;
@@ -600,10 +664,10 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate backwards.
 		actual_itr = list.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041f, "backward[%zd]=0x%x", i, exp[exp_len - i - 1].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041f, "backward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
 			passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, 0x10420, "%d") && passed;
-			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[exp_len - i - 1].first) && passed;
+			passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[exp_len - i - 1].first, __TAG__) && passed;
 			actual_itr--;
 		}
 		passed = context.are_equal(actual_itr == list.crbegin(), true, 0x103e0, "%d") && passed;
@@ -828,18 +892,18 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
-	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b) {
+	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b, abc::tag_t tag) {
 		bool passed = true;
 
 		const std::uint8_t* byte_buffer = reinterpret_cast<const std::uint8_t*>(buffer);
 		for (std::size_t i = begin_pos; i < end_pos; i++) {
 			if (byte_buffer[i] != b) {
 				if (i == begin_pos) {
-					context.log->put_any(abc::category::any, abc::severity::debug, 0x103fe, "Verifying 0x%x", b);
+					context.log->put_any(abc::category::any, abc::severity::debug, tag, "Verifying 0x%x", b);
 				}
 
-				context.log->put_any(abc::category::any, abc::severity::optional, 0x103ff, "i = %zu", i);
-				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, 0x10400, "0x%x") && passed;
+				context.log->put_any(abc::category::any, abc::severity::optional, tag, "i = %zu", i);
+				passed = context.are_equal<std::uint8_t>(byte_buffer[i], b, tag, "0x%x") && passed;
 			}
 		}
 
