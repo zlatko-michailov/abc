@@ -508,8 +508,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::splice() Start. front_page_pos=0x%llx, back_page_pos=0x%llx",
-				(long long)_state->front_page_pos, (long long)_state->back_page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::splice() Start. front_page_pos=0x%llx, back_page_pos=0x%llx, other.front_page_pos=0x%llx, other.back_page_pos=0x%llx",
+				(long long)_state->front_page_pos, (long long)_state->back_page_pos, (long long)other._state->front_page_pos, (long long)other._state->back_page_pos);
 		}
 
 		bool ok = true;
@@ -546,15 +546,19 @@ namespace abc {
 					}
 				}
 
-				back_linked_page->next_page_pos = other._state->front_page_pos;
-				other_front_linked_page->prev_page_pos = _state->back_page_pos;
-			}
-		}
+				if (ok) {
+					// Connect this back page and other front page.
+					back_linked_page->next_page_pos = other._state->front_page_pos;
+					other_front_linked_page->prev_page_pos = _state->back_page_pos;
 
-		if (ok) {
-			// Empty other.
-			other._state->front_page_pos = vmem_page_pos_nil;
-			other._state->back_page_pos = vmem_page_pos_nil;
+					// Update this state.
+					_state->back_page_pos = other._state->back_page_pos;
+
+					// Empty other state.
+					other._state->front_page_pos = vmem_page_pos_nil;
+					other._state->back_page_pos = vmem_page_pos_nil;
+				}
+			}
 		}
 
 		if (_log != nullptr) {

@@ -517,10 +517,139 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_linked_state linked_state;
 		Linked linked(&linked_state, &pool, context.log);
 
+		// Insert three
+		{
+			// Page 2
+			abc::vmem_page<Pool, Log> page2(&pool, context.log);
+			LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
+			passed = context.are_equal(linked_page2 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+			linked_page2->data = 0x0062;
+
+			// insert(begin)
+			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			Iterator actual_itr = linked.insert(linked.begin(), page2);
+			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
+		}
+		// 2
+
+		{
+			// Page 3
+			abc::vmem_page<Pool, Log> page3(&pool, context.log);
+			LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
+			passed = context.are_equal(linked_page3 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+			linked_page3->data = 0x0063;
+
+			// insert(begin)
+			Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			Iterator actual_itr = linked.insert(linked.begin(), page3);
+			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
+		}
+		// 3 2
+
+		{
+			// Page 4
+			abc::vmem_page<Pool, Log> page4(&pool, context.log);
+			LinkedPage* linked_page4 = reinterpret_cast<LinkedPage*>(page4.ptr());
+			passed = context.are_equal(linked_page4 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page4.pos(), 4LL, __TAG__, "0x%llx") && passed;
+			linked_page4->data = 0x0064;
+
+			// insert(begin)
+			Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			Iterator actual_itr = linked.insert(linked.begin(), page4);
+			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
+		}
+		// 4 3 2
+
 		abc::vmem_linked_state other_linked_state;
 		Linked other_linked(&other_linked_state, &pool, context.log);
 
-		//// TODO: test_vmem_linked_splice()
+		// Insert three
+		{
+			// Page 5
+			abc::vmem_page<Pool, Log> page5(&pool, context.log);
+			LinkedPage* linked_page5 = reinterpret_cast<LinkedPage*>(page5.ptr());
+			passed = context.are_equal(linked_page5 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page5.pos(), 5LL, __TAG__, "0x%llx") && passed;
+			linked_page5->data = 0x0065;
+
+			// insert(begin)
+			Iterator expected_itr = Iterator(&other_linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			Iterator actual_itr = other_linked.insert(other_linked.begin(), page5);
+			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == other_linked.begin(), true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == other_linked.rend(), true, __TAG__, "%d") && passed;
+		}
+		// 5
+
+		{
+			// Page 3
+			abc::vmem_page<Pool, Log> page6(&pool, context.log);
+			LinkedPage* linked_page6 = reinterpret_cast<LinkedPage*>(page6.ptr());
+			passed = context.are_equal(linked_page6 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page6.pos(), 6LL, __TAG__, "0x%llx") && passed;
+			linked_page6->data = 0x0066;
+
+			// insert(begin)
+			Iterator expected_itr = Iterator(&other_linked, 6U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			Iterator actual_itr = other_linked.insert(other_linked.begin(), page6);
+			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == other_linked.begin(), true, __TAG__, "%d") && passed;
+		}
+		// 6 5
+
+
+		linked.splice(other_linked);
+
+		passed = context.are_equal(other_linked.begin() == other_linked.end(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(other_linked.rend() == other_linked.rbegin(), true, __TAG__, "%d") && passed;
+
+		// Iterate after all erases
+		{
+			using Pair = std::pair<unsigned long long, Iterator>;
+			const Pair exp[] = {
+				{ 0x0064ULL, Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+				{ 0x0063ULL, Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+				{ 0x0062ULL, Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+				{ 0x0066ULL, Iterator(&linked, 6U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+				{ 0x0065ULL, Iterator(&linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+			};
+			constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
+
+			// Iterate forward.
+			Iterator actual_itr = linked.cbegin();
+			for (std::size_t i = 0; i < exp_len; i++) {
+				context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", i, exp[i].first);
+		
+				LinkedPage* linked_page = static_cast<LinkedPage*>(actual_itr.operator->().operator->());
+
+				passed = context.are_equal(actual_itr == exp[i].second, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(linked_page->data, exp[i].first, __TAG__, "0x%llx") && passed;
+
+				actual_itr++;
+			}
+			passed = context.are_equal(actual_itr == linked.cend(), true, __TAG__, "%d") && passed;
+
+			// Iterate backward.
+			actual_itr = linked.crend();
+			for (std::size_t i = 0; i < exp_len; i++) {
+				context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
+		
+				LinkedPage* linked_page = static_cast<LinkedPage*>(actual_itr.operator->().operator->());
+
+				passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(linked_page->data, exp[exp_len - i - 1].first, __TAG__, "0x%llx") && passed;
+
+				actual_itr--;
+			}
+			passed = context.are_equal(actual_itr == linked.crbegin(), true, __TAG__, "%d") && passed;
+		}
 
 		return passed;
 	}
