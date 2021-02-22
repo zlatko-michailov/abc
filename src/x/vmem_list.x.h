@@ -133,6 +133,10 @@ namespace abc {
 		vmem_item_pos_t item_pos;
 		begin_pos(page_pos, item_pos);
 
+		if (page_pos == vmem_page_pos_nil) {
+			return cend();
+		}
+
 		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, vmem_iterator_edge::none, _log);
 	}
 
@@ -176,6 +180,10 @@ namespace abc {
 		vmem_page_pos_t page_pos;
 		vmem_item_pos_t item_pos;
 		rend_pos(page_pos, item_pos);
+
+		if (page_pos == vmem_page_pos_nil) {
+			return crbegin();
+		}
 
 		return vmem_list_iterator<T, Pool, Log>(this, page_pos, item_pos, vmem_iterator_edge::none, _log);
 	}

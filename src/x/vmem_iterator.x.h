@@ -78,7 +78,6 @@ namespace abc {
 			&& _page_pos == other._page_pos
 			&& _item_pos == other._item_pos
 			&& _edge == other._edge;
-			//// Do not include _edge. Otherwise begin() != end() on an empty list.
 	}
 
 
