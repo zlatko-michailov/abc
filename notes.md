@@ -3,6 +3,8 @@
 - Refactor
   - vmem_pool
 - vmem_linked
+- vmem_linked::splice()
+- vmem_linked test - refactor
 
 ## To Do
 - Refactor
@@ -10,8 +12,6 @@
     + insert()
     + erase()
     - clear()
-- vmem_linked::splice()
-- vmem_linked test - refactor
 - free pages - BREAKING CHANGE
 - vmem_container
 ---
