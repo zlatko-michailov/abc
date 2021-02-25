@@ -872,6 +872,8 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline vmem_page<Pool, Log>& vmem_page<Pool, Log>::operator =(const vmem_page<Pool, Log>& other) noexcept {
+		unlock();
+
 		_pool = other._pool;
 		_pos = other._pos;
 		_ptr = other._ptr;
@@ -880,6 +882,21 @@ namespace abc {
 		if (_pool != nullptr && _pos != vmem_page_pos_nil) {
 			lock();
 		}
+
+		return *this;
+	}
+
+
+	template <typename Pool, typename Log>
+	inline vmem_page<Pool, Log>& vmem_page<Pool, Log>::operator =(vmem_page<Pool, Log>&& other) noexcept {
+		unlock();
+
+		_pool = other._pool;
+		_pos = other._pos;
+		_ptr = other._ptr;
+		_log = other._log;
+
+		other.invalidate();
 
 		return *this;
 	}

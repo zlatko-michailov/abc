@@ -12,7 +12,12 @@
     + insert()
     + erase()
     - clear()
-- free pages - BREAKING CHANGE
+- BREAKING CHANGE
+  - vmem_pool - format
+- vmem_pool
+  - free pages
+  - alloc_page()
+  - free_page()
 - vmem_container
 ---
 - vmem_map

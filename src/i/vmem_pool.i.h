@@ -155,6 +155,7 @@ namespace abc {
 
 	public:
 		vmem_page<Pool, Log>&		operator =(const vmem_page<Pool, Log>& other) noexcept;
+		vmem_page<Pool, Log>&		operator =(vmem_page<Pool, Log>&& other) noexcept;
 
 	public:
 		Pool*						pool() const noexcept;
