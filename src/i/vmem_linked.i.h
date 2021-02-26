@@ -48,8 +48,8 @@ namespace abc {
 		using value_type				= vmem_page<Pool, Log>;
 		using pointer					= vmem_ptr<vmem_linked_page, Pool, Log>;
 		using const_pointer				= const pointer;
-		using reference					= vmem_page<Pool, Log>&;
-		using const_reference			= const vmem_page<Pool, Log>&;
+		using reference					= value_type&;
+		using const_reference			= const value_type&;
 		using iterator					= vmem_linked_iterator<Pool, Log>;
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
@@ -84,8 +84,11 @@ namespace abc {
 	public:
 		bool					empty() const noexcept;
 
-		value_type				front() const;
-		value_type				back() const;
+		reference				front();
+		const_reference			front() const;
+
+		reference				back();
+		const_reference			back() const;
 
 		void					push_back(reference page);
 		void					pop_back();

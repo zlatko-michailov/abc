@@ -170,13 +170,25 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline vmem_page<Pool, Log> vmem_linked<Pool, Log>::front() const {
+	inline typename vmem_linked<Pool, Log>::reference vmem_linked<Pool, Log>::front() {
 		return at(begin());
 	}
 
 
 	template <typename Pool, typename Log>
-	inline vmem_page<Pool, Log> vmem_linked<Pool, Log>::back() const {
+	inline typename vmem_linked<Pool, Log>::const_reference vmem_linked<Pool, Log>::front() const {
+		return at(begin());
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::reference vmem_linked<Pool, Log>::back() {
+		return at(rend());
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::const_reference vmem_linked<Pool, Log>::back() const {
 		return at(rend());
 	}
 

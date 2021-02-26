@@ -820,7 +820,7 @@ namespace abc { namespace test { namespace vmem {
 		bool passed = true;
 
 		// Iterate forward.
-		Iterator actual_itr = linked.cbegin();
+		Iterator actual_itr = linked.begin();
 		for (std::size_t i = 0; i < expected_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", i, expected[i].first);
 	
@@ -831,10 +831,10 @@ namespace abc { namespace test { namespace vmem {
 
 			actual_itr++;
 		}
-		passed = context.are_equal(actual_itr == linked.cend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr == linked.end(), true, __TAG__, "%d") && passed;
 
 		// Iterate backward.
-		actual_itr = linked.crend();
+		actual_itr = linked.rend();
 		for (std::size_t i = 0; i < expected_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", expected_len - i - 1, expected[expected_len - i - 1].first);
 	
@@ -845,7 +845,7 @@ namespace abc { namespace test { namespace vmem {
 
 			actual_itr--;
 		}
-		passed = context.are_equal(actual_itr == linked.crbegin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr == linked.rbegin(), true, __TAG__, "%d") && passed;
 
 		return passed;
 	}

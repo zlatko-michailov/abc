@@ -142,7 +142,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Pool, typename Log>
+	template <typename Pool, typename Log = null_log>
 	class vmem_page {
 	public:
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
@@ -183,7 +183,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
+	template <typename T, typename Pool, typename Log = null_log>
 	class vmem_ptr {
 	public:
 		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
@@ -193,6 +193,7 @@ namespace abc {
 
 	public:
 		vmem_ptr<T, Pool, Log>&		operator =(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
+		vmem_ptr<T, Pool, Log>&		operator =(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
 
 	public:
 		Pool*						pool() const noexcept;
