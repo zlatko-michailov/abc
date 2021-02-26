@@ -121,7 +121,7 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e7) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = server.accept();
 
 		std::uint16_t content_length;
 		client.receive(&content_length, sizeof(std::uint16_t));
@@ -174,7 +174,7 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100e8) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = server.accept();
 
 		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
 		std::istream client_in(&sb);
@@ -291,7 +291,7 @@ namespace abc { namespace test { namespace socket {
 		});
 		passed = abc::test::heap::ignore_heap_allocation(context, 0x100f1) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = std::move(server.accept());
+		abc::tcp_client_socket<abc::test::log> client = server.accept();
 
 		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
 		abc::http_server_stream<abc::test::log> http(&sb, context.log);

@@ -109,7 +109,7 @@ namespace abc {
 	inline void duration_multifile_streambuf<MaxPath, Clock, Log>::reopen() {
 		base::reopen();
 
-		_ts = std::move(timestamp<Clock>());
+		_ts = timestamp<Clock>();
 	}
 
 
