@@ -241,6 +241,7 @@ namespace abc {
 
 
 	struct vmem_linked_page {
+		vmem_page_pos_t		page_pos			= vmem_page_pos_nil;
 		vmem_page_pos_t		prev_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		next_page_pos		= vmem_page_pos_nil;
 	};
@@ -257,7 +258,7 @@ namespace abc {
 
 
 	struct vmem_root_page {
-		const vmem_version_t	version			= 1;
+		const vmem_version_t	version			= 2;
 		const char				signature[10]	= "abc::vmem";
 		const vmem_item_pos_t	page_size		= vmem_page_size;
 		const std::uint16_t		unused1			= 0xcccc;

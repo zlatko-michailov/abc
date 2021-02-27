@@ -36,7 +36,7 @@ namespace abc {
 	class vmem_linked;
 
 	template <typename Pool, typename Log = null_log>
-	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_linked_page, Pool, Log>;
+	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, typename vmem_linked<Pool, Log>::value_type, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -45,8 +45,8 @@ namespace abc {
 	template <typename Pool, typename Log = null_log>
 	class vmem_linked {
 	public:
-		using value_type				= vmem_page<Pool, Log>;
-		using pointer					= vmem_ptr<vmem_linked_page, Pool, Log>;
+		using value_type				= vmem_page_pos_t;
+		using pointer					= vmem_ptr<value_type, Pool, Log>;
 		using const_pointer				= const pointer;
 		using reference					= value_type&;
 		using const_reference			= const value_type&;
@@ -90,27 +90,27 @@ namespace abc {
 		reference				back();
 		const_reference			back() const;
 
-		void					push_back(reference page);
+		void					push_back(const_reference page_pos);
 		void					pop_back();
 
-		void					push_front(reference page);
+		void					push_front(const_reference page_pos);
 		void					pop_front();
 
-		iterator				insert(const_iterator itr, reference page);
+		iterator				insert(const_iterator itr, const_reference page_pos);
 		iterator				erase(const_iterator itr);
 		void					clear();
-		void					splice(vmem_linked<Pool, Log>& other);
+		void					splice(vmem_linked<Pool, Log>& /*inout*/ other);
 		void					splice(vmem_linked<Pool, Log>&& other);
 
 	private:
-		bool					insert_nostate(const_iterator itr, reference page, vmem_page_pos_t back_page_pos) noexcept;
+		bool					insert_nostate(const_iterator itr, const_reference page_pos, vmem_page_pos_t back_page_pos) noexcept;
 		bool					erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& back_page_pos) noexcept;
 
 	private:
 		friend iterator;
 
-		void					move_next(iterator& itr) const noexcept;
-		void					move_prev(iterator& itr) const noexcept;
+		void					move_next(/*inout*/ iterator& itr) const noexcept;
+		void					move_prev(/*inout*/ iterator& itr) const noexcept;
 		pointer					at(const_iterator& itr) const noexcept;
 
 	private:

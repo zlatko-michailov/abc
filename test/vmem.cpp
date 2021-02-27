@@ -803,7 +803,7 @@ namespace abc { namespace test { namespace vmem {
 		linked_page->data = data;
 
 		// insert
-		actual_itr = linked.insert(itr, page);
+		actual_itr = linked.insert(itr, page.pos());
 		passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
 
 		return passed;
@@ -824,10 +824,11 @@ namespace abc { namespace test { namespace vmem {
 		for (std::size_t i = 0; i < expected_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", i, expected[i].first);
 	
-			LinkedPage& linked_page = static_cast<LinkedPage&>(*actual_itr);
+			abc::vmem_page<Pool, Log> page(pool, *actual_itr, context.log);
+			LinkedPage* linked_page = static_cast<LinkedPage*>(page.ptr());
 
 			passed = context.are_equal(actual_itr == expected[i].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(linked_page.data, expected[i].first, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(linked_page->data, expected[i].first, __TAG__, "0x%llx") && passed;
 
 			actual_itr++;
 		}
@@ -838,10 +839,11 @@ namespace abc { namespace test { namespace vmem {
 		for (std::size_t i = 0; i < expected_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zd]=0x%x", expected_len - i - 1, expected[expected_len - i - 1].first);
 	
-			LinkedPage& linked_page = static_cast<LinkedPage&>(*actual_itr);
+			abc::vmem_page<Pool, Log> page(pool, *actual_itr, context.log);
+			LinkedPage* linked_page = static_cast<LinkedPage*>(page.ptr());
 
 			passed = context.are_equal(actual_itr == expected[expected_len - i - 1].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(linked_page.data, expected[expected_len - i - 1].first, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(linked_page->data, expected[expected_len - i - 1].first, __TAG__, "0x%llx") && passed;
 
 			actual_itr--;
 		}
