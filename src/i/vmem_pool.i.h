@@ -262,7 +262,7 @@ namespace abc {
 		const char				signature[10]	= "abc::vmem";
 		const vmem_item_pos_t	page_size		= vmem_page_size;
 		const std::uint16_t		unused1			= 0xcccc;
-		vmem_list_state			free_pages;
+		vmem_linked_state		free_pages;
 		const std::uint8_t		unused2			= 0xcc;
 	};
 

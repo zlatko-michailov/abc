@@ -309,15 +309,15 @@ namespace abc {
 		else {
 			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
-			vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
+			vmem_linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
 
-			if (!free_pages_list.empty()) {
+			if (!free_pages_linked.empty()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10393, "vmem_pool::pop_free_page_pos() Free page. size=%zu", free_pages_list.size());
+					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10393, "vmem_pool::pop_free_page_pos() Non-empty");
 				}
 
-				page_pos = free_pages_list.back();
-				free_pages_list.pop_back();
+				page_pos = free_pages_linked.back();
+				free_pages_linked.pop_back();
 
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10394, "vmem_pool::pop_free_page_pos() Found free page. page_pos=0x%llx", (long long)page_pos);
@@ -349,9 +349,9 @@ namespace abc {
 		else {
 			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
-			vmem_list<vmem_page_pos_t, Pool, Log> free_pages_list(&root_page->free_pages, this, _log);
+			vmem_linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
 
-			free_pages_list.push_back(page_pos);
+			free_pages_linked.push_back(page_pos);
 		}
 
 		if (_log != nullptr) {

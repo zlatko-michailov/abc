@@ -105,7 +105,6 @@ namespace abc { namespace test { namespace vmem {
 			abc::vmem_page<Pool, Log> page(&pool, 0, context.log);
 
 			vmem_root_page expected;
-			expected.free_pages.item_size = static_cast<vmem_item_pos_t>(sizeof(vmem_page_pos_t));
 			int cmp = std::memcmp(&expected, page.ptr(), sizeof(vmem_root_page));
 			passed = context.are_equal<int>(cmp, 0, 0x103bd, "%d") && passed;
 

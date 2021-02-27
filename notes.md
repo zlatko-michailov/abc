@@ -1,10 +1,11 @@
 ## Done
+- BREAKING CHANGE
+  - vmem_list_state
+  - vmem_root_page
 - vmem_list::erase() bug
 - Refactor
   - vmem_pool
 - vmem_linked
-- vmem_linked::splice()
-- vmem_linked test - refactor
 
 ## To Do
 - Refactor
@@ -12,13 +13,8 @@
     + insert()
     + erase()
     - clear()
-- BREAKING CHANGE
-  - vmem_pool - format
-- vmem_pool
-  - free pages
-  - alloc_page()
-  - free_page()
 - vmem_container
+- vmem_list
 ---
 - vmem_map
 ---
