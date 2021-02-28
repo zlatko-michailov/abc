@@ -490,6 +490,75 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+
+		using Linked = abc::vmem_linked<Pool, Log>;
+		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/linked_clear.vmem", context.log);
+
+		abc::vmem_linked_state linked_state;
+		Linked linked(&linked_state, &pool, context.log);
+
+		// Allocate and insert
+		{
+			// Page 2
+			Iterator actual_itr = linked.end();
+			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			passed = insert_linked_page(context, &pool, linked, 2U, 0x0072, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
+		}
+
+		{
+			// Page 3
+			Iterator actual_itr = linked.end();
+			Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			passed = insert_linked_page(context, &pool, linked, 3U, 0x0073, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
+		}
+
+		{
+			// Page 4
+			Iterator actual_itr = linked.end();
+			Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+			passed = insert_linked_page(context, &pool, linked, 4U, 0x0074, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
+		}
+
+		// Clear
+		linked.clear();
+
+		// Allocate again
+		{
+			// Page 4
+			abc::vmem_page<Pool, Log> page4(&pool, context.log);
+			LinkedPage* linked_page4 = reinterpret_cast<LinkedPage*>(page4.ptr());
+			passed = context.are_equal(linked_page4 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page4.pos(), 4LL, __TAG__, "0x%llx") && passed;
+		}
+		{
+			// Page 3
+			abc::vmem_page<Pool, Log> page3(&pool, context.log);
+			LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
+			passed = context.are_equal(linked_page3 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+		}
+		{
+			// Page 2
+			abc::vmem_page<Pool, Log> page2(&pool, context.log);
+			LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
+			passed = context.are_equal(linked_page2 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+		}
+
+		return passed;
+	}
+
+
 	bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 

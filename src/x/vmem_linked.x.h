@@ -502,7 +502,7 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline void vmem_linked<Pool, Log>::clear() {
-		//// TODO: vmem_linked<Pool, Log>::clear()
+		_pool->clear_linked(/*inout*/ *this);
 	}
 
 

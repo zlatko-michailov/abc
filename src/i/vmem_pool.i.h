@@ -75,11 +75,13 @@ namespace abc {
 	template <typename Pool, typename Log>
 	class vmem_page;
 
+	template <typename Pool, typename Log>
+	class vmem_linked;
+
 
 	template <std::size_t MaxMappedPages, typename Log = null_log>
 	class vmem_pool {
 		using Pool = vmem_pool<MaxMappedPages, Log>;
-		using Page = vmem_page<vmem_pool<MaxMappedPages, Log>, Log>;
 
 	public:
 		static constexpr std::size_t	max_mapped_pages() noexcept;
@@ -88,13 +90,18 @@ namespace abc {
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
 	private:
-		friend Page;
+		friend vmem_page<Pool, Log>;
 
 		vmem_page_pos_t				alloc_page() noexcept;
 		void						free_page(vmem_page_pos_t page_pos) noexcept;
 
 		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
 		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
+
+	private:
+		friend vmem_linked<Pool, Log>;
+
+		void						clear_linked(/*inout*/ vmem_linked<Pool, Log>& linked);
 
 	// Constructor helpers
 	private:

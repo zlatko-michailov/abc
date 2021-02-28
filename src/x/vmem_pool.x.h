@@ -303,7 +303,7 @@ namespace abc {
 
 		if (page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10392, "vmem_pool::pop_free_page_pos() Could not check the free_pages list");
+				_log->put_any(category::abc::vmem, severity::warning, 0x10392, "vmem_pool::pop_free_page_pos() Could not check free_pages");
 			}
 		}
 		else {
@@ -343,7 +343,7 @@ namespace abc {
 
 		if (page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x1039a, "vmem_pool::push_free_page_pos() Could not add to the free_pages list");
+				_log->put_any(category::abc::vmem, severity::warning, 0x1039a, "vmem_pool::push_free_page_pos() Could not add to free_pages");
 			}
 		}
 		else {
@@ -796,6 +796,32 @@ namespace abc {
 				(unsigned)_mapped_page_totals.hit_count, (unsigned)hit_percent,
 				(unsigned)_mapped_page_totals.miss_count, (unsigned)miss_percent,
 				(unsigned)_mapped_page_totals.check_count, (unsigned)(check_factor_x10 / 10), (unsigned)(check_factor_x10 % 10), (unsigned)check_factor_percent);
+		}
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
+	inline void vmem_pool<MaxMappedPages, Log>::clear_linked(/*inout*/ vmem_linked<Pool, Log>& linked) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::clear_linked() Start");
+		}
+
+		vmem_page<Pool, Log> page(this, vmem_page_pos_root, _log);
+
+		if (page.ptr() == nullptr) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_pool::clear_linked() Could not check free_pages");
+			}
+		}
+		else {
+			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
+
+			vmem_linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
+			free_pages_linked.splice(/*inout*/linked);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::clear_linked() Done.");
 		}
 	}
 
