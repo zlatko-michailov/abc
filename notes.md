@@ -8,13 +8,13 @@
 - vmem_linked
 
 ## To Do
+- vmem_container
+- vmem_list
 - Refactor
   - vmem_list
     + insert()
     + erase()
     - clear()
-- vmem_container
-- vmem_list
 ---
 - vmem_map
 ---

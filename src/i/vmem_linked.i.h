@@ -36,7 +36,7 @@ namespace abc {
 	class vmem_linked;
 
 	template <typename Pool, typename Log = null_log>
-	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, typename vmem_linked<Pool, Log>::value_type, Pool, Log>;
+	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_page_pos_t, Pool, Log>;
 
 
 	// --------------------------------------------------------------
