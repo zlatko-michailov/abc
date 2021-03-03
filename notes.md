@@ -9,7 +9,8 @@
 
 ## To Do
 - vmem_container
-- vmem_list
+  - balance
+  - use a vmem_linked member
 - Refactor
   - vmem_list
     + insert()

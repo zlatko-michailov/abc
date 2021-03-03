@@ -85,7 +85,6 @@ namespace abc {
 
 	public:
 		vmem_container<T, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance, Pool* pool, Log* log);
-
 		vmem_container<T, Pool, Log>(const vmem_container<T, Pool, Log>& other) noexcept = default;
 		vmem_container<T, Pool, Log>(vmem_container<T, Pool, Log>&& other) noexcept = default;
 
