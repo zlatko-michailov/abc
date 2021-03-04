@@ -136,10 +136,11 @@ namespace abc {
 		bool					insert_nostate(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		bool					insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept;
 		bool					insert_nonempty(/*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
-		bool					insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, vmem_container_page<T>* container_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
+		bool					insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, vmem_container_page<T>* container_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		void					insert_with_capacity_safe(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item) noexcept;
 		void					balance_split_safe(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T>* new_container_page) noexcept;
 		bool					insert_page_after(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_container_page<T>*& new_container_page) noexcept;
+		bool					should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept;
 
 	// erase() helpers
 	private:
@@ -152,9 +153,7 @@ namespace abc {
 		bool					link_pages(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& front_page_pos, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
 		bool					link_next_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& front_page_pos) noexcept;
 		bool					link_prev_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
-
-	private:
-		bool					should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept;
+		bool					should_balance_erase(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos) const noexcept;
 
 	private:
 		friend iterator;

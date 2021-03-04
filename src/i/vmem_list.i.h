@@ -44,7 +44,7 @@ namespace abc {
 		using base = vmem_container<T, Pool, Log>;
 
 		static constexpr vmem_page_balance_t balance_insert	= ~vmem_page_balance::end;
-		static constexpr vmem_page_balance_t balance_erase	= ~vmem_page_balance::end;
+		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;	// A stack would still be kept dense.
 
 	public:
 		vmem_list<T, Pool, Log>(vmem_list_state* state, Pool* pool, Log* log);

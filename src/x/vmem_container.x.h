@@ -497,11 +497,8 @@ namespace abc {
 				// Preset the out params.
 				page_pos = page.pos();
 
-				// Decide whether we should balance.
-				bool balance = should_balance_insert(container_page, item_pos, itr_end);
-
 				// Insert the item into the page.
-				ok = insert_with_overflow(/*inout*/ page_pos, container_page, /*inout*/ item_pos, item, balance, /*out*/ new_page_pos);
+				ok = insert_with_overflow(/*inout*/ page_pos, container_page, /*inout*/ item_pos, item, itr_end, /*out*/ new_page_pos);
 			}
 			else {
 				// The page has capacity.
@@ -524,13 +521,16 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, vmem_container_page<T>* container_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool balance, /*out*/ vmem_page_pos_t& new_page_pos) noexcept {
+	inline bool vmem_container<T, Pool, Log>::insert_with_overflow(/*inout*/ vmem_page_pos_t& page_pos, vmem_container_page<T>* container_page, /*inout*/ vmem_item_pos_t& item_pos, const_reference item, bool itr_end, /*out*/ vmem_page_pos_t& new_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_with_overflow() Start. page_pos=0x%llx, item_pos=0x%x",
 				(long long)page_pos, item_pos);
 		}
 
 		bool ok = true;
+
+		// Decide whether we should balance before we alter any inout parameter.
+		bool balance = should_balance_insert(container_page, item_pos, itr_end);
 
 		vmem_page<Pool, Log> new_page(nullptr);
 		vmem_container_page<T>* new_container_page = nullptr;
@@ -539,8 +539,6 @@ namespace abc {
 		if (ok) {
 			new_page_pos = new_page.pos();
 
-			// Split the items evenly among the 2 pages unless we are inserting at the end.
-			// This exception fills up pages fully when items keep being added at the end.
 			if (balance) {
 				balance_split_safe(page_pos, container_page, new_page_pos, new_container_page);
 			}
@@ -701,6 +699,24 @@ namespace abc {
 	}
 
 
+	template <typename T, typename Pool, typename Log>
+	inline bool vmem_container<T, Pool, Log>::should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept {
+		bool balance = false;
+
+		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::begin);
+		}
+		else if (container_page->next_page_pos == vmem_page_pos_nil && itr_end) {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::end);
+		}
+		else {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::inner);
+		}
+
+		return balance;
+	}
+
+
 	// ..............................................................
 
 
@@ -788,11 +804,14 @@ namespace abc {
 			vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
 
 			if (container_page->item_count > 1) {
+				// Determine whether we should balance before any inout parameter gets altered.
+				bool balance = should_balance_erase(container_page, item_pos);
+
 				// There are many items on the page.
 				erase_from_many_safe(container_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ edge);
 
 				// Balance if item count drops below half of capacity.
-				if (2 * container_page->item_count <= page_capacity()) {
+				if (balance && 2 * container_page->item_count <= page_capacity()) {
 					balance_merge_safe(/*inout*/ page, /*inout*/ container_page, /*inout*/ page_pos, /*inout*/ item_pos, /*inout*/ back_page_pos);
 				}
 			}
@@ -1185,12 +1204,21 @@ namespace abc {
 	}
 
 
-	// ..............................................................
-
-
 	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::clear() noexcept {
-		erase(begin(), end());
+	inline bool vmem_container<T, Pool, Log>::should_balance_erase(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos) const noexcept {
+		bool balance = false;
+
+		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
+			balance = vmem_page_balance::test(_balance_erase, vmem_page_balance::begin);
+		}
+		else if (container_page->next_page_pos == vmem_page_pos_nil && item_pos == container_page->item_count - 1) {
+			balance = vmem_page_balance::test(_balance_erase, vmem_page_balance::end);
+		}
+		else {
+			balance = vmem_page_balance::test(_balance_erase, vmem_page_balance::inner);
+		}
+
+		return balance;
 	}
 
 
@@ -1198,20 +1226,8 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept {
-		bool balance = false;
-
-		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
-			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::begin);
-		}
-		else if (container_page->next_page_pos == vmem_page_pos_nil && itr_end) {
-			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::end);
-		}
-		else {
-			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::inner);
-		}
-
-		return balance;
+	inline void vmem_container<T, Pool, Log>::clear() noexcept {
+		erase(begin(), end());
 	}
 
 

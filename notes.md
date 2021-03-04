@@ -9,9 +9,6 @@
 
 ## To Do
 - vmem_container
-  - balance
-    - balancing the last page causes a crash
-    - erase(end) should not balance?
   - use a vmem_linked member
 - Refactor
   - vmem_list
