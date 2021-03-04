@@ -43,7 +43,8 @@ namespace abc {
 	class vmem_list : public vmem_container<T, Pool, Log> {
 		using base = vmem_container<T, Pool, Log>;
 
-		static constexpr vmem_page_balance_t balance	= (vmem_page_balance::op_all | vmem_page_balance::pos_begin | vmem_page_balance::pos_inner);
+		static constexpr vmem_page_balance_t balance_insert	= ~vmem_page_balance::end;
+		static constexpr vmem_page_balance_t balance_erase	= ~vmem_page_balance::end;
 
 	public:
 		vmem_list<T, Pool, Log>(vmem_list_state* state, Pool* pool, Log* log);

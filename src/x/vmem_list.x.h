@@ -35,7 +35,7 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline vmem_list<T, Pool, Log>::vmem_list(vmem_list_state* state, Pool* pool, Log* log)
-		: base(state, balance, pool, log) {
+		: base(state, balance_insert, balance_erase, pool, log) {
 	}
 
 }

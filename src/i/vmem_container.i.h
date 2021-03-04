@@ -35,19 +35,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using vmem_page_balance_t = std::uint16_t;
+	using vmem_page_balance_t = std::uint8_t;
 	namespace vmem_page_balance {
-		constexpr vmem_page_balance_t op_insert		= 0x0001;
-		constexpr vmem_page_balance_t op_erase		= 0x0002;
-		constexpr vmem_page_balance_t op_all		= 0x00ff;
-
-		constexpr vmem_page_balance_t pos_begin		= 0x0100;
-		constexpr vmem_page_balance_t pos_inner		= 0x0200;
-		constexpr vmem_page_balance_t pos_end		= 0x0400;
-		constexpr vmem_page_balance_t pos_all		= 0xff00;
-
-		constexpr vmem_page_balance_t never			= 0x0000;
-		constexpr vmem_page_balance_t always		= op_all | pos_all;
+		constexpr vmem_page_balance_t none		= 0x00;
+		constexpr vmem_page_balance_t begin		= 0x01;
+		constexpr vmem_page_balance_t inner		= 0x02;
+		constexpr vmem_page_balance_t end		= 0x04;
+		constexpr vmem_page_balance_t all		= 0xff;
 
 
 		bool test(vmem_page_balance_t value, vmem_page_balance_t bits) noexcept;
@@ -87,7 +81,7 @@ namespace abc {
 		static constexpr bool			is_uninit(const vmem_container_state* state) noexcept;
 
 	public:
-		vmem_container<T, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance, Pool* pool, Log* log);
+		vmem_container<T, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log);
 		vmem_container<T, Pool, Log>(const vmem_container<T, Pool, Log>& other) noexcept = default;
 		vmem_container<T, Pool, Log>(vmem_container<T, Pool, Log>&& other) noexcept = default;
 
@@ -160,7 +154,7 @@ namespace abc {
 		bool					link_prev_page(vmem_page_pos_t prev_page_pos, vmem_page_pos_t next_page_pos, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos, /*inout*/ vmem_iterator_edge_t& edge, /*inout*/ vmem_page_pos_t& back_page_pos) noexcept;
 
 	private:
-		bool					should_balance(vmem_page_balance_t op, const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept;
+		bool					should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept;
 
 	private:
 		friend iterator;
@@ -177,7 +171,8 @@ namespace abc {
 
 	private:
 		vmem_container_state*	_state;
-		vmem_page_balance_t		_balance;
+		vmem_page_balance_t		_balance_insert;
+		vmem_page_balance_t		_balance_erase;
 		Pool*					_pool;
 		Log*					_log;
 	};

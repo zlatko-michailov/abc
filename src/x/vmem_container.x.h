@@ -85,9 +85,10 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline vmem_container<T, Pool, Log>::vmem_container(vmem_container_state* state, vmem_page_balance_t balance, Pool* pool, Log* log)
+	inline vmem_container<T, Pool, Log>::vmem_container(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log)
 		: _state(state)
-		, _balance(balance)
+		, _balance_insert(balance_insert)
+		, _balance_erase(balance_erase)
 		, _pool(pool)
 		, _log(log) {
 
@@ -497,7 +498,7 @@ namespace abc {
 				page_pos = page.pos();
 
 				// Decide whether we should balance.
-				bool balance = should_balance(vmem_page_balance::op_insert, container_page, item_pos, itr_end);
+				bool balance = should_balance_insert(container_page, item_pos, itr_end);
 
 				// Insert the item into the page.
 				ok = insert_with_overflow(/*inout*/ page_pos, container_page, /*inout*/ item_pos, item, balance, /*out*/ new_page_pos);
@@ -1197,19 +1198,17 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::should_balance(vmem_page_balance_t op, const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept {
-		bool balance = vmem_page_balance::test(_balance, op);
+	inline bool vmem_container<T, Pool, Log>::should_balance_insert(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos, bool itr_end) const noexcept {
+		bool balance = false;
 
-		if (balance) {
-			if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
-				balance = vmem_page_balance::test(_balance, vmem_page_balance::pos_begin);
-			}
-			else if (container_page->next_page_pos == vmem_page_pos_nil && itr_end) {
-				balance = vmem_page_balance::test(_balance, vmem_page_balance::pos_end);
-			}
-			else {
-				balance = vmem_page_balance::test(_balance, vmem_page_balance::pos_inner);
-			}
+		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::begin);
+		}
+		else if (container_page->next_page_pos == vmem_page_pos_nil && itr_end) {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::end);
+		}
+		else {
+			balance = vmem_page_balance::test(_balance_insert, vmem_page_balance::inner);
 		}
 
 		return balance;
