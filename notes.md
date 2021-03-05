@@ -1,11 +1,14 @@
 ## Done
-- BREAKING CHANGE
+- Breaking Changes
   - vmem_list_state
   - vmem_root_page
-- vmem_list::erase() bug
-- Refactor
+- Bugs
+  - vmem_list::erase() bug
+- Additions
+  - vmem_linked
+  - vmem_container
+- Refactoring
   - vmem_pool
-- vmem_linked
 
 ## To Do
 - vmem_container
@@ -15,10 +18,13 @@
     + insert()
     + erase()
     - clear()
----
-- vmem_map
+- vmem_iterator
+  - page_pos()
+  - item_pos()
 ---
 - Roadmap
+---
+- vmem_map
 ---
 - vmem:
   - check
