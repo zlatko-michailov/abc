@@ -134,12 +134,12 @@ namespace abc {
 	// insert() helpers
 	private:
 		bool					insert_nostate(const_iterator itr, const_reference item, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
-		bool					insert_empty(const_iterator itr, const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept;
+		bool					insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept;
 		bool					insert_nonempty(const_iterator itr, const_reference item, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		bool					insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T>* container_page, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos, /*out*/ vmem_page_pos_t& new_page_pos) noexcept;
 		void					insert_with_capacity_safe(const_iterator itr, const_reference item, vmem_container_page<T>* container_page, /*out*/ vmem_item_pos_t& item_pos) noexcept;
 		void					balance_split_safe(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T>* new_container_page) noexcept;
-		bool					insert_page_after(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_container_page<T>*& new_container_page) noexcept;
+		bool					insert_page_after(vmem_page_pos_t after_page_pos, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_container_page<T>*& new_container_page) noexcept;
 		bool					should_balance_insert(const_iterator itr, const vmem_container_page<T>* container_page) const noexcept;
 
 	// erase() helpers

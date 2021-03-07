@@ -12,7 +12,7 @@
 
 ## To Do
 - vmem_container
-  - use a vmem_linked member
+  - use vmem_linked
 - Refactor
   - vmem_list
     + insert()
@@ -69,7 +69,11 @@
 - ring - single writer, multiple readers
 - file-backed buffer
 
+
 ---
+		context.log->filter()->min_severity(abc::severity::critical); ////
+---
+
 
 - conf
 - flight (killbit)

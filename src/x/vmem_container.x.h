@@ -403,7 +403,7 @@ namespace abc {
 		if (itr._page_pos == vmem_page_pos_nil) {
 			item_pos = 0;
 
-			ok = insert_empty(itr, item, /*out*/ page_pos);
+			ok = insert_empty(item, /*out*/ page_pos);
 			new_page_pos = page_pos;
 		}
 		else {
@@ -420,41 +420,22 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::insert_empty(const_iterator itr, const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept {
+	inline bool vmem_container<T, Pool, Log>::insert_empty(const_reference item, /*out*/ vmem_page_pos_t& page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_empty() Start");
 		}
 
-		bool ok = true;
-
-		// Create a new page.
-		vmem_page<Pool, Log> page(_pool, _log);
-
-		if (page.ptr() == nullptr) {
-			ok = false;
-
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::insert_empty() Could not load page");
-			}
-		}
-
-		vmem_item_pos_t item_pos = 0;
+		vmem_page<Pool, Log> page(nullptr);
 		vmem_container_page<T>* container_page = nullptr;
+		vmem_item_pos_t item_pos = 0;
+		bool ok = insert_page_after(vmem_page_pos_nil, /*out*/ page, /*out*/ container_page);
 
 		if (ok) {
-			container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
-
-			vmem_container_iterator<T, Pool, Log> new_itr(this, page.pos(), 0, vmem_iterator_edge::none, _log);
+			vmem_container_iterator<T, Pool, Log> itr(this, page.pos(), 0, vmem_iterator_edge::none, _log);
 			insert_with_capacity_safe(itr, item, container_page, /*out*/ item_pos);
 
 			// Set out params.
 			page_pos = page.pos();
-		}
-
-		// Link the page.
-		if (ok) {
-			container_page->next_page_pos = vmem_page_pos_nil;
-			container_page->prev_page_pos = vmem_page_pos_nil;
 		}
 
 		if (_log != nullptr) {
@@ -535,7 +516,7 @@ namespace abc {
 
 		vmem_page<Pool, Log> new_page(nullptr);
 		vmem_container_page<T>* new_container_page = nullptr;
-		ok = insert_page_after(itr._page_pos, container_page, /*out*/ new_page, /*out*/ new_container_page);
+		ok = insert_page_after(itr._page_pos, /*out*/ new_page, /*out*/ new_container_page);
 
 		if (ok) {
 			new_page_pos = new_page.pos();
@@ -635,10 +616,10 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::insert_page_after(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_container_page<T>*& new_container_page) noexcept {
+	inline bool vmem_container<T, Pool, Log>::insert_page_after(vmem_page_pos_t after_page_pos, /*out*/ vmem_page<Pool, Log>& new_page, /*out*/ vmem_container_page<T>*& new_container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_page_after() Start. page_pos=0x%llx",
-				(long long)page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_page_after() Start. after_page_pos=0x%llx",
+				(long long)after_page_pos);
 		}
 
 		bool ok = true;
@@ -657,28 +638,16 @@ namespace abc {
 		if (ok) {
 			new_container_page_local = reinterpret_cast<vmem_container_page<T>*>(new_page_local.ptr());
 
-			// Insert page - after.
-			new_container_page_local->next_page_pos = container_page->next_page_pos;
-			new_container_page_local->prev_page_pos = page_pos;
-			new_container_page_local->item_count = 0;
+			vmem_linked<Pool, Log> linked(_state, _pool, _log);
 
-			if (container_page->next_page_pos != vmem_page_pos_nil) {
-				vmem_page<Pool, Log> next_page(_pool, container_page->next_page_pos, _log);
-
-				if (next_page.ptr() == nullptr) {
-					ok = false;
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::insert_page_after() Could not load page pos=0x%llx", (long long)container_page->next_page_pos);
-					}
-				}
-
-				if (ok) {
-					vmem_container_page<T>* next_container_page = reinterpret_cast<vmem_container_page<T>*>(next_page.ptr());
-
-					next_container_page->prev_page_pos = new_page_local.pos();
-				}
+			vmem_linked_iterator<Pool, Log> itr = linked.end();
+			if (after_page_pos != vmem_page_pos_nil) {
+				itr = vmem_linked_iterator<Pool, Log>(&linked, after_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+				itr++;
 			}
+
+			vmem_linked_iterator<Pool, Log> new_itr = linked.insert(itr, new_page_local.pos());
+			ok = new_itr != linked.end();
 
 			if (!ok) {
 				new_page_local.free();
@@ -687,15 +656,15 @@ namespace abc {
 		}
 
 		if (ok) {
-			container_page->next_page_pos = new_page_local.pos();
+			new_container_page_local->item_count = 0;
 
 			new_page = std::move(new_page_local);
 			new_container_page = new_container_page_local;
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_page_after() Done. ok=%d, page_pos=0x%llx, new_page_pos=0x%llx",
-				ok, (long long)page_pos, (long long)new_page.pos());
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_container::insert_page_after() Done. ok=%d, after_page_pos=0x%llx, new_page_pos=0x%llx",
+				ok, (long long)after_page_pos, (long long)new_page.pos());
 		}
 
 		return ok;
