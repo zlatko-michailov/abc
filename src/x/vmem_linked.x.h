@@ -222,17 +222,17 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::insert(const_iterator itr, const_reference page_pos) {
-		if (itr._item_pos != vmem_item_pos_nil) {
+		if (itr.item_pos() != vmem_item_pos_nil) {
 			throw exception<std::logic_error, Log>("vmem_linked::insert(itr.item_pos)", __TAG__);
 		}
 
-		if (itr._page_pos == vmem_page_pos_nil && itr._edge != vmem_iterator_edge::end) {
+		if (itr.page_pos() == vmem_page_pos_nil && itr.edge() != vmem_iterator_edge::end) {
 			throw exception<std::logic_error, Log>("vmem_linked::insert(itr.page_pos)", __TAG__);
 		}
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::insert() Start. itr.page_pos=0x%llx, page_pos=0x%llx",
-				(long long)itr._page_pos, (long long)page_pos);
+				(long long)itr.page_pos(), (long long)page_pos);
 		}
 
 		// Regardless of where we insert, the result should be this iterator upon success.
@@ -245,12 +245,12 @@ namespace abc {
 			// We have inserted successfully.
 
 			// Update the front page pos.
-			if (_state->front_page_pos == vmem_page_pos_nil || _state->front_page_pos == itr._page_pos) {
+			if (_state->front_page_pos == vmem_page_pos_nil || _state->front_page_pos == itr.page_pos()) {
 				_state->front_page_pos = page_pos;
 			}
 
 			// Update the back page pos.
-			if (_state->back_page_pos == vmem_page_pos_nil || itr._edge == vmem_iterator_edge::end) {
+			if (_state->back_page_pos == vmem_page_pos_nil || itr.edge() == vmem_iterator_edge::end) {
 				_state->back_page_pos = page_pos;
 			}
 		}
@@ -263,7 +263,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::insert() Done. itr.page_pos=0x%llx, result.page_pos=0x%llx, result.edge=%u",
-				(long long)itr._page_pos, (long long)result._page_pos, result._edge);
+				(long long)itr.page_pos(), (long long)result.page_pos(), result.edge());
 		}
 
 		return result;
@@ -274,7 +274,7 @@ namespace abc {
 	inline bool vmem_linked<Pool, Log>::insert_nostate(const_iterator itr, const_reference page_pos, vmem_page_pos_t back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_linked::insert_nostate() Start. itr.page_pos=0x%llx, page_pos=0x%llx",
-				(long long)itr._page_pos, (long long)page_pos);
+				(long long)itr.page_pos(), (long long)page_pos);
 		}
 
 		bool ok = true;
@@ -299,7 +299,7 @@ namespace abc {
 			if (empty()) {
 				// Nothing to do.
 			}
-			else if (itr._page_pos == vmem_page_pos_nil) {
+			else if (itr.page_pos() == vmem_page_pos_nil) {
 				// Inserting at the end.
 
 				vmem_page<Pool, Log> back_page(_pool, back_page_pos, _log);
@@ -322,7 +322,7 @@ namespace abc {
 				// Inserting at the middle or at the front.
 				// A previous page may or may not exist, but the next page does, and itr is pointing at it.
 
-				vmem_page<Pool, Log> next_page(_pool, itr._page_pos, _log);
+				vmem_page<Pool, Log> next_page(_pool, itr.page_pos(), _log);
 				vmem_linked_page* next_linked_page = reinterpret_cast<vmem_linked_page*>(next_page.ptr());
 
 				if (next_linked_page == nullptr) {
@@ -366,7 +366,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_linked::insert_nostate() Done. ok=%d, itr.page_pos=0x%llx, page_pos=0x%llx",
-				ok, (long long)itr._page_pos, page_pos);
+				ok, (long long)itr.page_pos(), page_pos);
 		}
 
 		return ok;
@@ -378,12 +378,12 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::erase(const_iterator itr) {
-		if (itr._page_pos == vmem_page_pos_nil || itr._edge != vmem_iterator_edge::none) {
+		if (itr.page_pos() == vmem_page_pos_nil || itr.edge() != vmem_iterator_edge::none) {
 			throw exception<std::logic_error, Log>("vmem_linked::erase(itr)", __TAG__);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase() Start. itr.page_pos=0x%llx", (long long)itr._page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase() Start. itr.page_pos=0x%llx", (long long)itr.page_pos());
 		}
 
 		// The result, upon success, is the next of itr.
@@ -397,12 +397,12 @@ namespace abc {
 
 		if (ok) {
 			// Update the front page pos.
-			if (_state->front_page_pos == itr._page_pos) {
-				_state->front_page_pos = result._page_pos;
+			if (_state->front_page_pos == itr.page_pos()) {
+				_state->front_page_pos = result.page_pos();
 			}
 
 			// Update the back page pos.
-			if (_state->back_page_pos == itr._page_pos) {
+			if (_state->back_page_pos == itr.page_pos()) {
 				_state->back_page_pos = back_page_pos;
 			}
 		}
@@ -412,7 +412,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase() Done. itr.page_pos=0x%llx, result.page_pos=0x%llx, result.edge=%u",
-				(long long)itr._page_pos, (long long)result._page_pos, result._edge);
+				(long long)itr.page_pos(), (long long)result.page_pos(), result.edge());
 		}
 
 		return result;
@@ -422,12 +422,12 @@ namespace abc {
 	template <typename Pool, typename Log>
 	inline bool vmem_linked<Pool, Log>::erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Start. itr.page_pos=0x%llx", (long long)itr._page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Start. itr.page_pos=0x%llx", (long long)itr.page_pos());
 		}
 
 		bool ok = true;
 
-		vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
+		vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 		vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
 
 		if (linked_page == nullptr) {
@@ -490,7 +490,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Done. ok=%d, itr.page_pos=0x%llx",
-				ok, (long long)itr._page_pos);
+				ok, (long long)itr.page_pos());
 		}
 
 		return ok;
@@ -589,7 +589,7 @@ namespace abc {
 	inline void vmem_linked<Pool, Log>::move_next(/*inout*/ iterator& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::move_next() Start. itr.page_pos=0x%llx, itr.edge=%u",
-				(long long)itr._page_pos, itr._edge);
+				(long long)itr.page_pos(), itr.edge());
 		}
 
 		if (itr == end()) {
@@ -601,12 +601,12 @@ namespace abc {
 		else if (itr == rend()) {
 			itr = end();
 		}
-		else if (itr._page_pos != vmem_page_pos_nil) {
-			vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
+		else if (itr.page_pos() != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_next() Could not load page pos=0x%llx", (long long)itr._page_pos);
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_next() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
 			}
 			else {
@@ -619,7 +619,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::move_next() Done. itr.page_pos=0x%llx, itr.edge=%u",
-				(long long)itr._page_pos, itr._edge);
+				(long long)itr.page_pos(), itr.edge());
 		}
 	}
 
@@ -628,7 +628,7 @@ namespace abc {
 	inline void vmem_linked<Pool, Log>::move_prev(/*inout*/ iterator& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::move_prev() Start. itr.page_pos=0x%llx, itr.edge=%u",
-				(long long)itr._page_pos, itr._edge);
+				(long long)itr.page_pos(), itr.edge());
 		}
 
 		if (itr == rbegin()) {
@@ -640,12 +640,12 @@ namespace abc {
 		else if (itr == end()) {
 			itr = rend();
 		}
-		else if (itr._page_pos != vmem_page_pos_nil) {
-			vmem_page<Pool, Log> page(_pool, itr._page_pos, _log);
+		else if (itr.page_pos() != vmem_page_pos_nil) {
+			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_prev() Could not load page pos=0x%llx", (long long)itr._page_pos);
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
 			}
 			else {
@@ -658,14 +658,14 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::move_prev() Done. itr.page_pos=0x%llx, itr.edge=%u",
-				(long long)itr._page_pos, itr._edge);
+				(long long)itr.page_pos(), itr.edge());
 		}
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::pointer vmem_linked<Pool, Log>::at(const_iterator& itr) const noexcept {
-		return pointer(_pool, itr._page_pos, 0, _log);
+		return pointer(_pool, itr.page_pos(), 0, _log);
 	}
 
 }

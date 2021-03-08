@@ -76,6 +76,11 @@ namespace abc {
 
 		bool									can_deref() const noexcept;
 
+	public:
+		vmem_page_pos_t							page_pos() const noexcept;
+		vmem_item_pos_t							item_pos() const noexcept;
+		vmem_iterator_edge_t					edge() const noexcept;
+
 	private:
 		friend Container;
 

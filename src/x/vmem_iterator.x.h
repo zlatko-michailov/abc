@@ -167,4 +167,22 @@ namespace abc {
 		return *p;
 	}
 
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_page_pos_t vmem_iterator<Container, T, Pool, Log>::page_pos() const noexcept {
+		return _page_pos;
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_item_pos_t vmem_iterator<Container, T, Pool, Log>::item_pos() const noexcept {
+		return _item_pos;
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_iterator_edge_t vmem_iterator<Container, T, Pool, Log>::edge() const noexcept {
+		return _edge;
+	}
+
 }
