@@ -9,20 +9,14 @@
   - vmem_container
 - Refactoring
   - vmem_pool
+  - vmem_list
 
 ## To Do
-- vmem_container
-  - use vmem_linked
-- Refactor
-  - vmem_list
-    + insert()
-    + erase()
-    - clear()
 - vmem_iterator
   - page_pos()
   - item_pos()
----
 - Roadmap
+- Tag
 ---
 - vmem_map
 ---

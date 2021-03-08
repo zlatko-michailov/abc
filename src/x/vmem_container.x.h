@@ -1069,7 +1069,8 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline void vmem_container<T, Pool, Log>::clear() noexcept {
-		erase(begin(), end());
+		vmem_linked<Pool, Log> linked(_state, _pool, _log);
+		linked.clear();
 	}
 
 
