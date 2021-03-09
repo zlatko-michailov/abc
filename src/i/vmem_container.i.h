@@ -156,15 +156,15 @@ namespace abc {
 	private:
 		friend iterator;
 
-		void					move_next(iterator& itr) const noexcept;
-		void					move_prev(iterator& itr) const noexcept;
+		void					move_next(/*inout*/ iterator& itr) const noexcept;
+		void					move_prev(/*inout*/ iterator& itr) const noexcept;
 		pointer					at(const_iterator& itr) const noexcept;
 
 	private:
-		void					begin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
-		void					rbegin_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
-		void					end_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
-		void					rend_pos(vmem_page_pos_t& page_pos, vmem_item_pos_t& item_pos) const noexcept;
+		iterator				begin_itr() const noexcept;
+		iterator				rbegin_itr() const noexcept;
+		iterator				end_itr() const noexcept;
+		iterator				rend_itr() const noexcept;
 
 	private:
 		vmem_container_state*	_state;

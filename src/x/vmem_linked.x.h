@@ -608,6 +608,8 @@ namespace abc {
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_next() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
+
+				itr = end();
 			}
 			else {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
@@ -647,6 +649,8 @@ namespace abc {
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_linked::move_prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
+
+				itr = rbegin();
 			}
 			else {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
