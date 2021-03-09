@@ -60,7 +60,8 @@ namespace abc {
 		vmem_iterator<Container, T, Pool, Log>(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
 
 	public:
-		const vmem_iterator<Container, T, Pool, Log>&	operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept;
+		vmem_iterator<Container, T, Pool, Log>&	operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept = default;
+		vmem_iterator<Container, T, Pool, Log>&	operator =(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
 
 	public:
 		bool									operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;

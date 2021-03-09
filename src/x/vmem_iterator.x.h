@@ -52,26 +52,10 @@ namespace abc {
 
 
 	template <typename Container, typename T, typename Pool, typename Log>
-	inline const vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept {
-		_container = other._container;
-		_page_pos = other._page_pos;
-		_item_pos = other._item_pos;
-		_edge = other._edge;
-		_log = other._log;
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10349, "vmem_iterator::operator =() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
-		}
-
-		return *this;
-	}
-
-
-	template <typename Container, typename T, typename Pool, typename Log>
 	inline bool vmem_iterator<Container, T, Pool, Log>::operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_iterator::operator ==() _page_pos=0x%llx, _item_pos=0x%x, other._page_pos=0x%llx, other._item_pos=0x%x",
-				(long long)_page_pos, _item_pos, (long long)other._page_pos, other._item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_iterator::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
+				(long long)_page_pos, _item_pos, _edge, (long long)other._page_pos, other._item_pos, other._edge);
 		}
 
 		return _container == other._container
