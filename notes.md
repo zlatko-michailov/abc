@@ -12,10 +12,6 @@
   - vmem_list
 
 ## To Do
-- vmem_iterator
-  - page_pos()
-  - item_pos()
-- Roadmap
 - Tag
 ---
 - vmem_map
@@ -31,15 +27,14 @@
     - Possible data loss
       - Chain broken
   - repair
-  - compact
+---
+- tls_streambuf
 ---
 - GPIO
 ---
 - Samples
   - tictactoe
   - connect four
----
-- tls_streambuf
 ---
 
 ## Postponed

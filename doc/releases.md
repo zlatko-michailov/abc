@@ -2,12 +2,25 @@
 
 Up to [Documentation](README.md).
 
+## 1.12.2
+- Breaking Changes
+  - `vmem_list_state` - version up
+  - `vmem_root_page` - free_pages becomes a `vmem_linked`
+- Bugs
+  - `vmem_list::erase()` - was not balancing with previous
+- Additions
+  - `vmem_linked` - a sequence of linked pages
+  - `vmem_container` - a sequence of items
+- Refactoring
+  - `vmem_pool`
+  - `vmem_list`
+
 ## 1.12.1
 - No breaking changes.
 - Virtual memory:
   - `vmem_pool` bug fix
   - `vmem_iterator`
-  - `vmem_list` balance items on insert() and on erase()
+  - `vmem_list` balance items on `insert()` and on `erase()`
 
 ## 1.12.0
 - No breaking changes.
