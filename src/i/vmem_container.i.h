@@ -156,8 +156,8 @@ namespace abc {
 	private:
 		friend iterator;
 
-		void					move_next(/*inout*/ iterator& itr) const noexcept;
-		void					move_prev(/*inout*/ iterator& itr) const noexcept;
+		iterator				next(const_iterator& itr) const noexcept;
+		iterator				prev(const_iterator& itr) const noexcept;
 		pointer					at(const_iterator& itr) const noexcept;
 
 	private:

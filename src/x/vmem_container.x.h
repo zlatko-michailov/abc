@@ -1060,93 +1060,87 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::move_next(/*inout*/ iterator& itr) const noexcept {
+	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::next(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::move_next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
+		iterator result = end_itr();
+
 		if (itr.item_pos() == vmem_item_pos_nil && itr.edge() == vmem_iterator_edge::rbegin) {
-			itr = begin_itr();
+			result = begin_itr();
 		}
 		else if (itr.page_pos() != vmem_page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::move_next() Could not load page pos=0x%llx", (long long)itr.page_pos());
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::next() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
-
-				itr = end_itr();
 			}
 			else {
 				vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
 
 				if (itr._item_pos < container_page->item_count - 1) {
-					itr = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
+					result = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
 				}
 				else {
-					if (container_page->next_page_pos == vmem_page_pos_nil) {
-						itr = end_itr();
-					}
-					else {
-						itr = iterator(this, container_page->next_page_pos, 0, vmem_iterator_edge::none, _log);
+					if (container_page->next_page_pos != vmem_page_pos_nil) {
+						result = iterator(this, container_page->next_page_pos, 0, vmem_iterator_edge::none, _log);
 					}
 				}
 			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::move_next() After itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::next() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
+
+		return result;
 	}
 
 
 	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::move_prev(/*inout*/ iterator& itr) const noexcept {
+	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::prev(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::move_prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
+		iterator result = rbegin_itr();
+
 		if (itr.item_pos() == vmem_item_pos_nil && itr.edge() == vmem_iterator_edge::end) {
-			itr = rend_itr();
+			result = rend_itr();
 		}
 		else if (itr.page_pos() != vmem_page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::move_prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
-
-				itr = rbegin_itr();
 			}
 			else {
 				vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
 
 				if (itr._item_pos > 0) {
-					itr = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
+					result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
 				}
 				else {
-					if (container_page->prev_page_pos == vmem_page_pos_nil) {
-						itr = rbegin_itr();
-					}
-					else {
+					if (container_page->prev_page_pos != vmem_page_pos_nil) {
 						vmem_page<Pool, Log> prev_page(_pool, container_page->prev_page_pos, _log);
 
 						if (prev_page.ptr() == nullptr) {
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::move_prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
+								_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_container::prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
 							}
-
-							itr = rbegin_itr();
 						}
 						else {
 							vmem_container_page<T>* prev_container_page = reinterpret_cast<vmem_container_page<T>*>(prev_page.ptr());
 		
-							itr = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
+							result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
 						}
 					}
 				}
@@ -1154,9 +1148,11 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::move_prev() After itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_container::prev() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
+
+		return result;
 	}
 
 

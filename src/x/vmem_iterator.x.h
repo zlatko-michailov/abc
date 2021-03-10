@@ -73,7 +73,7 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++() noexcept {
-		_container->move_next(*this);
+		*this = _container->next(*this);
 
 		return *this;
 	}
@@ -81,7 +81,7 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++(int) noexcept {
-		_container->move_next(*this);
+		*this = _container->next(*this);
 
 		return *this;
 	}
@@ -89,7 +89,7 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --() noexcept {
-		_container->move_prev(*this);
+		*this = _container->prev(*this);
 
 		return *this;
 	}
@@ -97,7 +97,7 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --(int) noexcept {
-		_container->move_prev(*this);
+		*this = _container->prev(*this);
 
 		return *this;
 	}
