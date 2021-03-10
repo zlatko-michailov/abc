@@ -156,7 +156,7 @@ namespace abc {
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
 		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
 		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
-		vmem_page<Pool, Log>(nullptr_t) noexcept;
+		vmem_page<Pool, Log>(std::nullptr_t) noexcept;
 
 		~vmem_page<Pool, Log>() noexcept;
 
@@ -196,6 +196,8 @@ namespace abc {
 		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
 		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
 		vmem_ptr<T, Pool, Log>(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
+		vmem_ptr<T, Pool, Log>(std::nullptr_t) noexcept;
+
 		~vmem_ptr<T, Pool, Log>() = default;
 
 	public:
