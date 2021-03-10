@@ -1032,7 +1032,7 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	inline vmem_ptr<T, Pool, Log>::vmem_ptr(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log)
-		: _page(pool, page_pos)
+		: _page(page_pos != vmem_page_pos_nil ? vmem_page<Pool, Log>(pool, page_pos, log) : vmem_page<Pool, Log>(nullptr))
 		, _item_pos(item_pos)
 		, _log(log) {
 	}

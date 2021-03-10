@@ -10,7 +10,9 @@
 - Refactoring
   - vmem_pool
   - vmem_list
-
+----
+- Bugs
+  - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 ## To Do
 - Tag
 ---
