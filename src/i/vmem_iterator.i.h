@@ -55,9 +55,10 @@ namespace abc {
 		using const_reference			= const T&;
 
 	public:
-		vmem_iterator<Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log);
+		vmem_iterator<Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
 		vmem_iterator<Container, T, Pool, Log>(const vmem_iterator<Container, T, Pool, Log>& other) = default;
 		vmem_iterator<Container, T, Pool, Log>(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
+		vmem_iterator<Container, T, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
 		vmem_iterator<Container, T, Pool, Log>&	operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept = default;
@@ -75,18 +76,20 @@ namespace abc {
 		reference								operator *();
 		const_reference							operator *() const;
 
-		bool									can_deref() const noexcept;
-
 	public:
-		vmem_page_pos_t							page_pos() const noexcept;
-		vmem_item_pos_t							item_pos() const noexcept;
-		vmem_iterator_edge_t					edge() const noexcept;
+		bool									is_valid() const noexcept;
+		bool									can_deref() const noexcept;
 
 	private:
 		friend Container;
 
 		pointer									ptr() const noexcept;
 		reference								deref() const;
+
+	public:
+		vmem_page_pos_t							page_pos() const noexcept;
+		vmem_item_pos_t							item_pos() const noexcept;
+		vmem_iterator_edge_t					edge() const noexcept;
 
 	private:
 		const Container*						_container;

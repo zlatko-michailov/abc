@@ -34,20 +34,22 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
-	inline vmem_iterator<Container, T, Pool, Log>::vmem_iterator(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log)
+	inline vmem_iterator<Container, T, Pool, Log>::vmem_iterator(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
 		: _container(container)
 		, _page_pos(page_pos)
 		, _item_pos(item_pos)
 		, _edge(edge)
 		, _log(log) {
 
-		if (container == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_iterator::vmem_iterator(container)", 0x10347);
-		}
-
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10348, "vmem_iterator::vmem_iterator() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
 		}
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_iterator<Container, T, Pool, Log>::vmem_iterator(std::nullptr_t) noexcept
+		: vmem_iterator<Container, T, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, nullptr) {
 	}
 
 
@@ -73,7 +75,9 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++() noexcept {
-		*this = _container->next(*this);
+		if (is_valid()) {
+			*this = _container->next(*this);
+		}
 
 		return *this;
 	}
@@ -81,7 +85,9 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++(int) noexcept {
-		*this = _container->next(*this);
+		if (is_valid()) {
+			*this = _container->next(*this);
+		}
 
 		return *this;
 	}
@@ -89,7 +95,9 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --() noexcept {
-		*this = _container->prev(*this);
+		if (is_valid()) {
+			*this = _container->prev(*this);
+		}
 
 		return *this;
 	}
@@ -97,7 +105,9 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --(int) noexcept {
-		*this = _container->prev(*this);
+		if (is_valid()) {
+			*this = _container->prev(*this);
+		}
 
 		return *this;
 	}
@@ -128,15 +138,23 @@ namespace abc {
 
 
 	template <typename Container, typename T, typename Pool, typename Log>
+	inline bool vmem_iterator<Container, T, Pool, Log>::is_valid() const noexcept {
+		return _container != nullptr;
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
 	inline bool vmem_iterator<Container, T, Pool, Log>::can_deref() const noexcept {
-		return _page_pos != vmem_page_pos_nil
-			&& _item_pos != vmem_item_pos_nil;
+		return is_valid()
+			&& _page_pos != vmem_page_pos_nil
+			&& _item_pos != vmem_item_pos_nil
+			&& _edge == vmem_iterator_edge::none;
 	}
 
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_ptr<T, Pool, Log> vmem_iterator<Container, T, Pool, Log>::ptr() const noexcept {
-		return _container->at(*this);
+		return is_valid() ? _container->at(*this) : vmem_ptr<T, Pool, Log>(nullptr);
 	}
 
 
