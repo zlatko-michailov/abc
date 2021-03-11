@@ -144,8 +144,8 @@ namespace abc {
 
 	// erase() helpers
 	private:
-		bool					erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos, /*out*/ vmem_iterator_edge_t& edge) noexcept;
-		void					erase_from_many_safe(const_iterator itr, vmem_container_page<T>* container_page, /*out*/ vmem_page_pos_t& page_pos, /*out*/ vmem_item_pos_t& item_pos, /*out*/ vmem_iterator_edge_t& edge) noexcept;
+		iterator				erase_nostate(const_iterator itr) noexcept;
+		iterator				erase_from_many(const_iterator itr, vmem_container_page<T>* container_page) noexcept;
 		void					balance_merge_safe(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ vmem_container_page<T>* container_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos) noexcept;
 		bool					balance_merge_next(vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos) noexcept;
 		bool					balance_merge_prev(/*inout*/ vmem_page<Pool, Log>& page, /*inout*/ vmem_container_page<T>* container_page, /*inout*/ vmem_page_pos_t& page_pos, /*inout*/ vmem_item_pos_t& item_pos) noexcept;
