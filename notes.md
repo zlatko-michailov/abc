@@ -14,7 +14,6 @@
 - Bugs
   - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 ## To Do
-- vmem_container::insert() signatures
 - vmem_linked signatures
 - Tag
 ---
