@@ -14,7 +14,8 @@
 - Bugs
   - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 ## To Do
-- vmem_linked signatures
+- vmem_pool::open_pool_or_throw
+- Roadmap
 - Tag
 ---
 - vmem_map

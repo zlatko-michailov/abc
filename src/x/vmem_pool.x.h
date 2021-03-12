@@ -62,7 +62,7 @@ namespace abc {
 		verify_args_or_throw(file_path);
 
 		bool is_empty;
-		open_pool_or_throw(file_path, /*out*/ is_empty);
+		open_pool_or_throw(file_path, is_empty);
 
 		if (is_empty) {
 			init_pool_or_throw();
@@ -91,7 +91,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::open_pool_or_throw(const char* file_path, /*out*/ bool& is_empty) {
+	inline void vmem_pool<MaxMappedPages, Log>::open_pool_or_throw(const char* file_path, bool& is_empty) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1037c, "vmem_pool::open_pool_or_throw() Start path='%s'", file_path);
 		}
@@ -403,7 +403,7 @@ namespace abc {
 		}
 
 		std::size_t i;
-		bool is_found = find_mapped_page(page_pos, /*out*/ i);
+		bool is_found = find_mapped_page(page_pos, i);
 
 		if (!is_found) {
 			// The page is not mapped. We'll have to map it. We need capacity for that.
@@ -462,7 +462,7 @@ namespace abc {
 		_mapped_page_totals.unlock_count++;
 
 		std::size_t i;
-		bool is_found = find_mapped_page(page_pos, /*out*/ i);
+		bool is_found = find_mapped_page(page_pos, i);
 
 		if (is_found) {
 			unlock_mapped_page(i);
@@ -484,7 +484,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline bool vmem_pool<MaxMappedPages, Log>::find_mapped_page(vmem_page_pos_t page_pos, /*out*/ std::size_t& i) noexcept {
+	inline bool vmem_pool<MaxMappedPages, Log>::find_mapped_page(vmem_page_pos_t page_pos, std::size_t& i) noexcept {
 		bool is_found = false;
 
 		if (_log != nullptr) {
@@ -572,10 +572,10 @@ namespace abc {
 
 		for (std::size_t i = 0; i < _mapped_page_count; i++) {
 			if (should_keep_mapped_page(i, min_keep_count)) {
-				keep_mapped_page(i, min_keep_count, /*out*/ empty_i);
+				keep_mapped_page(i, min_keep_count, empty_i);
 			}
 			else {
-				unmap_mapped_page(i, min_keep_count, /*out*/ empty_i, /*inout*/ unmapped_count);
+				unmap_mapped_page(i, min_keep_count, empty_i, unmapped_count);
 			}
 		}
 
@@ -598,7 +598,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*inout*/ std::size_t& empty_i) noexcept {
+	inline void vmem_pool<MaxMappedPages, Log>::keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1039e, "vmem_pool::keep_mapped_page() Start. i=%zu, pos=0x%llx, keep_count=%u, min_keep_count=%u",
 				i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)min_keep_count);
@@ -640,7 +640,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*out*/ std::size_t& empty_i, /*inout*/ std::size_t& unmapped_count) noexcept {
+	inline void vmem_pool<MaxMappedPages, Log>::unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x103a0, "vmem_pool::unmap_mapped_page() Start. i=%zu, pos=0x%llx, keep_count=%u, min_keep_count=%u",
 				i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)min_keep_count);
@@ -801,7 +801,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::clear_linked(/*inout*/ vmem_linked<Pool, Log>& linked) {
+	inline void vmem_pool<MaxMappedPages, Log>::clear_linked(vmem_linked<Pool, Log>& linked) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::clear_linked() Start");
 		}
@@ -817,7 +817,7 @@ namespace abc {
 			vmem_root_page* root_page = reinterpret_cast<vmem_root_page*>(page.ptr());
 
 			vmem_linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
-			free_pages_linked.splice(/*inout*/linked);
+			free_pages_linked.splice(linked);
 		}
 
 		if (_log != nullptr) {

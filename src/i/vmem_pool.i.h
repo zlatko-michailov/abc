@@ -101,12 +101,12 @@ namespace abc {
 	private:
 		friend vmem_linked<Pool, Log>;
 
-		void						clear_linked(/*inout*/ vmem_linked<Pool, Log>& linked);
+		void						clear_linked(vmem_linked<Pool, Log>& linked);
 
 	// Constructor helpers
 	private:
 		void						verify_args_or_throw(const char* file_path);
-		void						open_pool_or_throw(const char* file_path, /*out*/ bool& is_empty);
+		void						open_pool_or_throw(const char* file_path,bool& is_empty);
 		void						init_pool_or_throw();
 		void						create_root_page_or_throw();
 		void						create_start_page_or_throw();
@@ -122,13 +122,13 @@ namespace abc {
 
 	// lock_page() / unlock_page() helpers
 	private:
-		bool						find_mapped_page(vmem_page_pos_t page_pos, /*out*/ std::size_t& i) noexcept;
+		bool						find_mapped_page(vmem_page_pos_t page_pos, std::size_t& i) noexcept;
 		bool						has_mapping_capacity() noexcept;
 		std::size_t					make_mapping_capacity() noexcept;
 		std::size_t					make_mapping_capacity(vmem_page_hit_count_t min_keep_count) noexcept;
 		bool						should_keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count) noexcept;
-		void						keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*inout*/ std::size_t& empty_i) noexcept;
-		void						unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, /*out*/ std::size_t& empty_i, /*inout*/ std::size_t& unmapped_count) noexcept;
+		void						keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i) noexcept;
+		void						unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count) noexcept;
 		void*						lock_mapped_page(std::size_t i) noexcept;
 		void						unlock_mapped_page(std::size_t i) noexcept;
 		void*						map_new_page(std::size_t i, vmem_page_pos_t page_pos) noexcept;

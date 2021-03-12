@@ -389,10 +389,8 @@ namespace abc {
 		// The result, upon success, is the next of itr.
 		iterator result = next(itr);
 
-		bool ok = true;
 		vmem_page_pos_t back_page_pos = vmem_page_pos_nil;
-
-		ok = erase_nostate(itr, /*out*/ back_page_pos);
+		bool ok = erase_nostate(itr, back_page_pos);
 
 		if (ok) {
 			// Update the front page pos.
@@ -419,7 +417,7 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline bool vmem_linked<Pool, Log>::erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& back_page_pos) noexcept {
+	inline bool vmem_linked<Pool, Log>::erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_linked::erase_nostate() Start. itr.page_pos=0x%llx", (long long)itr.page_pos());
 		}
@@ -501,7 +499,7 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline void vmem_linked<Pool, Log>::clear() {
-		_pool->clear_linked(/*inout*/ *this);
+		_pool->clear_linked(*this);
 	}
 
 
@@ -509,7 +507,7 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>& /*inout*/ other) {
+	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>& other) {
 		splice(std::move(other));
 	}
 

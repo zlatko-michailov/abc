@@ -99,12 +99,12 @@ namespace abc {
 		iterator				insert(const_iterator itr, const_reference page_pos);
 		iterator				erase(const_iterator itr);
 		void					clear();
-		void					splice(vmem_linked<Pool, Log>& /*inout*/ other);
+		void					splice(vmem_linked<Pool, Log>& other);
 		void					splice(vmem_linked<Pool, Log>&& other);
 
 	private:
 		bool					insert_nostate(const_iterator itr, const_reference page_pos, vmem_page_pos_t back_page_pos) noexcept;
-		bool					erase_nostate(const_iterator itr, /*out*/ vmem_page_pos_t& back_page_pos) noexcept;
+		bool					erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept;
 
 	private:
 		friend iterator;

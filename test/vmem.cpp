@@ -223,7 +223,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 2
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 2U, 0x0052, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 2U, 0x0052, linked.end(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
@@ -282,7 +282,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 2
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
@@ -292,7 +292,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 3
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.end(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
 		// 2 3
@@ -302,7 +302,7 @@ namespace abc { namespace test { namespace vmem {
 			Iterator actual_itr = linked.end();
 			Iterator itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
 			Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, itr, expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, itr, expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == expected_itr, true, __TAG__, "%d") && passed;
 		}
 		// 2 4 3
@@ -311,7 +311,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 5
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 5U, 0x0065, linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 5U, 0x0065, linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 		}
 		// 5 2 4 3
@@ -418,7 +418,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 2
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
@@ -428,7 +428,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 3
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 		}
 		// 3 2
@@ -437,7 +437,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 4
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 		}
 		// 4 3 2
@@ -450,7 +450,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 5
 			Iterator actual_itr = other_linked.end();
 			Iterator expected_itr = Iterator(&other_linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, other_linked, 5U, 0x0065, other_linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, other_linked, 5U, 0x0065, other_linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == other_linked.begin(), true, __TAG__, "%d") && passed;
 			passed = context.are_equal(actual_itr == other_linked.rend(), true, __TAG__, "%d") && passed;
 		}
@@ -460,7 +460,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 6
 			Iterator actual_itr = other_linked.end();
 			Iterator expected_itr = Iterator(&other_linked, 6U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, other_linked, 6U, 0x0066, other_linked.begin(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, other_linked, 6U, 0x0066, other_linked.begin(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == other_linked.begin(), true, __TAG__, "%d") && passed;
 		}
 		// 6 5
@@ -508,7 +508,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 2
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 2U, 0x0072, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 2U, 0x0072, linked.end(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.begin(), true, __TAG__, "%d") && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
@@ -517,7 +517,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 3
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 3U, 0x0073, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 3U, 0x0073, linked.end(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
 
@@ -525,7 +525,7 @@ namespace abc { namespace test { namespace vmem {
 			// Page 4
 			Iterator actual_itr = linked.end();
 			Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-			passed = insert_linked_page(context, &pool, linked, 4U, 0x0074, linked.end(), expected_itr, /*out*/ actual_itr) && passed;
+			passed = insert_linked_page(context, &pool, linked, 4U, 0x0074, linked.end(), expected_itr, actual_itr) && passed;
 			passed = context.are_equal(actual_itr == linked.rend(), true, __TAG__, "%d") && passed;
 		}
 
