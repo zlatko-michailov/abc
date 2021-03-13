@@ -61,10 +61,9 @@ namespace abc {
 
 		verify_args_or_throw(file_path);
 
-		bool is_empty;
-		open_pool_or_throw(file_path, is_empty);
+		bool is_init = open_pool_or_throw(file_path);
 
-		if (is_empty) {
+		if (!is_init) {
 			init_pool_or_throw();
 		}
 
@@ -91,7 +90,7 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
-	inline void vmem_pool<MaxMappedPages, Log>::open_pool_or_throw(const char* file_path, bool& is_empty) {
+	inline bool vmem_pool<MaxMappedPages, Log>::open_pool_or_throw(const char* file_path) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1037c, "vmem_pool::open_pool_or_throw() Start path='%s'", file_path);
 		}
@@ -116,11 +115,13 @@ namespace abc {
 			throw exception<std::runtime_error, Log>("vmem_pool::open_pool_or_throw() Corrupt vmem file - size", 0x10380, _log);
 		}
 
-		is_empty = (file_size == 0);
+		bool is_init = (file_size > 0);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::open_pool_or_throw() Done");
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::open_pool_or_throw() Done. init=%d", is_init);
 		}
+
+		return is_init;
 	}
 
 

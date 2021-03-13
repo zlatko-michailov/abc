@@ -106,7 +106,7 @@ namespace abc {
 	// Constructor helpers
 	private:
 		void						verify_args_or_throw(const char* file_path);
-		void						open_pool_or_throw(const char* file_path,bool& is_empty);
+		bool						open_pool_or_throw(const char* file_path);
 		void						init_pool_or_throw();
 		void						create_root_page_or_throw();
 		void						create_start_page_or_throw();

@@ -13,7 +13,6 @@
   - vmem_list
 ----
 ## To Do
-- vmem_pool::open_pool_or_throw
 - Tag
 ---
 - vmem_map
