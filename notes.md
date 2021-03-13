@@ -13,8 +13,6 @@
   - vmem_list
 ----
 ## To Do
-- Tag
----
 - vmem_map
 ---
 - vmem:
