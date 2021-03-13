@@ -341,14 +341,14 @@ namespace abc {
 
 		if (sent_size < 0) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, __TAG__, "_client_socket::send() sent_size=%l", (long)sent_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x1043f, "_client_socket::send() sent_size=%l", (long)sent_size);
 			}
 
 			sent_size = 0;
 		}
 		else if (sent_size < size) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, __TAG__, "_client_socket::send() sent_size=%l", (long)sent_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10440, "_client_socket::send() sent_size=%l", (long)sent_size);
 			}
 		}
 
@@ -386,14 +386,14 @@ namespace abc {
 
 		if (received_size < 0) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, __TAG__, "_client_socket::receive() received_size=%l", (long)received_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10441, "_client_socket::receive() received_size=%l", (long)received_size);
 			}
 
 			received_size = 0;
 		}
 		else if (received_size < size) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, __TAG__, "_client_socket::receive() received_size=%l", (long)received_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10442, "_client_socket::receive() received_size=%l", (long)received_size);
 			}
 		}
 
