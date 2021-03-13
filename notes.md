@@ -4,6 +4,7 @@
   - vmem_root_page
 - Bugs
   - vmem_list::erase() bug
+  - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 - Additions
   - vmem_linked
   - vmem_container
@@ -11,11 +12,8 @@
   - vmem_pool
   - vmem_list
 ----
-- Bugs
-  - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 ## To Do
 - vmem_pool::open_pool_or_throw
-- Roadmap
 - Tag
 ---
 - vmem_map

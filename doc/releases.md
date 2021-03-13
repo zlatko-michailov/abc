@@ -8,6 +8,7 @@ Up to [Documentation](README.md).
   - `vmem_root_page` - free_pages becomes a `vmem_linked`
 - Bugs
   - `vmem_list::erase()` - was not balancing with previous
+  - `vmem_ptr(vmem_page_pos_nil)` - was allocating a new page.
 - Additions
   - `vmem_linked` - a sequence of linked pages
   - `vmem_container` - a sequence of items
