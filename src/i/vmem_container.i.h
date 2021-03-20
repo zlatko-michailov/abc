@@ -61,6 +61,19 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	template <typename T, typename Pool, typename Log>
+	struct vmem_container_result2 {
+		vmem_container_result2(nullptr_t) noexcept;
+
+		vmem_container_iterator<T, Pool, Log>	iterator;
+		vmem_page_pos_t							page_pos;
+		T										item_0;
+	};
+
+
+	// --------------------------------------------------------------
+
+
 	template <typename T, typename Pool, typename Log = null_log>
 	class vmem_container {
 	public:
@@ -73,6 +86,7 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
+		using result2					= vmem_container_result2<T, Pool, Log>;
 
 	public:
 		static constexpr std::size_t	items_pos() noexcept;
@@ -124,20 +138,24 @@ namespace abc {
 		void					push_front(const_reference item);
 		void					pop_front();
 
+		result2					insert2(const_iterator itr, const_reference item);
 		iterator				insert(const_iterator itr, const_reference item);
 		template <typename InputItr>
 		iterator				insert(const_iterator itr, InputItr first, InputItr last);
+
+		result2					erase2(const_iterator itr);
 		iterator				erase(const_iterator itr);
 		iterator				erase(const_iterator first, const_iterator last);
+
 		void					clear() noexcept;
 
 	// insert() helpers
 	private:
-		iterator				insert_nostate(const_iterator itr, const_reference item, vmem_page_pos_t& new_page_pos) noexcept;
-		iterator				insert_empty(const_reference item) noexcept;
-		iterator				insert_nonempty(const_iterator itr, const_reference item, vmem_page_pos_t& new_page_pos) noexcept;
-		iterator				insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T>* container_page, vmem_page_pos_t& new_page_pos) noexcept;
-		iterator				insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept;
+		result2					insert_nostate(const_iterator itr, const_reference item) noexcept;
+		result2					insert_empty(const_reference item) noexcept;
+		result2					insert_nonempty(const_iterator itr, const_reference item) noexcept;
+		result2					insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept;
+		result2					insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept;
 		void					balance_split(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T>* new_container_page) noexcept;
 		bool					insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T>*& new_container_page) noexcept;
 		bool					should_balance_insert(const_iterator itr, const vmem_container_page<T>* container_page) const noexcept;

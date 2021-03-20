@@ -15,6 +15,10 @@
 ## To Do
 - vmem_map
 ---
+- Samples
+  - tictactoe
+  - connect four
+---
 - vmem:
   - check
     - No data loss
@@ -31,10 +35,6 @@
 ---
 - GPIO
 ---
-- Samples
-  - tictactoe
-  - connect four
----
 
 ## Postponed
 - Internationalization
@@ -42,22 +42,20 @@
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 
+---
+insert()
+{
+  itr
+  page_pos
+  item_0 (T)
+}
 
-
-# v1.12
-## Done
-## To Do
-- WebSocket (SHA-1, base64)
-
-
-
-# v1.13
-## Done
-## To Do
-- ring - single writer, multiple readers
-- file-backed buffer
-
-
+erase()
+{
+  itr
+  page_pos
+  item_0 (T)
+}
 ---
 		context.log->filter()->min_severity(abc::severity::critical); ////
 ---
