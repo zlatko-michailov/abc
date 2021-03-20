@@ -162,11 +162,11 @@ namespace abc {
 
 	// erase() helpers
 	private:
-		iterator				erase_nostate(const_iterator itr) noexcept;
-		iterator				erase_from_many(const_iterator itr, vmem_container_page<T>* container_page) noexcept;
-		iterator				balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
-		iterator				balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
-		iterator				balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
+		result2					erase_nostate(const_iterator itr) noexcept;
+		result2					erase_from_many(const_iterator itr, vmem_container_page<T>* container_page) noexcept;
+		result2					balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
+		result2					balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
+		result2					balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
 		bool					erase_page(vmem_page<Pool, Log>& page) noexcept;
 		bool					erase_page_pos(vmem_page_pos_t page_pos) noexcept;
 		bool					should_balance_erase(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos) const noexcept;
