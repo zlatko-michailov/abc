@@ -1,16 +1,14 @@
 ## Done
 - Breaking Changes
-  - vmem_list_state
-  - vmem_root_page
+  - vmem_container_page<Header>
+  - vmem_container<Header>
+  - vmem_container_iterator<Header>
 - Bugs
-  - vmem_list::erase() bug
-  - vmem_ptr(vmem_page_pos_nil) allocates a new page.
 - Additions
-  - vmem_linked
   - vmem_container
+    - insert2()
+    - erase2()
 - Refactoring
-  - vmem_pool
-  - vmem_list
 ----
 ## To Do
 - vmem_map

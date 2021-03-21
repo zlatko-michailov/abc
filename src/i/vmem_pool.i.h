@@ -233,6 +233,10 @@ namespace abc {
 	#pragma pack(push, 1)
 
 
+	struct vmem_noheader {
+	};
+
+
 	struct vmem_linked_state {
 		vmem_page_pos_t		front_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		back_page_pos		= vmem_page_pos_nil;
@@ -255,14 +259,17 @@ namespace abc {
 		vmem_page_pos_t		next_page_pos		= vmem_page_pos_nil;
 	};
 
-	template <typename T>
+
+	template <typename T, typename Header = vmem_noheader>
 	struct vmem_container_page : public vmem_linked_page {
+		Header				header				= { 0 };
 		vmem_item_pos_t		item_count			= 0;
 		T					items[1]			= { 0 };
 	};
 
+
 	template <typename T>
-	struct vmem_list_page : public vmem_container_page<T> {
+	struct vmem_list_page : public vmem_container_page<T, vmem_noheader> {
 	};
 
 

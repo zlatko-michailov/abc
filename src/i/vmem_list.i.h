@@ -33,15 +33,15 @@ SOFTWARE.
 namespace abc {
 
 	template <typename T, typename Pool, typename Log = null_log>
-	using vmem_list_iterator = vmem_container_iterator<T, Pool, Log>;
+	using vmem_list_iterator = vmem_container_iterator<T, vmem_noheader, Pool, Log>;
 
 
 	// --------------------------------------------------------------
 
 
 	template <typename T, typename Pool, typename Log = null_log>
-	class vmem_list : public vmem_container<T, Pool, Log> {
-		using base = vmem_container<T, Pool, Log>;
+	class vmem_list : public vmem_container<T, vmem_noheader, Pool, Log> {
+		using base = vmem_container<T, vmem_noheader, Pool, Log>;
 
 		static constexpr vmem_page_balance_t balance_insert	= ~vmem_page_balance::end;
 		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;	// A stack would still be kept dense.

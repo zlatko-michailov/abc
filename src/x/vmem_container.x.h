@@ -45,8 +45,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
-	vmem_container_result2<T, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
+	template <typename T, typename Header, typename Pool, typename Log>
+	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
 		: iterator(nullptr)
 		, page_pos(vmem_page_pos_nil)
 		, item_0{ 0 } {
@@ -56,26 +56,26 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
-	inline constexpr std::size_t vmem_container<T, Pool, Log>::items_pos() noexcept {
-		return sizeof(vmem_container_page<std::uint8_t>) - sizeof(std::uint8_t);
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline constexpr std::size_t vmem_container<T, Header, Pool, Log>::items_pos() noexcept {
+		return sizeof(vmem_container_page<T, Header>) - sizeof(T);
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline constexpr std::size_t vmem_container<T, Pool, Log>::max_item_size() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline constexpr std::size_t vmem_container<T, Header, Pool, Log>::max_item_size() noexcept {
 		return vmem_page_size - items_pos();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline constexpr std::size_t vmem_container<T, Pool, Log>::page_capacity() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline constexpr std::size_t vmem_container<T, Header, Pool, Log>::page_capacity() noexcept {
 		return max_item_size() / sizeof(T);
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline constexpr bool vmem_container<T, Pool, Log>::is_uninit(const vmem_container_state* state) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline constexpr bool vmem_container<T, Header, Pool, Log>::is_uninit(const vmem_container_state* state) noexcept {
 		return
 			// nil
 			(
@@ -95,8 +95,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline vmem_container<T, Pool, Log>::vmem_container(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log)
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline vmem_container<T, Header, Pool, Log>::vmem_container(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log)
 		: _state(state)
 		, _balance_insert(balance_insert)
 		, _balance_erase(balance_erase)
@@ -140,165 +140,165 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::begin() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::begin() noexcept {
 		return cbegin();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::begin() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::begin() const noexcept {
 		return cbegin();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::cbegin() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::cbegin() const noexcept {
 		return begin_itr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::end() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::end() noexcept {
 		return cend();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::end() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::end() const noexcept {
 		return cend();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::cend() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::cend() const noexcept {
 		return end_itr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::rend() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rend() noexcept {
 		return crend();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::rend() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::rend() const noexcept {
 		return crend();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::crend() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::crend() const noexcept {
 		return rend_itr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::rbegin() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rbegin() noexcept {
 		return crbegin();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::rbegin() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::rbegin() const noexcept {
 		return crbegin();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_iterator vmem_container<T, Pool, Log>::crbegin() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::crbegin() const noexcept {
 		return rbegin_itr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::empty() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::empty() const noexcept {
 		return _state->front_page_pos == vmem_page_pos_nil
 			|| _state->back_page_pos == vmem_page_pos_nil;
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline std::size_t vmem_container<T, Pool, Log>::size() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline std::size_t vmem_container<T, Header, Pool, Log>::size() const noexcept {
 		return _state->total_item_count;
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::pointer vmem_container<T, Pool, Log>::frontptr() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::pointer vmem_container<T, Header, Pool, Log>::frontptr() noexcept {
 		return begin().ptr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_pointer vmem_container<T, Pool, Log>::frontptr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_pointer vmem_container<T, Header, Pool, Log>::frontptr() const noexcept {
 		return begin().ptr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::reference vmem_container<T, Pool, Log>::front() {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::reference vmem_container<T, Header, Pool, Log>::front() {
 		return begin().deref();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_reference vmem_container<T, Pool, Log>::front() const {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_reference vmem_container<T, Header, Pool, Log>::front() const {
 		return begin().deref();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::pointer vmem_container<T, Pool, Log>::backptr() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::pointer vmem_container<T, Header, Pool, Log>::backptr() noexcept {
 		return rend().ptr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_pointer vmem_container<T, Pool, Log>::backptr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_pointer vmem_container<T, Header, Pool, Log>::backptr() const noexcept {
 		return rend().ptr();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::reference vmem_container<T, Pool, Log>::back() {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::reference vmem_container<T, Header, Pool, Log>::back() {
 		return rend().deref();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::const_reference vmem_container<T, Pool, Log>::back() const {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::const_reference vmem_container<T, Header, Pool, Log>::back() const {
 		return rend().deref();
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::push_back(const_reference item) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::push_back(const_reference item) {
 		insert(end(), item);
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::pop_back() {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::pop_back() {
 		erase(rend());
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::push_front(const_reference item) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::push_front(const_reference item) {
 		insert(begin(), item);
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::pop_front() {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::pop_front() {
 		erase(begin());
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert2(const_iterator itr, const_reference item) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert2(const_iterator itr, const_reference item) {
 		if (itr.page_pos() == vmem_page_pos_nil && (itr.item_pos() != vmem_item_pos_nil || !empty())) {
 			throw exception<std::logic_error, Log>("vmem_container::insert2(itr.page_pos)", 0x1044a);
 		}
@@ -354,15 +354,15 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::insert(const_iterator itr, const_reference item) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::insert(const_iterator itr, const_reference item) {
 		return insert2(itr, item).iterator;
 	}
 
 
-	template <typename T, typename Pool, typename Log>
+	template <typename T, typename Header, typename Pool, typename Log>
 	template <typename InputItr>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::insert(const_iterator itr, InputItr first, InputItr last) {
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::insert(const_iterator itr, InputItr first, InputItr last) {
 		iterator ret(itr);
 
 		for (InputItr item = first; item != last; item++) {
@@ -378,8 +378,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert_nostate(const_iterator itr, const_reference item) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert_nostate(const_iterator itr, const_reference item) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1044f, "vmem_container::insert_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -403,8 +403,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert_empty(const_reference item) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert_empty(const_reference item) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10451, "vmem_container::insert_empty() Start");
 		}
@@ -412,7 +412,7 @@ namespace abc {
 		result2 result(nullptr);
 
 		vmem_page<Pool, Log> page(nullptr);
-		vmem_container_page<T>* container_page = nullptr;
+		vmem_container_page<T, Header>* container_page = nullptr;
 		bool ok = insert_page_after(vmem_page_pos_nil, page, container_page);
 
 		if (ok) {
@@ -429,8 +429,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert_nonempty(const_iterator itr, const_reference item) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert_nonempty(const_iterator itr, const_reference item) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10453, "vmem_container::insert_nonempty() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
@@ -446,7 +446,7 @@ namespace abc {
 			}
 		}
 		else {
-			vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
+			vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
 			if (_log != nullptr) {
 				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10455, "vmem_container::insert_nonempty() item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
@@ -471,8 +471,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10457, "vmem_container::insert_with_overflow() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
@@ -484,7 +484,7 @@ namespace abc {
 		bool balance = should_balance_insert(itr, container_page);
 
 		vmem_page<Pool, Log> new_page(nullptr);
-		vmem_container_page<T>* new_container_page = nullptr;
+		vmem_container_page<T, Header>* new_container_page = nullptr;
 		bool ok = insert_page_after(itr.page_pos(), new_page, new_container_page);
 
 		if (ok) {
@@ -498,7 +498,7 @@ namespace abc {
 			}
 			else {
 				// Inserting to the latter page.
-				vmem_container_iterator<T, Pool, Log> new_itr(this, new_page.pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() - container_page->item_count : new_container_page->item_count, vmem_iterator_edge::none, _log);
+				vmem_container_iterator<T, Header, Pool, Log> new_itr(this, new_page.pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() - container_page->item_count : new_container_page->item_count, vmem_iterator_edge::none, _log);
 				result = insert_with_capacity(new_itr, item, new_container_page);
 			}
 
@@ -515,8 +515,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10459, "vmem_container::insert_with_capacity() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
@@ -548,8 +548,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::balance_split(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T>* new_container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::balance_split(vmem_page_pos_t page_pos, vmem_container_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T, Header>* new_container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1045c, "vmem_container::balance() Start. page_pos=0x%llx, new_page_pos=0x%llx",
 				(long long)page_pos, (long long)new_page_pos);
@@ -568,8 +568,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T>*& new_container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T, Header>*& new_container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1045e, "vmem_container::insert_page_after() Start. after_page_pos=0x%llx",
 				(long long)after_page_pos);
@@ -578,7 +578,7 @@ namespace abc {
 		bool ok = true;
 		
 		vmem_page<Pool, Log> new_page_local(_pool, _log);
-		vmem_container_page<T>* new_container_page_local = nullptr;
+		vmem_container_page<T, Header>* new_container_page_local = nullptr;
 
 		if (new_page_local.ptr() == nullptr) {
 			ok = false;
@@ -589,7 +589,7 @@ namespace abc {
 		}
 
 		if (ok) {
-			new_container_page_local = reinterpret_cast<vmem_container_page<T>*>(new_page_local.ptr());
+			new_container_page_local = reinterpret_cast<vmem_container_page<T, Header>*>(new_page_local.ptr());
 
 			vmem_linked<Pool, Log> linked(_state, _pool, _log);
 
@@ -624,8 +624,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::should_balance_insert(const_iterator itr, const vmem_container_page<T>* container_page) const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::should_balance_insert(const_iterator itr, const vmem_container_page<T, Header>* container_page) const noexcept {
 		bool balance = false;
 
 		if (container_page->prev_page_pos == vmem_page_pos_nil && itr.item_pos() == 0) {
@@ -645,8 +645,8 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::erase2(const_iterator itr) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::erase2(const_iterator itr) {
 		if (!itr.can_deref()) {
 			throw exception<std::logic_error, Log>("vmem_container::erase(itr)", 0x10461);
 		}
@@ -676,14 +676,14 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::erase(const_iterator itr) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::erase(const_iterator itr) {
 		return erase2(itr).iterator;
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::erase(const_iterator first, const_iterator last) {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::erase(const_iterator first, const_iterator last) {
 		iterator item = first;
 
 		while (item != last) {
@@ -702,8 +702,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::erase_nostate(const_iterator itr) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::erase_nostate(const_iterator itr) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10465, "vmem_container::erase_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
@@ -719,7 +719,7 @@ namespace abc {
 			}
 		}
 		else {
-			vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
+			vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
 			if (container_page->item_count > 1) {
 				// Determine whether we should balance before any inout parameter gets altered.
@@ -763,8 +763,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::erase_from_many(const_iterator itr, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10469, "vmem_container::erase_from_many() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
@@ -812,8 +812,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046d, "vmem_container::balance_merge_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
@@ -841,8 +841,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046f, "vmem_container::balance_merge_next_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
@@ -852,7 +852,7 @@ namespace abc {
 		result.iterator = itr;
 
 		vmem_page<Pool, Log> next_page(_pool, container_page->next_page_pos, _log);
-		vmem_container_page<T>* next_container_page = nullptr;
+		vmem_container_page<T, Header>* next_container_page = nullptr;
 
 		if (next_page.ptr() == nullptr) {
 			if (_log != nullptr) {
@@ -861,7 +861,7 @@ namespace abc {
 			}
 		}
 		else {
-			next_container_page = reinterpret_cast<vmem_container_page<T>*>(next_page.ptr());
+			next_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(next_page.ptr());
 
 			if (_log != nullptr) {
 				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10471, "vmem_container::balance_merge_next_safe() page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
@@ -902,8 +902,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::result2 vmem_container<T, Pool, Log>::balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::result2 vmem_container<T, Header, Pool, Log>::balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10474, "vmem_container::balance_merge_prev() Start. page_pos=0x%llx",
 				(long long)page.pos());
@@ -914,7 +914,7 @@ namespace abc {
 
 
 		vmem_page<Pool, Log> prev_page(_pool, container_page->prev_page_pos, _log);
-		vmem_container_page<T>* prev_container_page = nullptr;
+		vmem_container_page<T, Header>* prev_container_page = nullptr;
 
 		if (prev_page.ptr() == nullptr) {
 			if (_log != nullptr) {
@@ -923,7 +923,7 @@ namespace abc {
 			}
 		}
 		else {
-			prev_container_page = reinterpret_cast<vmem_container_page<T>*>(prev_page.ptr());
+			prev_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(prev_page.ptr());
 
 			if (_log != nullptr) {
 				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10476, "vmem_container::balance_merge_prev() page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
@@ -970,8 +970,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::erase_page(vmem_page<Pool, Log>& page) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::erase_page(vmem_page<Pool, Log>& page) noexcept {
 		vmem_page_pos_t page_pos = page.pos();
 
 		if (_log != nullptr) {
@@ -994,8 +994,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::erase_page_pos(vmem_page_pos_t page_pos) noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::erase_page_pos(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047b, "vmem_container::erase_page_pos() Start. page_pos=0x%llx",
 				(long long)page_pos);
@@ -1016,8 +1016,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline bool vmem_container<T, Pool, Log>::should_balance_erase(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos) const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline bool vmem_container<T, Header, Pool, Log>::should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept {
 		bool balance = false;
 
 		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
@@ -1037,8 +1037,8 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename T, typename Pool, typename Log>
-	inline void vmem_container<T, Pool, Log>::clear() noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline void vmem_container<T, Header, Pool, Log>::clear() noexcept {
 		vmem_linked<Pool, Log> linked(_state, _pool, _log);
 		linked.clear();
 	}
@@ -1047,8 +1047,8 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::next(const_iterator& itr) const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::next(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047d, "vmem_container::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -1068,7 +1068,7 @@ namespace abc {
 				}
 			}
 			else {
-				vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
+				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
 				if (itr._item_pos < container_page->item_count - 1) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
@@ -1090,8 +1090,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::prev(const_iterator& itr) const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::prev(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10480, "vmem_container::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -1111,7 +1111,7 @@ namespace abc {
 				}
 			}
 			else {
-				vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
+				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
 				if (itr._item_pos > 0) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
@@ -1126,7 +1126,7 @@ namespace abc {
 							}
 						}
 						else {
-							vmem_container_page<T>* prev_container_page = reinterpret_cast<vmem_container_page<T>*>(prev_page.ptr());
+							vmem_container_page<T, Header>* prev_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(prev_page.ptr());
 		
 							result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
 						}
@@ -1144,8 +1144,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline vmem_ptr<T, Pool, Log> vmem_container<T, Pool, Log>::at(const_iterator& itr) const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline vmem_ptr<T, Pool, Log> vmem_container<T, Header, Pool, Log>::at(const_iterator& itr) const noexcept {
 		vmem_item_pos_t item_pos =
 			itr.item_pos() == vmem_item_pos_nil ?
 				vmem_item_pos_nil :
@@ -1155,8 +1155,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::begin_itr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::begin_itr() const noexcept {
 		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
 
 		if (_state->front_page_pos != vmem_page_pos_nil) {
@@ -1172,8 +1172,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::rbegin_itr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rbegin_itr() const noexcept {
 		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
 
 		if (_log != nullptr) {
@@ -1185,8 +1185,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::end_itr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::end_itr() const noexcept {
 		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
 
 		if (_log != nullptr) {
@@ -1198,8 +1198,8 @@ namespace abc {
 	}
 
 
-	template <typename T, typename Pool, typename Log>
-	inline typename vmem_container<T, Pool, Log>::iterator vmem_container<T, Pool, Log>::rend_itr() const noexcept {
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rend_itr() const noexcept {
 		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
 
 		if (_state->back_page_pos != vmem_page_pos_nil) {
@@ -1211,7 +1211,7 @@ namespace abc {
 				}
 			}
 			else {
-				vmem_container_page<T>* container_page = reinterpret_cast<vmem_container_page<T>*>(page.ptr());
+				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 				itr = iterator(this, _state->back_page_pos, container_page->item_count - 1, vmem_iterator_edge::none, _log);
 			}
 		}

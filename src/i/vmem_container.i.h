@@ -51,30 +51,30 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
+	template <typename T, typename Header, typename Pool, typename Log>
 	class vmem_container;
 
-	template <typename T, typename Pool, typename Log = null_log>
-	using vmem_container_iterator = vmem_iterator<vmem_container<T, Pool, Log>, T, Pool, Log>;
+	template <typename T, typename Header, typename Pool, typename Log = null_log>
+	using vmem_container_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log>
+	template <typename T, typename Header, typename Pool, typename Log>
 	struct vmem_container_result2 {
 		vmem_container_result2(nullptr_t) noexcept;
 
-		vmem_container_iterator<T, Pool, Log>	iterator;
-		vmem_page_pos_t							page_pos;
-		T										item_0;
+		vmem_container_iterator<T, Header, Pool, Log>	iterator;
+		vmem_page_pos_t									page_pos;
+		T												item_0;
 	};
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Pool, typename Log = null_log>
+	template <typename T, typename Header, typename Pool, typename Log = null_log>
 	class vmem_container {
 	public:
 		using value_type				= T;
@@ -82,11 +82,11 @@ namespace abc {
 		using const_pointer				= const pointer;
 		using reference					= T&;
 		using const_reference			= const T&;
-		using iterator					= vmem_container_iterator<T, Pool, Log>;
+		using iterator					= vmem_container_iterator<T, Header, Pool, Log>;
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
-		using result2					= vmem_container_result2<T, Pool, Log>;
+		using result2					= vmem_container_result2<T, Header, Pool, Log>;
 
 	public:
 		static constexpr std::size_t	items_pos() noexcept;
@@ -95,9 +95,9 @@ namespace abc {
 		static constexpr bool			is_uninit(const vmem_container_state* state) noexcept;
 
 	public:
-		vmem_container<T, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log);
-		vmem_container<T, Pool, Log>(const vmem_container<T, Pool, Log>& other) noexcept = default;
-		vmem_container<T, Pool, Log>(vmem_container<T, Pool, Log>&& other) noexcept = default;
+		vmem_container<T, Header, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log);
+		vmem_container<T, Header, Pool, Log>(const vmem_container<T, Header, Pool, Log>& other) noexcept = default;
+		vmem_container<T, Header, Pool, Log>(vmem_container<T, Header, Pool, Log>&& other) noexcept = default;
 
 	public:
 		iterator				begin() noexcept;
@@ -154,22 +154,22 @@ namespace abc {
 		result2					insert_nostate(const_iterator itr, const_reference item) noexcept;
 		result2					insert_empty(const_reference item) noexcept;
 		result2					insert_nonempty(const_iterator itr, const_reference item) noexcept;
-		result2					insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept;
-		result2					insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T>* container_page) noexcept;
-		void					balance_split(vmem_page_pos_t page_pos, vmem_container_page<T>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T>* new_container_page) noexcept;
-		bool					insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T>*& new_container_page) noexcept;
-		bool					should_balance_insert(const_iterator itr, const vmem_container_page<T>* container_page) const noexcept;
+		result2					insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept;
+		result2					insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept;
+		void					balance_split(vmem_page_pos_t page_pos, vmem_container_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T, Header>* new_container_page) noexcept;
+		bool					insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T, Header>*& new_container_page) noexcept;
+		bool					should_balance_insert(const_iterator itr, const vmem_container_page<T, Header>* container_page) const noexcept;
 
 	// erase() helpers
 	private:
 		result2					erase_nostate(const_iterator itr) noexcept;
-		result2					erase_from_many(const_iterator itr, vmem_container_page<T>* container_page) noexcept;
-		result2					balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
-		result2					balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
-		result2					balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T>* container_page) noexcept;
+		result2					erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept;
+		result2					balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
+		result2					balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
+		result2					balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
 		bool					erase_page(vmem_page<Pool, Log>& page) noexcept;
 		bool					erase_page_pos(vmem_page_pos_t page_pos) noexcept;
-		bool					should_balance_erase(const vmem_container_page<T>* container_page, vmem_item_pos_t item_pos) const noexcept;
+		bool					should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept;
 
 	private:
 		friend iterator;

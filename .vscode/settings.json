@@ -93,6 +93,7 @@
 		"istream",
 		"michailov",
 		"multifile",
+		"noheader",
 		"ostream",
 		"posix",
 		"precompiled",
@@ -104,6 +105,7 @@
 		"struct",
 		"subfolders",
 		"triaged",
+		"vmem",
 		"zlatko"
 	]
 }
