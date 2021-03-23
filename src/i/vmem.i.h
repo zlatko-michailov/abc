@@ -28,3 +28,4 @@ SOFTWARE.
 #include "vmem_linked.i.h"
 #include "vmem_container.i.h"
 #include "vmem_list.i.h"
+#include "vmem_map.i.h"

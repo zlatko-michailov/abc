@@ -26,9 +26,11 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 #include "log.i.h"
 #include "vmem_pool.i.h"
+#include "vmem_container.i.h"
 
 
 namespace abc {
@@ -36,32 +38,75 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using vmem_page_balance_t = std::uint8_t;
-	namespace vmem_page_balance {
-		constexpr vmem_page_balance_t none		= 0x00;
-		constexpr vmem_page_balance_t begin		= 0x01;
-		constexpr vmem_page_balance_t inner		= 0x02;
-		constexpr vmem_page_balance_t end		= 0x04;
-		constexpr vmem_page_balance_t all		= 0xff;
+	// IMPORTANT: Ensure a predictable layout of the data on disk!
+	#pragma pack(push, 1)
 
 
-		bool test(vmem_page_balance_t value, vmem_page_balance_t bits) noexcept;
-	}
+	struct vmem_map_header {
+		vmem_page_pos_t			parent_page_pos;
+	};
+
+
+	struct vmem_map_value_level_header: public vmem_map_header {
+	};
+
+
+	struct vmem_map_key_level_header: public vmem_map_header {
+	};
+
+
+	template <typename Key, typename T>
+	struct vmem_map_value {
+		Key						key;
+		T						value;
+	};
+
+
+	template <typename Key>
+	struct vmem_map_key {
+		Key						key;
+		vmem_page_pos_t			page_pos;
+	};
+
+
+	struct vmem_map_state {
+		vmem_container_state	values;
+		vmem_container_state	key_levels;
+	};
+
+
+	#pragma pack(pop)
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Header, typename Pool, typename Log>
-	class vmem_container;
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	using vmem_map_value_level = vmem_container<vmem_map_value<Key, T>, vmem_map_value_level_header, Pool, Log>;
 
-	template <typename T, typename Header, typename Pool, typename Log = null_log>
-	using vmem_container_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
+
+	template <typename Key, typename Pool, typename Log = null_log>
+	using vmem_map_key_level = vmem_container<vmem_map_key<Key>, vmem_map_key_level_header, Pool, Log>;
+
+
+	template <typename Key, typename Pool, typename Log = null_log>
+	using vmem_map_key_level_stack = vmem_container<vmem_container_state, vmem_noheader, Pool, Log>;
 
 
 	// --------------------------------------------------------------
 
 
+	template <typename Key, typename T, typename Pool, typename Log>
+	class vmem_map;
+
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	using vmem_map_iterator = vmem_iterator<vmem_map<Key, T, Pool, Log>, vmem_map_value<Key, T>, Pool, Log>;
+
+
+	// --------------------------------------------------------------
+
+
+#ifdef REMOVE ////
 	template <typename T, typename Header, typename Pool, typename Log>
 	struct vmem_container_result2 {
 		vmem_container_result2(nullptr_t) noexcept;
@@ -70,25 +115,29 @@ namespace abc {
 		vmem_page_pos_t									page_pos;
 		T												item_0;
 	};
+#endif
 
 
 	// --------------------------------------------------------------
 
 
-	template <typename T, typename Header, typename Pool, typename Log = null_log>
-	class vmem_container {
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	class vmem_map {
 	public:
-		using value_type				= T;
-		using pointer					= vmem_ptr<T, Pool, Log>;
+		using key_type					= Key;
+		using mapped_type				= T;
+		using value_type				= vmem_map_value<Key, T>;
+		using pointer					= vmem_ptr<vmem_map_value<Key, T>, Pool, Log>;
 		using const_pointer				= const pointer;
-		using reference					= T&;
-		using const_reference			= const T&;
-		using iterator					= vmem_container_iterator<T, Header, Pool, Log>;
+		using reference					= vmem_map_value<Key, T>&;
+		using const_reference			= const vmem_map_value<Key, T>&;
+		using iterator					= vmem_map_iterator<Key, T, Pool, Log>;
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
-		using result2					= vmem_container_result2<T, Header, Pool, Log>;
+		////using result2					= vmem_container_result2<T, Header, Pool, Log>;
 
+#ifdef REMOVE ////
 	public:
 		static constexpr std::size_t	items_pos() noexcept;
 		static constexpr std::size_t	max_item_size() noexcept;
@@ -184,15 +233,13 @@ namespace abc {
 		iterator				rbegin_itr() const noexcept;
 		iterator				end_itr() const noexcept;
 		iterator				rend_itr() const noexcept;
+#endif
 
 	private:
-		vmem_container_state*	_state;
-		vmem_page_balance_t		_balance_insert;
-		vmem_page_balance_t		_balance_erase;
+		vmem_map_state*			_state;
 		Pool*					_pool;
 		Log*					_log;
 	};
-
 
 	// --------------------------------------------------------------
 
