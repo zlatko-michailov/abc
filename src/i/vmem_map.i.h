@@ -43,7 +43,7 @@ namespace abc {
 
 
 	struct vmem_map_header {
-		vmem_page_pos_t			parent_page_pos;
+		vmem_page_pos_t			parent_page_pos	= vmem_page_pos_nil;
 	};
 
 
@@ -57,21 +57,31 @@ namespace abc {
 
 	template <typename Key, typename T>
 	struct vmem_map_value {
-		Key						key;
-		T						value;
+		Key						key				= { 0 };
+		T						value			= { 0 };
 	};
 
 
 	template <typename Key>
 	struct vmem_map_key {
-		Key						key;
-		vmem_page_pos_t			page_pos;
+		Key						key				= { 0 };
+		vmem_page_pos_t			page_pos		= { 0 };
+	};
+
+
+	template <typename Key, typename T>
+	struct vmem_map_value_level_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_map_value_level_header> {
+	};
+
+
+	template <typename Key>
+	struct vmem_map_key_level_page : public vmem_container_page<vmem_map_key<Key>, vmem_map_key_level_header> {
 	};
 
 
 	struct vmem_map_state {
+		vmem_container_state	keys;
 		vmem_container_state	values;
-		vmem_container_state	key_levels;
 	};
 
 
@@ -137,13 +147,18 @@ namespace abc {
 		using const_reverse_iterator	= const_iterator;
 		////using result2					= vmem_container_result2<T, Header, Pool, Log>;
 
-#ifdef REMOVE ////
 	public:
-		static constexpr std::size_t	items_pos() noexcept;
-		static constexpr std::size_t	max_item_size() noexcept;
-		static constexpr std::size_t	page_capacity() noexcept;
-		static constexpr bool			is_uninit(const vmem_container_state* state) noexcept;
+		static constexpr std::size_t	key_items_pos() noexcept;
+		static constexpr std::size_t	max_key_item_size() noexcept;
+		static constexpr std::size_t	key_page_capacity() noexcept;
 
+		static constexpr std::size_t	value_items_pos() noexcept;
+		static constexpr std::size_t	max_value_item_size() noexcept;
+		static constexpr std::size_t	value_page_capacity() noexcept;
+
+		static constexpr bool			is_uninit(const vmem_map_state* state) noexcept;
+
+#ifdef REMOVE ////
 	public:
 		vmem_container<T, Header, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log);
 		vmem_container<T, Header, Pool, Log>(const vmem_container<T, Header, Pool, Log>& other) noexcept = default;
