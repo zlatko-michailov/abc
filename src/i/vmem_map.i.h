@@ -158,12 +158,12 @@ namespace abc {
 
 		static constexpr bool			is_uninit(const vmem_map_state* state) noexcept;
 
-#ifdef REMOVE ////
 	public:
-		vmem_container<T, Header, Pool, Log>(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log);
-		vmem_container<T, Header, Pool, Log>(const vmem_container<T, Header, Pool, Log>& other) noexcept = default;
-		vmem_container<T, Header, Pool, Log>(vmem_container<T, Header, Pool, Log>&& other) noexcept = default;
+		vmem_map<Key, T, Pool, Log>(vmem_map_state* state, Pool* pool, Log* log);
+		vmem_map<Key, T, Pool, Log>(const vmem_map<Key, T, Pool, Log>& other) noexcept = default;
+		vmem_map<Key, T, Pool, Log>(vmem_map<Key, T, Pool, Log>&& other) noexcept = default;
 
+#ifdef REMOVE ////
 	public:
 		iterator				begin() noexcept;
 		const_iterator			begin() const noexcept;

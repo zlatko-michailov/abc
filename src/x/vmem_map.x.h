@@ -38,7 +38,7 @@ namespace abc {
 
 #ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
+	vmem_map_result2<T, Header, Pool, Log>::vmem_map_result2(nullptr_t) noexcept
 		: iterator(nullptr)
 		, page_pos(vmem_page_pos_nil)
 		, item_0{ 0 } {
@@ -91,9 +91,6 @@ namespace abc {
 			// nil
 			(
 				state != nullptr
-				&& state->keys.front_page_pos == vmem_page_pos_nil
-				&& state->keys.back_page_pos == vmem_page_pos_nil
-				&& state->keys.item_size == 0
 				&& state->values.front_page_pos == vmem_page_pos_nil
 				&& state->values.back_page_pos == vmem_page_pos_nil
 				&& state->values.item_size == 0
@@ -102,9 +99,6 @@ namespace abc {
 			// zero
 			(
 				state != nullptr
-				&& state->keys.front_page_pos == 0
-				&& state->keys.back_page_pos == 0
-				&& state->keys.item_size == 0
 				&& state->values.front_page_pos == 0
 				&& state->values.back_page_pos == 0
 				&& state->values.item_size == 0
@@ -112,52 +106,62 @@ namespace abc {
 	}
 
 
-#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline vmem_map<Key, T, Pool, Log>::vmem_container(vmem_container_state* state, vmem_page_balance_t balance_insert, vmem_page_balance_t balance_erase, Pool* pool, Log* log)
+	inline vmem_map<Key, T, Pool, Log>::vmem_map(vmem_map_state* state, Pool* pool, Log* log)
 		: _state(state)
-		, _balance_insert(balance_insert)
-		, _balance_erase(balance_erase)
 		, _pool(pool)
 		, _log(log) {
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10443, "vmem_container::vmem_container() state=%p, pool=%p", state, pool);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::vmem_map() state=%p, pool=%p", state, pool);
 		}
 
 		if (state == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_container::vmem_container(state)", 0x10444);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(state)", __TAG__);
 		}
 
 		if (pool == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_container::vmem_container(pool)", 0x10445);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool)", __TAG__);
 		}
 
-		if (sizeof(T) > max_item_size()) {
-			throw exception<std::logic_error, Log>("vmem_container::vmem_container(size) excess", 0x10446);
+		if (sizeof(vmem_map_key<Key>) > max_key_item_size()) {
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) excess", __TAG__);
+		}
+
+		if (sizeof(vmem_map_value<Key, T>) > max_value_item_size()) {
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) excess", __TAG__);
 		}
 
 		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
-			throw exception<std::logic_error, Log>("vmem_container::vmem_container(pool<MaxMappedPages>)", 0x10447);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool<MaxMappedPages>)", __TAG__);
 		}
 
 		if (is_uninit(state)) {
-			_state->front_page_pos = vmem_page_pos_nil;
-			_state->back_page_pos = vmem_page_pos_nil;
-			_state->item_size = sizeof(T);
+			_state->keys.front_page_pos = vmem_page_pos_nil;
+			_state->keys.back_page_pos = vmem_page_pos_nil;
+			_state->keys.item_size = sizeof(vmem_map_key<Key>);
+
+			_state->values.front_page_pos = vmem_page_pos_nil;
+			_state->values.back_page_pos = vmem_page_pos_nil;
+			_state->values.item_size = sizeof(vmem_map_value<Key, T>);
 		}
 
-		if (sizeof(T) != _state->item_size) {
-			throw exception<std::logic_error, Log>("vmem_container::vmem_container(size) mismatch", 0x10448);
+		if (sizeof(vmem_map_key<Key>) != _state->keys.item_size) {
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) mismatch", __TAG__);
+		}
+
+		if (sizeof(vmem_map_value<Key, T>) != _state->values.item_size) {
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) mismatch", __TAG__);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10449, "vmem_container::vmem_container() front_page_pos=0x%llx, back_page_pos=0x%llx", 
-				(long long)_state->front_page_pos, (long long)_state->back_page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::vmem_map() keys.front_page_pos=0x%llx, keys.back_page_pos=0x%llx,  values.front_page_pos=0x%llx, values.back_page_pos=0x%llx", 
+				(long long)_state->keys.front_page_pos, (long long)_state->keys.back_page_pos, (long long)_state->values.front_page_pos, (long long)_state->values.back_page_pos);
 		}
 	}
 
 
+#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::begin() noexcept {
 		return cbegin();
@@ -318,15 +322,15 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert2(const_iterator itr, const_reference item) {
 		if (itr.page_pos() == vmem_page_pos_nil && (itr.item_pos() != vmem_item_pos_nil || !empty())) {
-			throw exception<std::logic_error, Log>("vmem_container::insert2(itr.page_pos)", 0x1044a);
+			throw exception<std::logic_error, Log>("vmem_map::insert2(itr.page_pos)", 0x1044a);
 		}
 
 		if (itr.item_pos() == vmem_item_pos_nil && (itr.page_pos() != _state->back_page_pos && itr.edge() != vmem_iterator_edge::end)) {
-			throw exception<std::logic_error, Log>("vmem_container::insert2(itr.item_pos)", 0x1044b);
+			throw exception<std::logic_error, Log>("vmem_map::insert2(itr.item_pos)", 0x1044b);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x1044c, "vmem_container::insert2() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1044c, "vmem_map::insert2() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -364,7 +368,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x1044d, "vmem_container::insert2() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1044d, "vmem_map::insert2() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
 				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos, (std::size_t)_state->total_item_count);
 		}
 
@@ -386,7 +390,7 @@ namespace abc {
 		for (InputItr item = first; item != last; item++) {
 			if (!insert(itr++, *item).can_deref()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::important, 0x1044e, "vmem_container::insert() Breaking from the loop.");
+					_log->put_any(category::abc::vmem, severity::important, 0x1044e, "vmem_map::insert() Breaking from the loop.");
 				}
 				break;
 			}
@@ -399,7 +403,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_nostate(const_iterator itr, const_reference item) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1044f, "vmem_container::insert_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1044f, "vmem_map::insert_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -413,7 +417,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10450, "vmem_container::insert_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, , result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, , result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
 		}
 
@@ -424,13 +428,13 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_empty(const_reference item) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10451, "vmem_container::insert_empty() Start");
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_empty() Start");
 		}
 
 		result2 result(nullptr);
 
 		vmem_page<Pool, Log> page(nullptr);
-		vmem_container_page<T, Header>* container_page = nullptr;
+		vmem_map_page<T, Header>* container_page = nullptr;
 		bool ok = insert_page_after(vmem_page_pos_nil, page, container_page);
 
 		if (ok) {
@@ -439,7 +443,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10452, "vmem_container::insert_empty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_empty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
 		}
 
@@ -450,7 +454,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_nonempty(const_iterator itr, const_reference item) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10453, "vmem_container::insert_nonempty() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_nonempty() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
@@ -460,14 +464,14 @@ namespace abc {
 
 		if (page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10454, "vmem_container::insert_nonempty() Could not load page pos=0x%llx", (long long)page.pos());
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::insert_nonempty() Could not load page pos=0x%llx", (long long)page.pos());
 			}
 		}
 		else {
-			vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
+			vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10455, "vmem_container::insert_nonempty() item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::insert_nonempty() item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
 			}
 
 			if (container_page->item_count == page_capacity()) {
@@ -481,7 +485,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10456, "vmem_container::insert_nonempty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_nonempty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
 		}
 
@@ -490,9 +494,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_with_overflow(const_iterator itr, const_reference item, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10457, "vmem_container::insert_with_overflow() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_with_overflow() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
@@ -502,7 +506,7 @@ namespace abc {
 		bool balance = should_balance_insert(itr, container_page);
 
 		vmem_page<Pool, Log> new_page(nullptr);
-		vmem_container_page<T, Header>* new_container_page = nullptr;
+		vmem_map_page<T, Header>* new_container_page = nullptr;
 		bool ok = insert_page_after(itr.page_pos(), new_page, new_container_page);
 
 		if (ok) {
@@ -516,7 +520,7 @@ namespace abc {
 			}
 			else {
 				// Inserting to the latter page.
-				vmem_container_iterator<T, Header, Pool, Log> new_itr(this, new_page.pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() - container_page->item_count : new_container_page->item_count, vmem_iterator_edge::none, _log);
+				vmem_map_iterator<T, Header, Pool, Log> new_itr(this, new_page.pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() - container_page->item_count : new_container_page->item_count, vmem_iterator_edge::none, _log);
 				result = insert_with_capacity(new_itr, item, new_container_page);
 			}
 
@@ -525,7 +529,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10458, "vmem_container::insert_with_overflow() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_with_overflow() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
 		}
 
@@ -534,9 +538,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert_with_capacity(const_iterator itr, const_reference item, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10459, "vmem_container::insert_with_capacity() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_with_capacity() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
@@ -558,7 +562,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1045b, "vmem_container::insert_with_capacity() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1045b, "vmem_map::insert_with_capacity() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x",
 				(long long)result.iterator.page_pos(), result.iterator.item_pos());
 		}
 
@@ -567,9 +571,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline void vmem_map<Key, T, Pool, Log>::balance_split(vmem_page_pos_t page_pos, vmem_container_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T, Header>* new_container_page) noexcept {
+	inline void vmem_map<Key, T, Pool, Log>::balance_split(vmem_page_pos_t page_pos, vmem_map_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, vmem_map_page<T, Header>* new_container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1045c, "vmem_container::balance() Start. page_pos=0x%llx, new_page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1045c, "vmem_map::balance() Start. page_pos=0x%llx, new_page_pos=0x%llx",
 				(long long)page_pos, (long long)new_page_pos);
 		}
 
@@ -580,34 +584,34 @@ namespace abc {
 		container_page->item_count = page_item_count;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1045d, "vmem_container::balance() Done. page_pos=0x%llx, item_count=%u, new_page_pos=0x%llx, new_item_count=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1045d, "vmem_map::balance() Done. page_pos=0x%llx, item_count=%u, new_page_pos=0x%llx, new_item_count=%u",
 				(long long)page_pos, container_page->item_count, (long long)new_page_pos, new_container_page->item_count);
 		}
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline bool vmem_map<Key, T, Pool, Log>::insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T, Header>*& new_container_page) noexcept {
+	inline bool vmem_map<Key, T, Pool, Log>::insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_map_page<T, Header>*& new_container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1045e, "vmem_container::insert_page_after() Start. after_page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1045e, "vmem_map::insert_page_after() Start. after_page_pos=0x%llx",
 				(long long)after_page_pos);
 		}
 
 		bool ok = true;
 		
 		vmem_page<Pool, Log> new_page_local(_pool, _log);
-		vmem_container_page<T, Header>* new_container_page_local = nullptr;
+		vmem_map_page<T, Header>* new_container_page_local = nullptr;
 
 		if (new_page_local.ptr() == nullptr) {
 			ok = false;
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x1045f, "vmem_container::insert_page_after() Could not create page");
+				_log->put_any(category::abc::vmem, severity::warning, 0x1045f, "vmem_map::insert_page_after() Could not create page");
 			}
 		}
 
 		if (ok) {
-			new_container_page_local = reinterpret_cast<vmem_container_page<T, Header>*>(new_page_local.ptr());
+			new_container_page_local = reinterpret_cast<vmem_map_page<T, Header>*>(new_page_local.ptr());
 
 			vmem_linked<Pool, Log> linked(_state, _pool, _log);
 
@@ -634,7 +638,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10460, "vmem_container::insert_page_after() Done. ok=%d, after_page_pos=0x%llx, new_page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::insert_page_after() Done. ok=%d, after_page_pos=0x%llx, new_page_pos=0x%llx",
 				ok, (long long)after_page_pos, (long long)new_page.pos());
 		}
 
@@ -643,7 +647,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline bool vmem_map<Key, T, Pool, Log>::should_balance_insert(const_iterator itr, const vmem_container_page<T, Header>* container_page) const noexcept {
+	inline bool vmem_map<Key, T, Pool, Log>::should_balance_insert(const_iterator itr, const vmem_map_page<T, Header>* container_page) const noexcept {
 		bool balance = false;
 
 		if (container_page->prev_page_pos == vmem_page_pos_nil && itr.item_pos() == 0) {
@@ -666,11 +670,11 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::erase2(const_iterator itr) {
 		if (!itr.can_deref()) {
-			throw exception<std::logic_error, Log>("vmem_container::erase(itr)", 0x10461);
+			throw exception<std::logic_error, Log>("vmem_map::erase(itr)", __TAG__);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x10462, "vmem_container::erase() Begin. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase() Begin. page_pos=0x%llx, item_pos=0x%x, edge=%u, total_item_count=%zu",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge(), (std::size_t)_state->total_item_count);
 		}
 
@@ -686,7 +690,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x10463, "vmem_container::erase() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
 				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos, (std::size_t)_state->total_item_count);
 		}
 
@@ -707,7 +711,7 @@ namespace abc {
 		while (item != last) {
 			if (!item.can_deref()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::important, 0x10464, "vmem_container::erase() Breaking from the loop.");
+					_log->put_any(category::abc::vmem, severity::important, __TAG__, "vmem_map::erase() Breaking from the loop.");
 				}
 
 				break;
@@ -723,7 +727,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::erase_nostate(const_iterator itr) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10465, "vmem_container::erase_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::erase_nostate() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
@@ -733,11 +737,11 @@ namespace abc {
 
 		if (page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10466, "vmem_container::erase() Could not load page pos=0x%llx", (long long)itr.page_pos());
+				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::erase() Could not load page pos=0x%llx", (long long)itr.page_pos());
 			}
 		}
 		else {
-			vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
+			vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
 
 			if (container_page->item_count > 1) {
 				// Determine whether we should balance before any inout parameter gets altered.
@@ -754,7 +758,7 @@ namespace abc {
 			else {
 				// Erasing the only item on a page means erasing the page.
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10467, "vmem_container::erase_nostate() Only.");
+					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::erase_nostate() Only.");
 				}
 
 				if (container_page->next_page_pos != vmem_page_pos_nil) {
@@ -773,7 +777,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10468, "vmem_container::erase_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::erase_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
 		}
 
@@ -782,9 +786,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::erase_from_many(const_iterator itr, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10469, "vmem_container::erase_from_many() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::erase_from_many() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
@@ -794,7 +798,7 @@ namespace abc {
 			// To delete an item before the last one, pull up the remaining elements.
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1046a, "vmem_container::erase_from_many() Middle.");
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1046a, "vmem_map::erase_from_many() Middle.");
 			}
 
 			std::size_t move_item_count = container_page->item_count - itr.item_pos() - 1;
@@ -806,7 +810,7 @@ namespace abc {
 			// To delete the last (back) item on a page, there is nothing to do.
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1046b, "vmem_container::erase_from_many() Last.");
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1046b, "vmem_map::erase_from_many() Last.");
 			}
 
 			// If we are deleting the last item on a page, the next item is item 0 on the next page or end().
@@ -822,7 +826,7 @@ namespace abc {
 		container_page->item_count--;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046c, "vmem_container::erase_from_many() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046c, "vmem_map::erase_from_many() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
 		}
 
@@ -831,9 +835,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046d, "vmem_container::balance_merge_safe() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046d, "vmem_map::balance_merge_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
 		}
 
@@ -851,7 +855,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046e, "vmem_container::balance_merge_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046e, "vmem_map::balance_merge_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
 		}
 
@@ -860,9 +864,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046f, "vmem_container::balance_merge_next_safe() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046f, "vmem_map::balance_merge_next_safe() Start. page_pos=0x%llx",
 				(long long)page.pos());
 		}
 
@@ -870,25 +874,25 @@ namespace abc {
 		result.iterator = itr;
 
 		vmem_page<Pool, Log> next_page(_pool, container_page->next_page_pos, _log);
-		vmem_container_page<T, Header>* next_container_page = nullptr;
+		vmem_map_page<T, Header>* next_container_page = nullptr;
 
 		if (next_page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10470, "vmem_container::balance_merge_next_safe() Could not load page pos=0x%llx",
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::balance_merge_next_safe() Could not load page pos=0x%llx",
 					(long long)container_page->next_page_pos);
 			}
 		}
 		else {
-			next_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(next_page.ptr());
+			next_container_page = reinterpret_cast<vmem_map_page<T, Header>*>(next_page.ptr());
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10471, "vmem_container::balance_merge_next_safe() page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::balance_merge_next_safe() page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
 					container_page->item_count, (long long)next_page.pos(), next_container_page->item_count);
 			}
 
 			if (container_page->item_count + next_container_page->item_count <= page_capacity()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10472, "vmem_container::balance_merge_next_safe() Do.");
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::balance_merge_next_safe() Do.");
 				}
 
 				result.page_pos = next_page.pos();
@@ -912,7 +916,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10473, "vmem_container::balance_merge_next_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::balance_merge_next_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
 		}
 
@@ -921,9 +925,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_map_page<T, Header>* container_page) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10474, "vmem_container::balance_merge_prev() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::balance_merge_prev() Start. page_pos=0x%llx",
 				(long long)page.pos());
 		}
 
@@ -932,25 +936,25 @@ namespace abc {
 
 
 		vmem_page<Pool, Log> prev_page(_pool, container_page->prev_page_pos, _log);
-		vmem_container_page<T, Header>* prev_container_page = nullptr;
+		vmem_map_page<T, Header>* prev_container_page = nullptr;
 
 		if (prev_page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10475, "vmem_container::balance_merge_prev() Could not load page pos=0x%llx",
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::balance_merge_prev() Could not load page pos=0x%llx",
 					(long long)container_page->prev_page_pos);
 			}
 		}
 		else {
-			prev_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(prev_page.ptr());
+			prev_container_page = reinterpret_cast<vmem_map_page<T, Header>*>(prev_page.ptr());
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10476, "vmem_container::balance_merge_prev() page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::balance_merge_prev() page_pos=0x%llx, page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
 					(long long)page.pos(), container_page->item_count, (long long)prev_page.pos(), prev_container_page->item_count);
 			}
 
 			if (container_page->item_count + prev_container_page->item_count <= page_capacity()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10477, "vmem_container::balance_merge_prev() Do.");
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::balance_merge_prev() Do.");
 				}
 
 				result.page_pos = prev_page.pos();
@@ -980,7 +984,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10478, "vmem_container::balance_merge_prev() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::balance_merge_prev() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
 				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
 		}
 
@@ -993,7 +997,7 @@ namespace abc {
 		vmem_page_pos_t page_pos = page.pos();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10479, "vmem_container::erase_page() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::erase_page() Start. page_pos=0x%llx",
 				(long long)page_pos);
 		}
 
@@ -1004,7 +1008,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047a, "vmem_container::erase_page() Done. ok=%d, page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047a, "vmem_map::erase_page() Done. ok=%d, page_pos=0x%llx",
 				ok, (long long)page_pos);
 		}
 
@@ -1015,7 +1019,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline bool vmem_map<Key, T, Pool, Log>::erase_page_pos(vmem_page_pos_t page_pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047b, "vmem_container::erase_page_pos() Start. page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047b, "vmem_map::erase_page_pos() Start. page_pos=0x%llx",
 				(long long)page_pos);
 		}
 
@@ -1026,7 +1030,7 @@ namespace abc {
 		bool ok = true;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047c, "vmem_container::erase_page_pos() Done. ok=%d, page_pos=0x%llx",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047c, "vmem_map::erase_page_pos() Done. ok=%d, page_pos=0x%llx",
 				ok, (long long)page_pos);
 		}
 
@@ -1035,7 +1039,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline bool vmem_map<Key, T, Pool, Log>::should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept {
+	inline bool vmem_map<Key, T, Pool, Log>::should_balance_erase(const vmem_map_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept {
 		bool balance = false;
 
 		if (container_page->prev_page_pos == vmem_page_pos_nil && item_pos == 0) {
@@ -1068,7 +1072,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::next(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047d, "vmem_container::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047d, "vmem_map::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -1082,11 +1086,11 @@ namespace abc {
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, 0x1047e, "vmem_container::next() Could not load page pos=0x%llx", (long long)itr.page_pos());
+					_log->put_any(category::abc::vmem, severity::warning, 0x1047e, "vmem_map::next() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
 			}
 			else {
-				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
+				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
 
 				if (itr._item_pos < container_page->item_count - 1) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
@@ -1100,7 +1104,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047f, "vmem_container::next() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047f, "vmem_map::next() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
@@ -1111,7 +1115,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::prev(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10480, "vmem_container::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -1125,11 +1129,11 @@ namespace abc {
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, 0x10481, "vmem_container::prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
 				}
 			}
 			else {
-				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
+				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
 
 				if (itr._item_pos > 0) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
@@ -1140,11 +1144,11 @@ namespace abc {
 
 						if (prev_page.ptr() == nullptr) {
 							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::warning, 0x10482, "vmem_container::prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
+								_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
 							}
 						}
 						else {
-							vmem_container_page<T, Header>* prev_container_page = reinterpret_cast<vmem_container_page<T, Header>*>(prev_page.ptr());
+							vmem_map_page<T, Header>* prev_container_page = reinterpret_cast<vmem_map_page<T, Header>*>(prev_page.ptr());
 		
 							result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
 						}
@@ -1154,7 +1158,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10483, "vmem_container::prev() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
@@ -1182,7 +1186,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10484, "vmem_container::begin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::begin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -1195,7 +1199,7 @@ namespace abc {
 		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10485, "vmem_container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -1208,7 +1212,7 @@ namespace abc {
 		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10486, "vmem_container::end_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::end_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -1225,18 +1229,18 @@ namespace abc {
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, 0x10487, "vmem_container::rend_itr() Could not load page pos=0x%llx", (long long)_state->back_page_pos);
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::rend_itr() Could not load page pos=0x%llx", (long long)_state->back_page_pos);
 				}
 			}
 			else {
-				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
+				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
 				itr = iterator(this, _state->back_page_pos, container_page->item_count - 1, vmem_iterator_edge::none, _log);
 			}
 		}
 
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10488, "vmem_container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
