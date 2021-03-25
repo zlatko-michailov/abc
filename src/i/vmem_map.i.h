@@ -163,7 +163,6 @@ namespace abc {
 		vmem_map<Key, T, Pool, Log>(const vmem_map<Key, T, Pool, Log>& other) noexcept = default;
 		vmem_map<Key, T, Pool, Log>(vmem_map<Key, T, Pool, Log>&& other) noexcept = default;
 
-#ifdef REMOVE ////
 	public:
 		iterator				begin() noexcept;
 		const_iterator			begin() const noexcept;
@@ -181,6 +180,7 @@ namespace abc {
 		const_reverse_iterator	rbegin() const noexcept;
 		const_reverse_iterator	crbegin() const noexcept;
 
+#ifdef REMOVE ////
 	public:
 		bool					empty() const noexcept;
 		std::size_t				size() const noexcept;
@@ -242,13 +242,14 @@ namespace abc {
 		iterator				next(const_iterator& itr) const noexcept;
 		iterator				prev(const_iterator& itr) const noexcept;
 		pointer					at(const_iterator& itr) const noexcept;
+#endif
 
 	private:
 		iterator				begin_itr() const noexcept;
 		iterator				rbegin_itr() const noexcept;
 		iterator				end_itr() const noexcept;
 		iterator				rend_itr() const noexcept;
-#endif
+		iterator				itr_from_values(typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr) const noexcept;
 
 	private:
 		vmem_map_state*			_state;

@@ -161,7 +161,6 @@ namespace abc {
 	}
 
 
-#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::begin() noexcept {
 		return cbegin();
@@ -234,6 +233,7 @@ namespace abc {
 	}
 
 
+#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline bool vmem_map<Key, T, Pool, Log>::empty() const noexcept {
 		return _state->front_page_pos == vmem_page_pos_nil
@@ -1175,77 +1175,51 @@ namespace abc {
 
 		return vmem_ptr<T, Pool, Log>(_pool, itr.page_pos(), item_pos, _log);
 	}
+#endif
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::begin_itr() const noexcept {
-		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
 
-		if (_state->front_page_pos != vmem_page_pos_nil) {
-			itr = iterator(this, _state->front_page_pos, 0, vmem_iterator_edge::none, _log);
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::begin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
-		}
-
-		return itr;
+		return itr_from_values(values.begin());
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rbegin_itr() const noexcept {
-		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
-		}
-
-		return itr;
+		return itr_from_values(values.rbegin());
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::end_itr() const noexcept {
-		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::end_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
-		}
-
-		return itr;
+		return itr_from_values(values.end());
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rend_itr() const noexcept {
-		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
 
-		if (_state->back_page_pos != vmem_page_pos_nil) {
-			vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
+		return itr_from_values(values.rend());
+	}
 
-			if (page.ptr() == nullptr) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::rend_itr() Could not load page pos=0x%llx", (long long)_state->back_page_pos);
-				}
-			}
-			else {
-				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
-				itr = iterator(this, _state->back_page_pos, container_page->item_count - 1, vmem_iterator_edge::none, _log);
-			}
-		}
 
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::itr_from_values(typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr) const noexcept {
+		iterator itr(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::itr_from_values() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
 		return itr;
 	}
-#endif
 
 }
