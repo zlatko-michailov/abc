@@ -29,6 +29,7 @@ SOFTWARE.
 
 #include "log.i.h"
 #include "vmem_pool.i.h"
+#include "vmem_layout.i.h"
 
 
 namespace abc {

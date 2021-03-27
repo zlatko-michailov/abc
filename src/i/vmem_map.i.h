@@ -30,63 +30,11 @@ SOFTWARE.
 
 #include "log.i.h"
 #include "vmem_pool.i.h"
+#include "vmem_layout.i.h"
 #include "vmem_container.i.h"
 
 
 namespace abc {
-
-	// --------------------------------------------------------------
-
-
-	// IMPORTANT: Ensure a predictable layout of the data on disk!
-	#pragma pack(push, 1)
-
-
-	struct vmem_map_header {
-		vmem_page_pos_t			parent_page_pos	= vmem_page_pos_nil;
-	};
-
-
-	struct vmem_map_key_header: public vmem_map_header {
-	};
-
-
-	struct vmem_map_value_header: public vmem_map_header {
-	};
-
-
-	template <typename Key>
-	struct vmem_map_key {
-		Key						key				= { 0 };
-		vmem_page_pos_t			page_pos		= { 0 };
-	};
-
-
-	template <typename Key, typename T>
-	struct vmem_map_value {
-		Key						key				= { 0 };
-		T						value			= { 0 };
-	};
-
-
-	template <typename Key>
-	struct vmem_map_key_page : public vmem_container_page<vmem_map_key<Key>, vmem_map_key_header> {
-	};
-
-
-	template <typename Key, typename T>
-	struct vmem_map_value_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_map_value_header> {
-	};
-
-
-	struct vmem_map_state {
-		vmem_container_state	keys;
-		vmem_container_state	values;
-	};
-
-
-	#pragma pack(pop)
-
 
 	// --------------------------------------------------------------
 

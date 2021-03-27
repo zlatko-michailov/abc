@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "vmem_pool.i.h"
+#include "vmem_layout.i.h"
 #include "vmem_iterator.i.h"
 #include "vmem_linked.i.h"
 #include "vmem_container.i.h"
