@@ -36,14 +36,11 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_result2<T, Header, Pool, Log>::vmem_map_result2(nullptr_t) noexcept
-		: iterator(nullptr)
-		, page_pos(vmem_page_pos_nil)
-		, item_0{ 0 } {
+	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(nullptr_t) noexcept
+		: actual_iterator(nullptr)
+		, expected_iterator(nullptr) {
 	}
-#endif
 
 
 	// --------------------------------------------------------------
@@ -51,7 +48,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline constexpr std::size_t vmem_map<Key, T, Pool, Log>::key_items_pos() noexcept {
-		return sizeof(vmem_map_key_level_page<Key>) - sizeof(vmem_map_key<Key>);
+		return sizeof(vmem_map_key_page<Key>) - sizeof(vmem_map_key<Key>);
 	}
 
 
@@ -69,7 +66,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline constexpr std::size_t vmem_map<Key, T, Pool, Log>::value_items_pos() noexcept {
-		return sizeof(vmem_map_value_level_page<Key, T>) - sizeof(vmem_map_value<Key, T>);
+		return sizeof(vmem_map_value_page<Key, T>) - sizeof(vmem_map_value<Key, T>);
 	}
 
 
@@ -233,92 +230,20 @@ namespace abc {
 	}
 
 
-#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline bool vmem_map<Key, T, Pool, Log>::empty() const noexcept {
-		return _state->front_page_pos == vmem_page_pos_nil
-			|| _state->back_page_pos == vmem_page_pos_nil;
+		return _state->values.front_page_pos == vmem_page_pos_nil
+			|| _state->values.back_page_pos == vmem_page_pos_nil;
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline std::size_t vmem_map<Key, T, Pool, Log>::size() const noexcept {
-		return _state->total_item_count;
+		return _state->values.total_item_count;
 	}
 
 
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::frontptr() noexcept {
-		return begin().ptr();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::frontptr() const noexcept {
-		return begin().ptr();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::reference vmem_map<Key, T, Pool, Log>::front() {
-		return begin().deref();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::const_reference vmem_map<Key, T, Pool, Log>::front() const {
-		return begin().deref();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::backptr() noexcept {
-		return rend().ptr();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::backptr() const noexcept {
-		return rend().ptr();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::reference vmem_map<Key, T, Pool, Log>::back() {
-		return rend().deref();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::const_reference vmem_map<Key, T, Pool, Log>::back() const {
-		return rend().deref();
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline void vmem_map<Key, T, Pool, Log>::push_back(const_reference item) {
-		insert(end(), item);
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline void vmem_map<Key, T, Pool, Log>::pop_back() {
-		erase(rend());
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline void vmem_map<Key, T, Pool, Log>::push_front(const_reference item) {
-		insert(begin(), item);
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline void vmem_map<Key, T, Pool, Log>::pop_front() {
-		erase(begin());
-	}
-
-
+#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert2(const_iterator itr, const_reference item) {
 		if (itr.page_pos() == vmem_page_pos_nil && (itr.item_pos() != vmem_item_pos_nil || !empty())) {
@@ -1164,18 +1089,138 @@ namespace abc {
 
 		return result;
 	}
+#endif
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline vmem_ptr<T, Pool, Log> vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) const noexcept {
-		vmem_item_pos_t item_pos =
-			itr.item_pos() == vmem_item_pos_nil ?
-				vmem_item_pos_nil :
-				items_pos() + (itr.item_pos() * sizeof(T));
+	inline typename vmem_map<Key, T, Pool, Log>::find_result2 vmem_map<Key, T, Pool, Log>::find2(const Key& key) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Start.");
+		}
 
-		return vmem_ptr<T, Pool, Log>(_pool, itr.page_pos(), item_pos, _log);
+		vmem_page_pos_t page_pos = vmem_page_pos_nil;
+		vmem_item_pos_t actual_item_pos = vmem_item_pos_nil;
+		vmem_item_pos_t expected_item_pos = vmem_item_pos_nil;
+
+		vmem_map_key_level_stack<Key, Pool, Log> key_stack(_state->keys, _pool, _log);
+
+		if (!key_stack.empty()) {
+			page_pos = key_stack.back().front_page_pos;
+
+			for (std::size_t l = 0; page_pos != vmem_page_pos_nil && l < key_stack.size(); l++) {
+				vmem_page<Pool, Log> page(page_pos, _pool, _log);
+
+				if (page.ptr() == nullptr) {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::find2() Could not load key page pos=0x%llx", (long long)page_pos);
+					}
+
+					page_pos = vmem_page_pos_nil;
+					break;
+				}
+				else {
+					vmem_map_key_page<Key>* key_page = reinterpret_cast<vmem_map_key_page<Key>*>(page.ptr());
+
+					page_pos = key_page->items[0].page_pos;
+					for (std::size_t i = 1; i < key_page->item_count && key < key_page->items[i].key; i++) {
+						page_pos = key_page->items[i].page_pos;
+					}
+				}
+			}
+
+			if (page_pos != vmem_page_pos_nil) {
+				vmem_page<Pool, Log> page(page_pos, _pool, _log);
+
+				if (page.ptr() == nullptr) {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::find2() Could not load value page pos=0x%llx", (long long)page_pos);
+					}
+
+					page_pos = vmem_page_pos_nil;
+				}
+				else {
+					vmem_map_value_page<Key, T>* value_page = reinterpret_cast<vmem_map_value_page<Key, T>*>(page.ptr());
+
+					actual_item_pos = vmem_item_pos_nil;
+					expected_item_pos = 0;
+					for (std::size_t i = 1; i < value_page->item_count && key <= value_page->items[i].key; i++) {
+						expected_item_pos++;
+
+						if (key == value_page->items[i].key) {
+							actual_item_pos = i;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		find_result2 result(nullptr);
+		result.actual_iterator = end_itr();
+
+		if (page_pos != vmem_item_pos_nil) {
+			if (actual_item_pos != vmem_item_pos_nil) {
+				result.actual_iterator = iterator(this, page_pos, actual_item_pos, _log);
+			}
+
+			result.expected_iterator = iterator(this, page_pos, expected_item_pos, _log);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Done. "
+				"result.actual.valid=%d, result.actual.page_pos=0x%llx, result.actual.item_pos=0x%x, result.actual.edge=%u, "
+				"result.expected.valid=%d, result.expected.page_pos=0x%llx, result.expected.item_pos=0x%x, result.expected.edge=%u",
+				result.actual_iterator.is_valid(), (long long)result.actual_iterator.page_pos(), result.actual_iterator.item_pos(), result.actual_iterator.edge(),
+				result.expected_iterator.is_valid(), (long long)result.expected_iterator.page_pos(), result.expected_iterator.item_pos(), result.expected_iterator.edge());
+		}
+
+		return result;
 	}
-#endif
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::find(const Key& key) noexcept {
+		return find2(key).actual_iterator;
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::const_iterator vmem_map<Key, T, Pool, Log>::find(const Key& key) const noexcept {
+		return const_cast<vmem_map<Key, T, Pool, Log>>(this)->find(key);
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline bool vmem_map<Key, T, Pool, Log>::contains(const Key& key) const noexcept {
+		return find(key).can_deref();
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::operator [](const Key& key) noexcept {
+		return find(key).operator->();
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::operator [](const Key& key) const noexcept {
+		return const_cast<vmem_map<Key, T, Pool, Log>>(this)->operator[](key);
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) noexcept {
+		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+
+		typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr(&values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
+		return values_itr.operator->();
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) const noexcept {
+		return const_cast<vmem_map<Key, T, Pool, Log>>(this)->at(itr);
+	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>

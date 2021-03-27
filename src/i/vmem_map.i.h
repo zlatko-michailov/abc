@@ -47,18 +47,11 @@ namespace abc {
 	};
 
 
-	struct vmem_map_value_level_header: public vmem_map_header {
+	struct vmem_map_key_header: public vmem_map_header {
 	};
 
 
-	struct vmem_map_key_level_header: public vmem_map_header {
-	};
-
-
-	template <typename Key, typename T>
-	struct vmem_map_value {
-		Key						key				= { 0 };
-		T						value			= { 0 };
+	struct vmem_map_value_header: public vmem_map_header {
 	};
 
 
@@ -70,12 +63,19 @@ namespace abc {
 
 
 	template <typename Key, typename T>
-	struct vmem_map_value_level_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_map_value_level_header> {
+	struct vmem_map_value {
+		Key						key				= { 0 };
+		T						value			= { 0 };
 	};
 
 
 	template <typename Key>
-	struct vmem_map_key_level_page : public vmem_container_page<vmem_map_key<Key>, vmem_map_key_level_header> {
+	struct vmem_map_key_page : public vmem_container_page<vmem_map_key<Key>, vmem_map_key_header> {
+	};
+
+
+	template <typename Key, typename T>
+	struct vmem_map_value_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_map_value_header> {
 	};
 
 
@@ -91,16 +91,16 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Key, typename T, typename Pool, typename Log = null_log>
-	using vmem_map_value_level = vmem_container<vmem_map_value<Key, T>, vmem_map_value_level_header, Pool, Log>;
-
-
 	template <typename Key, typename Pool, typename Log = null_log>
-	using vmem_map_key_level = vmem_container<vmem_map_key<Key>, vmem_map_key_level_header, Pool, Log>;
+	using vmem_map_key_level = vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log>;
 
 
 	template <typename Key, typename Pool, typename Log = null_log>
 	using vmem_map_key_level_stack = vmem_container<vmem_container_state, vmem_noheader, Pool, Log>;
+
+
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	using vmem_map_value_level = vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -116,16 +116,13 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-#ifdef REMOVE ////
-	template <typename T, typename Header, typename Pool, typename Log>
-	struct vmem_container_result2 {
-		vmem_container_result2(nullptr_t) noexcept;
+	template <typename Key, typename T, typename Pool, typename Log>
+	struct vmem_map_find_result2 {
+		vmem_map_find_result2(nullptr_t) noexcept;
 
-		vmem_container_iterator<T, Header, Pool, Log>	iterator;
-		vmem_page_pos_t									page_pos;
-		T												item_0;
+		vmem_map_iterator<Key, T, Pool, Log>	actual_iterator;
+		vmem_map_iterator<Key, T, Pool, Log>	expected_iterator;
 	};
-#endif
 
 
 	// --------------------------------------------------------------
@@ -145,7 +142,7 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
-		////using result2					= vmem_container_result2<T, Header, Pool, Log>;
+		using find_result2				= vmem_map_find_result2<Key, T, Pool, Log>;
 
 	public:
 		static constexpr std::size_t	key_items_pos() noexcept;
@@ -180,35 +177,15 @@ namespace abc {
 		const_reverse_iterator	rbegin() const noexcept;
 		const_reverse_iterator	crbegin() const noexcept;
 
-#ifdef REMOVE ////
 	public:
 		bool					empty() const noexcept;
 		std::size_t				size() const noexcept;
 
-		pointer					frontptr() noexcept;
-		const_pointer			frontptr() const noexcept;
-
-		reference				front();
-		const_reference			front() const;
-
-		pointer					backptr() noexcept;
-		const_pointer			backptr() const noexcept;
-
-		reference				back();
-		const_reference			back() const;
-
-		void					push_back(const_reference item);
-		void					pop_back();
-
-		void					push_front(const_reference item);
-		void					pop_front();
-
-		result2					insert2(const_iterator itr, const_reference item);
+#ifdef REMOVE ////
 		iterator				insert(const_iterator itr, const_reference item);
 		template <typename InputItr>
 		iterator				insert(const_iterator itr, InputItr first, InputItr last);
 
-		result2					erase2(const_iterator itr);
 		iterator				erase(const_iterator itr);
 		iterator				erase(const_iterator first, const_iterator last);
 
@@ -243,6 +220,19 @@ namespace abc {
 		iterator				prev(const_iterator& itr) const noexcept;
 		pointer					at(const_iterator& itr) const noexcept;
 #endif
+
+	public:
+		find_result2			find2(const Key& key) noexcept;
+		iterator				find(const Key& key) noexcept;
+		const_iterator			find(const Key& key) const noexcept;
+
+		bool					contains(const Key& key) const noexcept;
+
+		pointer					operator [] (const Key& key) noexcept;
+		const_pointer			operator [] (const Key& key) const noexcept;
+
+		pointer					at(const_iterator& itr) noexcept;
+		const pointer			at(const_iterator& itr) const noexcept;
 
 	private:
 		iterator				begin_itr() const noexcept;

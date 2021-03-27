@@ -283,31 +283,6 @@ namespace abc {
 	};
 
 
-	template <typename Key>
-	struct vmem_key_item {
-		Key					key;
-		vmem_page_pos_t		child_page_pos		= vmem_page_pos_nil;
-		vmem_page_pos_t		value_page_pos		= vmem_page_pos_nil;
-		vmem_item_pos_t		value_item_pos		= vmem_page_pos_nil;
-	};
-
-
-	template <typename Key>
-	struct vmem_key_page {
-		vmem_item_pos_t		item_count			= 0;
-		vmem_page_pos_t		else_page_pos		= vmem_page_pos_nil;
-		vmem_key_item<Key>	items[1]			= { 0 };
-	};
-
-
-	template <typename Value>
-	struct vmem_value_page {
-		vmem_page_pos_t		next_page_pos		= vmem_page_pos_nil;
-		vmem_item_pos_t		item_count			= 0;
-		Value				items[1]			= { 0 };
-	};
-
-
 	#pragma pack(pop)
 
 
