@@ -65,11 +65,11 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	struct vmem_map_find_result2 {
-		vmem_map_find_result2(nullptr_t) noexcept;
+	struct vmem_map_result2 {
+		vmem_map_result2(nullptr_t) noexcept;
 
-		vmem_map_iterator<Key, T, Pool, Log>	actual_iterator;
-		vmem_map_iterator<Key, T, Pool, Log>	expected_iterator;
+		vmem_map_iterator<Key, T, Pool, Log>	iterator;
+		bool									ok;
 	};
 
 
@@ -90,7 +90,7 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
-		using find_result2				= vmem_map_find_result2<Key, T, Pool, Log>;
+		using result2					= vmem_map_result2<Key, T, Pool, Log>;
 
 	public:
 		static constexpr std::size_t	key_items_pos() noexcept;
@@ -170,7 +170,7 @@ namespace abc {
 #endif
 
 	public:
-		find_result2			find2(const Key& key) noexcept;
+		result2					find2(const Key& key) noexcept;
 		iterator				find(const Key& key) noexcept;
 		const_iterator			find(const Key& key) const noexcept;
 

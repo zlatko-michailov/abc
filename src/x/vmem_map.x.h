@@ -37,9 +37,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(nullptr_t) noexcept
-		: actual_iterator(nullptr)
-		, expected_iterator(nullptr) {
+	vmem_map_result2<Key, T, Pool, Log>::vmem_map_result2(nullptr_t) noexcept
+		: iterator(nullptr)
+		, ok(false) {
 	}
 
 
@@ -1093,14 +1093,14 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::find_result2 vmem_map<Key, T, Pool, Log>::find2(const Key& key) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::find2(const Key& key) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Start.");
 		}
 
 		vmem_page_pos_t page_pos = vmem_page_pos_nil;
-		vmem_item_pos_t actual_item_pos = vmem_item_pos_nil;
-		vmem_item_pos_t expected_item_pos = vmem_item_pos_nil;
+		vmem_item_pos_t item_pos = vmem_item_pos_nil;
+		bool found = false;
 
 		vmem_map_key_level_stack<Key, Pool, Log> key_stack(_state->keys, _pool, _log);
 
@@ -1141,13 +1141,12 @@ namespace abc {
 				else {
 					vmem_map_value_page<Key, T>* value_page = reinterpret_cast<vmem_map_value_page<Key, T>*>(page.ptr());
 
-					actual_item_pos = vmem_item_pos_nil;
-					expected_item_pos = 0;
+					item_pos = 0;
 					for (std::size_t i = 1; i < value_page->item_count && key <= value_page->items[i].key; i++) {
-						expected_item_pos++;
+						item_pos++;
 
 						if (key == value_page->items[i].key) {
-							actual_item_pos = i;
+							found = true;
 							break;
 						}
 					}
@@ -1155,23 +1154,16 @@ namespace abc {
 			}
 		}
 
-		find_result2 result(nullptr);
-		result.actual_iterator = end_itr();
+		result2 result(nullptr);
+		result.ok = found;
 
-		if (page_pos != vmem_item_pos_nil) {
-			if (actual_item_pos != vmem_item_pos_nil) {
-				result.actual_iterator = iterator(this, page_pos, actual_item_pos, _log);
-			}
-
-			result.expected_iterator = iterator(this, page_pos, expected_item_pos, _log);
+		if (page_pos != vmem_item_pos_nil && item_pos != vmem_item_pos_nil) {
+			result.iterator = iterator(this, page_pos, item_pos, vmem_iterator_edge::none, _log);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Done. "
-				"result.actual.valid=%d, result.actual.page_pos=0x%llx, result.actual.item_pos=0x%x, result.actual.edge=%u, "
-				"result.expected.valid=%d, result.expected.page_pos=0x%llx, result.expected.item_pos=0x%x, result.expected.edge=%u",
-				result.actual_iterator.is_valid(), (long long)result.actual_iterator.page_pos(), result.actual_iterator.item_pos(), result.actual_iterator.edge(),
-				result.expected_iterator.is_valid(), (long long)result.expected_iterator.page_pos(), result.expected_iterator.item_pos(), result.expected_iterator.edge());
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+				result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
@@ -1180,7 +1172,8 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::find(const Key& key) noexcept {
-		return find2(key).actual_iterator;
+		result2 result = find2(key);
+		return result.ok ? result.iterator : end_itr();
 	}
 
 
