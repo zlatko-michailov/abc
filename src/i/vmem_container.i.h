@@ -197,4 +197,17 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+
+	template <typename Container>
+	class vmem_temp : public Container {
+	public:
+		template <typename... Args>
+		vmem_temp(Args&&... args);
+
+		~vmem_temp() noexcept;
+	};
+
+
+	// --------------------------------------------------------------
+
 }
