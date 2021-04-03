@@ -492,7 +492,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
 
@@ -848,6 +847,44 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal<std::size_t>(list.size(), 4, 0x104fe, "%zu") && passed;
 		// | (2)
 		// | 01 02 0c 0d
+
+		return passed;
+	}
+
+
+	bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+		using List = abc::vmem_list<ItemMany, Pool, Log>;
+		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/empty_destructor.vmem", context.log);
+
+		{
+			abc::vmem_list_state list_state;
+			abc::vmem_temp<List> temp_list(&list_state, &pool, context.log);
+
+			passed = insert_vmem_list_items(context, temp_list, 8) && passed;
+			// | (2)         | (3)
+			// | 00 01 02 03 | 04 05 06 07
+		}
+
+		// Allocate again
+		{
+			// Page 3
+			abc::vmem_page<Pool, Log> page3(&pool, context.log);
+			LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
+			passed = context.are_equal(linked_page3 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+		}
+		{
+			// Page 2
+			abc::vmem_page<Pool, Log> page2(&pool, context.log);
+			LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
+			passed = context.are_equal(linked_page2 != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+		}
 
 		return passed;
 	}
