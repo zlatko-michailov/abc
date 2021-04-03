@@ -38,4 +38,29 @@ namespace abc {
 		: base(state, balance_insert, balance_erase, pool, log) {
 	}
 
+
+	// --------------------------------------------------------------
+
+
+	template <typename T, typename Pool, typename Log>
+	inline vmem_stack<T, Pool, Log>::vmem_stack(vmem_stack_state* state, Pool* pool, Log* log)
+		: base(state, balance_insert, balance_erase, pool, log) {
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Container>
+	template <typename... Args>
+	vmem_temp<Container>::vmem_temp(Args&&... args)
+		: Container(std::forward<Args>(args)...) {
+	}
+
+
+	template <typename Container>
+	vmem_temp<Container>::~vmem_temp() noexcept {
+		Container::clear();
+	}
+
 }

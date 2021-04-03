@@ -122,6 +122,10 @@ namespace abc {
 	};
 
 
+	struct vmem_stack_state : public vmem_container_state {
+	};
+
+
 	struct vmem_map_state {
 		vmem_container_state	keys;
 		vmem_container_state	values;
