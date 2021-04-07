@@ -70,6 +70,7 @@ namespace abc {
 		vmem_container_iterator<T, Header, Pool, Log>	iterator;
 		vmem_page_pos_t									page_pos;
 		T												item_0;
+		T												item_begin;
 	};
 
 

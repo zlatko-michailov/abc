@@ -49,7 +49,8 @@ namespace abc {
 	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
 		: iterator(nullptr)
 		, page_pos(vmem_page_pos_nil)
-		, item_0{ 0 } {
+		, item_0{ 0 }
+		, item_begin{ 0 } {
 	}
 
 
@@ -504,6 +505,7 @@ namespace abc {
 
 			result.page_pos = new_page.pos();
 			std::memmove(&result.item_0, &new_container_page->items[0], sizeof(T));
+			std::memmove(&result.item_begin, &container_page->items[0], sizeof(T));
 		}
 
 		if (_log != nullptr) {
@@ -748,6 +750,7 @@ namespace abc {
 
 				result.page_pos = page.pos();
 				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
+				std::memmove(&result.item_begin, &container_page->items[0], sizeof(T));
 
 				erase_page(page);
 				container_page = nullptr;
@@ -875,6 +878,7 @@ namespace abc {
 
 				result.page_pos = next_page.pos();
 				std::memmove(&result.item_0, &next_container_page->items[0], sizeof(T));
+				std::memmove(&result.item_begin, &container_page->items[0], sizeof(T));
 
 				// Merge the items from the next page into this one.
 				std::memmove(&container_page->items[container_page->item_count], &next_container_page->items[0], next_container_page->item_count * sizeof(T));
@@ -936,7 +940,8 @@ namespace abc {
 				}
 
 				result.page_pos = prev_page.pos();
-				std::memmove(&result.item_0, &prev_container_page->items[0], sizeof(T));
+				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
+				std::memmove(&result.item_begin, &prev_container_page->items[0], sizeof(T));
 
 				// Merge the items from this page into the previous one.
 				std::memmove(&prev_container_page->items[prev_container_page->item_count], &container_page->items[0], container_page->item_count * sizeof(T));
