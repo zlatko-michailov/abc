@@ -44,7 +44,7 @@ namespace abc {
 
 
 	template <typename Key, typename Pool, typename Log = null_log>
-	using vmem_map_key_level_stack = vmem_container<vmem_container_state, vmem_noheader, Pool, Log>;
+	using vmem_map_key_level_stack = vmem_stack<vmem_container_state, Pool, Log>;
 
 
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
@@ -73,6 +73,17 @@ namespace abc {
 	};
 
 
+	template <typename Key, typename T, typename Pool, typename Log>
+	struct vmem_map_find_result2 : public vmem_map_result2<Key, T, Pool, Log> {
+		vmem_map_find_result2(nullptr_t) noexcept;
+		vmem_map_find_result2(const vmem_map_find_result2& other) = delete;
+		vmem_map_find_result2(vmem_map_find_result2&& other) noexcept = default;
+		~vmem_map_find_result2() noexcept;
+
+		vmem_stack_state						path_state;
+	};
+
+
 	// --------------------------------------------------------------
 
 
@@ -91,6 +102,8 @@ namespace abc {
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
 		using result2					= vmem_map_result2<Key, T, Pool, Log>;
+		using find_result2				= vmem_map_find_result2<Key, T, Pool, Log>;
+		using iterator_bool				= std::pair<vmem_map_iterator<Key, T, Pool, Log>, bool>;
 
 	public:
 		static constexpr std::size_t	key_items_pos() noexcept;
@@ -129,38 +142,26 @@ namespace abc {
 		bool					empty() const noexcept;
 		std::size_t				size() const noexcept;
 
-#ifdef REMOVE ////
-		iterator				insert(const_iterator itr, const_reference item);
+		result2					insert2(const_reference item);
+		iterator_bool			insert(const_reference item);
 		template <typename InputItr>
-		iterator				insert(const_iterator itr, InputItr first, InputItr last);
+		void					insert(InputItr first, InputItr last);
 
+#ifdef REMOVE ////
 		iterator				erase(const_iterator itr);
 		iterator				erase(const_iterator first, const_iterator last);
 
 		void					clear() noexcept;
+#endif
 
 	// insert() helpers
 	private:
-		result2					insert_nostate(const_iterator itr, const_reference item) noexcept;
-		result2					insert_empty(const_reference item) noexcept;
-		result2					insert_nonempty(const_iterator itr, const_reference item) noexcept;
-		result2					insert_with_overflow(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					insert_with_capacity(const_iterator itr, const_reference item, vmem_container_page<T, Header>* container_page) noexcept;
-		void					balance_split(vmem_page_pos_t page_pos, vmem_container_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, vmem_container_page<T, Header>* new_container_page) noexcept;
-		bool					insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T, Header>*& new_container_page) noexcept;
-		bool					should_balance_insert(const_iterator itr, const vmem_container_page<T, Header>* container_page) const noexcept;
+		result2					insert2(find_result2&& find_result, const_reference item);
 
 	// erase() helpers
 	private:
-		result2					erase_nostate(const_iterator itr) noexcept;
-		result2					erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		bool					erase_page(vmem_page<Pool, Log>& page) noexcept;
-		bool					erase_page_pos(vmem_page_pos_t page_pos) noexcept;
-		bool					should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept;
 
+#ifdef REMOVE ////
 	private:
 		friend iterator;
 
@@ -170,7 +171,7 @@ namespace abc {
 #endif
 
 	public:
-		result2					find2(const Key& key) noexcept;
+		find_result2			find2(const Key& key) noexcept;
 		iterator				find(const Key& key) noexcept;
 		const_iterator			find(const Key& key) const noexcept;
 
