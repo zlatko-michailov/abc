@@ -40,15 +40,42 @@ namespace abc {
 
 
 	template <typename Key, typename Pool, typename Log = null_log>
-	using vmem_map_key_level = vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log>;
+	class vmem_map_key_level : public vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log> {
+		using base = vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log>;
+
+		static constexpr vmem_page_balance_t balance_insert	= vmem_page_balance::all;
+		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;
+
+	public:
+		vmem_map_key_level<Key, Pool, Log>(vmem_container_state* state, Pool* pool, Log* log);
+		vmem_map_key_level<Key, Pool, Log>(const vmem_map_key_level<Key, Pool, Log>& other) noexcept = default;
+		vmem_map_key_level<Key, Pool, Log>(vmem_map_key_level<Key, Pool, Log>&& other) noexcept = default;
+	};
 
 
 	template <typename Key, typename Pool, typename Log = null_log>
-	using vmem_map_key_level_stack = vmem_stack<vmem_container_state, Pool, Log>;
+	class vmem_map_key_level_stack : public vmem_stack<vmem_container_state, Pool, Log> {
+		using base = vmem_stack<vmem_container_state, Pool, Log>;
+
+	public:
+		vmem_map_key_level_stack<Key, Pool, Log>(vmem_stack_state* state, Pool* pool, Log* log);
+		vmem_map_key_level_stack<Key, Pool, Log>(const vmem_map_key_level_stack<Key, Pool, Log>& other) noexcept = default;
+		vmem_map_key_level_stack<Key, Pool, Log>(vmem_map_key_level_stack<Key, Pool, Log>&& other) noexcept = default;
+	};
 
 
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
-	using vmem_map_value_level = vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log>;
+	class vmem_map_value_level : public vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log> {
+		using base = vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log>;
+
+		static constexpr vmem_page_balance_t balance_insert	= vmem_page_balance::all;
+		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;
+
+	public:
+		vmem_map_value_level<Key, T, Pool, Log>(vmem_container_state* state, Pool* pool, Log* log);
+		vmem_map_value_level<Key, T, Pool, Log>(const vmem_map_value_level<Key, T, Pool, Log>& other) noexcept = default;
+		vmem_map_value_level<Key, T, Pool, Log>(vmem_map_value_level<Key, T, Pool, Log>&& other) noexcept = default;
+	};
 
 
 	// --------------------------------------------------------------

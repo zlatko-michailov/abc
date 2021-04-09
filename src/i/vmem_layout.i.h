@@ -48,11 +48,11 @@ namespace abc {
 	};
 
 
-	struct vmem_map_key_header: public vmem_map_header {
+	struct vmem_map_key_header: public vmem_map_header { ////
 	};
 
 
-	struct vmem_map_value_header: public vmem_map_header {
+	struct vmem_map_value_header: public vmem_map_header { ////
 	};
 
 
@@ -127,7 +127,7 @@ namespace abc {
 
 
 	struct vmem_map_state {
-		vmem_container_state	keys;
+		vmem_stack_state		keys;
 		vmem_container_state	values;
 	};
 

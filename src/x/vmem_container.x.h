@@ -49,9 +49,9 @@ namespace abc {
 	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
 		: iterator(nullptr)
 		, page_pos(vmem_page_pos_nil)
-		, item_0{ 0 }
-		, other_page_pos(vmem_page_pos_nil)
-		, other_item_0{ 0 } {
+		, other_page_pos(vmem_page_pos_nil) {
+		std::memset(&item_0, 0, sizeof(T));
+		std::memset(&other_item_0, 0, sizeof(T));
 	}
 
 
