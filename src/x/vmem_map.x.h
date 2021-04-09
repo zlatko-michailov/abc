@@ -173,14 +173,14 @@ namespace abc {
 		if (is_uninit(state)) {
 			_state->keys.front_page_pos = vmem_page_pos_nil;
 			_state->keys.back_page_pos = vmem_page_pos_nil;
-			_state->keys.item_size = sizeof(vmem_map_key<Key>);
+			_state->keys.item_size = sizeof(vmem_container_state);
 
 			_state->values.front_page_pos = vmem_page_pos_nil;
 			_state->values.back_page_pos = vmem_page_pos_nil;
 			_state->values.item_size = sizeof(vmem_map_value<Key, T>);
 		}
 
-		if (sizeof(vmem_map_key<Key>) != _state->keys.item_size) {
+		if (sizeof(vmem_container_state) != _state->keys.item_size) {
 			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) mismatch", __TAG__);
 		}
 
@@ -452,8 +452,13 @@ namespace abc {
 			}
 		}
 
+		if (result.ok) {
+			result.iterator = iterator(this, values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge(), _log);
+		}
+
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2() Done. ok=&d", result.ok);
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+				result.ok, (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
@@ -587,10 +592,21 @@ namespace abc {
 
 		find_result2 result(nullptr);
 		vmem_stack<vmem_page_pos_t, Pool, Log> path(&result.path_state, _pool, _log);
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() path created.");
+		}
 
 		vmem_map_key_level_stack<Key, Pool, Log> key_stack(&_state->keys, _pool, _log);
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() key_stack created.");
+		}
 
 		if (!key_stack.empty()) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() %zu key levels. root page_pos=0x%llx",
+					key_stack.size(), (long long)key_stack.back().front_page_pos);
+			}
+
 			// There are key levels.
 			page_pos = key_stack.back().front_page_pos;
 			path.push_back(page_pos);
@@ -621,6 +637,11 @@ namespace abc {
 			}
 		}
 		else {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() No key levels. value page_pos=0x%llx",
+					(long long)_state->values.front_page_pos);
+			}
+
 			// There are no key levels. There must be at most 1 value page.
 			page_pos = _state->values.front_page_pos;
 		}
@@ -640,10 +661,10 @@ namespace abc {
 				vmem_map_value_page<Key, T>* value_page = reinterpret_cast<vmem_map_value_page<Key, T>*>(page.ptr());
 
 				item_pos = 0;
-				for (std::size_t i = 1; i < value_page->item_count && key <= value_page->items[i].key; i++) {
+				for (std::size_t i = 0; i < value_page->item_count && value_page->items[i].key <= key; i++) {
 					item_pos++;
 
-					if (key == value_page->items[i].key) {
+					if (value_page->items[i].key == key) {
 						found = true;
 						break;
 					}

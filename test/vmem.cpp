@@ -928,48 +928,48 @@ namespace abc { namespace test { namespace vmem {
 
 		Pool pool("out/test/map_insert.vmem", context.log);
 
+		context.log->filter()->min_severity(abc::severity::abc::debug); ////
 		abc::vmem_map_state map_state;
 		Map map(&map_state, &pool, context.log);
 		Item item;
 
-		context.log->filter()->min_severity(abc::severity::abc::debug); ////
-		item.key.data = item.value = 0x21;
+		item.key.data = item.value = 0x20;
 		IteratorBool actual_itr = map.insert(item);
 		Iterator expected_itr = Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 1,__TAG__, "%zu") && passed;
 		// | (2)
-		// | 21 __ __ __ |
+		// | 20 __ __ __ |
+
+		item.key.data = item.value = 0x50;
+		actual_itr = map.insert(item);
+		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 2,__TAG__, "%zu") && passed;
+		// | (2)
+		// | 20 50 __ __ |
+
+		item.key.data = item.value = 0x30;
+		actual_itr = map.insert(item);
+		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 3,__TAG__, "%zu") && passed;
+		// | (2)
+		// | 20 30 50 __ |
+
+		item.key.data = item.value = 0x40;
+		actual_itr = map.insert(item);
+		expected_itr = Iterator(&map, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 4,__TAG__, "%zu") && passed;
+		// | (2)
+		// | 20 30 40 50 |
 
 #ifdef REMOVE ////
-		item.fill(0x22);
-		actual_itr = list.insert(list.end(), item);
-		expected_itr = Iterator(&list, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr == expected_itr, true, 0x1040f, "%d") && passed;
-		passed = context.are_equal(actual_itr == list.rend(), true, 0x103d1, "%d") && passed;
-		passed = context.are_equal<std::size_t>(list.size(), 2, 0x103d2, "%zu") && passed;
-		// | (2)
-		// | 21 22 __ __ |
-
-		item.fill(0x23);
-		actual_itr = list.insert(itr21, item);
-		expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr == expected_itr, true, 0x10410, "%d") && passed;
-		passed = context.are_equal(actual_itr == itr21, true, 0x103d3, "%d") && passed;
-		passed = context.are_equal<std::size_t>(list.size(), 3, 0x103d4, "%zu") && passed;
-		// | (2)
-		// | 23 21 22 __ |
-
-		item.fill(0x24);
-		actual_itr = list.insert(list.begin(), item);
-		expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr == expected_itr, true, 0x10411, "%d") && passed;
-		passed = context.are_equal(actual_itr == list.begin(), true, 0x103d5, "%d") && passed;
-		passed = context.are_equal<std::size_t>(list.size(), 4, 0x103d6, "%zu") && passed;
-		// | (2)
-		// | 24 23 21 22 |
-
 		itr21 = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
 		item.fill(0x25);
 		actual_itr = list.insert(itr21, item);
