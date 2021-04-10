@@ -398,7 +398,7 @@ namespace abc {
 
 					// Find the item_pos for the new key.
 					vmem_item_pos_t parent_item_pos = 0;
-					for (std::size_t i = 1; i < parent_key_page->item_count && new_key < parent_key_page->items[i].key; i++) {
+					for (std::size_t i = 0; i < parent_key_page->item_count && parent_key_page->items[i].key < new_key; i++) {
 						parent_item_pos++;
 					}
 
@@ -592,14 +592,8 @@ namespace abc {
 
 		find_result2 result(nullptr);
 		vmem_stack<vmem_page_pos_t, Pool, Log> path(&result.path_state, _pool, _log);
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() path created.");
-		}
 
 		vmem_map_key_level_stack<Key, Pool, Log> key_stack(&_state->keys, _pool, _log);
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() key_stack created.");
-		}
 
 		if (!key_stack.empty()) {
 			if (_log != nullptr) {
@@ -623,10 +617,14 @@ namespace abc {
 					break;
 				}
 				else {
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Examine key lev=%zu, page_pos=0x%llx", lev, (long long)page.pos());
+					}
+
 					vmem_map_key_page<Key>* key_page = reinterpret_cast<vmem_map_key_page<Key>*>(page.ptr());
 
 					page_pos = key_page->items[0].page_pos;
-					for (std::size_t i = 1; i < key_page->item_count && key < key_page->items[i].key; i++) {
+					for (std::size_t i = 0; i < key_page->item_count && key_page->items[i].key < key; i++) {
 						page_pos = key_page->items[i].page_pos;
 					}
 
