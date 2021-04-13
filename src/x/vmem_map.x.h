@@ -65,14 +65,9 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(nullptr_t) noexcept
-		: vmem_map_result2<Key, T, Pool, Log>(nullptr) {
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_find_result2<Key, T, Pool, Log>::~vmem_map_find_result2() noexcept {
-		//// TODO:
+	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(Pool* pool, Log* log)
+		: vmem_map_result2<Key, T, Pool, Log>(nullptr)
+		, path(&_path_state, pool, log) {
 	}
 
 
@@ -357,11 +352,11 @@ namespace abc {
 
 		if (values_result.iterator.is_valid() && values_result.page_pos != vmem_page_pos_nil) {
 			vmem_map_key_level_stack<Key, Pool, Log> key_stack(&_state->keys, _pool, _log);
-			vmem_stack<vmem_page_pos_t, Pool, Log> path(&find_result.path_state, _pool, _log);
 
-			if (key_stack.size() != path.size()) {
+			if (key_stack.size() != find_result.path.size()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::insert2() Mismatch key_stack.size=%zu, path.size=%zu",key_stack.size(), path.size());
+					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::insert2() Mismatch key_stack.size=%zu, path.size=%zu",
+						key_stack.size(), find_result.path.size());
 				}
 
 				result.iterator = iterator(nullptr);
@@ -369,14 +364,14 @@ namespace abc {
 			}
 			else {
 				typename vmem_map_key_level_stack<Key, Pool, Log>::iterator key_stack_itr = key_stack.begin();
-				typename vmem_stack<vmem_page_pos_t, Pool, Log>::reverse_iterator path_itr = path.rend();
+				typename vmem_stack<vmem_page_pos_t, Pool, Log>::reverse_iterator path_itr = find_result.path.rend();
 				vmem_page_pos_t new_page_pos = values_result.page_pos;
 				Key new_key = values_result.item_0.key;
 				vmem_page_pos_t other_page_pos = values_result.other_page_pos;
 				Key other_key = values_result.other_item_0.key;
 
 				// While there is overflow, keep going back the path (and up the levels).
-				while (new_page_pos != vmem_page_pos_nil && key_stack_itr != key_stack.end() && path_itr != path.rbegin()) {
+				while (new_page_pos != vmem_page_pos_nil && key_stack_itr != key_stack.end() && path_itr != find_result.path.rbegin()) {
 					vmem_page_pos_t parent_page_pos = *path_itr;
 					vmem_page<Pool, Log> parent_page(_pool, parent_page_pos, _log);
 
@@ -426,6 +421,9 @@ namespace abc {
 						other_page_pos = keys_result.other_page_pos;
 						other_key = keys_result.other_item_0.key;
 					}
+
+					key_stack_itr++;
+					path_itr--;
 				} // while (new_page_pos != nil)
 
 				// If we still have a new_page_pos, then we have to add a key level at the top.
@@ -590,8 +588,7 @@ namespace abc {
 		vmem_item_pos_t item_pos = vmem_item_pos_nil;
 		bool found = false;
 
-		find_result2 result(nullptr);
-		vmem_stack<vmem_page_pos_t, Pool, Log> path(&result.path_state, _pool, _log);
+		find_result2 result(_pool, _log);
 
 		vmem_map_key_level_stack<Key, Pool, Log> key_stack(&_state->keys, _pool, _log);
 
@@ -603,7 +600,7 @@ namespace abc {
 
 			// There are key levels.
 			page_pos = key_stack.back().front_page_pos;
-			path.push_back(page_pos);
+			result.path.push_back(page_pos);
 
 			for (std::size_t lev = 0; page_pos != vmem_page_pos_nil && lev < key_stack.size(); lev++) {
 				vmem_page<Pool, Log> page(_pool, page_pos, _log);
@@ -624,12 +621,16 @@ namespace abc {
 					vmem_map_key_page<Key>* key_page = reinterpret_cast<vmem_map_key_page<Key>*>(page.ptr());
 
 					page_pos = key_page->items[0].page_pos;
-					for (std::size_t i = 0; i < key_page->item_count && key_page->items[i].key < key; i++) {
+					for (std::size_t i = 1; i < key_page->item_count && key_page->items[i].key <= key; i++) {
 						page_pos = key_page->items[i].page_pos;
 					}
 
+					if (_log != nullptr) {
+						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Child page_pos=0x%llx", (long long)page_pos);
+					}
+
 					if (lev != key_stack.size() - 1) {
-						path.push_back(page_pos);
+						result.path.push_back(page_pos);
 					}
 				}
 			}
@@ -659,14 +660,11 @@ namespace abc {
 				vmem_map_value_page<Key, T>* value_page = reinterpret_cast<vmem_map_value_page<Key, T>*>(page.ptr());
 
 				item_pos = 0;
-				for (std::size_t i = 0; i < value_page->item_count && value_page->items[i].key <= key; i++) {
+				for (std::size_t i = 0; i < value_page->item_count && value_page->items[i].key < key; i++) {
 					item_pos++;
-
-					if (value_page->items[i].key == key) {
-						found = true;
-						break;
-					}
 				}
+
+				found = (value_page->items[item_pos].key == key);
 			}
 		}
 
@@ -712,13 +710,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::operator [](const Key& key) const noexcept {
-		return const_cast<vmem_map<Key, T, Pool, Log>>(this)->operator[](key);
+		return const_cast<vmem_map<Key, T, Pool, Log>*>(this)->operator[](key);
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) noexcept {
-		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
 
 		typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr(&values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
 		return values_itr.operator->();
@@ -727,13 +725,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) const noexcept {
-		return const_cast<vmem_map<Key, T, Pool, Log>>(this)->at(itr);
+		return const_cast<vmem_map<Key, T, Pool, Log>*>(this)->at(itr);
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::begin_itr() const noexcept {
-		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
 
 		return itr_from_values(values.begin());
 	}
@@ -741,7 +739,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rbegin_itr() const noexcept {
-		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
 
 		return itr_from_values(values.rbegin());
 	}
@@ -749,7 +747,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::end_itr() const noexcept {
-		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
 
 		return itr_from_values(values.end());
 	}
@@ -757,7 +755,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rend_itr() const noexcept {
-		vmem_map_value_level<Key, T, Pool, Log> values(_state->values, _pool, _log);
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
 
 		return itr_from_values(values.rend());
 	}

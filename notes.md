@@ -1,15 +1,4 @@
 ## Done
-- Breaking Changes
-  - vmem_container_page<Header>
-  - vmem_container<Header>
-  - vmem_container_iterator<Header>
-- Bugs
-- Additions
-  - vmem_container
-    - insert2()
-    - erase2()
-  - vmem_container_page<Header>
-- Refactoring
 ----
 ## To Do
 - vmem_map

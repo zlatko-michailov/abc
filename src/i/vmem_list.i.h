@@ -97,9 +97,10 @@ namespace abc {
 	class vmem_temp : public Container {
 	public:
 		template <typename... Args>
-		vmem_temp(Args&&... args);
+		vmem_temp<Container>(Args&&... args);
+		vmem_temp<Container>(vmem_temp<Container>&& other) noexcept = default;
 
-		~vmem_temp() noexcept;
+		~vmem_temp<Container>() noexcept;
 	};
 
 

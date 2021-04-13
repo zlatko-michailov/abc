@@ -992,53 +992,74 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 7, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)
+		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ |
 
 		item.key.data = item.value = 0x80;
 		actual_itr = map.insert(item);
-		expected_itr = Iterator(&map, 8U, 2U, abc::vmem_iterator_edge::none, context.log);
+		expected_itr = Iterator(&map, 7U, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)
+		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 __ |
 
 		item.key.data = item.value = 0x90;
 		actual_itr = map.insert(item);
-		expected_itr = Iterator(&map, 8U, 3U, abc::vmem_iterator_edge::none, context.log);
+		expected_itr = Iterator(&map, 7U, 3U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 9, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)
+		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 90 |
 
 		item.key.data = item.value = 0x88;
 		actual_itr = map.insert(item);
-		expected_itr = Iterator(&map, 0xc, 1U, abc::vmem_iterator_edge::none, context.log);
+		expected_itr = Iterator(&map, 0x8, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 10, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)         | (c)
+		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 __ |
 
 		item.key.data = item.value = 0xa0;
 		actual_itr = map.insert(item);
-		expected_itr = Iterator(&map, 0xc, 3U, abc::vmem_iterator_edge::none, context.log);
+		expected_itr = Iterator(&map, 0x8, 3U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 11, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)         | (c)
+		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 a0 |
 
 		item.key.data = item.value = 0xb0;
 		actual_itr = map.insert(item);
-		expected_itr = Iterator(&map, 0xf, 2U, abc::vmem_iterator_edge::none, context.log);
+		expected_itr = Iterator(&map, 0x9, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal<std::size_t>(map.size(), 12, __TAG__, "%zu") && passed;
-		// | (2)         | (3)         | (8)         | (c)         | (f)
+		// | (2)         | (3)         | (7)         | (8)         | (9)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 __ __ | 90 a0 b0 __ |
+
+		Key key;
+		key.data = 0x70;
+		Iterator itr = map.find(key);
+		expected_itr = Iterator(&map, 7U, 1U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x70, true, __TAG__, "%d") && passed;
+
+		key.data = 0x40;
+		itr = map.find(key);
+		expected_itr = Iterator(&map, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x40, true, __TAG__, "%d") && passed;
+
+		key.data = 0xa0;
+		itr = map.find(key);
+		expected_itr = Iterator(&map, 9U, 1U, abc::vmem_iterator_edge::none, context.log);
+		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0xa0, true, __TAG__, "%d") && passed;
+
+		context.log->filter()->min_severity(abc::severity::optional); ////
 
 #ifdef REMOVE ////
 		using Pair = std::pair<std::uint64_t, Iterator>;

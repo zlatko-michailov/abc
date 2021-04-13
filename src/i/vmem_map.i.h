@@ -94,6 +94,10 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	struct vmem_map_result2 {
 		vmem_map_result2(nullptr_t) noexcept;
+		vmem_map_result2(const vmem_map_result2& other) = default;
+		vmem_map_result2(vmem_map_result2&& other) noexcept = default;
+
+		vmem_map_result2& operator =(vmem_map_result2&& other) noexcept = default;
 
 		vmem_map_iterator<Key, T, Pool, Log>	iterator;
 		bool									ok;
@@ -102,12 +106,18 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	struct vmem_map_find_result2 : public vmem_map_result2<Key, T, Pool, Log> {
-		vmem_map_find_result2(nullptr_t) noexcept;
+		vmem_map_find_result2(Pool* pool, Log* log);
 		vmem_map_find_result2(const vmem_map_find_result2& other) = delete;
 		vmem_map_find_result2(vmem_map_find_result2&& other) noexcept = default;
-		~vmem_map_find_result2() noexcept;
 
-		vmem_stack_state						path_state;
+		vmem_map_find_result2& operator =(vmem_map_find_result2&& other) noexcept = default;
+
+
+	private:
+		vmem_stack_state									_path_state;
+
+	public:
+		vmem_temp<vmem_stack<vmem_page_pos_t, Pool, Log>>	path;
 	};
 
 
