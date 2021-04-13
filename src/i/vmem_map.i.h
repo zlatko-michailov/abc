@@ -198,14 +198,11 @@ namespace abc {
 	// erase() helpers
 	private:
 
-#ifdef REMOVE ////
 	private:
 		friend iterator;
 
 		iterator				next(const_iterator& itr) const noexcept;
 		iterator				prev(const_iterator& itr) const noexcept;
-		pointer					at(const_iterator& itr) const noexcept;
-#endif
 
 	public:
 		find_result2			find2(const Key& key) noexcept;

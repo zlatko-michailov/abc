@@ -1059,9 +1059,6 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(itr->value == 0xa0, true, __TAG__, "%d") && passed;
 
-		context.log->filter()->min_severity(abc::severity::optional); ////
-
-#ifdef REMOVE ////
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
 			{ 0x20, Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log) },
@@ -1069,18 +1066,18 @@ namespace abc { namespace test { namespace vmem {
 			{ 0x40, Iterator(&map, 3U, 0U, abc::vmem_iterator_edge::none, context.log) },
 			{ 0x50, Iterator(&map, 3U, 1U, abc::vmem_iterator_edge::none, context.log) },
 			{ 0x58, Iterator(&map, 3U, 2U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0x60, Iterator(&map, 8U, 0U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0x70, Iterator(&map, 8U, 1U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0x80, Iterator(&map, 0xc, 0U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0x88, Iterator(&map, 0xc, 1U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0x90, Iterator(&map, 0xf, 0U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0xa0, Iterator(&map, 0xf, 1U, abc::vmem_iterator_edge::none, context.log) },
-			{ 0xb0, Iterator(&map, 0xf, 2U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x60, Iterator(&map, 7U, 0U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x70, Iterator(&map, 7U, 1U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x80, Iterator(&map, 8U, 0U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x88, Iterator(&map, 8U, 1U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x90, Iterator(&map, 9U, 0U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0xa0, Iterator(&map, 9U, 1U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0xb0, Iterator(&map, 9U, 2U, abc::vmem_iterator_edge::none, context.log) },
 		};
 		constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
 		// Iterate forward.
-		Iterator itr = map.cbegin();
+		itr = map.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
 	
@@ -1092,7 +1089,7 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
 		// Iterate backwards.
-		itr = list.crend();
+		itr = map.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
@@ -1101,10 +1098,8 @@ namespace abc { namespace test { namespace vmem {
 			passed = context.are_equal(itr->value == exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
 			itr--;
 		}
-		passed = context.are_equal(itr == list.crbegin(), true, __TAG__, "%d") && passed;
-#endif
+		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
 
-		context.log->filter()->min_severity(abc::severity::critical); ////
 		return passed;
 	}
 

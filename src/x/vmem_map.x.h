@@ -466,15 +466,16 @@ namespace abc {
 	// ..............................................................
 
 
-#ifdef REMOVE ////
 	// ..............................................................
 
 
+#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline void vmem_map<Key, T, Pool, Log>::clear() noexcept {
 		vmem_linked<Pool, Log> linked(_state, _pool, _log);
 		linked.clear();
 	}
+#endif
 
 
 	// ..............................................................
@@ -483,39 +484,19 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::next(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047d, "vmem_map::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::next() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
-		iterator result = end_itr();
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
+		typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr(&values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
 
-		if (itr.item_pos() == vmem_item_pos_nil && itr.edge() == vmem_iterator_edge::rbegin) {
-			result = begin_itr();
-		}
-		else if (itr.page_pos() != vmem_page_pos_nil) {
-			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
+		values_itr++;
 
-			if (page.ptr() == nullptr) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, 0x1047e, "vmem_map::next() Could not load page pos=0x%llx", (long long)itr.page_pos());
-				}
-			}
-			else {
-				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
-
-				if (itr._item_pos < container_page->item_count - 1) {
-					result = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
-				}
-				else {
-					if (container_page->next_page_pos != vmem_page_pos_nil) {
-						result = iterator(this, container_page->next_page_pos, 0, vmem_iterator_edge::none, _log);
-					}
-				}
-			}
-		}
+		iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047f, "vmem_map::next() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::next() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
@@ -526,56 +507,24 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::prev(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
-		iterator result = rbegin_itr();
+		vmem_map_value_level<Key, T, Pool, Log> values(&_state->values, _pool, _log);
+		typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr(&values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
 
-		if (itr.item_pos() == vmem_item_pos_nil && itr.edge() == vmem_iterator_edge::end) {
-			result = rend_itr();
-		}
-		else if (itr.page_pos() != vmem_page_pos_nil) {
-			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
+		values_itr--;
 
-			if (page.ptr() == nullptr) {
-				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
-				}
-			}
-			else {
-				vmem_map_page<T, Header>* container_page = reinterpret_cast<vmem_map_page<T, Header>*>(page.ptr());
-
-				if (itr._item_pos > 0) {
-					result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
-				}
-				else {
-					if (container_page->prev_page_pos != vmem_page_pos_nil) {
-						vmem_page<Pool, Log> prev_page(_pool, container_page->prev_page_pos, _log);
-
-						if (prev_page.ptr() == nullptr) {
-							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
-							}
-						}
-						else {
-							vmem_map_page<T, Header>* prev_container_page = reinterpret_cast<vmem_map_page<T, Header>*>(prev_page.ptr());
-		
-							result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
-						}
-					}
-				}
-			}
-		}
+		iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
 		return result;
 	}
-#endif
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
