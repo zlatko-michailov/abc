@@ -142,6 +142,16 @@ namespace abc {
 		using find_result2				= vmem_map_find_result2<Key, T, Pool, Log>;
 		using iterator_bool				= std::pair<vmem_map_iterator<Key, T, Pool, Log>, bool>;
 
+	private:
+		using path_reverse_iterator		= typename vmem_stack<vmem_page_pos_t, Pool, Log>::reverse_iterator;
+		using key_level_stack			= vmem_map_key_level_stack<Key, Pool, Log>;
+		using key_level_stack_iterator	= typename vmem_map_key_level_stack<Key, Pool, Log>::iterator;
+		using key_level_iterator		= typename vmem_map_key_level<Key, Pool, Log>::iterator;
+		using key_level_result2			= typename vmem_map_key_level<Key, Pool, Log>::result2;
+		using value_level_container		= vmem_map_value_level<Key, T, Pool, Log>;
+		using value_level_iterator		= typename vmem_map_value_level<Key, T, Pool, Log>::iterator;
+		using value_level_result2		= typename vmem_map_value_level<Key, T, Pool, Log>::result2;
+
 	public:
 		static constexpr std::size_t	key_items_pos() noexcept;
 		static constexpr std::size_t	max_key_item_size() noexcept;
@@ -222,7 +232,7 @@ namespace abc {
 		iterator				rbegin_itr() const noexcept;
 		iterator				end_itr() const noexcept;
 		iterator				rend_itr() const noexcept;
-		iterator				itr_from_values(typename vmem_map_value_level<Key, T, Pool, Log>::iterator values_itr) const noexcept;
+		iterator				itr_from_values(value_level_iterator values_itr) const noexcept;
 
 	private:
 		vmem_map_state*			_state;
