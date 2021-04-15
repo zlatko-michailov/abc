@@ -33,7 +33,7 @@ namespace abc { namespace test { namespace vmem {
 	using PoolFit = abc::vmem_pool<4, Log>;
 	using PoolExceed = abc::vmem_pool<3, Log>;
 	using PoolFree = abc::vmem_pool<5, Log>;
-	using PoolMap = abc::vmem_pool<16, Log>;
+	using PoolMap = abc::vmem_pool<8, Log>;
 
 	using LinkedPageData = unsigned long long;
 	struct LinkedPage : abc::vmem_linked_page {
@@ -932,7 +932,8 @@ namespace abc { namespace test { namespace vmem {
 		Map map(&map_state, &pool, context.log);
 		Item item;
 
-		item.key.data = item.value = 0x20;
+		item.key.data = 0x20;
+		item.value = 0x900 + item.key.data;
 		IteratorBool actual_itr = map.insert(item);
 		Iterator expected_itr = Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -941,7 +942,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)
 		// | 20 __ __ __ |
 
-		item.key.data = item.value = 0x50;
+		item.key.data = 0x50;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -950,7 +952,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)
 		// | 20 50 __ __ |
 
-		item.key.data = item.value = 0x30;
+		item.key.data = 0x30;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -959,7 +962,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)
 		// | 20 30 50 __ |
 
-		item.key.data = item.value = 0x40;
+		item.key.data = 0x40;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -968,7 +972,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)
 		// | 20 30 40 50 |
 
-		item.key.data = item.value = 0x60;
+		item.key.data = 0x60;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -977,7 +982,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)
 		// | 20 30 __ __ | 40 50 60 __ |
 
-		item.key.data = item.value = 0x70;
+		item.key.data = 0x70;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 3U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -986,7 +992,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)
 		// | 20 30 __ __ | 40 50 60 70 |
 
-		item.key.data = item.value = 0x58;
+		item.key.data = 0x58;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -995,7 +1002,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ |
 
-		item.key.data = item.value = 0x80;
+		item.key.data = 0x80;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 7U, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -1004,7 +1012,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 __ |
 
-		item.key.data = item.value = 0x90;
+		item.key.data = 0x90;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 7U, 3U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -1013,7 +1022,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 90 |
 
-		item.key.data = item.value = 0x88;
+		item.key.data = 0x88;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x8, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -1022,7 +1032,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 __ |
 
-		item.key.data = item.value = 0xa0;
+		item.key.data = 0xa0;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x8, 3U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -1031,7 +1042,8 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 a0 |
 
-		item.key.data = item.value = 0xb0;
+		item.key.data = 0xb0;
+		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x9, 2U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
@@ -1045,19 +1057,19 @@ namespace abc { namespace test { namespace vmem {
 		Iterator itr = map.find(key);
 		expected_itr = Iterator(&map, 7U, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0x70, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x970, true, __TAG__, "%d") && passed;
 
 		key.data = 0x40;
 		itr = map.find(key);
 		expected_itr = Iterator(&map, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0x40, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x940, true, __TAG__, "%d") && passed;
 
 		key.data = 0xa0;
 		itr = map.find(key);
 		expected_itr = Iterator(&map, 9U, 1U, abc::vmem_iterator_edge::none, context.log);
 		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0xa0, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x9a0, true, __TAG__, "%d") && passed;
 
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
@@ -1083,7 +1095,7 @@ namespace abc { namespace test { namespace vmem {
 	
 			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
 			passed = context.are_equal(itr->key.data == exp[i].first, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->value == exp[i].first, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr->value == 0x900 + exp[i].first, true, __TAG__, "%d") && passed;
 			itr++;
 		}
 		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
@@ -1095,7 +1107,7 @@ namespace abc { namespace test { namespace vmem {
 	
 			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
 			passed = context.are_equal(itr->key.data == exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->value == exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr->value == 0x900 + exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
 			itr--;
 		}
 		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;

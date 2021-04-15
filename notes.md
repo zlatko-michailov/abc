@@ -3,6 +3,9 @@
 ## To Do
 - vmem_map
   - make `values` a member. Don't create it every time.
+  - operator []
+  - erase + clear
+  - why do we need 8 pages?
 ---
 - Samples
   - tictactoe
