@@ -161,8 +161,6 @@ namespace abc {
 		static constexpr std::size_t	max_value_item_size() noexcept;
 		static constexpr std::size_t	value_page_capacity() noexcept;
 
-		static constexpr bool			is_uninit(const vmem_map_state* state) noexcept;
-
 	public:
 		vmem_map<Key, T, Pool, Log>(vmem_map_state* state, Pool* pool, Log* log);
 		vmem_map<Key, T, Pool, Log>(const vmem_map<Key, T, Pool, Log>& other) noexcept = default;
@@ -238,6 +236,10 @@ namespace abc {
 		vmem_map_state*			_state;
 		Pool*					_pool;
 		Log*					_log;
+
+	private:
+		key_level_stack			_key_stack;
+		value_level_container	_values;
 	};
 
 	// --------------------------------------------------------------

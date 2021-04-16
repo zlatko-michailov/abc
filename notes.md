@@ -2,7 +2,6 @@
 ----
 ## To Do
 - vmem_map
-  - make `values` and `key_stack` members. Don't create them every time.
   - operator []
   - erase + clear
   - why do we need 8 pages?
