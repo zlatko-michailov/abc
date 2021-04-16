@@ -2,7 +2,6 @@
 ----
 ## To Do
 - vmem_map
-  - operator []
   - erase + clear
   - why do we need 8 pages?
 ---

@@ -1071,6 +1071,18 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
 		passed = context.are_equal(itr->value == 0x9a0, true, __TAG__, "%d") && passed;
 
+		key.data = 0x20;
+		item = *map[key];
+		passed = context.are_equal(item.value == 0x920, true, __TAG__, "%d") && passed;
+
+		key.data = 0x50;
+		item = *map[key];
+		passed = context.are_equal(item.value == 0x950, true, __TAG__, "%d") && passed;
+
+		key.data = 0xb0;
+		item = *map[key];
+		passed = context.are_equal(item.value == 0x9b0, true, __TAG__, "%d") && passed;
+
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
 			{ 0x20, Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log) },
