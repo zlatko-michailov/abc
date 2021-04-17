@@ -434,6 +434,73 @@ namespace abc {
 	// ..............................................................
 
 
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline std::size_t vmem_map<Key, T, Pool, Log>::erase(const Key& key) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Start.");
+		}
+
+		std::size_t result = 0;
+
+		iterator itr = find(key);
+
+		if (itr.can_deref()) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
+					(long long)itr.page_pos(), itr.item_pos(), itr.edge());
+			}
+
+			erase(itr);
+			result = 1;
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Done. result=%zu", result);
+		}
+
+		return result;
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::erase(const_iterator itr) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(itr) Start.");
+		}
+
+		value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
+
+		values_itr = _values.erase(values_itr);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(itr) Done. values_itr.page_pos=0x%llx, values_itr.item_pos=0x%x, values_itr.edge=%d",
+				(long long)values_itr.page_pos(), values_itr.item_pos(), values_itr.edge());
+		}
+
+		return iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::erase(const_iterator first, const_iterator last) {
+		iterator itr = first;
+
+		while (itr != last) {
+			if (!itr.can_deref()) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::important, __TAG__, "vmem_map::erase(first, last) Breaking from the loop.");
+				}
+
+				break;
+			}
+
+			itr = erase(itr);
+		}
+
+		return itr;
+	}
+
+
 	// ..............................................................
 
 

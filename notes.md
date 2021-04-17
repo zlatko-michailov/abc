@@ -2,7 +2,11 @@
 ----
 ## To Do
 - vmem_map
-  - erase + clear
+  - test insert_many
+  - erase
+  - test erase
+  - clear
+  - test clear
   - why do we need 8 pages?
 ---
 - Samples

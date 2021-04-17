@@ -192,19 +192,16 @@ namespace abc {
 		template <typename InputItr>
 		void					insert(InputItr first, InputItr last);
 
-#ifdef REMOVE ////
-		iterator				erase(const_iterator itr);
-		iterator				erase(const_iterator first, const_iterator last);
-
-		void					clear() noexcept;
-#endif
-
 	// insert() helpers
 	private:
 		result2					insert2(find_result2&& find_result, const_reference item);
 
-	// erase() helpers
-	private:
+	public:
+		std::size_t				erase(const Key& key);
+		iterator				erase(const_iterator itr);
+		iterator				erase(const_iterator first, const_iterator last);
+
+		void					clear() noexcept;
 
 	private:
 		friend iterator;

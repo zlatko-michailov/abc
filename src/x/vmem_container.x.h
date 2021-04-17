@@ -688,21 +688,21 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::erase(const_iterator first, const_iterator last) {
-		iterator item = first;
+		iterator itr = first;
 
-		while (item != last) {
-			if (!item.can_deref()) {
+		while (itr != last) {
+			if (!itr.can_deref()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::important, 0x10464, "vmem_container::erase() Breaking from the loop.");
+					_log->put_any(category::abc::vmem, severity::important, 0x10464, "vmem_container::erase(first, last) Breaking from the loop.");
 				}
 
 				break;
 			}
 
-			item = erase(item);
+			itr = erase(itr);
 		}
 
-		return item;
+		return itr;
 	}
 
 
