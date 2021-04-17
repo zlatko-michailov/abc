@@ -144,6 +144,7 @@ int main() {
 				{ "test_vmem_list_erase",							abc::test::vmem::test_vmem_list_erase },
 				{ "test_vmem_temp_destructor",						abc::test::vmem::test_vmem_temp_destructor },
 				{ "test_vmem_map_insert",							abc::test::vmem::test_vmem_map_insert },
+				{ "test_vmem_map_insertmany",						abc::test::vmem::test_vmem_map_insertmany },
 			} },
 			{ "post-tests", {
 				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },

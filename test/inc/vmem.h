@@ -50,6 +50,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_temp_destructor(test_context<abc::test::log>& context);
 
 	bool test_vmem_map_insert(test_context<abc::test::log>& context);
+	bool test_vmem_map_insertmany(test_context<abc::test::log>& context);
 
 }}}
 

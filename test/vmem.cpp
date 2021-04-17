@@ -34,6 +34,7 @@ namespace abc { namespace test { namespace vmem {
 	using PoolExceed = abc::vmem_pool<3, Log>;
 	using PoolFree = abc::vmem_pool<5, Log>;
 	using PoolMap = abc::vmem_pool<8, Log>;
+	using PoolMapMany = abc::vmem_pool<20, Log>;
 
 	using LinkedPageData = unsigned long long;
 	struct LinkedPage : abc::vmem_linked_page {
@@ -69,10 +70,15 @@ namespace abc { namespace test { namespace vmem {
 			return data == other.data;
 		}
 	};
+	using Value = std::uint64_t;
+	using MapItem = vmem_map_value<Key, Value>;
 
 
 	template <typename List>
 	bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count);
+
+	template <typename Map>
+	bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std::size_t count);
 
 	template <typename Pool>
 	bool create_vmem_pool(test_context<abc::test::log>& context, Pool* pool, bool fit);
@@ -918,8 +924,6 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_map_insert(test_context<abc::test::log>& context) {
 		using Pool = PoolMap;
 
-		using Value = std::uint64_t;
-		using Item = vmem_map_value<Key, Value>;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
 		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
 		using IteratorBool = std::pair<abc::vmem_map_iterator<Key, Value, Pool, Log>, bool>;
@@ -930,7 +934,7 @@ namespace abc { namespace test { namespace vmem {
 
 		abc::vmem_map_state map_state;
 		Map map(&map_state, &pool, context.log);
-		Item item;
+		MapItem item;
 
 		item.key.data = 0x20;
 		item.value = 0x900 + item.key.data;
@@ -1128,6 +1132,23 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_map_insertmany(test_context<abc::test::log>& context) {
+		using Pool = PoolMapMany;
+		using Map = abc::vmem_map<Key, Value, Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/map_insertmany.vmem", context.log);
+
+		abc::vmem_map_state map_state;
+		Map map(&map_state, &pool, context.log);
+
+		passed = insert_vmem_map_items(context, map, 40) && passed; //// 4000
+
+		return passed;
+	}
+
+
 	template <typename Pool>
 	bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked, abc::vmem_page_pos_t expected_page_pos, LinkedPageData data,
 							const abc::vmem_linked_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_iterator<Pool, abc::test::log>& expected_itr,
@@ -1221,6 +1242,43 @@ namespace abc { namespace test { namespace vmem {
 			itr--;
 		}
 		passed = context.are_equal(itr == list.crbegin(), true, 0x103f0, "%d") && passed;
+
+		return passed;
+	}
+
+
+	template <typename Map>
+	bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std::size_t count) {
+		constexpr std::size_t base_value = 0x90000000;
+
+		bool passed = true;
+
+		// Insert.
+		for (std::size_t i = 0; i < count; i++) {
+			MapItem item;
+			item.key.data = i;
+			item.value = base_value + i;
+
+			map.insert(item);
+		}
+
+		// Iterate forward.
+		typename Map::iterator itr = map.cbegin();
+		for (std::size_t i = 0; i < count; i++) {
+			passed = context.are_equal<unsigned long long>(itr->key.data, i, __TAG__, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->value, base_value + i, __TAG__, "%llu") && passed;
+			itr++;
+		}
+		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+
+		// Iterate backwards.
+		itr = map.crend();
+		for (std::size_t i = 0; i < count; i++) {
+			passed = context.are_equal<unsigned long long>(itr->key.data, count - i - 1, __TAG__, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->value, base_value + (count - i - 1), __TAG__, "%llu") && passed;
+			itr--;
+		}
+		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
 
 		return passed;
 	}

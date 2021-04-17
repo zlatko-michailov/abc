@@ -2,12 +2,10 @@
 ----
 ## To Do
 - vmem_map
-  - test insert_many
-  - erase
+  - BUG BUG BUG: Why do we need 8 pages? See insert_map_many
   - test erase
   - clear
   - test clear
-  - why do we need 8 pages?
 ---
 - Samples
   - tictactoe
