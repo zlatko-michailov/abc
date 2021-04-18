@@ -33,8 +33,6 @@ namespace abc { namespace test { namespace vmem {
 	using PoolFit = abc::vmem_pool<4, Log>;
 	using PoolExceed = abc::vmem_pool<3, Log>;
 	using PoolFree = abc::vmem_pool<5, Log>;
-	using PoolMap = abc::vmem_pool<8, Log>;
-	using PoolMapMany = abc::vmem_pool<20, Log>;
 
 	using LinkedPageData = unsigned long long;
 	struct LinkedPage : abc::vmem_linked_page {
@@ -922,7 +920,7 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_map_insert(test_context<abc::test::log>& context) {
-		using Pool = PoolMap;
+		using Pool = PoolMin;
 
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
 		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
@@ -1133,7 +1131,7 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_map_insertmany(test_context<abc::test::log>& context) {
-		using Pool = PoolMapMany;
+		using Pool = PoolMin;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
 
 		bool passed = true;
@@ -1143,7 +1141,7 @@ namespace abc { namespace test { namespace vmem {
 		abc::vmem_map_state map_state;
 		Map map(&map_state, &pool, context.log);
 
-		passed = insert_vmem_map_items(context, map, 40) && passed; //// 4000
+		passed = insert_vmem_map_items(context, map, 4000) && passed;
 
 		return passed;
 	}

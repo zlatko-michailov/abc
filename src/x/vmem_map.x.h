@@ -365,7 +365,10 @@ namespace abc {
 						parent_item_pos++;
 					}
 
-					vmem_map_key_level<Key, Pool, Log> parent_keys(key_stack_itr.operator->(), _pool, _log);
+					// IMPORTANT: Save the vmem_ptr instance to keep the page locked.
+					vmem_ptr<vmem_container_state, Pool, Log> key_level_state_ptr = key_stack_itr.operator->();
+
+					vmem_map_key_level<Key, Pool, Log> parent_keys(key_level_state_ptr.operator->(), _pool, _log);
 					key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
 					vmem_map_key<Key> key_item;
 					key_item.key = new_key;

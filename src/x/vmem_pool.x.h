@@ -923,6 +923,11 @@ namespace abc {
 		_ptr = other._ptr;
 		_log = other._log;
 
+		if (_pool != nullptr && _pos != vmem_page_pos_nil) {
+			lock();
+		}
+
+		other.unlock();
 		other.invalidate();
 
 		return *this;
