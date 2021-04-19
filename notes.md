@@ -2,10 +2,13 @@
 ----
 ## To Do
 - vmem_map
-  - BUG BUG BUG: Why do we need 8 pages? See insert_map_many
-  - test erase
   - clear
   - test clear
+  - remove `vmem_map_key_header` and `vmem_map_value_header`
+
+- Prepare release
+  - tag
+  - version up
 ---
 - Samples
   - tictactoe

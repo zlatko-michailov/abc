@@ -236,7 +236,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_linked_mixedone(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
 
@@ -295,7 +294,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
 
@@ -431,7 +429,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
 
@@ -589,7 +586,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Item = std::array<std::uint8_t, 900>;
 		using List = abc::vmem_list<Item, Pool, Log>;
 		using Iterator = abc::vmem_list_iterator<Item, Pool, Log>;
@@ -921,7 +917,6 @@ namespace abc { namespace test { namespace vmem {
 
 	bool test_vmem_map_insert(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
-
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
 		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
 		using IteratorBool = std::pair<abc::vmem_map_iterator<Key, Value, Pool, Log>, bool>;
@@ -1108,8 +1103,8 @@ namespace abc { namespace test { namespace vmem {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
 	
 			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->key.data == exp[i].first, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->value == 0x900 + exp[i].first, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[i].first, __TAG__, "%d") && passed;
 			itr++;
 		}
 		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
@@ -1120,8 +1115,8 @@ namespace abc { namespace test { namespace vmem {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
 			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->key.data == exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(itr->value == 0x900 + exp[exp_len - i - 1].first, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
 			itr--;
 		}
 		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
@@ -1142,6 +1137,124 @@ namespace abc { namespace test { namespace vmem {
 		Map map(&map_state, &pool, context.log);
 
 		passed = insert_vmem_map_items(context, map, 4000) && passed;
+
+		return passed;
+	}
+
+
+	bool test_vmem_map_erase(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+		using Map = abc::vmem_map<Key, Value, Pool, Log>;
+		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/map_erase.vmem", context.log);
+
+		abc::vmem_map_state map_state;
+		Map map(&map_state, &pool, context.log);
+		Key key;
+
+		passed = insert_vmem_map_items(context, map, 11) && passed;
+		// | (2)         | (3)         | (7)         | (8)         | (9)
+		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
+
+		key.data = 0x09;
+		std::size_t one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 10, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (7)         | (8)
+		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
+
+		key.data = 0x04;
+		one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 9, __TAG__, "%zu") && passed;
+		// | (2)         | (3)         | (8)
+		// | 00 01 __ __ | 02 03 05 __ | 06 07 08 0a |
+
+		key.data = 0x01;
+		one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		// | (2)         | (8)
+		// | 00 02 03 05 | 06 07 08 0a |
+
+		using Pair = std::pair<std::uint64_t, Iterator>;
+		const Pair exp[] = {
+			{ 0x00, Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x02, Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x03, Iterator(&map, 2U, 2U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x05, Iterator(&map, 2U, 3U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x06, Iterator(&map, 8U, 0U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x07, Iterator(&map, 8U, 1U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x08, Iterator(&map, 8U, 2U, abc::vmem_iterator_edge::none, context.log) },
+			{ 0x0a, Iterator(&map, 8U, 3U, abc::vmem_iterator_edge::none, context.log) },
+		};
+		constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
+
+		// Iterate forward.
+		Iterator itr = map.cbegin();
+		for (std::size_t i = 0; i < exp_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
+	
+			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%d") && passed;
+			itr++;
+		}
+		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+
+		// Iterate backwards.
+		itr = map.crend();
+		for (std::size_t i = 0; i < exp_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+	
+			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			itr--;
+		}
+		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
+
+		key.data = 0x09;
+		one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+
+		key.data = 0x04;
+		one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+
+		key.data = 0x01;
+		one = map.erase(key);
+		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+
+		// Iterate forward.
+		itr = map.cbegin();
+		for (std::size_t i = 0; i < exp_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
+	
+			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%d") && passed;
+			itr++;
+		}
+		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+
+		// Iterate backwards.
+		itr = map.crend();
+		for (std::size_t i = 0; i < exp_len; i++) {
+			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+	
+			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			itr--;
+		}
+		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
 
 		return passed;
 	}
