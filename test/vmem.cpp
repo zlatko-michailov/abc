@@ -33,6 +33,7 @@ namespace abc { namespace test { namespace vmem {
 	using PoolFit = abc::vmem_pool<4, Log>;
 	using PoolExceed = abc::vmem_pool<3, Log>;
 	using PoolFree = abc::vmem_pool<5, Log>;
+	using PoolMap = abc::vmem_pool<4, Log>;
 
 	using LinkedPageData = unsigned long long;
 	struct LinkedPage : abc::vmem_linked_page {
@@ -1143,7 +1144,7 @@ namespace abc { namespace test { namespace vmem {
 
 
 	bool test_vmem_map_erase(test_context<abc::test::log>& context) {
-		using Pool = PoolMin;
+		using Pool = PoolMap;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
 		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
 
@@ -1166,6 +1167,14 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)         | (8)
 		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
 
+		context.log->filter()->min_severity(abc::severity::optional); ////
+		// Test that key levels have been updated.
+		key.data = 0x0a;
+		Iterator itr = map.find(key);
+		passed = context.are_equal<long long>(itr.page_pos(), 8LL, __TAG__, "0x%llx") && passed;
+		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+		////context.log->filter()->min_severity(abc::severity::critical); ////
+
 		key.data = 0x04;
 		one = map.erase(key);
 		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
@@ -1179,6 +1188,14 @@ namespace abc { namespace test { namespace vmem {
 		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
 		// | (2)         | (8)
 		// | 00 02 03 05 | 06 07 08 0a |
+
+		// Test that key levels have been updated.
+		//// context.log->filter()->min_severity(abc::severity::abc::debug); ////
+		key.data = 0x05;
+		itr = map.find(key);
+		passed = context.are_equal<long long>(itr.page_pos(), 2LL, __TAG__, "0x%llx") && passed;
+		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+		context.log->filter()->min_severity(abc::severity::critical); ////
 
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
@@ -1194,7 +1211,7 @@ namespace abc { namespace test { namespace vmem {
 		constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
 		// Iterate forward.
-		Iterator itr = map.cbegin();
+		itr = map.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
 			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
 	

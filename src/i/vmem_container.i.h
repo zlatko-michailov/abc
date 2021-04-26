@@ -63,16 +63,57 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	using vmem_container_page_lead_flag_t	= std::uint8_t;
+
+	namespace vmem_container_page_lead_flag {
+		constexpr vmem_container_page_lead_flag_t		none		= 0x0;
+		constexpr vmem_container_page_lead_flag_t		erase		= 0x1;
+		constexpr vmem_container_page_lead_flag_t		insert		= 0x2;
+		constexpr vmem_container_page_lead_flag_t		modify		= 0x3;
+	}
+
+	template <typename T, typename Header>
+	struct vmem_container_page_lead {
+		vmem_container_page_lead_flag_t					flags		= vmem_container_page_lead_flag::none;
+		T												old_item;	// flag: erase (0x1)
+		T												new_item;	// flag: insert (0x2)
+		vmem_page_pos_t									page_pos	= vmem_page_pos_nil;
+	};
+
+
+#ifdef REMOVE ////
 	template <typename T, typename Header, typename Pool, typename Log>
 	struct vmem_container_result2 {
 		vmem_container_result2(nullptr_t) noexcept;
 
 		vmem_container_iterator<T, Header, Pool, Log>	iterator;
-		vmem_page_pos_t									page_pos;
-		T												item_0;
-		vmem_page_pos_t									other_page_pos;
-		T												other_item_0;
+		vmem_container_page_lead<T, Header>				page_leads[2];
 	};
+
+
+	template <typename T, typename Header, typename Pool, typename Log>
+	struct vmem_container_insert_result {
+		vmem_container_iterator<T, Header, Pool, Log>	iterator	= nullptr;
+		T												item;
+		vmem_page_pos_t									page_pos;
+	};
+#endif
+
+
+	template <typename T, typename Header, typename Pool, typename Log>
+	struct vmem_container_result2 {
+		vmem_container_iterator<T, Header, Pool, Log>	iterator	= nullptr;
+		vmem_container_page_lead<T, Header>				page_leads[2];
+	};
+
+
+#ifdef REMOVE ////
+	template <typename T, typename Header, typename Pool, typename Log>
+	union vmem_container_result {
+		vmem_container_insert_result<T, Header, Pool, Log>	insert;
+		vmem_container_erase_result<T, Header, Pool, Log>	erase;
+	};
+#endif
 
 
 	// --------------------------------------------------------------
@@ -90,7 +131,13 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
+		////using insert_result				= vmem_container_insert_result<T, Header, Pool, Log>;
+		////using erase_result				= vmem_container_erase_result<T, Header, Pool, Log>;
+		////using result					= vmem_container_result<T, Header, Pool, Log>;
 		using result2					= vmem_container_result2<T, Header, Pool, Log>;
+
+	private:
+		using page_lead					= vmem_container_page_lead<T, Header>;
 
 	public:
 		static constexpr std::size_t	items_pos() noexcept;

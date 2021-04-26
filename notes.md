@@ -2,6 +2,7 @@
 ----
 ## To Do
 - vmem_map
+  - BUG BUG BUG: update key levels on erase()
   - clear
   - test clear
   - remove `vmem_map_key_header` and `vmem_map_value_header`
@@ -37,20 +38,6 @@
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 
----
-insert()
-{
-  itr
-  page_pos
-  item_0 (T)
-}
-
-erase()
-{
-  itr
-  page_pos
-  item_0 (T)
-}
 ---
 		context.log->filter()->min_severity(abc::severity::critical); ////
 ---

@@ -45,14 +45,12 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+#ifdef REMOVE ////
 	template <typename T, typename Header, typename Pool, typename Log>
 	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
-		: iterator(nullptr)
-		, page_pos(vmem_page_pos_nil)
-		, other_page_pos(vmem_page_pos_nil) {
-		std::memset(&item_0, 0, sizeof(T));
-		std::memset(&other_item_0, 0, sizeof(T));
+		: iterator(nullptr)	{
 	}
+#endif
 
 
 	// --------------------------------------------------------------
@@ -332,8 +330,8 @@ namespace abc {
 			if (_state->back_page_pos == vmem_page_pos_nil) {
 				_state->back_page_pos = result.iterator.page_pos();
 			}
-			else if (_state->back_page_pos == itr.page_pos() && result.page_pos != vmem_page_pos_nil) {
-				_state->back_page_pos = result.page_pos;
+			else if (_state->back_page_pos == itr.page_pos() && result.page_leads[0].page_pos != vmem_page_pos_nil) {
+				_state->back_page_pos = result.page_leads[0].page_pos;
 			} 
 
 			// Update the total item count.
@@ -344,12 +342,12 @@ namespace abc {
 
 			// Return end().
 			result.iterator = end_itr();
-			result.page_pos = vmem_page_pos_nil;
+			result.page_leads[0] = result.page_leads[1] = page_lead();
 		}
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x1044d, "vmem_container::insert2() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
-				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos, (std::size_t)_state->total_item_count);
+				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_leads[0].page_pos, (std::size_t)_state->total_item_count);
 		}
 
 		return result;
@@ -387,7 +385,7 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		if (itr.page_pos() == vmem_page_pos_nil) {
 			result = insert_empty(item);
@@ -398,7 +396,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10450, "vmem_container::insert_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_leads[0].page_pos);
 		}
 
 		return result;
@@ -411,7 +409,7 @@ namespace abc {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10451, "vmem_container::insert_empty() Start");
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		vmem_page<Pool, Log> page(nullptr);
 		vmem_container_page<T, Header>* container_page = nullptr;
@@ -424,7 +422,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10452, "vmem_container::insert_empty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_leads[0].page_pos);
 		}
 
 		return result;
@@ -438,7 +436,7 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
@@ -466,7 +464,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10456, "vmem_container::insert_nonempty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_leads[0].page_pos);
 		}
 
 		return result;
@@ -480,7 +478,7 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		// Decide whether we should balance before we alter container_page.
 		bool balance = should_balance_insert(itr, container_page);
@@ -490,6 +488,9 @@ namespace abc {
 		bool ok = insert_page_after(itr.page_pos(), new_page, new_container_page);
 
 		if (ok) {
+			T old_item; //// remove
+			std::memmove(&old_item, &container_page->items[0], sizeof(T));
+
 			if (balance) {
 				balance_split(itr.page_pos(), container_page, new_page.pos(), new_container_page);
 			}
@@ -504,15 +505,26 @@ namespace abc {
 				result = insert_with_capacity(new_itr, item, new_container_page);
 			}
 
+			////
+			result.page_leads[0].flags = vmem_container_page_lead_flag::insert;
+			std::memmove(&result.page_leads[0].new_item, &new_container_page->items[0], sizeof(T));
+			result.page_leads[0].page_pos = new_page.pos();
+
+			result.page_leads[1].flags = vmem_container_page_lead_flag::insert; ////
+			std::memmove(&result.page_leads[1].new_item, &container_page->items[0], sizeof(T));
+			result.page_leads[1].page_pos = itr.page_pos();
+
+#ifdef REMOVE ////
 			result.page_pos = new_page.pos();
 			std::memmove(&result.item_0, &new_container_page->items[0], sizeof(T));
 			result.other_page_pos = itr.page_pos();
 			std::memmove(&result.other_item_0, &container_page->items[0], sizeof(T));
+#endif
 		}
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10458, "vmem_container::insert_with_overflow() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_leads[0].page_pos);
 		}
 
 		return result;
@@ -526,7 +538,7 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 		result.iterator = iterator(this, itr.page_pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() : container_page->item_count, vmem_iterator_edge::none, _log);
 
 		// Shift items from the insertion position to free up a slot.
@@ -667,13 +679,13 @@ namespace abc {
 			_state->total_item_count--;
 		}
 		else {
-			result = result2(nullptr);
+			result = result2();
 			result.iterator = end_itr();
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x10463, "vmem_container::erase() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
-				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos, (std::size_t)_state->total_item_count);
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10463, "vmem_container::erase() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, total_item_count=%zu",
+				(long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (std::size_t)_state->total_item_count);
 		}
 
 		return result;
@@ -713,7 +725,7 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
@@ -729,12 +741,17 @@ namespace abc {
 				// Determine whether we should balance before any inout parameter gets altered.
 				bool balance = should_balance_erase(container_page, itr.item_pos());
 
+				////
+
 				// There are many items on the page.
 				result = erase_from_many(itr, container_page);
 
 				// Balance if item count drops below half of capacity.
 				if (balance && 2 * container_page->item_count <= page_capacity()) {
-					result = balance_merge(result.iterator, page, container_page);
+					result2 res = balance_merge(result.iterator, page, container_page);
+
+					res.page_leads[1] = result.page_leads[0];
+					result = res;
 				}
 			}
 			else {
@@ -750,10 +767,17 @@ namespace abc {
 					result.iterator = end_itr();
 				}
 
+				////
+				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
+				result.page_leads[0].page_pos = page.pos(); ////
+
+#ifdef REMOVE ////
 				result.page_pos = page.pos();
 				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
 				result.other_page_pos = vmem_page_pos_nil;
 				std::memset(&result.other_item_0, 0, sizeof(T));
+#endif
 
 				erase_page(page);
 				container_page = nullptr;
@@ -761,8 +785,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10468, "vmem_container::erase_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10468, "vmem_container::erase_nostate() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
@@ -776,9 +800,18 @@ namespace abc {
 				(long long)itr.page_pos(), itr.item_pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 
 		if (itr.item_pos() < container_page->item_count - 1) {
+			////
+			if (itr.item_pos() == 0) {
+				////
+				result.page_leads[0].flags = vmem_container_page_lead_flag::modify;
+				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
+				std::memmove(&result.page_leads[0].new_item, &container_page->items[1], sizeof(T));
+				result.page_leads[0].page_pos = itr.page_pos(); ////
+			}
+
 			// To delete an item before the last one, pull up the remaining elements.
 
 			if (_log != nullptr) {
@@ -810,8 +843,8 @@ namespace abc {
 		container_page->item_count--;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046c, "vmem_container::erase_from_many() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046c, "vmem_container::erase_from_many() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
@@ -825,8 +858,8 @@ namespace abc {
 				(long long)page.pos());
 		}
 
-		result2 result(nullptr);
-		result.iterator = itr;
+		result2 result;
+		result.iterator = itr; ////
 
 		// Try the next page.
 		if (container_page->next_page_pos != vmem_page_pos_nil) {
@@ -839,8 +872,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046e, "vmem_container::balance_merge_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1046e, "vmem_container::balance_merge_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x",
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos());
 		}
 
 		return result;
@@ -854,7 +887,7 @@ namespace abc {
 				(long long)page.pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 		result.iterator = itr;
 
 		vmem_page<Pool, Log> next_page(_pool, container_page->next_page_pos, _log);
@@ -879,10 +912,17 @@ namespace abc {
 					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10472, "vmem_container::balance_merge_next_safe() Do.");
 				}
 
+				////
+				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[0].old_item, &next_container_page->items[0], sizeof(T));
+				result.page_leads[0].page_pos = next_page.pos(); ////
+
+#ifdef REMOVE ////
 				result.page_pos = page.pos();
 				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
 				result.other_page_pos = next_page.pos();
 				std::memmove(&result.other_item_0, &container_page->items[0], sizeof(T));
+#endif
 
 				// Merge the items from the next page into this one.
 				std::memmove(&container_page->items[container_page->item_count], &next_container_page->items[0], next_container_page->item_count * sizeof(T));
@@ -902,8 +942,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10473, "vmem_container::balance_merge_next_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10473, "vmem_container::balance_merge_next_safe() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
@@ -917,7 +957,7 @@ namespace abc {
 				(long long)page.pos());
 		}
 
-		result2 result(nullptr);
+		result2 result;
 		result.iterator = itr;
 
 
@@ -943,10 +983,17 @@ namespace abc {
 					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10477, "vmem_container::balance_merge_prev() Do.");
 				}
 
+				////
+				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
+				result.page_leads[0].page_pos = page.pos(); ////
+
+#ifdef REMOVE ////
 				result.page_pos = page.pos();
 				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
 				result.other_page_pos = vmem_page_pos_nil;
 				std::memset(&result.other_item_0, 0, sizeof(T));
+#endif
 
 				// Merge the items from this page into the previous one.
 				std::memmove(&prev_container_page->items[prev_container_page->item_count], &container_page->items[0], container_page->item_count * sizeof(T));
@@ -972,8 +1019,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10478, "vmem_container::balance_merge_prev() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (long long)result.page_pos);
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10478, "vmem_container::balance_merge_prev() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+				result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
 		return result;
