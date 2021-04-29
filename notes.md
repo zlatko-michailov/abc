@@ -3,6 +3,7 @@
 ## To Do
 - vmem_map
   - BUG BUG BUG: update key levels on erase()
+  - remove `memmove`
   - clear
   - test clear
   - remove `vmem_map_key_header` and `vmem_map_value_header`

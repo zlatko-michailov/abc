@@ -447,6 +447,9 @@ namespace abc {
 
 					key_level_result2 keys_result;
 					if (is_insert) {
+						// page_leads[0] - insert
+						// page_leads[1] - supplemental; used only when a new level is created
+						
 						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key); //// new_key);
 						if (parent_item_pos == vmem_item_pos_nil) {
 							ok = false;
@@ -462,7 +465,24 @@ namespace abc {
 						keys_result = parent_keys.insert2(parent_keys_itr, key_item);
 					}
 					else {
-						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key); //// new_key);
+						// page_leads[0] - replace or none; doesn't create new leads
+						// page_leads[1] - erase
+
+						if (page_leads[0].flags == vmem_container_page_lead_flag::replace) {
+							vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key); //// new_key);
+							if (parent_item_pos == vmem_item_pos_nil) {
+								ok = false;
+								break;
+							}
+
+							key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
+							if (parent_keys_itr.can_deref()) {
+								vmem_ptr<vmem_map_key<Key>, Pool, Log> key_ptr = parent_keys_itr.operator->();
+								key_ptr->key = page_leads[0].items[1].key;
+							}
+						}
+
+						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[1].items[0].key); //// new_key);
 						if (parent_item_pos == vmem_item_pos_nil) {
 							ok = false;
 							break;

@@ -747,7 +747,7 @@ namespace abc {
 				if (balance && 2 * container_page->item_count <= page_capacity()) {
 					result2 res = balance_merge(result.iterator, page, container_page);
 
-					res.page_leads[1] = result.page_leads[0];
+					res.page_leads[0] = result.page_leads[0];
 					result = res;
 				}
 			}
@@ -765,9 +765,9 @@ namespace abc {
 				}
 
 				////
-				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
-				result.page_leads[0].page_pos = page.pos(); ////
+				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
+				result.page_leads[1].page_pos = page.pos(); ////
 
 #ifdef REMOVE ////
 				result.page_pos = page.pos();
@@ -910,9 +910,9 @@ namespace abc {
 				}
 
 				////
-				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].items[0], &next_container_page->items[0], sizeof(T));
-				result.page_leads[0].page_pos = next_page.pos(); ////
+				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[1].items[0], &next_container_page->items[0], sizeof(T));
+				result.page_leads[1].page_pos = next_page.pos(); ////
 
 #ifdef REMOVE ////
 				result.page_pos = page.pos();
@@ -981,9 +981,9 @@ namespace abc {
 				}
 
 				////
-				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
-				result.page_leads[0].page_pos = page.pos(); ////
+				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
+				std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
+				result.page_leads[1].page_pos = page.pos(); ////
 
 #ifdef REMOVE ////
 				result.page_pos = page.pos();
