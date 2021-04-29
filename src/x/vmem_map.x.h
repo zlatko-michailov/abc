@@ -329,6 +329,72 @@ namespace abc {
 	}
 
 
+	// ..............................................................
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline std::size_t vmem_map<Key, T, Pool, Log>::erase(const Key& key) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Start.");
+		}
+
+		std::size_t result = 0;
+
+		find_result2 find_result = find2(key);
+
+		if (find_result.ok) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
+					(long long)find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge());
+			}
+
+			result = erase2(std::move(find_result));
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Done. result=%zu", result);
+		}
+
+		return result;
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	template <typename InputItr>
+	inline void vmem_map<Key, T, Pool, Log>::erase(InputItr first, InputItr last) {
+		for (InputItr item_itr = first; item_itr != last; item_itr++) {
+			erase(*item_itr);
+		}
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline std::size_t vmem_map<Key, T, Pool, Log>::erase2(find_result2&& find_result) noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Start.");
+		}
+
+		value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), _log);
+
+		value_level_result2 values_result = _values.erase2(values_itr);
+
+		result2 result(nullptr);
+		if (values_result.iterator.is_valid()) {
+			result = update_key_levels(false, std::move(find_result), std::move(values_result));
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Done. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+				(long long)values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge());
+		}
+
+		return values_result.iterator.is_valid() ? 1 : 0;
+	}
+
+
+	// ..............................................................
+
+
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept {
 		if (_log != nullptr) {
@@ -351,38 +417,59 @@ namespace abc {
 				path_reverse_iterator path_itr = find_result.path.rend();
 
 				////
+				page_lead page_leads[2];
+				page_leads[0].flags = values_result.page_leads[0].flags;
+				page_leads[0].items[0].key = values_result.page_leads[0].items[0].key;
+				page_leads[0].items[1].key = values_result.page_leads[0].items[1].key;
+				page_leads[0].page_pos = values_result.page_leads[0].page_pos;
+
+				page_leads[1].flags = values_result.page_leads[1].flags;
+				page_leads[1].items[0].key = values_result.page_leads[1].items[0].key;
+				page_leads[1].items[1].key = values_result.page_leads[1].items[1].key;
+				page_leads[1].page_pos = values_result.page_leads[1].page_pos;
+
+				////
 				Key new_key;
-				std::memmove(&new_key, &values_result.page_leads[0].new_item.key, sizeof(Key));
+				std::memmove(&new_key, &values_result.page_leads[0].items[0].key, sizeof(Key));
 				vmem_page_pos_t new_page_pos = values_result.page_leads[0].page_pos;
 
 				Key other_key;
-				std::memmove(&other_key, &values_result.page_leads[1].new_item.key, sizeof(Key));
+				std::memmove(&other_key, &values_result.page_leads[1].items[0].key, sizeof(Key));
 				vmem_page_pos_t other_page_pos = values_result.page_leads[1].page_pos;
 
 				// While there is rebalance, keep going back the path (and up the levels).
-				while (new_page_pos != vmem_page_pos_nil && key_stack_itr != _key_stack.end() && path_itr != find_result.path.rbegin()) {
-					vmem_page_pos_t parent_page_pos = *path_itr;
-
-					vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, new_key);
-					if (parent_item_pos == vmem_item_pos_nil) {
-						ok = false;
-						break;
-					}
-
+				while ((page_leads[0].flags != 0 || page_leads[1].flags != 0) && key_stack_itr != _key_stack.end() && path_itr != find_result.path.rbegin()) { //// new_page_pos != vmem_page_pos_nil
 					// IMPORTANT: Save the vmem_ptr instance to keep the page locked.
 					vmem_ptr<vmem_container_state, Pool, Log> key_level_state_ptr = key_stack_itr.operator->();
 
 					vmem_map_key_level<Key, Pool, Log> parent_keys(key_level_state_ptr.operator->(), _pool, _log);
-					key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
-					vmem_map_key<Key> key_item;
-					key_item.key = new_key; //// std::memmove()
-					key_item.page_pos = new_page_pos;
+					vmem_page_pos_t parent_page_pos = *path_itr;
 
 					key_level_result2 keys_result;
 					if (is_insert) {
+						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key); //// new_key);
+						if (parent_item_pos == vmem_item_pos_nil) {
+							ok = false;
+							break;
+						}
+
+						key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
+
+						vmem_map_key<Key> key_item;
+						key_item.key = page_leads[0].items[0].key; //// new_key; //// std::memmove()
+						key_item.page_pos = page_leads[0].page_pos; //// new_page_pos;
+
 						keys_result = parent_keys.insert2(parent_keys_itr, key_item);
 					}
 					else {
+						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key); //// new_key);
+						if (parent_item_pos == vmem_item_pos_nil) {
+							ok = false;
+							break;
+						}
+
+						key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
+
 						keys_result = parent_keys.erase2(parent_keys_itr);
 					}
 
@@ -395,12 +482,16 @@ namespace abc {
 						break;
 					}
 
-					if (new_page_pos != vmem_page_pos_nil) {
+					////
+					if (page_leads[0].flags != 0 || page_leads[1].flags != 0) { //// (new_page_pos != vmem_page_pos_nil) {
+						page_leads[0] = keys_result.page_leads[0];
+						page_leads[1] = keys_result.page_leads[1];
+
 						////
-						new_key = keys_result.page_leads[0].new_item.key; //// std::memmove()
+						new_key = keys_result.page_leads[0].items[0].key; //// std::memmove()
 						new_page_pos = keys_result.page_leads[0].page_pos;
 
-						other_key = keys_result.page_leads[1].new_item.key; //// std::memmove()
+						other_key = keys_result.page_leads[1].items[0].key; //// std::memmove()
 						other_page_pos = keys_result.page_leads[1].page_pos;
 					}
 
@@ -411,20 +502,20 @@ namespace abc {
 				// If we still have a new_page_pos, then we have to add/remove a key level at the top.
 				if (ok) {
 					if (is_insert) {
-						if (new_page_pos != vmem_page_pos_nil) {
+						if (page_leads[0].page_pos != vmem_page_pos_nil) { //// new_page_pos
 							vmem_container_state new_keys_state;
 							vmem_map_key_level<Key, Pool, Log> new_keys(&new_keys_state, _pool, _log);
 
 							// item[0]
 							vmem_map_key<Key> other_key_item;
-							other_key_item.key = other_key; //// std::memmove()
+							other_key_item.key = page_leads[1].items[0].key; //// other_key; //// std::memmove()
 							other_key_item.page_pos = other_page_pos;
 							new_keys.push_back(other_key_item);
 
 							// item[1]
 							vmem_map_key<Key> new_key_item;
-							new_key_item.key = new_key; //// std::memmove()
-							new_key_item.page_pos = new_page_pos;
+							new_key_item.key = page_leads[0].items[0].key; //// new_key; //// std::memmove()
+							new_key_item.page_pos = page_leads[0].page_pos; //// new_page_pos;
 							new_keys.push_back(new_key_item);
 
 							_key_stack.push_back(new_keys_state);
@@ -502,69 +593,6 @@ namespace abc {
 		}
 
 		return item_pos;
-	}
-
-
-	// ..............................................................
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline std::size_t vmem_map<Key, T, Pool, Log>::erase(const Key& key) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Start.");
-		}
-
-		std::size_t result = 0;
-
-		find_result2 find_result = find2(key);
-
-		if (find_result.ok) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
-					(long long)find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge());
-			}
-
-			result = erase2(std::move(find_result));
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Done. result=%zu", result);
-		}
-
-		return result;
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	template <typename InputItr>
-	inline void vmem_map<Key, T, Pool, Log>::erase(InputItr first, InputItr last) {
-		for (InputItr item_itr = first; item_itr != last; item_itr++) {
-			erase(*item_itr);
-		}
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
-	inline std::size_t vmem_map<Key, T, Pool, Log>::erase2(find_result2&& find_result) noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Start.");
-		}
-
-		value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), _log);
-
-		value_level_result2 values_result = _values.erase2(values_itr);
-
-		result2 result(nullptr);
-		if (values_result.iterator.is_valid()) {
-			result = update_key_levels(false, std::move(find_result), std::move(values_result));
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Done. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
-				(long long)values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge());
-		}
-
-		return values_result.iterator.is_valid() ? 1 : 0;
 	}
 
 

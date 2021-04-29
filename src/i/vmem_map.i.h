@@ -155,6 +155,7 @@ namespace abc {
 		////using value_level_insert_result	= typename vmem_map_value_level<Key, T, Pool, Log>::insert_result;
 		////using value_level_erase_result	= typename vmem_map_value_level<Key, T, Pool, Log>::erase_result;
 		using value_level_result2		= typename vmem_map_value_level<Key, T, Pool, Log>::result2;
+		using page_lead					= typename vmem_map_key_level<Key, Pool, Log>::page_lead;
 
 	public:
 		static constexpr std::size_t	key_items_pos() noexcept;
@@ -196,20 +197,21 @@ namespace abc {
 		template <typename InputItr>
 		void					insert(InputItr first, InputItr last);
 
-	// insert() helpers
 	private:
 		result2					insert2(find_result2&& find_result, const_reference item) noexcept;
-		result2					update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept;
-		vmem_item_pos_t			key_item_pos(vmem_page_pos_t key_page_pos, const Key& key) noexcept;
 
 	public:
 		std::size_t				erase(const Key& key);
 		template <typename InputItr>
 		void					erase(InputItr first, InputItr last);
 
-	// erase() helpers ////
 	private:
 		std::size_t				erase2(find_result2&& find_result) noexcept;
+
+	// update_key_levels() ////
+	private:
+		result2					update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept;
+		vmem_item_pos_t			key_item_pos(vmem_page_pos_t key_page_pos, const Key& key) noexcept;
 
 	public:
 		void					clear() noexcept;

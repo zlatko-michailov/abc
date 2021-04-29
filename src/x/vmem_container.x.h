@@ -488,9 +488,6 @@ namespace abc {
 		bool ok = insert_page_after(itr.page_pos(), new_page, new_container_page);
 
 		if (ok) {
-			T old_item; //// remove
-			std::memmove(&old_item, &container_page->items[0], sizeof(T));
-
 			if (balance) {
 				balance_split(itr.page_pos(), container_page, new_page.pos(), new_container_page);
 			}
@@ -507,11 +504,11 @@ namespace abc {
 
 			////
 			result.page_leads[0].flags = vmem_container_page_lead_flag::insert;
-			std::memmove(&result.page_leads[0].new_item, &new_container_page->items[0], sizeof(T));
+			std::memmove(&result.page_leads[0].items[0], &new_container_page->items[0], sizeof(T));
 			result.page_leads[0].page_pos = new_page.pos();
 
 			result.page_leads[1].flags = vmem_container_page_lead_flag::insert; ////
-			std::memmove(&result.page_leads[1].new_item, &container_page->items[0], sizeof(T));
+			std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
 			result.page_leads[1].page_pos = itr.page_pos();
 
 #ifdef REMOVE ////
@@ -769,7 +766,7 @@ namespace abc {
 
 				////
 				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
+				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
 				result.page_leads[0].page_pos = page.pos(); ////
 
 #ifdef REMOVE ////
@@ -806,9 +803,9 @@ namespace abc {
 			////
 			if (itr.item_pos() == 0) {
 				////
-				result.page_leads[0].flags = vmem_container_page_lead_flag::modify;
-				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
-				std::memmove(&result.page_leads[0].new_item, &container_page->items[1], sizeof(T));
+				result.page_leads[0].flags = vmem_container_page_lead_flag::replace;
+				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
+				std::memmove(&result.page_leads[0].items[1], &container_page->items[1], sizeof(T));
 				result.page_leads[0].page_pos = itr.page_pos(); ////
 			}
 
@@ -914,7 +911,7 @@ namespace abc {
 
 				////
 				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].old_item, &next_container_page->items[0], sizeof(T));
+				std::memmove(&result.page_leads[0].items[0], &next_container_page->items[0], sizeof(T));
 				result.page_leads[0].page_pos = next_page.pos(); ////
 
 #ifdef REMOVE ////
@@ -985,7 +982,7 @@ namespace abc {
 
 				////
 				result.page_leads[0].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[0].old_item, &container_page->items[0], sizeof(T));
+				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
 				result.page_leads[0].page_pos = page.pos(); ////
 
 #ifdef REMOVE ////
