@@ -1167,13 +1167,11 @@ namespace abc { namespace test { namespace vmem {
 		// | (2)         | (3)         | (7)         | (8)
 		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
 
-		context.log->filter()->min_severity(abc::severity::optional); ////
 		// Test that key levels have been updated.
 		key.data = 0x0a;
 		Iterator itr = map.find(key);
 		passed = context.are_equal<long long>(itr.page_pos(), 8LL, __TAG__, "0x%llx") && passed;
 		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
-		////context.log->filter()->min_severity(abc::severity::critical); ////
 
 		key.data = 0x04;
 		one = map.erase(key);
@@ -1190,12 +1188,10 @@ namespace abc { namespace test { namespace vmem {
 		// | 00 02 03 05 | 06 07 08 0a |
 
 		// Test that key levels have been updated.
-		//// context.log->filter()->min_severity(abc::severity::abc::debug); ////
 		key.data = 0x05;
 		itr = map.find(key);
 		passed = context.are_equal<long long>(itr.page_pos(), 2LL, __TAG__, "0x%llx") && passed;
 		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
-		context.log->filter()->min_severity(abc::severity::critical); ////
 
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
