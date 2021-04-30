@@ -75,9 +75,16 @@ namespace abc {
 
 	template <typename T>
 	struct vmem_container_page_lead {
-		vmem_container_page_lead_flag_t					flags		= vmem_container_page_lead_flag::none; ////
+		vmem_container_page_lead() noexcept;
+		template <typename Other>
+		vmem_container_page_lead(const Other& other) noexcept;
+		vmem_container_page_lead(vmem_container_page_lead_flag_t flags, vmem_page_pos_t page_pos) noexcept;
+		template <typename Key>
+		vmem_container_page_lead(vmem_container_page_lead_flag_t flags, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept;
+
+		vmem_container_page_lead_flag_t					flags; ////
 		T												items[2];
-		vmem_page_pos_t									page_pos	= vmem_page_pos_nil;
+		vmem_page_pos_t									page_pos;
 	};
 
 

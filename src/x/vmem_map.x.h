@@ -65,7 +65,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(Pool* pool, Log* log)
+	vmem_map_find_result2<Key, T, Pool, Log>::vmem_map_find_result2(Pool* pool, Log* log) noexcept
 		: vmem_map_result2<Key, T, Pool, Log>(nullptr)
 		, path(&_path_state, pool, log) {
 	}
@@ -416,8 +416,9 @@ namespace abc {
 				key_level_stack_iterator key_stack_itr = _key_stack.begin();
 				path_reverse_iterator path_itr = find_result.path.rend();
 
-				////
-				page_lead page_leads[2];
+				page_lead page_leads[] = { values_result.page_leads[0], values_result.page_leads[1] };
+
+#ifdef REMOVE ////
 				page_leads[0].flags = values_result.page_leads[0].flags;
 				page_leads[0].items[0].key = values_result.page_leads[0].items[0].key;
 				page_leads[0].items[1].key = values_result.page_leads[0].items[1].key;
@@ -427,8 +428,9 @@ namespace abc {
 				page_leads[1].items[0].key = values_result.page_leads[1].items[0].key;
 				page_leads[1].items[1].key = values_result.page_leads[1].items[1].key;
 				page_leads[1].page_pos = values_result.page_leads[1].page_pos;
+#endif
 
-				////
+#ifdef REMOVE ////				
 				Key new_key;
 				std::memmove(&new_key, &values_result.page_leads[0].items[0].key, sizeof(Key));
 				vmem_page_pos_t new_page_pos = values_result.page_leads[0].page_pos;
@@ -436,6 +438,7 @@ namespace abc {
 				Key other_key;
 				std::memmove(&other_key, &values_result.page_leads[1].items[0].key, sizeof(Key));
 				vmem_page_pos_t other_page_pos = values_result.page_leads[1].page_pos;
+#endif
 
 				// While there is rebalance, keep going back the path (and up the levels).
 				while ((page_leads[0].flags != 0 || page_leads[1].flags != 0) && key_stack_itr != _key_stack.end() && path_itr != find_result.path.rbegin()) { //// new_page_pos != vmem_page_pos_nil
@@ -502,17 +505,17 @@ namespace abc {
 						break;
 					}
 
-					////
 					if (page_leads[0].flags != 0 || page_leads[1].flags != 0) { //// (new_page_pos != vmem_page_pos_nil) {
 						page_leads[0] = keys_result.page_leads[0];
 						page_leads[1] = keys_result.page_leads[1];
 
-						////
+#ifdef REMOVE ////
 						new_key = keys_result.page_leads[0].items[0].key; //// std::memmove()
 						new_page_pos = keys_result.page_leads[0].page_pos;
 
 						other_key = keys_result.page_leads[1].items[0].key; //// std::memmove()
 						other_page_pos = keys_result.page_leads[1].page_pos;
+#endif
 					}
 
 					key_stack_itr++;
@@ -526,13 +529,13 @@ namespace abc {
 							vmem_container_state new_keys_state;
 							vmem_map_key_level<Key, Pool, Log> new_keys(&new_keys_state, _pool, _log);
 
-							// item[0]
+							// items[0]
 							vmem_map_key<Key> other_key_item;
 							other_key_item.key = page_leads[1].items[0].key; //// other_key; //// std::memmove()
-							other_key_item.page_pos = other_page_pos;
+							other_key_item.page_pos = page_leads[1].page_pos; //// other_page_pos;
 							new_keys.push_back(other_key_item);
 
-							// item[1]
+							// items[1]
 							vmem_map_key<Key> new_key_item;
 							new_key_item.key = page_leads[0].items[0].key; //// new_key; //// std::memmove()
 							new_key_item.page_pos = page_leads[0].page_pos; //// new_page_pos;
@@ -542,7 +545,6 @@ namespace abc {
 						}
 					}
 					else {
-						////
 						if (!_key_stack.empty()) {
 							std::size_t top_keys_size = 2;
 							{

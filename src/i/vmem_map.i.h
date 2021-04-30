@@ -106,7 +106,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	struct vmem_map_find_result2 : public vmem_map_result2<Key, T, Pool, Log> {
-		vmem_map_find_result2(Pool* pool, Log* log);
+		vmem_map_find_result2(Pool* pool, Log* log) noexcept;
 		vmem_map_find_result2(const vmem_map_find_result2& other) = delete;
 		vmem_map_find_result2(vmem_map_find_result2&& other) noexcept = default;
 

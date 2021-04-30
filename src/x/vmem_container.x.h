@@ -45,6 +45,38 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	template <typename T>
+	vmem_container_page_lead<T>::vmem_container_page_lead() noexcept
+		: vmem_container_page_lead(vmem_container_page_lead_flag::none, vmem_page_pos_nil) {
+	}
+
+
+	template <typename T>
+	template <typename Other>
+	vmem_container_page_lead<T>::vmem_container_page_lead(const Other& other) noexcept
+		: vmem_container_page_lead(other.flags, other.items[0].key, other.items[1].key, other.page_pos) {
+	}
+
+
+	template <typename T>
+	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_flag_t flags, vmem_page_pos_t page_pos) noexcept
+		: flags(flags)
+		, page_pos(page_pos) {
+	}
+
+
+	template <typename T>
+	template <typename Key>
+	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_flag_t flags, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept
+		: vmem_container_page_lead(flags, page_pos) {
+		items[0].key = items_0_key;
+		items[1].key = items_1_key;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 #ifdef REMOVE ////
 	template <typename T, typename Header, typename Pool, typename Log>
 	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept

@@ -3,9 +3,12 @@
 ## To Do
 - vmem_map
   - BUG BUG BUG: update key levels on erase()
+  - clean up `////`
+  - rename `vmem_container_page_lead_flag` to `vmem_container_page_lead_operation`
   - remove `memmove`
   - clear
   - test clear
+  - `vmem_map` docs
   - remove `vmem_map_key_header` and `vmem_map_value_header`
 
 - Prepare release
