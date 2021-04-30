@@ -147,13 +147,9 @@ namespace abc {
 		using key_level_stack			= vmem_map_key_level_stack<Key, Pool, Log>;
 		using key_level_stack_iterator	= typename vmem_map_key_level_stack<Key, Pool, Log>::iterator;
 		using key_level_iterator		= typename vmem_map_key_level<Key, Pool, Log>::iterator;
-		////using key_level_insert_result	= typename vmem_map_key_level<Key, Pool, Log>::insert_result;
-		////using key_level_erase_result	= typename vmem_map_key_level<Key, Pool, Log>::erase_result;
 		using key_level_result2			= typename vmem_map_key_level<Key, Pool, Log>::result2;
 		using value_level_container		= vmem_map_value_level<Key, T, Pool, Log>;
 		using value_level_iterator		= typename vmem_map_value_level<Key, T, Pool, Log>::iterator;
-		////using value_level_insert_result	= typename vmem_map_value_level<Key, T, Pool, Log>::insert_result;
-		////using value_level_erase_result	= typename vmem_map_value_level<Key, T, Pool, Log>::erase_result;
 		using value_level_result2		= typename vmem_map_value_level<Key, T, Pool, Log>::result2;
 		using page_lead					= typename vmem_map_key_level<Key, Pool, Log>::page_lead;
 
@@ -208,7 +204,7 @@ namespace abc {
 	private:
 		std::size_t				erase2(find_result2&& find_result) noexcept;
 
-	// update_key_levels() ////
+	// update_key_levels() helpers
 	private:
 		result2					update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept;
 		vmem_item_pos_t			key_item_pos(vmem_page_pos_t key_page_pos, const Key& key) noexcept;

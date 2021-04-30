@@ -77,17 +77,6 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-#ifdef REMOVE ////
-	template <typename T, typename Header, typename Pool, typename Log>
-	vmem_container_result2<T, Header, Pool, Log>::vmem_container_result2(nullptr_t) noexcept
-		: iterator(nullptr)	{
-	}
-#endif
-
-
-	// --------------------------------------------------------------
-
-
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline constexpr std::size_t vmem_container<T, Header, Pool, Log>::items_pos() noexcept {
 		return sizeof(vmem_container_page<T, Header>) - sizeof(T);
@@ -534,21 +523,12 @@ namespace abc {
 				result = insert_with_capacity(new_itr, item, new_container_page);
 			}
 
-			////
-			result.page_leads[0].flags = vmem_container_page_lead_flag::insert;
-			std::memmove(&result.page_leads[0].items[0], &new_container_page->items[0], sizeof(T));
-			result.page_leads[0].page_pos = new_page.pos();
-
-			result.page_leads[1].flags = vmem_container_page_lead_flag::insert; ////
-			std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
-			result.page_leads[1].page_pos = itr.page_pos();
-
-#ifdef REMOVE ////
-			result.page_pos = new_page.pos();
-			std::memmove(&result.item_0, &new_container_page->items[0], sizeof(T));
-			result.other_page_pos = itr.page_pos();
-			std::memmove(&result.other_item_0, &container_page->items[0], sizeof(T));
-#endif
+			// page_leads[0] - insert; new page
+			// page_leads[1] - supplemental; used only when a new level is created
+			result.page_leads[0] = page_lead(vmem_container_page_lead_flag::insert, new_page.pos());
+			result.page_leads[0].items[0] = new_container_page->items[0];
+			result.page_leads[1] = page_lead(vmem_container_page_lead_flag::supplemental, itr.page_pos());
+			result.page_leads[1].items[0] = container_page->items[0];
 		}
 
 		if (_log != nullptr) {
@@ -770,8 +750,6 @@ namespace abc {
 				// Determine whether we should balance before any inout parameter gets altered.
 				bool balance = should_balance_erase(container_page, itr.item_pos());
 
-				////
-
 				// There are many items on the page.
 				result = erase_from_many(itr, container_page);
 
@@ -796,17 +774,11 @@ namespace abc {
 					result.iterator = end_itr();
 				}
 
-				////
-				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
-				result.page_leads[1].page_pos = page.pos(); ////
-
-#ifdef REMOVE ////
-				result.page_pos = page.pos();
-				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
-				result.other_page_pos = vmem_page_pos_nil;
-				std::memset(&result.other_item_0, 0, sizeof(T));
-#endif
+				// page_leads[0] - none
+				// page_leads[1] - erase
+				result.page_leads[0] = page_lead();
+				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, page.pos());
+				result.page_leads[1].items[0] = container_page->items[0];
 
 				erase_page(page);
 				container_page = nullptr;
@@ -832,13 +804,13 @@ namespace abc {
 		result2 result;
 
 		if (itr.item_pos() < container_page->item_count - 1) {
-			////
 			if (itr.item_pos() == 0) {
-				////
-				result.page_leads[0].flags = vmem_container_page_lead_flag::replace;
-				std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
-				std::memmove(&result.page_leads[0].items[1], &container_page->items[1], sizeof(T));
-				result.page_leads[0].page_pos = itr.page_pos(); ////
+				// page_leads[0] - replace
+				// page_leads[1] - none
+				result.page_leads[0] = page_lead(vmem_container_page_lead_flag::replace, itr.page_pos());
+				result.page_leads[0].items[0] = container_page->items[0];
+				result.page_leads[0].items[1] = container_page->items[1];
+				result.page_leads[1] = page_lead();
 			}
 
 			// To delete an item before the last one, pull up the remaining elements.
@@ -888,7 +860,7 @@ namespace abc {
 		}
 
 		result2 result;
-		result.iterator = itr; ////
+		result.iterator = itr;
 
 		// Try the next page.
 		if (container_page->next_page_pos != vmem_page_pos_nil) {
@@ -941,17 +913,11 @@ namespace abc {
 					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10472, "vmem_container::balance_merge_next_safe() Do.");
 				}
 
-				////
-				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[1].items[0], &next_container_page->items[0], sizeof(T));
-				result.page_leads[1].page_pos = next_page.pos(); ////
-
-#ifdef REMOVE ////
-				result.page_pos = page.pos();
-				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
-				result.other_page_pos = next_page.pos();
-				std::memmove(&result.other_item_0, &container_page->items[0], sizeof(T));
-#endif
+				// page_leads[0] - none
+				// page_leads[1] - erase
+				result.page_leads[0] = page_lead();
+				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, next_page.pos());
+				result.page_leads[1].items[0] = next_container_page->items[0];
 
 				// Merge the items from the next page into this one.
 				std::memmove(&container_page->items[container_page->item_count], &next_container_page->items[0], next_container_page->item_count * sizeof(T));
@@ -1012,17 +978,11 @@ namespace abc {
 					_log->put_any(category::abc::vmem, severity::abc::optional, 0x10477, "vmem_container::balance_merge_prev() Do.");
 				}
 
-				////
-				result.page_leads[1].flags = vmem_container_page_lead_flag::erase;
-				std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
-				result.page_leads[1].page_pos = page.pos(); ////
-
-#ifdef REMOVE ////
-				result.page_pos = page.pos();
-				std::memmove(&result.item_0, &container_page->items[0], sizeof(T));
-				result.other_page_pos = vmem_page_pos_nil;
-				std::memset(&result.other_item_0, 0, sizeof(T));
-#endif
+				// page_leads[0] - none
+				// page_leads[1] - erase
+				result.page_leads[0] = page_lead();
+				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, page.pos());
+				result.page_leads[1].items[0] = container_page->items[0];
 
 				// Merge the items from this page into the previous one.
 				std::memmove(&prev_container_page->items[prev_container_page->item_count], &container_page->items[0], container_page->item_count * sizeof(T));

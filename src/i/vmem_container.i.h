@@ -88,39 +88,11 @@ namespace abc {
 	};
 
 
-#ifdef REMOVE ////
-	template <typename T, typename Header, typename Pool, typename Log>
-	struct vmem_container_result2 {
-		vmem_container_result2(nullptr_t) noexcept;
-
-		vmem_container_iterator<T, Header, Pool, Log>	iterator;
-		vmem_container_page_lead<T>						page_leads[2];
-	};
-
-
-	template <typename T, typename Header, typename Pool, typename Log>
-	struct vmem_container_insert_result {
-		vmem_container_iterator<T, Header, Pool, Log>	iterator	= nullptr;
-		T												item;
-		vmem_page_pos_t									page_pos;
-	};
-#endif
-
-
 	template <typename T, typename Header, typename Pool, typename Log>
 	struct vmem_container_result2 {
 		vmem_container_iterator<T, Header, Pool, Log>	iterator	= nullptr;
 		vmem_container_page_lead<T>						page_leads[2];
 	};
-
-
-#ifdef REMOVE ////
-	template <typename T, typename Header, typename Pool, typename Log>
-	union vmem_container_result {
-		vmem_container_insert_result<T, Header, Pool, Log>	insert;
-		vmem_container_erase_result<T, Header, Pool, Log>	erase;
-	};
-#endif
 
 
 	// --------------------------------------------------------------
@@ -138,9 +110,6 @@ namespace abc {
 		using const_iterator			= const iterator;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
-		////using insert_result				= vmem_container_insert_result<T, Header, Pool, Log>;
-		////using erase_result				= vmem_container_erase_result<T, Header, Pool, Log>;
-		////using result					= vmem_container_result<T, Header, Pool, Log>;
 		using result2					= vmem_container_result2<T, Header, Pool, Log>;
 		using page_lead					= vmem_container_page_lead<T>;
 
