@@ -47,28 +47,28 @@ namespace abc {
 
 	template <typename T>
 	vmem_container_page_lead<T>::vmem_container_page_lead() noexcept
-		: vmem_container_page_lead(vmem_container_page_lead_flag::none, vmem_page_pos_nil) {
+		: vmem_container_page_lead(vmem_container_page_lead_operation::none, vmem_page_pos_nil) {
 	}
 
 
 	template <typename T>
 	template <typename Other>
 	vmem_container_page_lead<T>::vmem_container_page_lead(const Other& other) noexcept
-		: vmem_container_page_lead(other.flags, other.items[0].key, other.items[1].key, other.page_pos) {
+		: vmem_container_page_lead(other.operation, other.items[0].key, other.items[1].key, other.page_pos) {
 	}
 
 
 	template <typename T>
-	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_flag_t flags, vmem_page_pos_t page_pos) noexcept
-		: flags(flags)
+	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, vmem_page_pos_t page_pos) noexcept
+		: operation(operation)
 		, page_pos(page_pos) {
 	}
 
 
 	template <typename T>
 	template <typename Key>
-	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_flag_t flags, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept
-		: vmem_container_page_lead(flags, page_pos) {
+	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept
+		: vmem_container_page_lead(operation, page_pos) {
 		items[0].key = items_0_key;
 		items[1].key = items_1_key;
 	}
@@ -525,9 +525,9 @@ namespace abc {
 
 			// page_leads[0] - insert; new page
 			// page_leads[1] - supplemental; used only when a new level is created
-			result.page_leads[0] = page_lead(vmem_container_page_lead_flag::insert, new_page.pos());
+			result.page_leads[0] = page_lead(vmem_container_page_lead_operation::insert, new_page.pos());
 			result.page_leads[0].items[0] = new_container_page->items[0];
-			result.page_leads[1] = page_lead(vmem_container_page_lead_flag::supplemental, itr.page_pos());
+			result.page_leads[1] = page_lead(vmem_container_page_lead_operation::supplemental, itr.page_pos());
 			result.page_leads[1].items[0] = container_page->items[0];
 		}
 
@@ -777,7 +777,7 @@ namespace abc {
 				// page_leads[0] - none
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
-				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, page.pos());
+				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, page.pos());
 				result.page_leads[1].items[0] = container_page->items[0];
 
 				erase_page(page);
@@ -807,7 +807,7 @@ namespace abc {
 			if (itr.item_pos() == 0) {
 				// page_leads[0] - replace
 				// page_leads[1] - none
-				result.page_leads[0] = page_lead(vmem_container_page_lead_flag::replace, itr.page_pos());
+				result.page_leads[0] = page_lead(vmem_container_page_lead_operation::replace, itr.page_pos());
 				result.page_leads[0].items[0] = container_page->items[0];
 				result.page_leads[0].items[1] = container_page->items[1];
 				result.page_leads[1] = page_lead();
@@ -916,7 +916,7 @@ namespace abc {
 				// page_leads[0] - none
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
-				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, next_page.pos());
+				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, next_page.pos());
 				result.page_leads[1].items[0] = next_container_page->items[0];
 
 				// Merge the items from the next page into this one.
@@ -981,7 +981,7 @@ namespace abc {
 				// page_leads[0] - none
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
-				result.page_leads[1] = page_lead(vmem_container_page_lead_flag::erase, page.pos());
+				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, page.pos());
 				result.page_leads[1].items[0] = container_page->items[0];
 
 				// Merge the items from this page into the previous one.

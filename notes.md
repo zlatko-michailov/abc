@@ -2,7 +2,6 @@
 ----
 ## To Do
 - vmem_map
-  - rename `vmem_container_page_lead_flag` to `vmem_container_page_lead_operation`
   - remove `memmove`
   - clear
   - test clear

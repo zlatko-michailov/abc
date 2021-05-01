@@ -403,7 +403,8 @@ namespace abc {
 
 		bool ok = true;
 
-		if (values_result.iterator.is_valid() && (values_result.page_leads[0].flags != 0 || values_result.page_leads[1].flags != 0)) {
+		if (values_result.iterator.is_valid()
+			&& (values_result.page_leads[0].operation != vmem_container_page_lead_operation::none || values_result.page_leads[1].operation != vmem_container_page_lead_operation::none)) {
 			if (_key_stack.size() != find_result.path.size()) {
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::update_key_levels() Mismatch key_stack.size=%zu, path.size=%zu",
@@ -419,7 +420,9 @@ namespace abc {
 				page_lead page_leads[] = { values_result.page_leads[0], values_result.page_leads[1] };
 
 				// While there is rebalance, keep going back the path (and up the levels).
-				while ((page_leads[0].flags != 0 || page_leads[1].flags != 0) && key_stack_itr != _key_stack.end() && path_itr != find_result.path.rbegin()) {
+				while ((page_leads[0].operation != vmem_container_page_lead_operation::none || page_leads[1].operation != vmem_container_page_lead_operation::none)
+						&& key_stack_itr != _key_stack.end()
+						&& path_itr != find_result.path.rbegin()) {
 					// IMPORTANT: Save the vmem_ptr instance to keep the page locked.
 					vmem_ptr<vmem_container_state, Pool, Log> key_level_state_ptr = key_stack_itr.operator->();
 
@@ -449,7 +452,7 @@ namespace abc {
 						// page_leads[0] - replace or none; doesn't create new leads
 						// page_leads[1] - erase
 
-						if (page_leads[0].flags == vmem_container_page_lead_flag::replace) {
+						if (page_leads[0].operation == vmem_container_page_lead_operation::replace) {
 							vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
 							if (parent_item_pos == vmem_item_pos_nil) {
 								ok = false;
@@ -483,7 +486,7 @@ namespace abc {
 						break;
 					}
 
-					if (page_leads[0].flags != 0 || page_leads[1].flags != 0) {
+					if (page_leads[0].operation != vmem_container_page_lead_operation::none || page_leads[1].operation != vmem_container_page_lead_operation::none) {
 						page_leads[0] = keys_result.page_leads[0];
 						page_leads[1] = keys_result.page_leads[1];
 					}

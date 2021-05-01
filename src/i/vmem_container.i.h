@@ -63,14 +63,14 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using vmem_container_page_lead_flag_t	= std::uint8_t;
+	using vmem_container_page_lead_operation_t	= std::uint8_t;
 
-	namespace vmem_container_page_lead_flag {
-		constexpr vmem_container_page_lead_flag_t		none			= 0x0;
-		constexpr vmem_container_page_lead_flag_t		erase			= 0x1;
-		constexpr vmem_container_page_lead_flag_t		insert			= 0x2;
-		constexpr vmem_container_page_lead_flag_t		replace			= 0x3;
-		constexpr vmem_container_page_lead_flag_t		supplemental	= 0x4;
+	namespace vmem_container_page_lead_operation {
+		constexpr vmem_container_page_lead_operation_t	none			= 0x0;
+		constexpr vmem_container_page_lead_operation_t	erase			= 0x1;
+		constexpr vmem_container_page_lead_operation_t	insert			= 0x2;
+		constexpr vmem_container_page_lead_operation_t	replace			= 0x3;
+		constexpr vmem_container_page_lead_operation_t	supplemental	= 0x4;
 	}
 
 	template <typename T>
@@ -78,11 +78,11 @@ namespace abc {
 		vmem_container_page_lead() noexcept;
 		template <typename Other>
 		vmem_container_page_lead(const Other& other) noexcept;
-		vmem_container_page_lead(vmem_container_page_lead_flag_t flags, vmem_page_pos_t page_pos) noexcept;
+		vmem_container_page_lead(vmem_container_page_lead_operation_t operation, vmem_page_pos_t page_pos) noexcept;
 		template <typename Key>
-		vmem_container_page_lead(vmem_container_page_lead_flag_t flags, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept;
+		vmem_container_page_lead(vmem_container_page_lead_operation_t operation, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept;
 
-		vmem_container_page_lead_flag_t					flags; ////
+		vmem_container_page_lead_operation_t			operation;
 		T												items[2];
 		vmem_page_pos_t									page_pos;
 	};
