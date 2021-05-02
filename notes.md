@@ -2,7 +2,6 @@
 ----
 ## To Do
 - vmem_map
-  - remove `memmove`
   - clear
   - test clear
   - `vmem_map` docs

@@ -69,8 +69,8 @@ namespace abc {
 	template <typename Key>
 	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept
 		: vmem_container_page_lead(operation, page_pos) {
-		items[0].key = items_0_key;
-		items[1].key = items_1_key;
+		vmem_copy(items[0].key, items_0_key);
+		vmem_copy(items[1].key, items_1_key);
 	}
 
 
@@ -526,9 +526,9 @@ namespace abc {
 			// page_leads[0] - insert; new page
 			// page_leads[1] - supplemental; used only when a new level is created
 			result.page_leads[0] = page_lead(vmem_container_page_lead_operation::insert, new_page.pos());
-			result.page_leads[0].items[0] = new_container_page->items[0];
+			vmem_copy(result.page_leads[0].items[0], new_container_page->items[0]);
 			result.page_leads[1] = page_lead(vmem_container_page_lead_operation::supplemental, itr.page_pos());
-			result.page_leads[1].items[0] = container_page->items[0];
+			vmem_copy(result.page_leads[1].items[0], container_page->items[0]);
 		}
 
 		if (_log != nullptr) {
@@ -558,7 +558,7 @@ namespace abc {
 
 		// Insert the item.
 		++container_page->item_count;
-		std::memmove(&container_page->items[result.iterator.item_pos()], &item, sizeof(T));
+		vmem_copy(container_page->items[result.iterator.item_pos()], item);
 
 		if (_log != nullptr) {
 			_log->put_binary(category::abc::vmem, severity::abc::debug, 0x1045a, &container_page->items[result.iterator.item_pos()], std::min(sizeof(T), (std::size_t)16));
@@ -778,7 +778,7 @@ namespace abc {
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
 				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, page.pos());
-				result.page_leads[1].items[0] = container_page->items[0];
+				vmem_copy(result.page_leads[1].items[0], container_page->items[0]);
 
 				erase_page(page);
 				container_page = nullptr;
@@ -808,8 +808,8 @@ namespace abc {
 				// page_leads[0] - replace
 				// page_leads[1] - none
 				result.page_leads[0] = page_lead(vmem_container_page_lead_operation::replace, itr.page_pos());
-				result.page_leads[0].items[0] = container_page->items[0];
-				result.page_leads[0].items[1] = container_page->items[1];
+				vmem_copy(result.page_leads[0].items[0], container_page->items[0]);
+				vmem_copy(result.page_leads[0].items[1], container_page->items[1]);
 				result.page_leads[1] = page_lead();
 			}
 
@@ -917,7 +917,7 @@ namespace abc {
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
 				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, next_page.pos());
-				result.page_leads[1].items[0] = next_container_page->items[0];
+				vmem_copy(result.page_leads[1].items[0], next_container_page->items[0]);
 
 				// Merge the items from the next page into this one.
 				std::memmove(&container_page->items[container_page->item_count], &next_container_page->items[0], next_container_page->item_count * sizeof(T));
@@ -982,7 +982,7 @@ namespace abc {
 				// page_leads[1] - erase
 				result.page_leads[0] = page_lead();
 				result.page_leads[1] = page_lead(vmem_container_page_lead_operation::erase, page.pos());
-				result.page_leads[1].items[0] = container_page->items[0];
+				vmem_copy(result.page_leads[1].items[0], container_page->items[0]);
 
 				// Merge the items from this page into the previous one.
 				std::memmove(&prev_container_page->items[prev_container_page->item_count], &container_page->items[0], container_page->item_count * sizeof(T));

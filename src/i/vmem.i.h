@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 
+#include "../vmem_util.h"
 #include "vmem_pool.i.h"
 #include "vmem_layout.i.h"
 #include "vmem_iterator.i.h"

@@ -23,10 +23,40 @@ SOFTWARE.
 */
 
 
-#include "vmem_util.h"
-#include "x/vmem_pool.x.h"
-#include "x/vmem_iterator.x.h"
-#include "x/vmem_linked.x.h"
-#include "x/vmem_container.x.h"
-#include "x/vmem_list.x.h"
-#include "x/vmem_map.x.h"
+#pragma once
+
+#include <cstring>
+
+
+namespace abc {
+
+	template <typename T>
+	void vmem_init(T& dest) noexcept {
+		std::memset(&dest, 0, sizeof(T));
+	}
+
+
+	template <typename T>
+	void vmem_copy(T& dest, const T& src) noexcept {
+		std::memmove(&dest, &src, sizeof(T));
+	}
+
+
+	template <typename T>
+	bool vmem_is_less(const T& left, const T& right) noexcept {
+		return left < right;
+	}
+
+
+	template <typename T>
+	bool vmem_is_less_or_equal(const T& left, const T& right) noexcept {
+		return left <= right;
+	}
+
+
+	template <typename T>
+	bool vmem_are_equal(const T& left, const T& right) noexcept {
+		return left == right;
+	}
+
+}

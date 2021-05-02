@@ -443,7 +443,7 @@ namespace abc {
 						key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
 
 						vmem_map_key<Key> key_item;
-						key_item.key = page_leads[0].items[0].key;
+						vmem_copy(key_item.key, page_leads[0].items[0].key);
 						key_item.page_pos = page_leads[0].page_pos;
 
 						keys_result = parent_keys.insert2(parent_keys_itr, key_item);
@@ -462,7 +462,7 @@ namespace abc {
 							key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, vmem_iterator_edge::none, _log);
 							if (parent_keys_itr.can_deref()) {
 								vmem_ptr<vmem_map_key<Key>, Pool, Log> key_ptr = parent_keys_itr.operator->();
-								key_ptr->key = page_leads[0].items[1].key;
+								vmem_copy(key_ptr->key, page_leads[0].items[1].key);
 							}
 						}
 
@@ -504,13 +504,13 @@ namespace abc {
 
 							// items[0]
 							vmem_map_key<Key> other_key_item;
-							other_key_item.key = page_leads[1].items[0].key;
+							vmem_copy(other_key_item.key, page_leads[1].items[0].key);
 							other_key_item.page_pos = page_leads[1].page_pos;
 							new_keys.push_back(other_key_item);
 
 							// items[1]
 							vmem_map_key<Key> new_key_item;
-							new_key_item.key = page_leads[0].items[0].key;
+							vmem_copy(new_key_item.key, page_leads[0].items[0].key);
 							new_key_item.page_pos = page_leads[0].page_pos;
 							new_keys.push_back(new_key_item);
 
@@ -574,7 +574,7 @@ namespace abc {
 			vmem_map_key_page<Key>* key_page = reinterpret_cast<vmem_map_key_page<Key>*>(page.ptr());
 
 			item_pos = 0;
-			for (std::size_t i = 0; i < key_page->item_count && key_page->items[i].key < key; i++) {
+			for (std::size_t i = 0; i < key_page->item_count && vmem_is_less(key_page->items[i].key, key); i++) {
 				if (_log != nullptr) {
 					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::key_item_pos() item[%zu]=0x%llx..., key=0x%llx...",
 						i, *(long long*)&key_page->items[i].key, *(long long*)&key);
@@ -696,7 +696,7 @@ namespace abc {
 						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Item i=0 page_pos=0x%llx", (long long)page_pos);
 					}
 
-					for (std::size_t i = 1; i < key_page->item_count && key_page->items[i].key <= key; i++) {
+					for (std::size_t i = 1; i < key_page->item_count && vmem_is_less_or_equal(key_page->items[i].key, key); i++) {
 						page_pos = key_page->items[i].page_pos;
 						if (_log != nullptr) {
 							_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Item i=%zu page_pos=0x%llx", i, (long long)page_pos);
@@ -738,11 +738,11 @@ namespace abc {
 				vmem_map_value_page<Key, T>* value_page = reinterpret_cast<vmem_map_value_page<Key, T>*>(page.ptr());
 
 				item_pos = 0;
-				for (std::size_t i = 0; i < value_page->item_count && value_page->items[i].key < key; i++) {
+				for (std::size_t i = 0; i < value_page->item_count && vmem_is_less(value_page->items[i].key, key); i++) {
 					item_pos++;
 				}
 
-				found = (value_page->items[item_pos].key == key);
+				found = vmem_are_equal(value_page->items[item_pos].key, key);
 			}
 		}
 
