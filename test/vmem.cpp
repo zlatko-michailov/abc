@@ -29,11 +29,11 @@ SOFTWARE.
 namespace abc { namespace test { namespace vmem {
 
 	using Log = abc::test::log;
-	using PoolMin = abc::vmem_pool<3, Log>;
+	using PoolMin = abc::vmem_pool<4, Log>;
 	using PoolFit = abc::vmem_pool<4, Log>;
 	using PoolExceed = abc::vmem_pool<3, Log>;
 	using PoolFree = abc::vmem_pool<5, Log>;
-	using PoolMap = abc::vmem_pool<4, Log>;
+	using PoolMap = abc::vmem_pool<5, Log>;
 
 	using LinkedPageData = unsigned long long;
 	struct LinkedPage : abc::vmem_linked_page {

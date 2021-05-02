@@ -2,6 +2,7 @@
 ----
 ## To Do
 - vmem_map
+  - updating keys requires locking a page for each level
   - clear
   - test clear
   - `vmem_map` docs
