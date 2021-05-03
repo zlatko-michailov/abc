@@ -2,9 +2,6 @@
 ----
 ## To Do
 - vmem_map
-  - updating keys requires locking a page for each level
-  - clear
-  - test clear
   - `vmem_map` docs
   - remove `vmem_map_key_header` and `vmem_map_value_header`
 

@@ -595,13 +595,20 @@ namespace abc {
 	// ..............................................................
 
 
-#ifdef REMOVE ////
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline void vmem_map<Key, T, Pool, Log>::clear() noexcept {
-		vmem_linked<Pool, Log> linked(_state, _pool, _log);
-		linked.clear();
+		for (key_level_stack_iterator key_stack_itr = _key_stack.rend(); key_stack_itr != _key_stack.rbegin(); key_stack_itr--) {
+			// IMPORTANT: Save the vmem_ptr instance to keep the page locked.
+			vmem_ptr<vmem_container_state, Pool, Log> key_level_state_ptr = key_stack_itr.operator->();
+
+			vmem_map_key_level<Key, Pool, Log> keys(key_level_state_ptr.operator->(), _pool, _log);
+			keys.clear();
+		}
+
+		_key_stack.clear();
+
+		_values.clear();
 	}
-#endif
 
 
 	// ..............................................................

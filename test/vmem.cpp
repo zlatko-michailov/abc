@@ -1273,6 +1273,70 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_map_clear(test_context<abc::test::log>& context) {
+		using Pool = PoolMap;
+		using Map = abc::vmem_map<Key, Value, Pool, Log>;
+		////using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
+		using Linked = abc::vmem_linked<Pool, Log>;
+		using LinkedIterator = abc::vmem_linked_iterator<Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/map_clear.vmem", context.log);
+
+		abc::vmem_map_state map_state;
+		Map map(&map_state, &pool, context.log);
+		Key key;
+
+		passed = insert_vmem_map_items(context, map, 11) && passed;
+		// | (2)         | (3)         | (7)         | (8)         | (9)
+		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
+
+		constexpr vmem_page_pos_t max_page_pos = 0x0c;
+
+		// This is only used to find out the above max_page_pos.
+		{
+			// Page 06
+			abc::vmem_page<Pool, Log> page_06(&pool, context.log);
+			passed = context.are_equal(page_06.ptr() != nullptr, true, __TAG__, "%d") && passed;
+
+			// Page 0c
+			abc::vmem_page<Pool, Log> page_0c(&pool, context.log);
+			passed = context.are_equal(page_0c.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(page_0c.pos(), max_page_pos, __TAG__, "0x%llx") && passed;
+
+			page_06.free();
+			page_0c.free();
+		}
+
+		map.clear();
+
+		// Verify all pages 2..max_page_pos are free.
+		{
+			unsigned long long bits = 0LLU;
+			abc::vmem_linked_state linked_state;
+			Linked linked(&linked_state, &pool, context.log);
+
+			for (std::size_t i = 2; i <= max_page_pos; i++) {
+				abc::vmem_page<Pool, Log> page(&pool, context.log);
+
+				unsigned long long b = 1LLU << page.pos();
+				passed = context.are_equal(page.pos() <= max_page_pos, true, __TAG__, "%d") && passed;
+				passed = context.are_equal(bits & b, 0LLU, __TAG__, "%d") && passed;
+
+				bits |= b;
+				linked.push_back(page.pos());
+			}
+
+			passed = context.are_equal(bits, 0x01ffcLLU, __TAG__, "0x%llx") && passed;
+
+			linked.clear();
+		}
+
+		return passed;
+	}
+
+
 	template <typename Pool>
 	bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked, abc::vmem_page_pos_t expected_page_pos, LinkedPageData data,
 							const abc::vmem_linked_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_iterator<Pool, abc::test::log>& expected_itr,
