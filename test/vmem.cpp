@@ -1276,9 +1276,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_map_clear(test_context<abc::test::log>& context) {
 		using Pool = PoolMap;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
-		////using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
 		using Linked = abc::vmem_linked<Pool, Log>;
-		using LinkedIterator = abc::vmem_linked_iterator<Pool, Log>;
 
 		bool passed = true;
 
