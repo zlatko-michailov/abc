@@ -78,31 +78,40 @@ using vmem_start_page = struct {
 Remember to pack the layout to a byte, and mind the 4KB limit.
 
 ## Using Large Data Sets through Lists
-If you need to work with uniform records of data, organize them in a data structure - `vmem_list` or `vmem_map`.
-
-> __NOTE__: `vmem_map` is not yet available.
+If you need to work with uniform records of data, organize them in a data structure like `vmem_list` or `vmem_map`.
 
 ### Traversing a List
 ``` c++
-for (vmem_list:: iterator itr = list.begin(); itr != list.end(); itr++) {
+for (vmem_list::iterator itr = list.begin(); itr != list.end(); itr++) {
 	// Do something with *itr
 }
 ```
 
 ### Adding Items to a List
 ``` c++
-vmem_list:: iterator itr = list.end(); // ... or any other position
+vmem_list::iterator itr = list.end(); // ... or any other position
 list.insert(itr, item);
 ```
 
 ### Removing Items from a List
 ``` c++
-vmem_list:: iterator itr = list.rend(); // ... or any other position
+vmem_list::iterator itr = list.rend(); // ... or any other position
 itr = list.erase(itr);
 ```
 
-## Accessing Large Data Manually
-If you are implementing your own data structure on top of `vmem_pool` and `vmem_page`, you will have to access pages manually.
-Follow the above pattern.
+### Traversing a Map
+``` c++
+for (vmem_map::iterator itr = map.begin(); itr != map.end(); itr++) {
+	// Do something with *itr
+}
+```
 
-Keep each page locked during the entire time while you need its memory, but not much longer, to keep the pool functioning efficiently.
+### Adding Items to a Map
+``` c++
+map.insert(abc::vmem_map_value(key, value));
+```
+
+### Removing Items from a Map
+``` c++
+map.erase(key);
+```

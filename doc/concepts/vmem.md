@@ -11,8 +11,12 @@ Typically, programs only work with a small window of the large data set at any g
 If the data records that a program needs to deal with are keyless, they can be organized in a linked list.
 `abc` provides `vmem_list`, which offers methods very similar to `std::list`.
 
+If `vmem_list`'s balancing policy is not a good fit, `abc` provides the more generic `vmem_container`.
+
 If the data records have keys, they can be organized in a map.
-`abc` will soon provide `vmem_map`.
+`abc` provides `vmem_map`, which offers methods very similar to `std::map`.
+
+For any other kind of data, `abc` provides `vmem_linked`, which is a linked list of pages.  
 
 Using data structures avoids the hustle of mapping and unmapping individual pages to and from memory.
 

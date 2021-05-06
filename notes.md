@@ -2,10 +2,11 @@
 ----
 ## To Do
 - vmem_map
-  - `vmem_map` docs
   - remove `vmem_map_key_header` and `vmem_map_value_header`
 
 - Prepare release
+  - releases
+  - roadmap
   - tag
   - version up
 ---
