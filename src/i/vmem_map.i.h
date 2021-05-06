@@ -40,8 +40,8 @@ namespace abc {
 
 
 	template <typename Key, typename Pool, typename Log = null_log>
-	class vmem_map_key_level : public vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log> {
-		using base = vmem_container<vmem_map_key<Key>, vmem_map_key_header, Pool, Log>;
+	class vmem_map_key_level : public vmem_container<vmem_map_key<Key>, vmem_noheader, Pool, Log> {
+		using base = vmem_container<vmem_map_key<Key>, vmem_noheader, Pool, Log>;
 
 		static constexpr vmem_page_balance_t balance_insert	= vmem_page_balance::all;
 		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;
@@ -65,8 +65,8 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
-	class vmem_map_value_level : public vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log> {
-		using base = vmem_container<vmem_map_value<Key, T>, vmem_map_value_header, Pool, Log>;
+	class vmem_map_value_level : public vmem_container<vmem_map_value<Key, T>, vmem_noheader, Pool, Log> {
+		using base = vmem_container<vmem_map_value<Key, T>, vmem_noheader, Pool, Log>;
 
 		static constexpr vmem_page_balance_t balance_insert	= vmem_page_balance::all;
 		static constexpr vmem_page_balance_t balance_erase	= vmem_page_balance::all;

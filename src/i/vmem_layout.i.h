@@ -43,19 +43,6 @@ namespace abc {
 	};
 
 
-	struct vmem_map_header {
-		vmem_page_pos_t			parent_page_pos	= vmem_page_pos_nil;
-	};
-
-
-	struct vmem_map_key_header: public vmem_map_header { ////
-	};
-
-
-	struct vmem_map_value_header: public vmem_map_header { ////
-	};
-
-
 	// ..............................................................
 
 
@@ -94,12 +81,12 @@ namespace abc {
 
 
 	template <typename Key>
-	struct vmem_map_key_page : public vmem_container_page<vmem_map_key<Key>, vmem_map_key_header> {
+	struct vmem_map_key_page : public vmem_container_page<vmem_map_key<Key>, vmem_noheader> {
 	};
 
 
 	template <typename Key, typename T>
-	struct vmem_map_value_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_map_value_header> {
+	struct vmem_map_value_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_noheader> {
 	};
 
 

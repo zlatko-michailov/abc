@@ -1,9 +1,6 @@
 ## Done
 ----
 ## To Do
-- vmem_map
-  - remove `vmem_map_key_header` and `vmem_map_value_header`
-
 - Prepare release
   - releases
   - roadmap
