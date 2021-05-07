@@ -2,6 +2,17 @@
 
 Up to [Documentation](README.md).
 
+## 1.12.3
+- Breaking Changes
+  - `vmem_container_result2`
+- Bugs
+  - none
+- Additions
+  - `vmem_map` - a B-tree of key-value pairs
+  - `vmem_stack` - a container with no balancing
+- Refactoring
+  - none
+
 ## 1.12.2
 - Breaking Changes
   - `vmem_list_state` - version up

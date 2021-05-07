@@ -2,8 +2,6 @@
 ----
 ## To Do
 - Prepare release
-  - releases
-  - roadmap
   - tag
   - version up
 ---

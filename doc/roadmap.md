@@ -2,10 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.12.3
-- Virtual memory:
-  - `vmem_map`
-
 ## 1.13.0
 - Tic Tac Toe sample (thinking fast and slow).
 
