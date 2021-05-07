@@ -3,7 +3,6 @@
 ## To Do
 - Prepare release
   - tag
-  - version up
 ---
 - Samples
   - tictactoe
