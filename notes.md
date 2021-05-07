@@ -1,8 +1,6 @@
 ## Done
 ----
 ## To Do
-- Prepare release
-  - tag
 ---
 - Samples
   - tictactoe

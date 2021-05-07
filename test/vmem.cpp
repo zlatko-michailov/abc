@@ -901,15 +901,15 @@ namespace abc { namespace test { namespace vmem {
 			// Page 3
 			abc::vmem_page<Pool, Log> page3(&pool, context.log);
 			LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
-			passed = context.are_equal(linked_page3 != nullptr, true, __TAG__, "%d") && passed;
-			passed = context.are_equal((long long)page3.pos(), 3LL, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(linked_page3 != nullptr, true, 0x10538, "%d") && passed;
+			passed = context.are_equal((long long)page3.pos(), 3LL, 0x10539, "0x%llx") && passed;
 		}
 		{
 			// Page 2
 			abc::vmem_page<Pool, Log> page2(&pool, context.log);
 			LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
-			passed = context.are_equal(linked_page2 != nullptr, true, __TAG__, "%d") && passed;
-			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(linked_page2 != nullptr, true, 0x1053a, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, 0x1053b, "0x%llx") && passed;
 		}
 
 		return passed;
@@ -934,9 +934,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		IteratorBool actual_itr = map.insert(item);
 		Iterator expected_itr = Iterator(&map, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 1, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1053c, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x1053d, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 1, 0x1053e, "%zu") && passed;
 		// | (2)
 		// | 20 __ __ __ |
 
@@ -944,9 +944,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 2, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1053f, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10540, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 2, 0x10541, "%zu") && passed;
 		// | (2)
 		// | 20 50 __ __ |
 
@@ -954,9 +954,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 3, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10542, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10543, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 3, 0x10544, "%zu") && passed;
 		// | (2)
 		// | 20 30 50 __ |
 
@@ -964,9 +964,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 4, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10545, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10546, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 4, 0x10547, "%zu") && passed;
 		// | (2)
 		// | 20 30 40 50 |
 
@@ -974,9 +974,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 5, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10548, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10549, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 5, 0x1054a, "%zu") && passed;
 		// | (2)         | (3)
 		// | 20 30 __ __ | 40 50 60 __ |
 
@@ -984,9 +984,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 3U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 6, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1054b, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x1054c, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 6, 0x1054d, "%zu") && passed;
 		// | (2)         | (3)
 		// | 20 30 __ __ | 40 50 60 70 |
 
@@ -994,9 +994,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 7, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1054e, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x1054f, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 7, 0x10550, "%zu") && passed;
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ |
 
@@ -1004,9 +1004,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 7U, 2U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10551, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10552, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, 0x10553, "%zu") && passed;
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 __ |
 
@@ -1014,9 +1014,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 7U, 3U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 9, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10554, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10555, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 9, 0x10556, "%zu") && passed;
 		// | (2)         | (3)         | (7)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 80 90 |
 
@@ -1024,9 +1024,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x8, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 10, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x10557, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x10558, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 10, 0x10559, "%zu") && passed;
 		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 __ |
 
@@ -1034,9 +1034,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x8, 3U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 11, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1055a, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x1055b, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 11, 0x1055c, "%zu") && passed;
 		// | (2)         | (3)         | (7)         | (8)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 90 a0 |
 
@@ -1044,9 +1044,9 @@ namespace abc { namespace test { namespace vmem {
 		item.value = 0x900 + item.key.data;
 		actual_itr = map.insert(item);
 		expected_itr = Iterator(&map, 0x9, 2U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(actual_itr.second, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(actual_itr.first == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 12, __TAG__, "%zu") && passed;
+		passed = context.are_equal(actual_itr.second, true, 0x1055d, "%d") && passed;
+		passed = context.are_equal(actual_itr.first == expected_itr, true, 0x1055e, "%d") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 12, 0x1055f, "%zu") && passed;
 		// | (2)         | (3)         | (7)         | (8)         | (9)
 		// | 20 30 __ __ | 40 50 58 __ | 60 70 __ __ | 80 88 __ __ | 90 a0 b0 __ |
 
@@ -1054,32 +1054,32 @@ namespace abc { namespace test { namespace vmem {
 		key.data = 0x70;
 		Iterator itr = map.find(key);
 		expected_itr = Iterator(&map, 7U, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0x970, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == expected_itr, true, 0x10560, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x970, true, 0x10561, "%d") && passed;
 
 		key.data = 0x40;
 		itr = map.find(key);
 		expected_itr = Iterator(&map, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0x940, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == expected_itr, true, 0x10562, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x940, true, 0x10563, "%d") && passed;
 
 		key.data = 0xa0;
 		itr = map.find(key);
 		expected_itr = Iterator(&map, 9U, 1U, abc::vmem_iterator_edge::none, context.log);
-		passed = context.are_equal(itr == expected_itr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal(itr->value == 0x9a0, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == expected_itr, true, 0x10564, "%d") && passed;
+		passed = context.are_equal(itr->value == 0x9a0, true, 0x10565, "%d") && passed;
 
 		key.data = 0x20;
 		item = *map[key];
-		passed = context.are_equal(item.value == 0x920, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(item.value == 0x920, true, 0x10566, "%d") && passed;
 
 		key.data = 0x50;
 		item = *map[key];
-		passed = context.are_equal(item.value == 0x950, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(item.value == 0x950, true, 0x10567, "%d") && passed;
 
 		key.data = 0xb0;
 		item = *map[key];
-		passed = context.are_equal(item.value == 0x9b0, true, __TAG__, "%d") && passed;
+		passed = context.are_equal(item.value == 0x9b0, true, 0x10568, "%d") && passed;
 
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
@@ -1101,26 +1101,26 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate forward.
 		itr = map.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x10569, "forward[%zu]=0x%llx", i, exp[i].first);
 	
-			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[i].second, true, 0x1056a, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1056b, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[i].first, 0x1056c, "%d") && passed;
 			itr++;
 		}
-		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.cend(), true, 0x1056d, "%d") && passed;
 
 		// Iterate backwards.
 		itr = map.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1056e, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
-			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x1056f, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10570, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x900 + exp[exp_len - i - 1].first, 0x10571, "%d") && passed;
 			itr--;
 		}
-		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.crbegin(), true, 0x10572, "%d") && passed;
 
 		return passed;
 	}
@@ -1162,36 +1162,36 @@ namespace abc { namespace test { namespace vmem {
 
 		key.data = 0x09;
 		std::size_t one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 10, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 1, 0x10573, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 10, 0x10574, "%zu") && passed;
 		// | (2)         | (3)         | (7)         | (8)
 		// | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
 
 		// Test that key levels have been updated.
 		key.data = 0x0a;
 		Iterator itr = map.find(key);
-		passed = context.are_equal<long long>(itr.page_pos(), 8LL, __TAG__, "0x%llx") && passed;
-		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+		passed = context.are_equal<long long>(itr.page_pos(), 8LL, 0x10575, "0x%llx") && passed;
+		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x10576, "0x%x") && passed;
 
 		key.data = 0x04;
 		one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 9, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 1, 0x10577, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 9, 0x10578, "%zu") && passed;
 		// | (2)         | (3)         | (8)
 		// | 00 01 __ __ | 02 03 05 __ | 06 07 08 0a |
 
 		key.data = 0x01;
 		one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 1, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 1, 0x10579, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, 0x1057a, "%zu") && passed;
 		// | (2)         | (8)
 		// | 00 02 03 05 | 06 07 08 0a |
 
 		// Test that key levels have been updated.
 		key.data = 0x05;
 		itr = map.find(key);
-		passed = context.are_equal<long long>(itr.page_pos(), 2LL, __TAG__, "0x%llx") && passed;
-		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+		passed = context.are_equal<long long>(itr.page_pos(), 2LL, 0x1057b, "0x%llx") && passed;
+		passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x1057c, "0x%x") && passed;
 
 		using Pair = std::pair<std::uint64_t, Iterator>;
 		const Pair exp[] = {
@@ -1209,65 +1209,65 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate forward.
 		itr = map.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1057d, "forward[%zu]=0x%llx", i, exp[i].first);
 	
-			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[i].second, true, 0x1057e, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1057f, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, 0x10580, "%d") && passed;
 			itr++;
 		}
-		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.cend(), true, 0x10581, "%d") && passed;
 
 		// Iterate backwards.
 		itr = map.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x10582, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
-			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10583, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10584, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, 0x10585, "%d") && passed;
 			itr--;
 		}
-		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.crbegin(), true, 0x10586, "%d") && passed;
 
 		key.data = 0x09;
 		one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 0, 0x10587, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, 0x10588, "%zu") && passed;
 
 		key.data = 0x04;
 		one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 0, 0x10589, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, 0x1058a, "%zu") && passed;
 
 		key.data = 0x01;
 		one = map.erase(key);
-		passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
-		passed = context.are_equal<std::size_t>(map.size(), 8, __TAG__, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(one, 0, 0x1058b, "%zu") && passed;
+		passed = context.are_equal<std::size_t>(map.size(), 8, 0x1058c, "%zu") && passed;
 
 		// Iterate forward.
 		itr = map.cbegin();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1058d, "forward[%zu]=0x%llx", i, exp[i].first);
 	
-			passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[i].second, true, 0x1058e, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1058f, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, 0x10590, "%d") && passed;
 			itr++;
 		}
-		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.cend(), true, 0x10591, "%d") && passed;
 
 		// Iterate backwards.
 		itr = map.crend();
 		for (std::size_t i = 0; i < exp_len; i++) {
-			context.log->put_any(abc::category::any, abc::severity::abc::important, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+			context.log->put_any(abc::category::any, abc::severity::abc::important, 0x10592, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 	
-			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
-			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%d") && passed;
+			passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10593, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10594, "%d") && passed;
+			passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, 0x10595, "%d") && passed;
 			itr--;
 		}
-		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.crbegin(), true, 0x10596, "%d") && passed;
 
 		return passed;
 	}
@@ -1296,12 +1296,12 @@ namespace abc { namespace test { namespace vmem {
 		{
 			// Page 06
 			abc::vmem_page<Pool, Log> page_06(&pool, context.log);
-			passed = context.are_equal(page_06.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(page_06.ptr() != nullptr, true, 0x10597, "%d") && passed;
 
 			// Page 0c
 			abc::vmem_page<Pool, Log> page_0c(&pool, context.log);
-			passed = context.are_equal(page_0c.ptr() != nullptr, true, __TAG__, "%d") && passed;
-			passed = context.are_equal(page_0c.pos(), max_page_pos, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(page_0c.ptr() != nullptr, true, 0x10598, "%d") && passed;
+			passed = context.are_equal(page_0c.pos(), max_page_pos, 0x10599, "0x%llx") && passed;
 
 			page_06.free();
 			page_0c.free();
@@ -1319,14 +1319,14 @@ namespace abc { namespace test { namespace vmem {
 				abc::vmem_page<Pool, Log> page(&pool, context.log);
 
 				unsigned long long b = 1LLU << page.pos();
-				passed = context.are_equal(page.pos() <= max_page_pos, true, __TAG__, "%d") && passed;
-				passed = context.are_equal(bits & b, 0LLU, __TAG__, "%d") && passed;
+				passed = context.are_equal(page.pos() <= max_page_pos, true, 0x1059a, "%d") && passed;
+				passed = context.are_equal(bits & b, 0LLU, 0x1059b, "%d") && passed;
 
 				bits |= b;
 				linked.push_back(page.pos());
 			}
 
-			passed = context.are_equal(bits, 0x01ffcLLU, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(bits, 0x01ffcLLU, 0x1059c, "0x%llx") && passed;
 
 			linked.clear();
 		}
@@ -1451,20 +1451,20 @@ namespace abc { namespace test { namespace vmem {
 		// Iterate forward.
 		typename Map::iterator itr = map.cbegin();
 		for (std::size_t i = 0; i < count; i++) {
-			passed = context.are_equal<unsigned long long>(itr->key.data, i, __TAG__, "%llu") && passed;
-			passed = context.are_equal<unsigned long long>(itr->value, base_value + i, __TAG__, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "%llu") && passed;
 			itr++;
 		}
-		passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.cend(), true, 0x1059f, "%d") && passed;
 
 		// Iterate backwards.
 		itr = map.crend();
 		for (std::size_t i = 0; i < count; i++) {
-			passed = context.are_equal<unsigned long long>(itr->key.data, count - i - 1, __TAG__, "%llu") && passed;
-			passed = context.are_equal<unsigned long long>(itr->value, base_value + (count - i - 1), __TAG__, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->key.data, count - i - 1, 0x105a0, "%llu") && passed;
+			passed = context.are_equal<unsigned long long>(itr->value, base_value + (count - i - 1), 0x105a1, "%llu") && passed;
 			itr--;
 		}
-		passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
+		passed = context.are_equal(itr == map.crbegin(), true, 0x105a2, "%d") && passed;
 
 		return passed;
 	}

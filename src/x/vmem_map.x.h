@@ -119,43 +119,43 @@ namespace abc {
 		, _values(&state->values, pool, log) {
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::vmem_map() state=%p, pool=%p", state, pool);
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1050a, "vmem_map::vmem_map() state=%p, pool=%p", state, pool);
 		}
 
 		if (state == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(state)", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(state)", 0x1050b);
 		}
 
 		if (pool == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool)", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool)", 0x1050c);
 		}
 
 		if (sizeof(vmem_map_key<Key>) > max_key_item_size()) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) excess", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) excess", 0x1050d);
 		}
 
 		if (sizeof(vmem_map_value<Key, T>) > max_value_item_size()) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) excess", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) excess", 0x1050e);
 		}
 
 		if (key_page_capacity() < 2) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key page capacity) insufficient", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key page capacity) insufficient", 0x1050f);
 		}
 
 		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool<MaxMappedPages>)", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(pool<MaxMappedPages>)", 0x10510);
 		}
 
 		if (sizeof(vmem_container_state) != _state->keys.item_size) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) mismatch", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(key size) mismatch", 0x10511);
 		}
 
 		if (sizeof(vmem_map_value<Key, T>) != _state->values.item_size) {
-			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) mismatch", __TAG__);
+			throw exception<std::logic_error, Log>("vmem_map::vmem_map(value size) mismatch", 0x10512);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::vmem_map() keys.front_page_pos=0x%llx, keys.back_page_pos=0x%llx,  values.front_page_pos=0x%llx, values.back_page_pos=0x%llx", 
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10513, "vmem_map::vmem_map() keys.front_page_pos=0x%llx, keys.back_page_pos=0x%llx,  values.front_page_pos=0x%llx, values.back_page_pos=0x%llx", 
 				(long long)_state->keys.front_page_pos, (long long)_state->keys.back_page_pos, (long long)_state->values.front_page_pos, (long long)_state->values.back_page_pos);
 		}
 	}
@@ -252,7 +252,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert2(const_reference item) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2(item) Start.");
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10514, "vmem_map::insert2(item) Start.");
 		}
 
 		find_result2 find_result = find2(item.key);
@@ -260,14 +260,14 @@ namespace abc {
 
 		if (!find_result.ok) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2(item) Not found.");
+				_log->put_any(category::abc::vmem, severity::abc::important, 0x10515, "vmem_map::insert2(item) Not found.");
 			}
 
 			result = insert2(std::move(find_result), item);
 		}
 		else {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2(item) Found.");
+				_log->put_any(category::abc::vmem, severity::abc::important, 0x10516, "vmem_map::insert2(item) Found.");
 			}
 
 			result.iterator = find_result.iterator;
@@ -275,7 +275,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10517, "vmem_map::insert2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
 				result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
@@ -297,7 +297,7 @@ namespace abc {
 		for (InputItr item_itr = first; item_itr != last; item_itr++) {
 			if (!insert(*item_itr).second) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::important, __TAG__, "vmem_map::insert() Breaking from the loop.");
+					_log->put_any(category::abc::vmem, severity::important, 0x10518, "vmem_map::insert() Breaking from the loop.");
 				}
 				break;
 			}
@@ -308,7 +308,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::insert2(find_result2&& find_result, const_reference item) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2() Start.");
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10519, "vmem_map::insert2() Start.");
 		}
 
 		value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), _log);
@@ -321,7 +321,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::insert2() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1051a, "vmem_map::insert2() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
 				result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
@@ -335,7 +335,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline std::size_t vmem_map<Key, T, Pool, Log>::erase(const Key& key) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Start.");
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1051b, "vmem_map::erase(key) Start.");
 		}
 
 		std::size_t result = 0;
@@ -344,7 +344,7 @@ namespace abc {
 
 		if (find_result.ok) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1051c, "vmem_map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
 					(long long)find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge());
 			}
 
@@ -352,7 +352,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(key) Done. result=%zu", result);
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1051d, "vmem_map::erase(key) Done. result=%zu", result);
 		}
 
 		return result;
@@ -371,7 +371,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline std::size_t vmem_map<Key, T, Pool, Log>::erase2(find_result2&& find_result) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Start.");
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1051e, "vmem_map::erase(find_result2) Start.");
 		}
 
 		value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), _log);
@@ -384,7 +384,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::erase(find_result2) Done. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1051f, "vmem_map::erase(find_result2) Done. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
 				(long long)values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge());
 		}
 
@@ -398,7 +398,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::result2 vmem_map<Key, T, Pool, Log>::update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::update_key_levels() Start.");
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10520, "vmem_map::update_key_levels() Start.");
 		}
 
 		bool ok = true;
@@ -407,7 +407,7 @@ namespace abc {
 			&& (values_result.page_leads[0].operation != vmem_container_page_lead_operation::none || values_result.page_leads[1].operation != vmem_container_page_lead_operation::none)) {
 			if (_key_stack.size() != find_result.path.size()) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::update_key_levels() Mismatch key_stack.size=%zu, path.size=%zu",
+					_log->put_any(category::abc::vmem, severity::warning, 0x10521, "vmem_map::update_key_levels() Mismatch key_stack.size=%zu, path.size=%zu",
 						_key_stack.size(), find_result.path.size());
 				}
 
@@ -479,7 +479,7 @@ namespace abc {
 
 					if (!keys_result.iterator.is_valid()) {
 						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::update_key_levels() Could not insert key to page pos=0x%llx", (long long)parent_page_pos);
+							_log->put_any(category::abc::vmem, severity::warning, 0x10522, "vmem_map::update_key_levels() Could not insert key to page pos=0x%llx", (long long)parent_page_pos);
 						}
 
 						ok = false;
@@ -533,7 +533,7 @@ namespace abc {
 					}
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::update_key_levels() key_stack.size=%zu", _key_stack.size());
+						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10523, "vmem_map::update_key_levels() key_stack.size=%zu", _key_stack.size());
 					}
 				}
 			}
@@ -547,7 +547,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_map::update_key_levels() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10524, "vmem_map::update_key_levels() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
 				result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
@@ -558,7 +558,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline vmem_item_pos_t vmem_map<Key, T, Pool, Log>::key_item_pos(vmem_page_pos_t key_page_pos, const Key& key) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::key_item_pos() Start. key_page_pos=0x%llx..., key=0x%llx...",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10525, "vmem_map::key_item_pos() Start. key_page_pos=0x%llx..., key=0x%llx...",
 				(long long)key_page_pos, *(long long*)&key);
 		}
 
@@ -567,7 +567,7 @@ namespace abc {
 
 		if (page.ptr() == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::key_item_pos() Could not load key page pos=0x%llx", (long long)key_page_pos);
+				_log->put_any(category::abc::vmem, severity::warning, 0x10526, "vmem_map::key_item_pos() Could not load key page pos=0x%llx", (long long)key_page_pos);
 			}
 		}
 		else {
@@ -576,7 +576,7 @@ namespace abc {
 			item_pos = 0;
 			for (std::size_t i = 0; i < key_page->item_count && vmem_is_less(key_page->items[i].key, key); i++) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::key_item_pos() item[%zu]=0x%llx..., key=0x%llx...",
+					_log->put_any(category::abc::vmem, severity::abc::debug, 0x10527, "vmem_map::key_item_pos() item[%zu]=0x%llx..., key=0x%llx...",
 						i, *(long long*)&key_page->items[i].key, *(long long*)&key);
 				}
 
@@ -585,7 +585,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::key_item_pos() Done. item_pos=0x%x", item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10528, "vmem_map::key_item_pos() Done. item_pos=0x%x", item_pos);
 		}
 
 		return item_pos;
@@ -617,7 +617,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::next(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::next() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10529, "vmem_map::next() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -628,7 +628,7 @@ namespace abc {
 		iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::next() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1052a, "vmem_map::next() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
@@ -639,7 +639,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::prev(const_iterator& itr) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1052b, "vmem_map::prev() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
@@ -650,7 +650,7 @@ namespace abc {
 		iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::prev() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1052c, "vmem_map::prev() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
 				(long long)result.page_pos(), result.item_pos(), result.edge());
 		}
 
@@ -661,7 +661,7 @@ namespace abc {
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::find_result2 vmem_map<Key, T, Pool, Log>::find2(const Key& key) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Start.");
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x1052d, "vmem_map::find2() Start.");
 		}
 
 		vmem_page_pos_t page_pos = vmem_page_pos_nil;
@@ -672,7 +672,7 @@ namespace abc {
 
 		if (!_key_stack.empty()) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() %zu key levels. root page_pos=0x%llx",
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x1052e, "vmem_map::find2() %zu key levels. root page_pos=0x%llx",
 					_key_stack.size(), (long long)_key_stack.back().front_page_pos);
 			}
 
@@ -685,7 +685,7 @@ namespace abc {
 
 				if (page.ptr() == nullptr) {
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::find2() Could not load key page pos=0x%llx", (long long)page_pos);
+						_log->put_any(category::abc::vmem, severity::warning, 0x1052f, "vmem_map::find2() Could not load key page pos=0x%llx", (long long)page_pos);
 					}
 
 					page_pos = vmem_page_pos_nil;
@@ -693,25 +693,25 @@ namespace abc {
 				}
 				else {
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Examine key lev=%zu, page_pos=0x%llx", lev, (long long)page.pos());
+						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10530, "vmem_map::find2() Examine key lev=%zu, page_pos=0x%llx", lev, (long long)page.pos());
 					}
 
 					vmem_map_key_page<Key>* key_page = reinterpret_cast<vmem_map_key_page<Key>*>(page.ptr());
 
 					page_pos = key_page->items[0].page_pos;
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Item i=0 page_pos=0x%llx", (long long)page_pos);
+						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10531, "vmem_map::find2() Item i=0 page_pos=0x%llx", (long long)page_pos);
 					}
 
 					for (std::size_t i = 1; i < key_page->item_count && vmem_is_less_or_equal(key_page->items[i].key, key); i++) {
 						page_pos = key_page->items[i].page_pos;
 						if (_log != nullptr) {
-							_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Item i=%zu page_pos=0x%llx", i, (long long)page_pos);
+							_log->put_any(category::abc::vmem, severity::abc::debug, 0x10532, "vmem_map::find2() Item i=%zu page_pos=0x%llx", i, (long long)page_pos);
 						}
 					}
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() Child page_pos=0x%llx", (long long)page_pos);
+						_log->put_any(category::abc::vmem, severity::abc::debug, 0x10533, "vmem_map::find2() Child page_pos=0x%llx", (long long)page_pos);
 					}
 
 					if (lev != _key_stack.size() - 1) {
@@ -722,7 +722,7 @@ namespace abc {
 		}
 		else {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::find2() No key levels. value page_pos=0x%llx",
+				_log->put_any(category::abc::vmem, severity::abc::debug, 0x10534, "vmem_map::find2() No key levels. value page_pos=0x%llx",
 					(long long)_state->values.front_page_pos);
 			}
 
@@ -736,7 +736,7 @@ namespace abc {
 
 			if (page.ptr() == nullptr) {
 				if (_log != nullptr) {
-					_log->put_any(category::abc::vmem, severity::warning, __TAG__, "vmem_map::find2() Could not load value page pos=0x%llx", (long long)page_pos);
+					_log->put_any(category::abc::vmem, severity::warning, 0x10535, "vmem_map::find2() Could not load value page pos=0x%llx", (long long)page_pos);
 				}
 
 				page_pos = vmem_page_pos_nil;
@@ -760,7 +760,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_map::find2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::important, 0x10536, "vmem_map::find2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
 				result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
 		}
 
@@ -841,7 +841,7 @@ namespace abc {
 		iterator itr(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "vmem_map::itr_from_values() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10537, "vmem_map::itr_from_values() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 
