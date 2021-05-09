@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
 
 		if (full_path_len >= max_path) {
 			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x102f4,
-				"This samples allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
+				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
 				max_path, full_path_len);
 
 			return 1;
