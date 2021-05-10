@@ -37,6 +37,7 @@ SUBDIR_SAMPLES = samples
 SUBDIR_RESOURCES = resources
 SAMPLE_BASIC = basic
 SAMPLE_VMEM = vmem
+SAMPLE_TICTACTOE = tictactoe
 PROG_TEST = $(PROJECT)_test
 
 
@@ -82,6 +83,11 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)
 	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/$(SAMPLE_VMEM) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/*.cpp $(LINKOPTIONS)
 	# ---------- Done building vmem ----------
+	#
+	# ---------- Begin building tictactoe ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(LINKOPTIONS)
+	# ---------- Done building tictactoe ----------
 	#
 	# ---------- Done building samples ----------
 	#
