@@ -68,9 +68,16 @@ constexpr player	player_o	= 0x3;
 
 
 struct move {
-	int row;
-	int col;
+	int		row;
+	int		col;
+
+	bool	is_valid() const;
 };
+
+
+inline bool move::is_valid() const {
+	return (0 <= row && row < size && 0 <= col && col < size);
+}
 
 
 // --------------------------------------------------------------
@@ -85,9 +92,10 @@ public:
 	player			winner() const;
 	bool			accept_move(const move& mv);
 
-private:
+public:
 	player			get_move(const move& mv) const;
 	void			set_move(const move& mv);
+	void			clear_move(const move& mv);
 	bool			has_move(player plr, const move& mv) const;
 	bool			check_winner();
 	void			switch_current_player();
@@ -100,9 +108,6 @@ private:
 	player			_current_player	= player_x;
 	board_state		_board_state	= { 0 };
 };
-
-
-// --------------------------------------------------------------
 
 
 inline bool board::is_game_over() const {
@@ -142,6 +147,12 @@ inline player board::get_move(const move& mv) const {
 inline void board::set_move(const move& mv) {
 	int cell = mv.row * size + mv.col;
 	_board_state |= (_current_player << (cell * 2));
+}
+
+
+inline void board::clear_move(const move& mv) {
+	int cell = mv.row * size + mv.col;
+	_board_state &= ~(0x3 << (cell * 2));
 }
 
 
@@ -200,9 +211,6 @@ private:
 };
 
 
-// --------------------------------------------------------------
-
-
 template <typename Engine1, typename Engine2>
 inline game<Engine1, Engine2>::game(board* brd, Engine1* eng1, Engine2* eng2, log_ostream* log)
 	: _board(brd)
@@ -210,9 +218,6 @@ inline game<Engine1, Engine2>::game(board* brd, Engine1* eng1, Engine2* eng2, lo
 	, _engine2(eng2)
 	, _log(log) {
 }
-
-
-// --------------------------------------------------------------
 
 
 template <typename Engine1, typename Engine2>
@@ -244,6 +249,38 @@ inline void game<Engine1, Engine2>::start() {
 			break;
 		}
 	}
+}
+
+
+// --------------------------------------------------------------
+
+
+class thinking_slow {
+public:
+	move	make_move(const board* brd);
+
+private:
+	move	make_necessary_move(const board* brd);
+	move	find_best_move(board* brd);
+};
+
+
+inline move thinking_slow::make_move(const board* brd) {
+	move mv = make_necessary_move(brd);
+	if (mv.is_valid()) {
+		return mv;
+	}
+
+	board board_copy = *brd;
+	return find_best_move(&board_copy);
+
+}
+
+
+inline move thinking_slow::find_best_move(board* brd) {
+	//// Try the center
+	//// Try the corners
+	//// Try the sides
 }
 
 
