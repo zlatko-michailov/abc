@@ -29,13 +29,13 @@ SOFTWARE.
 #include <cstring>
 #include <algorithm>
 
-#include "tictactoe.h"
+#include "tictactoe.i.h"
 
 
 int main(int argc, const char* argv[]) {
 	// Create a log.
 	abc::log_filter filter(abc::severity::optional);
-	log_ostream log(std::cout.rdbuf(), &filter);
+	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Use the path to this program to build the path to the pool file.
 	constexpr std::size_t max_path = abc::size::k1;
@@ -73,7 +73,7 @@ int main(int argc, const char* argv[]) {
 	// Construct a pool instance.
 	// If the file doesn't exist, the pool will be initialized.
 	// If the fie exists, it should be a valid pool.
-	vmem_pool pool(path, &log);
+	abc::samples::vmem_pool pool(path, &log);
 
 
 	std::strcpy(path + prog_path_len, results_path);
@@ -81,7 +81,7 @@ int main(int argc, const char* argv[]) {
 	std::ofstream results_stream(path, std::ios::ate);
 
 	abc::log_filter results_filter(abc::severity::optional);
-	results_ostream results(results_stream.rdbuf(), &results_filter);
+	abc::samples::results_ostream results(results_stream.rdbuf(), &results_filter);
 
 	return 0;
 }

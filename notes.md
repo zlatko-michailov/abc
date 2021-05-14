@@ -47,59 +47,81 @@ ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$
 
 
 -----------------------------------------
-when to unload pages?
------------------------------------------
-
-page_file<Record, MaxPages, FreePercent = 25> {
-  page<Record> create_page()
-  page<Record> get_page(i)
-}
-
-page<Record> {
-  ~page()
-  Record* get()
-}
-
-meta | free pages list + index b-tree + heap
-
------------------------------------------
-POST /game
+POST /games
 -----------------------------------------
 Request
-
-human vs human
 {
-  "play": false
+  "players": string[]
 }
 
-human vs this (computer)
+Response
 {
-  "play": true,
-  "start": false
-}
-
-remote (computer) vs this (computer)
-{
-  "play": true,
-  "start": false
-  "notify": "http://..."
+  "gameId": number
 }
 
 -----------------------------------------
-POST /move
+POST /games/{gameId}/players/{i}
 -----------------------------------------
 Response
-
 {
-  "delay": 0 | n (seconds)
+  "playerId": number
 }
 
 -----------------------------------------
-GET /moves?since=stamp
+POST /games/{gameId}/player/{playerId}/move
+-----------------------------------------
+Request
+any
+
+Response
+{
+  "i": number
+}
+
+-----------------------------------------
+GET /games/{gameId}/moves?since={i}
 -----------------------------------------
 Response
-
 {
-  "stamp": "...",
-  "moves": [ ... ]
+  "moves": Array<{
+    "i": number,
+    "move": any,
+  }> | undefined,
+  "winner": number | undefined
 }
+
+
+game_endpoint<MaxGames, Game, MaxMoves, Move> : endpoint {
+  virtual void  process_rest_request()
+
+  void      create_game()
+  void      claim_player()
+  void      accept_move()
+  void      get_moves()
+}
+
+game<MaxMoves, Move> {
+  game()
+
+  virtual bool      init(const char* players[])
+  virtual bool      start()
+  virtual bool      accept_move(player_i, const Move& mv)
+
+  uint8_t   status() const
+  uint8_t   current_player_i() const
+  uint16_t  move_count() const
+  const Move* moves(since_i) const
+}
+
+game_player<Move> {
+  virtual void      init(game* gm, player_i)
+  virtual void      make_move()
+}
+
+Move {
+  Move()
+
+  void      from_json(json_stream)
+  void      to_json(json_stream) const
+}
+
