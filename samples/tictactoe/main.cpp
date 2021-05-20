@@ -65,7 +65,6 @@ int main(int argc, const char* argv[]) {
 
 		std::strncpy(path, argv[0], prog_path_len);
 	}
-
 	std::strcpy(path + prog_path_len, kb_path);
 	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "kb_path='%s'", path);
 
@@ -82,6 +81,13 @@ int main(int argc, const char* argv[]) {
 
 	abc::log_filter results_filter(abc::severity::optional);
 	abc::samples::results_ostream results(results_stream.rdbuf(), &results_filter);
+
+
+	////
+	abc::samples::game game(abc::samples::player_type::slow_engine, abc::samples::player_type::slow_engine, &log);
+	game.start();
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	return 0;
 }

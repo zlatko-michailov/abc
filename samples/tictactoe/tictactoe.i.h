@@ -98,25 +98,32 @@ namespace abc { namespace samples {
 		////board() = default;
 
 	public:
-		bool				is_game_over() const;
-		player_id_t			winner() const;
 		bool				accept_move(const move& move);
+		bool				undo_move(const move& move);
 
 	public:
+		bool				is_game_over() const;
+		player_id_t			winner() const;
 		player_id_t			get_move(const move& move) const;
-		void				set_move(const move& move);
-		void				clear_move(const move& move);
+		unsigned			move_count() const;
 		bool				has_move(player_id_t player_id, const move& move) const;
-		bool				check_winner();
 		player_id_t			current_player_id() const;
-		void				switch_current_player_id();
+		board_state			state() const;
 
 		static player_id_t	opponent(player_id_t player_id);
 
 	private:
+		void				set_move(const move& move);
+		void				clear_move(const move& move);
+		bool				check_winner();
+		void				switch_current_player_id();
+
+	private:
+		bool				_is_game_over		= false;
 		player_id_t			_winner				= player_id::none;
 		player_id_t			_current_player_id	= player_id::x;
-		board_state			_board_state	= { 0 };
+		board_state			_board_state		= { 0 };
+		unsigned			_move_count			= 0;
 	};
 
 
@@ -128,7 +135,7 @@ namespace abc { namespace samples {
 
 	class player_agent {
 	public:
-		player_agent(game* game, player_id_t player_id, player_type_t player_type);
+		player_agent(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
 
 		void	make_move_async();
 
@@ -139,6 +146,7 @@ namespace abc { namespace samples {
 	// Thinking slow
 	private:
 		void	slow_make_move();
+		//// ->
 		bool	slow_make_necessary_move();
 		bool	slow_make_winning_move();
 		bool	slow_make_defending_move();
@@ -147,16 +155,19 @@ namespace abc { namespace samples {
 		bool	slow_complete_vertical(player_id_t player_id, int j);
 		bool	slow_complete_main_diagonal(player_id_t player_id);
 		bool	slow_complete_reverse_diagonal(player_id_t player_id);
-		bool	slow_make_best_move();
+		//// <-
+		int		slow_find_best_move_for(player_id_t player_id, move* best_move);
 
 	// Thinking fast
 	private:
 		void	fast_make_move();
 
 	private:
-		game*			_game;
-		player_id_t		_player_id;
-		player_type_t	_player_type;
+		game*				_game;
+		const player_id_t	_player_id;
+		const player_type_t	_player_type;
+		board				_temp_board;
+		log_ostream*		_log;
 	};
 
 
