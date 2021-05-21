@@ -29,7 +29,7 @@ SOFTWARE.
 namespace abc { namespace samples {
 
 
-	bool move::is_valid() const {
+	inline bool move::is_valid() const {
 		return (0 <= row && row < size && 0 <= col && col < size);
 	}
 
@@ -37,7 +37,7 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	bool board::accept_move(const move& move) {
+	inline bool board::accept_move(const move& move) {
 		if (!move.is_valid()) {
 			return false;
 		}
@@ -61,7 +61,7 @@ namespace abc { namespace samples {
 	}
 
 
-	bool board::undo_move(const move& move) {
+	inline bool board::undo_move(const move& move) {
 		if (!move.is_valid()) {
 			return false;
 		}
@@ -78,46 +78,46 @@ namespace abc { namespace samples {
 	}
 
 
-	bool board::is_game_over() const {
+	inline bool board::is_game_over() const {
 		return _is_game_over;
 	}
 
 
-	player_id_t board::winner() const {
+	inline player_id_t board::winner() const {
 		return _winner;
 	}
 
 
-	player_id_t board::get_move(const move& move) const {
+	inline player_id_t board::get_move(const move& move) const {
 		return shift_down(move);
 	}
 
 
-	void board::set_move(const move& move) {
+	inline void board::set_move(const move& move) {
 		_board_state |= shift_up(_current_player_id, move);
 		_move_count++;
 	}
 
 
-	void board::clear_move(const move& move) {
+	inline void board::clear_move(const move& move) {
 		_board_state &= ~shift_up(player_id::mask, move);
 		_move_count--;
 	}
 
 
-	unsigned board::move_count() const {
+	inline unsigned board::move_count() const {
 		return _move_count;
 	}
 
 
-	bool board::has_move(player_id_t player_id, const move& move) const {
+	inline bool board::has_move(player_id_t player_id, const move& move) const {
 		board_state bits = shift_up(player_id, move);
 		board_state mask = shift_up(player_id::mask, move);
 		return (_board_state & mask) == bits;
 	}
 
 
-	bool board::check_winner() {
+	inline bool board::check_winner() {
 		bool horizontal =
 			(has_move(_current_player_id, { 0, 0 }) && has_move(_current_player_id, { 0, 1 }) && has_move(_current_player_id, { 0, 2 })) ||
 			(has_move(_current_player_id, { 1, 0 }) && has_move(_current_player_id, { 1, 1 }) && has_move(_current_player_id, { 1, 2 })) ||
@@ -151,33 +151,33 @@ namespace abc { namespace samples {
 	}
 
 
-	player_id_t board::current_player_id() const {
+	inline player_id_t board::current_player_id() const {
 		return _current_player_id;
 	}
 
 
-	void board::switch_current_player_id() {
+	inline void board::switch_current_player_id() {
 		_current_player_id = opponent(_current_player_id);
 	}
 
 
-	board_state board::state() const {
+	inline board_state board::state() const {
 		return _board_state;
 	}
 
 
-	player_id_t board::opponent(player_id_t player_id) {
+	inline player_id_t board::opponent(player_id_t player_id) {
 		return player_id ^ 0x1;
 	}
 
 
-	board_state board::shift_up(player_id_t player_id, const move& move) {
+	inline board_state board::shift_up(player_id_t player_id, const move& move) {
 		int cell = move.row * size + move.col;
 		return static_cast<board_state>(player_id) << (cell * 2);
 	}
 
 
-	player_id_t board::shift_down(const move& move) const {
+	inline player_id_t board::shift_down(const move& move) const {
 		int cell = move.row * size + move.col;
 		return static_cast<player_id_t>((_board_state >> (cell * 2)) & player_id::mask);
 	}
@@ -186,7 +186,7 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	player_agent::player_agent(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log)
+	inline player_agent::player_agent(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log)
 		: _game(game)
 		, _player_id(player_id)
 		, _player_type(player_type)
@@ -194,7 +194,7 @@ namespace abc { namespace samples {
 	}
 
 
-	void player_agent::make_move_async() {
+	inline void player_agent::make_move_async() {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move_async()");
 		}
@@ -203,7 +203,7 @@ namespace abc { namespace samples {
 	}
 
 
-	void player_agent::make_move_proc(player_agent* this_ptr) {
+	inline void player_agent::make_move_proc(player_agent* this_ptr) {
 		if (this_ptr->_log != nullptr) {
 			this_ptr->_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move_proc()");
 		}
@@ -212,7 +212,7 @@ namespace abc { namespace samples {
 	}
 
 
-	void player_agent::make_move() {
+	inline void player_agent::make_move() {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move()");
 		}
@@ -229,7 +229,7 @@ namespace abc { namespace samples {
 	}
 
 
-	void player_agent::slow_make_move() {
+	inline void player_agent::slow_make_move() {
 		_temp_board = _game->board();
 
 		if (_log != nullptr) {
@@ -244,7 +244,7 @@ namespace abc { namespace samples {
 	}
 
 
-	int player_agent::slow_find_best_move_for(player_id_t player_id, move* best_move) {
+	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move* best_move) {
 		int best_score = -1;
 
 		// For simplicity, try cells in order.
@@ -284,7 +284,7 @@ namespace abc { namespace samples {
 	}
 
 
-	void player_agent::fast_make_move() {
+	inline void player_agent::fast_make_move() {
 		//// TODO:
 	}
 
@@ -292,21 +292,21 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	game::game()
+	inline game::game()
 		: _agent_x(this, player_id::none, player_type::none, nullptr)
 		, _agent_o(this, player_id::none, player_type::none, nullptr)
 		, _log(nullptr) {
 	}
 
 
-	game::game(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log)
+	inline game::game(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log)
 		: _agent_x(this, player_id::x, player_x_type, log)
 		, _agent_o(this, player_id::o, player_o_type, log)
 		, _log(log) {
 	}
 
 
-	void game::start() {
+	inline void game::start() {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::start(): player_id=%u", _board.current_player_id());
 		}
@@ -320,7 +320,7 @@ namespace abc { namespace samples {
 	}
 
 
-	bool game::accept_move(player_id_t player_id, const move& move) {
+	inline bool game::accept_move(player_id_t player_id, const move& move) {
 		if (player_id != _board.current_player_id()) {
 			return false;
 		}
@@ -355,12 +355,34 @@ namespace abc { namespace samples {
 	}
 
 
-	const samples::board& game::board() const {
+	inline const samples::board& game::board() const {
 		return _board;
 	}
 
 
 	// --------------------------------------------------------------
+
+
+	template <typename Limits, typename Log>
+	inline tictactoe_endpoint<Limits, Log>::tictactoe_endpoint(endpoint_config* config, Log* log)
+		: base(config, log) {
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void tictactoe_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Start REST processing");
+		}
+
+		// Support a graceful shutdown.
+		if (ascii::are_equal_i(method, method::POST) && ascii::are_equal_i(resource, "/shutdown")) {
+			base::set_shutdown_requested();
+
+			base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
+			return;
+		}
+	}
 
 }}
 

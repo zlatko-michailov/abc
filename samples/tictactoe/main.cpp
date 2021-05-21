@@ -29,7 +29,7 @@ SOFTWARE.
 #include <cstring>
 #include <algorithm>
 
-#include "tictactoe.i.h"
+#include "tictactoe.h"
 
 
 int main(int argc, const char* argv[]) {
@@ -50,10 +50,12 @@ int main(int argc, const char* argv[]) {
 
 	const char* prog_last_separator = std::strrchr(argv[0], '/');
 	std::size_t prog_path_len = 0;
+	std::size_t prog_path_len_1 = 0;
 
 	if (prog_last_separator != nullptr) {
-		prog_path_len = prog_last_separator - argv[0] + 1;
-		std::size_t full_path_len = prog_path_len + std::max(kb_path_len, results_path_len);
+		prog_path_len = prog_last_separator - argv[0];
+		prog_path_len_1 = prog_path_len + 1;
+		std::size_t full_path_len = prog_path_len_1 + std::max(kb_path_len, results_path_len);
 
 		if (full_path_len >= max_path) {
 			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
@@ -63,9 +65,9 @@ int main(int argc, const char* argv[]) {
 			return 1;
 		}
 
-		std::strncpy(path, argv[0], prog_path_len);
+		std::strncpy(path, argv[0], prog_path_len_1);
 	}
-	std::strcpy(path + prog_path_len, kb_path);
+	std::strcpy(path + prog_path_len_1, kb_path);
 	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "kb_path='%s'", path);
 
 
@@ -75,12 +77,32 @@ int main(int argc, const char* argv[]) {
 	abc::samples::vmem_pool pool(path, &log);
 
 
-	std::strcpy(path + prog_path_len, results_path);
+	std::strcpy(path + prog_path_len_1, results_path);
 	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "results_path='%s'", path);
 	std::ofstream results_stream(path, std::ios::ate);
 
 	abc::log_filter results_filter(abc::severity::optional);
 	abc::samples::results_ostream results(results_stream.rdbuf(), &results_filter);
+
+
+	path[prog_path_len] = '\0';
+
+
+	// Create a endpoint.
+	abc::endpoint_config config(
+		"30303",			// port
+		5,					// listen_queue_size
+		path,				// root_dir (Note: No trailing slash!)
+		"/resources/"		// files_prefix
+	);
+	abc::samples::tictactoe_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
+
+	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30303/resources/index.html.");
+	log.put_blank_line();
+
+	// Let the endpoint listen in a separate thread.
+	std::future<void> done = endpoint.start_async();
+	done.wait();
 
 
 	////

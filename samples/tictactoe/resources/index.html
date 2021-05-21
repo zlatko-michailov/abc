@@ -1,0 +1,281 @@
+<!--
+MIT License
+
+Copyright (c) 2018-2021 Zlatko Michailov 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<html>
+	<head>
+		<title>Basic (abc Samples)</title>
+		<style>
+			.readonly
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(60, 60, 60);
+				color: rgb(210, 210, 210);
+			}
+
+			.edit
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(210, 210, 210);
+				color: rgb(60, 60, 60);
+			}
+
+			.title
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 36;
+				text-align: center;
+			}
+
+			.subtitle
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 26;
+				text-align: center;
+			}
+
+			.copyright
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 14;
+				text-align: center;
+			}
+
+			.board
+			{
+				font-family: 'Courier New', Courier, monospace;
+				font-size: 64;
+				text-align: center;
+				border-style: solid;
+				border-color:grey;
+				border-width: 1pt;
+				border-spacing: 0pt;
+			}
+			.x
+			{
+				color: red;
+			}
+			.o
+			{
+				color: green;
+			}
+		</style>
+	</head>
+	<body class="readonly">
+		<table>
+			<tr>
+				<td>
+					<div class="title">Tic-Tac-Toe</div>
+					<div class="subtitle">abc Samples</div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">This is a C++ program that implements different strategies for playing tic-tac-toe.</div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<hr />
+					<br />
+					<button id="startButton" class="edit" onclick="start()">&nbsp; Start &nbsp;</button>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<select id="player_x">
+						<option value="external">User</option>
+						<option value="slow_engine">Computer, thinking slow</option>
+						<option value="fast_engine">Computer, thinking fast</option>
+					</select>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<select id="player_o">
+						<option value="external">User</option>
+						<option value="slow_engine">Computer, thinking slow</option>
+						<option value="fast_engine">Computer, thinking fast</option>
+					</select>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<table class="board">
+						<tr>
+							<td id="0_0" class="board"><span class="x">&nbsp;X&nbsp;</span></td>
+							<td id="0_1" class="board">&nbsp;&nbsp;&nbsp;</td>
+							<td id="0_2" class="board"><span class="o">&nbsp;O&nbsp;</span></td>
+						</tr>
+						<tr>
+							<td id="1_0" class="board">&nbsp;&nbsp;&nbsp;</td>
+							<td id="1_1" class="board"><span class="o">&nbsp;O&nbsp;</span></td>
+							<td id="1_2" class="board">&nbsp;&nbsp;&nbsp;</td>
+						</tr>
+						<tr>
+							<td id="2_0" class="board"><span class="x">&nbsp;X&nbsp;</span></td>
+							<td id="2_1" class="board">&nbsp;&nbsp;&nbsp;</td>
+							<td id="2_2" class="board"><span class="x">&nbsp;X&nbsp;</span></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<br />
+					<button id="shutdownButton" class="edit" onclick="shutdown()">&nbsp; Shutdown &nbsp;</button>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<hr />
+					<br />
+					<div id="status" class="readonly"></div>
+					<br />
+					<hr />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<br />
+					<br />
+					<div class="copyright">Copyright (c) 2018-2021 by Zlatko Michailov, MIT License</div>
+				</td>
+			</tr>
+		</table>
+
+
+		<script>
+			var isRunning = true;
+			var gameId = 0;
+			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
+
+			function start() {
+				let requestInit = {
+					method: "POST",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/game");
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+						gameId = result.gameId;
+						document.getElementById("status").innerText = "gameId=" + result.gameId;
+					});
+			}
+
+			function postProblem() {
+				if (!isRunning) {
+					document.getElementById("solutionArea").innerText = remoteIsDown;
+					return;
+				}
+
+				let a = [ [], [] ];
+				a[0][0] = parseFloat(document.getElementById("a00").value);
+				a[0][1] = parseFloat(document.getElementById("a01").value);
+				a[1][0] = parseFloat(document.getElementById("a10").value);
+				a[1][1] = parseFloat(document.getElementById("a11").value);
+				
+				let b = [];
+				b[0] = parseFloat(document.getElementById("b0").value);
+				b[1] = parseFloat(document.getElementById("b1").value);
+
+				if (isNaN(a[0][0]) || isNaN(a[0][1]) || isNaN(a[1][0]) || isNaN(a[1][1]) || isNaN(b[0]) || isNaN(b[1])) {
+					document.getElementById("solutionArea").innerText = "Client error: Invalid input. Enter all required numbers, and try again.";
+					return;
+				}
+
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
+				let requestInit = {
+					method: "POST",
+					headers: requestHeaders,
+					mode: "same-origin",
+					body: JSON.stringify({
+ 						a: a,
+						b: b
+					})
+				};
+
+				let request = new Request("/problem");
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+
+						if (result.status === 1) {
+							document.getElementById("solutionArea").innerText = "Solution: x=" + result.x + ", y=" + result.y;
+						}
+						else if (result.status === 0) {
+							document.getElementById("solutionArea").innerText = "This system has no solution.";
+						}
+						else {
+							document.getElementById("solutionArea").innerText = "These equations are equivalent.";
+						}
+					});
+			}
+
+			function shutdown() {
+				let requestInit = {
+					method: "POST",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/shutdown");
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+
+						if (response.ok) {
+							isRunning = false;
+							document.getElementById("status").innerText = remoteIsDown;
+						}
+						else {
+							document.getElementById("status").innerText = "Received status " + response.status + ": " + response.statusText;
+						}
+					});
+			}
+		</script>
+	</body>
+</html>

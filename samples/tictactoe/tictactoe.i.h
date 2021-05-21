@@ -28,12 +28,14 @@ SOFTWARE.
 
 #include "../../src/log.h"
 #include "../../src/vmem.h"
+#include "../../src/endpoint.h"
 
 
 namespace abc { namespace samples {
 
 	using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 	using results_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
+	using limits = abc::endpoint_limits;
 
 	// Max 8 pages = 32KB in memory.
 	using vmem_pool = abc::vmem_pool<8, log_ostream>;
@@ -185,6 +187,21 @@ namespace abc { namespace samples {
 		player_agent			_agent_x;
 		player_agent			_agent_o;
 		log_ostream*			_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Limits, typename Log>
+	class tictactoe_endpoint : public endpoint<Limits, Log> {
+		using base = endpoint<Limits, Log>;
+
+	public:
+		tictactoe_endpoint(endpoint_config* config, Log* log);
+
+	protected:
+		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
 	};
 
 
