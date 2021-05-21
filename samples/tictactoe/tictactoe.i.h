@@ -63,6 +63,7 @@ namespace abc { namespace samples {
 		constexpr player_id_t	none		= 0x0;
 		constexpr player_id_t	x			= 0x2;
 		constexpr player_id_t	o			= 0x3;
+		constexpr player_id_t	mask		= 0x3;
 	}
 
 
@@ -111,8 +112,11 @@ namespace abc { namespace samples {
 		board_state			state() const;
 
 		static player_id_t	opponent(player_id_t player_id);
-
+		
 	private:
+		static board_state	shift_up(player_id_t player_id, const move& move);
+		player_id_t			shift_down(const move& move) const;
+
 		void				set_move(const move& move);
 		void				clear_move(const move& move);
 		bool				check_winner();
@@ -146,16 +150,6 @@ namespace abc { namespace samples {
 	// Thinking slow
 	private:
 		void	slow_make_move();
-		//// ->
-		bool	slow_make_necessary_move();
-		bool	slow_make_winning_move();
-		bool	slow_make_defending_move();
-		bool	slow_complete(player_id_t player_id);
-		bool	slow_complete_horizontal(player_id_t player_id, int i);
-		bool	slow_complete_vertical(player_id_t player_id, int j);
-		bool	slow_complete_main_diagonal(player_id_t player_id);
-		bool	slow_complete_reverse_diagonal(player_id_t player_id);
-		//// <-
 		int		slow_find_best_move_for(player_id_t player_id, move* best_move);
 
 	// Thinking fast

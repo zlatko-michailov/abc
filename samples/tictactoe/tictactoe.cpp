@@ -89,21 +89,18 @@ namespace abc { namespace samples {
 
 
 	player_id_t board::get_move(const move& move) const {
-		int cell = move.row * size + move.col;
-		return (_board_state >> (cell * 2)) & 0x3;
+		return shift_down(move);
 	}
 
 
 	void board::set_move(const move& move) {
-		int cell = move.row * size + move.col;
-		_board_state |= (_current_player_id << (cell * 2));
+		_board_state |= shift_up(_current_player_id, move);
 		_move_count++;
 	}
 
 
 	void board::clear_move(const move& move) {
-		int cell = move.row * size + move.col;
-		_board_state &= ~(0x3 << (cell * 2));
+		_board_state &= ~shift_up(player_id::mask, move);
 		_move_count--;
 	}
 
@@ -114,9 +111,8 @@ namespace abc { namespace samples {
 
 
 	bool board::has_move(player_id_t player_id, const move& move) const {
-		int cell = move.row * size + move.col;
-		int bits = (player_id << (cell * 2));
-		int mask = (0x3 << (cell * 2));
+		board_state bits = shift_up(player_id, move);
+		board_state mask = shift_up(player_id::mask, move);
 		return (_board_state & mask) == bits;
 	}
 
@@ -172,6 +168,18 @@ namespace abc { namespace samples {
 
 	player_id_t board::opponent(player_id_t player_id) {
 		return player_id ^ 0x1;
+	}
+
+
+	board_state board::shift_up(player_id_t player_id, const move& move) {
+		int cell = move.row * size + move.col;
+		return static_cast<board_state>(player_id) << (cell * 2);
+	}
+
+
+	player_id_t board::shift_down(const move& move) const {
+		int cell = move.row * size + move.col;
+		return static_cast<player_id_t>((_board_state >> (cell * 2)) & player_id::mask);
 	}
 
 
@@ -274,167 +282,6 @@ namespace abc { namespace samples {
 
 		return best_score;
 	}
-
-#ifdef REMOVE ////
-	bool player_agent::slow_make_necessary_move() {
-		if (slow_make_winning_move()) {
-			return true;
-		}
-
-		if (slow_make_defending_move()) {
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool player_agent::slow_make_winning_move() {
-		return slow_complete(_player_id);
-	}
-
-
-	bool player_agent::slow_make_defending_move() {
-		return slow_complete(board::opponent(_player_id));
-	}
-
-
-	bool player_agent::slow_complete(player_id_t player_id) {
-		for (int i = 0; i < size; i++) {
-			if (slow_complete_horizontal(player_id, i)) {
-				return true;
-			}
-
-			if (slow_complete_vertical(player_id, i)) {
-				return true;
-			}
-		}
-
-		if (slow_complete_main_diagonal(player_id)) {
-			return true;
-		}
-
-		if (slow_complete_reverse_diagonal(player_id)) {
-			return true;
-		}
-	}
-
-
-	bool player_agent::slow_complete_horizontal(player_id_t player_id, int i) {
-		int player_count = 0;
-		int empty_count = 0;
-		int empty_j = -1;
-
-		for (int j = 0; j < size; j++) {
-			player_id_t plr = _game->board().get_move({ i, j });
-
-			if (plr == player_id) {
-				player_count++;
-			}
-			else if (plr == player_id::none) {
-				empty_count++;
-				empty_j = j;
-			}
-			else {
-				return false;
-			}
-		}
-
-		if (player_count == 2 && empty_count == 1) {
-			_game->accept_move(_player_id, { i, empty_j });
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool player_agent::slow_complete_vertical(player_id_t player_id, int j) {
-		int player_count = 0;
-		int empty_count = 0;
-		int empty_i = -1;
-
-		for (int i = 0; i < size; i++) {
-			player_id_t plr = _game->board().get_move({ i, j });
-
-			if (plr == player_id) {
-				player_count++;
-			}
-			else if (plr == player_id::none) {
-				empty_count++;
-				empty_i = i;
-			}
-			else {
-				return false;
-			}
-		}
-
-		if (player_count == 2 && empty_count == 1) {
-			_game->accept_move(_player_id, { empty_i, j });
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool player_agent::slow_complete_main_diagonal(player_id_t player_id) {
-		int player_count = 0;
-		int empty_count = 0;
-		int empty_i = -1;
-
-		for (int i = 0; i < size; i++) {
-			player_id_t plr = _game->board().get_move({ i, i });
-
-			if (plr == player_id) {
-				player_count++;
-			}
-			else if (plr == player_id::none) {
-				empty_count++;
-				empty_i = i;
-			}
-			else {
-				return false;
-			}
-		}
-
-		if (player_count == 2 && empty_count == 1) {
-			_game->accept_move(_player_id, { empty_i, empty_i });
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool player_agent::slow_complete_reverse_diagonal(player_id_t player_id) {
-		int player_count = 0;
-		int empty_count = 0;
-		int empty_i = -1;
-
-		for (int i = 0; i < size; i++) {
-			player_id_t plr = _game->board().get_move({ i, 2 - i });
-
-			if (plr == player_id) {
-				player_count++;
-			}
-			else if (plr == player_id::none) {
-				empty_count++;
-				empty_i = i;
-			}
-			else {
-				return false;
-			}
-		}
-
-		if (player_count == 2 && empty_count == 1) {
-			_game->accept_move(_player_id, { empty_i, 2 - empty_i });
-			return true;
-		}
-
-		return false;
-	}
-#endif
 
 
 	void player_agent::fast_make_move() {
