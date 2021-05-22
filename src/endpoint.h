@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <system_error>

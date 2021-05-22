@@ -26,6 +26,7 @@ SOFTWARE.
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 
@@ -33,6 +34,8 @@ SOFTWARE.
 
 
 int main(int argc, const char* argv[]) {
+	std::srand(std::time(nullptr));
+
 	// Create a log.
 	abc::log_filter filter(abc::severity::optional);
 	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);

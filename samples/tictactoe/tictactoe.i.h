@@ -202,6 +202,13 @@ namespace abc { namespace samples {
 
 	protected:
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
+
+	private:
+		void			process_games(abc::http_server_stream<Log>& http, const char* method);
+		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
+
+		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
+		bool			verify_header_json(abc::http_server_stream<Log>& http);
 	};
 
 

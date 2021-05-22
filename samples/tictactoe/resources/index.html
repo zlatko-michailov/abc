@@ -183,12 +183,22 @@ SOFTWARE.
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function start() {
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
 				let requestInit = {
 					method: "POST",
+					headers: requestHeaders,
 					mode: "same-origin",
+					body: JSON.stringify({
+						players: [
+							JSON.stringify(document.getElementById("player_x").value),
+							JSON.stringify(document.getElementById("player_o").value)
+						]
+					})
 				};
 
-				let request = new Request("/game");
+				let request = new Request("/games");
 				fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);

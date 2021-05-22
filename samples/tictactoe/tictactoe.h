@@ -23,6 +23,13 @@ SOFTWARE.
 */
 
 
+#include <cstdlib>
+
+#include "../../src/ascii.h"
+#include "../../src/endpoint.h"
+#include "../../src/http.h"
+#include "../../src/json.h"
+
 #include "tictactoe.i.h"
 
 
@@ -375,13 +382,262 @@ namespace abc { namespace samples {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Start REST processing");
 		}
 
-		// Support a graceful shutdown.
-		if (ascii::are_equal_i(method, method::POST) && ascii::are_equal_i(resource, "/shutdown")) {
-			base::set_shutdown_requested();
+		if (ascii::are_equal_i(resource, "/games")) {
+			process_games(http, method);
+		}
+		else if (ascii::are_equal_i(resource, "/shutdown")) {
+			process_shutdown(http, method);
+		}
+		else {
+			// 404
+			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", __TAG__);
+		}
+	}
 
-			base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
+
+	template <typename Limits, typename Log>
+	inline void tictactoe_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method) {
+		if (!verify_method_post(http, method)) {
 			return;
 		}
+
+		if (!verify_header_json(http)) {
+			return;
+		}
+
+		char players[abc::size::_64 + 1][2];
+		bool has_players = false;
+
+		// Use a block to release the buffers when done parsing
+		{
+			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
+			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
+			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
+			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
+			const char* const invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::begin_object) {
+				// The body is not a JSON object.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected '{'.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			// Read all properties.
+			while (true) {
+				// The tokens at this level must be properties or }.
+				json.get_token(token, sizeof(buffer));
+
+				// If we reached }, then we are done parsing.
+				if (token->item == abc::json::item::end_object) {
+					break;
+				}
+
+				if (token->item != abc::json::item::property) {
+					// Not a property.
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected a property.");
+					}
+
+					// 400
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+					return;
+				}
+
+				// We expect 1 property - "players".
+				if (ascii::are_equal(token->value.property, "players")) {
+					// Parse array [2].
+					json.get_token(token, sizeof(buffer));
+
+					if (token->item != abc::json::item::begin_array) {
+						// Not [.
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected '['.");
+						}
+
+						// 400
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+						return;
+					}
+
+					for (std::size_t i = 0; i < 2; i++) {
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing players[%zu]", i);
+						}
+
+						json.get_token(token, sizeof(buffer));
+						if (token->item != abc::json::item::string) {
+							// Not a string.
+							if (base::_log != nullptr) {
+								base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected a string.");
+							}
+
+							// 400
+							base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+							return;
+						}
+
+						std::strcpy(players[i], token->value.string);
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]=\"%s\"", i, players[i]);
+						}
+					}
+
+					json.get_token(token, sizeof(buffer));
+					if (token->item != abc::json::item::end_array) {
+						// Not ].
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected ']'.");
+						}
+
+						// 400
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+						return;
+					}
+
+					has_players = true;
+				}
+				else {
+					// Future-proof: Ignore unknown properties.
+					json.skip_value();
+				}
+			}
+
+			if (!has_players) {
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Players not received.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+		}
+
+		std::uint32_t gameId = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+
+		// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+		char body[abc::size::k1 + 1];
+		abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
+		abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+		json.put_begin_object();
+			json.put_property("gameId");
+			json.put_number(gameId);
+		json.put_end_object();
+		json.put_char('\0');
+		json.flush();
+
+		char content_length[abc::size::_32 + 1];
+		std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+
+		// Send the http response
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+		}
+
+		http.put_protocol(protocol::HTTP_11);
+		http.put_status_code(status_code::OK);
+		http.put_reason_phrase(reason_phrase::OK);
+
+		http.put_header_name(header::Connection);
+		http.put_header_value(connection::close);
+		http.put_header_name(header::Content_Type);
+		http.put_header_value(content_type::json);
+		http.put_header_name(header::Content_Length);
+		http.put_header_value(content_length);
+		http.end_headers();
+
+		http.put_body(body);
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Finish REST processing");
+		}
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void tictactoe_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
+		if (!verify_method_post(http, method)) {
+			return;
+		}
+
+		base::set_shutdown_requested();
+
+		// 200
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
+	}
+
+
+	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
+		if (!ascii::are_equal_i(method, method::POST)) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'POST'.");
+			}
+
+			// 405
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "POST is the only supported method for resource '/problem'.", __TAG__);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::verify_header_json(abc::http_server_stream<Log>& http) {
+		bool has_content_type_json = false;
+
+		// Read all headers
+		while (true) {
+			char header[abc::size::k1 + 1];
+
+			// No more headers
+			http.get_header_name(header, sizeof(header));
+			if (http.gcount() == 0) {
+				break;
+			}
+
+			if (ascii::are_equal_i(header, header::Content_Type)) {
+				if (has_content_type_json) {
+					// We've already received a Content-Type header.
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Already received 'Content-Type'.");
+					}
+
+					// 400
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", __TAG__);
+					return false;
+				}
+
+				http.get_header_value(header, sizeof(header));
+
+				static const std::size_t content_type_json_len = std::strlen(content_type::json);
+				if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
+					// The Content-Type is not json.
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Expected `application/json` as 'Content-Type'.");
+					}
+
+					// 400
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", __TAG__);
+					return false;
+				}
+
+				has_content_type_json = true;
+			}
+			else {
+				// Future-proof: Ignore unknown headers.
+				http.get_header_value(header, sizeof(header));
+			}
+		}
+
+		return has_content_type_json;
 	}
 
 }}
