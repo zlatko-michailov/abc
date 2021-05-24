@@ -36,6 +36,28 @@ SOFTWARE.
 namespace abc { namespace samples {
 
 
+	// --------------------------------------------------------------
+
+
+	inline player_type_t player_type::from_text(const char* text) {
+		if (ascii::are_equal(text, "external")) {
+			return player_type::external;
+		}
+		else if (ascii::are_equal(text, "slow_engine")) {
+			return player_type::slow_engine;
+		}
+		else if (ascii::are_equal(text, "fast_engine")) {
+			return player_type::fast_engine;
+		}
+		else {
+			return player_type::none;
+		}
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	inline bool move::is_valid() const {
 		return (0 <= row && row < size && 0 <= col && col < size);
 	}
@@ -193,11 +215,11 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	inline player_agent::player_agent(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log)
-		: _game(game)
-		, _player_id(player_id)
-		, _player_type(player_type)
-		, _log(log) {
+	inline void player_agent::reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log) {
+		_game = game;
+		_player_id = player_id;
+		_player_type = player_type;
+		_log = log;
 	}
 
 
@@ -299,17 +321,10 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	inline game::game()
-		: _agent_x(this, player_id::none, player_type::none, nullptr)
-		, _agent_o(this, player_id::none, player_type::none, nullptr)
-		, _log(nullptr) {
-	}
-
-
-	inline game::game(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log)
-		: _agent_x(this, player_id::x, player_x_type, log)
-		, _agent_o(this, player_id::o, player_o_type, log)
-		, _log(log) {
+	inline void game::reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log) {
+		_agent_x.reset(this, player_id::x, player_x_type, log);
+		_agent_o.reset(this, player_id::o, player_o_type, log);
+		_log = log;
 	}
 
 
@@ -370,6 +385,14 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	inline bool endpoint_game::is_done() const {
+		return _endpoint_game_id == 0;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	template <typename Limits, typename Log>
 	inline tictactoe_endpoint<Limits, Log>::tictactoe_endpoint(endpoint_config* config, Log* log)
 		: base(config, log) {
@@ -379,11 +402,11 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline void tictactoe_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Start REST processing");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::process_rest_request: Start.");
 		}
 
-		if (ascii::are_equal_i(resource, "/games")) {
-			process_games(http, method);
+		if (ascii::are_equal_i_n(resource, "/games", 6)) {
+			process_games(http, method, resource);
 		}
 		else if (ascii::are_equal_i(resource, "/shutdown")) {
 			process_shutdown(http, method);
@@ -392,11 +415,29 @@ namespace abc { namespace samples {
 			// 404
 			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", __TAG__);
 		}
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::process_rest_request: Done.");
+		}
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void tictactoe_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method) {
+	inline void tictactoe_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+		const char* resource_games = resource + 6;
+
+		if (ascii::are_equal_i(resource_games, "")) {
+			create_game(http, method);
+		}
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void tictactoe_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::create_game: Start.");
+		}
+
 		if (!verify_method_post(http, method)) {
 			return;
 		}
@@ -405,7 +446,7 @@ namespace abc { namespace samples {
 			return;
 		}
 
-		char players[abc::size::_64 + 1][2];
+		char players[2][abc::size::_64 + 1];
 		bool has_players = false;
 
 		// Use a block to release the buffers when done parsing
@@ -414,13 +455,13 @@ namespace abc { namespace samples {
 			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
 			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
 			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-			const char* const invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
+			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
 
 			json.get_token(token, sizeof(buffer));
 			if (token->item != abc::json::item::begin_object) {
 				// The body is not a JSON object.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected '{'.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
 				}
 
 				// 400
@@ -441,7 +482,7 @@ namespace abc { namespace samples {
 				if (token->item != abc::json::item::property) {
 					// Not a property.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected a property.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a property.");
 					}
 
 					// 400
@@ -457,7 +498,7 @@ namespace abc { namespace samples {
 					if (token->item != abc::json::item::begin_array) {
 						// Not [.
 						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected '['.");
+							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '['.");
 						}
 
 						// 400
@@ -474,7 +515,7 @@ namespace abc { namespace samples {
 						if (token->item != abc::json::item::string) {
 							// Not a string.
 							if (base::_log != nullptr) {
-								base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected a string.");
+								base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a string.");
 							}
 
 							// 400
@@ -484,7 +525,7 @@ namespace abc { namespace samples {
 
 						std::strcpy(players[i], token->value.string);
 						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]=\"%s\"", i, players[i]);
+							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]='%s'", i, players[i]);
 						}
 					}
 
@@ -492,7 +533,7 @@ namespace abc { namespace samples {
 					if (token->item != abc::json::item::end_array) {
 						// Not ].
 						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Expected ']'.");
+							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected ']'.");
 						}
 
 						// 400
@@ -510,7 +551,7 @@ namespace abc { namespace samples {
 
 			if (!has_players) {
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Content error: Players not received.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Players not received.");
 				}
 
 				// 400
@@ -519,7 +560,62 @@ namespace abc { namespace samples {
 			}
 		}
 
-		std::uint32_t gameId = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+		// Player types
+		constexpr const char* invalid_player_type = "An invalid player type was received.";
+
+		player_type_t player_x_type = player_type::from_text(players[0]);
+		if (player_x_type == player_type::none) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[0]='%s'.", players[0]);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			return;
+		}
+
+		player_type_t player_o_type = player_type::from_text(players[1]);
+		if (player_o_type == player_type::none) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[1]='%s'.", players[1]);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			return;
+		}
+
+		endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+
+		// Find a slot
+		std::size_t game_i = max_game_count;
+		if (_game_count < max_game_count) {
+			game_i = _game_count++;
+		}
+		else {
+			for (std::size_t i = 0; i < max_game_count; i++) {
+				if (_games[i].is_done()) {
+					game_i = i;
+
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "tictactoe_endpoint::create_game: game_i=%zu", game_i);
+					}
+					break;
+				}
+			}
+		}
+
+		if (game_i >= max_game_count) {
+			constexpr const char* no_game_capacity = "The service has a temporary game capacity shortage.";
+
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Service error: Out of game capacity.");
+			}
+
+			// 503
+			base::send_simple_response(http, status_code::Service_Unavailable, reason_phrase::Service_Unavailable, content_type::text, no_game_capacity, __TAG__);
+			return;
+		}
 
 		// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
 		char body[abc::size::k1 + 1];
@@ -527,7 +623,7 @@ namespace abc { namespace samples {
 		abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
 		json.put_begin_object();
 			json.put_property("gameId");
-			json.put_number(gameId);
+			json.put_number(endpoint_game_id);
 		json.put_end_object();
 		json.put_char('\0');
 		json.flush();
@@ -555,7 +651,7 @@ namespace abc { namespace samples {
 		http.put_body(body);
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Finish REST processing");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::create_game: Done.");
 		}
 	}
 

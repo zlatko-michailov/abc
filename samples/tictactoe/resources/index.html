@@ -192,8 +192,8 @@ SOFTWARE.
 					mode: "same-origin",
 					body: JSON.stringify({
 						players: [
-							JSON.stringify(document.getElementById("player_x").value),
-							JSON.stringify(document.getElementById("player_o").value)
+							document.getElementById("player_x").value,
+							document.getElementById("player_o").value
 						]
 					})
 				};

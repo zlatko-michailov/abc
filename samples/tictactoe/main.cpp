@@ -109,7 +109,8 @@ int main(int argc, const char* argv[]) {
 
 
 	////
-	abc::samples::game game(abc::samples::player_type::slow_engine, abc::samples::player_type::slow_engine, &log);
+	abc::samples::game game;
+	game.reset(abc::samples::player_type::slow_engine, abc::samples::player_type::slow_engine, &log);
 	game.start();
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));

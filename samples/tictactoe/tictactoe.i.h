@@ -42,7 +42,7 @@ namespace abc { namespace samples {
 	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
 
 
-	constexpr int size = 3;
+	constexpr std::size_t size = 3;
 
 	// IMPORTANT: Ensure a predictable layout of the data on disk!
 	#pragma pack(push, 1)
@@ -79,6 +79,8 @@ namespace abc { namespace samples {
 		constexpr player_type_t	external	= 1;
 		constexpr player_type_t	slow_engine	= 2;
 		constexpr player_type_t	fast_engine	= 3;
+
+		player_type_t	from_text(const char* text);
 	}
 
 
@@ -141,8 +143,10 @@ namespace abc { namespace samples {
 
 	class player_agent {
 	public:
-		player_agent(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
+		////player_agent() = default;
 
+	public:
+		void	reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
 		void	make_move_async();
 
 	private:
@@ -159,11 +163,11 @@ namespace abc { namespace samples {
 		void	fast_make_move();
 
 	private:
-		game*				_game;
-		const player_id_t	_player_id;
-		const player_type_t	_player_type;
+		game*				_game			= nullptr;
+		player_id_t			_player_id		= player_id::none;
+		player_type_t		_player_type	= player_type::none;
 		board				_temp_board;
-		log_ostream*		_log;
+		log_ostream*		_log			= nullptr;
 	};
 
 
@@ -172,10 +176,10 @@ namespace abc { namespace samples {
 
 	class game {
 	public:
-		game();
-		game(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log);
+		////game() = default;
 
 	public:
+		void					reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log);
 		void					start();
 		bool					accept_move(player_id_t player_id, const move& move);
 
@@ -186,7 +190,41 @@ namespace abc { namespace samples {
 		samples::board			_board;
 		player_agent			_agent_x;
 		player_agent			_agent_o;
-		log_ostream*			_log;
+		log_ostream*			_log		= nullptr;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	using endpoint_player_id_t = std::uint32_t;
+
+
+	struct endpoint_player {
+		endpoint_player_id_t	_endpoint_player_id		= 0;
+		bool					_is_claimed				= true;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	using endpoint_game_id_t = std::uint32_t;
+
+
+	class endpoint_game: public game {
+		static constexpr std::size_t max_move_count = size * size;
+
+	public:
+		bool			is_done() const;
+
+	private:
+		endpoint_game_id_t		_endpoint_game_id		= 0;
+		endpoint_player			_endpoint_player_x;
+		endpoint_player			_endpoint_player_o;
+		std::size_t				_move_count				= 0;
+		move					_moves[max_move_count];
+
 	};
 
 
@@ -197,6 +235,8 @@ namespace abc { namespace samples {
 	class tictactoe_endpoint : public endpoint<Limits, Log> {
 		using base = endpoint<Limits, Log>;
 
+		static constexpr std::size_t max_game_count = 1;
+
 	public:
 		tictactoe_endpoint(endpoint_config* config, Log* log);
 
@@ -204,11 +244,17 @@ namespace abc { namespace samples {
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
 
 	private:
-		void			process_games(abc::http_server_stream<Log>& http, const char* method);
+		void			process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
+
+		void			create_game(abc::http_server_stream<Log>& http, const char* method);
 
 		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_header_json(abc::http_server_stream<Log>& http);
+
+	private:
+		std::size_t				_game_count 		= 0;
+		endpoint_game			_games[max_game_count];
 	};
 
 
