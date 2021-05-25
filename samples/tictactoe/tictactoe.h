@@ -472,11 +472,11 @@ namespace abc { namespace samples {
 			create_game(http, method);
 		}
 		else {
-			endpoint_game_id_t endpoint_game_id = 0;
+			unsigned game_id = 0;
 			unsigned player_i = 0;
 
-			if (std::sscanf(resource_games, "/%u/players/%u", &endpoint_game_id, &player_i) == 2) {
-				claim_player(http, method, endpoint_game_id, player_i);
+			if (std::sscanf(resource_games, "/%u/players/%u", &game_id, &player_i) == 2) {
+				claim_player(http, method, static_cast<endpoint_game_id_t>(game_id), player_i);
 			}
 		}
 	}
@@ -740,6 +740,10 @@ namespace abc { namespace samples {
 	inline bool tictactoe_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::claim_player: Start.");
+		}
+
+		if (!verify_method_post(http, method)) {
+			return false;
 		}
 
 		if (endpoint_game_id == 0 || player_i > 1) {
