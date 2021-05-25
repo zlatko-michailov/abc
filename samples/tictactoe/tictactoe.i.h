@@ -156,7 +156,7 @@ namespace abc { namespace samples {
 	// Thinking slow
 	private:
 		void	slow_make_move();
-		int		slow_find_best_move_for(player_id_t player_id, move* best_move);
+		int		slow_find_best_move_for(player_id_t player_id, move& best_move);
 
 	// Thinking fast
 	private:
@@ -201,8 +201,8 @@ namespace abc { namespace samples {
 
 
 	struct endpoint_player {
-		endpoint_player_id_t	_endpoint_player_id		= 0;
-		bool					_is_claimed				= true;
+		endpoint_player_id_t	endpoint_player_id		= 0;
+		bool					is_claimed				= true;
 	};
 
 
@@ -213,10 +213,19 @@ namespace abc { namespace samples {
 
 
 	class endpoint_game: public game {
+		using base = game;
+
 		static constexpr std::size_t max_move_count = size * size;
 
 	public:
-		bool			is_done() const;
+		void					reset(endpoint_game_id_t endpoint_game_id,
+									 player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
+									 player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id,
+									 log_ostream* log);
+		bool					claim_player(unsigned player_i, endpoint_player_id_t& endpoint_player_id);
+
+		endpoint_game_id_t		id() const;
+		bool					is_done() const;
 
 	private:
 		endpoint_game_id_t		_endpoint_game_id		= 0;
@@ -247,7 +256,9 @@ namespace abc { namespace samples {
 		void			process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource);
 		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
 
-		void			create_game(abc::http_server_stream<Log>& http, const char* method);
+		bool			create_game(abc::http_server_stream<Log>& http, const char* method);
+		bool			get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type);
+		bool			claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
 
 		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_header_json(abc::http_server_stream<Log>& http);

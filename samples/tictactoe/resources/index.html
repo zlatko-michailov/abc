@@ -26,6 +26,10 @@ SOFTWARE.
 	<head>
 		<title>Basic (abc Samples)</title>
 		<style>
+			a
+			{
+				color: honeydew;
+			}
 			.readonly
 			{
 				font-family: Arial, Helvetica, sans-serif;
@@ -106,20 +110,30 @@ SOFTWARE.
 				<td>
 					<hr />
 					<br />
-					<button id="startButton" class="edit" onclick="start()">&nbsp; Start &nbsp;</button>
-					&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;
-					<select id="player_x">
-						<option value="external">User</option>
-						<option value="slow_engine">Computer, thinking slow</option>
-						<option value="fast_engine">Computer, thinking fast</option>
-					</select>
-					&nbsp;&nbsp;&nbsp;&nbsp;
-					<select id="player_o">
-						<option value="external">User</option>
-						<option value="slow_engine">Computer, thinking slow</option>
-						<option value="fast_engine">Computer, thinking fast</option>
-					</select>
+					<div>
+						<a href="javascript:createGame()">Create game</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<select id="playerX">
+							<option value="external">User</option>
+							<option value="slow_engine">Computer, slow</option>
+							<option value="fast_engine">Computer, fast</option>
+						</select>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<select id="playerO">
+							<option value="external">User</option>
+							<option value="slow_engine">Computer, slow</option>
+							<option value="fast_engine">Computer, fast</option>
+						</select>
+					</div>
+					<br />
+					<div>
+						<a href="javascript:claimPlayer()">Claim player</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<select id="playerI">
+							<option value="0">X</option>
+							<option value="1">O</option>
+						</select>
+					</div>
 					<br />
 					<br />
 				</td>
@@ -150,7 +164,9 @@ SOFTWARE.
 			<tr>
 				<td>
 					<br />
-					<button id="shutdownButton" class="edit" onclick="shutdown()">&nbsp; Shutdown &nbsp;</button>
+					<div>
+						<a href="javascript:shutdown()">Shutdown</a>
+					</div>
 					<br />
 					<br />
 				</td>
@@ -178,11 +194,12 @@ SOFTWARE.
 
 
 		<script>
-			var isRunning = true;
-			var gameId = 0;
+			let isRunning = true;
+			let gameId = 0;
+			let playerIds = [];
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
-			function start() {
+			function createGame() {
 				let requestHeaders = new Headers();
 				requestHeaders.append("Content-Type", "application/json");
 
@@ -192,8 +209,8 @@ SOFTWARE.
 					mode: "same-origin",
 					body: JSON.stringify({
 						players: [
-							document.getElementById("player_x").value,
-							document.getElementById("player_o").value
+							document.getElementById("playerX").value,
+							document.getElementById("playerO").value
 						]
 					})
 				};
@@ -207,45 +224,20 @@ SOFTWARE.
 					.then(function (result) {
 						console.log(result);
 						gameId = result.gameId;
-						document.getElementById("status").innerText = "gameId=" + result.gameId;
+						document.getElementById("status").innerHTML += "gameId=" + gameId + "<br />";
 					});
 			}
 
-			function postProblem() {
-				if (!isRunning) {
-					document.getElementById("solutionArea").innerText = remoteIsDown;
-					return;
-				}
-
-				let a = [ [], [] ];
-				a[0][0] = parseFloat(document.getElementById("a00").value);
-				a[0][1] = parseFloat(document.getElementById("a01").value);
-				a[1][0] = parseFloat(document.getElementById("a10").value);
-				a[1][1] = parseFloat(document.getElementById("a11").value);
-				
-				let b = [];
-				b[0] = parseFloat(document.getElementById("b0").value);
-				b[1] = parseFloat(document.getElementById("b1").value);
-
-				if (isNaN(a[0][0]) || isNaN(a[0][1]) || isNaN(a[1][0]) || isNaN(a[1][1]) || isNaN(b[0]) || isNaN(b[1])) {
-					document.getElementById("solutionArea").innerText = "Client error: Invalid input. Enter all required numbers, and try again.";
-					return;
-				}
-
+			function claimPlayer() {
 				let requestHeaders = new Headers();
 				requestHeaders.append("Content-Type", "application/json");
 
 				let requestInit = {
 					method: "POST",
-					headers: requestHeaders,
 					mode: "same-origin",
-					body: JSON.stringify({
- 						a: a,
-						b: b
-					})
 				};
 
-				let request = new Request("/problem");
+				let request = new Request("/games/" + gameId + "/players/" + document.getElementById("playerI").value);
 				fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
@@ -253,16 +245,8 @@ SOFTWARE.
 					})
 					.then(function (result) {
 						console.log(result);
-
-						if (result.status === 1) {
-							document.getElementById("solutionArea").innerText = "Solution: x=" + result.x + ", y=" + result.y;
-						}
-						else if (result.status === 0) {
-							document.getElementById("solutionArea").innerText = "This system has no solution.";
-						}
-						else {
-							document.getElementById("solutionArea").innerText = "These equations are equivalent.";
-						}
+						playerIds[parseInt(document.getElementById("playerI").value)] = result.playerId;
+						document.getElementById("status").innerHTML += "playerId[" + document.getElementById("playerI").value + "]=" + playerIds[parseInt(document.getElementById("playerI").value)] + "<br />";
 					});
 			}
 
@@ -279,10 +263,10 @@ SOFTWARE.
 
 						if (response.ok) {
 							isRunning = false;
-							document.getElementById("status").innerText = remoteIsDown;
+							document.getElementById("status").innerHTML += remoteIsDown + "<br />";
 						}
 						else {
-							document.getElementById("status").innerText = "Received status " + response.status + ": " + response.statusText;
+							document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
 						}
 					});
 			}

@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include <cstdlib>
+#include <cstdio>
 
 #include "../../src/ascii.h"
 #include "../../src/endpoint.h"
@@ -267,13 +268,13 @@ namespace abc { namespace samples {
 		}
 
 		move best_move;
-		slow_find_best_move_for(_player_id, &best_move);
+		slow_find_best_move_for(_player_id, best_move);
 
 		_game->accept_move(_player_id, best_move);
 	}
 
 
-	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move* best_move) {
+	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& best_move) {
 		int best_score = -1;
 
 		// For simplicity, try cells in order.
@@ -289,11 +290,11 @@ namespace abc { namespace samples {
 						}
 						else {
 							move dummy_mv;
-							score = -slow_find_best_move_for(board::opponent(player_id), &dummy_mv);
+							score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv);
 						}
 
 						if (score > best_score) {
-							*best_move = mv;
+							best_move = mv;
 							best_score = score;
 						}
 
@@ -385,6 +386,47 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	inline void endpoint_game::reset(endpoint_game_id_t endpoint_game_id,
+									player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
+									player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id,
+									log_ostream* log) {
+		base::reset(player_x_type, player_o_type, log);
+
+		_endpoint_game_id						= endpoint_game_id;
+		_endpoint_player_x.endpoint_player_id	= endpoint_player_x_id;
+		_endpoint_player_x.is_claimed			= endpoint_player_x_id == 0;
+		_endpoint_player_o.endpoint_player_id	= endpoint_player_o_id;
+		_endpoint_player_o.is_claimed			= endpoint_player_o_id == 0;
+	}
+
+
+	inline bool endpoint_game::claim_player(unsigned player_i, endpoint_player_id_t& endpoint_player_id) {
+		if (player_i == 0) {
+			if (_endpoint_player_x.is_claimed) {
+				return false;
+			}
+
+			endpoint_player_id = _endpoint_player_x.endpoint_player_id;
+			_endpoint_player_x.is_claimed = true;
+		}
+		else {
+			if (_endpoint_player_o.is_claimed) {
+				return false;
+			}
+
+			endpoint_player_id = _endpoint_player_o.endpoint_player_id;
+			_endpoint_player_o.is_claimed = true;
+		}
+
+		return true;
+	}
+
+
+	inline endpoint_game_id_t endpoint_game::id() const {
+		return _endpoint_game_id;
+	}
+
+
 	inline bool endpoint_game::is_done() const {
 		return _endpoint_game_id == 0;
 	}
@@ -429,163 +471,37 @@ namespace abc { namespace samples {
 		if (ascii::are_equal_i(resource_games, "")) {
 			create_game(http, method);
 		}
+		else {
+			endpoint_game_id_t endpoint_game_id = 0;
+			unsigned player_i = 0;
+
+			if (std::sscanf(resource_games, "/%u/players/%u", &endpoint_game_id, &player_i) == 2) {
+				claim_player(http, method, endpoint_game_id, player_i);
+			}
+		}
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void tictactoe_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
+	inline bool tictactoe_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::create_game: Start.");
 		}
 
 		if (!verify_method_post(http, method)) {
-			return;
+			return false;
 		}
 
 		if (!verify_header_json(http)) {
-			return;
+			return false;
 		}
 
-		char players[2][abc::size::_64 + 1];
-		bool has_players = false;
+		player_type_t player_x_type;
+		player_type_t player_o_type;
 
-		// Use a block to release the buffers when done parsing
-		{
-			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
-			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
-			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
-			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::begin_object) {
-				// The body is not a JSON object.
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-				return;
-			}
-
-			// Read all properties.
-			while (true) {
-				// The tokens at this level must be properties or }.
-				json.get_token(token, sizeof(buffer));
-
-				// If we reached }, then we are done parsing.
-				if (token->item == abc::json::item::end_object) {
-					break;
-				}
-
-				if (token->item != abc::json::item::property) {
-					// Not a property.
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a property.");
-					}
-
-					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-					return;
-				}
-
-				// We expect 1 property - "players".
-				if (ascii::are_equal(token->value.property, "players")) {
-					// Parse array [2].
-					json.get_token(token, sizeof(buffer));
-
-					if (token->item != abc::json::item::begin_array) {
-						// Not [.
-						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '['.");
-						}
-
-						// 400
-						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-						return;
-					}
-
-					for (std::size_t i = 0; i < 2; i++) {
-						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing players[%zu]", i);
-						}
-
-						json.get_token(token, sizeof(buffer));
-						if (token->item != abc::json::item::string) {
-							// Not a string.
-							if (base::_log != nullptr) {
-								base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a string.");
-							}
-
-							// 400
-							base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-							return;
-						}
-
-						std::strcpy(players[i], token->value.string);
-						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]='%s'", i, players[i]);
-						}
-					}
-
-					json.get_token(token, sizeof(buffer));
-					if (token->item != abc::json::item::end_array) {
-						// Not ].
-						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected ']'.");
-						}
-
-						// 400
-						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-						return;
-					}
-
-					has_players = true;
-				}
-				else {
-					// Future-proof: Ignore unknown properties.
-					json.skip_value();
-				}
-			}
-
-			if (!has_players) {
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Players not received.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
-				return;
-			}
+		if (!get_player_types(http, method, player_x_type, player_o_type)) {
+			return false;
 		}
-
-		// Player types
-		constexpr const char* invalid_player_type = "An invalid player type was received.";
-
-		player_type_t player_x_type = player_type::from_text(players[0]);
-		if (player_x_type == player_type::none) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[0]='%s'.", players[0]);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
-			return;
-		}
-
-		player_type_t player_o_type = player_type::from_text(players[1]);
-		if (player_o_type == player_type::none) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[1]='%s'.", players[1]);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
-			return;
-		}
-
-		endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
 
 		// Find a slot
 		std::size_t game_i = max_game_count;
@@ -614,8 +530,28 @@ namespace abc { namespace samples {
 
 			// 503
 			base::send_simple_response(http, status_code::Service_Unavailable, reason_phrase::Service_Unavailable, content_type::text, no_game_capacity, __TAG__);
-			return;
+			return false;
 		}
+
+		endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+
+		endpoint_player_id_t endpoint_player_x_id = 0;
+		bool is_endpoint_player_x_claimed = true;
+
+		endpoint_player_id_t endpoint_player_o_id = 0;
+		bool is_endpoint_player_o_claimed = true;
+
+		if (player_x_type == player_type::external) {
+			endpoint_player_x_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+			is_endpoint_player_x_claimed = false;
+		}
+
+		if (player_o_type == player_type::external) {
+			endpoint_player_o_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+			is_endpoint_player_o_claimed = false;
+		}
+
+		_games[game_i].reset(endpoint_game_id, player_x_type, endpoint_player_x_id, player_o_type, endpoint_player_o_id, base::_log);
 
 		// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
 		char body[abc::size::k1 + 1];
@@ -653,6 +589,230 @@ namespace abc { namespace samples {
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::create_game: Done.");
 		}
+
+		return true;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type) {
+		char players[2][abc::size::_64 + 1];
+		bool has_players = false;
+
+		std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
+		abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
+		char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
+		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
+		constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
+
+		json.get_token(token, sizeof(buffer));
+		if (token->item != abc::json::item::begin_object) {
+			// The body is not a JSON object.
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+			return false;
+		}
+
+		// Read all properties.
+		while (true) {
+			// The tokens at this level must be properties or }.
+			json.get_token(token, sizeof(buffer));
+
+			// If we reached }, then we are done parsing.
+			if (token->item == abc::json::item::end_object) {
+				break;
+			}
+
+			if (token->item != abc::json::item::property) {
+				// Not a property.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a property.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			// We expect 1 property - "players".
+			if (ascii::are_equal(token->value.property, "players")) {
+				// Parse array [2].
+				json.get_token(token, sizeof(buffer));
+
+				if (token->item != abc::json::item::begin_array) {
+					// Not [.
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '['.");
+					}
+
+					// 400
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+					return false;
+				}
+
+				for (std::size_t i = 0; i < 2; i++) {
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing players[%zu]", i);
+					}
+
+					json.get_token(token, sizeof(buffer));
+					if (token->item != abc::json::item::string) {
+						// Not a string.
+						if (base::_log != nullptr) {
+							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a string.");
+						}
+
+						// 400
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+						return false;
+					}
+
+					std::strcpy(players[i], token->value.string);
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]='%s'", i, players[i]);
+					}
+				}
+
+				json.get_token(token, sizeof(buffer));
+				if (token->item != abc::json::item::end_array) {
+					// Not ].
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected ']'.");
+					}
+
+					// 400
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+					return false;
+				}
+
+				has_players = true;
+			}
+			else {
+				// Future-proof: Ignore unknown properties.
+				json.skip_value();
+			}
+		}
+
+		if (!has_players) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Players not received.");
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+			return false;
+		}
+
+		// Player types
+		constexpr const char* invalid_player_type = "An invalid player type was received.";
+
+		player_x_type = player_type::from_text(players[0]);
+		if (player_x_type == player_type::none) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[0]='%s'.", players[0]);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			return false;
+		}
+
+		player_o_type = player_type::from_text(players[1]);
+		if (player_o_type == player_type::none) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[1]='%s'.", players[1]);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::claim_player: Start.");
+		}
+
+		if (endpoint_game_id == 0 || player_i > 1) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			return false;
+		}
+
+		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
+			if (_games[game_i].id() == endpoint_game_id) {
+				endpoint_player_id_t endpoint_player_id;
+				if (!_games[game_i].claim_player(player_i, endpoint_player_id)) {
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Security error: Player already claimed. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+					}
+
+					// 403
+					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "This play has already been claimed.", __TAG__);
+					return false;
+				}
+
+				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+				char body[abc::size::k1 + 1];
+				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
+				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+				json.put_begin_object();
+					json.put_property("playerId");
+					json.put_number(endpoint_player_id);
+				json.put_end_object();
+				json.put_char('\0');
+				json.flush();
+
+				char content_length[abc::size::_32 + 1];
+				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+
+				// Send the http response
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+				}
+
+				http.put_protocol(protocol::HTTP_11);
+				http.put_status_code(status_code::OK);
+				http.put_reason_phrase(reason_phrase::OK);
+
+				http.put_header_name(header::Connection);
+				http.put_header_value(connection::close);
+				http.put_header_name(header::Content_Type);
+				http.put_header_value(content_type::json);
+				http.put_header_name(header::Content_Length);
+				http.put_header_value(content_length);
+				http.end_headers();
+
+				http.put_body(body);
+
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::claim_player: Done.");
+				}
+
+				return true;
+			}
+		}
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+		}
+
+		// 404
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		return false;
 	}
 
 
