@@ -261,7 +261,9 @@ namespace abc { namespace samples {
 		bool			create_game(abc::http_server_stream<Log>& http, const char* method);
 		bool			get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type);
 		bool			claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
+		bool			get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
 
+		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_header_json(abc::http_server_stream<Log>& http);
 

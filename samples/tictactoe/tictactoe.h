@@ -500,9 +500,13 @@ namespace abc { namespace samples {
 		else {
 			unsigned game_id = 0;
 			unsigned player_i = 0;
+			unsigned since_move_i = 0;
 
 			if (std::sscanf(resource_games, "/%u/players/%u", &game_id, &player_i) == 2) {
 				claim_player(http, method, static_cast<endpoint_game_id_t>(game_id), player_i);
+			}
+			else if (std::sscanf(resource_games, "/%u/moves?since=%u", &game_id, &since_move_i) == 2) {
+				get_moves(http, method, static_cast<endpoint_game_id_t>(game_id), since_move_i);
 			}
 		}
 	}
@@ -847,6 +851,96 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::get_moves: Start.");
+		}
+
+		if (!verify_method_get(http, method)) {
+			return false;
+		}
+
+		if (endpoint_game_id == 0) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u", (unsigned)endpoint_game_id);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			return false;
+		}
+
+		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
+			if (_games[game_i].id() == endpoint_game_id) {
+				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+				char body[abc::size::k1 + 1];
+				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
+				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+
+				json.put_begin_object();
+					json.put_property("moves");
+						json.put_begin_array();
+
+						for (std::size_t move_i = since_move_i; move_i < _games[game_i].move_count(); move_i++) {
+							json.put_begin_object();
+								json.put_property("i");
+								json.put_number(move_i);
+								json.put_property("move");
+								json.put_begin_object();
+									json.put_property("row");
+									json.put_number(_games[game_i].moves()[move_i].row);
+									json.put_property("col");
+									json.put_number(_games[game_i].moves()[move_i].col);
+								json.put_end_object();
+							json.put_end_object();
+						}
+
+						json.put_end_array();
+				json.put_end_object();
+				json.put_char('\0');
+				json.flush();
+
+				char content_length[abc::size::_32 + 1];
+				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+
+				// Send the http response
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+				}
+
+				http.put_protocol(protocol::HTTP_11);
+				http.put_status_code(status_code::OK);
+				http.put_reason_phrase(reason_phrase::OK);
+
+				http.put_header_name(header::Connection);
+				http.put_header_value(connection::close);
+				http.put_header_name(header::Content_Type);
+				http.put_header_value(content_type::json);
+				http.put_header_name(header::Content_Length);
+				http.put_header_value(content_length);
+				http.end_headers();
+
+				http.put_body(body);
+
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::get_moves: Done.");
+				}
+
+				return true;
+			}
+		}
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u, since_move_i=%u", (unsigned)endpoint_game_id, since_move_i);
+		}
+
+		// 404
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		return false;
+	}
+
+
+	template <typename Limits, typename Log>
 	inline void tictactoe_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
 		if (!verify_method_post(http, method)) {
 			return;
@@ -860,6 +954,22 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
+		if (!ascii::are_equal_i(method, method::GET)) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'GET'.");
+			}
+
+			// 405
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", __TAG__);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	template <typename Limits, typename Log>
 	inline bool tictactoe_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::POST)) {
 			if (base::_log != nullptr) {
@@ -867,7 +977,7 @@ namespace abc { namespace samples {
 			}
 
 			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "POST is the only supported method for resource '/problem'.", __TAG__);
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", __TAG__);
 			return false;
 		}
 

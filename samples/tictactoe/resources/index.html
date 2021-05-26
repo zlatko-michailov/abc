@@ -115,13 +115,13 @@ SOFTWARE.
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<select id="playerX">
 							<option value="external">User</option>
-							<option value="slow_engine">Computer, slow</option>
+							<option value="slow_engine" selected>Computer, slow</option>
 							<option value="fast_engine">Computer, fast</option>
 						</select>
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						<select id="playerO">
 							<option value="external">User</option>
-							<option value="slow_engine">Computer, slow</option>
+							<option value="slow_engine" selected>Computer, slow</option>
 							<option value="fast_engine">Computer, fast</option>
 						</select>
 					</div>
@@ -133,6 +133,10 @@ SOFTWARE.
 							<option value="0">X</option>
 							<option value="1">O</option>
 						</select>
+					</div>
+					<br />
+					<div>
+						<a href="javascript:getMoves()">Get moves</a>
 					</div>
 					<br />
 					<br />
@@ -197,6 +201,7 @@ SOFTWARE.
 			let isRunning = true;
 			let gameId = 0;
 			let playerIds = [];
+			let lastMoveI = 0;
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function createGame() {
@@ -250,6 +255,40 @@ SOFTWARE.
 						playerIds[parseInt(document.getElementById("playerI").value)] = result.playerId;
 						document.getElementById("status").innerHTML += "playerId[" + document.getElementById("playerI").value + "]=" + playerIds[parseInt(document.getElementById("playerI").value)] + "<br />";
 					});
+			}
+
+			function getMoves() {
+				let requestInit = {
+					method: "GET",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/games/" + gameId + "/moves?since=" + lastMoveI);
+				fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+						showMoves(result.moves);
+					});
+			}
+
+			function showMoves(mvs) {
+				mvs.forEach(mv => {
+					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
+					lastMoveI = Math.max(lastMoveI, mv.i);
+					let html;
+					if (mv.i % 2 == 0) {
+						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
+					}
+					else {
+						html = "<span class=\"o\">&nbsp;O&nbsp;</span>";
+					}
+					document.getElementById(mv.move.row + "_" + mv.move.col).innerHTML = html;
+				});
+
 			}
 
 			function shutdown() {
