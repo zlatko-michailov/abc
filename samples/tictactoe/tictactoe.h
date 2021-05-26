@@ -355,6 +355,10 @@ namespace abc { namespace samples {
 				accepted, _board.move_count(), player_id, move.row, move.col);
 		}
 
+		if (accepted) {
+			_moves[_move_count++] = move;
+		}
+
 		if (_board.is_game_over()) {
 			if (_log != nullptr) {
 				if (_board.winner() != player_id::none) {
@@ -362,6 +366,10 @@ namespace abc { namespace samples {
 				}
 				else {
 					_log->put_any(category::abc::samples, severity::important, __TAG__, "game::accept_move(): GAME OVER - draw");
+				}
+
+				for (std::size_t i = 0; i < _move_count; i++) {
+					_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
 				}
 			}
 		}
@@ -383,6 +391,16 @@ namespace abc { namespace samples {
 	}
 
 
+	inline std::size_t game::move_count() const {
+		return _move_count;
+	}
+
+
+	inline const move* game::moves() const {
+		return _moves;
+	}
+
+
 	// --------------------------------------------------------------
 
 
@@ -397,6 +415,10 @@ namespace abc { namespace samples {
 		_endpoint_player_x.is_claimed			= endpoint_player_x_id == 0;
 		_endpoint_player_o.endpoint_player_id	= endpoint_player_o_id;
 		_endpoint_player_o.is_claimed			= endpoint_player_o_id == 0;
+
+		if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
+			start();
+		}
 	}
 
 
@@ -416,6 +438,10 @@ namespace abc { namespace samples {
 
 			endpoint_player_id = _endpoint_player_o.endpoint_player_id;
 			_endpoint_player_o.is_claimed = true;
+		}
+
+		if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
+			start();
 		}
 
 		return true;

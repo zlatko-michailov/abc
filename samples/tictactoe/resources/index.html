@@ -200,6 +200,8 @@ SOFTWARE.
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function createGame() {
+				clearBoard();
+
 				let requestHeaders = new Headers();
 				requestHeaders.append("Content-Type", "application/json");
 
@@ -269,6 +271,14 @@ SOFTWARE.
 							document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
 						}
 					});
+			}
+
+			function clearBoard() {
+				for (let row = 0; row < 3; row++) {
+					for (let col = 0; col < 3; col++) {
+						document.getElementById(row + "_" + col).innerHTML = "&nbsp;&nbsp;&nbsp;";
+					}
+				}
 			}
 		</script>
 	</body>

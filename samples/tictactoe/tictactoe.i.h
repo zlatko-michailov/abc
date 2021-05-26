@@ -176,6 +176,8 @@ namespace abc { namespace samples {
 
 	class game {
 	public:
+		static constexpr std::size_t max_move_count = size * size;
+
 		////game() = default;
 
 	public:
@@ -185,12 +187,17 @@ namespace abc { namespace samples {
 
 	public:
 		const samples::board&	board() const;
+		std::size_t				move_count() const;
+		const move*				moves() const;
 
 	private:
 		samples::board			_board;
 		player_agent			_agent_x;
 		player_agent			_agent_o;
-		log_ostream*			_log		= nullptr;
+		log_ostream*			_log					= nullptr;
+
+		std::size_t				_move_count				= 0;
+		move					_moves[max_move_count];
 	};
 
 
@@ -215,8 +222,6 @@ namespace abc { namespace samples {
 	class endpoint_game: public game {
 		using base = game;
 
-		static constexpr std::size_t max_move_count = size * size;
-
 	public:
 		void					reset(endpoint_game_id_t endpoint_game_id,
 									 player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
@@ -231,9 +236,6 @@ namespace abc { namespace samples {
 		endpoint_game_id_t		_endpoint_game_id		= 0;
 		endpoint_player			_endpoint_player_x;
 		endpoint_player			_endpoint_player_o;
-		std::size_t				_move_count				= 0;
-		move					_moves[max_move_count];
-
 	};
 
 
