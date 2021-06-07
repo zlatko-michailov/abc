@@ -68,10 +68,10 @@ Response
 }
 
 -----------------------------------------
-POST /games/{gameId}/player/{playerId}/move
+POST /games/{gameId}/players/{playerId}/moves
 -----------------------------------------
 Request
-any
+any (move)
 
 Response
 {
@@ -85,43 +85,7 @@ Response
 {
   "moves": Array<{
     "i": number,
-    "move": any,
+    "move": any (move),
   }> | undefined,
   "winner": number | undefined
 }
-
-
-game_endpoint<MaxGames, Game, MaxMoves, Move> : endpoint {
-  virtual void  process_rest_request()
-
-  void      create_game()
-  void      claim_player()
-  void      accept_move()
-  void      get_moves()
-}
-
-game<MaxMoves, Move> {
-  game()
-
-  virtual bool      init(const char* players[])
-  virtual bool      start()
-  virtual bool      accept_move(player_i, const Move& mv)
-
-  uint8_t   status() const
-  uint8_t   current_player_i() const
-  uint16_t  move_count() const
-  const Move* moves(since_i) const
-}
-
-game_player<Move> {
-  virtual void      init(game* gm, player_i)
-  virtual void      make_move()
-}
-
-Move {
-  Move()
-
-  void      from_json(json_stream)
-  void      to_json(json_stream) const
-}
-

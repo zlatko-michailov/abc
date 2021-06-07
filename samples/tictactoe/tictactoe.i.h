@@ -231,6 +231,7 @@ namespace abc { namespace samples {
 
 		endpoint_game_id_t		id() const;
 		bool					is_done() const;
+		player_id_t				player_id(endpoint_player_id_t endpoint_player_id) const;
 
 	private:
 		endpoint_game_id_t		_endpoint_game_id		= 0;
@@ -261,6 +262,7 @@ namespace abc { namespace samples {
 		bool			create_game(abc::http_server_stream<Log>& http, const char* method);
 		bool			get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type);
 		bool			claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
+		bool			accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
 		bool			get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
 
 		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);

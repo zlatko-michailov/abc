@@ -315,7 +315,7 @@ namespace abc { namespace samples {
 
 
 	inline void player_agent::fast_make_move() {
-		//// TODO:
+		//// TODO: fast
 	}
 
 
@@ -458,6 +458,18 @@ namespace abc { namespace samples {
 	}
 
 
+	inline player_id_t endpoint_game::player_id(endpoint_player_id_t endpoint_player_id) const {
+		if (endpoint_player_id == _endpoint_player_x.endpoint_player_id) {
+			return player_id::x;
+		}
+		else if (endpoint_player_id == _endpoint_player_o.endpoint_player_id) {
+			return player_id::o;
+		}
+
+		return player_id::none;
+	}
+
+
 	// --------------------------------------------------------------
 
 
@@ -499,10 +511,16 @@ namespace abc { namespace samples {
 		}
 		else {
 			unsigned game_id = 0;
+			unsigned player_id = 0;
 			unsigned player_i = 0;
 			unsigned since_move_i = 0;
+			char moves[6 + 1 + 1];
+			moves[0] = '\0';
 
-			if (std::sscanf(resource_games, "/%u/players/%u", &game_id, &player_i) == 2) {
+			if (std::sscanf(resource_games, "/%u/players/%u/%6s", &game_id, &player_id, moves) == 3) {
+				accept_move(http, method, static_cast<endpoint_game_id_t>(game_id), static_cast<endpoint_player_id_t>(player_id), moves);
+			}
+			else if (std::sscanf(resource_games, "/%u/players/%u", &game_id, &player_i) == 2) {
 				claim_player(http, method, static_cast<endpoint_game_id_t>(game_id), player_i);
 			}
 			else if (std::sscanf(resource_games, "/%u/moves?since=%u", &game_id, &since_move_i) == 2) {
@@ -842,6 +860,192 @@ namespace abc { namespace samples {
 
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+		}
+
+		// 404
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		return false;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline bool tictactoe_endpoint<Limits, Log>::accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::accept_move: Start.");
+		}
+
+		if (!ascii::are_equal_i(moves, "moves")) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: '%s' must be 'moves'.", moves);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			return false;
+		}
+
+		if (!verify_method_post(http, method)) {
+			return false;
+		}
+
+		if (!verify_header_json(http)) {
+			return false;
+		}
+
+		if (endpoint_game_id == 0 || endpoint_player_id == 0) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u, player_id=%u",
+					(unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			return false;
+		}
+
+		move mv;
+		// Read move from JSON
+		{
+			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
+			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
+			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
+			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
+			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"row\": 0, \"col\": 1}.";
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::begin_object) {
+				// Not {.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "row")) {
+				// Not "row".
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"row\".");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 2)) {
+				// Not a valid row.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 2.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			mv.row = token->value.number;
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "col")) {
+				// Not "col".
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"col\".");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 2)) {
+				// Not a valid row.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 2.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return false;
+			}
+
+			mv.col = token->value.number;
+		}
+
+		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
+			if (_games[game_i].id() == endpoint_game_id) {
+				player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
+
+				if (player_id == player_id::none) {
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Player not found. player_id=%u", (unsigned)endpoint_player_id);
+					}
+
+					// 404
+					base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A player with the supplied ID was not found.", __TAG__);
+					return false;
+				}
+
+				if (!_games[game_i].accept_move(player_id, mv)) {
+					if (base::_log != nullptr) {
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Move not accepted. move={ %u, %u }", mv.row, mv.col);
+					}
+
+					// 403
+					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "The move was not accepted.", __TAG__);
+					return false;
+				}
+
+				// Return 200.
+				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+				char body[abc::size::k1 + 1];
+				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
+				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+
+				json.put_begin_object();
+					json.put_property("i");
+					json.put_number(_games[game_i].move_count() - 1);
+				json.put_end_object();
+				json.put_char('\0');
+				json.flush();
+
+				char content_length[abc::size::_32 + 1];
+				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+
+				// Send the http response
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+				}
+
+				http.put_protocol(protocol::HTTP_11);
+				http.put_status_code(status_code::OK);
+				http.put_reason_phrase(reason_phrase::OK);
+
+				http.put_header_name(header::Connection);
+				http.put_header_value(connection::close);
+				http.put_header_name(header::Content_Type);
+				http.put_header_value(content_type::json);
+				http.put_header_name(header::Content_Length);
+				http.put_header_value(content_length);
+				http.end_headers();
+
+				http.put_body(body);
+
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "tictactoe_endpoint::get_moves: Done.");
+				}
+
+				return true;
+			}
+		}
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u", (unsigned)endpoint_game_id);
 		}
 
 		// 404
