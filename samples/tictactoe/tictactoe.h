@@ -453,11 +453,6 @@ namespace abc { namespace samples {
 	}
 
 
-	inline bool endpoint_game::is_done() const {
-		return _endpoint_game_id == 0;
-	}
-
-
 	inline player_id_t endpoint_game::player_id(endpoint_player_id_t endpoint_player_id) const {
 		if (endpoint_player_id == _endpoint_player_x.endpoint_player_id) {
 			return player_id::x;
@@ -558,7 +553,7 @@ namespace abc { namespace samples {
 		}
 		else {
 			for (std::size_t i = 0; i < max_game_count; i++) {
-				if (_games[i].is_done()) {
+				if (_games[i].board().is_game_over()) {
 					game_i = i;
 
 					if (base::_log != nullptr) {
@@ -1010,6 +1005,12 @@ namespace abc { namespace samples {
 				json.put_begin_object();
 					json.put_property("i");
 					json.put_number(_games[game_i].move_count() - 1);
+
+					if (_games[game_i].board().is_game_over()) {
+						json.put_property("winner");
+						json.put_number(_games[game_i].board().winner());
+					}
+
 				json.put_end_object();
 				json.put_char('\0');
 				json.flush();
@@ -1100,6 +1101,12 @@ namespace abc { namespace samples {
 						}
 
 						json.put_end_array();
+
+					if (_games[game_i].board().is_game_over()) {
+						json.put_property("winner");
+						json.put_number(_games[game_i].board().winner());
+					}
+
 				json.put_end_object();
 				json.put_char('\0');
 				json.flush();

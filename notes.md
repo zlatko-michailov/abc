@@ -75,7 +75,8 @@ any (move)
 
 Response
 {
-  "i": number
+  "i": number,
+  "winner": number | undefined
 }
 
 -----------------------------------------

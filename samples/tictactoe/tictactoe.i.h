@@ -230,7 +230,6 @@ namespace abc { namespace samples {
 		bool					claim_player(unsigned player_i, endpoint_player_id_t& endpoint_player_id);
 
 		endpoint_game_id_t		id() const;
-		bool					is_done() const;
 		player_id_t				player_id(endpoint_player_id_t endpoint_player_id) const;
 
 	private:
