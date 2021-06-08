@@ -67,6 +67,15 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	inline void board::reset() {
+		_is_game_over		= false;
+		_winner				= player_id::none;
+		_current_player_id	= player_id::x;
+		_board_state		= { 0 };
+		_move_count			= 0;
+	}
+
+
 	inline bool board::accept_move(const move& move) {
 		if (!move.is_valid()) {
 			return false;
@@ -326,6 +335,7 @@ namespace abc { namespace samples {
 		_agent_x.reset(this, player_id::x, player_x_type, log);
 		_agent_o.reset(this, player_id::o, player_o_type, log);
 		_log = log;
+		_board.reset();
 	}
 
 
@@ -356,7 +366,7 @@ namespace abc { namespace samples {
 		}
 
 		if (accepted) {
-			_moves[_move_count++] = move;
+			_moves[_board.move_count() - 1] = move;
 		}
 
 		if (_board.is_game_over()) {
@@ -368,7 +378,7 @@ namespace abc { namespace samples {
 					_log->put_any(category::abc::samples, severity::important, __TAG__, "game::accept_move(): GAME OVER - draw");
 				}
 
-				for (std::size_t i = 0; i < _move_count; i++) {
+				for (std::size_t i = 0; i < _board.move_count(); i++) {
 					_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
 				}
 			}
@@ -388,11 +398,6 @@ namespace abc { namespace samples {
 
 	inline const samples::board& game::board() const {
 		return _board;
-	}
-
-
-	inline std::size_t game::move_count() const {
-		return _move_count;
 	}
 
 
@@ -1004,7 +1009,7 @@ namespace abc { namespace samples {
 
 				json.put_begin_object();
 					json.put_property("i");
-					json.put_number(_games[game_i].move_count() - 1);
+					json.put_number(_games[game_i].board().move_count() - 1);
 
 					if (_games[game_i].board().is_game_over()) {
 						json.put_property("winner");
@@ -1086,7 +1091,7 @@ namespace abc { namespace samples {
 					json.put_property("moves");
 						json.put_begin_array();
 
-						for (std::size_t move_i = since_move_i; move_i < _games[game_i].move_count(); move_i++) {
+						for (std::size_t move_i = since_move_i; move_i < _games[game_i].board().move_count(); move_i++) {
 							json.put_begin_object();
 								json.put_property("i");
 								json.put_number(move_i);

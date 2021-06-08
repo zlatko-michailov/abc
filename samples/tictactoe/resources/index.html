@@ -201,8 +201,9 @@ SOFTWARE.
 			let isRunning = true;
 			let gameId = 0;
 			let playerIds = [];
-			let lastMoveI = -1;
+			let sinceMoveI = 0;
 			let canAcceptMove = true;
+			let canRefreshMoves = true;
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function createGame() {
@@ -224,12 +225,18 @@ SOFTWARE.
 				};
 
 				let request = new Request("/games");
-				fetch(request, requestInit)
+				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
 
 						if (response.status === 200) {
+							gameId = 0;
+							playerIds = [];
+							sinceMoveI = 0;
 							canAcceptMove = true;
+							canRefreshMoves = true;
+
+							refreshMoves();
 						}
 
 						return response.json();
@@ -251,7 +258,7 @@ SOFTWARE.
 				};
 
 				let request = new Request("/games/" + gameId + "/players/" + document.getElementById("playerI").value);
-				fetch(request, requestInit)
+				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
 						return response.json();
@@ -269,7 +276,7 @@ SOFTWARE.
 					return;
 				}
 
-				let playerI = (lastMoveI + 1) % 2;
+				let playerI = sinceMoveI % 2;
 				let playerSymbol = playerI == 0 ? "X" : "O";
 				if (!playerIds[playerI]) {
 					document.getElementById("status").innerHTML += "Player " + playerSymbol + " has not been claimed by this console. <br />";
@@ -298,7 +305,7 @@ SOFTWARE.
 				};
 
 				let request = new Request("/games/" + gameId + "/players/" + playerIds[playerI] + "/moves");
-				fetch(request, requestInit)
+				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
 						return response.json();
@@ -307,7 +314,8 @@ SOFTWARE.
 						console.log(result);
 
 						canAcceptMove = true;
-						lastMoveI = Math.max(lastMoveI, result.i);
+						document.getElementById("status").innerHTML += result.i + ": { " + row + ", " + col + "} <br />";
+						sinceMoveI = Math.max(sinceMoveI, result.i + 1);
 
 						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;X&nbsp;</span>";
 						square.innerHTML = html;
@@ -316,14 +324,25 @@ SOFTWARE.
 					});
 			}
 
+			function refreshMoves() {
+				if (canRefreshMoves) {
+					setTimeout(function () {
+						getMoves()
+						.then(function () {
+							refreshMoves();
+						})
+					}, 1000);
+				}
+			}
+
 			function getMoves() {
 				let requestInit = {
 					method: "GET",
 					mode: "same-origin",
 				};
 
-				let request = new Request("/games/" + gameId + "/moves?since=" + lastMoveI);
-				fetch(request, requestInit)
+				let request = new Request("/games/" + gameId + "/moves?since=" + sinceMoveI);
+				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
 						return response.json();
@@ -338,7 +357,7 @@ SOFTWARE.
 			function showMoves(mvs) {
 				mvs.forEach(mv => {
 					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
-					lastMoveI = Math.max(lastMoveI, mv.i);
+					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
 					let html;
 					if (mv.i % 2 == 0) {
 						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
@@ -354,6 +373,7 @@ SOFTWARE.
 			function checkWinner(winner) {
 				if (typeof(winner) === "number") {
 					canAcceptMove = false;
+					canRefreshMoves = false;
 
 					if (winner === 0) {
 						document.getElementById("status").innerHTML += "The game ends in a DRAW. <br />";
@@ -377,7 +397,7 @@ SOFTWARE.
 				};
 
 				let request = new Request("/shutdown");
-				fetch(request, requestInit)
+				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
 
@@ -397,6 +417,8 @@ SOFTWARE.
 						document.getElementById(row + "_" + col).innerHTML = "&nbsp;&nbsp;&nbsp;";
 					}
 				}
+
+				document.getElementById("status").innerHTML = "";
 			}
 		</script>
 	</body>

@@ -101,6 +101,7 @@ namespace abc { namespace samples {
 	class board {
 	public:
 		////board() = default;
+		void				reset();
 
 	public:
 		bool				accept_move(const move& move);
@@ -187,16 +188,14 @@ namespace abc { namespace samples {
 
 	public:
 		const samples::board&	board() const;
-		std::size_t				move_count() const;
 		const move*				moves() const;
 
 	private:
 		samples::board			_board;
 		player_agent			_agent_x;
 		player_agent			_agent_o;
-		log_ostream*			_log					= nullptr;
+		log_ostream*			_log			= nullptr;
 
-		std::size_t				_move_count				= 0;
 		move					_moves[max_move_count];
 	};
 
