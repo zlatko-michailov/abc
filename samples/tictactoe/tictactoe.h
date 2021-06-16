@@ -40,6 +40,17 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	inline vmem_bundle::vmem_bundle(const char* path, log_ostream* log)
+		: pool(path, log)
+		, start_page(&pool, vmem_page_pos_start, log)
+		, state_scores_map(&static_cast<start_page_layout*>(start_page.ptr())->map_state, &pool, log)
+		, log(log) {
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	inline player_type_t player_type::from_text(const char* text) {
 		if (ascii::are_equal(text, "external")) {
 			return player_type::external;
@@ -324,7 +335,17 @@ namespace abc { namespace samples {
 
 
 	inline void player_agent::fast_make_move() {
-		//// TODO: fast
+		move best_move = fast_find_best_move();
+		_game->accept_move(_player_id, best_move);
+
+		if (_game->board().is_game_over()) {
+			//// TODO: fast apply learning
+		}
+	}
+
+
+	inline move player_agent::fast_find_best_move() {
+		//// TODO: fast find best move
 	}
 
 

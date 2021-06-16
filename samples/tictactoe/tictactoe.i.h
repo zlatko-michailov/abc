@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <cstdint>
 #include <thread>
+#include <mutex>
 
 #include "../../src/log.h"
 #include "../../src/vmem.h"
@@ -37,9 +38,8 @@ namespace abc { namespace samples {
 	using results_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
 	using limits = abc::endpoint_limits;
 
-	// Max 8 pages = 32KB in memory.
-	using vmem_pool = abc::vmem_pool<8, log_ostream>;
-	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
+
+	// --------------------------------------------------------------
 
 
 	constexpr std::size_t size = 3;
@@ -48,12 +48,33 @@ namespace abc { namespace samples {
 	#pragma pack(push, 1)
 
 	using board_state = std::uint32_t;
-	using board_move_stats = std::int8_t[size][size];
+	using board_state_scores = std::int8_t[size][size];
+
+	struct start_page_layout {
+		vmem_map_state	map_state;
+	};
 
 	#pragma pack(pop)
 
 
-	using vmem_kb = abc::vmem_map<board_state, board_move_stats, vmem_pool, log_ostream>;
+	// --------------------------------------------------------------
+
+
+	// Max 8 pages = 32KB in memory.
+	using vmem_pool = abc::vmem_pool<8, log_ostream>;
+	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
+	using vmem_map = abc::vmem_map<board_state, board_state_scores, vmem_pool, log_ostream>;
+
+
+	struct vmem_bundle {
+		vmem_bundle(const char* path, log_ostream* log);
+
+		std::mutex		mutex;
+		vmem_pool		pool;
+		vmem_page		start_page;
+		vmem_map		state_scores_map;
+		log_ostream*	log;
+	};
 
 
 	// --------------------------------------------------------------
@@ -162,6 +183,7 @@ namespace abc { namespace samples {
 	// Thinking fast
 	private:
 		void	fast_make_move();
+		move	fast_find_best_move();
 
 	private:
 		game*				_game			= nullptr;
@@ -169,6 +191,9 @@ namespace abc { namespace samples {
 		player_type_t		_player_type	= player_type::none;
 		board				_temp_board;
 		log_ostream*		_log			= nullptr;
+
+	public:
+		static vmem_bundle*	vmem;
 	};
 
 

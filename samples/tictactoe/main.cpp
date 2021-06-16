@@ -33,6 +33,15 @@ SOFTWARE.
 #include "tictactoe.h"
 
 
+// --------------------------------------------------------------
+
+
+abc::samples::vmem_bundle* abc::samples::player_agent::vmem = nullptr;
+
+
+// --------------------------------------------------------------
+
+
 int main(int argc, const char* argv[]) {
 	std::srand(std::time(nullptr));
 
@@ -45,8 +54,8 @@ int main(int argc, const char* argv[]) {
 	char path[max_path];
 	path[0] = '\0';
 
-	constexpr const char kb_path[] = "kb.vmem";
-	std::size_t kb_path_len = std::strlen(kb_path); 
+	constexpr const char vmem_path[] = "kb.vmem";
+	std::size_t vmem_path_len = std::strlen(vmem_path); 
 
 	constexpr const char results_path[] = "results.csv";
 	std::size_t results_path_len = std::strlen(results_path); 
@@ -58,7 +67,7 @@ int main(int argc, const char* argv[]) {
 	if (prog_last_separator != nullptr) {
 		prog_path_len = prog_last_separator - argv[0];
 		prog_path_len_1 = prog_path_len + 1;
-		std::size_t full_path_len = prog_path_len_1 + std::max(kb_path_len, results_path_len);
+		std::size_t full_path_len = prog_path_len_1 + std::max(vmem_path_len, results_path_len);
 
 		if (full_path_len >= max_path) {
 			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
@@ -70,14 +79,15 @@ int main(int argc, const char* argv[]) {
 
 		std::strncpy(path, argv[0], prog_path_len_1);
 	}
-	std::strcpy(path + prog_path_len_1, kb_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "kb_path='%s'", path);
+	std::strcpy(path + prog_path_len_1, vmem_path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "vmem_path='%s'", path);
 
 
-	// Construct a pool instance.
+	// Construct a pool and a map on it.
 	// If the file doesn't exist, the pool will be initialized.
 	// If the fie exists, it should be a valid pool.
-	abc::samples::vmem_pool pool(path, &log);
+	abc::samples::vmem_bundle vmem(path, &log);
+	abc::samples::player_agent::vmem = &vmem;
 
 
 	std::strcpy(path + prog_path_len_1, results_path);
