@@ -48,7 +48,15 @@ namespace abc { namespace samples {
 	#pragma pack(push, 1)
 
 	using board_state = std::uint32_t;
-	using board_state_scores = std::int8_t[size][size];
+
+	using score_calc = std::int16_t;
+	using score = std::uint8_t;
+	constexpr score no_score  = 255;
+	constexpr score max_score = 100;
+	constexpr score mid_score = 50;
+	constexpr score min_score = 0;
+
+	using scores = score[size][size];
 
 	struct start_page_layout {
 		vmem_map_state	map_state;
@@ -63,7 +71,7 @@ namespace abc { namespace samples {
 	// Max 8 pages = 32KB in memory.
 	using vmem_pool = abc::vmem_pool<8, log_ostream>;
 	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
-	using vmem_map = abc::vmem_map<board_state, board_state_scores, vmem_pool, log_ostream>;
+	using vmem_map = abc::vmem_map<board_state, scores, vmem_pool, log_ostream>;
 
 
 	struct vmem_bundle {
@@ -193,7 +201,7 @@ namespace abc { namespace samples {
 		log_ostream*		_log			= nullptr;
 
 	public:
-		static vmem_bundle*	vmem;
+		static vmem_bundle*	_vmem;
 	};
 
 

@@ -36,7 +36,7 @@ SOFTWARE.
 // --------------------------------------------------------------
 
 
-abc::samples::vmem_bundle* abc::samples::player_agent::vmem = nullptr;
+abc::samples::vmem_bundle* abc::samples::player_agent::_vmem = nullptr;
 
 
 // --------------------------------------------------------------
@@ -87,7 +87,18 @@ int main(int argc, const char* argv[]) {
 	// If the file doesn't exist, the pool will be initialized.
 	// If the fie exists, it should be a valid pool.
 	abc::samples::vmem_bundle vmem(path, &log);
-	abc::samples::player_agent::vmem = &vmem;
+	abc::samples::player_agent::_vmem = &vmem;
+
+	//// REMOVE
+	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "KB >>>");
+	for (abc::samples::vmem_map::iterator itr = vmem.state_scores_map.begin(); itr != vmem.state_scores_map.end(); itr++) {
+		log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "%8.8x: %d %d %d %d %d %d %d %d %d",
+			itr->key,
+			itr->value[0][0], itr->value[0][1], itr->value[0][2],
+			itr->value[1][0], itr->value[1][1], itr->value[1][2],
+			itr->value[2][0], itr->value[2][1], itr->value[2][2]);
+	}
+	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "<<< KB");
 
 
 	std::strcpy(path + prog_path_len_1, results_path);

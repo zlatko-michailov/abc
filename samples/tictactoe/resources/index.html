@@ -319,8 +319,6 @@ SOFTWARE.
 
 						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;X&nbsp;</span>";
 						square.innerHTML = html;
-
-						checkWinner(result.winner);
 					});
 			}
 
@@ -355,9 +353,15 @@ SOFTWARE.
 			}
 
 			function showMoves(mvs) {
+				sinceMoveISaved = sinceMoveI;
 				mvs.forEach(mv => {
-					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
+					if (mv.i < sinceMoveISaved) {
+						return;
+					}
+
 					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
+
+					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
 					let html;
 					if (mv.i % 2 == 0) {
 						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";

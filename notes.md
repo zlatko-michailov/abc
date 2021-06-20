@@ -2,6 +2,8 @@
 ----
 ## To Do
 ---
+const_iterator should support ++ and --
+---
 - Samples
   - tictactoe
   - connect four

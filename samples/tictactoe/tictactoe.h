@@ -191,8 +191,7 @@ namespace abc { namespace samples {
 			_is_game_over = true;
 			_winner = _current_player_id;
 		}
-
-		if (draw) {
+		else if (draw) {
 			_is_game_over = true;
 			_winner = player_id::none;
 		}
@@ -345,7 +344,71 @@ namespace abc { namespace samples {
 
 
 	inline move player_agent::fast_find_best_move() {
-		//// TODO: fast find best move
+		std::lock_guard<std::mutex> lock(_vmem->mutex);
+
+		vmem_map::find_result2 find_result = _vmem->state_scores_map.find2(_game->board().state());
+		bool ok = find_result.ok;
+		vmem_map::iterator itr = find_result.iterator;
+		_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 1: ok=%d", ok);
+		if (!ok) {
+			vmem_map::value_type item;
+			item.key = _game->board().state();
+			for (int r = 0; r < size; r++) {
+				for (int c = 0; c < size; c++) {
+					item.value[r][c] = no_score;
+				}
+			}
+
+			vmem_map::result2 insert_result = _vmem->state_scores_map.insert2(item);
+			ok = insert_result.ok;
+			itr = insert_result.iterator;
+			_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 2: ok=%d", ok);
+		}
+
+		_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 3: ok=%d", ok);
+		move some_move;
+		if (ok) {
+			bool should_explore = true; // TODO: Calculate exploration
+			score_calc score_sum = 0;
+			for (int r = 0; r < size; r++) {
+				for (int c = 0; c < size; c++) {
+					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
+						score_calc curr_score = itr->value[r][c];
+						if (min_score <= curr_score && curr_score <= max_score) {
+							score_sum += curr_score;
+						}
+						else if (should_explore && curr_score == no_score) {
+							score_sum += mid_score;
+						}
+					}
+				}
+			}
+
+			score_calc score_rand = static_cast<score_calc>(1 + std::rand() % score_sum);
+			for (int r = 0; r < size; r++) {
+				for (int c = 0; c < size; c++) {
+					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
+						some_move = move{ r, c };
+
+						score_calc curr_score = itr->value[r][c];
+						if (min_score <= curr_score && curr_score <= max_score) {
+							score_rand -= curr_score;
+						}
+						else if (should_explore && curr_score == no_score) {
+							score_rand -= mid_score;
+						}
+
+						if (score_rand <= 0) {
+							_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, itr->value[r][c]);
+							return move{ r, c };
+						}
+					}
+				}
+			}
+		}
+
+		_log->put_any(category::abc::samples, severity::critical, __TAG__, "FAST impossible move");
+		return some_move;
 	}
 
 
