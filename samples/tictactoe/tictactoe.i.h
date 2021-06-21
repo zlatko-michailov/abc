@@ -44,19 +44,29 @@ namespace abc { namespace samples {
 
 	constexpr std::size_t size = 3;
 
+	using board_state_t = std::uint32_t;
+
+	using score_calc_t = std::int16_t;
+
+	using score_t = std::int8_t;
+
+	namespace score {
+		constexpr score_t none	= -1;
+
+		constexpr score_t max	= 100;
+		constexpr score_t mid	= 50;
+		constexpr score_t min	= 0;
+
+		constexpr score_t win	= 3;
+		constexpr score_t draw	= 1;
+		constexpr score_t loss	= -1;
+	}
+
+
 	// IMPORTANT: Ensure a predictable layout of the data on disk!
 	#pragma pack(push, 1)
 
-	using board_state = std::uint32_t;
-
-	using score_calc = std::int16_t;
-	using score = std::uint8_t;
-	constexpr score no_score  = 255;
-	constexpr score max_score = 100;
-	constexpr score mid_score = 50;
-	constexpr score min_score = 0;
-
-	using scores = score[size][size];
+	using scores = score_t[size][size];
 
 	struct start_page_layout {
 		vmem_map_state	map_state;
@@ -71,7 +81,7 @@ namespace abc { namespace samples {
 	// Max 8 pages = 32KB in memory.
 	using vmem_pool = abc::vmem_pool<8, log_ostream>;
 	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
-	using vmem_map = abc::vmem_map<board_state, scores, vmem_pool, log_ostream>;
+	using vmem_map = abc::vmem_map<board_state_t, scores, vmem_pool, log_ostream>;
 
 
 	struct vmem_bundle {
@@ -143,12 +153,12 @@ namespace abc { namespace samples {
 		unsigned			move_count() const;
 		bool				has_move(player_id_t player_id, const move& move) const;
 		player_id_t			current_player_id() const;
-		board_state			state() const;
+		board_state_t		state() const;
 
 		static player_id_t	opponent(player_id_t player_id);
 		
 	private:
-		static board_state	shift_up(player_id_t player_id, const move& move);
+		static board_state_t shift_up(player_id_t player_id, const move& move);
 		player_id_t			shift_down(const move& move) const;
 
 		void				set_move(const move& move);
@@ -160,7 +170,7 @@ namespace abc { namespace samples {
 		bool				_is_game_over		= false;
 		player_id_t			_winner				= player_id::none;
 		player_id_t			_current_player_id	= player_id::x;
-		board_state			_board_state		= { 0 };
+		board_state_t		_board_state		= { 0 };
 		unsigned			_move_count			= 0;
 	};
 
@@ -176,22 +186,25 @@ namespace abc { namespace samples {
 		////player_agent() = default;
 
 	public:
-		void	reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
-		void	make_move_async();
+		void				reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
+		void				make_move_async();
+		void				learn();
+		player_type_t		player_type() const;
 
 	private:
-		static void	make_move_proc(player_agent* this_ptr);
-		void	make_move();
+		static void			make_move_proc(player_agent* this_ptr);
+		void				make_move();
 
 	// Thinking slow
 	private:
-		void	slow_make_move();
-		int		slow_find_best_move_for(player_id_t player_id, move& best_move);
+		void				slow_make_move();
+		int					slow_find_best_move_for(player_id_t player_id, move& best_move);
 
 	// Thinking fast
 	private:
-		void	fast_make_move();
-		move	fast_find_best_move();
+		void				fast_make_move();
+		move				fast_find_best_move();
+		vmem_map::iterator	ensure_board_state_in_map(board_state_t board_state);
 
 	private:
 		game*				_game			= nullptr;

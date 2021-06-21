@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <cstdlib>
 #include <cstdio>
+#include <algorithm>
 
 #include "../../src/ascii.h"
 #include "../../src/endpoint.h"
@@ -161,8 +162,8 @@ namespace abc { namespace samples {
 
 
 	inline bool board::has_move(player_id_t player_id, const move& move) const {
-		board_state bits = shift_up(player_id, move);
-		board_state mask = shift_up(player_id::mask, move);
+		board_state_t bits = shift_up(player_id, move);
+		board_state_t mask = shift_up(player_id::mask, move);
 		return (_board_state & mask) == bits;
 	}
 
@@ -210,7 +211,7 @@ namespace abc { namespace samples {
 	}
 
 
-	inline board_state board::state() const {
+	inline board_state_t board::state() const {
 		return _board_state;
 	}
 
@@ -220,9 +221,9 @@ namespace abc { namespace samples {
 	}
 
 
-	inline board_state board::shift_up(player_id_t player_id, const move& move) {
+	inline board_state_t board::shift_up(player_id_t player_id, const move& move) {
 		int cell = move.row * size + move.col;
-		return static_cast<board_state>(player_id) << (cell * 2);
+		return static_cast<board_state_t>(player_id) << (cell * 2);
 	}
 
 
@@ -336,70 +337,57 @@ namespace abc { namespace samples {
 	inline void player_agent::fast_make_move() {
 		move best_move = fast_find_best_move();
 		_game->accept_move(_player_id, best_move);
-
-		if (_game->board().is_game_over()) {
-			//// TODO: fast apply learning
-		}
 	}
 
 
 	inline move player_agent::fast_find_best_move() {
 		std::lock_guard<std::mutex> lock(_vmem->mutex);
 
-		vmem_map::find_result2 find_result = _vmem->state_scores_map.find2(_game->board().state());
-		bool ok = find_result.ok;
-		vmem_map::iterator itr = find_result.iterator;
-		_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 1: ok=%d", ok);
-		if (!ok) {
-			vmem_map::value_type item;
-			item.key = _game->board().state();
-			for (int r = 0; r < size; r++) {
-				for (int c = 0; c < size; c++) {
-					item.value[r][c] = no_score;
-				}
-			}
+		vmem_map::iterator itr = ensure_board_state_in_map(_game->board().state());
 
-			vmem_map::result2 insert_result = _vmem->state_scores_map.insert2(item);
-			ok = insert_result.ok;
-			itr = insert_result.iterator;
-			_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 2: ok=%d", ok);
-		}
-
-		_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST 3: ok=%d", ok);
 		move some_move;
-		if (ok) {
-			bool should_explore = true; // TODO: Calculate exploration
-			score_calc score_sum = 0;
+		if (itr.can_deref()) {
+			bool should_explore = true; //// TODO: Calculate exploration
+
+			// We give all moves a weighted chance except to those that lead to the rock bottom.
+			// We calculate the sum of all eligible weights.
+			score_calc_t score_sum = 0;
 			for (int r = 0; r < size; r++) {
 				for (int c = 0; c < size; c++) {
 					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
-						score_calc curr_score = itr->value[r][c];
-						if (min_score <= curr_score && curr_score <= max_score) {
+						score_calc_t curr_score = itr->value[r][c];
+						if (score::min <= curr_score && curr_score <= score::max) {
 							score_sum += curr_score;
 						}
-						else if (should_explore && curr_score == no_score) {
-							score_sum += mid_score;
+						else if (should_explore && curr_score == score::none) {
+							score_sum += score::mid;
 						}
 					}
 				}
 			}
 
-			score_calc score_rand = static_cast<score_calc>(1 + std::rand() % score_sum);
+			// Generate a random number between 1 and sum of all eligible weights.
+			score_calc_t score_rand = static_cast<score_calc_t>(1 + std::rand() % score_sum);
+
+			// We find a move by subtracting each move's weight from the random number until there is nothing left.
 			for (int r = 0; r < size; r++) {
 				for (int c = 0; c < size; c++) {
 					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
 						some_move = move{ r, c };
 
-						score_calc curr_score = itr->value[r][c];
-						if (min_score <= curr_score && curr_score <= max_score) {
+						score_calc_t curr_score = itr->value[r][c];
+						if (score::min <= curr_score && curr_score <= score::max) {
 							score_rand -= curr_score;
 						}
-						else if (should_explore && curr_score == no_score) {
-							score_rand -= mid_score;
+						else if (should_explore && curr_score == score::none) {
+							score_rand -= score::mid;
 						}
 
 						if (score_rand <= 0) {
-							_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, itr->value[r][c]);
+							if (_log != nullptr) {
+								_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, itr->value[r][c]);
+							}
+
 							return move{ r, c };
 						}
 					}
@@ -407,8 +395,87 @@ namespace abc { namespace samples {
 			}
 		}
 
-		_log->put_any(category::abc::samples, severity::critical, __TAG__, "FAST impossible move");
+		// We should never end up here.
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::critical, __TAG__, "FAST: Impossible!");
+		}
+
 		return some_move;
+	}
+
+
+	inline void player_agent::learn() {
+		std::lock_guard<std::mutex> lock(_vmem->mutex);
+
+		board temp_board;
+		for (unsigned i = 0; i < _game->board().move_count(); i++) {
+			vmem_map::iterator itr = ensure_board_state_in_map(temp_board.state());
+
+			move mv(_game->moves()[i]);
+			score_t old_score = itr->value[mv.row][mv.col] == score::none ? score::mid : itr->value[mv.row][mv.col];
+
+			if (_game->board().winner() == temp_board.current_player_id()) {
+				// Win (for the current player)
+				score_t new_score = old_score + score::win;
+				itr->value[mv.row][mv.col] = std::min(score::max, new_score);
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+				}
+			}
+			else if (_game->board().winner() == player_id::none) {
+				// Draw
+				score_t new_score = old_score + score::draw;
+				itr->value[mv.row][mv.col] = std::min(score::max, new_score);
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+				}
+			}
+			else {
+				// Loss (for the current player)
+				score_t new_score = old_score + score::loss;
+				itr->value[mv.row][mv.col] = std::max(score::min, new_score);
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+				}
+			}
+
+			temp_board.accept_move(mv);
+		}
+	}
+
+
+	inline player_type_t player_agent::player_type() const {
+		return _player_type;
+	}
+
+
+	inline vmem_map::iterator player_agent::ensure_board_state_in_map(board_state_t board_state) {
+		vmem_map::iterator itr = _vmem->state_scores_map.find(board_state);
+
+		if (itr.can_deref()) {
+			return itr;
+		}
+
+		// An item with this key was not found. We'll insert it.
+
+		// Init the item before inserting it.
+		vmem_map::value_type item;
+		item.key = board_state;
+		for (int r = 0; r < size; r++) {
+			for (int c = 0; c < size; c++) {
+				item.value[r][c] = score::none;
+			}
+		}
+
+		// Insert the item.
+		vmem_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
+		return itr_b.first;
 	}
 
 
@@ -465,6 +532,14 @@ namespace abc { namespace samples {
 				for (std::size_t i = 0; i < _board.move_count(); i++) {
 					_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
 				}
+			}
+
+			//// TODO: Learn only from slow_engine
+			if (_agent_x.player_type() == player_type::fast_engine) {
+				_agent_x.learn();
+			}
+			else if (_agent_o.player_type() == player_type::fast_engine) {
+				_agent_o.learn();
 			}
 		}
 		else if (accepted) {
