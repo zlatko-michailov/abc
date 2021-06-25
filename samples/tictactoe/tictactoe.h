@@ -349,46 +349,84 @@ namespace abc { namespace samples {
 		if (itr.can_deref()) {
 			bool should_explore = true; //// TODO: Calculate exploration
 
-			// We give all moves a weighted chance except to those that lead to the rock bottom.
-			// We calculate the sum of all eligible weights.
+			// Analyze what we have.
+			score_calc_t max_count = 0;
+			score_calc_t min_count = 0;
+			score_calc_t none_count = 0;
 			score_calc_t score_sum = 0;
+
 			for (int r = 0; r < size; r++) {
 				for (int c = 0; c < size; c++) {
 					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
 						score_calc_t curr_score = itr->value[r][c];
-						if (score::min <= curr_score && curr_score <= score::max) {
-							score_sum += curr_score;
+
+						if (curr_score == score::max) {
+							max_count++;
 						}
-						else if (should_explore && curr_score == score::none) {
-							score_sum += score::mid;
+						else if (curr_score == score::min) {
+							min_count++;
+						}
+						else if (curr_score == score::none) {
+							none_count++;
+						}
+						else {
+							score_sum += curr_score;
 						}
 					}
 				}
 			}
 
-			// Generate a random number between 1 and sum of all eligible weights.
-			score_calc_t score_rand = static_cast<score_calc_t>(1 + std::rand() % score_sum);
+			// If there is one or more max scores, pick one of them.
+			if (max_count > 0) {
+				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-			// We find a move by subtracting each move's weight from the random number until there is nothing left.
-			for (int r = 0; r < size; r++) {
-				for (int c = 0; c < size; c++) {
-					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
-						some_move = move{ r, c };
+				for (int r = 0; r < size; r++) {
+					for (int c = 0; c < size; c++) {
+						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none && itr->value[r][c] == score::max) {
+							if (--max_count == 0) {
+								return move{ r, c };
+							}
+						}
+					}
+				}
+			}
 
+			// If all the scores are min, pick one of them.
+			else if (min_count == size * size) {
+				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
+
+				return move{ rand_i / (score_calc_t)size, rand_i % (score_calc_t)size };
+			}
+
+			// Make a weighted pick.
+			else {
+				if (should_explore) {
+					score_sum += none_count * score::mid;
+				}
+
+				score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
+
+				for (int r = 0; r < size; r++) {
+					for (int c = 0; c < size; c++) {
 						score_calc_t curr_score = itr->value[r][c];
-						if (score::min <= curr_score && curr_score <= score::max) {
-							score_rand -= curr_score;
-						}
-						else if (should_explore && curr_score == score::none) {
-							score_rand -= score::mid;
-						}
 
-						if (score_rand <= 0) {
-							if (_log != nullptr) {
-								_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, itr->value[r][c]);
+						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
+							if (score::min <= curr_score && curr_score <= score::max) {
+								some_move = move{ r, c };
+								rand_sum -= curr_score;
+							}
+							else if (should_explore && curr_score == score::none) {
+								some_move = move{ r, c };
+								rand_sum -= score::mid;
 							}
 
-							return move{ r, c };
+							if (rand_sum <= 0) {
+								if (_log != nullptr) {
+									_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, curr_score);
+								}
+
+								return move{ r, c };
+							}
 						}
 					}
 				}
@@ -409,39 +447,42 @@ namespace abc { namespace samples {
 
 		board temp_board;
 		for (unsigned i = 0; i < _game->board().move_count(); i++) {
-			vmem_map::iterator itr = ensure_board_state_in_map(temp_board.state());
-
 			move mv(_game->moves()[i]);
-			score_t old_score = itr->value[mv.row][mv.col] == score::none ? score::mid : itr->value[mv.row][mv.col];
 
-			if (_game->board().winner() == temp_board.current_player_id()) {
-				// Win (for the current player)
-				score_t new_score = old_score + score::win;
-				itr->value[mv.row][mv.col] = std::min(score::max, new_score);
+			if (temp_board.current_player_id() == _player_id) {
+				vmem_map::iterator itr = ensure_board_state_in_map(temp_board.state());
 
-				if (_log != nullptr) {
-					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+				score_t old_score = itr->value[mv.row][mv.col] == score::none ? score::mid : itr->value[mv.row][mv.col];
+
+				if (_game->board().winner() == _player_id) {
+					// Win
+					score_t new_score = old_score + score::win;
+					itr->value[mv.row][mv.col] = std::min(score::max, new_score);
+
+					if (_log != nullptr) {
+						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+					}
 				}
-			}
-			else if (_game->board().winner() == player_id::none) {
-				// Draw
-				score_t new_score = old_score + score::draw;
-				itr->value[mv.row][mv.col] = std::min(score::max, new_score);
+				else if (_game->board().winner() == player_id::none) {
+					// Draw
+					score_t new_score = old_score + score::draw;
+					itr->value[mv.row][mv.col] = std::min(score::max, new_score);
 
-				if (_log != nullptr) {
-					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+					if (_log != nullptr) {
+						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+					}
 				}
-			}
-			else {
-				// Loss (for the current player)
-				score_t new_score = old_score + score::loss;
-				itr->value[mv.row][mv.col] = std::max(score::min, new_score);
+				else {
+					// Loss
+					score_t new_score = old_score + score::loss;
+					itr->value[mv.row][mv.col] = std::max(score::min, new_score);
 
-				if (_log != nullptr) {
-					_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-						i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+					if (_log != nullptr) {
+						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+					}
 				}
 			}
 

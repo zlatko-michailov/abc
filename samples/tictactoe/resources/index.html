@@ -180,6 +180,20 @@ SOFTWARE.
 				<td>
 					<hr />
 					<br />
+					<div id="gameCount" class="readonly"></div>
+					<br />
+					<div id="currentStreak" class="readonly"></div>
+					<br />
+					<div id="streaks" class="readonly"></div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<hr />
+					<br />
 					<div id="status" class="readonly"></div>
 					<br />
 					<hr />
@@ -204,9 +218,18 @@ SOFTWARE.
 			let sinceMoveI = 0;
 			let canAcceptMove = true;
 			let canRefreshMoves = true;
+			const maxGameCount = 500;
+			let gameCount = 0;
+			let currentStreak = 0;
+			let autoCreateGame = false;
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function createGame() {
+				const playerX = document.getElementById("playerX").value;
+				const playerO = document.getElementById("playerO").value;
+
+				autoCreateGame = (playerX === "fast_engine" || playerX === "slow_engine") && (playerO === "fast_engine" || playerO === "slow_engine");
+
 				clearBoard();
 
 				let requestHeaders = new Headers();
@@ -381,15 +404,31 @@ SOFTWARE.
 
 					if (winner === 0) {
 						document.getElementById("status").innerHTML += "The game ends in a DRAW. <br />";
+
+						document.getElementById("streaks").innerHTML += " " + currentStreak;
+						currentStreak = 0;
 					}
 					else if (winner === 2) {
 						document.getElementById("status").innerHTML += "Player X wins! <br />";
+
+						currentStreak++;
 					}
 					else if (winner === 3) {
 						document.getElementById("status").innerHTML += "Player O wins! <br />";
+
+						currentStreak++;
 					}
 					else {
 						document.getElementById("status").innerHTML += "Unexpected winner " + winner + " <br />";
+					}
+
+					document.getElementById("currentStreak").innerHTML = currentStreak;
+
+					gameCount++;
+					document.getElementById("gameCount").innerHTML = gameCount;
+
+					if (autoCreateGame && gameCount < maxGameCount) {
+						setTimeout(createGame, 1000);
 					}
 				}
 			}

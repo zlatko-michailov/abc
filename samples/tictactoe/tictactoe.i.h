@@ -53,12 +53,12 @@ namespace abc { namespace samples {
 	namespace score {
 		constexpr score_t none	= -1;
 
-		constexpr score_t max	= 100;
-		constexpr score_t mid	= 50;
-		constexpr score_t min	= 0;
+		constexpr score_t max	= 20;
+		constexpr score_t mid	= 10;
+		constexpr score_t min	=  1;
 
-		constexpr score_t win	= 3;
-		constexpr score_t draw	= 1;
+		constexpr score_t win	=  3;
+		constexpr score_t draw	=  1;
 		constexpr score_t loss	= -1;
 	}
 
