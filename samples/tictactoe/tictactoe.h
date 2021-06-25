@@ -347,7 +347,7 @@ namespace abc { namespace samples {
 
 		move some_move;
 		if (itr.can_deref()) {
-			bool should_explore = true; //// TODO: Calculate exploration
+			bool should_explore = true; // TODO: Calculate exploration
 
 			// Analyze what we have.
 			score_calc_t max_count = 0;
@@ -575,11 +575,10 @@ namespace abc { namespace samples {
 				}
 			}
 
-			//// TODO: Learn only from slow_engine
-			if (_agent_x.player_type() == player_type::fast_engine) {
+			if (_agent_x.player_type() == player_type::fast_engine && _agent_o.player_type() == player_type::slow_engine) {
 				_agent_x.learn();
 			}
-			else if (_agent_o.player_type() == player_type::fast_engine) {
+			else if (_agent_o.player_type() == player_type::fast_engine && _agent_x.player_type() == player_type::slow_engine) {
 				_agent_o.learn();
 			}
 		}

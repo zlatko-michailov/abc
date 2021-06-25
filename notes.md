@@ -2,6 +2,7 @@
 ----
 ## To Do
 ---
+bind(REUSE)
 const_iterator should support ++ and --
 ---
 - Samples
