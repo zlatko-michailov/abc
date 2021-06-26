@@ -1,9 +1,10 @@
 ## Done
 ----
+tictactoe
+BUGFIX: Socket bind(REUSEADDR)
 ## To Do
 ---
-bind(REUSE)
-const_iterator should support ++ and --
+BUGFIX: const_iterator should support ++ and --
 ---
 - Samples
   - tictactoe

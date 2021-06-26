@@ -197,7 +197,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() connect()", 0x10010, _log);
+			throw exception<std::runtime_error, Log>("_basic_socket::tie() bind()/connect()", 0x10010, _log);
 		}
 
 		if (_log != nullptr) {
@@ -229,8 +229,12 @@ namespace abc {
 			throw exception<std::runtime_error, Log>("_basic_socket::tie() !is_open()", 0x10014, _log);
 		}
 
+		const int on = 1;
+
 		switch(tt) {
 			case socket::tie::bind:
+				::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
 				return ::bind(handle(), &addr, addr_len);
 
 			case socket::tie::connect:
