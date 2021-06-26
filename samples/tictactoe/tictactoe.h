@@ -422,7 +422,7 @@ namespace abc { namespace samples {
 
 							if (rand_sum <= 0) {
 								if (_log != nullptr) {
-									_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST best move: row=%d, col=%d, score=%d", r, c, curr_score);
+									_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
 								}
 
 								return move{ r, c };
@@ -435,7 +435,7 @@ namespace abc { namespace samples {
 
 		// We should never end up here.
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::critical, __TAG__, "FAST: Impossible!");
+			_log->put_any(category::abc::samples, severity::important, __TAG__, "player_agent::fast_find_best_move(): Impossible!");
 		}
 
 		return some_move;
@@ -460,7 +460,7 @@ namespace abc { namespace samples {
 					itr->value[mv.row][mv.col] = std::min(score::max, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
 							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
@@ -470,7 +470,7 @@ namespace abc { namespace samples {
 					itr->value[mv.row][mv.col] = std::min(score::max, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
 							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
@@ -480,7 +480,7 @@ namespace abc { namespace samples {
 					itr->value[mv.row][mv.col] = std::max(score::min, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, __TAG__, "FAST learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
 							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
