@@ -139,7 +139,6 @@ namespace abc { namespace samples {
 
 	class board {
 	public:
-		////board() = default;
 		void				reset();
 
 	public:
@@ -183,9 +182,6 @@ namespace abc { namespace samples {
 
 	class player_agent {
 	public:
-		////player_agent() = default;
-
-	public:
 		void				reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
 		void				make_move_async();
 		void				learn();
@@ -224,8 +220,6 @@ namespace abc { namespace samples {
 	class game {
 	public:
 		static constexpr std::size_t max_move_count = size * size;
-
-		////game() = default;
 
 	public:
 		void					reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log);
