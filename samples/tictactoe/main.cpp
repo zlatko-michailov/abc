@@ -90,7 +90,7 @@ int main(int argc, const char* argv[]) {
 	abc::samples::player_agent::_vmem = &vmem;
 
 	log.put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "KB >>>");
-	for (abc::samples::vmem_map::iterator itr = vmem.state_scores_map.begin(); itr != vmem.state_scores_map.end(); itr++) {
+	for (abc::samples::vmem_map::const_iterator itr = vmem.state_scores_map.cbegin(); itr != vmem.state_scores_map.cend(); itr++) {
 		log.put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "%8.8x: %d %d %d %d %d %d %d %d %d",
 			itr->key,
 			itr->value[0][0], itr->value[0][1], itr->value[0][2],
