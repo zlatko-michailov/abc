@@ -2,12 +2,11 @@
 ----
 tictactoe
 BUGFIX: Socket bind(REUSEADDR)
+BUGFIX: const_iterator to support ++ and --
 ## To Do
 ---
-BUGFIX: const_iterator should support ++ and --
 ---
 - Samples
-  - tictactoe
   - connect four
 ---
 - vmem:

@@ -75,16 +75,30 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++() noexcept {
-		if (is_valid()) {
-			*this = _container->next(*this);
-		}
+		return inc();
+	}
 
-		return *this;
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline const vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++() const noexcept {
+		return const_cast<vmem_iterator<Container, T, Pool, Log>*>(this)->inc();
 	}
 
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++(int) noexcept {
+		return inc();
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline const vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator ++(int) const noexcept {
+		return const_cast<vmem_iterator<Container, T, Pool, Log>*>(this)->inc();
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::inc() noexcept {
 		if (is_valid()) {
 			*this = _container->next(*this);
 		}
@@ -95,16 +109,30 @@ namespace abc {
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --() noexcept {
-		if (is_valid()) {
-			*this = _container->prev(*this);
-		}
+		return dec();
+	}
 
-		return *this;
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline const vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --() const noexcept {
+		return const_cast<vmem_iterator<Container, T, Pool, Log>*>(this)->dec();
 	}
 
 
 	template <typename Container, typename T, typename Pool, typename Log>
 	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --(int) noexcept {
+		return dec();
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline const vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::operator --(int) const noexcept {
+		return const_cast<vmem_iterator<Container, T, Pool, Log>*>(this)->dec();
+	}
+
+
+	template <typename Container, typename T, typename Pool, typename Log>
+	inline vmem_iterator<Container, T, Pool, Log>& vmem_iterator<Container, T, Pool, Log>::dec() noexcept {
 		if (is_valid()) {
 			*this = _container->prev(*this);
 		}

@@ -61,42 +61,50 @@ namespace abc {
 		vmem_iterator<Container, T, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
-		vmem_iterator<Container, T, Pool, Log>&	operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept = default;
-		vmem_iterator<Container, T, Pool, Log>&	operator =(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
+		vmem_iterator<Container, T, Pool, Log>&			operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept = default;
+		vmem_iterator<Container, T, Pool, Log>&			operator =(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
 
 	public:
-		bool									operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
-		bool									operator !=(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
-		vmem_iterator<Container, T, Pool, Log>&	operator ++() noexcept;
-		vmem_iterator<Container, T, Pool, Log>&	operator ++(int) noexcept;
-		vmem_iterator<Container, T, Pool, Log>&	operator --() noexcept;
-		vmem_iterator<Container, T, Pool, Log>&	operator --(int) noexcept;
-		pointer									operator ->() noexcept;
-		const_pointer							operator ->() const noexcept;
-		reference								operator *();
-		const_reference							operator *() const;
+		bool											operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
+		bool											operator !=(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
+		vmem_iterator<Container, T, Pool, Log>&			operator ++() noexcept;
+		const vmem_iterator<Container, T, Pool, Log>&	operator ++() const noexcept;
+		vmem_iterator<Container, T, Pool, Log>&			operator ++(int) noexcept;
+		const vmem_iterator<Container, T, Pool, Log>&	operator ++(int) const noexcept;
+		vmem_iterator<Container, T, Pool, Log>&			operator --() noexcept;
+		const vmem_iterator<Container, T, Pool, Log>&	operator --() const noexcept;
+		vmem_iterator<Container, T, Pool, Log>&			operator --(int) noexcept;
+		const vmem_iterator<Container, T, Pool, Log>&	operator --(int) const noexcept;
+		pointer											operator ->() noexcept;
+		const_pointer									operator ->() const noexcept;
+		reference										operator *();
+		const_reference									operator *() const;
 
 	public:
-		bool									is_valid() const noexcept;
-		bool									can_deref() const noexcept;
+		bool											is_valid() const noexcept;
+		bool											can_deref() const noexcept;
+
+	private:
+		vmem_iterator<Container, T, Pool, Log>&			inc() noexcept;
+		vmem_iterator<Container, T, Pool, Log>&			dec() noexcept;
 
 	private:
 		friend Container;
 
-		pointer									ptr() const noexcept;
-		reference								deref() const;
+		pointer											ptr() const noexcept;
+		reference										deref() const;
 
 	public:
-		vmem_page_pos_t							page_pos() const noexcept;
-		vmem_item_pos_t							item_pos() const noexcept;
-		vmem_iterator_edge_t					edge() const noexcept;
+		vmem_page_pos_t									page_pos() const noexcept;
+		vmem_item_pos_t									item_pos() const noexcept;
+		vmem_iterator_edge_t							edge() const noexcept;
 
 	private:
-		const Container*						_container;
-		vmem_page_pos_t							_page_pos;
-		vmem_item_pos_t							_item_pos;
-		vmem_iterator_edge_t					_edge;
-		Log*									_log;
+		const Container*								_container;
+		vmem_page_pos_t									_page_pos;
+		vmem_item_pos_t									_item_pos;
+		vmem_iterator_edge_t							_edge;
+		Log*											_log;
 	};
 
 
