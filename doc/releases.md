@@ -2,6 +2,21 @@
 
 Up to [Documentation](README.md).
 
+## 1.13.0
+- Breaking Changes
+  - none
+- Bugs
+  - `_basic_socket::bind(SO_REUSEADDR)` to prevent failure on quick restart
+  - `const_iterator`
+    - To support `++` and `--`
+    - To support binding to `iterator`
+- Additions
+  - Tic-Tac-Toe
+    - "Thinking Slow" engine
+    - "Thinking Fast" engine
+- Refactoring
+  - Iterators
+
 ## 1.12.3
 - Breaking Changes
   - `vmem_container_result2`

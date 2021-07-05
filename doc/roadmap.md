@@ -2,9 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.13.0
-- Tic Tac Toe sample (thinking fast and slow).
-
 ## 1.14.0
 - Connect Four sample (thinking fast and slow).
 
