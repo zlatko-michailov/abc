@@ -36,7 +36,13 @@ namespace abc {
 	class vmem_linked;
 
 	template <typename Pool, typename Log = null_log>
+	using vmem_linked_iterator_state = _vmem_iterator_state<vmem_linked<Pool, Log>, Pool, Log>;
+
+	template <typename Pool, typename Log = null_log>
 	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_page_pos_t, Pool, Log>;
+
+	template <typename Pool, typename Log = null_log>
+	using vmem_linked_const_iterator = vmem_const_iterator<vmem_linked<Pool, Log>, vmem_page_pos_t, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -44,14 +50,16 @@ namespace abc {
 
 	template <typename Pool, typename Log = null_log>
 	class vmem_linked {
+		using iterator_state			= vmem_linked_iterator_state<Pool, Log>;
+
 	public:
 		using value_type				= vmem_page_pos_t;
 		using pointer					= vmem_ptr<value_type, Pool, Log>;
-		using const_pointer				= const pointer;
+		using const_pointer				= vmem_ptr<const value_type, Pool, Log>;
 		using reference					= value_type&;
 		using const_reference			= const value_type&;
 		using iterator					= vmem_linked_iterator<Pool, Log>;
-		using const_iterator			= const iterator;
+		using const_iterator			= vmem_linked_const_iterator<Pool, Log>;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
 
@@ -107,11 +115,19 @@ namespace abc {
 		bool					erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept;
 
 	private:
+		friend iterator_state;
+		friend const_iterator;
 		friend iterator;
 
-		iterator				next(const_iterator& itr) const noexcept;
-		iterator				prev(const_iterator& itr) const noexcept;
-		pointer					at(const_iterator& itr) const noexcept;
+		iterator				next(const iterator_state& itr) const noexcept;
+		iterator				prev(const iterator_state& itr) const noexcept;
+		pointer					at(const iterator_state& itr) const noexcept;
+
+	private:
+		iterator				begin_itr() const noexcept;
+		iterator				end_itr() const noexcept;
+		reverse_iterator		rend_itr() const noexcept;
+		reverse_iterator		rbegin_itr() const noexcept;
 
 	private:
 		vmem_linked_state*		_state;

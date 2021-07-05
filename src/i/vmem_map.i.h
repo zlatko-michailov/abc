@@ -85,7 +85,13 @@ namespace abc {
 	class vmem_map;
 
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	using vmem_map_iterator_state = _vmem_iterator_state<vmem_map<Key, T, Pool, Log>, Pool, Log>;
+
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
 	using vmem_map_iterator = vmem_iterator<vmem_map<Key, T, Pool, Log>, vmem_map_value<Key, T>, Pool, Log>;
+
+	template <typename Key, typename T, typename Pool, typename Log = null_log>
+	using vmem_map_const_iterator = vmem_const_iterator<vmem_map<Key, T, Pool, Log>, vmem_map_value<Key, T>, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -126,16 +132,18 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
 	class vmem_map {
+		using iterator_state			= vmem_map_iterator_state<Key, T, Pool, Log>;
+
 	public:
 		using key_type					= Key;
 		using mapped_type				= T;
 		using value_type				= vmem_map_value<Key, T>;
 		using pointer					= vmem_ptr<vmem_map_value<Key, T>, Pool, Log>;
-		using const_pointer				= const pointer;
+		using const_pointer				= vmem_ptr<const vmem_map_value<Key, T>, Pool, Log>;
 		using reference					= vmem_map_value<Key, T>&;
 		using const_reference			= const vmem_map_value<Key, T>&;
 		using iterator					= vmem_map_iterator<Key, T, Pool, Log>;
-		using const_iterator			= const iterator;
+		using const_iterator			= vmem_map_const_iterator<Key, T, Pool, Log>;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
 		using result2					= vmem_map_result2<Key, T, Pool, Log>;
@@ -213,10 +221,12 @@ namespace abc {
 		void					clear() noexcept;
 
 	private:
+		friend iterator_state;
+		friend const_iterator;
 		friend iterator;
 
-		iterator				next(const_iterator& itr) const noexcept;
-		iterator				prev(const_iterator& itr) const noexcept;
+		iterator				next(const iterator_state& itr) const noexcept;
+		iterator				prev(const iterator_state& itr) const noexcept;
 
 	public:
 		find_result2			find2(const Key& key) noexcept;
@@ -228,14 +238,14 @@ namespace abc {
 		pointer					operator [] (const Key& key) noexcept;
 		const_pointer			operator [] (const Key& key) const noexcept;
 
-		pointer					at(const_iterator& itr) noexcept;
-		const pointer			at(const_iterator& itr) const noexcept;
+		pointer					at(const iterator_state& itr) noexcept;
+		const_pointer			at(const iterator_state& itr) const noexcept;
 
 	private:
 		iterator				begin_itr() const noexcept;
-		iterator				rbegin_itr() const noexcept;
 		iterator				end_itr() const noexcept;
-		iterator				rend_itr() const noexcept;
+		reverse_iterator		rend_itr() const noexcept;
+		reverse_iterator		rbegin_itr() const noexcept;
 		iterator				itr_from_values(value_level_iterator values_itr) const noexcept;
 
 	private:

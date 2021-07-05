@@ -38,6 +38,9 @@ namespace abc {
 	template <typename T, typename Pool, typename Log = null_log>
 	using vmem_list_iterator = vmem_container_iterator<T, vmem_noheader, Pool, Log>;
 
+	template <typename T, typename Pool, typename Log = null_log>
+	using vmem_list_const_iterator = vmem_container_const_iterator<T, vmem_noheader, Pool, Log>;
+
 
 	// --------------------------------------------------------------
 
@@ -61,6 +64,9 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log = null_log>
 	using vmem_stack_iterator = vmem_container_iterator<T, vmem_noheader, Pool, Log>;
+
+	template <typename T, typename Pool, typename Log = null_log>
+	using vmem_stack_const_iterator = vmem_container_const_iterator<T, vmem_noheader, Pool, Log>;
 
 
 	// --------------------------------------------------------------

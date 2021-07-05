@@ -57,7 +57,13 @@ namespace abc {
 	class vmem_container;
 
 	template <typename T, typename Header, typename Pool, typename Log = null_log>
+	using vmem_container_iterator_state = _vmem_iterator_state<vmem_container<T, Header, Pool, Log>, Pool, Log>;
+
+	template <typename T, typename Header, typename Pool, typename Log = null_log>
 	using vmem_container_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
+
+	template <typename T, typename Header, typename Pool, typename Log = null_log>
+	using vmem_container_const_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -100,14 +106,16 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log = null_log>
 	class vmem_container {
+		using iterator_state			= vmem_container_iterator_state<T, Header, Pool, Log>;
+
 	public:
 		using value_type				= T;
 		using pointer					= vmem_ptr<T, Pool, Log>;
-		using const_pointer				= const pointer;
+		using const_pointer				= vmem_ptr<const T, Pool, Log>;
 		using reference					= T&;
 		using const_reference			= const T&;
 		using iterator					= vmem_container_iterator<T, Header, Pool, Log>;
-		using const_iterator			= const iterator;
+		using const_iterator			= vmem_container_const_iterator<T, Header, Pool, Log>;
 		using reverse_iterator			= iterator;
 		using const_reverse_iterator	= const_iterator;
 		using result2					= vmem_container_result2<T, Header, Pool, Log>;
@@ -197,17 +205,19 @@ namespace abc {
 		bool					should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept;
 
 	private:
+		friend iterator_state;
+		friend const_iterator;
 		friend iterator;
 
-		iterator				next(const_iterator& itr) const noexcept;
-		iterator				prev(const_iterator& itr) const noexcept;
-		pointer					at(const_iterator& itr) const noexcept;
+		iterator				next(const iterator_state& itr) const noexcept;
+		iterator				prev(const iterator_state& itr) const noexcept;
+		pointer					at(const iterator_state& itr) const noexcept;
 
 	private:
 		iterator				begin_itr() const noexcept;
-		iterator				rbegin_itr() const noexcept;
 		iterator				end_itr() const noexcept;
-		iterator				rend_itr() const noexcept;
+		reverse_iterator		rend_itr() const noexcept;
+		reverse_iterator		rbegin_itr() const noexcept;
 
 	private:
 		vmem_container_state*	_state;

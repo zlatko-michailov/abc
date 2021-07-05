@@ -44,68 +44,90 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Container, typename T, typename Pool, typename Log = null_log>
-	class vmem_iterator {
+	template <typename Container, typename Pool, typename Log = null_log>
+	class _vmem_iterator_state {
 	public:
 		using container					= Container;
-		using value_type				= T;
-		using pointer					= vmem_ptr<T, Pool, Log>;
-		using const_pointer				= const pointer;
-		using reference					= T&;
-		using const_reference			= const T&;
 
 	public:
-		vmem_iterator<Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
-		vmem_iterator<Container, T, Pool, Log>(const vmem_iterator<Container, T, Pool, Log>& other) = default;
-		vmem_iterator<Container, T, Pool, Log>(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
-		vmem_iterator<Container, T, Pool, Log>(std::nullptr_t) noexcept;
+		_vmem_iterator_state<Container, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
+		_vmem_iterator_state<Container, Pool, Log>(const _vmem_iterator_state<Container, Pool, Log>& other) = default;
+		_vmem_iterator_state<Container, Pool, Log>(_vmem_iterator_state<Container, Pool, Log>&& other) noexcept = default;
+		_vmem_iterator_state<Container, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
-		vmem_iterator<Container, T, Pool, Log>&			operator =(const vmem_iterator<Container, T, Pool, Log>& other) noexcept = default;
-		vmem_iterator<Container, T, Pool, Log>&			operator =(vmem_iterator<Container, T, Pool, Log>&& other) noexcept = default;
+		_vmem_iterator_state<Container, Pool, Log>&		operator =(const _vmem_iterator_state<Container, Pool, Log>& other) noexcept = default;
+		_vmem_iterator_state<Container, Pool, Log>&		operator =(_vmem_iterator_state<Container, Pool, Log>&& other) noexcept = default;
 
 	public:
-		bool											operator ==(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
-		bool											operator !=(const vmem_iterator<Container, T, Pool, Log>& other) const noexcept;
-		vmem_iterator<Container, T, Pool, Log>&			operator ++() noexcept;
-		const vmem_iterator<Container, T, Pool, Log>&	operator ++() const noexcept;
-		vmem_iterator<Container, T, Pool, Log>&			operator ++(int) noexcept;
-		const vmem_iterator<Container, T, Pool, Log>&	operator ++(int) const noexcept;
-		vmem_iterator<Container, T, Pool, Log>&			operator --() noexcept;
-		const vmem_iterator<Container, T, Pool, Log>&	operator --() const noexcept;
-		vmem_iterator<Container, T, Pool, Log>&			operator --(int) noexcept;
-		const vmem_iterator<Container, T, Pool, Log>&	operator --(int) const noexcept;
-		pointer											operator ->() noexcept;
-		const_pointer									operator ->() const noexcept;
-		reference										operator *();
-		const_reference									operator *() const;
+		bool											operator ==(const _vmem_iterator_state<Container, Pool, Log>& other) const noexcept;
+		bool											operator !=(const _vmem_iterator_state<Container, Pool, Log>& other) const noexcept;
+		_vmem_iterator_state<Container, Pool, Log>&		operator ++() noexcept;
+		_vmem_iterator_state<Container, Pool, Log>&		operator ++(int) noexcept;
+		_vmem_iterator_state<Container, Pool, Log>&		operator --() noexcept;
+		_vmem_iterator_state<Container, Pool, Log>&		operator --(int) noexcept;
 
 	public:
 		bool											is_valid() const noexcept;
 		bool											can_deref() const noexcept;
 
 	private:
-		vmem_iterator<Container, T, Pool, Log>&			inc() noexcept;
-		vmem_iterator<Container, T, Pool, Log>&			dec() noexcept;
-
-	private:
-		friend Container;
-
-		pointer											ptr() const noexcept;
-		reference										deref() const;
+		_vmem_iterator_state<Container, Pool, Log>&		inc() noexcept;
+		_vmem_iterator_state<Container, Pool, Log>&		dec() noexcept;
 
 	public:
 		vmem_page_pos_t									page_pos() const noexcept;
 		vmem_item_pos_t									item_pos() const noexcept;
 		vmem_iterator_edge_t							edge() const noexcept;
 
-	private:
+	protected:
 		const Container*								_container;
 		vmem_page_pos_t									_page_pos;
 		vmem_item_pos_t									_item_pos;
 		vmem_iterator_edge_t							_edge;
 		Log*											_log;
 	};
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log = null_log>
+	class _vmem_iterator : public Base {
+	public:
+		using value_type				= T;
+		using pointer					= vmem_ptr<T, Pool, Log>;
+		using const_pointer				= vmem_ptr<const T, Pool, Log>;
+		using reference					= T&;
+		using const_reference			= const T&;
+
+	public:
+		_vmem_iterator<Base, Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
+		_vmem_iterator<Base, Container, T, Pool, Log>(const _vmem_iterator<Base, Container, T, Pool, Log>& other) = default;
+		_vmem_iterator<Base, Container, T, Pool, Log>(_vmem_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+		_vmem_iterator<Base, Container, T, Pool, Log>(std::nullptr_t) noexcept;
+
+	public:
+		_vmem_iterator<Base, Container, T, Pool, Log>&	operator =(const _vmem_iterator<Base, Container, T, Pool, Log>& other) noexcept = default;
+		_vmem_iterator<Base, Container, T, Pool, Log>&	operator =(_vmem_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+
+	public:
+		pointer											operator ->() noexcept;
+		const_pointer									operator ->() const noexcept;
+		reference										operator *();
+		const_reference									operator *() const;
+
+	private:
+		friend Container;
+
+		pointer											ptr() const noexcept;
+		reference										deref() const;
+	};
+
+
+	template <typename Container, typename T, typename Pool, typename Log = null_log>
+	using vmem_const_iterator = _vmem_iterator<_vmem_iterator_state<Container, Pool, Log>, Container, const T, Pool, Log>;
+
+
+	template <typename Container, typename T, typename Pool, typename Log = null_log>
+	using vmem_iterator = _vmem_iterator<vmem_const_iterator<Container, T, Pool, Log>, Container, T, Pool, Log>;
 
 
 	// --------------------------------------------------------------

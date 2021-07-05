@@ -2,7 +2,7 @@
 ----
 tictactoe
 BUGFIX: Socket bind(REUSEADDR)
-BUGFIX: const_iterator to support ++ and --
+BUGFIX: Refactor iterators
 ## To Do
 ---
 ---

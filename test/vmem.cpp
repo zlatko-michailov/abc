@@ -84,12 +84,12 @@ namespace abc { namespace test { namespace vmem {
 
 	template <typename Pool>
 	bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked, abc::vmem_page_pos_t expected_page_pos, LinkedPageData data,
-							const abc::vmem_linked_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_iterator<Pool, abc::test::log>& expected_itr,
-							abc::vmem_linked_iterator<Pool, abc::test::log>& actual_itr);
+							const abc::vmem_linked_const_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_const_iterator<Pool, abc::test::log>& expected_itr,
+							abc::vmem_linked_const_iterator<Pool, abc::test::log>& actual_itr);
 
 	template <typename Pool>
 	bool verify_linked_pages(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked,
-							const std::pair<LinkedPageData, abc::vmem_linked_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len);
+							const std::pair<LinkedPageData, abc::vmem_linked_const_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len);
 
 	bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b, abc::tag_t tag);
 
@@ -238,7 +238,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_linked_mixedone(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 		using Linked = abc::vmem_linked<Pool, Log>;
-		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+		using Iterator = abc::vmem_linked_const_iterator<Pool, Log>;
 
 		bool passed = true;
 
@@ -296,7 +296,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 		using Linked = abc::vmem_linked<Pool, Log>;
-		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+		using Iterator = abc::vmem_linked_const_iterator<Pool, Log>;
 
 		bool passed = true;
 
@@ -431,7 +431,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 		using Linked = abc::vmem_linked<Pool, Log>;
-		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+		using Iterator = abc::vmem_linked_const_iterator<Pool, Log>;
 
 		bool passed = true;
 
@@ -919,7 +919,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_map_insert(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
-		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
+		using Iterator = abc::vmem_map_const_iterator<Key, Value, Pool, Log>;
 		using IteratorBool = std::pair<abc::vmem_map_iterator<Key, Value, Pool, Log>, bool>;
 
 		bool passed = true;
@@ -1146,7 +1146,7 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_map_erase(test_context<abc::test::log>& context) {
 		using Pool = PoolMap;
 		using Map = abc::vmem_map<Key, Value, Pool, Log>;
-		using Iterator = abc::vmem_map_iterator<Key, Value, Pool, Log>;
+		using Iterator = abc::vmem_map_const_iterator<Key, Value, Pool, Log>;
 
 		bool passed = true;
 
@@ -1337,8 +1337,8 @@ namespace abc { namespace test { namespace vmem {
 
 	template <typename Pool>
 	bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked, abc::vmem_page_pos_t expected_page_pos, LinkedPageData data,
-							const abc::vmem_linked_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_iterator<Pool, abc::test::log>& expected_itr,
-							abc::vmem_linked_iterator<Pool, abc::test::log>& actual_itr) {
+							const abc::vmem_linked_const_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_const_iterator<Pool, abc::test::log>& expected_itr,
+							abc::vmem_linked_const_iterator<Pool, abc::test::log>& actual_itr) {
 		using Log = abc::test::log;
 		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
@@ -1362,10 +1362,10 @@ namespace abc { namespace test { namespace vmem {
 
 	template <typename Pool>
 	bool verify_linked_pages(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked,
-							const std::pair<LinkedPageData, abc::vmem_linked_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len) {
+							const std::pair<LinkedPageData, abc::vmem_linked_const_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len) {
 		using Log = abc::test::log;
 		using Linked = abc::vmem_linked<Pool, Log>;
-		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
+		using Iterator = abc::vmem_linked_const_iterator<Pool, Log>;
 
 		bool passed = true;
 
@@ -1449,7 +1449,7 @@ namespace abc { namespace test { namespace vmem {
 		}
 
 		// Iterate forward.
-		typename Map::iterator itr = map.cbegin();
+		typename Map::const_iterator itr = map.cbegin();
 		for (std::size_t i = 0; i < count; i++) {
 			passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "%llu") && passed;
 			passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "%llu") && passed;

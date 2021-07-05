@@ -163,13 +163,13 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::begin() noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::begin() const noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
@@ -181,13 +181,13 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::end() noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::end() const noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
@@ -199,13 +199,13 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rend() noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::rend() const noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
@@ -217,13 +217,13 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rbegin() noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::const_iterator vmem_container<T, Header, Pool, Log>::rbegin() const noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
@@ -1094,7 +1094,7 @@ namespace abc {
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
-	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::next(const_iterator& itr) const noexcept {
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::next(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1047d, "vmem_container::next() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -1116,7 +1116,7 @@ namespace abc {
 			else {
 				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
-				if (itr._item_pos < container_page->item_count - 1) {
+				if (itr.item_pos() < container_page->item_count - 1) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() + 1, vmem_iterator_edge::none, _log);
 				}
 				else {
@@ -1137,7 +1137,7 @@ namespace abc {
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
-	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::prev(const_iterator& itr) const noexcept {
+	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::prev(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10480, "vmem_container::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -1159,7 +1159,7 @@ namespace abc {
 			else {
 				vmem_container_page<T, Header>* container_page = reinterpret_cast<vmem_container_page<T, Header>*>(page.ptr());
 
-				if (itr._item_pos > 0) {
+				if (itr.item_pos() > 0) {
 					result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
 				}
 				else {
@@ -1191,13 +1191,13 @@ namespace abc {
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
-	inline vmem_ptr<T, Pool, Log> vmem_container<T, Header, Pool, Log>::at(const_iterator& itr) const noexcept {
+	inline typename vmem_container<T, Header, Pool, Log>::pointer vmem_container<T, Header, Pool, Log>::at(const iterator_state& itr) const noexcept {
 		vmem_item_pos_t item_pos =
 			itr.item_pos() == vmem_item_pos_nil ?
 				vmem_item_pos_nil :
 				items_pos() + (itr.item_pos() * sizeof(T));
 
-		return vmem_ptr<T, Pool, Log>(_pool, itr.page_pos(), item_pos, _log);
+		return pointer(_pool, itr.page_pos(), item_pos, _log);
 	}
 
 
@@ -1219,19 +1219,6 @@ namespace abc {
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
-	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rbegin_itr() const noexcept {
-		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10485, "vmem_container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
-		}
-
-		return itr;
-	}
-
-
-	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::end_itr() const noexcept {
 		iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
 
@@ -1245,7 +1232,7 @@ namespace abc {
 
 
 	template <typename T, typename Header, typename Pool, typename Log>
-	inline typename vmem_container<T, Header, Pool, Log>::iterator vmem_container<T, Header, Pool, Log>::rend_itr() const noexcept {
+	inline typename vmem_container<T, Header, Pool, Log>::reverse_iterator vmem_container<T, Header, Pool, Log>::rend_itr() const noexcept {
 		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
 
 		if (_state->back_page_pos != vmem_page_pos_nil) {
@@ -1265,6 +1252,19 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10488, "vmem_container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
+				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
+		}
+
+		return itr;
+	}
+
+
+	template <typename T, typename Header, typename Pool, typename Log>
+	inline typename vmem_container<T, Header, Pool, Log>::reverse_iterator vmem_container<T, Header, Pool, Log>::rbegin_itr() const noexcept {
+		iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10485, "vmem_container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
 		}
 

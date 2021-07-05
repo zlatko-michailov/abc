@@ -163,13 +163,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::begin() noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_iterator vmem_map<Key, T, Pool, Log>::begin() const noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
@@ -181,13 +181,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::end() noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_iterator vmem_map<Key, T, Pool, Log>::end() const noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
@@ -199,13 +199,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rend() noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_iterator vmem_map<Key, T, Pool, Log>::rend() const noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
@@ -217,13 +217,13 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rbegin() noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::const_iterator vmem_map<Key, T, Pool, Log>::rbegin() const noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
@@ -615,7 +615,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::next(const_iterator& itr) const noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::next(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10529, "vmem_map::next() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -637,7 +637,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::prev(const_iterator& itr) const noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::prev(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1052b, "vmem_map::prev() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
 				(long long)itr.page_pos(), itr.item_pos(), itr.edge());
@@ -800,14 +800,14 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::pointer vmem_map<Key, T, Pool, Log>::at(const iterator_state& itr) noexcept {
 		value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
 		return values_itr.operator->();
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::at(const_iterator& itr) const noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::const_pointer vmem_map<Key, T, Pool, Log>::at(const iterator_state& itr) const noexcept {
 		return const_cast<vmem_map<Key, T, Pool, Log>*>(this)->at(itr);
 	}
 
@@ -819,20 +819,20 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rbegin_itr() const noexcept {
-		return itr_from_values(_values.rbegin());
-	}
-
-
-	template <typename Key, typename T, typename Pool, typename Log>
 	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::end_itr() const noexcept {
 		return itr_from_values(_values.end());
 	}
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	inline typename vmem_map<Key, T, Pool, Log>::iterator vmem_map<Key, T, Pool, Log>::rend_itr() const noexcept {
+	inline typename vmem_map<Key, T, Pool, Log>::reverse_iterator vmem_map<Key, T, Pool, Log>::rend_itr() const noexcept {
 		return itr_from_values(_values.rend());
+	}
+
+
+	template <typename Key, typename T, typename Pool, typename Log>
+	inline typename vmem_map<Key, T, Pool, Log>::reverse_iterator vmem_map<Key, T, Pool, Log>::rbegin_itr() const noexcept {
+		return itr_from_values(_values.rbegin());
 	}
 
 

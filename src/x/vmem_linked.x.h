@@ -84,81 +84,73 @@ namespace abc {
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::begin() noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::begin() const noexcept {
-		return cbegin();
+		return begin_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::cbegin() const noexcept {
-		if (_state->front_page_pos == vmem_page_pos_nil) {
-			return cend();
-		}
-
-		return iterator(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+		return begin_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::end() noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::end() const noexcept {
-		return cend();
+		return end_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::cend() const noexcept {
-		return iterator(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+		return end_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::rend() noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::rend() const noexcept {
-		return crend();
+		return rend_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::crend() const noexcept {
-		if (_state->back_page_pos == vmem_page_pos_nil) {
-			return crbegin();
-		}
-
-		return iterator(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+		return rend_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::rbegin() noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::rbegin() const noexcept {
-		return crbegin();
+		return rbegin_itr();
 	}
 
 
 	template <typename Pool, typename Log>
 	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::crbegin() const noexcept {
-		return vmem_linked_iterator<Pool, Log>(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+		return rbegin_itr();
 	}
 
 
@@ -583,19 +575,19 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::next(const_iterator& itr) const noexcept {
+	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::next(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x104a5, "vmem_linked::next() Start. itr.page_pos=0x%llx, itr.edge=%u",
 				(long long)itr.page_pos(), itr.edge());
 		}
 
-		iterator result = end();
+		iterator result = end_itr();
 
 		if (itr == end()) {
 			// Nothing to do.
 		}
 		else if (itr == rbegin()) {
-			result = begin();
+			result = begin_itr();
 		}
 		else if (itr == rend()) {
 			// Nothing to do.
@@ -626,13 +618,13 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::prev(const_iterator& itr) const noexcept {
+	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::prev(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x104a8, "vmem_linked::prev() Start. itr.page_pos=0x%llx, itr.edge=%u",
 				(long long)itr.page_pos(), itr.edge());
 		}
 
-		iterator result = rbegin();
+		iterator result = rbegin_itr();
 
 		if (itr == rbegin()) {
 			// Nothing to do.
@@ -641,7 +633,7 @@ namespace abc {
 			// Nothing to do.
 		}
 		else if (itr == end()) {
-			result = rend();
+			result = rend_itr();
 		}
 		else if (itr.page_pos() != vmem_page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
@@ -669,8 +661,40 @@ namespace abc {
 
 
 	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::pointer vmem_linked<Pool, Log>::at(const_iterator& itr) const noexcept {
+	inline typename vmem_linked<Pool, Log>::pointer vmem_linked<Pool, Log>::at(const iterator_state& itr) const noexcept {
 		return pointer(_pool, itr.page_pos(), 0, _log);
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::begin_itr() const noexcept {
+		if (_state->front_page_pos == vmem_page_pos_nil) {
+			return end_itr();
+		}
+
+		return iterator(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::end_itr() const noexcept {
+		return iterator(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::reverse_iterator vmem_linked<Pool, Log>::rend_itr() const noexcept {
+		if (_state->back_page_pos == vmem_page_pos_nil) {
+			return rbegin_itr();
+		}
+
+		return iterator(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+	}
+
+
+	template <typename Pool, typename Log>
+	inline typename vmem_linked<Pool, Log>::reverse_iterator vmem_linked<Pool, Log>::rbegin_itr() const noexcept {
+		return vmem_linked_iterator<Pool, Log>(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
 	}
 
 }
