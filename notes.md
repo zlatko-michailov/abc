@@ -1,10 +1,6 @@
 ## Done
 ----
-tictactoe
-BUGFIX: Socket bind(REUSEADDR)
-BUGFIX: Refactor iterators
 ## To Do
----
 ---
 - Samples
   - connect four

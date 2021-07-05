@@ -42,7 +42,7 @@ namespace abc {
 		, _log(log) {
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "_vmem_iterator_state::_vmem_iterator_state() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10604, "_vmem_iterator_state::_vmem_iterator_state() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
 		}
 	}
 
@@ -56,7 +56,7 @@ namespace abc {
 	template <typename Container, typename Pool, typename Log>
 	inline bool _vmem_iterator_state<Container, Pool, Log>::operator ==(const _vmem_iterator_state<Container, Pool, Log>& other) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "_vmem_iterator_state::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10605, "_vmem_iterator_state::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
 				(long long)_page_pos, _item_pos, _edge, (long long)other._page_pos, other._item_pos, other._edge);
 		}
 
@@ -205,7 +205,7 @@ namespace abc {
 		vmem_ptr<T, Pool, Log> p = ptr();
 
 		if (p == nullptr) {
-			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", __TAG__);
+			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", 0x10606);
 		}
 
 		return *p;

@@ -70,7 +70,7 @@ int main(int argc, const char* argv[]) {
 		std::size_t full_path_len = prog_path_len_1 + std::max(vmem_path_len, results_path_len);
 
 		if (full_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
+			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x105a3,
 				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
 				max_path, full_path_len);
 
@@ -80,7 +80,7 @@ int main(int argc, const char* argv[]) {
 		std::strncpy(path, argv[0], prog_path_len_1);
 	}
 	std::strcpy(path + prog_path_len_1, vmem_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "vmem_path='%s'", path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x105a4, "vmem_path='%s'", path);
 
 
 	// Construct a pool and a map on it.
@@ -89,19 +89,19 @@ int main(int argc, const char* argv[]) {
 	abc::samples::vmem_bundle vmem(path, &log);
 	abc::samples::player_agent::_vmem = &vmem;
 
-	log.put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "KB >>>");
+	log.put_any(abc::category::abc::samples, abc::severity::debug, 0x105a5, "KB >>>");
 	for (abc::samples::vmem_map::const_iterator itr = vmem.state_scores_map.cbegin(); itr != vmem.state_scores_map.cend(); itr++) {
-		log.put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "%8.8x: %d %d %d %d %d %d %d %d %d",
+		log.put_any(abc::category::abc::samples, abc::severity::debug, 0x105a6, "%8.8x: %d %d %d %d %d %d %d %d %d",
 			itr->key,
 			itr->value[0][0], itr->value[0][1], itr->value[0][2],
 			itr->value[1][0], itr->value[1][1], itr->value[1][2],
 			itr->value[2][0], itr->value[2][1], itr->value[2][2]);
 	}
-	log.put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "<<< KB");
+	log.put_any(abc::category::abc::samples, abc::severity::debug, 0x105a7, "<<< KB");
 
 
 	std::strcpy(path + prog_path_len_1, results_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "results_path='%s'", path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x105a8, "results_path='%s'", path);
 	std::ofstream results_stream(path, std::ios::ate);
 
 	abc::log_filter results_filter(abc::severity::optional);
@@ -120,7 +120,7 @@ int main(int argc, const char* argv[]) {
 	);
 	abc::samples::tictactoe_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
 
-	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30303/resources/index.html.");
+	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x105a9, "Open a browser and navigate to http://<host>:30303/resources/index.html.");
 	log.put_blank_line();
 
 	// Let the endpoint listen in a separate thread.
