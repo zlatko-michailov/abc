@@ -282,13 +282,13 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	class tictactoe_endpoint : public endpoint<Limits, Log> {
+	class game_endpoint : public endpoint<Limits, Log> {
 		using base = endpoint<Limits, Log>;
 
 		static constexpr std::size_t max_game_count = 1;
 
 	public:
-		tictactoe_endpoint(endpoint_config* config, Log* log);
+		game_endpoint(endpoint_config* config, Log* log);
 
 	protected:
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;

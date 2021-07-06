@@ -673,15 +673,15 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline tictactoe_endpoint<Limits, Log>::tictactoe_endpoint(endpoint_config* config, Log* log)
+	inline game_endpoint<Limits, Log>::game_endpoint(endpoint_config* config, Log* log)
 		: base(config, log) {
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void tictactoe_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	inline void game_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105b9, "tictactoe_endpoint::process_rest_request: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105b9, "game_endpoint::process_rest_request: Start.");
 		}
 
 		if (ascii::are_equal_i_n(resource, "/games", 6)) {
@@ -696,13 +696,13 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105bb, "tictactoe_endpoint::process_rest_request: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105bb, "game_endpoint::process_rest_request: Done.");
 		}
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void tictactoe_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	inline void game_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		const char* resource_games = resource + 6;
 
 		if (ascii::are_equal_i(resource_games, "")) {
@@ -730,9 +730,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
+	inline bool game_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105bc, "tictactoe_endpoint::create_game: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105bc, "game_endpoint::create_game: Start.");
 		}
 
 		if (!verify_method_post(http, method)) {
@@ -761,7 +761,7 @@ namespace abc { namespace samples {
 					game_i = i;
 
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x105bd, "tictactoe_endpoint::create_game: game_i=%zu", game_i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x105bd, "game_endpoint::create_game: game_i=%zu", game_i);
 					}
 					break;
 				}
@@ -834,7 +834,7 @@ namespace abc { namespace samples {
 		http.put_body(body);
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105c1, "tictactoe_endpoint::create_game: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105c1, "game_endpoint::create_game: Done.");
 		}
 
 		return true;
@@ -842,7 +842,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type) {
+	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type) {
 		char players[2][abc::size::_64 + 1];
 		bool has_players = false;
 
@@ -984,9 +984,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
+	inline bool game_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105d4, "tictactoe_endpoint::claim_player: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105d4, "game_endpoint::claim_player: Start.");
 		}
 
 		if (!verify_method_post(http, method)) {
@@ -1050,7 +1050,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105da, "tictactoe_endpoint::claim_player: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105da, "game_endpoint::claim_player: Done.");
 				}
 
 				return true;
@@ -1068,9 +1068,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
+	inline bool game_endpoint<Limits, Log>::accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105dd, "tictactoe_endpoint::accept_move: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105dd, "game_endpoint::accept_move: Start.");
 		}
 
 		if (!ascii::are_equal_i(moves, "moves")) {
@@ -1242,7 +1242,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f1, "tictactoe_endpoint::get_moves: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f1, "game_endpoint::get_moves: Done.");
 				}
 
 				return true;
@@ -1260,9 +1260,9 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
+	inline bool game_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f4, "tictactoe_endpoint::get_moves: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f4, "game_endpoint::get_moves: Start.");
 		}
 
 		if (!verify_method_get(http, method)) {
@@ -1338,7 +1338,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f8, "tictactoe_endpoint::get_moves: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f8, "game_endpoint::get_moves: Done.");
 				}
 
 				return true;
@@ -1356,7 +1356,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void tictactoe_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
+	inline void game_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
 		if (!verify_method_post(http, method)) {
 			return;
 		}
@@ -1369,7 +1369,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
+	inline bool game_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::GET)) {
 			if (base::_log != nullptr) {
 				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105fc, "Method error: Expected 'GET'.");
@@ -1385,7 +1385,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
+	inline bool game_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::POST)) {
 			if (base::_log != nullptr) {
 				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105fe, "Method error: Expected 'POST'.");
@@ -1401,7 +1401,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool tictactoe_endpoint<Limits, Log>::verify_header_json(abc::http_server_stream<Log>& http) {
+	inline bool game_endpoint<Limits, Log>::verify_header_json(abc::http_server_stream<Log>& http) {
 		bool has_content_type_json = false;
 
 		// Read all headers
