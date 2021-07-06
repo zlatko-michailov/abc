@@ -30,7 +30,7 @@ SOFTWARE.
 #include <cstring>
 #include <algorithm>
 
-#include "tictactoe.h"
+#include "game.h"
 
 
 // --------------------------------------------------------------

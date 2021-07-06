@@ -32,7 +32,7 @@ SOFTWARE.
 #include "../../src/http.h"
 #include "../../src/json.h"
 
-#include "tictactoe.i.h"
+#include "game.i.h"
 
 
 namespace abc { namespace samples {
