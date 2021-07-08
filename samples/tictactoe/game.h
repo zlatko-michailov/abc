@@ -72,7 +72,7 @@ namespace abc { namespace samples {
 
 
 	inline bool move::is_valid() const {
-		return (0 <= row && row < size && 0 <= col && col < size);
+		return (0 <= row && row < row_count && 0 <= col && col < col_count);
 	}
 
 
@@ -186,7 +186,7 @@ namespace abc { namespace samples {
 
 		bool win = (horizontal || vertical || diagonal);
 
-		bool draw = (_move_count == (size * size));
+		bool draw = (_move_count == (row_count * col_count));
 
 		if (win) {
 			_is_game_over = true;
@@ -222,13 +222,13 @@ namespace abc { namespace samples {
 
 
 	inline board_state_t board::shift_up(player_id_t player_id, const move& move) {
-		int cell = move.row * size + move.col;
+		int cell = move.row * col_count + move.col;
 		return static_cast<board_state_t>(player_id) << (cell * 2);
 	}
 
 
 	inline player_id_t board::shift_down(const move& move) const {
-		int cell = move.row * size + move.col;
+		int cell = move.row * col_count + move.col;
 		return static_cast<player_id_t>((_board_state >> (cell * 2)) & player_id::mask);
 	}
 
@@ -298,8 +298,8 @@ namespace abc { namespace samples {
 		int best_score = -1;
 
 		// For simplicity, try cells in order.
-		for (int r = 0; r < size; r++) {
-			for (int c = 0; c < size; c++) {
+		for (int r = 0; r < row_count; r++) {
+			for (int c = 0; c < col_count; c++) {
 				move mv{ r, c };
 
 				if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
@@ -355,8 +355,8 @@ namespace abc { namespace samples {
 			score_calc_t none_count = 0;
 			score_calc_t score_sum = 0;
 
-			for (int r = 0; r < size; r++) {
-				for (int c = 0; c < size; c++) {
+			for (int r = 0; r < row_count; r++) {
+				for (int c = 0; c < col_count; c++) {
 					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
 						score_calc_t curr_score = itr->value[r][c];
 
@@ -380,8 +380,8 @@ namespace abc { namespace samples {
 			if (max_count > 0) {
 				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-				for (int r = 0; r < size; r++) {
-					for (int c = 0; c < size; c++) {
+				for (int r = 0; r < row_count; r++) {
+					for (int c = 0; c < col_count; c++) {
 						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none && itr->value[r][c] == score::max) {
 							if (--max_count == 0) {
 								return move{ r, c };
@@ -392,10 +392,10 @@ namespace abc { namespace samples {
 			}
 
 			// If all the scores are min, pick one of them.
-			else if (min_count == size * size) {
+			else if (min_count == row_count * col_count) {
 				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-				return move{ rand_i / (score_calc_t)size, rand_i % (score_calc_t)size };
+				return move{ rand_i / (score_calc_t)col_count, rand_i % (score_calc_t)col_count };
 			}
 
 			// Make a weighted pick.
@@ -406,8 +406,8 @@ namespace abc { namespace samples {
 
 				score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
 
-				for (int r = 0; r < size; r++) {
-					for (int c = 0; c < size; c++) {
+				for (int r = 0; r < row_count; r++) {
+					for (int c = 0; c < col_count; c++) {
 						score_calc_t curr_score = itr->value[r][c];
 
 						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
@@ -508,8 +508,8 @@ namespace abc { namespace samples {
 		// Init the item before inserting it.
 		vmem_map::value_type item;
 		item.key = board_state;
-		for (int r = 0; r < size; r++) {
-			for (int c = 0; c < size; c++) {
+		for (int r = 0; r < row_count; r++) {
+			for (int c = 0; c < col_count; c++) {
 				item.value[r][c] = score::none;
 			}
 		}

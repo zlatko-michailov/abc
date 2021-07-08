@@ -42,7 +42,8 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	constexpr std::size_t size = 3;
+	constexpr std::size_t row_count = 3;
+	constexpr std::size_t col_count = 3;
 
 	using board_state_t = std::uint32_t;
 
@@ -66,7 +67,7 @@ namespace abc { namespace samples {
 	// IMPORTANT: Ensure a predictable layout of the data on disk!
 	#pragma pack(push, 1)
 
-	using scores = score_t[size][size];
+	using scores = score_t[row_count][col_count];
 
 	struct start_page_layout {
 		vmem_map_state	map_state;
@@ -219,7 +220,7 @@ namespace abc { namespace samples {
 
 	class game {
 	public:
-		static constexpr std::size_t max_move_count = size * size;
+		static constexpr std::size_t max_move_count = row_count * col_count;
 
 	public:
 		void					reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log);
