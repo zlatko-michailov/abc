@@ -54,7 +54,7 @@ int main(int argc, const char* argv[]) {
 	char path[max_path];
 	path[0] = '\0';
 
-	constexpr const char vmem_path[] = "kb.vmem";
+	constexpr const char vmem_path[] = "tictactoe.vmem";
 	std::size_t vmem_path_len = std::strlen(vmem_path); 
 
 	constexpr const char results_path[] = "results.csv";
