@@ -356,7 +356,7 @@ SOFTWARE.
 						document.getElementById("status").innerHTML += result.i + ": { " + row + ", " + col + "} <br />";
 						sinceMoveI = Math.max(sinceMoveI, result.i + 1);
 
-						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;X&nbsp;</span>";
+						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;" + playerSymbol.toUpperCase() + "&nbsp;</span>";
 						square.innerHTML = html;
 					});
 			}
