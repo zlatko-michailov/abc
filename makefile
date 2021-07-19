@@ -38,6 +38,7 @@ SUBDIR_RESOURCES = resources
 SAMPLE_BASIC = basic
 SAMPLE_VMEM = vmem
 SAMPLE_TICTACTOE = tictactoe
+SAMPLE_CONNECT4 = connect4
 PROG_TEST = $(PROJECT)_test
 
 
@@ -91,7 +92,14 @@ build_samples: build_product
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	# ---------- Done building tictactoe ----------
 	#
-	# ---------- Done building samples ----------
+	# ---------- Begin building connect4 ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SAMPLE_CONNECT4) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/*.cpp $(LINKOPTIONS)
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
+	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
+	# ---------- Done building tictactoe ----------
+	#
+	# ---------- Done building connect4 ----------
 	#
 
 build_test: build_product
