@@ -111,14 +111,14 @@ int main(int argc, const char* argv[]) {
 
 	// Create a endpoint.
 	abc::endpoint_config config(
-		"30303",			// port
+		"30304",			// port
 		5,					// listen_queue_size
 		path,				// root_dir (Note: No trailing slash!)
 		"/resources/"		// files_prefix
 	);
 	abc::samples::game_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
 
-	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30303/resources/index.html.");
+	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30304/resources/index.html.");
 	log.put_blank_line();
 
 	// Let the endpoint listen in a separate thread.

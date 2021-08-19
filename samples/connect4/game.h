@@ -79,37 +79,58 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	inline void board::reset() {
+	inline void board::reset(log_ostream* log) {
 		_is_game_over		= false;
 		_winner				= player_id::none;
 		_current_player_id	= player_id::x;
 		_board_state		= { 0 };
 		_move_count			= 0;
+		_log				= log;
 	}
 
 
 	inline bool board::accept_move(const move& move) {
 		if (!move.is_valid()) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - not valid");
+			}
+
 			return false;
 		}
 
 		if (is_game_over()) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - game over");
+			}
+
 			return false;
 		}
 
 		if (get_move(move) != player_id::none) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - taken");
+			}
+
 			return false;
 		}
 
 		if (0 < move.row && get_move({move.row - 1, move.col}) == player_id::none) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - in the air");
+			}
+
 			return false;
 		}
 
 		set_move(move);
-		check_winner();
+		check_winner(move);
 
 		if (!is_game_over()) {
 			switch_current_player_id();
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): true");
 		}
 
 		return true;
@@ -148,7 +169,16 @@ namespace abc { namespace samples {
 
 
 	inline player_id_t board::get_move(const move& move) const {
-		if (col_size(move.col) < move.row) {
+		count_t col_sz = col_size(move.col);
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): _board_state=%llx, col_sz=%u, move.row=%u", (long long)_board_state, col_sz, move.row);
+		}
+
+		if (col_sz == 0 || col_sz <= move.row) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): none");
+			}
+
 			return player_id::none;
 		}
 
@@ -180,24 +210,48 @@ namespace abc { namespace samples {
 	}
 
 
-	inline bool board::check_winner() {
-		//// TODO: board::check_winner()
-		bool horizontal =
-			(has_move(_current_player_id, { 0, 0 }) && has_move(_current_player_id, { 0, 1 }) && has_move(_current_player_id, { 0, 2 })) ||
-			(has_move(_current_player_id, { 1, 0 }) && has_move(_current_player_id, { 1, 1 }) && has_move(_current_player_id, { 1, 2 })) ||
-			(has_move(_current_player_id, { 2, 0 }) && has_move(_current_player_id, { 2, 1 }) && has_move(_current_player_id, { 2, 2 }));
+	inline bool board::check_winner(const move& move) {
+		count_t west_count = 0;
+		for (count_t c = move.col - 1; 0 <= c && has_move(_current_player_id, { move.row, c }); c--) {
+			west_count++;
+		}
 
-		bool vertical =
-			(has_move(_current_player_id, { 0, 0 }) && has_move(_current_player_id, { 1, 0 }) && has_move(_current_player_id, { 2, 0 })) ||
-			(has_move(_current_player_id, { 0, 1 }) && has_move(_current_player_id, { 1, 1 }) && has_move(_current_player_id, { 2, 1 })) ||
-			(has_move(_current_player_id, { 0, 2 }) && has_move(_current_player_id, { 1, 2 }) && has_move(_current_player_id, { 2, 2 }));
+		count_t east_count = 0;
+		for (count_t c = move.col + 1; c < col_count && has_move(_current_player_id, { move.row, c }); c++) {
+			east_count++;
+		}
 
-		bool diagonal =
-			(has_move(_current_player_id, { 0, 0 }) && has_move(_current_player_id, { 1, 1 }) && has_move(_current_player_id, { 2, 2 })) ||
-			(has_move(_current_player_id, { 0, 2 }) && has_move(_current_player_id, { 1, 1 }) && has_move(_current_player_id, { 2, 0 }));
+		count_t south_count = 0;
+		for (count_t r = move.row - 1; 0 <= r && has_move(_current_player_id, { r, move.col }); r--) {
+			south_count++;
+		}
 
+		count_t southwest_count = 0;
+		for (count_t i = 1; 0 <= move.row - i && 0 <= move.col - i && has_move(_current_player_id, { move.row - i, move.col - i }); i++) {
+			southwest_count++;
+		}
 
-		bool win = (horizontal || vertical || diagonal);
+		count_t northeast_count = 0;
+		for (count_t i = 1; move.row + i < row_count && move.col + i < col_count && has_move(_current_player_id, { move.row + i, move.col + i }); i++) {
+			northeast_count++;
+		}
+
+		count_t southeast_count = 0;
+		for (count_t i = 1; 0 <= move.row - i && move.col + i < col_count && has_move(_current_player_id, { move.row - i, move.col + i }); i++) {
+			southeast_count++;
+		}
+
+		count_t northwest_count = 0;
+		for (count_t i = 1; move.row + i < row_count && 0 <= move.col - i < col_count && has_move(_current_player_id, { move.row + i, move.col - i }); i++) {
+			northwest_count++;
+		}
+
+		bool horizontal	= west_count + east_count >= 3;
+		bool vertical	= south_count >= 3;
+		bool diagonal1	= southwest_count + northeast_count >= 3;
+		bool diagonal2	= southeast_count + northwest_count >= 3;
+
+		bool win = (horizontal || vertical || diagonal1 || diagonal2);
 
 		bool draw = (_move_count == (row_count * col_count));
 
@@ -235,15 +289,37 @@ namespace abc { namespace samples {
 
 
 	inline count_t board::col_size(count_t col) const {
-		return (_board_state >> col_pos(col)) & col_size_mask;
+		count_t col_sz = ( (_board_state >> col_pos(col)) & col_size_mask );
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::col_size(): col=%u, col_sz=%u", col, col_sz);
+		}
+
+		return col_sz;
 	}
 
 	inline count_t board::inc_col_size(count_t col) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): before - _board_state=%llx, col=%u", (long long)_board_state, col);
+		}
+
 		_board_state += (board_state_1 << col_pos(col));
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): after  - _board_state=%llx, col=%u", (long long)_board_state, col);
+		}
 	}
 
 	inline count_t board::dec_col_size(count_t col) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): before - _board_state=%llx, col=%u", (long long)_board_state, col);
+		}
+
 		_board_state -= (board_state_1 << col_pos(col));
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): after  - _board_state=%llx, col=%u", (long long)_board_state, col);
+		}
 	}
 
 	inline count_t board::col_pos(count_t col) const {
@@ -251,16 +327,48 @@ namespace abc { namespace samples {
 	}
 
 	inline player_id_t board::get_move_bits(const move& move) const {
-		return (_board_state >> move_pos(move)) & move_mask;
+		count_t pos = move_pos(move);
+		player_id_t move_bits = ( (_board_state >> pos) & move_mask );
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move_bits(): pos=%u, move_bits=%u", pos, move_bits);
+		}
+
+		return move_bits;
 	}
 
 	inline void board::set_move_bits(const move& move, count_t bits) {
+		count_t pos = move_pos(move);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): start  - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+		}
+
 		clear_move_bits(move);
-		_board_state |= ((board_state_t)bits << move_pos(move));
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): before - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+		}
+
+		_board_state |= ((board_state_t)bits << pos);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): after  - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+		}
 	}
 
 	inline void board::clear_move_bits(const move& move) {
-		_board_state &= (~(board_state_t)move_mask << move_pos(move));
+		count_t pos = move_pos(move);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): before - _board_state=%llx, pos=%u", (long long)_board_state, pos);
+		}
+
+		_board_state &= ( ~((board_state_t)move_mask << pos) );
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): after  - _board_state=%llx, pos=%u", (long long)_board_state, pos);
+		}
 	}
 
 	inline count_t board::move_pos(const move& move) const {
@@ -333,34 +441,31 @@ namespace abc { namespace samples {
 		int best_score = -1;
 
 		// For simplicity, try cells in order.
-		//// TODO: player_agent::slow_find_best_move_for() col only
-		for (count_t r = 0; r < row_count; r++) {
-			for (count_t c = 0; c < col_count; c++) {
-				move mv{ r, c };
+		for (count_t c = 0; c < col_count; c++) {
+			move mv{ _temp_board.col_size(c), c };
 
-				if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
-					if (_temp_board.accept_move(mv)) {
-						int score = -1;
-						if (_temp_board.is_game_over()) {
-							score = _temp_board.winner() == player_id ? 1 : 0;
-						}
-						else {
-							move dummy_mv;
-							score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv);
-						}
-
-						if (score > best_score) {
-							best_move = mv;
-							best_score = score;
-						}
-
-						_temp_board.undo_move(mv);
+			if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
+				if (_temp_board.accept_move(mv)) {
+					int score = -1;
+					if (_temp_board.is_game_over()) {
+						score = _temp_board.winner() == player_id ? 1 : 0;
 					}
-					else{
-						if (_log != nullptr) {
-							_log->put_any(category::abc::samples, severity::important, __TAG__, "player_agent::slow_find_best_move(): IMPOSSIBLE. move_count=%u, current_player_id=%u, best_score=%d, is_game_over=%d, get_move({%d, %d})=%d",
-								_temp_board.move_count(), _temp_board.current_player_id(), best_score, _temp_board.is_game_over(), mv.row, mv.col, _temp_board.get_move(mv));
-						}
+					else {
+						move dummy_mv;
+						score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv);
+					}
+
+					if (score > best_score) {
+						best_move = mv;
+						best_score = score;
+					}
+
+					_temp_board.undo_move(mv);
+				}
+				else{
+					if (_log != nullptr) {
+						_log->put_any(category::abc::samples, severity::important, __TAG__, "player_agent::slow_find_best_move(): IMPOSSIBLE. move_count=%u, current_player_id=%u, best_score=%d, is_game_over=%d, get_move({%d, %d})=%d",
+							_temp_board.move_count(), _temp_board.current_player_id(), best_score, _temp_board.is_game_over(), mv.row, mv.col, _temp_board.get_move(mv));
 					}
 				}
 			}
@@ -392,23 +497,23 @@ namespace abc { namespace samples {
 			score_calc_t score_sum = 0;
 
 			//// TODO: player_agent::fast_find_best_move() col only
-			for (count_t r = 0; r < row_count; r++) {
-				for (count_t c = 0; c < col_count; c++) {
-					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
-						score_calc_t curr_score = itr->value[c];
+			for (count_t c = 0; c < col_count; c++) {
+				move mv{ _game->board().col_size(c), c };
 
-						if (curr_score == score::max) {
-							max_count++;
-						}
-						else if (curr_score == score::min) {
-							min_count++;
-						}
-						else if (curr_score == score::none) {
-							none_count++;
-						}
-						else {
-							score_sum += curr_score;
-						}
+				if (_game->board().get_move(mv) == abc::samples::player_id::none) {
+					score_calc_t curr_score = itr->value[c];
+
+					if (curr_score == score::max) {
+						max_count++;
+					}
+					else if (curr_score == score::min) {
+						min_count++;
+					}
+					else if (curr_score == score::none) {
+						none_count++;
+					}
+					else {
+						score_sum += curr_score;
 					}
 				}
 			}
@@ -417,12 +522,12 @@ namespace abc { namespace samples {
 			if (max_count > 0) {
 				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-				for (count_t r = 0; r < row_count; r++) {
-					for (count_t c = 0; c < col_count; c++) {
-						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none && itr->value[c] == score::max) {
-							if (--max_count == 0) {
-								return move{ r, c };
-							}
+				for (count_t c = 0; c < col_count; c++) {
+					move mv{ _game->board().col_size(c), c };
+
+					if (_game->board().get_move(mv) == abc::samples::player_id::none && itr->value[c] == score::max) {
+						if (--rand_i == 0) {
+							return mv;
 						}
 					}
 				}
@@ -564,7 +669,7 @@ namespace abc { namespace samples {
 		_agent_x.reset(this, player_id::x, player_x_type, log);
 		_agent_o.reset(this, player_id::o, player_o_type, log);
 		_log = log;
-		_board.reset();
+		_board.reset(log);
 	}
 
 
@@ -1173,10 +1278,10 @@ namespace abc { namespace samples {
 			}
 
 			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 2)) {
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < row_count)) {
 				// Not a valid row.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 2.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 5.");
 				}
 
 				// 400
@@ -1199,10 +1304,10 @@ namespace abc { namespace samples {
 			}
 
 			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 2)) {
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < col_count)) {
 				// Not a valid row.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 2.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 7.");
 				}
 
 				// 400

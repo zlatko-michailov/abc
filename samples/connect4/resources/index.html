@@ -314,7 +314,7 @@ SOFTWARE.
 							canAcceptMove = true;
 							canRefreshMoves = true;
 
-							refreshMoves();
+							//// refreshMoves();
 						}
 
 						return response.json();
@@ -361,8 +361,16 @@ SOFTWARE.
 					return;
 				}
 
-				let square = document.getElementById(col + "_5");
-				if (square.childElementCount > 0) {
+				let row;
+				for (row = 5; row >= 0; row--) {
+					let square = document.getElementById(col + "_" + row);
+					if (square.childElementCount > 0) {
+						break;
+					}
+				}
+				row++;
+
+				if (row >= 6) {
 					document.getElementById("status").innerHTML += "Column [" + col + "] is not available. <br />";
 					return;
 				}
@@ -377,6 +385,7 @@ SOFTWARE.
 					headers: requestHeaders,
 					mode: "same-origin",
 					body: JSON.stringify({
+						row: row,
 						col: col
 					})
 				};
@@ -395,7 +404,7 @@ SOFTWARE.
 						sinceMoveI = Math.max(sinceMoveI, result.i + 1);
 
 						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;" + playerSymbol.toUpperCase() + "&nbsp;</span>";
-						square = document.getElementById(col + "_" + row);
+						let square = document.getElementById(col + "_" + row);
 						square.innerHTML = html;
 					});
 			}
@@ -457,18 +466,18 @@ SOFTWARE.
 					canAcceptMove = false;
 					canRefreshMoves = false;
 
-					if (winner === 0) {
+					if (winner === 2) {
 						document.getElementById("status").innerHTML += "The game ends in a DRAW. <br />";
 
 						document.getElementById("streaks").innerHTML += " " + currentStreak;
 						currentStreak = 0;
 					}
-					else if (winner === 2) {
+					else if (winner === 0) {
 						document.getElementById("status").innerHTML += "Player X wins! <br />";
 
 						currentStreak++;
 					}
-					else if (winner === 3) {
+					else if (winner === 1) {
 						document.getElementById("status").innerHTML += "Player O wins! <br />";
 
 						currentStreak++;

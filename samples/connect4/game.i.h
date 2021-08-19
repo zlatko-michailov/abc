@@ -157,7 +157,7 @@ namespace abc { namespace samples {
 
 	class board {
 	public:
-		void				reset();
+		void				reset(log_ostream* log);
 
 	public:
 		bool				accept_move(const move& move);
@@ -171,16 +171,16 @@ namespace abc { namespace samples {
 		bool				has_move(player_id_t player_id, const move& move) const;
 		player_id_t			current_player_id() const;
 		board_state_t		state() const;
+		count_t				col_size(count_t col) const;
 
 		static player_id_t	opponent(player_id_t player_id);
 		
 	private:
 		void				set_move(const move& move);
 		void				clear_move(const move& move);
-		bool				check_winner();
+		bool				check_winner(const move& move);
 		void				switch_current_player_id();
 
-		count_t				col_size(count_t col) const;
 		count_t				inc_col_size(count_t col);
 		count_t				dec_col_size(count_t col);
 		count_t				col_pos(count_t col) const;
@@ -195,6 +195,7 @@ namespace abc { namespace samples {
 		player_id_t			_current_player_id	= player_id::x;
 		board_state_t		_board_state		= { 0 };
 		unsigned			_move_count			= 0;
+		log_ostream*		_log				= nullptr;
 	};
 
 
