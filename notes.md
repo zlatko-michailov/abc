@@ -1,6 +1,7 @@
 ## Done
 ----
 ## To Do
+BUG: player_agent::fast_find_best_move() doesn't use i_rand
 ---
 - Samples
   - connect four

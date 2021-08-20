@@ -383,7 +383,7 @@ namespace abc { namespace samples {
 				for (int r = 0; r < row_count; r++) {
 					for (int c = 0; c < col_count; c++) {
 						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none && itr->value[r][c] == score::max) {
-							if (--max_count == 0) {
+							if (--rand_i == 0) {
 								return move{ r, c };
 							}
 						}
