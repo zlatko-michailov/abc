@@ -171,7 +171,7 @@ namespace abc { namespace samples {
 	inline player_id_t board::get_move(const move& move) const {
 		count_t col_sz = col_size(move.col);
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): _board_state=%llx, col_sz=%u, move.row=%u", (long long)_board_state, col_sz, move.row);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
 		}
 
 		if (col_sz == 0 || col_sz <= move.row) {
@@ -300,25 +300,25 @@ namespace abc { namespace samples {
 
 	inline count_t board::inc_col_size(count_t col) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): before - _board_state=%llx, col=%u", (long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 
 		_board_state += (board_state_1 << col_pos(col));
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): after  - _board_state=%llx, col=%u", (long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 	}
 
 	inline count_t board::dec_col_size(count_t col) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): before - _board_state=%llx, col=%u", (long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 
 		_board_state -= (board_state_1 << col_pos(col));
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): after  - _board_state=%llx, col=%u", (long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 	}
 
@@ -341,19 +341,19 @@ namespace abc { namespace samples {
 		count_t pos = move_pos(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): start  - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): start  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 
 		clear_move_bits(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): before - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): before - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 
 		_board_state |= ((board_state_t)bits << pos);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): after  - _board_state=%llx, pos=%u, bits=%u", (long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): after  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 	}
 
@@ -361,13 +361,13 @@ namespace abc { namespace samples {
 		count_t pos = move_pos(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): before - _board_state=%llx, pos=%u", (long long)_board_state, pos);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): before - board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
 		}
 
 		_board_state &= ( ~((board_state_t)move_mask << pos) );
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): after  - _board_state=%llx, pos=%u", (long long)_board_state, pos);
+			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): after  -_board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
 		}
 	}
 
@@ -426,46 +426,77 @@ namespace abc { namespace samples {
 		_temp_board = _game->board();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::slow_make_move(): player_id=%u, board_state=0x%16.16x, temp_board_state=0x%16.16x",
+			_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_make_move(): player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
 				_player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
 		}
 
+		int max_depth = slow_choose_max_depth();
 		move best_move;
-		slow_find_best_move_for(_player_id, best_move);
+		slow_find_best_move_for(_player_id, best_move, max_depth, max_depth);
 
 		_game->accept_move(_player_id, best_move);
 	}
 
 
-	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& best_move) {
-		int best_score = -1;
+	inline int player_agent::slow_choose_max_depth() const {
+		unsigned move_count = _game->board().move_count();
+		int max_depth = 8;
+
+		if (move_count < 4) {
+			max_depth = 6;
+		}
+		else if (max_depth < 10) {
+			max_depth = 8;
+		}
+		else if (max_depth < 16) {
+			max_depth = 10;
+		}
+		else if (max_depth < 20) {
+			max_depth = 14;
+		}
+		else {
+			max_depth = 20;
+		}
+
+		return max_depth;
+	}
+
+
+	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& best_move, int max_depth, int depth) {
+		int best_score = -max_depth;
+		int best_pos = row_count + col_count;
 
 		// For simplicity, try cells in order.
 		for (count_t c = 0; c < col_count; c++) {
 			move mv{ _temp_board.col_size(c), c };
 
-			if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
+			if (best_score < 1 && mv.is_valid()) { //// && _temp_board.get_move(mv) == player_id::none) {
 				if (_temp_board.accept_move(mv)) {
 					int score = -1;
+
 					if (_temp_board.is_game_over()) {
-						score = _temp_board.winner() == player_id ? 1 : 0;
+						score = _temp_board.winner() == player_id ? std::max(1, depth) : 0;
+					}
+					else if (depth > 0 && _temp_board.move_count() < row_count * col_count) {
+						move dummy_mv;
+						score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv, max_depth, depth - 1);
 					}
 					else {
-						move dummy_mv;
-						score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv);
+						score = 0;
 					}
 
-					if (score > best_score) {
+					int pos = mv.row + std::abs((col_count + 1) / 2 - mv.col);
+					if ( (score > best_score)
+						|| (score == best_score && pos < best_pos) ) {
 						best_move = mv;
 						best_score = score;
+						best_pos = pos;
 					}
 
 					_temp_board.undo_move(mv);
-				}
-				else{
-					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::important, __TAG__, "player_agent::slow_find_best_move(): IMPOSSIBLE. move_count=%u, current_player_id=%u, best_score=%d, is_game_over=%d, get_move({%d, %d})=%d",
-							_temp_board.move_count(), _temp_board.current_player_id(), best_score, _temp_board.is_game_over(), mv.row, mv.col, _temp_board.get_move(mv));
+
+					if (depth == max_depth && _log != nullptr) {
+						_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_find_best_move_for() depth=%d, mv.row=%d, mv.col=%d, score=%d, pos=%d", depth, mv.row, mv.col, score, pos);
 					}
 				}
 			}
@@ -602,8 +633,8 @@ namespace abc { namespace samples {
 					itr->value[mv.col] = std::min(score::max, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (win) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
 				else if (_game->board().winner() == player_id::none) {
@@ -612,8 +643,8 @@ namespace abc { namespace samples {
 					itr->value[mv.col] = std::min(score::max, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (draw) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
 				else {
@@ -622,8 +653,8 @@ namespace abc { namespace samples {
 					itr->value[mv.col] = std::max(score::min, new_score);
 
 					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, temp_board.state(), mv.row, mv.col, old_score, new_score);
+						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (loss) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
+							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
 					}
 				}
 			}
