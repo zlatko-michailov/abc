@@ -219,6 +219,7 @@ namespace abc { namespace samples {
 	// Thinking slow
 	private:
 		void				slow_make_move();
+		bool				slow_make_first_move(move& best_move);
 		int					slow_choose_max_depth() const;
 		int					slow_find_best_move_for(player_id_t player_id, move& best_move, int max_depth, int depth);
 

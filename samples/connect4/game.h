@@ -430,22 +430,50 @@ namespace abc { namespace samples {
 				_player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
 		}
 
-		int max_depth = slow_choose_max_depth();
 		move best_move;
-		slow_find_best_move_for(_player_id, best_move, max_depth, max_depth);
+		if (!slow_make_first_move(best_move)) {
+			int max_depth = slow_choose_max_depth();
+			slow_find_best_move_for(_player_id, best_move, max_depth, max_depth);
+		}
 
 		_game->accept_move(_player_id, best_move);
 	}
 
+	inline bool player_agent::slow_make_first_move(move& best_move) {
+		unsigned move_count = _game->board().move_count();
+
+		if (move_count >= 4) {
+			return false;
+		}
+
+		move mid_next{ _game->board().col_size(col_count / 2), col_count / 2 };
+		move mid{ 0, col_count / 2 };
+		move right{ 0, col_count / 2 + 1 };
+		move left{ 0, col_count / 2 - 1 };
+
+		player_id_t opo = board::opponent(_player_id);
+
+		if (move_count < 2) {
+			best_move = mid_next;
+		}
+		else if (_game->board().get_move(move{ 0, col_count / 2 }) == _player_id) {
+			best_move = mid_next;
+		}
+		else if (_game->board().get_move(right) == opo) {
+			best_move = left;
+		}
+		else {
+			best_move = right;
+		}
+
+		return true;
+	}
 
 	inline int player_agent::slow_choose_max_depth() const {
 		unsigned move_count = _game->board().move_count();
 		int max_depth = 8;
 
-		if (move_count < 4) {
-			max_depth = 6;
-		}
-		else if (max_depth < 10) {
+		if (max_depth < 10) {
 			max_depth = 8;
 		}
 		else if (max_depth < 16) {
@@ -461,13 +489,16 @@ namespace abc { namespace samples {
 		return max_depth;
 	}
 
-
 	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& best_move, int max_depth, int depth) {
-		int best_score = -max_depth;
-		int best_pos = row_count + col_count;
+		int best_score = -1;
+		int best_pos = col_count;
 
-		// For simplicity, try cells in order.
-		for (count_t c = 0; c < col_count; c++) {
+		int sign = -1;
+		int mid = col_count / 2;
+		for (int i = 0; i < col_count; i++) {
+			count_t c = (count_t)(mid + sign * (i + 1) / 2);
+			sign = -sign;
+
 			move mv{ _temp_board.col_size(c), c };
 
 			if (best_score < 1 && mv.is_valid()) { //// && _temp_board.get_move(mv) == player_id::none) {
@@ -485,9 +516,10 @@ namespace abc { namespace samples {
 						score = 0;
 					}
 
-					int pos = mv.row + std::abs((col_count + 1) / 2 - mv.col);
-					if ( (score > best_score)
-						|| (score == best_score && pos < best_pos) ) {
+					int pos = std::abs((col_count + 1) / 2 - mv.col);
+					if ( (score >= 0 && score > best_score)
+						|| (score < 0 && best_score < 0 && score <= best_score)
+						|| (score == best_score && pos <= best_pos) ) {
 						best_move = mv;
 						best_score = score;
 						best_pos = pos;
