@@ -426,14 +426,14 @@ namespace abc { namespace samples {
 		_temp_board = _game->board();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_make_move(): player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
-				_player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
+			_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_make_move(): move_count=%u, player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
+				_game->board().move_count(), _player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
 		}
 
 		move best_move;
 		if (!slow_make_first_move(best_move)) {
 			int max_depth = slow_choose_max_depth();
-			slow_find_best_move_for(_player_id, best_move, max_depth, max_depth);
+			slow_find_best_move(best_move, max_depth, max_depth);
 		}
 
 		_game->accept_move(_player_id, best_move);
@@ -471,27 +471,29 @@ namespace abc { namespace samples {
 
 	inline int player_agent::slow_choose_max_depth() const {
 		unsigned move_count = _game->board().move_count();
-		int max_depth = 8;
+		int max_depth = -1;
 
-		if (max_depth < 10) {
+		if (move_count < 10) {
+			max_depth = 6;
+		}
+		else if (move_count < 16) {
 			max_depth = 8;
 		}
-		else if (max_depth < 16) {
+		else if (move_count < 24) {
 			max_depth = 10;
 		}
-		else if (max_depth < 20) {
-			max_depth = 14;
+		else if (move_count < 30) {
+			max_depth = 12;
 		}
 		else {
-			max_depth = 20;
+			max_depth = 16;
 		}
 
 		return max_depth;
 	}
 
-	inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& best_move, int max_depth, int depth) {
-		int best_score = -1;
-		int best_pos = col_count;
+	inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int depth) {
+		int best_score = -(2 * max_depth);
 
 		int sign = -1;
 		int mid = col_count / 2;
@@ -501,34 +503,30 @@ namespace abc { namespace samples {
 
 			move mv{ _temp_board.col_size(c), c };
 
-			if (best_score < 1 && mv.is_valid()) { //// && _temp_board.get_move(mv) == player_id::none) {
+			if (mv.is_valid()) { //// && _temp_board.get_move(mv) == player_id::none) {
 				if (_temp_board.accept_move(mv)) {
-					int score = -1;
+					int score = -max_depth;
 
 					if (_temp_board.is_game_over()) {
-						score = _temp_board.winner() == player_id ? std::max(1, depth) : 0;
+						score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
 					}
 					else if (depth > 0 && _temp_board.move_count() < row_count * col_count) {
 						move dummy_mv;
-						score = -slow_find_best_move_for(board::opponent(player_id), dummy_mv, max_depth, depth - 1);
+						score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
 					}
 					else {
-						score = 0;
+						score = -1;
 					}
 
-					int pos = std::abs((col_count + 1) / 2 - mv.col);
-					if ( (score >= 0 && score > best_score)
-						|| (score < 0 && best_score < 0 && score <= best_score)
-						|| (score == best_score && pos <= best_pos) ) {
+					if (score > best_score) {
 						best_move = mv;
 						best_score = score;
-						best_pos = pos;
 					}
 
 					_temp_board.undo_move(mv);
 
 					if (depth == max_depth && _log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_find_best_move_for() depth=%d, mv.row=%d, mv.col=%d, score=%d, pos=%d", depth, mv.row, mv.col, score, pos);
+						_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_find_best_move_for() mv.col=%d, score=%d", mv.col, score);
 					}
 				}
 			}
