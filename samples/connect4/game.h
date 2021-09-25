@@ -473,20 +473,20 @@ namespace abc { namespace samples {
 		unsigned move_count = _game->board().move_count();
 		int max_depth = -1;
 
-		if (move_count < 10) {
+		if (move_count < 12) {
 			max_depth = 6;
 		}
-		else if (move_count < 16) {
+		else if (move_count < 18) {
 			max_depth = 8;
 		}
 		else if (move_count < 24) {
 			max_depth = 10;
 		}
 		else if (move_count < 30) {
-			max_depth = 12;
+			max_depth = 16;
 		}
 		else {
-			max_depth = 16;
+			max_depth = 20;
 		}
 
 		return max_depth;
