@@ -393,7 +393,7 @@ namespace abc { namespace samples {
 
 			// If all the scores are min, pick one of them.
 			else if (min_count == row_count * col_count) {
-				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
+				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
 
 				return move{ rand_i / (score_calc_t)col_count, rand_i % (score_calc_t)col_count };
 			}
