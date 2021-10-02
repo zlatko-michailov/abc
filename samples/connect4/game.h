@@ -298,7 +298,7 @@ namespace abc { namespace samples {
 		return col_sz;
 	}
 
-	inline count_t board::inc_col_size(count_t col) {
+	inline void board::inc_col_size(count_t col) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
@@ -310,7 +310,7 @@ namespace abc { namespace samples {
 		}
 	}
 
-	inline count_t board::dec_col_size(count_t col) {
+	inline void board::dec_col_size(count_t col) {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}

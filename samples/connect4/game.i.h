@@ -181,8 +181,8 @@ namespace abc { namespace samples {
 		bool				check_winner(const move& move);
 		void				switch_current_player_id();
 
-		count_t				inc_col_size(count_t col);
-		count_t				dec_col_size(count_t col);
+		void				inc_col_size(count_t col);
+		void				dec_col_size(count_t col);
 		count_t				col_pos(count_t col) const;
 		player_id_t			get_move_bits(const move& move) const;
 		void				set_move_bits(const move& move, count_t bits);
