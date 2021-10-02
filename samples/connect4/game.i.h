@@ -75,7 +75,7 @@ namespace abc { namespace samples {
 		constexpr score_t mid	= 10;
 		constexpr score_t min	=  1;
 
-		constexpr score_t win	=  3;
+		constexpr score_t win	=  10;
 		constexpr score_t draw	=  1;
 		constexpr score_t loss	= -1;
 	}

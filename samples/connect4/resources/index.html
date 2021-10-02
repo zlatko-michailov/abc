@@ -273,7 +273,6 @@ SOFTWARE.
 			let sinceMoveI = 0;
 			let canAcceptMove = true;
 			let canRefreshMoves = true;
-			const maxGameCount = 500;
 			let gameCount = 0;
 			let currentStreak = 0;
 			let autoCreateGame = false;
@@ -313,9 +312,9 @@ SOFTWARE.
 							sinceMoveI = 0;
 							canAcceptMove = true;
 							canRefreshMoves = true;
-
-							//// refreshMoves();
 						}
+
+						refreshMoves();
 
 						return response.json();
 					})
@@ -491,7 +490,7 @@ SOFTWARE.
 					gameCount++;
 					document.getElementById("gameCount").innerHTML = gameCount;
 
-					if (autoCreateGame && gameCount < maxGameCount) {
+					if (autoCreateGame) {
 						setTimeout(createGame, 1000);
 					}
 				}

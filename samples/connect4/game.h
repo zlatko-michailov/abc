@@ -503,7 +503,7 @@ namespace abc { namespace samples {
 
 			move mv{ _temp_board.col_size(c), c };
 
-			if (mv.is_valid()) { //// && _temp_board.get_move(mv) == player_id::none) {
+			if (mv.is_valid()) {
 				if (_temp_board.accept_move(mv)) {
 					int score = -max_depth;
 
@@ -555,13 +555,14 @@ namespace abc { namespace samples {
 			score_calc_t max_count = 0;
 			score_calc_t min_count = 0;
 			score_calc_t none_count = 0;
+			score_calc_t valid_count = 0;
 			score_calc_t score_sum = 0;
 
-			//// TODO: player_agent::fast_find_best_move() col only
 			for (count_t c = 0; c < col_count; c++) {
 				move mv{ _game->board().col_size(c), c };
 
-				if (_game->board().get_move(mv) == abc::samples::player_id::none) {
+				if (mv.is_valid()) {
+					valid_count++;
 					score_calc_t curr_score = itr->value[c];
 
 					if (curr_score == score::max) {
@@ -586,7 +587,7 @@ namespace abc { namespace samples {
 				for (count_t c = 0; c < col_count; c++) {
 					move mv{ _game->board().col_size(c), c };
 
-					if (_game->board().get_move(mv) == abc::samples::player_id::none && itr->value[c] == score::max) {
+					if (mv.is_valid() && itr->value[c] == score::max) {
 						if (--rand_i == 0) {
 							return mv;
 						}
@@ -595,10 +596,14 @@ namespace abc { namespace samples {
 			}
 
 			// If all the scores are min, pick one of them.
-			else if (min_count == row_count * col_count) {
-				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
+			else if (min_count == valid_count) {
+				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
 
-				return move{ rand_i / (score_calc_t)col_count, rand_i % (score_calc_t)col_count };
+				count_t c = static_cast<count_t>(rand_i % (score_calc_t)col_count);
+				count_t r = _game->board().col_size(c);
+				move mv{ r, c };
+
+				return mv;
 			}
 
 			// Make a weighted pick.
@@ -609,27 +614,28 @@ namespace abc { namespace samples {
 
 				score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
 
-				for (count_t r = 0; r < row_count; r++) {
-					for (count_t c = 0; c < col_count; c++) {
-						score_calc_t curr_score = itr->value[c];
+				for (count_t c = 0; c < col_count; c++) {
+					count_t r = _game->board().col_size(c);
+					move mv{ r, c };
+	
+					score_calc_t curr_score = itr->value[c];
 
-						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
-							if (score::min <= curr_score && curr_score <= score::max) {
-								some_move = move{ r, c };
-								rand_sum -= curr_score;
-							}
-							else if (should_explore && curr_score == score::none) {
-								some_move = move{ r, c };
-								rand_sum -= score::mid;
+					if (mv.is_valid()) {
+						if (score::min <= curr_score && curr_score <= score::max) {
+							some_move = mv;
+							rand_sum -= curr_score;
+						}
+						else if (should_explore && curr_score == score::none) {
+							some_move = mv;
+							rand_sum -= score::mid;
+						}
+
+						if (rand_sum <= 0) {
+							if (_log != nullptr) {
+								_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
 							}
 
-							if (rand_sum <= 0) {
-								if (_log != nullptr) {
-									_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
-								}
-
-								return move{ r, c };
-							}
+							return mv;
 						}
 					}
 				}
@@ -646,46 +652,66 @@ namespace abc { namespace samples {
 
 
 	inline void player_agent::learn() {
+		unsigned move_count = _game->board().move_count();
+
+		const char* label = "ERROR!";
+		score_t gain = 0;
+		if (_game->board().winner() == _player_id) {
+			// Win
+			label = "win";
+			gain = score::win;
+		}
+		else if (_game->board().winner() == player_id::none) {
+			// Draw
+			label = "draw";
+			gain = score::draw;
+		}
+		else {
+			label = "loss";
+			gain = score::loss;
+		}
+
+		if (move_count <= 12) {
+			if (gain < 0) {
+				gain *= 3;
+			}
+		}
+		else if (move_count <= 18) {
+			if (gain < 0) {
+				gain *= 2;
+			}
+		}
+		else if (_game->board().winner() != _player_id) {
+			if (move_count > 32) {
+				gain += 3;
+			}
+			else if (move_count > 24) {
+				gain += 2;
+			}
+		}
+
 		std::lock_guard<std::mutex> lock(_vmem->mutex);
 
 		board temp_board;
-		for (unsigned i = 0; i < _game->board().move_count(); i++) {
+		for (unsigned i = 0; i < move_count; i++) {
 			move mv(_game->moves()[i]);
 
 			if (temp_board.current_player_id() == _player_id) {
 				vmem_map::iterator itr = ensure_board_state_in_map(temp_board.state());
 
 				score_t old_score = itr->value[mv.col] == score::none ? score::mid : itr->value[mv.col];
+				score_t new_score = old_score + gain;
 
-				if (_game->board().winner() == _player_id) {
-					// Win
-					score_t new_score = old_score + score::win;
+				if (new_score > 0) {
 					itr->value[mv.col] = std::min(score::max, new_score);
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (win) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
-					}
-				}
-				else if (_game->board().winner() == player_id::none) {
-					// Draw
-					score_t new_score = old_score + score::draw;
-					itr->value[mv.col] = std::min(score::max, new_score);
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (draw) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
-					}
 				}
 				else {
-					// Loss
-					score_t new_score = old_score + score::loss;
 					itr->value[mv.col] = std::max(score::min, new_score);
+				}
 
-					if (_log != nullptr) {
-						_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (loss) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
-							i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
-					}
+				if (_log != nullptr) {
+					_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (%s) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
+						label, i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
 				}
 			}
 
@@ -711,10 +737,8 @@ namespace abc { namespace samples {
 		// Init the item before inserting it.
 		vmem_map::value_type item;
 		item.key = board_state;
-		for (int r = 0; r < row_count; r++) {
-			for (int c = 0; c < col_count; c++) {
-				item.value[c] = score::none;
-			}
+		for (int c = 0; c < col_count; c++) {
+			item.value[c] = score::none;
 		}
 
 		// Insert the item.
