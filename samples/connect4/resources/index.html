@@ -311,9 +311,9 @@ SOFTWARE.
 							playerIds = [];
 							sinceMoveI = 0;
 							canAcceptMove = true;
-							canRefreshMoves = true;
 						}
 
+						canRefreshMoves = true;
 						refreshMoves();
 
 						return response.json();
@@ -399,7 +399,7 @@ SOFTWARE.
 						console.log(result);
 
 						canAcceptMove = true;
-						document.getElementById("status").innerHTML += result.i + ": { " + col + ", " + row + "} <br />";
+						document.getElementById("status").innerHTML += result.i + ": { " + row + ", " + col + "} <br />";
 						sinceMoveI = Math.max(sinceMoveI, result.i + 1);
 
 						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;" + playerSymbol.toUpperCase() + "&nbsp;</span>";
@@ -429,7 +429,12 @@ SOFTWARE.
 				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.json();
+						console.log("Content-Length " + response.headers.get("Content-Length"));
+						return response.text();
+					})
+					.then(function (text) {
+						console.log("Body <" + text + ">");
+						return JSON.parse(text);
 					})
 					.then(function (result) {
 						console.log(result);
@@ -447,7 +452,7 @@ SOFTWARE.
 
 					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
 
-					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.col + ", " + mv.move.row + "} <br />";
+					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
 					let html;
 					if (mv.i % 2 == 0) {
 						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
@@ -474,12 +479,24 @@ SOFTWARE.
 					else if (winner === 0) {
 						document.getElementById("status").innerHTML += "Player X wins! <br />";
 
-						currentStreak++;
+						if (document.getElementById("playerX").value === "fast_engine") {
+							document.getElementById("streaks").innerHTML += " " + currentStreak;
+							currentStreak = 0;
+						}
+						else {
+							currentStreak++;
+						}
 					}
 					else if (winner === 1) {
 						document.getElementById("status").innerHTML += "Player O wins! <br />";
 
-						currentStreak++;
+						if (document.getElementById("playerO").value === "fast_engine") {
+							document.getElementById("streaks").innerHTML += " " + currentStreak;
+							currentStreak = 0;
+						}
+						else {
+							currentStreak++;
+						}
 					}
 					else {
 						document.getElementById("status").innerHTML += "Unexpected winner " + winner + " <br />";
