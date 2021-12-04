@@ -473,6 +473,8 @@ namespace abc { namespace samples {
 		unsigned move_count = _game->board().move_count();
 		int max_depth = -1;
 
+		max_depth = 2;
+#ifdef TEMP
 		if (move_count < 12) {
 			max_depth = 6;
 		}
@@ -488,6 +490,7 @@ namespace abc { namespace samples {
 		else {
 			max_depth = 20;
 		}
+#endif
 
 		return max_depth;
 	}
@@ -671,22 +674,15 @@ namespace abc { namespace samples {
 			gain = score::loss;
 		}
 
-		if (move_count <= 12) {
-			if (gain < 0) {
-				gain *= 3;
-			}
-		}
-		else if (move_count <= 18) {
-			if (gain < 0) {
-				gain *= 2;
-			}
-		}
-		else if (_game->board().winner() != _player_id) {
+		if (_game->board().winner() != _player_id) {
 			if (move_count > 32) {
 				gain += 3;
 			}
 			else if (move_count > 24) {
 				gain += 2;
+			}
+			else if (move_count > 18) {
+				gain += 1;
 			}
 		}
 
@@ -1469,7 +1465,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::get_moves: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::accept_moves: Done.");
 				}
 
 				return true;
@@ -1509,7 +1505,7 @@ namespace abc { namespace samples {
 		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
 			if (_games[game_i].id() == endpoint_game_id) {
 				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-				char body[abc::size::k1 + 1];
+				char body[abc::size::k2 + 1];
 				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
 				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
 
