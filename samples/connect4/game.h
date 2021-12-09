@@ -473,8 +473,6 @@ namespace abc { namespace samples {
 		unsigned move_count = _game->board().move_count();
 		int max_depth = -1;
 
-		max_depth = 2;
-#ifdef TEMP
 		if (move_count < 12) {
 			max_depth = 6;
 		}
@@ -490,7 +488,6 @@ namespace abc { namespace samples {
 		else {
 			max_depth = 20;
 		}
-#endif
 
 		return max_depth;
 	}
