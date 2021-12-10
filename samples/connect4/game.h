@@ -92,7 +92,7 @@ namespace abc { namespace samples {
 	inline bool board::accept_move(const move& move) {
 		if (!move.is_valid()) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - not valid");
+				_log->put_any(category::abc::samples, severity::debug, 0x10607, "board::accept_move(): false - not valid");
 			}
 
 			return false;
@@ -100,7 +100,7 @@ namespace abc { namespace samples {
 
 		if (is_game_over()) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - game over");
+				_log->put_any(category::abc::samples, severity::debug, 0x10608, "board::accept_move(): false - game over");
 			}
 
 			return false;
@@ -108,7 +108,7 @@ namespace abc { namespace samples {
 
 		if (get_move(move) != player_id::none) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - taken");
+				_log->put_any(category::abc::samples, severity::debug, 0x10609, "board::accept_move(): false - taken");
 			}
 
 			return false;
@@ -116,7 +116,7 @@ namespace abc { namespace samples {
 
 		if (0 < move.row && get_move({move.row - 1, move.col}) == player_id::none) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): false - in the air");
+				_log->put_any(category::abc::samples, severity::debug, 0x1060a, "board::accept_move(): false - in the air");
 			}
 
 			return false;
@@ -130,7 +130,7 @@ namespace abc { namespace samples {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::accept_move(): true");
+			_log->put_any(category::abc::samples, severity::debug, 0x1060b, "board::accept_move(): true");
 		}
 
 		return true;
@@ -171,12 +171,12 @@ namespace abc { namespace samples {
 	inline player_id_t board::get_move(const move& move) const {
 		count_t col_sz = col_size(move.col);
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
+			_log->put_any(category::abc::samples, severity::debug, 0x1060c, "board::get_move(): board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
 		}
 
 		if (col_sz == 0 || col_sz <= move.row) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move(): none");
+				_log->put_any(category::abc::samples, severity::debug, 0x1060d, "board::get_move(): none");
 			}
 
 			return player_id::none;
@@ -292,7 +292,7 @@ namespace abc { namespace samples {
 		count_t col_sz = ( (_board_state >> col_pos(col)) & col_size_mask );
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::col_size(): col=%u, col_sz=%u", col, col_sz);
+			_log->put_any(category::abc::samples, severity::debug, 0x1060e, "board::col_size(): col=%u, col_sz=%u", col, col_sz);
 		}
 
 		return col_sz;
@@ -300,25 +300,25 @@ namespace abc { namespace samples {
 
 	inline void board::inc_col_size(count_t col) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, 0x1060f, "board::inc_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 
 		_board_state += (board_state_1 << col_pos(col));
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::inc_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, 0x10610, "board::inc_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 	}
 
 	inline void board::dec_col_size(count_t col) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, 0x10611, "board::dec_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 
 		_board_state -= (board_state_1 << col_pos(col));
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::dec_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+			_log->put_any(category::abc::samples, severity::debug, 0x10612, "board::dec_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 		}
 	}
 
@@ -331,7 +331,7 @@ namespace abc { namespace samples {
 		player_id_t move_bits = ( (_board_state >> pos) & move_mask );
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::get_move_bits(): pos=%u, move_bits=%u", pos, move_bits);
+			_log->put_any(category::abc::samples, severity::debug, 0x10613, "board::get_move_bits(): pos=%u, move_bits=%u", pos, move_bits);
 		}
 
 		return move_bits;
@@ -341,19 +341,19 @@ namespace abc { namespace samples {
 		count_t pos = move_pos(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): start  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, 0x10614, "board::set_move_bits(): start  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 
 		clear_move_bits(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): before - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, 0x10615, "board::set_move_bits(): before - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 
 		_board_state |= ((board_state_t)bits << pos);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::set_move_bits(): after  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
+			_log->put_any(category::abc::samples, severity::debug, 0x10616, "board::set_move_bits(): after  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
 		}
 	}
 
@@ -361,13 +361,13 @@ namespace abc { namespace samples {
 		count_t pos = move_pos(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): before - board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
+			_log->put_any(category::abc::samples, severity::debug, 0x10617, "board::clear_move_bits(): before - board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
 		}
 
 		_board_state &= ( ~((board_state_t)move_mask << pos) );
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "board::clear_move_bits(): after  -_board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
+			_log->put_any(category::abc::samples, severity::debug, 0x10618, "board::clear_move_bits(): after  -_board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
 		}
 	}
 
@@ -389,7 +389,7 @@ namespace abc { namespace samples {
 
 	inline void player_agent::make_move_async() {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move_async()");
+			_log->put_any(category::abc::samples, severity::debug, 0x10619, "player_agent::make_move_async()");
 		}
 
 		std::thread(player_agent::make_move_proc, this).detach();
@@ -398,7 +398,7 @@ namespace abc { namespace samples {
 
 	inline void player_agent::make_move_proc(player_agent* this_ptr) {
 		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move_proc()");
+			this_ptr->_log->put_any(category::abc::samples, severity::debug, 0x1061a, "player_agent::make_move_proc()");
 		}
 
 		this_ptr->make_move();
@@ -407,7 +407,7 @@ namespace abc { namespace samples {
 
 	inline void player_agent::make_move() {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::make_move()");
+			_log->put_any(category::abc::samples, severity::debug, 0x1061b, "player_agent::make_move()");
 		}
 
 		switch (_player_type) {
@@ -426,7 +426,7 @@ namespace abc { namespace samples {
 		_temp_board = _game->board();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_make_move(): move_count=%u, player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
+			_log->put_any(category::abc::samples, severity::optional, 0x1061c, "player_agent::slow_make_move(): move_count=%u, player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
 				_game->board().move_count(), _player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
 		}
 
@@ -526,7 +526,7 @@ namespace abc { namespace samples {
 					_temp_board.undo_move(mv);
 
 					if (depth == max_depth && _log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::slow_find_best_move_for() mv.col=%d, score=%d", mv.col, score);
+						_log->put_any(category::abc::samples, severity::optional, 0x1061d, "player_agent::slow_find_best_move_for() mv.col=%d, score=%d", mv.col, score);
 					}
 				}
 			}
@@ -632,7 +632,7 @@ namespace abc { namespace samples {
 
 						if (rand_sum <= 0) {
 							if (_log != nullptr) {
-								_log->put_any(category::abc::samples, severity::optional, __TAG__, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
+								_log->put_any(category::abc::samples, severity::optional, 0x1061e, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
 							}
 
 							return mv;
@@ -644,7 +644,7 @@ namespace abc { namespace samples {
 
 		// We should never end up here.
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::important, __TAG__, "player_agent::fast_find_best_move(): Impossible!");
+			_log->put_any(category::abc::samples, severity::important, 0x1061f, "player_agent::fast_find_best_move(): Impossible!");
 		}
 
 		return some_move;
@@ -703,7 +703,7 @@ namespace abc { namespace samples {
 				}
 
 				if (_log != nullptr) {
-					_log->put_any(category::abc::samples, severity::debug, __TAG__, "player_agent::learn: (%s) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
+					_log->put_any(category::abc::samples, severity::debug, 0x10620, "player_agent::learn: (%s) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
 						label, i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
 				}
 			}
@@ -753,7 +753,7 @@ namespace abc { namespace samples {
 
 	inline void game::start() {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::start(): player_id=%u", _board.current_player_id());
+			_log->put_any(category::abc::samples, severity::optional, 0x10621, "game::start(): player_id=%u", _board.current_player_id());
 		}
 
 		if (_board.current_player_id() == player_id::x) {
@@ -773,7 +773,7 @@ namespace abc { namespace samples {
 		bool accepted = _board.accept_move(move);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::accept_move(): accepted=%d, move_count=%u, player_id=%u, best_move={%d, %d}",
+			_log->put_any(category::abc::samples, severity::optional, 0x10622, "game::accept_move(): accepted=%d, move_count=%u, player_id=%u, best_move={%d, %d}",
 				accepted, _board.move_count(), player_id, move.row, move.col);
 		}
 
@@ -784,14 +784,14 @@ namespace abc { namespace samples {
 		if (_board.is_game_over()) {
 			if (_log != nullptr) {
 				if (_board.winner() != player_id::none) {
-					_log->put_any(category::abc::samples, severity::important, __TAG__, "game::accept_move(): GAME OVER - player_id=%u wins", _board.winner());
+					_log->put_any(category::abc::samples, severity::important, 0x10623, "game::accept_move(): GAME OVER - player_id=%u wins", _board.winner());
 				}
 				else {
-					_log->put_any(category::abc::samples, severity::important, __TAG__, "game::accept_move(): GAME OVER - draw");
+					_log->put_any(category::abc::samples, severity::important, 0x10624, "game::accept_move(): GAME OVER - draw");
 				}
 
 				for (std::size_t i = 0; i < _board.move_count(); i++) {
-					_log->put_any(category::abc::samples, severity::optional, __TAG__, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
+					_log->put_any(category::abc::samples, severity::optional, 0x10625, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
 				}
 			}
 
@@ -901,7 +901,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline void game_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::process_rest_request: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10626, "game_endpoint::process_rest_request: Start.");
 		}
 
 		if (ascii::are_equal_i_n(resource, "/games", 6)) {
@@ -912,11 +912,11 @@ namespace abc { namespace samples {
 		}
 		else {
 			// 404
-			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", __TAG__);
+			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", 0x10627);
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::process_rest_request: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10628, "game_endpoint::process_rest_request: Done.");
 		}
 	}
 
@@ -952,7 +952,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline bool game_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::create_game: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10629, "game_endpoint::create_game: Start.");
 		}
 
 		if (!verify_method_post(http, method)) {
@@ -981,7 +981,7 @@ namespace abc { namespace samples {
 					game_i = i;
 
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "game_endpoint::create_game: game_i=%zu", game_i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1062a, "game_endpoint::create_game: game_i=%zu", game_i);
 					}
 					break;
 				}
@@ -992,11 +992,11 @@ namespace abc { namespace samples {
 			constexpr const char* no_game_capacity = "The service has a temporary game capacity shortage.";
 
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Service error: Out of game capacity.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1062b, "Service error: Out of game capacity.");
 			}
 
 			// 503
-			base::send_simple_response(http, status_code::Service_Unavailable, reason_phrase::Service_Unavailable, content_type::text, no_game_capacity, __TAG__);
+			base::send_simple_response(http, status_code::Service_Unavailable, reason_phrase::Service_Unavailable, content_type::text, no_game_capacity, 0x1062c);
 			return false;
 		}
 
@@ -1036,7 +1036,7 @@ namespace abc { namespace samples {
 
 		// Send the http response
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1062d, "Sending response 200");
 		}
 
 		http.put_protocol(protocol::HTTP_11);
@@ -1054,7 +1054,7 @@ namespace abc { namespace samples {
 		http.put_body(body);
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::create_game: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1062e, "game_endpoint::create_game: Done.");
 		}
 
 		return true;
@@ -1076,11 +1076,11 @@ namespace abc { namespace samples {
 		if (token->item != abc::json::item::begin_object) {
 			// The body is not a JSON object.
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1062f, "Content error: Expected '{'.");
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10630);
 			return false;
 		}
 
@@ -1097,11 +1097,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property) {
 				// Not a property.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a property.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10631, "Content error: Expected a property.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10632);
 				return false;
 			}
 
@@ -1113,34 +1113,34 @@ namespace abc { namespace samples {
 				if (token->item != abc::json::item::begin_array) {
 					// Not [.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '['.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10633, "Content error: Expected '['.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10634);
 					return false;
 				}
 
 				for (std::size_t i = 0; i < 2; i++) {
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Parsing players[%zu]", i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10635, "Parsing players[%zu]", i);
 					}
 
 					json.get_token(token, sizeof(buffer));
 					if (token->item != abc::json::item::string) {
 						// Not a string.
 						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected a string.");
+							base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10636, "Content error: Expected a string.");
 						}
 
 						// 400
-						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10637);
 						return false;
 					}
 
 					std::strcpy(players[i], token->value.string);
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "players[%zu]='%s'", i, players[i]);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10638, "players[%zu]='%s'", i, players[i]);
 					}
 				}
 
@@ -1148,11 +1148,11 @@ namespace abc { namespace samples {
 				if (token->item != abc::json::item::end_array) {
 					// Not ].
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected ']'.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10639, "Content error: Expected ']'.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1063a);
 					return false;
 				}
 
@@ -1166,11 +1166,11 @@ namespace abc { namespace samples {
 
 		if (!has_players) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Players not received.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063b, "Content error: Players not received.");
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1063c);
 			return false;
 		}
 
@@ -1180,22 +1180,22 @@ namespace abc { namespace samples {
 		player_x_type = player_type::from_text(players[0]);
 		if (player_x_type == player_type::none) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[0]='%s'.", players[0]);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063d, "Content error: Invalid value of players[0]='%s'.", players[0]);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, 0x1063e);
 			return false;
 		}
 
 		player_o_type = player_type::from_text(players[1]);
 		if (player_o_type == player_type::none) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Invalid value of players[1]='%s'.", players[1]);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063f, "Content error: Invalid value of players[1]='%s'.", players[1]);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, 0x10640);
 			return false;
 		}
 
@@ -1206,7 +1206,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline bool game_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::claim_player: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10641, "game_endpoint::claim_player: Start.");
 		}
 
 		if (!verify_method_post(http, method)) {
@@ -1215,11 +1215,11 @@ namespace abc { namespace samples {
 
 		if (endpoint_game_id == 0 || player_i > 1) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10642, "Resource error: game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x10643);
 			return false;
 		}
 
@@ -1228,11 +1228,11 @@ namespace abc { namespace samples {
 				endpoint_player_id_t endpoint_player_id;
 				if (!_games[game_i].claim_player(player_i, endpoint_player_id)) {
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Security error: Player already claimed. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10644, "Security error: Player already claimed. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
 					}
 
 					// 403
-					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "This play has already been claimed.", __TAG__);
+					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "This play has already been claimed.", 0x10645);
 					return false;
 				}
 
@@ -1252,7 +1252,7 @@ namespace abc { namespace samples {
 
 				// Send the http response
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10646, "Sending response 200");
 				}
 
 				http.put_protocol(protocol::HTTP_11);
@@ -1270,7 +1270,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::claim_player: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10647, "game_endpoint::claim_player: Done.");
 				}
 
 				return true;
@@ -1278,11 +1278,11 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10648, "Resource error: Game not found. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
 		}
 
 		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10649);
 		return false;
 	}
 
@@ -1290,16 +1290,16 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline bool game_endpoint<Limits, Log>::accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::accept_move: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1064a, "game_endpoint::accept_move: Start.");
 		}
 
 		if (!ascii::are_equal_i(moves, "moves")) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: '%s' must be 'moves'.", moves);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064b, "Resource error: '%s' must be 'moves'.", moves);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x1064c);
 			return false;
 		}
 
@@ -1313,12 +1313,12 @@ namespace abc { namespace samples {
 
 		if (endpoint_game_id == 0 || endpoint_player_id == 0) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u, player_id=%u",
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064d, "Resource error: game_id=%u, player_id=%u",
 					(unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x1064e);
 			return false;
 		}
 
@@ -1335,11 +1335,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::begin_object) {
 				// Not {.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064f, "Content error: Expected '{'.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10650);
 				return false;
 			}
 
@@ -1347,11 +1347,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "row")) {
 				// Not "row".
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"row\".");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10651, "Content error: Expected \"row\".");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10652);
 				return false;
 			}
 
@@ -1359,11 +1359,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < row_count)) {
 				// Not a valid row.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 5.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10653, "Content error: Expected 0 <= number <= 5.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10654);
 				return false;
 			}
 
@@ -1373,11 +1373,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "col")) {
 				// Not "col".
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"col\".");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10655, "Content error: Expected \"col\".");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10656);
 				return false;
 			}
 
@@ -1385,11 +1385,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < col_count)) {
 				// Not a valid row.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 7.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10657, "Content error: Expected 0 <= number <= 7.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10658);
 				return false;
 			}
 
@@ -1402,21 +1402,21 @@ namespace abc { namespace samples {
 
 				if (player_id == player_id::none) {
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Player not found. player_id=%u", (unsigned)endpoint_player_id);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10659, "Resource error: Player not found. player_id=%u", (unsigned)endpoint_player_id);
 					}
 
 					// 404
-					base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A player with the supplied ID was not found.", __TAG__);
+					base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A player with the supplied ID was not found.", 0x1065a);
 					return false;
 				}
 
 				if (!_games[game_i].accept_move(player_id, mv)) {
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Move not accepted. move={ %u, %u }", mv.row, mv.col);
+						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1065b, "Resource error: Move not accepted. move={ %u, %u }", mv.row, mv.col);
 					}
 
 					// 403
-					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "The move was not accepted.", __TAG__);
+					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "The move was not accepted.", 0x1065c);
 					return false;
 				}
 
@@ -1444,7 +1444,7 @@ namespace abc { namespace samples {
 
 				// Send the http response
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1065d, "Sending response 200");
 				}
 
 				http.put_protocol(protocol::HTTP_11);
@@ -1462,7 +1462,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::accept_moves: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1065e, "game_endpoint::accept_moves: Done.");
 				}
 
 				return true;
@@ -1470,11 +1470,11 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u", (unsigned)endpoint_game_id);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1065f, "Resource error: Game not found. game_id=%u", (unsigned)endpoint_game_id);
 		}
 
 		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10660);
 		return false;
 	}
 
@@ -1482,7 +1482,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline bool game_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::get_moves: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10661, "game_endpoint::get_moves: Start.");
 		}
 
 		if (!verify_method_get(http, method)) {
@@ -1491,11 +1491,11 @@ namespace abc { namespace samples {
 
 		if (endpoint_game_id == 0) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: game_id=%u", (unsigned)endpoint_game_id);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10662, "Resource error: game_id=%u", (unsigned)endpoint_game_id);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x10663);
 			return false;
 		}
 
@@ -1540,7 +1540,7 @@ namespace abc { namespace samples {
 
 				// Send the http response
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10664, "Sending response 200");
 				}
 
 				http.put_protocol(protocol::HTTP_11);
@@ -1558,7 +1558,7 @@ namespace abc { namespace samples {
 				http.put_body(body);
 
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "game_endpoint::get_moves: Done.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10665, "game_endpoint::get_moves: Done.");
 				}
 
 				return true;
@@ -1566,11 +1566,11 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Resource error: Game not found. game_id=%u, since_move_i=%u", (unsigned)endpoint_game_id, since_move_i);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10666, "Resource error: Game not found. game_id=%u, since_move_i=%u", (unsigned)endpoint_game_id, since_move_i);
 		}
 
 		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", __TAG__);
+		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10667);
 		return false;
 	}
 
@@ -1584,7 +1584,7 @@ namespace abc { namespace samples {
 		base::set_shutdown_requested();
 
 		// 200
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x10668);
 	}
 
 
@@ -1592,11 +1592,11 @@ namespace abc { namespace samples {
 	inline bool game_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::GET)) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'GET'.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10669, "Method error: Expected 'GET'.");
 			}
 
 			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", __TAG__);
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", 0x1066a);
 			return false;
 		}
 
@@ -1608,11 +1608,11 @@ namespace abc { namespace samples {
 	inline bool game_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::POST)) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'POST'.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066b, "Method error: Expected 'POST'.");
 			}
 
 			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", __TAG__);
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", 0x1066c);
 			return false;
 		}
 
@@ -1638,11 +1638,11 @@ namespace abc { namespace samples {
 				if (has_content_type_json) {
 					// We've already received a Content-Type header.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Already received 'Content-Type'.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066d, "Header error: Already received 'Content-Type'.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x1066e);
 					return false;
 				}
 
@@ -1652,11 +1652,11 @@ namespace abc { namespace samples {
 				if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
 					// The Content-Type is not json.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Expected `application/json` as 'Content-Type'.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066f, "Header error: Expected `application/json` as 'Content-Type'.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x10670);
 					return false;
 				}
 
