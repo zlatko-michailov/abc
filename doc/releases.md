@@ -2,6 +2,18 @@
 
 Up to [Documentation](README.md).
 
+## 1.14.0
+- Breaking Changes
+  - none
+- Bugs
+  - Tic-Tac-Toe visualization issues.
+- Additions
+  - Connect 4
+    - "Thinking Slow" engine
+    - "Thinking Fast" engine
+- Refactoring
+  - none
+
 ## 1.13.0
 - Breaking Changes
   - none

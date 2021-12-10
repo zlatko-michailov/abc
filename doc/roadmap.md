@@ -2,14 +2,11 @@
 
 Up to [Documentation](README.md).
 
-## 1.14.0
-- Connect Four sample (thinking fast and slow).
-
 ## 1.15.0
-- SSL/TLS wrapper.
+- GPIO.
 
 ## 1.16.0
-- GPIO.
+- SSL/TLS wrapper.
 
 ## Pick List
 - Virtual memory:
