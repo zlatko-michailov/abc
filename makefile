@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 1.13.0
+VERSION = 1.14.0
 DEBUG = -ggdb
 CPPOPTIONS = $(DEBUG) --std=c++11 -Wpedantic -D_FILE_OFFSET_BITS=64
 LINKOPTIONS = -lstdc++ -lpthread
