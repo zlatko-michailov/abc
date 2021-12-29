@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018-2021 Zlatko Michailov 
+Copyright (c) 2018-2021 Zlatko Michailov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -84,15 +84,16 @@ namespace abc {
 
 		namespace abc {
 			constexpr category_t base		= 0x8000;
-			constexpr category_t exception	= base + 1;
-			constexpr category_t stream		= base + 2;
-			constexpr category_t socket		= base + 3;
-			constexpr category_t http		= base + 4;
-			constexpr category_t json		= base + 5;
-			constexpr category_t multifile	= base + 6;
-			constexpr category_t endpoint	= base + 7;
-			constexpr category_t vmem		= base + 8;
-			constexpr category_t samples	= base + 9;
+			constexpr category_t exception	= base +  1;
+			constexpr category_t stream		= base +  2;
+			constexpr category_t socket		= base +  3;
+			constexpr category_t http		= base +  4;
+			constexpr category_t json		= base +  5;
+			constexpr category_t multifile	= base +  6;
+			constexpr category_t endpoint	= base +  7;
+			constexpr category_t vmem		= base +  8;
+			constexpr category_t samples	= base +  9;
+			constexpr category_t gpio		= base + 10;
 		}
 	}
 

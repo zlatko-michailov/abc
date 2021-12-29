@@ -1,7 +1,9 @@
 ## Done
-----
+
 ## To Do
----
+GPIO: rename "pin" to "line".
+
+## Pick List
 - vmem:
   - check
     - No data loss
@@ -15,8 +17,6 @@
   - repair
 ---
 - tls_streambuf
----
-- GPIO
 ---
 
 ## Postponed

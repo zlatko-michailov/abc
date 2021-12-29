@@ -39,6 +39,7 @@ SAMPLE_BASIC = basic
 SAMPLE_VMEM = vmem
 SAMPLE_TICTACTOE = tictactoe
 SAMPLE_CONNECT4 = connect4
+SAMPLE_PICAR_4WD = picar_4wd
 PROG_TEST = $(PROJECT)_test
 
 
@@ -98,6 +99,11 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	# ---------- Done building connect4 ----------
+	#
+	# ---------- Begin building picar_4wd ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)
+	g++ $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SAMPLE_PICAR_4WD) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/*.cpp $(LINKOPTIONS)
+	# ---------- Done building picar_4wd ----------
 	#
 	# ---------- Done building samples ----------
 	#

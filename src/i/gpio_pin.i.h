@@ -1,0 +1,130 @@
+/*
+MIT License
+
+Copyright (c) 2018-2021 Zlatko Michailov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+#pragma once
+
+#include <cstdint>
+#include <linux/gpio.h>
+
+#include "gpio_chip.i.h"
+
+
+namespace abc {
+
+	using gpio_fd_t			= int;
+
+
+	// --------------------------------------------------------------
+
+
+	using gpio_pin_pos_t	= std::uint32_t;
+	using gpio_pin_flags_t	= std::uint64_t;
+
+
+	// --------------------------------------------------------------
+
+
+	using gpio_pin_value_t	= std::uint32_t;
+
+	class gpio_pin_value {
+	public:
+		static constexpr gpio_pin_value_t low			= 0x0;
+		static constexpr gpio_pin_value_t high			= 0x1;
+
+		static constexpr gpio_pin_value_t valid_mask	= 0x1;
+		static constexpr gpio_pin_value_t invalid_mask	= ~valid_mask;
+
+	public:
+		gpio_pin_value(gpio_pin_value_t value) noexcept;
+
+	public:
+		bool				is_valid() const noexcept;
+		gpio_pin_value_t	value() const noexcept;
+		operator gpio_pin_value_t() const noexcept;
+
+	private:
+		gpio_pin_value_t	_value;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log>
+	class gpio_chip;
+
+	template <typename Log>
+	class gpio_pin {
+	protected:
+		gpio_pin(gpio_fd_t fd, gpio_pin_flags_t flags, Log* log);
+
+	protected:
+		gpio_pin_value		get_value() noexcept;
+		bool				set_value(const gpio_pin_value& value) noexcept;
+
+	public:
+		bool				is_valid() const noexcept;
+
+	private:
+		gpio_fd_t			_fd;
+		Log*				_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log>
+	class gpio_input_pin : public gpio_pin<Log> {
+		using base = gpio_pin<Log>;
+
+	protected:
+		friend class gpio_chip<Log>;
+		gpio_input_pin(gpio_fd_t fd, Log* log);
+
+	public:
+		gpio_pin_value	get_value() noexcept;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log>
+	class gpio_output_pin : public gpio_pin<Log> {
+		using base = gpio_pin<Log>;
+
+	protected:
+		friend class gpio_chip<Log>;
+		gpio_output_pin(gpio_fd_t fd, Log* log);
+
+	public:
+		bool	set_value(const gpio_pin_value& value) noexcept;
+	};
+
+
+	// --------------------------------------------------------------
+
+}
