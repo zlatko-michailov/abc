@@ -29,7 +29,7 @@ SOFTWARE.
 #include <linux/gpio.h>
 
 #include "../size.h"
-#include "gpio_pin.i.h"
+#include "gpio_line.i.h"
 
 
 namespace abc {

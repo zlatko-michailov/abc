@@ -26,4 +26,4 @@ SOFTWARE.
 #pragma once
 
 #include "gpio_chip.i.h"
-#include "gpio_pin.i.h"
+#include "gpio_line.i.h"
