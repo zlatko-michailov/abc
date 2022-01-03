@@ -41,8 +41,8 @@ namespace abc {
 	};
 
 
-	struct gpio_pin_info : public gpio_v2_line_info {
-		gpio_pin_info() noexcept;
+	struct gpio_line_info : public gpio_v2_line_info {
+		gpio_line_info() noexcept;
 
 		bool is_valid;
 	};
@@ -64,11 +64,11 @@ namespace abc {
 
 	public:
 		gpio_chip_info			chip_info() noexcept;
-		gpio_pin_info			pin_info(gpio_pin_pos_t pos) noexcept;
+		gpio_line_info			line_info(gpio_line_pos_t pos) noexcept;
 
 	public:
-		gpio_input_pin<Log>		open_input_pin(gpio_pin_pos_t pos) noexcept;
-		gpio_output_pin<Log>	open_output_pin(gpio_pin_pos_t pos) noexcept;
+		gpio_input_line<Log>	open_input_line(gpio_line_pos_t pos) noexcept;
+		gpio_output_line<Log>	open_output_line(gpio_line_pos_t pos) noexcept;
 
 	private:
 		char					_path[max_path + 1];

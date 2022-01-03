@@ -51,15 +51,15 @@ int main(int argc, const char* argv[]) {
 	log.put_blank_line();
 
 	// Get each line's info.
-	for (abc::gpio_pin_pos_t pos = 0; pos < chip_info.lines; pos++) {
-		abc::gpio_pin_info pin_info = chip.pin_info(pos);
+	for (abc::gpio_line_pos_t pos = 0; pos < chip_info.lines; pos++) {
+		abc::gpio_line_info line_info = chip.line_info(pos);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "pin %2u info:", (unsigned)pos);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  is_valid = %d", pin_info.is_valid);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  name     = %s", pin_info.name);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  consumer = %s", pin_info.consumer);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  flags    = %llx", (long long)pin_info.flags);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  in/out   = %s", (pin_info.flags & GPIO_V2_LINE_FLAG_OUTPUT) != 0 ? "OUTPUT" : "INPUT");
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "line %2u info:", (unsigned)pos);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  is_valid = %d", line_info.is_valid);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  name     = %s", line_info.name);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  consumer = %s", line_info.consumer);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  flags    = %llx", (long long)line_info.flags);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  in/out   = %s", (line_info.flags & GPIO_V2_LINE_FLAG_OUTPUT) != 0 ? "OUTPUT" : "INPUT");
 		log.put_blank_line();
 	}
 

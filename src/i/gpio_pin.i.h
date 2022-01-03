@@ -39,33 +39,33 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using gpio_pin_pos_t	= std::uint32_t;
-	using gpio_pin_flags_t	= std::uint64_t;
+	using gpio_line_pos_t	= std::uint32_t;
+	using gpio_line_flags_t	= std::uint64_t;
 
 
 	// --------------------------------------------------------------
 
 
-	using gpio_pin_value_t	= std::uint32_t;
+	using gpio_line_value_t	= std::uint32_t;
 
-	class gpio_pin_value {
+	class gpio_line_value {
 	public:
-		static constexpr gpio_pin_value_t low			= 0x0;
-		static constexpr gpio_pin_value_t high			= 0x1;
+		static constexpr gpio_line_value_t low			= 0x0;
+		static constexpr gpio_line_value_t high			= 0x1;
 
-		static constexpr gpio_pin_value_t valid_mask	= 0x1;
-		static constexpr gpio_pin_value_t invalid_mask	= ~valid_mask;
+		static constexpr gpio_line_value_t valid_mask	= 0x1;
+		static constexpr gpio_line_value_t invalid_mask	= ~valid_mask;
 
 	public:
-		gpio_pin_value(gpio_pin_value_t value) noexcept;
+		gpio_line_value(gpio_line_value_t value) noexcept;
 
 	public:
 		bool				is_valid() const noexcept;
-		gpio_pin_value_t	value() const noexcept;
-		operator gpio_pin_value_t() const noexcept;
+		gpio_line_value_t	value() const noexcept;
+		operator gpio_line_value_t() const noexcept;
 
 	private:
-		gpio_pin_value_t	_value;
+		gpio_line_value_t	_value;
 	};
 
 
@@ -76,13 +76,13 @@ namespace abc {
 	class gpio_chip;
 
 	template <typename Log>
-	class gpio_pin {
+	class gpio_line {
 	protected:
-		gpio_pin(gpio_fd_t fd, gpio_pin_flags_t flags, Log* log);
+		gpio_line(gpio_fd_t fd, gpio_line_flags_t flags, Log* log);
 
 	protected:
-		gpio_pin_value		get_value() noexcept;
-		bool				set_value(const gpio_pin_value& value) noexcept;
+		gpio_line_value		get_value() noexcept;
+		bool				set_value(const gpio_line_value& value) noexcept;
 
 	public:
 		bool				is_valid() const noexcept;
@@ -97,15 +97,15 @@ namespace abc {
 
 
 	template <typename Log>
-	class gpio_input_pin : public gpio_pin<Log> {
-		using base = gpio_pin<Log>;
+	class gpio_input_line : public gpio_line<Log> {
+		using base = gpio_line<Log>;
 
 	protected:
 		friend class gpio_chip<Log>;
-		gpio_input_pin(gpio_fd_t fd, Log* log);
+		gpio_input_line(gpio_fd_t fd, Log* log);
 
 	public:
-		gpio_pin_value	get_value() noexcept;
+		gpio_line_value	get_value() noexcept;
 	};
 
 
@@ -113,15 +113,15 @@ namespace abc {
 
 
 	template <typename Log>
-	class gpio_output_pin : public gpio_pin<Log> {
-		using base = gpio_pin<Log>;
+	class gpio_output_line : public gpio_line<Log> {
+		using base = gpio_line<Log>;
 
 	protected:
 		friend class gpio_chip<Log>;
-		gpio_output_pin(gpio_fd_t fd, Log* log);
+		gpio_output_line(gpio_fd_t fd, Log* log);
 
 	public:
-		bool	set_value(const gpio_pin_value& value) noexcept;
+		bool	set_value(const gpio_line_value& value) noexcept;
 	};
 
 

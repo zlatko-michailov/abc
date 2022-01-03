@@ -44,7 +44,7 @@ namespace abc {
 	}
 
 
-	gpio_pin_info::gpio_pin_info() noexcept
+	gpio_line_info::gpio_line_info() noexcept
 		: gpio_v2_line_info{0}
 		, is_valid(false) {
 	}
@@ -129,19 +129,19 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_pin_info gpio_chip<Log>::pin_info(gpio_pin_pos_t pos) noexcept {
+	inline gpio_line_info gpio_chip<Log>::line_info(gpio_line_pos_t pos) noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::pin_info() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::line_info() Start.");
 		}
 
-		gpio_pin_info info;
+		gpio_line_info info;
 		info.is_valid = false;
 		info.offset = pos;
 
 		gpio_fd_t fd = open(_path, O_RDONLY);
 		if (fd < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::pin_info() Could not open()");
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not open()");
 			}
 
 			return info;
@@ -153,7 +153,7 @@ namespace abc {
 		if (stat < 0)
 		{
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::pin_info() Could not ioctl(GPIO_V2_GET_LINEINFO_IOCTL)");
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not ioctl(GPIO_V2_GET_LINEINFO_IOCTL)");
 			}
 
 			return info;
@@ -162,15 +162,15 @@ namespace abc {
 		info.is_valid = true;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::pin_info() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::line_info() Done.");
 		}
 
 		return info;
 	}
 
 
-	////	gpio_input_pin<Log>		open_input_pin(gpio_pin_pos_t pos) noexcept;
-	////	gpio_output_pin<Log>	open_output_pin(gpio_pin_pos_t pos) noexcept;
+	////	gpio_input_line<Log>		open_input_line(gpio_line_pos_t pos) noexcept;
+	////	gpio_output_line<Log>	open_output_line(gpio_line_pos_t pos) noexcept;
 
 
 	// --------------------------------------------------------------
