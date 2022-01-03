@@ -35,12 +35,29 @@ namespace abc {
 
 	using gpio_fd_t			= int;
 
+	using gpio_line_pos_t	= std::uint32_t;
+
 
 	// --------------------------------------------------------------
 
 
-	using gpio_line_pos_t	= std::uint32_t;
 	using gpio_line_flags_t	= std::uint64_t;
+
+	namespace gpio_line_flag {
+		constexpr gpio_line_flags_t	none					= static_cast<gpio_line_flags_t>(0);
+		constexpr gpio_line_flags_t	used					= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_USED);
+		constexpr gpio_line_flags_t	active_low				= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_ACTIVE_LOW);
+		constexpr gpio_line_flags_t	input					= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_INPUT);
+		constexpr gpio_line_flags_t	output					= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_OUTPUT);
+		constexpr gpio_line_flags_t	edge_rising				= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_EDGE_RISING);
+		constexpr gpio_line_flags_t	edge_falling			= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_EDGE_FALLING);
+		constexpr gpio_line_flags_t	open_drain				= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_OPEN_DRAIN);
+		constexpr gpio_line_flags_t	open_source				= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_OPEN_SOURCE);
+		constexpr gpio_line_flags_t	bias_pull_up			= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_BIAS_PULL_UP);
+		constexpr gpio_line_flags_t	bias_pull_down			= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_BIAS_PULL_DOWN);
+		constexpr gpio_line_flags_t	bias_disabled			= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_BIAS_DISABLED);
+		// constexpr gpio_line_flags_t	event_clock_realtime	= static_cast<gpio_line_flags_t>(GPIO_V2_LINE_FLAG_EVENT_CLOCK_REALTIME);
+	}
 
 
 	// --------------------------------------------------------------
