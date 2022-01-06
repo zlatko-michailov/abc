@@ -24,3 +24,4 @@ SOFTWARE.
 
 
 #include "x/gpio_chip.x.h"
+#include "x/gpio_line.x.h"

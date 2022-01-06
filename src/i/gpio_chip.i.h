@@ -54,24 +54,23 @@ namespace abc {
 	template <typename Log>
 	class gpio_chip {
 	public:
-		static constexpr std::size_t max_path = size::_64;
+		static constexpr std::size_t max_path 		= GPIO_MAX_NAME_SIZE;
+		static constexpr std::size_t max_consumer	= GPIO_MAX_NAME_SIZE;
 
 	public:
-		gpio_chip(const char* path, Log* log = nullptr);
+		gpio_chip(const char* path, const char* consumer = "abc", Log* log = nullptr);
 
 	public:
 		const char* 			path() const noexcept;
+		const char* 			consumer() const noexcept;
 
 	public:
-		gpio_chip_info			chip_info() noexcept;
-		gpio_line_info			line_info(gpio_line_pos_t pos) noexcept;
-
-	public:
-		gpio_input_line<Log>	open_input_line(gpio_line_pos_t pos) noexcept;
-		gpio_output_line<Log>	open_output_line(gpio_line_pos_t pos) noexcept;
+		gpio_chip_info			chip_info() const noexcept;
+		gpio_line_info			line_info(gpio_line_pos_t pos) const noexcept;
 
 	private:
-		char					_path[max_path + 1];
+		char					_path[max_path];
+		char					_consumer[max_consumer];
 		Log*					_log;
 	};
 

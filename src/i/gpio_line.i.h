@@ -67,13 +67,14 @@ namespace abc {
 
 	class gpio_line_value {
 	public:
-		static constexpr gpio_line_value_t low			= 0x0;
-		static constexpr gpio_line_value_t high			= 0x1;
+		static constexpr gpio_line_value_t bit			= 0x1;
 
-		static constexpr gpio_line_value_t valid_mask	= 0x1;
-		static constexpr gpio_line_value_t invalid_mask	= ~valid_mask;
+		static constexpr gpio_line_value_t low			= 0x0;
+		static constexpr gpio_line_value_t high			= bit;
+		static constexpr gpio_line_value_t invalid		= bit + 1;
 
 	public:
+		gpio_line_value() noexcept;
 		gpio_line_value(gpio_line_value_t value) noexcept;
 
 	public:
@@ -94,15 +95,12 @@ namespace abc {
 
 	template <typename Log>
 	class gpio_line {
-	protected:
-		gpio_line(gpio_fd_t fd, gpio_line_flags_t flags, Log* log);
-
-	protected:
-		gpio_line_value		get_value() noexcept;
-		bool				set_value(const gpio_line_value& value) noexcept;
+	public:
+		gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
 
 	public:
-		bool				is_valid() const noexcept;
+		gpio_line_value		get_value() const noexcept;
+		bool				set_value(const gpio_line_value& value) const noexcept;
 
 	private:
 		gpio_fd_t			_fd;
@@ -117,12 +115,11 @@ namespace abc {
 	class gpio_input_line : public gpio_line<Log> {
 		using base = gpio_line<Log>;
 
-	protected:
-		friend class gpio_chip<Log>;
-		gpio_input_line(gpio_fd_t fd, Log* log);
+	public:
+		gpio_input_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		gpio_line_value	get_value() noexcept;
+		bool				set_value(const gpio_line_value& value) const noexcept = delete;
 	};
 
 
@@ -133,12 +130,11 @@ namespace abc {
 	class gpio_output_line : public gpio_line<Log> {
 		using base = gpio_line<Log>;
 
-	protected:
-		friend class gpio_chip<Log>;
-		gpio_output_line(gpio_fd_t fd, Log* log);
+	public:
+		gpio_output_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		bool	set_value(const gpio_line_value& value) noexcept;
+		gpio_line_value		get_value() const noexcept = delete;
 	};
 
 

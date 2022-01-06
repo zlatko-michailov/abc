@@ -38,13 +38,13 @@ SOFTWARE.
 
 namespace abc {
 
-	gpio_chip_info::gpio_chip_info() noexcept
+	inline gpio_chip_info::gpio_chip_info() noexcept
 		: gpiochip_info{0}
 		, is_valid(false) {
 	}
 
 
-	gpio_line_info::gpio_line_info() noexcept
+	inline gpio_line_info::gpio_line_info() noexcept
 		: gpio_v2_line_info{0}
 		, is_valid(false) {
 	}
@@ -54,7 +54,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_chip<Log>::gpio_chip(const char* path, Log* log)
+	inline gpio_chip<Log>::gpio_chip(const char* path, const char* consumer, Log* log)
 		: _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::gpio_chip() Start.");
@@ -64,8 +64,16 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path == nullptr", __TAG__);
 		}
 
-		if (std::strlen(path) > max_path) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path > max_path", __TAG__);
+		if (std::strlen(path) >= max_path) {
+			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path >= max_path", __TAG__);
+		}
+
+		if (consumer == nullptr) {
+			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer == nullptr", __TAG__);
+		}
+
+		if (std::strlen(consumer) >= max_consumer) {
+			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer >= max_consumer", __TAG__);
 		}
 
 		gpio_fd_t fd = open(path, O_RDONLY);
@@ -74,7 +82,8 @@ namespace abc {
 		}
 		close(fd);
 
-		std::strncpy(_path, path, sizeof(_path)/sizeof(_path[0]));
+		std::strncpy(_path, path, max_path);
+		std::strncpy(_consumer, consumer, max_consumer);
 
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::gpio_chip() Done.");
@@ -89,7 +98,13 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_chip_info gpio_chip<Log>::chip_info() noexcept {
+	inline const char* gpio_chip<Log>::consumer() const noexcept {
+		return _consumer;
+	}
+
+
+	template <typename Log>
+	inline gpio_chip_info gpio_chip<Log>::chip_info() const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::chip_info() Start.");
 		}
@@ -129,7 +144,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_line_info gpio_chip<Log>::line_info(gpio_line_pos_t pos) noexcept {
+	inline gpio_line_info gpio_chip<Log>::line_info(gpio_line_pos_t pos) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::line_info() Start.");
 		}
@@ -167,10 +182,6 @@ namespace abc {
 
 		return info;
 	}
-
-
-	////	gpio_input_line<Log>		open_input_line(gpio_line_pos_t pos) noexcept;
-	////	gpio_output_line<Log>	open_output_line(gpio_line_pos_t pos) noexcept;
 
 
 	// --------------------------------------------------------------
