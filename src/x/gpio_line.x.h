@@ -37,30 +37,6 @@ SOFTWARE.
 
 namespace abc {
 
-	inline gpio_line_value::gpio_line_value() noexcept
-		: _value(invalid) {
-	}
-
-	inline gpio_line_value::gpio_line_value(gpio_line_value_t value) noexcept
-		: _value(value) {
-	}
-
-	inline bool gpio_line_value::is_valid() const noexcept {
-		return (_value & ~bit) == 0;
-	}
-
-	inline gpio_line_value_t gpio_line_value::value() const noexcept {
-		return _value;
-	}
-
-	inline gpio_line_value::operator gpio_line_value_t() const noexcept {
-		return _value;
-	}
-
-
-	// --------------------------------------------------------------
-
-
 	template <typename Log>
 	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
 		: _log(log) {
@@ -98,27 +74,35 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_line_value gpio_line<Log>::get_value() const noexcept {
+	inline gpio_bit_value_t gpio_line<Log>::get_value() const noexcept {
 		gpio_v2_line_values values{ 0 };
-		values.mask = gpio_line_value::bit;
+		values.mask = gpio_bit_value::mask;
 		
 		int ret = ioctl(_fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &values);
 		if (ret < 0) {
-			return gpio_line_value::invalid;
+			return gpio_bit_value::invalid;
 		}
 
-		return (values.bits & gpio_line_value::bit);
+		return (values.bits & gpio_bit_value::mask);
 	}
 
 
 	template <typename Log>
-	inline bool gpio_line<Log>::set_value(const gpio_line_value& value) const noexcept {
+	inline gpio_bit_value_t gpio_line<Log>::put_value(gpio_bit_value_t value) const noexcept {
+		if ((value & ~gpio_bit_value::mask) != 0) {
+			return gpio_bit_value::invalid;
+		}
+
 		gpio_v2_line_values values{ 0 };
-		values.mask = gpio_line_value::bit;
-		values.bits = (value & gpio_line_value::bit);
+		values.mask = gpio_bit_value::mask;
+		values.bits = (value & gpio_bit_value::mask);
 
 		int ret = ioctl(_fd, GPIO_V2_LINE_SET_VALUES_IOCTL, &values);
-		return (ret >= 0);
+		if (ret < 0) {
+			return gpio_bit_value::invalid;
+		}
+
+		return value;
 	}
 
 

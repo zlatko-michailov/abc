@@ -1,7 +1,20 @@
 ## Done
+- CRC: Moved to boneyard.
+- GPIO:
+  - Chip - get chip and line info.
+  - Line - get, put, and pulse bit values.
+- Sample picar_4wd:
+  - Get chip and line info.
+  - Get distance.
 
 ## To Do
-GPIO: rename "pin" to "line".
+GPIO:
+  - Use C++ chrono for time.
+  - Add gpio_line::pulse_value(bit_value, duration).
+Sample picar_4wd:
+  - Limit getting distance by a timeout.
+  - Remove the time logging.
+
 
 ## Pick List
 - vmem:

@@ -69,11 +69,11 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 
 	for (int i = 0; i < 20; i++) {
 		// Clear and send a pulse.
-		trigger_line.set_value(abc::gpio_line_value::low);
+		trigger_line.put_value(abc::gpio_bit_value::low);
 		usleep(10);
-		trigger_line.set_value(abc::gpio_line_value::high);
+		trigger_line.put_value(abc::gpio_bit_value::high);
 		usleep(10);
-		trigger_line.set_value(abc::gpio_line_value::low);
+		trigger_line.put_value(abc::gpio_bit_value::low);
 
 		timespec base_tp;
 		timespec pulse_start_tp;
@@ -81,15 +81,15 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 
 		clock_gettime(CLOCK_REALTIME, &base_tp);
 		
-		abc::gpio_line_value value;
+		abc::gpio_bit_value_t value;
 		value = echo_line.get_value();
-		while (value.is_valid() && value == abc::gpio_line_value::low) {
+		while (value == abc::gpio_bit_value::low) {
 			clock_gettime(CLOCK_REALTIME, &pulse_start_tp);
 			value = echo_line.get_value();
 		}
 
 		// Measure the duration of the high echo.
-		while (value.is_valid() && value == abc::gpio_line_value::high) {
+		while (value == abc::gpio_bit_value::high) {
 			clock_gettime(CLOCK_REALTIME, &pulse_end_tp);
 			value = echo_line.get_value();
 		}
