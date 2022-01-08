@@ -9,11 +9,9 @@
 
 ## To Do
 GPIO:
-  - Use C++ chrono for time.
   - Add gpio_line::pulse_value(bit_value, duration).
 Sample picar_4wd:
   - Limit getting distance by a timeout.
-  - Remove the time logging.
 
 
 ## Pick List

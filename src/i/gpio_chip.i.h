@@ -51,7 +51,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
+	template <typename Log = null_log>
 	class gpio_chip {
 	public:
 		static constexpr std::size_t max_path 		= GPIO_MAX_NAME_SIZE;

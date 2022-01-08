@@ -80,7 +80,7 @@ namespace abc {
 	template <typename Log>
 	class gpio_chip;
 
-	template <typename Log>
+	template <typename Log = null_log>
 	class gpio_line {
 	public:
 		gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
@@ -98,7 +98,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
+	template <typename Log = null_log>
 	class gpio_input_line : public gpio_line<Log> {
 		using base = gpio_line<Log>;
 
@@ -113,7 +113,7 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	template <typename Log>
+	template <typename Log = null_log>
 	class gpio_output_line : public gpio_line<Log> {
 		using base = gpio_line<Log>;
 

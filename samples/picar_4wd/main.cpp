@@ -24,8 +24,7 @@ SOFTWARE.
 
 
 #include <iostream>
-#include <unistd.h>
-#include <time.h>
+#include <chrono>
 
 #include "../../src/gpio.h"
 
@@ -64,51 +63,49 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 
 
 void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	using clock = std::chrono::steady_clock;
+
 	abc::gpio_output_line<log_ostream> trigger_line(chip, 5, &log);
 	abc::gpio_input_line<log_ostream> echo_line(chip, 6, &log);
 
 	for (int i = 0; i < 20; i++) {
 		// Clear and send a pulse.
 		trigger_line.put_value(abc::gpio_bit_value::low);
-		usleep(10);
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 		trigger_line.put_value(abc::gpio_bit_value::high);
-		usleep(10);
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 		trigger_line.put_value(abc::gpio_bit_value::low);
 
-		timespec base_tp;
-		timespec pulse_start_tp;
-		timespec pulse_end_tp;
+		clock::time_point base_time_point = clock::now();
+		clock::time_point echo_start_time_point;
+		clock::time_point echo_end_time_point;
 
-		clock_gettime(CLOCK_REALTIME, &base_tp);
-		
 		abc::gpio_bit_value_t value;
 		value = echo_line.get_value();
 		while (value == abc::gpio_bit_value::low) {
-			clock_gettime(CLOCK_REALTIME, &pulse_start_tp);
+			echo_start_time_point = clock::now();
 			value = echo_line.get_value();
 		}
 
 		// Measure the duration of the high echo.
 		while (value == abc::gpio_bit_value::high) {
-			clock_gettime(CLOCK_REALTIME, &pulse_end_tp);
+			echo_end_time_point = clock::now();
 			value = echo_line.get_value();
 		}
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "base= %llu : %lu", (long long)base_tp.tv_sec, base_tp.tv_nsec);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "start=%llu : %lu (%lu)", (long long)pulse_start_tp.tv_sec, pulse_start_tp.tv_nsec, pulse_start_tp.tv_nsec - base_tp.tv_nsec);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "end=  %llu : %lu (%lu)", (long long)pulse_end_tp.tv_sec, pulse_end_tp.tv_nsec, pulse_end_tp.tv_nsec - pulse_start_tp.tv_nsec);
+		std::chrono::microseconds echo_us = std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - echo_start_time_point);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "us=%llu", (long long)echo_us.count());
 
-		double duration = (pulse_end_tp.tv_sec - pulse_start_tp.tv_sec) + (pulse_end_tp.tv_nsec - pulse_start_tp.tv_nsec) / 1000000000.0;
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duration=%.6f", duration);
-
-		// Calculate length in cm based on the speed of sound - 340 m/s.
-		double cm = 340.0 * 100.0 * duration / 2.0;
-		log.put_blank_line();
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "cm=%.2f", cm);
+		// Calculate roundtip at the speed of sound - 340 m/s.
+		double echo_s = echo_us.count() / (1000.0 * 1000.0);
+		double roundtrip_m = 340.0 * echo_s;
+		double roundtrip_cm = roundtrip_m * 100.0;
+		double distance_cm = roundtrip_cm / 2.0;
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "cm=%.2f", distance_cm);
 		log.put_blank_line();
 
 		// Sleep for 1 sec between iterations.
-		usleep(1 * 1000 * 1000);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
