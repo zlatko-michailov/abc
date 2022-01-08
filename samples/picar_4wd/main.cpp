@@ -64,6 +64,7 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 
 void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
+	const std::chrono::microseconds timeout_us((2 * 1000 * 1000) / 340); // 6ms
 
 	abc::gpio_output_line<log_ostream> trigger_line(chip, 5, &log);
 	abc::gpio_input_line<log_ostream> echo_line(chip, 6, &log);
@@ -77,31 +78,36 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 		trigger_line.put_value(abc::gpio_bit_value::low);
 
 		clock::time_point base_time_point = clock::now();
-		clock::time_point echo_start_time_point;
-		clock::time_point echo_end_time_point;
+		clock::time_point echo_start_time_point = base_time_point;
+		clock::time_point echo_end_time_point = base_time_point;
 
 		abc::gpio_bit_value_t value;
 		value = echo_line.get_value();
-		while (value == abc::gpio_bit_value::low) {
+		while (value == abc::gpio_bit_value::low && std::chrono::duration_cast<std::chrono::microseconds>(echo_start_time_point - base_time_point) <= timeout_us) {
 			echo_start_time_point = clock::now();
 			value = echo_line.get_value();
 		}
 
 		// Measure the duration of the high echo.
-		while (value == abc::gpio_bit_value::high) {
+		while (value == abc::gpio_bit_value::high && std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) <= timeout_us) {
 			echo_end_time_point = clock::now();
 			value = echo_line.get_value();
 		}
 
+		if (std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) > timeout_us) {
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TIMEOUT us = %llu", (long long)timeout_us.count());
+			continue;
+		}
+
 		std::chrono::microseconds echo_us = std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - echo_start_time_point);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "us=%llu", (long long)echo_us.count());
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "us = %llu", (long long)echo_us.count());
 
 		// Calculate roundtip at the speed of sound - 340 m/s.
 		double echo_s = echo_us.count() / (1000.0 * 1000.0);
 		double roundtrip_m = 340.0 * echo_s;
 		double roundtrip_cm = roundtrip_m * 100.0;
 		double distance_cm = roundtrip_cm / 2.0;
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "cm=%.2f", distance_cm);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "cm = %.2f", distance_cm);
 		log.put_blank_line();
 
 		// Sleep for 1 sec between iterations.

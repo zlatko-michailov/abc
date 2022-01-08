@@ -10,8 +10,6 @@
 ## To Do
 GPIO:
   - Add gpio_line::pulse_value(bit_value, duration).
-Sample picar_4wd:
-  - Limit getting distance by a timeout.
 
 
 ## Pick List
