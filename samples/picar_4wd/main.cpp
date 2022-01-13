@@ -71,27 +71,27 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 
 	for (int i = 0; i < 20; i++) {
 		// Clear and send a pulse.
-		trigger_line.put_value(abc::gpio_bit_value::low);
+		trigger_line.put_level(abc::gpio_level::low);
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
-		trigger_line.put_value(abc::gpio_bit_value::high);
+		trigger_line.put_level(abc::gpio_level::high);
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
-		trigger_line.put_value(abc::gpio_bit_value::low);
+		trigger_line.put_level(abc::gpio_level::low);
 
 		clock::time_point base_time_point = clock::now();
 		clock::time_point echo_start_time_point = base_time_point;
 		clock::time_point echo_end_time_point = base_time_point;
 
-		abc::gpio_bit_value_t value;
-		value = echo_line.get_value();
-		while (value == abc::gpio_bit_value::low && std::chrono::duration_cast<std::chrono::microseconds>(echo_start_time_point - base_time_point) <= timeout_us) {
+		abc::gpio_level_t level;
+		level = echo_line.get_level();
+		while (level == abc::gpio_level::low && std::chrono::duration_cast<std::chrono::microseconds>(echo_start_time_point - base_time_point) <= timeout_us) {
 			echo_start_time_point = clock::now();
-			value = echo_line.get_value();
+			level = echo_line.get_level();
 		}
 
 		// Measure the duration of the high echo.
-		while (value == abc::gpio_bit_value::high && std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) <= timeout_us) {
+		while (level == abc::gpio_level::high && std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) <= timeout_us) {
 			echo_end_time_point = clock::now();
-			value = echo_line.get_value();
+			level = echo_line.get_level();
 		}
 
 		if (std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) > timeout_us) {

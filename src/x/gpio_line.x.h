@@ -74,35 +74,35 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_bit_value_t gpio_line<Log>::get_value() const noexcept {
+	inline gpio_level_t gpio_line<Log>::get_level() const noexcept {
 		gpio_v2_line_values values{ 0 };
-		values.mask = gpio_bit_value::mask;
+		values.mask = gpio_level::mask;
 		
 		int ret = ioctl(_fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &values);
 		if (ret < 0) {
-			return gpio_bit_value::invalid;
+			return gpio_level::invalid;
 		}
 
-		return (values.bits & gpio_bit_value::mask);
+		return (values.bits & gpio_level::mask);
 	}
 
 
 	template <typename Log>
-	inline gpio_bit_value_t gpio_line<Log>::put_value(gpio_bit_value_t value) const noexcept {
-		if ((value & ~gpio_bit_value::mask) != 0) {
-			return gpio_bit_value::invalid;
+	inline gpio_level_t gpio_line<Log>::put_level(gpio_level_t level) const noexcept {
+		if ((level & ~gpio_level::mask) != 0) {
+			return gpio_level::invalid;
 		}
 
 		gpio_v2_line_values values{ 0 };
-		values.mask = gpio_bit_value::mask;
-		values.bits = (value & gpio_bit_value::mask);
+		values.mask = gpio_level::mask;
+		values.bits = (level & gpio_level::mask);
 
 		int ret = ioctl(_fd, GPIO_V2_LINE_SET_VALUES_IOCTL, &values);
 		if (ret < 0) {
-			return gpio_bit_value::invalid;
+			return gpio_level::invalid;
 		}
 
-		return value;
+		return level;
 	}
 
 

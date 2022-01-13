@@ -9,7 +9,10 @@
 
 ## To Do
 GPIO:
-  - Add gpio_line::pulse_value(bit_value, duration).
+  - gpio_line
+    - put_level_for(level, duration)
+    - wait_for_level_for(level, duration)
+  - gpio_pwm_emulator(line, frequency, &control{ duty_cycle, quit })
 
 
 ## Pick List

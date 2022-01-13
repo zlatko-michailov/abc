@@ -63,14 +63,14 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	using gpio_bit_value_t	= std::uint32_t;
+	using gpio_level_t	= std::uint32_t;
 
-	namespace gpio_bit_value {
-		static constexpr gpio_bit_value_t mask			= 0x1;
+	namespace gpio_level {
+		static constexpr gpio_level_t mask			= 0x1;
 
-		static constexpr gpio_bit_value_t low			= 0x0;
-		static constexpr gpio_bit_value_t high			= 0x1;
-		static constexpr gpio_bit_value_t invalid		= mask + 1;
+		static constexpr gpio_level_t low			= 0x0;
+		static constexpr gpio_level_t high			= 0x1;
+		static constexpr gpio_level_t invalid		= mask + 1;
 	}
 
 
@@ -86,8 +86,8 @@ namespace abc {
 		gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
 
 	public:
-		gpio_bit_value_t	get_value() const noexcept;
-		gpio_bit_value_t	put_value(gpio_bit_value_t value) const noexcept;
+		gpio_level_t	get_level() const noexcept;
+		gpio_level_t	put_level(gpio_level_t level) const noexcept;
 
 	private:
 		gpio_fd_t			_fd;
@@ -106,7 +106,7 @@ namespace abc {
 		gpio_input_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		gpio_bit_value_t	put_value(gpio_bit_value_t value) const noexcept = delete;
+		gpio_level_t	put_level(gpio_level_t level) const noexcept = delete;
 	};
 
 
@@ -121,7 +121,7 @@ namespace abc {
 		gpio_output_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		gpio_bit_value_t	get_value() const noexcept = delete;
+		gpio_level_t	get_level() const noexcept = delete;
 	};
 
 
