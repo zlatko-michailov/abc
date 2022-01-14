@@ -64,42 +64,44 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 
 void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
-	const std::chrono::microseconds timeout_us((2 * 1000 * 1000) / 340); // 6ms
+	using microseconds = std::chrono::microseconds;
 
 	abc::gpio_output_line<log_ostream> trigger_line(chip, 5, &log);
 	abc::gpio_input_line<log_ostream> echo_line(chip, 6, &log);
 
 	for (int i = 0; i < 20; i++) {
 		// Clear and send a pulse.
-		trigger_line.put_level(abc::gpio_level::low);
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
-		trigger_line.put_level(abc::gpio_level::high);
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
+		trigger_line.put_level(abc::gpio_level::low, microseconds(10));
+		trigger_line.put_level(abc::gpio_level::high, microseconds(10));
 		trigger_line.put_level(abc::gpio_level::low);
 
-		clock::time_point base_time_point = clock::now();
-		clock::time_point echo_start_time_point = base_time_point;
-		clock::time_point echo_end_time_point = base_time_point;
+		clock::time_point echo_not_ready_tp = clock::now();
+		microseconds timeout((2 * 1000 * 1000) / 340); // ~6,000 us
 
-		abc::gpio_level_t level;
-		level = echo_line.get_level();
-		while (level == abc::gpio_level::low && std::chrono::duration_cast<std::chrono::microseconds>(echo_start_time_point - base_time_point) <= timeout_us) {
-			echo_start_time_point = clock::now();
-			level = echo_line.get_level();
+		// Make sure there is no echo in progress.
+		abc::gpio_level_t level = echo_line.expect_level(abc::gpio_level::low, timeout);
+		clock::time_point echo_ready_tp = clock::now();
+
+		// Wait until the echo starts.
+		if (level != abc::gpio_level::invalid) {
+			timeout -= std::chrono::duration_cast<microseconds>(echo_ready_tp - echo_not_ready_tp);
+			level = echo_line.expect_level(abc::gpio_level::high, timeout);
 		}
+		clock::time_point echo_start_tp = clock::now();
 
-		// Measure the duration of the high echo.
-		while (level == abc::gpio_level::high && std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) <= timeout_us) {
-			echo_end_time_point = clock::now();
-			level = echo_line.get_level();
+		// Wait until the echo ends.
+		if (level != abc::gpio_level::invalid) {
+			timeout -= std::chrono::duration_cast<microseconds>(echo_start_tp - echo_ready_tp);
+			level = echo_line.expect_level(abc::gpio_level::low, timeout);
 		}
+		clock::time_point echo_end_tp = clock::now();
 
-		if (std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - base_time_point) > timeout_us) {
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TIMEOUT us = %llu", (long long)timeout_us.count());
+		if (level == abc::gpio_level::invalid) {
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TIMEOUT us = %llu", (long long)timeout.count());
 			continue;
 		}
 
-		std::chrono::microseconds echo_us = std::chrono::duration_cast<std::chrono::microseconds>(echo_end_time_point - echo_start_time_point);
+		microseconds echo_us = std::chrono::duration_cast<microseconds>(echo_end_tp - echo_start_tp);
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "us = %llu", (long long)echo_us.count());
 
 		// Calculate roundtip at the speed of sound - 340 m/s.

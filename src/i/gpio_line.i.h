@@ -87,7 +87,12 @@ namespace abc {
 
 	public:
 		gpio_level_t	get_level() const noexcept;
+		template <typename Duration>
+		gpio_level_t	expect_level(gpio_level_t level, Duration timeout) const noexcept;
+
 		gpio_level_t	put_level(gpio_level_t level) const noexcept;
+		template <typename Duration>
+		gpio_level_t	put_level(gpio_level_t level, Duration duration) const noexcept;
 
 	private:
 		gpio_fd_t			_fd;
@@ -107,6 +112,8 @@ namespace abc {
 
 	public:
 		gpio_level_t	put_level(gpio_level_t level) const noexcept = delete;
+		template <typename Duration>
+		gpio_level_t	put_level(gpio_level_t level, Duration duration) const noexcept = delete;
 	};
 
 
@@ -122,6 +129,8 @@ namespace abc {
 
 	public:
 		gpio_level_t	get_level() const noexcept = delete;
+		template <typename Duration>
+		gpio_level_t	expect_level(gpio_level_t level, Duration timeout) const noexcept = delete;
 	};
 
 

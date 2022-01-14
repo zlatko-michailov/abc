@@ -9,9 +9,6 @@
 
 ## To Do
 GPIO:
-  - gpio_line
-    - put_level_for(level, duration)
-    - wait_for_level_for(level, duration)
   - gpio_pwm_emulator(line, frequency, &control{ duty_cycle, quit })
 
 

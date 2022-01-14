@@ -26,6 +26,8 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -36,6 +38,9 @@ SOFTWARE.
 
 
 namespace abc {
+
+	using clock = std::chrono::steady_clock;
+
 
 	template <typename Log>
 	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
@@ -88,6 +93,26 @@ namespace abc {
 
 
 	template <typename Log>
+	template <typename Duration>
+	gpio_level_t gpio_line<Log>::expect_level(gpio_level_t level, Duration timeout) const noexcept {
+		clock::time_point start_tp = clock::now();
+		clock::time_point current_tp = clock::now();
+		gpio_level_t current_level = get_level();
+
+		while (current_level != level) {
+			if (std::chrono::duration_cast<Duration>(current_tp - start_tp) > timeout) {
+				return gpio_level::invalid;
+			}
+
+			current_tp = clock::now();
+			current_level = get_level();
+		}
+
+		return level;
+	}
+
+
+	template <typename Log>
 	inline gpio_level_t gpio_line<Log>::put_level(gpio_level_t level) const noexcept {
 		if ((level & ~gpio_level::mask) != 0) {
 			return gpio_level::invalid;
@@ -103,6 +128,19 @@ namespace abc {
 		}
 
 		return level;
+	}
+
+
+	template <typename Log>
+	template <typename Duration>
+	inline gpio_level_t gpio_line<Log>::put_level(gpio_level_t level, Duration duration) const noexcept {
+		gpio_level_t ret = put_level(level);
+
+		if (ret != gpio_level::invalid) {
+			std::this_thread::sleep_for(duration);
+		}
+
+		return ret;
 	}
 
 
