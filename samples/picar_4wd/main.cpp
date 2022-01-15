@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 #include "../../src/gpio.h"
 
@@ -118,6 +119,40 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 }
 
 
+void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	using clock = std::chrono::steady_clock;
+	using microseconds = std::chrono::microseconds;
+
+	const std::uint32_t min_pulse_width_us = 500;
+	const std::uint32_t max_pulse_width_us = 2500;
+	const std::uint32_t frequency = 50; // 50 Hz
+	const std::uint32_t period_us = 1000 * 1000 / frequency;
+
+	const std::uint32_t duration_us = 250 * 1000; // 250 ms
+	const std::uint32_t period_count = duration_us / period_us;
+
+	const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
+
+	abc::gpio_output_line<log_ostream> line(chip, 4, &log);
+
+	for (std::uint32_t duty_cycle : duty_cycles) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+
+		const std::uint32_t high_duration_us = min_pulse_width_us + duty_cycle * (max_pulse_width_us - min_pulse_width_us) / 100;
+		const std::uint32_t low_duration_us = period_us - high_duration_us;
+
+		line.put_level(abc::gpio_level::low, microseconds(10));
+		for (std::uint32_t p = 0; p < period_count; p++) {
+			line.put_level(abc::gpio_level::high, microseconds(high_duration_us));
+			line.put_level(abc::gpio_level::low, microseconds(low_duration_us));
+		}
+		line.put_level(abc::gpio_level::low, microseconds(10));
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}
+
+
 int main(int argc, const char* argv[]) {
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::important);
@@ -130,7 +165,11 @@ int main(int argc, const char* argv[]) {
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
 
+	// Ultrasonic - binary signal
 	measure_distance(chip, log);
+
+	// Servo - pwm
+	move_servo(chip, log);
 
 	return 0;
 }
