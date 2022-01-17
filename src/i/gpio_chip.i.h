@@ -59,6 +59,8 @@ namespace abc {
 
 	public:
 		gpio_chip(const char* path, const char* consumer = "abc", Log* log = nullptr);
+		gpio_chip(gpio_chip<Log>&& other) noexcept = default;
+		gpio_chip(const gpio_chip<Log>& other) = default;
 
 	public:
 		const char* 			path() const noexcept;

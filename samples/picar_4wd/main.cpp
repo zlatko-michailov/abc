@@ -70,7 +70,7 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 	abc::gpio_output_line<log_ostream> trigger_line(chip, 5, &log);
 	abc::gpio_input_line<log_ostream> echo_line(chip, 6, &log);
 
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 10; i++) {
 		// Clear and send a pulse.
 		trigger_line.put_level(abc::gpio_level::low, microseconds(10));
 		trigger_line.put_level(abc::gpio_level::high, microseconds(10));
@@ -123,30 +123,25 @@ void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 
-	const std::uint32_t min_pulse_width_us = 500;
-	const std::uint32_t max_pulse_width_us = 2500;
-	const std::uint32_t frequency = 50; // 50 Hz
-	const std::uint32_t period_us = 1000 * 1000 / frequency;
+	const microseconds min_pulse_width = microseconds(500);
+	const microseconds max_pulse_width = microseconds(2500);
+	const abc::gpio_pwm_frequency_t frequency = 50; // 50 Hz
 
-	const std::uint32_t duration_us = 250 * 1000; // 250 ms
-	const std::uint32_t period_count = duration_us / period_us;
+	const microseconds duty_duration = microseconds(250 * 1000);
 
 	const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
 
 	abc::gpio_output_line<log_ostream> line(chip, 4, &log);
+	abc::gpio_pwm_emulator<microseconds, log_ostream> pwm(std::move(line), min_pulse_width, max_pulse_width, frequency, &log);
+
+	// Make sure it wakes up after a const level.
+	pwm.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	for (std::uint32_t duty_cycle : duty_cycles) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
 
-		const std::uint32_t high_duration_us = min_pulse_width_us + duty_cycle * (max_pulse_width_us - min_pulse_width_us) / 100;
-		const std::uint32_t low_duration_us = period_us - high_duration_us;
-
-		line.put_level(abc::gpio_level::low, microseconds(10));
-		for (std::uint32_t p = 0; p < period_count; p++) {
-			line.put_level(abc::gpio_level::high, microseconds(high_duration_us));
-			line.put_level(abc::gpio_level::low, microseconds(low_duration_us));
-		}
-		line.put_level(abc::gpio_level::low, microseconds(10));
+		pwm.set_duty_cycle(duty_cycle, duty_duration);
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}

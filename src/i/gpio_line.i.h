@@ -84,6 +84,10 @@ namespace abc {
 	class gpio_line {
 	public:
 		gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
+		gpio_line(gpio_line<Log>&& other) noexcept = default;
+		gpio_line(const gpio_line<Log>& other) = delete;
+
+		virtual ~gpio_line() noexcept;
 
 	public:
 		gpio_level_t	get_level() const noexcept;
@@ -95,7 +99,7 @@ namespace abc {
 		gpio_level_t	put_level(gpio_level_t level, Duration duration) const noexcept;
 
 	private:
-		gpio_fd_t			_fd;
+		gpio_fd_t			_fd		= -1;
 		Log*				_log;
 	};
 

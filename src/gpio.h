@@ -25,3 +25,4 @@ SOFTWARE.
 
 #include "x/gpio_chip.x.h"
 #include "x/gpio_line.x.h"
+#include "x/gpio_pwm_emulator.x.h"

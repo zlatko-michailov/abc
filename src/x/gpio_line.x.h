@@ -79,6 +79,14 @@ namespace abc {
 
 
 	template <typename Log>
+	inline gpio_line<Log>::~gpio_line() noexcept {
+		if (_fd >= 0) {
+			close(_fd);
+		}
+	}
+
+
+	template <typename Log>
 	inline gpio_level_t gpio_line<Log>::get_level() const noexcept {
 		gpio_v2_line_values values{ 0 };
 		values.mask = gpio_level::mask;

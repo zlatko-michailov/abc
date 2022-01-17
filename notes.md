@@ -8,8 +8,10 @@
   - Get distance.
 
 ## To Do
+Copyright
+  - 2022
 GPIO:
-  - gpio_pwm_emulator(line, frequency, &control{ duty_cycle, quit })
+  - smbus
 
 
 ## Pick List
