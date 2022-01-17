@@ -8,8 +8,6 @@
   - Get distance.
 
 ## To Do
-Copyright
-  - 2022
 GPIO:
   - smbus
 
