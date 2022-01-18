@@ -2,14 +2,19 @@
 - CRC: Moved to boneyard.
 - GPIO:
   - Chip - get chip and line info.
-  - Line - get, put, and pulse bit values.
+  - Line - get and put low/high signal level.
+  - PWM Emulator - put variable signal level through a duty cycle.
 - Sample picar_4wd:
   - Get chip and line info.
-  - Get distance.
+  - Get distance through the ultrasound sensor.
+  - Turn the ultrasound sensor through its servo.
 
 ## To Do
-GPIO:
-  - smbus
+I2C:
+  - i2c_bus
+  - i2c_device
+  - i2c_channel
+  - i2c_channel_streambuf
 
 
 ## Pick List

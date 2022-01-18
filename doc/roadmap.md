@@ -3,10 +3,14 @@
 Up to [Documentation](README.md).
 
 ## 1.15.0
-- GPIO.
+- GPIO
+- I2C
 
 ## 1.16.0
-- SSL/TLS wrapper.
+- doxygen
+
+## 1.17.0
+- SSL/TLS wrapper
 
 ## Pick List
 - Virtual memory:
