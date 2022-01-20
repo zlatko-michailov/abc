@@ -12,10 +12,17 @@
 ## To Do
 I2C:
   - i2c_bus
-  - i2c_device
-  - i2c_channel
-  - i2c_channel_streambuf
-
+    - bus(i)
+      - set_address(address)
+      - address()
+      - mutex()
+      - write(byte)
+      - write(word)
+      - write(size, buffer)
+      - read_byte(&byte)
+      - read_word(&word)
+      - read_buffer(size, buffer)
+  
 
 ## Pick List
 - vmem:

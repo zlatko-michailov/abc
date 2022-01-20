@@ -29,6 +29,10 @@ SOFTWARE.
 
 #include "../../src/gpio.h"
 
+#include <linux/i2c-dev.h>
+extern "C" {
+#include <i2c/smbus.h>
+}
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
@@ -148,6 +152,48 @@ void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
+void i2c_reset(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	using milliseconds = std::chrono::milliseconds;
+
+	abc::gpio_output_line<log_ostream> reset_line(chip, 21, &log);
+
+	reset_line.put_level(abc::gpio_level::low, milliseconds(1));
+	reset_line.put_level(abc::gpio_level::high, milliseconds(2));
+}
+
+
+void turn_motors(log_ostream& log) {
+	int fd = open("/dev/i2c-1", O_RDWR);
+	if (fd < 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to open.");
+		return;
+	}
+
+	unsigned long funcs = 0;
+	if (ioctl(fd, I2C_FUNCS, &funcs) < 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to get funcs.");
+	}
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "funcs = %4.4lx %4.4lx", funcs >> 16, funcs & 0xffff);
+
+	if (ioctl(fd, I2C_SLAVE, 0x14) < 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to set address.");
+	}
+
+	unsigned data[] = { 0x00102c, 0x00002c, 0x00102d, 0x00002d, };
+	for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
+		int ret = write(fd, &data[i], 3);
+		//int ret = i2c_smbus_write_word_data(fd, data[i] & 0xff, data[i] >> 8);
+		if (ret < 3) {
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to write: i = %d, data = %6.6x, ret = %d, errno = %d.", i, data[i], ret, errno);
+			i--;
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+
+	close(fd);
+}
+
+
 int main(int argc, const char* argv[]) {
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::important);
@@ -156,6 +202,7 @@ int main(int argc, const char* argv[]) {
 	// Create a chip.
 	abc::gpio_chip<log_ostream> chip("/dev/gpiochip0", "picar_4wd", &log);
 
+#ifdef TEMP ////
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
@@ -165,6 +212,13 @@ int main(int argc, const char* argv[]) {
 
 	// Servo - pwm
 	move_servo(chip, log);
+#endif
+
+	// Init i2c
+	i2c_reset(chip, log);
+
+	// Motors - i2c
+	turn_motors(log);
 
 	return 0;
 }
