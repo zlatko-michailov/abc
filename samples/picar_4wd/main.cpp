@@ -158,7 +158,7 @@ void i2c_reset(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_output_line<log_ostream> reset_line(chip, 21, &log);
 
 	reset_line.put_level(abc::gpio_level::low, milliseconds(1));
-	reset_line.put_level(abc::gpio_level::high, milliseconds(2));
+	reset_line.put_level(abc::gpio_level::high, milliseconds(3));
 }
 
 
@@ -179,16 +179,16 @@ void turn_motors(log_ostream& log) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to set address.");
 	}
 
+#ifdef TEMP
 	unsigned data[] = { 0x00102c, 0x00002c, 0x00102d, 0x00002d, };
 	for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
-		int ret = write(fd, &data[i], 3);
-		//int ret = i2c_smbus_write_word_data(fd, data[i] & 0xff, data[i] >> 8);
-		if (ret < 3) {
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to write: i = %d, data = %6.6x, ret = %d, errno = %d.", i, data[i], ret, errno);
-			i--;
-		}
+		//int ret = write(fd, &data[i], 3);
+		int ret = i2c_smbus_write_word_data(fd, data[i] & 0xff, data[i] >> 8);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "i = %d, data = %6.6x, ret = %d, errno = %d.", i, data[i], ret, errno);
+
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
+#endif
 
 	close(fd);
 }
