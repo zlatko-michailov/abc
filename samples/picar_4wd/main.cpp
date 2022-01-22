@@ -163,6 +163,25 @@ void i2c_reset(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void turn_motors(log_ostream& log) {
+	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", &log);
+
+	const abc::gpio_smbus_address_t addr_hat = 0x14;
+	const abc::gpio_smbus_register_t reg_front_left = 0x2d;
+	const abc::gpio_smbus_register_t reg_front_right = 0x2c;
+
+	smbus.put_word(addr_hat, reg_front_left, 0x0010);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	smbus.put_word(addr_hat, reg_front_left, 0x0000);
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	smbus.put_word(addr_hat, reg_front_right, 0x0010);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	smbus.put_word(addr_hat, reg_front_right, 0x0000);
+}
+
+
+void turn_motors_old(log_ostream& log) {
 	int fd = open("/dev/i2c-1", O_RDWR);
 	if (fd < 0) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to open.");
@@ -196,7 +215,7 @@ void turn_motors(log_ostream& log) {
 
 int main(int argc, const char* argv[]) {
 	// Create a log.
-	abc::log_filter filter(abc::severity::abc::important);
+	abc::log_filter filter(abc::severity::abc::optional);
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a chip.
@@ -217,7 +236,7 @@ int main(int argc, const char* argv[]) {
 	// Init i2c
 	i2c_reset(chip, log);
 
-	// Motors - i2c
+	// Motors - smbus
 	turn_motors(log);
 
 	return 0;

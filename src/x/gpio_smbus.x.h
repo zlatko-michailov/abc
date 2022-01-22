@@ -41,7 +41,8 @@ namespace abc {
 
 	template <typename Log>
 	inline gpio_smbus<Log>::gpio_smbus(const char* path, Log* log)
-		: _functionality(0)
+		: _fd(-1)
+		, _functionality(0)
 		, _addr(0)
 		, _log(log) {
 		if (log != nullptr) {
@@ -56,7 +57,7 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= max_path", __TAG__);
 		}
 
-		gpio_fd_t _fd = open(path, O_RDWR);
+		_fd = open(path, O_RDWR);
 		if (_fd < 0) {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() open() < 0", __TAG__);
 		}
@@ -72,7 +73,23 @@ namespace abc {
 		std::strncpy(_path, path, max_path);
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);
+		}
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus<Log>::~gpio_smbus() noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Start.");
+		}
+
+		if (_fd >=0) {
+			close(_fd);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Done.");
 		}
 	}
 
@@ -178,7 +195,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_WORD_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &ioctl) < 0) {
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_word() I2C_SMBUS failed. errno = %d", errno);
 
@@ -224,7 +241,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BLOCK_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &ioctl) < 0) {
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() I2C_SMBUS failed. errno = %d", errno);
 
@@ -261,10 +278,10 @@ namespace abc {
 			}
 		}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::ensure_address() Done.");
+		_addr = addr;
 
-			return true;
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::ensure_address() Done. _addr = 0x%2.2x", _addr);
 		}
 
 		return true;
