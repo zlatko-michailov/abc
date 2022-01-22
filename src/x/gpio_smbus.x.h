@@ -270,7 +270,7 @@ namespace abc {
 		}
 
 		long laddr = addr;
-		if (ioctl(_fd, I2C_SLAVE, laddr) < 0) {
+		if (ioctl(_fd, I2C_SLAVE_FORCE, laddr) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::ensure_address() I2C_SLAVE failed. errno = %d", errno);
 

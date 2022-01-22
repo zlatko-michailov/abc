@@ -29,10 +29,6 @@ SOFTWARE.
 
 #include "../../src/gpio.h"
 
-#include <linux/i2c-dev.h>
-extern "C" {
-#include <i2c/smbus.h>
-}
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
@@ -152,7 +148,7 @@ void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
-void i2c_reset(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using milliseconds = std::chrono::milliseconds;
 
 	abc::gpio_output_line<log_ostream> reset_line(chip, 21, &log);
@@ -168,48 +164,30 @@ void turn_motors(log_ostream& log) {
 	const abc::gpio_smbus_address_t addr_hat = 0x14;
 	const abc::gpio_smbus_register_t reg_front_left = 0x2d;
 	const abc::gpio_smbus_register_t reg_front_right = 0x2c;
+	const abc::gpio_smbus_register_t reg_rear_left = 0x28;
+	const abc::gpio_smbus_register_t reg_rear_right = 0x29;
 
 	smbus.put_word(addr_hat, reg_front_left, 0x0010);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	smbus.put_word(addr_hat, reg_front_left, 0x0000);
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	smbus.put_word(addr_hat, reg_front_right, 0x0010);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	smbus.put_word(addr_hat, reg_front_right, 0x0000);
-}
-
-
-void turn_motors_old(log_ostream& log) {
-	int fd = open("/dev/i2c-1", O_RDWR);
-	if (fd < 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to open.");
-		return;
-	}
-
-	unsigned long funcs = 0;
-	if (ioctl(fd, I2C_FUNCS, &funcs) < 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to get funcs.");
-	}
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "funcs = %4.4lx %4.4lx", funcs >> 16, funcs & 0xffff);
-
-	if (ioctl(fd, I2C_SLAVE, 0x14) < 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Failed to set address.");
-	}
-
-#ifdef TEMP
-	unsigned data[] = { 0x00102c, 0x00002c, 0x00102d, 0x00002d, };
-	for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
-		//int ret = write(fd, &data[i], 3);
-		int ret = i2c_smbus_write_word_data(fd, data[i] & 0xff, data[i] >> 8);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "i = %d, data = %6.6x, ret = %d, errno = %d.", i, data[i], ret, errno);
-
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
-#endif
+	smbus.put_word(addr_hat, reg_front_right, 0x0000);
 
-	close(fd);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	smbus.put_word(addr_hat, reg_rear_left, 0x0010);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	smbus.put_word(addr_hat, reg_rear_left, 0x0000);
+
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	smbus.put_word(addr_hat, reg_rear_right, 0x0010);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	smbus.put_word(addr_hat, reg_rear_right, 0x0000);
 }
 
 
@@ -228,13 +206,13 @@ int main(int argc, const char* argv[]) {
 
 	// Ultrasonic - binary signal
 	measure_distance(chip, log);
+#endif
 
 	// Servo - pwm
 	move_servo(chip, log);
-#endif
 
-	// Init i2c
-	i2c_reset(chip, log);
+	// Init hat
+	reset_hat(chip, log);
 
 	// Motors - smbus
 	turn_motors(log);

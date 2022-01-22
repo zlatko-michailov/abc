@@ -14,17 +14,10 @@ GPIO:
   - gpio_chip
     - gpio_chip(i)
   - gpio_smbus
-    - gpio_smbus(i, opt_force)
-
-      - put_nodata(address, register)
-      - put_byte(address, register, byte)
-      - put_word(address, register, word)
-      - put_block(address, register, size, buffer)
-
+    - gpio_smbus(i)
       - get_byte(address, register, &byte)
       - get_word(address, register, &word)
       - gett_block(address, register, &size, buffer)
-
 
 ## Pick List
 - vmem:
