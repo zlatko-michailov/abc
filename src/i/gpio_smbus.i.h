@@ -65,9 +65,10 @@ namespace abc {
 		bool						put_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t word) noexcept;
 		bool						put_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept;
 
+		bool						get_noreg(gpio_smbus_address_t addr, std::uint8_t& byte) noexcept;
 		bool						get_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept;
 		bool						get_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t& word) noexcept;
-		bool						get_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, void* block, std::size_t size) noexcept;
+		bool						get_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept;
 
 	private:
 		bool						ensure_address(gpio_smbus_address_t addr) noexcept;

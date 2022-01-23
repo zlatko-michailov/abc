@@ -260,6 +260,167 @@ namespace abc {
 
 
 	template <typename Log>
+	inline bool gpio_smbus<Log>::get_noreg(gpio_smbus_address_t addr, std::uint8_t& byte) noexcept {
+		if (!ensure_address(addr)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg() ensure_address() failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		i2c_smbus_data data = { 0 };
+
+		i2c_smbus_ioctl_data msg = { 0 };
+		msg.read_write = I2C_SMBUS_READ;
+		msg.size = I2C_SMBUS_BYTE;
+		msg.data = &data;
+
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg() I2C_SMBUS failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		byte = data.byte;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_noreg() Done.");
+
+			return true;
+		}
+
+		return true;
+	}
+
+
+	template <typename Log>
+	inline bool gpio_smbus<Log>::get_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept {
+		if (!ensure_address(addr)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_byte() ensure_address() failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		i2c_smbus_data data = { 0 };
+
+		i2c_smbus_ioctl_data msg = { 0 };
+		msg.read_write = I2C_SMBUS_READ;
+		msg.command = reg;
+		msg.size = I2C_SMBUS_BYTE_DATA;
+		msg.data = &data;
+
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_byte() I2C_SMBUS failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		byte = data.byte;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_byte() Done.");
+
+			return true;
+		}
+
+		return true;
+	}
+
+
+	template <typename Log>
+	inline bool gpio_smbus<Log>::get_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t& word) noexcept {
+		if (!ensure_address(addr)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_word() ensure_address() failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		i2c_smbus_data data = { 0 };
+
+		i2c_smbus_ioctl_data msg = { 0 };
+		msg.read_write = I2C_SMBUS_READ;
+		msg.command = reg;
+		msg.size = I2C_SMBUS_WORD_DATA;
+		msg.data = &data;
+
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_word() I2C_SMBUS failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		word = data.word;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_word() Done.");
+
+			return true;
+		}
+
+		return true;
+	}
+
+
+	template <typename Log>
+	inline bool gpio_smbus<Log>::get_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept {
+		if (!ensure_address(addr)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() ensure_address() failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		i2c_smbus_data data = { 0 };
+		data.block[0] = static_cast<std::uint8_t>(size);
+
+		i2c_smbus_ioctl_data msg = { 0 };
+		msg.read_write = I2C_SMBUS_READ;
+		msg.command = reg;
+		msg.size = I2C_SMBUS_BLOCK_DATA;
+		msg.data = &data;
+
+		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() I2C_SMBUS failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		if (data.block[0] > size) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() block[0] = %d, size = %d", data.block[0], (int)size);
+
+				return false;
+			}
+		}
+
+		size = data.block[0];
+		std::memmove(block, &data.block[1], data.block[0]);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_block() Done.");
+
+			return true;
+		}
+
+		return true;
+	}
+
+
+	template <typename Log>
 	inline bool gpio_smbus<Log>::ensure_address(gpio_smbus_address_t addr) noexcept {
 		if (_addr == addr) {
 			if (_log != nullptr) {

@@ -15,9 +15,15 @@ GPIO:
     - gpio_chip(i)
   - gpio_smbus
     - gpio_smbus(i)
-      - get_byte(address, register, &byte)
-      - get_word(address, register, &word)
-      - gett_block(address, register, &size, buffer)
+    - photointerrupter
+picar_4wd:
+  - ultrasonic
+  - motor
+  - car
+  - photointerrupter
+  - speed
+  - grayscale
+  - UI
 
 ## Pick List
 - vmem:

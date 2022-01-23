@@ -191,13 +191,54 @@ void turn_motors(log_ostream& log) {
 }
 
 
+void measure_grayscale(log_ostream& log) {
+	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", &log);
+
+	const abc::gpio_smbus_address_t addr_hat = 0x14;
+	const abc::gpio_smbus_register_t reg_left = 0x12;
+	const abc::gpio_smbus_register_t reg_center = 0x11;
+	const abc::gpio_smbus_register_t reg_right = 0x10;
+	const std::uint16_t zero = 0x0000;
+
+	for (int i = 0; i < 10; i++) {
+		std::uint8_t high_byte;
+		std::uint8_t low_byte;
+
+		std::uint16_t left;
+		smbus.put_word(addr_hat, reg_left, zero);
+		smbus.get_noreg(addr_hat, high_byte);
+		smbus.get_noreg(addr_hat, low_byte);
+		left = (high_byte << 8) | low_byte;
+
+		std::uint16_t center;
+		smbus.put_word(addr_hat, reg_center, zero);
+		smbus.get_noreg(addr_hat, high_byte);
+		smbus.get_noreg(addr_hat, low_byte);
+		center = (high_byte << 8) | low_byte;
+
+		std::uint16_t right;
+		smbus.put_word(addr_hat, reg_right, zero);
+		smbus.get_noreg(addr_hat, high_byte);
+		smbus.get_noreg(addr_hat, low_byte);
+		right = (high_byte << 8) | low_byte;
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}
+
+
 int main(int argc, const char* argv[]) {
 	// Create a log.
-	abc::log_filter filter(abc::severity::abc::optional);
+	abc::log_filter filter(abc::severity::abc::important);
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a chip.
 	abc::gpio_chip<log_ostream> chip("/dev/gpiochip0", "picar_4wd", &log);
+
+	// Init hat
+	reset_hat(chip, log);
 
 #ifdef TEMP ////
 	// Info
@@ -206,16 +247,15 @@ int main(int argc, const char* argv[]) {
 
 	// Ultrasonic - binary signal
 	measure_distance(chip, log);
-#endif
 
 	// Servo - pwm
 	move_servo(chip, log);
 
-	// Init hat
-	reset_hat(chip, log);
-
 	// Motors - smbus
 	turn_motors(log);
+#endif
+
+	measure_grayscale(log);
 
 	return 0;
 }
