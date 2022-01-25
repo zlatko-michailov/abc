@@ -53,8 +53,8 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path == nullptr", __TAG__);
 		}
 
-		if (std::strlen(path) >= max_path) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= max_path", __TAG__);
+		if (std::strlen(path) >= gpio_max_path) {
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= gpio_max_path", __TAG__);
 		}
 
 		_fd = open(path, O_RDWR);
@@ -70,7 +70,7 @@ namespace abc {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
 		}
 
-		std::strncpy(_path, path, max_path);
+		std::strncpy(_path, path, gpio_max_path);
 
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);

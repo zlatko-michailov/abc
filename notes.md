@@ -15,7 +15,6 @@ GPIO:
     - gpio_chip(i)
   - gpio_smbus
     - gpio_smbus(i)
-    - photointerrupter
 picar_4wd:
   - ultrasonic
   - motor

@@ -31,6 +31,7 @@ SOFTWARE.
 #include <linux/i2c-dev.h>
 
 #include "../size.h"
+#include "gpio_base.i.h"
 #include "gpio_line.i.h"
 
 
@@ -46,9 +47,6 @@ namespace abc {
 
 	template <typename Log = null_log>
 	class gpio_smbus {
-	public:
-		static constexpr std::size_t max_path 		= GPIO_MAX_NAME_SIZE;
-
 	public:
 		gpio_smbus(const char* path, Log* log = nullptr);
 		gpio_smbus(gpio_smbus<Log>&& other) noexcept = default;
@@ -74,7 +72,7 @@ namespace abc {
 		bool						ensure_address(gpio_smbus_address_t addr) noexcept;
 
 	private:
-		char						_path[max_path];
+		char						_path[gpio_max_path];
 		gpio_fd_t					_fd;
 		gpio_smbus_functionality_t	_functionality;
 		gpio_smbus_address_t		_addr;
