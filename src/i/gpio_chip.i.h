@@ -26,22 +26,22 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
-#include <linux/gpio.h>
 
 #include "../size.h"
+#include "gpio_base.i.h"
 #include "gpio_line.i.h"
 
 
 namespace abc {
 
-	struct gpio_chip_info : public gpiochip_info {
+	struct gpio_chip_info : public gpio_chip_info_base {
 		gpio_chip_info() noexcept;
 
 		bool is_valid;
 	};
 
 
-	struct gpio_line_info : public gpio_v2_line_info {
+	struct gpio_line_info : public gpio_line_info_base {
 		gpio_line_info() noexcept;
 
 		bool is_valid;
@@ -53,10 +53,6 @@ namespace abc {
 
 	template <typename Log = null_log>
 	class gpio_chip {
-	public:
-		static constexpr std::size_t max_path 		= GPIO_MAX_NAME_SIZE;
-		static constexpr std::size_t max_consumer	= GPIO_MAX_NAME_SIZE;
-
 	public:
 		gpio_chip(const char* path, const char* consumer = "abc", Log* log = nullptr);
 		gpio_chip(gpio_chip<Log>&& other) noexcept = default;
@@ -71,8 +67,8 @@ namespace abc {
 		gpio_line_info			line_info(gpio_line_pos_t pos) const noexcept;
 
 	private:
-		char					_path[max_path];
-		char					_consumer[max_consumer];
+		char					_path[gpio_max_path];
+		char					_consumer[gpio_max_consumer];
 		Log*					_log;
 	};
 

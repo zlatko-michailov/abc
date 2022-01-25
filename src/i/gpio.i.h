@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include "gpio_base.i.h"
 #include "gpio_chip.i.h"
 #include "gpio_line.i.h"
 #include "gpio_pwm_emulator.i.h"

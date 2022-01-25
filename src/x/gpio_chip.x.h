@@ -39,13 +39,13 @@ SOFTWARE.
 namespace abc {
 
 	inline gpio_chip_info::gpio_chip_info() noexcept
-		: gpiochip_info{0}
+		: gpio_chip_info_base{0}
 		, is_valid(false) {
 	}
 
 
 	inline gpio_line_info::gpio_line_info() noexcept
-		: gpio_v2_line_info{0}
+		: gpio_line_info_base{0}
 		, is_valid(false) {
 	}
 
@@ -64,16 +64,16 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path == nullptr", __TAG__);
 		}
 
-		if (std::strlen(path) >= max_path) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path >= max_path", __TAG__);
+		if (std::strlen(path) >= gpio_max_path) {
+			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path >= gpo_max_path", __TAG__);
 		}
 
 		if (consumer == nullptr) {
 			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer == nullptr", __TAG__);
 		}
 
-		if (std::strlen(consumer) >= max_consumer) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer >= max_consumer", __TAG__);
+		if (std::strlen(consumer) >= gpio_max_consumer) {
+			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer >= gpio_max_consumer", __TAG__);
 		}
 
 		gpio_fd_t fd = open(path, O_RDONLY);
@@ -82,8 +82,8 @@ namespace abc {
 		}
 		close(fd);
 
-		std::strncpy(_path, path, max_path);
-		std::strncpy(_consumer, consumer, max_consumer);
+		std::strncpy(_path, path, gpio_max_path);
+		std::strncpy(_consumer, consumer, gpio_max_consumer);
 
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::gpio_chip() Done.");
@@ -121,13 +121,13 @@ namespace abc {
 			return info;
 		}
 
-		int stat = ioctl(fd, GPIO_GET_CHIPINFO_IOCTL, &info);
+		int stat = ioctl(fd, gpio_ioctl::get_chip_info, &info);
 		close(fd);
 
 		if (stat < 0)
 		{
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::chip_info() Could not ioctl(GPIO_GET_CHIPINFO_IOCTL)");
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::chip_info() Could not ioctl()");
 			}
 
 			return info;
@@ -151,7 +151,11 @@ namespace abc {
 
 		gpio_line_info info;
 		info.is_valid = false;
+#if ((__ABC__GPIO_VER) == 2)
 		info.offset = pos;
+#else
+		info.line_offset = pos;
+#endif
 
 		gpio_fd_t fd = open(_path, O_RDONLY);
 		if (fd < 0) {
@@ -162,13 +166,13 @@ namespace abc {
 			return info;
 		}
 
-		int stat = ioctl(fd, GPIO_V2_GET_LINEINFO_IOCTL, &info);
+		int stat = ioctl(fd, gpio_ioctl::get_line_info, &info);
 		close(fd);
 
 		if (stat < 0)
 		{
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not ioctl(GPIO_V2_GET_LINEINFO_IOCTL)");
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not ioctl()");
 			}
 
 			return info;

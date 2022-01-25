@@ -54,16 +54,22 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", __TAG__);
 		}
 
-		gpio_v2_line_request line_request{ 0 };
+		gpio_line_request line_request{ 0 };
+#if ((__ABC__GPIO_VER) == 2)
 		line_request.num_lines = 1;
 		line_request.offsets[0] = pos;
-		std::strncpy(line_request.consumer, chip.consumer(), GPIO_MAX_NAME_SIZE);
+		std::strncpy(line_request.consumer, chip.consumer(), gpio_max_consumer);
 		line_request.config.flags = flags;
+#else
+		line_request.lines = 1;
+		line_request.lineoffsets[0] = pos;
+		std::strncpy(line_request.consumer_label, chip.consumer(), gpio_max_consumer);
+		line_request.flags = flags;
+#endif
 
-
-		int ret = ioctl(fd, GPIO_V2_GET_LINE_IOCTL, &line_request);
+		int ret = ioctl(fd, gpio_ioctl::get_line, &line_request);
 		if (ret < 0) {
-			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl(GPIO_V2_GET_LINE_IOCTL) < 0", __TAG__);
+			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl() < 0", __TAG__);
 		}
 
 		if (close(fd) < 0) {
@@ -88,15 +94,21 @@ namespace abc {
 
 	template <typename Log>
 	inline gpio_level_t gpio_line<Log>::get_level() const noexcept {
-		gpio_v2_line_values values{ 0 };
+		gpio_line_values values{ 0 };
+#if ((__ABC__GPIO_VER) == 2)
 		values.mask = gpio_level::mask;
-		
-		int ret = ioctl(_fd, GPIO_V2_LINE_GET_VALUES_IOCTL, &values);
+#endif		
+
+		int ret = ioctl(_fd, gpio_ioctl::get_line_values, &values);
 		if (ret < 0) {
 			return gpio_level::invalid;
 		}
 
+#if ((__ABC__GPIO_VER) == 2)
 		return (values.bits & gpio_level::mask);
+#else
+		return (values.values[0] & gpio_level::mask);
+#endif
 	}
 
 
@@ -126,11 +138,15 @@ namespace abc {
 			return gpio_level::invalid;
 		}
 
-		gpio_v2_line_values values{ 0 };
+		gpio_line_values values{ 0 };
+#if ((__ABC__GPIO_VER) == 2)
 		values.mask = gpio_level::mask;
 		values.bits = (level & gpio_level::mask);
+#else
+		values.values[0] = level;
+#endif
 
-		int ret = ioctl(_fd, GPIO_V2_LINE_SET_VALUES_IOCTL, &values);
+		int ret = ioctl(_fd, gpio_ioctl::set_line_values, &values);
 		if (ret < 0) {
 			return gpio_level::invalid;
 		}

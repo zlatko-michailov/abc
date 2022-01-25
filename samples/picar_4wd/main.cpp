@@ -240,7 +240,6 @@ int main(int argc, const char* argv[]) {
 	// Init hat
 	reset_hat(chip, log);
 
-#ifdef TEMP ////
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
@@ -251,6 +250,7 @@ int main(int argc, const char* argv[]) {
 	// Servo - pwm
 	move_servo(chip, log);
 
+#ifdef TEMP ////
 	// Motors - smbus
 	turn_motors(log);
 #endif
