@@ -42,7 +42,7 @@ namespace abc {
 		, _min_pulse_width(std::chrono::duration_cast<std::chrono::microseconds>(min_pulse_width))
 		, _max_pulse_width(std::chrono::duration_cast<std::chrono::microseconds>(max_pulse_width))
 		, _frequency(frequency)
-		, _period(std::chrono::microseconds(1000 * 1000).count() / frequency)
+		, _period(std::chrono::microseconds(1000 * 1000 / frequency))
 		, _duty_cycle(0)
 		, _quit(false)
 		, _log(log)
@@ -51,7 +51,7 @@ namespace abc {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Start.");
 		}
 
-		if (min_pulse_width >= max_pulse_width) {
+		if (min_pulse_width > max_pulse_width) {
 			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() min_pulse_width", __TAG__);
 		}
 
@@ -62,6 +62,12 @@ namespace abc {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Done.");
 		}
+	}
+
+
+	template <typename Log>
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, gpio_pwm_pulse_frequency_t frequency, Log* log)
+		: gpio_pwm_emulator<Log>(std::move(line), std::chrono::microseconds(0), std::chrono::microseconds(1000 * 1000 / frequency), frequency, log) {
 	}
 
 

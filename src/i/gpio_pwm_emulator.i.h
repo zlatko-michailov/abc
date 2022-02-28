@@ -47,6 +47,7 @@ namespace abc {
 	public:
 		template <typename PulseWidthDuration>
 		gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
+		gpio_pwm_emulator(gpio_output_line<Log>&& line, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 		virtual ~gpio_pwm_emulator() noexcept;
 
 	public:
