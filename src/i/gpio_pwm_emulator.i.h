@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
+#include <chrono>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -33,55 +34,38 @@ SOFTWARE.
 #include <linux/gpio.h>
 
 #include "gpio_chip.i.h"
+#include "gpio_pwm_base.i.h"
 
 
 namespace abc {
 
-	using gpio_pwm_frequency_t  = std::uint16_t;
-
-
-	// --------------------------------------------------------------
-
-
-	using gpio_pwm_duty_cycle_t = std::uint16_t;
-
-	namespace gpio_pwm_duty_cycle {
-		constexpr gpio_pwm_duty_cycle_t min =   0;
-		constexpr gpio_pwm_duty_cycle_t max = 100;
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename PulseWidthDuration, typename Log = null_log>
+	template <typename Log = null_log>
 	class gpio_pwm_emulator {
-		using gpio_pwm_duration_t  = std::uint32_t;
-
 		// Break const level sleeps periodically to prevent notification misses.
 		const std::chrono::milliseconds	const_level_period = std::chrono::milliseconds(200);
 
 	public:
-		gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_frequency_t frequency, Log* log = nullptr);
+		template <typename PulseWidthDuration>
+		gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 		virtual ~gpio_pwm_emulator() noexcept;
 
 	public:
-		void				set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle);
+		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle);
 
 		template <typename PwmDuration>
-		void				set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration);
+		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration);
 
 	private:
-		static void			thread_func(gpio_pwm_emulator* this_ptr) noexcept;
+		static void	thread_func(gpio_pwm_emulator* this_ptr) noexcept;
 
 	private:
 		const gpio_output_line<Log>	_line;
 
 		// Parameters
-		const PulseWidthDuration			_min_pulse_width;
-		const PulseWidthDuration			_max_pulse_width;
-		const gpio_pwm_frequency_t			_frequency;
-		const PulseWidthDuration			_period;
+		const std::chrono::microseconds		_min_pulse_width;
+		const std::chrono::microseconds		_max_pulse_width;
+		const gpio_pwm_pulse_frequency_t	_frequency;
+		const std::chrono::microseconds		_period;
 
 		// Sync
 		std::mutex							_control_mutex;

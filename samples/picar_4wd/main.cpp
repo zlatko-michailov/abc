@@ -31,6 +31,7 @@ SOFTWARE.
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
+constexpr abc::gpio_smbus_clock_frequency_t smbus_clock_frequency = 72 * 1000 * 1000;
 
 
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
@@ -67,8 +68,8 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 
-	abc::gpio_output_line<log_ostream> trigger_line(chip, 5, &log);
-	abc::gpio_input_line<log_ostream> echo_line(chip, 6, &log);
+	abc::gpio_output_line<log_ostream> trigger_line(&chip, 5, &log);
+	abc::gpio_input_line<log_ostream> echo_line(&chip, 6, &log);
 
 	for (int i = 0; i < 10; i++) {
 		// Clear and send a pulse.
@@ -125,14 +126,14 @@ void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 	const microseconds min_pulse_width = microseconds(500);
 	const microseconds max_pulse_width = microseconds(2500);
-	const abc::gpio_pwm_frequency_t frequency = 50; // 50 Hz
+	const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
 
 	const microseconds duty_duration = microseconds(250 * 1000);
 
 	const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
 
-	abc::gpio_output_line<log_ostream> line(chip, 4, &log);
-	abc::gpio_pwm_emulator<microseconds, log_ostream> pwm(std::move(line), min_pulse_width, max_pulse_width, frequency, &log);
+	abc::gpio_output_line<log_ostream> line(&chip, 4, &log);
+	abc::gpio_pwm_emulator<log_ostream> pwm(std::move(line), min_pulse_width, max_pulse_width, frequency, &log);
 
 	// Make sure it wakes up after a const level.
 	pwm.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
@@ -151,7 +152,7 @@ void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using milliseconds = std::chrono::milliseconds;
 
-	abc::gpio_output_line<log_ostream> reset_line(chip, 21, &log);
+	abc::gpio_output_line<log_ostream> reset_line(&chip, 21, &log);
 
 	reset_line.put_level(abc::gpio_level::low, milliseconds(1));
 	reset_line.put_level(abc::gpio_level::high, milliseconds(3));
@@ -159,7 +160,7 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void turn_motors(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", &log);
+	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, &log);
 
 	const abc::gpio_smbus_address_t addr_hat = 0x14;
 	const abc::gpio_smbus_register_t reg_front_left = 0x2d;
@@ -192,7 +193,7 @@ void turn_motors(log_ostream& log) {
 
 
 void measure_grayscale(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", &log);
+	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, &log);
 
 	const abc::gpio_smbus_address_t addr_hat = 0x14;
 	const abc::gpio_smbus_register_t reg_left = 0x12;
@@ -240,12 +241,14 @@ int main(int argc, const char* argv[]) {
 	// Init hat
 	reset_hat(chip, log);
 
+#ifdef TEMP ////
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
 
 	// Ultrasonic - binary signal
 	measure_distance(chip, log);
+#endif
 
 	// Servo - pwm
 	move_servo(chip, log);
@@ -253,9 +256,9 @@ int main(int argc, const char* argv[]) {
 #ifdef TEMP ////
 	// Motors - smbus
 	turn_motors(log);
-#endif
 
 	measure_grayscale(log);
+#endif
 
 	return 0;
 }

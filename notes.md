@@ -15,6 +15,7 @@ GPIO:
     - gpio_chip(i)
   - gpio_smbus
     - gpio_smbus(i)
+  - gpio_smbus_pwm
 picar_4wd:
   - ultrasonic
   - motor

@@ -40,10 +40,11 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline gpio_smbus<Log>::gpio_smbus(const char* path, Log* log)
+	inline gpio_smbus<Log>::gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, Log* log)
 		: _fd(-1)
 		, _functionality(0)
 		, _addr(0)
+		, _clock_frequency(clock_frequency)
 		, _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
@@ -103,6 +104,12 @@ namespace abc {
 	template <typename Log>
 	inline gpio_smbus_functionality_t gpio_smbus<Log>::functionality() const noexcept {
 		return _functionality;
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus_clock_frequency_t gpio_smbus<Log>::clock_frequency() const noexcept {
+		return _clock_frequency;
 	}
 
 

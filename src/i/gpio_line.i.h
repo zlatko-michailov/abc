@@ -61,7 +61,7 @@ namespace abc {
 	template <typename Log = null_log>
 	class gpio_line {
 	public:
-		gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
+		gpio_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
 		gpio_line(gpio_line<Log>&& other) noexcept = default;
 		gpio_line(const gpio_line<Log>& other) = delete;
 
@@ -90,7 +90,7 @@ namespace abc {
 		using base = gpio_line<Log>;
 
 	public:
-		gpio_input_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
+		gpio_input_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
 		gpio_level_t	put_level(gpio_level_t level) const noexcept = delete;
@@ -107,7 +107,7 @@ namespace abc {
 		using base = gpio_line<Log>;
 
 	public:
-		gpio_output_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log = nullptr);
+		gpio_output_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
 		gpio_level_t	get_level() const noexcept = delete;

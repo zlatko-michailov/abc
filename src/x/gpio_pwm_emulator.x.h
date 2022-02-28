@@ -35,25 +35,38 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename PulseWidthDuration, typename Log>
-	inline gpio_pwm_emulator<PulseWidthDuration, Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_frequency_t frequency, Log* log)
+	template <typename Log>
+	template <typename PulseWidthDuration>
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
 		: _line(std::move(line))
-		, _min_pulse_width(min_pulse_width)
-		, _max_pulse_width(max_pulse_width)
+		, _min_pulse_width(std::chrono::duration_cast<std::chrono::microseconds>(min_pulse_width))
+		, _max_pulse_width(std::chrono::duration_cast<std::chrono::microseconds>(max_pulse_width))
 		, _frequency(frequency)
-		, _period(std::chrono::duration_cast<PulseWidthDuration>(std::chrono::seconds(1)).count() / frequency)
+		, _period(std::chrono::microseconds(1000 * 1000).count() / frequency)
 		, _duty_cycle(0)
 		, _quit(false)
 		, _log(log)
 		, _thread(thread_func, this) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Start - done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Start.");
+		}
+
+		if (min_pulse_width >= max_pulse_width) {
+			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() min_pulse_width", __TAG__);
+		}
+
+		if (max_pulse_width > _period) {
+			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() max_pulse_width", __TAG__);
+		}
+
+		if (log != nullptr) {
+			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Done.");
 		}
 	}
 
 
-	template <typename PulseWidthDuration, typename Log>
-	inline gpio_pwm_emulator<PulseWidthDuration, Log>::~gpio_pwm_emulator() noexcept {
+	template <typename Log>
+	inline gpio_pwm_emulator<Log>::~gpio_pwm_emulator() noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::~gpio_pwm_emulator() Start.");
 		}
@@ -73,8 +86,8 @@ namespace abc {
 		}
 	}
 
-	template <typename PulseWidthDuration, typename Log>
-	inline void gpio_pwm_emulator<PulseWidthDuration, Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) {
+	template <typename Log>
+	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) {
 		if (duty_cycle < gpio_pwm_duty_cycle::min || gpio_pwm_duty_cycle::max < duty_cycle) {
 			throw exception<std::logic_error, Log>("gpio_pwm_emulator::set_duty_cycle() Out of range", __TAG__);
 		}
@@ -94,17 +107,17 @@ namespace abc {
 		}
 	}
 
-	template <typename PulseWidthDuration, typename Log>
+	template <typename Log>
 	template <typename PwmDuration>
-	inline void gpio_pwm_emulator<PulseWidthDuration, Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
+	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
 		set_duty_cycle(duty_cycle);
 		std::this_thread::sleep_for(duration);
 		set_duty_cycle(0);
 	}
 
 
-	template <typename PulseWidthDuration, typename Log>
-	inline void gpio_pwm_emulator<PulseWidthDuration, Log>::thread_func(gpio_pwm_emulator* this_ptr) noexcept {
+	template <typename Log>
+	inline void gpio_pwm_emulator<Log>::thread_func(gpio_pwm_emulator* this_ptr) noexcept {
 		using clock = std::chrono::steady_clock;
 
 		if (this_ptr->_log != nullptr) {
@@ -140,8 +153,8 @@ namespace abc {
 			else {
 				// Alternating level:
 				// Calculate the time points when the level should change, and use the longer interval to refresh the control variables. 
-				PulseWidthDuration high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / gpio_pwm_duty_cycle::max;
-				PulseWidthDuration low_duration  = this_ptr->_period - high_duration;
+				std::chrono::microseconds high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / gpio_pwm_duty_cycle::max;
+				std::chrono::microseconds low_duration  = this_ptr->_period - high_duration;
 
 				typename clock::time_point start_time_point = clock::now();
 				typename clock::time_point high_end_time_point = start_time_point + high_duration;

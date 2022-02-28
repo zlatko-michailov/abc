@@ -43,13 +43,17 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
+	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
 		: _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_line::gpio_line() Start.");
 		}
 
-		gpio_fd_t fd = open(chip.path(), O_RDONLY);
+		if (chip == nullptr) {
+			throw exception<std::logic_error, Log>("gpio_line::gpio_line() chip == nullptr", __TAG__);
+		}
+
+		gpio_fd_t fd = open(chip->path(), O_RDONLY);
 		if (fd < 0) {
 			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", __TAG__);
 		}
@@ -58,12 +62,12 @@ namespace abc {
 #if ((__ABC__GPIO_VER) == 2)
 		line_request.num_lines = 1;
 		line_request.offsets[0] = pos;
-		std::strncpy(line_request.consumer, chip.consumer(), gpio_max_consumer);
+		std::strncpy(line_request.consumer, chip->consumer(), gpio_max_consumer);
 		line_request.config.flags = flags;
 #else
 		line_request.lines = 1;
 		line_request.lineoffsets[0] = pos;
-		std::strncpy(line_request.consumer_label, chip.consumer(), gpio_max_consumer);
+		std::strncpy(line_request.consumer_label, chip->consumer(), gpio_max_consumer);
 		line_request.flags = flags;
 #endif
 
@@ -172,7 +176,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_input_line<Log>::gpio_input_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log)
+	inline gpio_input_line<Log>::gpio_input_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log)
 		: base(chip, pos, gpio_line_flag::input, log) {
 	}
 
@@ -181,7 +185,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_output_line<Log>::gpio_output_line(const gpio_chip<Log>& chip, gpio_line_pos_t pos, Log* log)
+	inline gpio_output_line<Log>::gpio_output_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log)
 		: base(chip, pos, gpio_line_flag::output, log) {
 	}
 
