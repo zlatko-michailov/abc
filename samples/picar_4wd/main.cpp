@@ -25,13 +25,14 @@ SOFTWARE.
 
 #include <iostream>
 #include <chrono>
+#include <ratio>
 #include <vector>
 
 #include "../../src/gpio.h"
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-constexpr abc::gpio_smbus_clock_frequency_t smbus_clock_frequency = 72 * 1000 * 1000;
+constexpr abc::gpio_smbus_clock_frequency_t smbus_clock_frequency = 72 * std::mega::num;
 
 
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
@@ -78,7 +79,7 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 		trigger_line.put_level(abc::gpio_level::low);
 
 		clock::time_point echo_not_ready_tp = clock::now();
-		microseconds timeout((2 * 1000 * 1000) / 340); // ~6,000 us
+		microseconds timeout((2 * std::mega::num) / 340); // ~6,000 us
 
 		// Make sure there is no echo in progress.
 		abc::gpio_level_t level = echo_line.expect_level(abc::gpio_level::low, timeout);

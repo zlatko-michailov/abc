@@ -26,11 +26,13 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
+#include <chrono>
 
 
 namespace abc {
 
 	using gpio_pwm_pulse_frequency_t	= std::uint16_t;
+	using gpio_pwm_duration_t			= std::chrono::microseconds;
 
 
 	// --------------------------------------------------------------
@@ -41,6 +43,14 @@ namespace abc {
 	namespace gpio_pwm_duty_cycle {
 		constexpr gpio_pwm_duty_cycle_t min =   0;
 		constexpr gpio_pwm_duty_cycle_t max = 100;
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	constexpr gpio_pwm_duration_t gpio_pwm_period(gpio_pwm_pulse_frequency_t frequency) noexcept {
+		return gpio_pwm_duration_t(gpio_pwm_duration_t::period::den / frequency);
 	}
 
 

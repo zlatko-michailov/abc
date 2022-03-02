@@ -65,10 +65,10 @@ namespace abc {
 		const gpio_output_line<Log>	_line;
 
 		// Parameters
-		const std::chrono::microseconds		_min_pulse_width;
-		const std::chrono::microseconds		_max_pulse_width;
+		const gpio_pwm_duration_t			_min_pulse_width;
+		const gpio_pwm_duration_t			_max_pulse_width;
 		const gpio_pwm_pulse_frequency_t	_frequency;
-		const std::chrono::microseconds		_period;
+		const gpio_pwm_duration_t			_period;
 
 		// Sync
 		std::mutex							_control_mutex;
