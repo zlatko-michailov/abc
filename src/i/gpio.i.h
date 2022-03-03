@@ -30,3 +30,4 @@ SOFTWARE.
 #include "gpio_line.i.h"
 #include "gpio_pwm_emulator.i.h"
 #include "gpio_smbus.i.h"
+#include "gpio_smbus_pwm.i.h"

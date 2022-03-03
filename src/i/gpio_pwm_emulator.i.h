@@ -62,13 +62,13 @@ namespace abc {
 		static void	thread_func(gpio_pwm_emulator* this_ptr) noexcept;
 
 	private:
-		const gpio_output_line<Log>	_line;
+		gpio_output_line<Log>				_line;
 
 		// Parameters
-		const gpio_pwm_duration_t			_min_pulse_width;
-		const gpio_pwm_duration_t			_max_pulse_width;
-		const gpio_pwm_pulse_frequency_t	_frequency;
-		const gpio_pwm_duration_t			_period;
+		gpio_pwm_duration_t					_min_pulse_width;
+		gpio_pwm_duration_t					_max_pulse_width;
+		gpio_pwm_pulse_frequency_t			_frequency;
+		gpio_pwm_duration_t					_period;
 
 		// Sync
 		std::mutex							_control_mutex;
