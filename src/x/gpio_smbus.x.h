@@ -40,11 +40,21 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline gpio_smbus<Log>::gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, Log* log)
+	inline std::uint16_t gpio_smbus<Log>::swap_bytes(std::uint16_t word) noexcept {
+		std::uint16_t lo = word & 0x00ff;
+		std::uint16_t hi = (word >> 8) & 0x00ff;
+
+		return (lo << 8) | hi;
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus<Log>::gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, bool swap_bytes, Log* log)
 		: _fd(-1)
 		, _functionality(0)
 		, _addr(0)
 		, _clock_frequency(clock_frequency)
+		, _swap_bytes(swap_bytes)
 		, _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
@@ -194,7 +204,7 @@ namespace abc {
 		}
 
 		i2c_smbus_data data = { 0 };
-		data.word = word;
+		data.word = _swap_bytes ? swap_bytes(word) : word;
 
 		i2c_smbus_ioctl_data msg = { 0 };
 		msg.read_write = I2C_SMBUS_WRITE;
@@ -367,7 +377,7 @@ namespace abc {
 			}
 		}
 
-		word = data.word;
+		word = _swap_bytes ? swap_bytes(data.word) : data.word;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_word() Done.");

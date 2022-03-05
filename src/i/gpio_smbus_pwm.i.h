@@ -61,7 +61,7 @@ namespace abc {
 		gpio_pwm_duration_t				_min_pulse_width;
 		gpio_pwm_duration_t				_max_pulse_width;
 		gpio_pwm_pulse_frequency_t		_frequency;
-		gpio_pwm_duration_t				_period;
+		gpio_smbus_clock_frequency_t	_period;
 		gpio_smbus_clock_frequency_t	_autoreload;
 		gpio_smbus_clock_frequency_t	_prescaler;
 		gpio_smbus_address_t			_addr;

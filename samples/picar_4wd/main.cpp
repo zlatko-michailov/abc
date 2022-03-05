@@ -161,35 +161,29 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void turn_motors(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, &log);
+	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, true, &log);
 
-	const abc::gpio_smbus_address_t addr_hat = 0x14;
-	const abc::gpio_smbus_register_t reg_front_left = 0x2d;
-	const abc::gpio_smbus_register_t reg_front_right = 0x2c;
-	const abc::gpio_smbus_register_t reg_rear_left = 0x28;
-	const abc::gpio_smbus_register_t reg_rear_right = 0x29;
+	const abc::gpio_smbus_address_t addr_hat				= 0x14;
 
-	smbus.put_word(addr_hat, reg_front_left, 0x0010);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	smbus.put_word(addr_hat, reg_front_left, 0x0000);
+	const abc::gpio_smbus_register_t reg_base_pwm			= 0x20;
+	const abc::gpio_smbus_register_t reg_base_autoreload	= 0x44;
+	const abc::gpio_smbus_register_t reg_base_prescaler		= 0x40;
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	const abc::gpio_smbus_register_t reg_front_left			= 0x0d;
+	const abc::gpio_smbus_register_t reg_front_right		= 0x0c;
+	const abc::gpio_smbus_register_t reg_rear_left			= 0x08;
+	const abc::gpio_smbus_register_t reg_rear_right			= 0x09;
 
-	smbus.put_word(addr_hat, reg_front_right, 0x0010);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	smbus.put_word(addr_hat, reg_front_right, 0x0000);
+	const abc::gpio_smbus_register_t wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
+	for (const abc::gpio_smbus_register_t wheel : wheels) {
+		abc::gpio_smbus_register_t timer = wheel / 4;
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, 50, addr_hat, reg_base_pwm + wheel, reg_base_autoreload + timer, reg_base_prescaler + timer, &log);
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-
-	smbus.put_word(addr_hat, reg_rear_left, 0x0010);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	smbus.put_word(addr_hat, reg_rear_left, 0x0000);
-
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-
-	smbus.put_word(addr_hat, reg_rear_right, 0x0010);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	smbus.put_word(addr_hat, reg_rear_right, 0x0000);
+		pwm_wheel.set_duty_cycle(25, std::chrono::seconds(1));
+		pwm_wheel.set_duty_cycle(50, std::chrono::seconds(1));
+		pwm_wheel.set_duty_cycle(75, std::chrono::seconds(1));
+		pwm_wheel.set_duty_cycle(100, std::chrono::seconds(1));
+	}
 }
 
 
@@ -249,15 +243,15 @@ int main(int argc, const char* argv[]) {
 
 	// Ultrasonic - binary signal
 	measure_distance(chip, log);
-#endif
 
 	// Servo - pwm
 	move_servo(chip, log);
+#endif
 
-#ifdef TEMP ////
 	// Motors - smbus
 	turn_motors(log);
 
+#ifdef TEMP ////
 	measure_grayscale(log);
 #endif
 

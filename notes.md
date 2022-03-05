@@ -11,11 +11,12 @@
 
 ## To Do
 GPIO:
+  - gpio_smbus_device(addr, clock_freq, swap)
+  - gpio_smbus_pwm
   - gpio_chip
     - gpio_chip(i)
   - gpio_smbus
     - gpio_smbus(i)
-  - gpio_smbus_pwm
 picar_4wd:
   - ultrasonic
   - motor

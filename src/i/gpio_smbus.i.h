@@ -47,8 +47,11 @@ namespace abc {
 
 	template <typename Log = null_log>
 	class gpio_smbus {
+	private:
+		static std::uint16_t swap_bytes(std::uint16_t word) noexcept;
+
 	public:
-		gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, Log* log = nullptr);
+		gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, bool swap_bytes = false, Log* log = nullptr);
 		gpio_smbus(gpio_smbus<Log>&& other) noexcept = default;
 		gpio_smbus(const gpio_smbus<Log>& other) = default;
 		~gpio_smbus() noexcept;
@@ -78,6 +81,7 @@ namespace abc {
 		gpio_smbus_functionality_t		_functionality;
 		gpio_smbus_address_t			_addr;
 		gpio_smbus_clock_frequency_t	_clock_frequency;
+		bool							_swap_bytes;
 		Log*							_log;
 	};
 
