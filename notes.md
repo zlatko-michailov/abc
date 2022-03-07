@@ -11,8 +11,6 @@
 
 ## To Do
 GPIO:
-  - gpio_smbus
-    - gpio_smbus(i)
   - ultrasonic
     - "distance" -> "obstacle"
     - obstacle - use pwm

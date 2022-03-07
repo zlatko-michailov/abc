@@ -40,13 +40,48 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
+	inline gpio_smbus<Log>::gpio_smbus(int dev_i2c_pos, Log* log)
+		: _fd(-1)
+		, _functionality(0)
+		, _addr(0)
+		, _log(log) {
+		char path[gpio_max_path];
+		std::snprintf(path, gpio_max_path, "/dev/i2c-%d", dev_i2c_pos);
+
+		init(path);
+	}
+
+
+	template <typename Log>
 	inline gpio_smbus<Log>::gpio_smbus(const char* path, Log* log)
 		: _fd(-1)
 		, _functionality(0)
 		, _addr(0)
 		, _log(log) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
+		init(path);
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus<Log>::~gpio_smbus() noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Start.");
+		}
+
+		if (_fd >=0) {
+			close(_fd);
+		}
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Done.");
+		}
+	}
+
+
+	template <typename Log>
+	inline void gpio_smbus<Log>::init(const char* path) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
 		}
 
 		if (path == nullptr) {
@@ -66,30 +101,14 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() I2C_FUNCS failed", __TAG__);
 		}
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
 		}
 
 		std::strncpy(_path, path, gpio_max_path);
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);
-		}
-	}
-
-
-	template <typename Log>
-	inline gpio_smbus<Log>::~gpio_smbus() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Start.");
-		}
-
-		if (_fd >=0) {
-			close(_fd);
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);
 		}
 	}
 

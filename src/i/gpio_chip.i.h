@@ -54,7 +54,7 @@ namespace abc {
 	template <typename Log = null_log>
 	class gpio_chip {
 	public:
-		gpio_chip(int dev_pos, const char* consumer = "abc", Log* log = nullptr);
+		gpio_chip(int dev_gpiochip_pos, const char* consumer = "abc", Log* log = nullptr);
 		gpio_chip(const char* path, const char* consumer = "abc", Log* log = nullptr);
 		gpio_chip(gpio_chip<Log>&& other) noexcept = default;
 		gpio_chip(const gpio_chip<Log>& other) = default;

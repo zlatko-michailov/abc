@@ -54,10 +54,10 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_chip<Log>::gpio_chip(int dev_pos, const char* consumer, Log* log)
+	inline gpio_chip<Log>::gpio_chip(int dev_gpiochip_pos, const char* consumer, Log* log)
 		: _log(log) {
 		char path[gpio_max_path];
-		std::snprintf(path, gpio_max_path, "/dev/gpiochip%d", dev_pos);
+		std::snprintf(path, gpio_max_path, "/dev/gpiochip%d", dev_gpiochip_pos);
 
 		init(path, consumer);
 	}

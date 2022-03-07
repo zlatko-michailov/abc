@@ -33,7 +33,6 @@ SOFTWARE.
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
-constexpr const char*						smbus_path						= "/dev/i2c-1";
 constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
 constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
 constexpr bool								smbus_hat_requires_byte_swap	= true;
@@ -166,7 +165,7 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void turn_motors(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus(smbus_path, &log);
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
 
 	const abc::gpio_smbus_register_t reg_base_autoreload	= 0x44;
@@ -192,7 +191,7 @@ void turn_motors(log_ostream& log) {
 
 
 void measure_grayscale(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus(smbus_path, &log);
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
 
 	const abc::gpio_smbus_register_t reg_left = 0x12;
@@ -250,12 +249,12 @@ int main(int argc, const char* argv[]) {
 
 	// Servo - pwm
 	move_servo(chip, log);
+#endif
 
 	// Motors - smbus
 	turn_motors(log);
 
 	measure_grayscale(log);
-#endif	
 
 	return 0;
 }

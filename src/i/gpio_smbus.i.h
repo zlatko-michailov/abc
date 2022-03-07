@@ -52,10 +52,14 @@ namespace abc {
 	template <typename Log = null_log>
 	class gpio_smbus {
 	public:
+		gpio_smbus(int dev_i2c_pos, Log* log = nullptr);
 		gpio_smbus(const char* path, Log* log = nullptr);
 		gpio_smbus(gpio_smbus<Log>&& other) noexcept = default;
 		gpio_smbus(const gpio_smbus<Log>& other) = default;
 		~gpio_smbus() noexcept;
+
+	private:
+		void init(const char* path);
 
 	public:
 		const char* 					path() const noexcept;
