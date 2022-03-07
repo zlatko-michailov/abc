@@ -38,16 +38,19 @@ namespace abc {
 
 	template <typename Log>
 	template <typename PulseWidthDuration>
-	inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency,
-										gpio_smbus_address_t addr, gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler, Log* log)
+	inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+										PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+										gpio_pwm_pulse_frequency_t frequency,
+										gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+										Log* log)
 		: _smbus(smbus)
+		, _smbus_target(smbus_target)
 		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration_t>(min_pulse_width))
 		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration_t>(max_pulse_width))
 		, _frequency(frequency)
 		, _period(0)
 		, _autoreload(0)
 		, _prescaler(0)
-		, _addr(addr)
 		, _reg_pwm(reg_pwm)
 		, _reg_autoreload(reg_autoreload)
 		, _reg_prescaler(reg_prescaler)
@@ -62,19 +65,18 @@ namespace abc {
 		}
 
 		// Calculate auto_reload and prescaler
-		_period = smbus->clock_frequency() / _frequency;
+		_period = _smbus_target.clock_frequency() / _frequency;
 		gpio_smbus_clock_frequency_t sqrt_period = static_cast<gpio_smbus_clock_frequency_t>(std::lround(std::sqrt(_period)));
 		_autoreload = (sqrt_period / 100) * 100;
 		_prescaler = _period / _autoreload;
 
 		if (log != nullptr) {
-			//// TODO: Reduce severity
-			log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() period = %u | autoreload = %u | prescaler = %u",
+			log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() period = %u | autoreload = %u | prescaler = %u",
 				(unsigned)_period, (unsigned)_autoreload, (unsigned)_prescaler);
 		}
 
-		_smbus->put_word(_addr, _reg_autoreload, _autoreload);
-		_smbus->put_word(_addr, _reg_prescaler, _prescaler);
+		_smbus->put_word(_smbus_target, _reg_autoreload, _autoreload);
+		_smbus->put_word(_smbus_target, _reg_prescaler, _prescaler);
 
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() Done.");
@@ -83,9 +85,11 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, gpio_pwm_pulse_frequency_t frequency,
-										gpio_smbus_address_t addr, gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler, Log* log)
-		: gpio_smbus_pwm<Log>(smbus, gpio_pwm_duration_t(0), gpio_pwm_period(frequency), frequency, addr, reg_pwm, reg_autoreload, reg_prescaler, log) {
+	inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+										gpio_pwm_pulse_frequency_t frequency,
+										gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+										Log* log)
+		: gpio_smbus_pwm<Log>(smbus, smbus_target, gpio_pwm_duration_t(0), gpio_pwm_period(frequency), frequency, reg_pwm, reg_autoreload, reg_prescaler, log) {
 	}
 
 
@@ -102,7 +106,7 @@ namespace abc {
 		_duty_cycle = duty_cycle;
 		gpio_smbus_clock_frequency_t capture_compare = (_duty_cycle * _autoreload) / gpio_pwm_duty_cycle::max;
 
-		_smbus->put_word(_addr, _reg_pwm, capture_compare);
+		_smbus->put_word(_smbus_target, _reg_pwm, capture_compare);
 	}
 
 	template <typename Log>

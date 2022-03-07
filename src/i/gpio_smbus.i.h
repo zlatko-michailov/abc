@@ -45,13 +45,14 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	template <typename Log>
+	class gpio_smbus_target;
+
+
 	template <typename Log = null_log>
 	class gpio_smbus {
-	private:
-		static std::uint16_t swap_bytes(std::uint16_t word) noexcept;
-
 	public:
-		gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, bool swap_bytes = false, Log* log = nullptr);
+		gpio_smbus(const char* path, Log* log = nullptr);
 		gpio_smbus(gpio_smbus<Log>&& other) noexcept = default;
 		gpio_smbus(const gpio_smbus<Log>& other) = default;
 		~gpio_smbus() noexcept;
@@ -59,29 +60,52 @@ namespace abc {
 	public:
 		const char* 					path() const noexcept;
 		gpio_smbus_functionality_t		functionality() const noexcept;
-		gpio_smbus_clock_frequency_t	clock_frequency() const noexcept;
 
 	public:
-		bool							put_nodata(gpio_smbus_address_t addr, gpio_smbus_register_t reg) noexcept;
-		bool							put_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t byte) noexcept;
-		bool							put_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t word) noexcept;
-		bool							put_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept;
+		bool							put_nodata(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg) noexcept;
+		bool							put_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t byte) noexcept;
+		bool							put_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t word) noexcept;
+		bool							put_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept;
 
-		bool							get_noreg(gpio_smbus_address_t addr, std::uint8_t& byte) noexcept;
-		bool							get_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept;
-		bool							get_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t& word) noexcept;
-		bool							get_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept;
+		bool							get_noreg(const gpio_smbus_target<Log>& target, std::uint8_t& byte) noexcept;
+		bool							get_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept;
+		bool							get_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t& word) noexcept;
+		bool							get_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept;
 
 	private:
 		bool							ensure_address(gpio_smbus_address_t addr) noexcept;
+
+	private:
+		static std::uint16_t			swap_bytes(std::uint16_t word) noexcept;
 
 	private:
 		char							_path[gpio_max_path];
 		gpio_fd_t						_fd;
 		gpio_smbus_functionality_t		_functionality;
 		gpio_smbus_address_t			_addr;
+		Log*							_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log = null_log>
+	class gpio_smbus_target {
+	public:
+		gpio_smbus_target(gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap = false, Log* log = nullptr);
+		gpio_smbus_target(gpio_smbus_target&& other) noexcept = default;
+		gpio_smbus_target(const gpio_smbus_target& other) = default;
+
+	public:
+		gpio_smbus_address_t			address() const noexcept;
+		gpio_smbus_clock_frequency_t	clock_frequency() const noexcept;
+		bool							requires_byte_swap() const noexcept;
+
+	private:
+		gpio_smbus_address_t			_addr;
 		gpio_smbus_clock_frequency_t	_clock_frequency;
-		bool							_swap_bytes;
+		bool							_requires_byte_swap;
 		Log*							_log;
 	};
 

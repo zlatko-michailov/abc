@@ -32,7 +32,12 @@ SOFTWARE.
 
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-constexpr abc::gpio_smbus_clock_frequency_t smbus_clock_frequency = 72 * std::mega::num;
+
+constexpr const char*						smbus_path						= "/dev/i2c-1";
+constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
+constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
+constexpr bool								smbus_hat_requires_byte_swap	= true;
+constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
 
 
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
@@ -161,11 +166,9 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void turn_motors(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, true, &log);
+	abc::gpio_smbus<log_ostream> smbus(smbus_path, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
 
-	const abc::gpio_smbus_address_t addr_hat				= 0x14;
-
-	const abc::gpio_smbus_register_t reg_base_pwm			= 0x20;
 	const abc::gpio_smbus_register_t reg_base_autoreload	= 0x44;
 	const abc::gpio_smbus_register_t reg_base_prescaler		= 0x40;
 
@@ -175,22 +178,23 @@ void turn_motors(log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_rear_right			= 0x09;
 
 	const abc::gpio_smbus_register_t wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
+
 	for (const abc::gpio_smbus_register_t wheel : wheels) {
 		abc::gpio_smbus_register_t timer = wheel / 4;
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, 50, addr_hat, reg_base_pwm + wheel, reg_base_autoreload + timer, reg_base_prescaler + timer, &log);
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, hat, 50, smbus_hat_reg_base_pwm + wheel, reg_base_autoreload + timer, reg_base_prescaler + timer, &log);
 
-		pwm_wheel.set_duty_cycle(25, std::chrono::seconds(1));
-		pwm_wheel.set_duty_cycle(50, std::chrono::seconds(1));
-		pwm_wheel.set_duty_cycle(75, std::chrono::seconds(1));
-		pwm_wheel.set_duty_cycle(100, std::chrono::seconds(1));
+		pwm_wheel.set_duty_cycle(25, std::chrono::milliseconds(250));
+		pwm_wheel.set_duty_cycle(50, std::chrono::milliseconds(250));
+		pwm_wheel.set_duty_cycle(75, std::chrono::milliseconds(250));
+		pwm_wheel.set_duty_cycle(100, std::chrono::milliseconds(250));
 	}
 }
 
 
 void measure_grayscale(log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus("/dev/i2c-1", smbus_clock_frequency, &log);
+	abc::gpio_smbus<log_ostream> smbus(smbus_path, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
 
-	const abc::gpio_smbus_address_t addr_hat = 0x14;
 	const abc::gpio_smbus_register_t reg_left = 0x12;
 	const abc::gpio_smbus_register_t reg_center = 0x11;
 	const abc::gpio_smbus_register_t reg_right = 0x10;
@@ -201,21 +205,21 @@ void measure_grayscale(log_ostream& log) {
 		std::uint8_t low_byte;
 
 		std::uint16_t left;
-		smbus.put_word(addr_hat, reg_left, zero);
-		smbus.get_noreg(addr_hat, high_byte);
-		smbus.get_noreg(addr_hat, low_byte);
+		smbus.put_word(hat, reg_left, zero);
+		smbus.get_noreg(hat, high_byte);
+		smbus.get_noreg(hat, low_byte);
 		left = (high_byte << 8) | low_byte;
 
 		std::uint16_t center;
-		smbus.put_word(addr_hat, reg_center, zero);
-		smbus.get_noreg(addr_hat, high_byte);
-		smbus.get_noreg(addr_hat, low_byte);
+		smbus.put_word(hat, reg_center, zero);
+		smbus.get_noreg(hat, high_byte);
+		smbus.get_noreg(hat, low_byte);
 		center = (high_byte << 8) | low_byte;
 
 		std::uint16_t right;
-		smbus.put_word(addr_hat, reg_right, zero);
-		smbus.get_noreg(addr_hat, high_byte);
-		smbus.get_noreg(addr_hat, low_byte);
+		smbus.put_word(hat, reg_right, zero);
+		smbus.get_noreg(hat, high_byte);
+		smbus.get_noreg(hat, low_byte);
 		right = (high_byte << 8) | low_byte;
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
@@ -246,14 +250,11 @@ int main(int argc, const char* argv[]) {
 
 	// Servo - pwm
 	move_servo(chip, log);
-#endif
 
 	// Motors - smbus
 	turn_motors(log);
 
-#ifdef TEMP ////
 	measure_grayscale(log);
-#endif
 
 	return 0;
 }

@@ -43,10 +43,15 @@ namespace abc {
 	class gpio_smbus_pwm {
 	public:
 		template <typename PulseWidthDuration>
-		gpio_smbus_pwm(gpio_smbus<Log>* smbus, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency,
-					gpio_smbus_address_t addr, gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler, Log* log = nullptr);
-		gpio_smbus_pwm(gpio_smbus<Log>* smbus, gpio_pwm_pulse_frequency_t frequency,
-					gpio_smbus_address_t addr, gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler, Log* log = nullptr);
+		gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+					PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+					gpio_pwm_pulse_frequency_t frequency,
+					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+					Log* log = nullptr);
+		gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+					gpio_pwm_pulse_frequency_t frequency,
+					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+					Log* log = nullptr);
 		gpio_smbus_pwm(gpio_smbus_pwm<Log>&& other) noexcept = default;
 		gpio_smbus_pwm(const gpio_smbus_pwm<Log>& other) = default;
 
@@ -58,13 +63,13 @@ namespace abc {
 
 	public:
 		gpio_smbus<Log>*				_smbus;
+		gpio_smbus_target<Log>			_smbus_target;
 		gpio_pwm_duration_t				_min_pulse_width;
 		gpio_pwm_duration_t				_max_pulse_width;
 		gpio_pwm_pulse_frequency_t		_frequency;
 		gpio_smbus_clock_frequency_t	_period;
 		gpio_smbus_clock_frequency_t	_autoreload;
 		gpio_smbus_clock_frequency_t	_prescaler;
-		gpio_smbus_address_t			_addr;
 		gpio_smbus_register_t			_reg_pwm;
 		gpio_smbus_register_t			_reg_autoreload;
 		gpio_smbus_register_t			_reg_prescaler;

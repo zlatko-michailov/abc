@@ -40,21 +40,10 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline std::uint16_t gpio_smbus<Log>::swap_bytes(std::uint16_t word) noexcept {
-		std::uint16_t lo = word & 0x00ff;
-		std::uint16_t hi = (word >> 8) & 0x00ff;
-
-		return (lo << 8) | hi;
-	}
-
-
-	template <typename Log>
-	inline gpio_smbus<Log>::gpio_smbus(const char* path, gpio_smbus_clock_frequency_t clock_frequency, bool swap_bytes, Log* log)
+	inline gpio_smbus<Log>::gpio_smbus(const char* path, Log* log)
 		: _fd(-1)
 		, _functionality(0)
 		, _addr(0)
-		, _clock_frequency(clock_frequency)
-		, _swap_bytes(swap_bytes)
 		, _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
@@ -118,14 +107,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_smbus_clock_frequency_t gpio_smbus<Log>::clock_frequency() const noexcept {
-		return _clock_frequency;
-	}
-
-
-	template <typename Log>
-	inline bool gpio_smbus<Log>::put_nodata(gpio_smbus_address_t addr, gpio_smbus_register_t reg) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::put_nodata(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_nodata() ensure_address() failed. errno = %d", errno);
 
@@ -157,8 +140,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::put_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t byte) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::put_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t byte) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_byte() ensure_address() failed. errno = %d", errno);
 
@@ -194,8 +177,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::put_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t word) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::put_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t word) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_word() ensure_address() failed. errno = %d", errno);
 
@@ -204,7 +187,7 @@ namespace abc {
 		}
 
 		i2c_smbus_data data = { 0 };
-		data.word = _swap_bytes ? swap_bytes(word) : word;
+		data.word = target.requires_byte_swap() ? swap_bytes(word) : word;
 
 		i2c_smbus_ioctl_data msg = { 0 };
 		msg.read_write = I2C_SMBUS_WRITE;
@@ -231,7 +214,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::put_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept {
+	inline bool gpio_smbus<Log>::put_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept {
 		if (size > I2C_SMBUS_BLOCK_MAX) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() size > I2C_SMBUS_BLOCK_MAX. errno = %d", errno);
@@ -240,7 +223,7 @@ namespace abc {
 			}
 		}
 
-		if (!ensure_address(addr)) {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() ensure_address() failed. errno = %d", errno);
 
@@ -277,8 +260,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::get_noreg(gpio_smbus_address_t addr, std::uint8_t& byte) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::get_noreg(const gpio_smbus_target<Log>& target, std::uint8_t& byte) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg() ensure_address() failed. errno = %d", errno);
 
@@ -314,8 +297,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::get_byte(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::get_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_byte() ensure_address() failed. errno = %d", errno);
 
@@ -352,8 +335,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::get_word(gpio_smbus_address_t addr, gpio_smbus_register_t reg, std::uint16_t& word) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::get_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t& word) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_word() ensure_address() failed. errno = %d", errno);
 
@@ -377,7 +360,7 @@ namespace abc {
 			}
 		}
 
-		word = _swap_bytes ? swap_bytes(data.word) : data.word;
+		word = target.requires_byte_swap() ? swap_bytes(data.word) : data.word;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_word() Done.");
@@ -390,8 +373,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline bool gpio_smbus<Log>::get_block(gpio_smbus_address_t addr, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept {
-		if (!ensure_address(addr)) {
+	inline bool gpio_smbus<Log>::get_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept {
+		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() ensure_address() failed. errno = %d", errno);
 
@@ -465,6 +448,47 @@ namespace abc {
 		return true;
 	}
 
+
+	template <typename Log>
+	inline std::uint16_t gpio_smbus<Log>::swap_bytes(std::uint16_t word) noexcept {
+		std::uint16_t lo = word & 0x00ff;
+		std::uint16_t hi = (word >> 8) & 0x00ff;
+
+		return (lo << 8) | hi;
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log>
+	inline gpio_smbus_target<Log>::gpio_smbus_target(gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log)
+		: _addr(addr)
+		, _clock_frequency(clock_frequency)
+		, _requires_byte_swap(requires_byte_swap)
+		, _log(log) {
+		if (log != nullptr) {
+			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_target::gpio_smbus_target() Done.");
+		}
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus_address_t gpio_smbus_target<Log>::address() const noexcept {
+		return _addr;
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus_clock_frequency_t gpio_smbus_target<Log>::clock_frequency() const noexcept {
+		return _clock_frequency;
+	}
+
+
+	template <typename Log>
+	inline bool gpio_smbus_target<Log>::requires_byte_swap() const noexcept {
+		return _requires_byte_swap;
+	}
 
 	// --------------------------------------------------------------
 
