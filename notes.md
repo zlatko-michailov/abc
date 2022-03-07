@@ -11,10 +11,14 @@
 
 ## To Do
 GPIO:
-  - gpio_chip
-    - gpio_chip(i)
   - gpio_smbus
     - gpio_smbus(i)
+  - ultrasonic
+    - "distance" -> "obstacle"
+    - obstacle - use pwm
+    - measure speed
+    - measure distance
+  - UI
 picar_4wd:
   - ultrasonic
   - motor

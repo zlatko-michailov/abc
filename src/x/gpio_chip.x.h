@@ -54,39 +54,55 @@ namespace abc {
 
 
 	template <typename Log>
+	inline gpio_chip<Log>::gpio_chip(int dev_pos, const char* consumer, Log* log)
+		: _log(log) {
+		char path[gpio_max_path];
+		std::snprintf(path, gpio_max_path, "/dev/gpiochip%d", dev_pos);
+
+		init(path, consumer);
+	}
+
+
+	template <typename Log>
 	inline gpio_chip<Log>::gpio_chip(const char* path, const char* consumer, Log* log)
 		: _log(log) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::gpio_chip() Start.");
+		init(path, consumer);
+	}
+
+
+	template <typename Log>
+	inline void gpio_chip<Log>::init(const char* path, const char* consumer) {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::init() Start.");
 		}
 
 		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() path == nullptr", __TAG__);
 		}
 
 		if (std::strlen(path) >= gpio_max_path) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() path >= gpo_max_path", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::int() path >= gpo_max_path", __TAG__);
 		}
 
 		if (consumer == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() consumer == nullptr", __TAG__);
 		}
 
 		if (std::strlen(consumer) >= gpio_max_consumer) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() consumer >= gpio_max_consumer", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() consumer >= gpio_max_consumer", __TAG__);
 		}
 
 		gpio_fd_t fd = open(path, O_RDONLY);
 		if (fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_chip::gpio_chip() open() < 0", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() open() < 0", __TAG__);
 		}
 		close(fd);
 
 		std::strncpy(_path, path, gpio_max_path);
 		std::strncpy(_consumer, consumer, gpio_max_consumer);
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::gpio_chip() Done.");
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::init() Done.");
 		}
 	}
 

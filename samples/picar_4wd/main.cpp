@@ -235,16 +235,16 @@ int main(int argc, const char* argv[]) {
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a chip.
-	abc::gpio_chip<log_ostream> chip("/dev/gpiochip0", "picar_4wd", &log);
+	abc::gpio_chip<log_ostream> chip(0, "picar_4wd", &log);
 
 	// Init hat
 	reset_hat(chip, log);
 
-#ifdef TEMP ////
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
 
+#ifdef TEMP ////
 	// Ultrasonic - binary signal
 	measure_distance(chip, log);
 
@@ -255,6 +255,7 @@ int main(int argc, const char* argv[]) {
 	turn_motors(log);
 
 	measure_grayscale(log);
+#endif	
 
 	return 0;
 }
