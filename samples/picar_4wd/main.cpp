@@ -69,7 +69,7 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 }
 
 
-void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 
@@ -125,7 +125,7 @@ void measure_distance(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 }
 
 
-void move_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void turn_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 
@@ -164,7 +164,7 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
-void turn_motors(log_ostream& log) {
+void turn_wheels(log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
 
@@ -243,17 +243,16 @@ int main(int argc, const char* argv[]) {
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
 
-#ifdef TEMP ////
-	// Ultrasonic - binary signal
-	measure_distance(chip, log);
+	// Ultrasonic - binary input
+	measure_obstacle(chip, log);
 
-	// Servo - pwm
-	move_servo(chip, log);
-#endif
+	// Servo - pwm output
+	turn_servo(chip, log);
 
-	// Motors - smbus
-	turn_motors(log);
+	// Wheels - pwm output
+	turn_wheels(log);
 
+	// Grayscale - pwm input
 	measure_grayscale(log);
 
 	return 0;

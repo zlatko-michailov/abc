@@ -12,7 +12,7 @@
 ## To Do
 GPIO:
   - ultrasonic
-    - "distance" -> "obstacle"
+    - smbus - get_noreg -> get_noreg_byte, get_noreg_word
     - obstacle - use pwm
     - measure speed
     - measure distance
