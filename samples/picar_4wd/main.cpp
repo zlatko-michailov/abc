@@ -200,26 +200,17 @@ void measure_grayscale(log_ostream& log) {
 	const std::uint16_t zero = 0x0000;
 
 	for (int i = 0; i < 10; i++) {
-		std::uint8_t high_byte;
-		std::uint8_t low_byte;
-
 		std::uint16_t left;
 		smbus.put_word(hat, reg_left, zero);
-		smbus.get_noreg(hat, high_byte);
-		smbus.get_noreg(hat, low_byte);
-		left = (high_byte << 8) | low_byte;
+		smbus.get_noreg_2(hat, left);
 
 		std::uint16_t center;
 		smbus.put_word(hat, reg_center, zero);
-		smbus.get_noreg(hat, high_byte);
-		smbus.get_noreg(hat, low_byte);
-		center = (high_byte << 8) | low_byte;
+		smbus.get_noreg_2(hat, center);
 
 		std::uint16_t right;
 		smbus.put_word(hat, reg_right, zero);
-		smbus.get_noreg(hat, high_byte);
-		smbus.get_noreg(hat, low_byte);
-		right = (high_byte << 8) | low_byte;
+		smbus.get_noreg_2(hat, right);
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
 
@@ -239,6 +230,7 @@ int main(int argc, const char* argv[]) {
 	// Init hat
 	reset_hat(chip, log);
 
+#ifdef TEMP
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
@@ -251,6 +243,7 @@ int main(int argc, const char* argv[]) {
 
 	// Wheels - pwm output
 	turn_wheels(log);
+#endif
 
 	// Grayscale - pwm input
 	measure_grayscale(log);

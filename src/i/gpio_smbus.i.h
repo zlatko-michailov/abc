@@ -72,6 +72,7 @@ namespace abc {
 		bool							put_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept;
 
 		bool							get_noreg(const gpio_smbus_target<Log>& target, std::uint8_t& byte) noexcept;
+		bool							get_noreg_2(const gpio_smbus_target<Log>& target, std::uint16_t& word) noexcept;
 		bool							get_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept;
 		bool							get_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t& word) noexcept;
 		bool							get_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept;

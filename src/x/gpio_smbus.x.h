@@ -316,6 +316,38 @@ namespace abc {
 
 
 	template <typename Log>
+	inline bool gpio_smbus<Log>::get_noreg_2(const gpio_smbus_target<Log>& target, std::uint16_t& word) noexcept {
+		std:uint8_t byte0;
+		if (!get_noreg(target, byte0)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg_2() byte0 failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		std::uint8_t byte1;
+		if (!get_noreg(target, byte1)) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg_2() byte1 failed. errno = %d", errno);
+
+				return false;
+			}
+		}
+
+		word = target.requires_byte_swap() ? ((byte0 << 8) | byte1) : ((byte1 << 8) | byte0);
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_noreg_2() Done.");
+
+			return true;
+		}
+
+		return true;
+	}
+
+
+	template <typename Log>
 	inline bool gpio_smbus<Log>::get_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
