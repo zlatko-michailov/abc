@@ -39,7 +39,7 @@ namespace abc {
 	using gpio_smbus_functionality_t	= unsigned long;
 	using gpio_smbus_address_t			= std::uint8_t;
 	using gpio_smbus_register_t			= std::uint8_t;
-	using gpio_smbus_clock_frequency_t	= std::uint32_t;
+	using gpio_smbus_clock_frequency_t	= std::uint64_t;
 
 
 	// --------------------------------------------------------------
@@ -98,7 +98,7 @@ namespace abc {
 	template <typename Log = null_log>
 	class gpio_smbus_target {
 	public:
-		gpio_smbus_target(gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap = false, Log* log = nullptr);
+		gpio_smbus_target(gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log = nullptr);
 		gpio_smbus_target(gpio_smbus_target&& other) noexcept = default;
 		gpio_smbus_target(const gpio_smbus_target& other) = default;
 

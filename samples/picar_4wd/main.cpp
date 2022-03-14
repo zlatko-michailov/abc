@@ -37,6 +37,9 @@ constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * st
 constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
 constexpr bool								smbus_hat_requires_byte_swap	= true;
 constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
+constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
+constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
+
 
 
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
@@ -125,31 +128,33 @@ void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 }
 
 
-void turn_servo(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void turn_servo(log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
+	using milliseconds = std::chrono::milliseconds;
 
 	const microseconds min_pulse_width = microseconds(500);
 	const microseconds max_pulse_width = microseconds(2500);
 	const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
 
-	const microseconds duty_duration = microseconds(250 * 1000);
+	const abc::gpio_smbus_register_t reg_servo = 0x00;
+	const abc::gpio_smbus_register_t reg_timer = reg_servo / 4;
+
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_servo(&smbus, hat, min_pulse_width, max_pulse_width, frequency, smbus_hat_reg_base_pwm + reg_servo, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
 
 	const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
 
-	abc::gpio_output_line<log_ostream> line(&chip, 4, &log);
-	abc::gpio_pwm_emulator<log_ostream> pwm(std::move(line), min_pulse_width, max_pulse_width, frequency, &log);
-
-	// Make sure it wakes up after a const level.
-	pwm.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-
 	for (std::uint32_t duty_cycle : duty_cycles) {
+		const milliseconds duty_duration = milliseconds(250);
+		const milliseconds sleep_duration = milliseconds(500);
+
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
 
-		pwm.set_duty_cycle(duty_cycle, duty_duration);
+		pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(sleep_duration);
 	}
 }
 
@@ -166,26 +171,29 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 void turn_wheels(log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
-	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
-
-	const abc::gpio_smbus_register_t reg_base_autoreload	= 0x44;
-	const abc::gpio_smbus_register_t reg_base_prescaler		= 0x40;
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
 	const abc::gpio_smbus_register_t reg_front_left			= 0x0d;
 	const abc::gpio_smbus_register_t reg_front_right		= 0x0c;
 	const abc::gpio_smbus_register_t reg_rear_left			= 0x08;
 	const abc::gpio_smbus_register_t reg_rear_right			= 0x09;
 
-	const abc::gpio_smbus_register_t wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
+	const abc::gpio_smbus_register_t reg_wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
 
-	for (const abc::gpio_smbus_register_t wheel : wheels) {
-		abc::gpio_smbus_register_t timer = wheel / 4;
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, hat, 50, smbus_hat_reg_base_pwm + wheel, reg_base_autoreload + timer, reg_base_prescaler + timer, &log);
+	for (const abc::gpio_smbus_register_t reg_wheel : reg_wheels) {
+		const abc::gpio_smbus_register_t reg_timer = reg_wheel / 4;
+		const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
+		const std::chrono::milliseconds duty_duration(500);
 
-		pwm_wheel.set_duty_cycle(25, std::chrono::milliseconds(250));
-		pwm_wheel.set_duty_cycle(50, std::chrono::milliseconds(250));
-		pwm_wheel.set_duty_cycle(75, std::chrono::milliseconds(250));
-		pwm_wheel.set_duty_cycle(100, std::chrono::milliseconds(250));
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
+
+		pwm_wheel.set_duty_cycle(25, duty_duration);
+		pwm_wheel.set_duty_cycle(50, duty_duration);
+		pwm_wheel.set_duty_cycle(75, duty_duration);
+		pwm_wheel.set_duty_cycle(100, duty_duration);
+		pwm_wheel.set_duty_cycle(75, duty_duration);
+		pwm_wheel.set_duty_cycle(50, duty_duration);
+		pwm_wheel.set_duty_cycle(25, duty_duration);
 	}
 }
 
@@ -237,16 +245,18 @@ int main(int argc, const char* argv[]) {
 
 	// Ultrasonic - binary input
 	measure_obstacle(chip, log);
+#endif
 
 	// Servo - pwm output
-	turn_servo(chip, log);
+	turn_servo(log);
 
 	// Wheels - pwm output
 	turn_wheels(log);
-#endif
 
+#ifdef TEMP
 	// Grayscale - pwm input
 	measure_grayscale(log);
+#endif
 
 	return 0;
 }

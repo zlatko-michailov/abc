@@ -64,8 +64,8 @@ namespace abc {
 	public:
 		gpio_smbus<Log>*				_smbus;
 		gpio_smbus_target<Log>			_smbus_target;
-		gpio_pwm_duration_t				_min_pulse_width;
-		gpio_pwm_duration_t				_max_pulse_width;
+		gpio_smbus_clock_frequency_t	_min_pulse_width;
+		gpio_smbus_clock_frequency_t	_max_pulse_width;
 		gpio_pwm_pulse_frequency_t		_frequency;
 		gpio_smbus_clock_frequency_t	_period;
 		gpio_smbus_clock_frequency_t	_autoreload;

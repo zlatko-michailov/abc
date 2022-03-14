@@ -40,8 +40,8 @@ namespace abc {
 	template <typename PulseWidthDuration>
 	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
 		: _line(std::move(line))
-		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration_t>(min_pulse_width))
-		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration_t>(max_pulse_width))
+		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
+		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
 		, _frequency(frequency)
 		, _period(gpio_pwm_period(frequency))
 		, _duty_cycle(0)
@@ -68,7 +68,7 @@ namespace abc {
 
 	template <typename Log>
 	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, gpio_pwm_pulse_frequency_t frequency, Log* log)
-		: gpio_pwm_emulator<Log>(std::move(line), gpio_pwm_duration_t(0), gpio_pwm_period(frequency), frequency, log) {
+		: gpio_pwm_emulator<Log>(std::move(line), gpio_pwm_duration(0), gpio_pwm_period(frequency), frequency, log) {
 	}
 
 
@@ -119,7 +119,7 @@ namespace abc {
 	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
 		set_duty_cycle(duty_cycle);
 		std::this_thread::sleep_for(duration);
-		set_duty_cycle(0);
+		set_duty_cycle(gpio_pwm_duty_cycle::min);
 	}
 
 
@@ -160,8 +160,8 @@ namespace abc {
 			else {
 				// Alternating level:
 				// Calculate the time points when the level should change, and use the longer interval to refresh the control variables. 
-				gpio_pwm_duration_t high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / gpio_pwm_duty_cycle::max;
-				gpio_pwm_duration_t low_duration  = this_ptr->_period - high_duration;
+				gpio_pwm_duration high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / gpio_pwm_duty_cycle::max;
+				gpio_pwm_duration low_duration  = this_ptr->_period - high_duration;
 
 				typename clock::time_point start_time_point = clock::now();
 				typename clock::time_point high_end_time_point = start_time_point + high_duration;

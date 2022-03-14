@@ -11,10 +11,8 @@
 
 ## To Do
 GPIO:
-  - ultrasonic
-    - obstacle - use pwm
-    - measure speed
-    - measure distance
+  - measure speed
+  - measure distance
   - UI
 picar_4wd:
   - ultrasonic

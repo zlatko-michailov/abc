@@ -32,7 +32,7 @@ SOFTWARE.
 namespace abc {
 
 	using gpio_pwm_pulse_frequency_t	= std::uint16_t;
-	using gpio_pwm_duration_t			= std::chrono::microseconds;
+	using gpio_pwm_duration				= std::chrono::microseconds;
 
 
 	// --------------------------------------------------------------
@@ -49,8 +49,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	constexpr gpio_pwm_duration_t gpio_pwm_period(gpio_pwm_pulse_frequency_t frequency) noexcept {
-		return gpio_pwm_duration_t(gpio_pwm_duration_t::period::den / frequency);
+	constexpr gpio_pwm_duration gpio_pwm_period(gpio_pwm_pulse_frequency_t frequency) noexcept {
+		return gpio_pwm_duration(gpio_pwm_duration::period::den / frequency);
 	}
 
 
