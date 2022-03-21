@@ -173,28 +173,115 @@ void turn_wheels(log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
-	const abc::gpio_smbus_register_t reg_front_left			= 0x0d;
-	const abc::gpio_smbus_register_t reg_front_right		= 0x0c;
-	const abc::gpio_smbus_register_t reg_rear_left			= 0x08;
-	const abc::gpio_smbus_register_t reg_rear_right			= 0x09;
+	const abc::gpio_smbus_register_t reg_front_left		= 0x0d;
+	const abc::gpio_smbus_register_t reg_front_right	= 0x0c;
+	const abc::gpio_smbus_register_t reg_rear_left		= 0x08;
+	const abc::gpio_smbus_register_t reg_rear_right		= 0x09;
 
 	const abc::gpio_smbus_register_t reg_wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
 
 	for (const abc::gpio_smbus_register_t reg_wheel : reg_wheels) {
-		const abc::gpio_smbus_register_t reg_timer = reg_wheel / 4;
-		const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
+		const abc::gpio_smbus_register_t reg_timer		= reg_wheel / 4;
+		const abc::gpio_pwm_pulse_frequency_t frequency	= 50; // 50 Hz
 		const std::chrono::milliseconds duty_duration(500);
 
 		abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
 
-		pwm_wheel.set_duty_cycle(25, duty_duration);
-		pwm_wheel.set_duty_cycle(50, duty_duration);
-		pwm_wheel.set_duty_cycle(75, duty_duration);
-		pwm_wheel.set_duty_cycle(100, duty_duration);
-		pwm_wheel.set_duty_cycle(75, duty_duration);
-		pwm_wheel.set_duty_cycle(50, duty_duration);
-		pwm_wheel.set_duty_cycle(25, duty_duration);
+		const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
+		for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
+			pwm_wheel.set_duty_cycle(duty_cycle, duty_duration);
+		}
 	}
+}
+
+
+void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+
+	const abc::gpio_smbus_register_t reg_wheel_front_left	= 0x0d;
+	const abc::gpio_smbus_register_t reg_wheel_front_right	= 0x0c;
+	const abc::gpio_smbus_register_t reg_wheel_rear_left	= 0x08;
+	const abc::gpio_smbus_register_t reg_wheel_rear_right	= 0x09;
+	const abc::gpio_smbus_register_t reg_timer_front_left	= reg_wheel_front_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_front_right	= reg_wheel_front_right / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_left	= reg_wheel_rear_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
+	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
+	const std::chrono::milliseconds duty_duration(500);
+
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+														reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+														reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+														reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+														reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+
+	abc::gpio_input_line<log_ostream> speed_rear_left(&chip, 25, &log);
+	abc::gpio_input_line<log_ostream> speed_rear_right(&chip, 4, &log);
+
+	const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
+	for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
+		const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
+		const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
+
+		pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
+		pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
+		pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
+		pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
+
+		std::size_t total_count_rear_left  = 0;
+		std::size_t total_count_rear_right = 0;
+
+		for (int b = 0; b < 5; b++) {
+			std::size_t count_rear_left  = 0;
+			std::size_t count_rear_right = 0;
+
+			abc::gpio_level_t level_prev_rear_left	= abc::gpio_level::invalid;
+			abc::gpio_level_t level_prev_rear_right	= abc::gpio_level::invalid;
+
+			for (int c = 0; c < 200; c++) {
+				abc::gpio_level_t level_curr_rear_left	= speed_rear_left.get_level();
+				abc::gpio_level_t level_curr_rear_right	= speed_rear_right.get_level();
+
+				const std::size_t change_rear_left  = level_prev_rear_left  != level_curr_rear_left  ? 1 : 0;
+				const std::size_t change_rear_right = level_prev_rear_right != level_curr_rear_right ? 1 : 0;
+
+				count_rear_left  += change_rear_left;
+				count_rear_right += change_rear_right;
+
+				level_prev_rear_left  = level_curr_rear_left;
+				level_prev_rear_right = level_curr_rear_right;
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+
+			count_rear_left  /= 2;
+			count_rear_right /= 2;
+
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+											(unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
+
+			total_count_rear_left  += count_rear_left;
+			total_count_rear_right += count_rear_right;
+		}
+
+		total_count_rear_left  /= 5;
+		total_count_rear_right /= 5;
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "----------------------------------------------------------------------");
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+										(unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
+		log.put_blank_line();
+
+	}
+
+	pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 }
 
 
@@ -245,13 +332,16 @@ int main(int argc, const char* argv[]) {
 
 	// Ultrasonic - binary input
 	measure_obstacle(chip, log);
-#endif
 
 	// Servo - pwm output
 	turn_servo(log);
 
 	// Wheels - pwm output
 	turn_wheels(log);
+#endif
+
+	// Speed - binary input
+	measure_speed(chip, log);
 
 #ifdef TEMP
 	// Grayscale - pwm input
