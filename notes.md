@@ -8,7 +8,8 @@
   - Get chip and line info.
   - Get distance through the ultrasound sensor.
   - Turn the ultrasound sensor through its servo.
-  - Speed (all wheels):
+  
+Speed (all wheels):
   
 duty cycle |   25 |   50 |   75 |  100
 ---------- |   -- |   -- |   -- |  ---
@@ -17,11 +18,19 @@ duty cycle |   25 |   50 |   75 |  100
  r / sec   | 0.75 | 1.75 | 2.75 | 3.50
  cm / sec  | 15.6 | 36.3 | 57.0 | 72.6
 
+Turn:
+
+deg        |   30 |   45 |   60
+---        |   -- |   -- |   --
+rad        | 0.52 | 0.79 | 1.05
+delta / 2  |  7.4 | 11.2 | 14.9
+duty cycle |   12 |   16 |   25
+experi. dc |   11 |   18 |   25
+
 ## To Do
 GPIO:
-  - make turns
-  - measure distance
   - UI
+  - measure distance
 picar_4wd:
   - ultrasonic
   - motor

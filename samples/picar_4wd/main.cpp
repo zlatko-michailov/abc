@@ -285,6 +285,86 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
+void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+
+	const abc::gpio_smbus_register_t reg_wheel_front_left	= 0x0d;
+	const abc::gpio_smbus_register_t reg_wheel_front_right	= 0x0c;
+	const abc::gpio_smbus_register_t reg_wheel_rear_left	= 0x08;
+	const abc::gpio_smbus_register_t reg_wheel_rear_right	= 0x09;
+	const abc::gpio_smbus_register_t reg_timer_front_left	= reg_wheel_front_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_front_right	= reg_wheel_front_right / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_left	= reg_wheel_rear_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
+	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
+	const std::chrono::milliseconds duty_duration(500);
+
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+														reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+														reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+														reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+														reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+
+	const int degs[] = { +30, -30 };
+	for (const int deg : degs) {
+		abc::gpio_pwm_duty_cycle_t duty_cycle_left	= 50;
+		abc::gpio_pwm_duty_cycle_t duty_cycle_right	= 50;
+
+		pwm_wheel_front_left.set_duty_cycle(duty_cycle_left);
+		pwm_wheel_front_right.set_duty_cycle(duty_cycle_right);
+		pwm_wheel_rear_left.set_duty_cycle(duty_cycle_left);
+		pwm_wheel_rear_right.set_duty_cycle(duty_cycle_right);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+		abc::gpio_pwm_duty_cycle_t delta_duty_cycle = 0;
+		switch (deg) {
+		case -30:
+		case +30:
+			delta_duty_cycle = 11;
+			break;
+
+		case -45:
+		case +45:
+			delta_duty_cycle = 18;
+			break;
+
+		case -60:
+		case +60:
+			delta_duty_cycle = 25;
+			break;
+		}
+
+		if (deg < 0) {
+			duty_cycle_left  += delta_duty_cycle;
+			duty_cycle_right -= delta_duty_cycle;
+		}
+		else {
+			duty_cycle_left  -= delta_duty_cycle;
+			duty_cycle_right += delta_duty_cycle;
+		}
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "deg = %3d, delta = %3d", deg, delta_duty_cycle);
+
+		pwm_wheel_front_left.set_duty_cycle(duty_cycle_left);
+		pwm_wheel_front_right.set_duty_cycle(duty_cycle_right);
+		pwm_wheel_rear_left.set_duty_cycle(duty_cycle_left);
+		pwm_wheel_rear_right.set_duty_cycle(duty_cycle_right);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+
+	pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+	pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+}
+
+
 void measure_grayscale(log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
@@ -338,10 +418,13 @@ int main(int argc, const char* argv[]) {
 
 	// Wheels - pwm output
 	turn_wheels(log);
-#endif
 
 	// Speed - binary input
 	measure_speed(chip, log);
+#endif
+
+	// Wheels - pwm output
+	make_turns(chip, log);
 
 #ifdef TEMP
 	// Grayscale - pwm input
