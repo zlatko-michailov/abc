@@ -357,8 +357,8 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_binary(category::abc::socket, severity::abc::optional, 0x10066, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::optional, 0x1001b, "_client_socket::send() <<< size=%zu, sent_size=%l", size, sent_size);
+			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10066, buffer, size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001b, "_client_socket::send() <<< size=%zu, sent_size=%l", size, sent_size);
 		}
 
 		return sent_size;
@@ -402,8 +402,8 @@ namespace abc {
 		}
 
 		if (log_local != nullptr) {
-			log_local->put_binary(category::abc::socket, severity::abc::optional, 0x10067, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::optional, 0x10021, "_client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
+			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10067, buffer, size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10021, "_client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
 		}
 
 		return received_size;
