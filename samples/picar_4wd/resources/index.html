@@ -1,0 +1,248 @@
+<!--
+MIT License
+
+Copyright (c) 2018-2022 Zlatko Michailov 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<html>
+	<head>
+		<title>picar 4wd (abc Samples)</title>
+		<style>
+			a
+			{
+				color: honeydew;
+			}
+			.readonly
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(60, 60, 60);
+				color: rgb(210, 210, 210);
+			}
+
+			.edit
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18;
+				background-color: rgb(210, 210, 210);
+				color: rgb(60, 60, 60);
+			}
+
+			.title
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 36;
+				text-align: center;
+			}
+
+			.subtitle
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 26;
+				text-align: center;
+			}
+
+			.copyright
+			{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 14;
+				text-align: center;
+			}
+
+			.board
+			{
+				font-family: 'Courier New', Courier, monospace;
+				font-size: 64;
+				text-align: center;
+				border-style: solid;
+				border-color:grey;
+				border-width: 1pt;
+				border-spacing: 0pt;
+			}
+		</style>
+	</head>
+	<body class="readonly">
+		<table>
+			<tr>
+				<td>
+					<div class="title">picar 4wd</div>
+					<div class="subtitle">abc Samples</div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<div class="readonly">This is a C++ program that drives picar 4wd.</div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+
+			<tr>
+				<td>
+					<br />
+					<div>
+						<a href="javascript:shutdown()">Shutdown</a>
+					</div>
+					<br />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<hr />
+					<br />
+					<div id="status" class="readonly"></div>
+					<br />
+					<hr />
+					<br />
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<br />
+					<br />
+					<div class="copyright">Copyright (c) 2018-2022 by Zlatko Michailov, MIT License</div>
+				</td>
+			</tr>
+		</table>
+
+
+		<script>
+			let isRunning = true;
+			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
+
+			function createGame() {
+				const playerX = document.getElementById("playerX").value;
+				const playerO = document.getElementById("playerO").value;
+
+				autoCreateGame = (playerX === "fast_engine" || playerX === "slow_engine") && (playerO === "fast_engine" || playerO === "slow_engine");
+
+				clearBoard();
+
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
+				let requestInit = {
+					method: "POST",
+					headers: requestHeaders,
+					mode: "same-origin",
+					body: JSON.stringify({
+						players: [
+							document.getElementById("playerX").value,
+							document.getElementById("playerO").value
+						]
+					})
+				};
+
+				let request = new Request("/games");
+				return fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+
+						if (response.status === 200) {
+							gameId = 0;
+							playerIds = [];
+							sinceMoveI = 0;
+							canAcceptMove = true;
+							canRefreshMoves = true;
+
+							refreshMoves();
+						}
+
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+						gameId = result.gameId;
+						document.getElementById("status").innerHTML += "gameId=" + gameId + "<br />";
+					});
+			}
+
+			function getMoves() {
+				let requestInit = {
+					method: "GET",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/games/" + gameId + "/moves?since=" + sinceMoveI);
+				return fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+						showMoves(result.moves);
+						checkWinner(result.winner);
+					});
+			}
+
+			function showMoves(mvs) {
+				sinceMoveISaved = sinceMoveI;
+				mvs.forEach(mv => {
+					if (mv.i < sinceMoveISaved) {
+						return;
+					}
+
+					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
+
+					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
+					let html;
+					if (mv.i % 2 == 0) {
+						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
+					}
+					else {
+						html = "<span class=\"o\">&nbsp;O&nbsp;</span>";
+					}
+					document.getElementById(mv.move.row + "_" + mv.move.col).innerHTML = html;
+				});
+
+			}
+
+			function shutdown() {
+				let requestInit = {
+					method: "POST",
+					mode: "same-origin",
+				};
+
+				let request = new Request("/shutdown");
+				return fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+
+						if (response.ok) {
+							isRunning = false;
+							document.getElementById("status").innerHTML += remoteIsDown + "<br />";
+						}
+						else {
+							document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
+						}
+					});
+			}
+		</script>
+	</body>
+</html>

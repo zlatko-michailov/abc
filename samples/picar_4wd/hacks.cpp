@@ -394,7 +394,7 @@ void measure_grayscale(log_ostream& log) {
 }
 
 
-int main(int argc, const char* argv[]) {
+void run_all() {
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::important);
 	log_ostream log(std::cout.rdbuf(), &filter);
@@ -405,7 +405,6 @@ int main(int argc, const char* argv[]) {
 	// Init hat
 	reset_hat(chip, log);
 
-#ifdef TEMP
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
@@ -421,15 +420,10 @@ int main(int argc, const char* argv[]) {
 
 	// Speed - binary input
 	measure_speed(chip, log);
-#endif
 
 	// Wheels - pwm output
 	make_turns(chip, log);
 
-#ifdef TEMP
 	// Grayscale - pwm input
 	measure_grayscale(log);
-#endif
-
-	return 0;
 }

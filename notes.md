@@ -29,16 +29,20 @@ experi. dc |   11 |   18 |   25
 
 ## To Do
 GPIO:
-  - UI
   - measure distance
-picar_4wd:
-  - ultrasonic
-  - motor
-  - car
-  - photointerrupter
-  - speed
-  - grayscale
-  - UI
+
+UI
+
+x   |     |     |     |     |     |  x
+--  | --  | --  | --  | --  | --  |  -
+ 75 |  75 |  75 |  75 |  75 |  75 |  75
+ 75 |  50 |  50 |  50 |  50 |  50 |  75
+ 75 |  50 |  25 |  25 |  25 |  50 |  75
+ 75 |  50 |  25 |  0  |  25 |  50 |  75
+ 75 |  50 |  25 |  25 |  25 |  50 |  75
+ 75 |  50 |  50 |  50 |  50 |  50 |  75
+ 75 |  75 |  75 |  75 |  75 |  75 |  75
+
 
 ## Pick List
 - vmem:
