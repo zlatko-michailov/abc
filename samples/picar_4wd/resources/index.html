@@ -30,6 +30,17 @@ SOFTWARE.
 			{
 				color: honeydew;
 			}
+
+			input[type=range].horizontal-slider {
+	 		   width: 300px;
+			}
+
+			input[type=range].vertical-slider {
+				height: 200px;
+				-webkit-appearance: slider-vertical;
+				writing-mode: bt-lr;
+			}
+
 			.readonly
 			{
 				font-family: Arial, Helvetica, sans-serif;
@@ -67,16 +78,6 @@ SOFTWARE.
 				text-align: center;
 			}
 
-			.board
-			{
-				font-family: 'Courier New', Courier, monospace;
-				font-size: 64;
-				text-align: center;
-				border-style: solid;
-				border-color:grey;
-				border-width: 1pt;
-				border-spacing: 0pt;
-			}
 		</style>
 	</head>
 	<body class="readonly">
@@ -101,6 +102,61 @@ SOFTWARE.
 
 			<tr>
 				<td>
+					<table>
+						<tr>
+							<td>
+								<div class="subtitle">Power</div>
+							</td>
+				
+							<td width="600px">
+								<div class="subtitle">Info</div>
+							</td>
+				
+							<td>
+								<div class="subtitle">Turn</div>
+							</td>
+						</tr>
+				
+						<tr>
+							<td>
+								<input id="power" type="range" min="0" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="document.getElementById('power-info').innerText=value" />
+							</td>
+				
+							<td>
+								<table align="center">
+									<tr>
+										<td>
+											<span class="readonly">Power:</span>
+										</td>
+										<td>
+											<span id="power-info" class="readonly">0</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="readonly">Turn:</span>
+										</td>
+										<td>
+											<span id="turn-info" class="readonly">0</span>
+										</td>
+									</tr>
+								</table>
+							</td>
+				
+							<td>
+								<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="document.getElementById('turn-info').innerText=value" />
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+
+
+			<tr>
+				<td>
+					<br />
+					<br />
+					<br />
 					<br />
 					<div>
 						<a href="javascript:shutdown()">Shutdown</a>
