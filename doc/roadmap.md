@@ -4,12 +4,15 @@ Up to [Documentation](README.md).
 
 ## 1.15.0
 - GPIO
-- I2C
+- SMBus
 
 ## 1.16.0
-- doxygen
+- Mac OS / clang
 
 ## 1.17.0
+- doxygen
+
+## 1.18.0
 - SSL/TLS wrapper
 
 ## Pick List
