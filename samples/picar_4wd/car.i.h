@@ -58,9 +58,20 @@ namespace abc { namespace samples {
 	private:
 		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
 
+		void			set_power(abc::http_server_stream<Log>& http, const char* method, std::int32_t power);
+		void			set_turn(abc::http_server_stream<Log>& http, const char* method, std::int32_t turn);
+
 		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_header_json(abc::http_server_stream<Log>& http);
+		template <typename T>
+		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step);
+
+		void			drive(abc::http_server_stream<Log>& http, std::int32_t power, std::int32_t turn);
+
+	private:
+		std::int32_t	_power;
+		std::int32_t	_turn;
 	};
 
 

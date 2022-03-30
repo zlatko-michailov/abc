@@ -80,6 +80,34 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::set_power(abc::http_server_stream<Log>& http, const char* method, std::int32_t power) {
+		if (!verify_method_post(http, method)) {
+			return;
+		}
+
+		if (!verify_range(http, power, 0, 100, 25)) {
+			return;
+		}
+
+		drive(http, power, _turn);
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::set_turn(abc::http_server_stream<Log>& http, const char* method, std::int32_t turn) {
+		if (!verify_method_post(http, method)) {
+			return;
+		}
+
+		if (!verify_range(http, turn, -90, 90, 30)) {
+			return;
+		}
+
+		drive(http, _power, turn);
+	}
+
+
+	template <typename Limits, typename Log>
 	inline bool car_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
 		if (!ascii::are_equal_i(method, method::GET)) {
 			if (base::_log != nullptr) {
@@ -160,6 +188,32 @@ namespace abc { namespace samples {
 		}
 
 		return has_content_type_json;
+	}
+
+
+	template <typename Limits, typename Log>
+	template <typename T>
+	inline bool car_endpoint<Limits, Log>::verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step) {
+		if (value < lo_bound || hi_bound < value || value % step != 0) {
+			if (base::_log != nullptr) {
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Range error: value = %d.", (int)value);
+			}
+
+			// 400
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "Value not in range.", __TAG__);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::drive(abc::http_server_stream<Log>& http, std::int32_t power, std::int32_t turn) {
+		//// TODO: drive
+
+		// 200
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "TODO: drive", __TAG__);
 	}
 
 }}
