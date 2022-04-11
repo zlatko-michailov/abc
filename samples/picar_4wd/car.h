@@ -52,7 +52,13 @@ namespace abc { namespace samples {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::process_rest_request: Start.");
 		}
 
-		if (ascii::are_equal_i(resource, "/shutdown")) {
+		if (ascii::are_equal_i(resource, "/power")) {
+			process_power(http, method);
+		}
+		else if (ascii::are_equal_i(resource, "/turn")) {
+			process_turn(http, method);
+		}
+		else if (ascii::are_equal_i(resource, "/shutdown")) {
 			process_shutdown(http, method);
 		}
 		else {
@@ -63,6 +69,150 @@ namespace abc { namespace samples {
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::process_rest_request: Done.");
 		}
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::process_power(abc::http_server_stream<Log>& http, const char* method) {
+		if (!verify_method_post(http, method)) {
+			return;
+		}
+
+		if (!verify_header_json(http)) {
+			return;
+		}
+
+		std::int32_t power;
+		// Read power from JSON
+		{
+			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
+			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
+			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
+			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
+			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"power\": 50}.";
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::begin_object) {
+				// Not {.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "power")) {
+				// Not "power".
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"power\".");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < 100)) {
+				// Not a valid power.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 100.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			power = token->value.number;
+		}
+
+		if (!verify_range(http, power, 0, 100, 25)) {
+			return;
+		}
+
+		_power = power;
+		drive_verified();
+
+		// 200
+		char body[abc::size::_256 + 1];
+		std::snprintf(body, sizeof(body), "power: power=%d, turn=%d", _power, _turn);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::process_turn(abc::http_server_stream<Log>& http, const char* method) {
+		if (!verify_method_post(http, method)) {
+			return;
+		}
+
+		if (!verify_header_json(http)) {
+			return;
+		}
+
+		std::int32_t turn;
+		// Read turn from JSON
+		{
+			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
+			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
+			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
+			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
+			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"turn\": 50}.";
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::begin_object) {
+				// Not {.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "turn")) {
+				// Not "turn".
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"turn\".");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			json.get_token(token, sizeof(buffer));
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < 100)) {
+				// Not a valid turn.
+				if (base::_log != nullptr) {
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 100.");
+				}
+
+				// 400
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				return;
+			}
+
+			turn = token->value.number;
+		}
+
+		if (!verify_range(http, turn, -90, 90, 30)) {
+			return;
+		}
+
+		_turn = turn;
+		drive_verified();
+
+		// 200
+		char body[abc::size::_256 + 1];
+		std::snprintf(body, sizeof(body), "turn: power=%d, turn=%d", _power, _turn);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
 	}
 
 
@@ -80,30 +230,109 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline void car_endpoint<Limits, Log>::set_power(abc::http_server_stream<Log>& http, const char* method, std::int32_t power) {
-		if (!verify_method_post(http, method)) {
-			return;
-		}
+	inline void car_endpoint<Limits, Log>::drive_verified() {
+		constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
+		constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
+		constexpr bool								smbus_hat_requires_byte_swap	= true;
+		constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
+		constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
+		constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
 
-		if (!verify_range(http, power, 0, 100, 25)) {
-			return;
-		}
+		constexpr abc::gpio_smbus_register_t		reg_wheel_front_left			= 0x0d;
+		constexpr abc::gpio_smbus_register_t		reg_wheel_front_right			= 0x0c;
+		constexpr abc::gpio_smbus_register_t		reg_wheel_rear_left				= 0x08;
+		constexpr abc::gpio_smbus_register_t		reg_wheel_rear_right			= 0x09;
+		constexpr abc::gpio_smbus_register_t		reg_timer_front_left			= reg_wheel_front_left / 4;
+		constexpr abc::gpio_smbus_register_t		reg_timer_front_right			= reg_wheel_front_right / 4;
+		constexpr abc::gpio_smbus_register_t		reg_timer_rear_left				= reg_wheel_rear_left / 4;
+		constexpr abc::gpio_smbus_register_t		reg_timer_rear_right			= reg_wheel_rear_right / 4;
+		constexpr abc::gpio_pwm_pulse_frequency_t	frequency						= 50; // 50 Hz
 
-		drive(http, power, _turn);
+		abc::gpio_smbus<log_ostream> smbus(1, base::_log);
+		abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, base::_log);
+
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+															reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, base::_log);
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+															reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, base::_log);
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+															reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, base::_log);
+		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+															reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, base::_log);
+
+		std::int32_t left_power;
+		std::int32_t right_power;
+		get_side_powers(left_power, right_power);
+
+		pwm_wheel_front_left.set_duty_cycle(left_power);
+		pwm_wheel_front_right.set_duty_cycle(right_power);
+		pwm_wheel_rear_left.set_duty_cycle(left_power);
+		pwm_wheel_rear_right.set_duty_cycle(right_power);
 	}
 
 
 	template <typename Limits, typename Log>
-	inline void car_endpoint<Limits, Log>::set_turn(abc::http_server_stream<Log>& http, const char* method, std::int32_t turn) {
-		if (!verify_method_post(http, method)) {
-			return;
+	inline void car_endpoint<Limits, Log>::get_side_powers(std::int32_t& left_power, std::int32_t& right_power) {
+		std::int32_t delta = get_delta_power();
+
+		left_power  = _power + delta;
+		right_power = _power - delta;
+
+		constexpr std::int32_t min_power = static_cast<std::int32_t>(abc::gpio_pwm_duty_cycle::min);
+		constexpr std::int32_t max_power = static_cast<std::int32_t>(abc::gpio_pwm_duty_cycle::max);
+
+		std::int32_t adjust = 0;
+		if (left_power > max_power) {
+			adjust = max_power - left_power;
+		}
+		else if (right_power > max_power) {
+			adjust = max_power - right_power;
+		}
+		else if (left_power < min_power) {
+			adjust = min_power - left_power;
+		}
+		else if (right_power < min_power) {
+			adjust = min_power - right_power;
 		}
 
-		if (!verify_range(http, turn, -90, 90, 30)) {
-			return;
+		left_power  += adjust;
+		right_power += adjust;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline std::int32_t car_endpoint<Limits, Log>::get_delta_power() {
+		std::int32_t delta = 0;
+
+		switch (_turn) {
+		case -30:
+		case +30:
+			delta = 11;
+			break;
+
+		case -45:
+		case +45:
+			delta = 18;
+			break;
+
+		case -60:
+		case +60:
+			delta = 25;
+			break;
+
+		case -90:
+		case +90:
+			delta = 50;
+			break;
 		}
 
-		drive(http, _power, turn);
+		if (_turn > 0) {
+			delta = -delta;
+		}
+
+		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "turn = %3d, delta = %3d", _turn, delta);
+
+		return delta;
 	}
 
 
@@ -205,15 +434,6 @@ namespace abc { namespace samples {
 		}
 
 		return true;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline void car_endpoint<Limits, Log>::drive(abc::http_server_stream<Log>& http, std::int32_t power, std::int32_t turn) {
-		//// TODO: drive
-
-		// 200
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "TODO: drive", __TAG__);
 	}
 
 }}

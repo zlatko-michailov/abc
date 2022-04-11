@@ -33,13 +33,13 @@ SOFTWARE.
 
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
+
 constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
 constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
 constexpr bool								smbus_hat_requires_byte_swap	= true;
 constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
 constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
 constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
-
 
 
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
@@ -286,9 +286,6 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 
 void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
-	abc::gpio_smbus<log_ostream> smbus(1, &log);
-	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
-
 	const abc::gpio_smbus_register_t reg_wheel_front_left	= 0x0d;
 	const abc::gpio_smbus_register_t reg_wheel_front_right	= 0x0c;
 	const abc::gpio_smbus_register_t reg_wheel_rear_left	= 0x08;
@@ -299,6 +296,9 @@ void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
 	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
 	const std::chrono::milliseconds duty_duration(500);
+
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
 	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
 														reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);

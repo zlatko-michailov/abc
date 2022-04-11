@@ -56,18 +56,20 @@ namespace abc { namespace samples {
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
 
 	private:
+		void			process_power(abc::http_server_stream<Log>& http, const char* method);
+		void			process_turn(abc::http_server_stream<Log>& http, const char* method);
 		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
 
-		void			set_power(abc::http_server_stream<Log>& http, const char* method, std::int32_t power);
-		void			set_turn(abc::http_server_stream<Log>& http, const char* method, std::int32_t turn);
+		template <typename T>
+		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step);
+
+		void			drive_verified();
+		std::int32_t	get_delta_power();
+		void			get_side_powers(std::int32_t& left_power, std::int32_t& right_power);
 
 		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
 		bool			verify_header_json(abc::http_server_stream<Log>& http);
-		template <typename T>
-		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step);
-
-		void			drive(abc::http_server_stream<Log>& http, std::int32_t power, std::int32_t turn);
 
 	private:
 		std::int32_t	_power;
