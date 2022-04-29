@@ -43,6 +43,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline car_endpoint<Limits, Log>::car_endpoint(endpoint_config* config, Log* log)
 		: base(config, log) {
+		reset_hat();
 	}
 
 
@@ -116,7 +117,7 @@ namespace abc { namespace samples {
 			}
 
 			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < 100)) {
+			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 100)) {
 				// Not a valid power.
 				if (base::_log != nullptr) {
 					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 100.");
@@ -188,10 +189,10 @@ namespace abc { namespace samples {
 			}
 
 			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < 100)) {
+			if (token->item != abc::json::item::number || !(-90 <= token->value.number && token->value.number <= 90)) {
 				// Not a valid turn.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 100.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected -90 <= number <= 90.");
 				}
 
 				// 400
@@ -333,6 +334,16 @@ namespace abc { namespace samples {
 		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "turn = %3d, delta = %3d", _turn, delta);
 
 		return delta;
+	}
+
+
+	template <typename Limits, typename Log>
+	inline void car_endpoint<Limits, Log>::reset_hat() {
+		abc::gpio_chip<Log> chip(0, "picar_4wd", base::_log);
+		abc::gpio_output_line<Log> reset_line(&chip, 21, base::_log);
+
+		reset_line.put_level(abc::gpio_level::low,  std::chrono::milliseconds(1));
+		reset_line.put_level(abc::gpio_level::high, std::chrono::milliseconds(3));
 	}
 
 

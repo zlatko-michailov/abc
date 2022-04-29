@@ -119,7 +119,7 @@ SOFTWARE.
 				
 						<tr>
 							<td>
-								<input id="power" type="range" min="0" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="document.getElementById('power-info').innerText=value" />
+								<input id="power" type="range" min="0" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
 							</td>
 				
 							<td>
@@ -144,7 +144,7 @@ SOFTWARE.
 							</td>
 				
 							<td>
-								<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="document.getElementById('turn-info').innerText=value" />
+								<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateTurn(value)" />
 							</td>
 						</tr>
 					</table>
@@ -191,13 +191,8 @@ SOFTWARE.
 			let isRunning = true;
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
-			function createGame() {
-				const playerX = document.getElementById("playerX").value;
-				const playerO = document.getElementById("playerO").value;
-
-				autoCreateGame = (playerX === "fast_engine" || playerX === "slow_engine") && (playerO === "fast_engine" || playerO === "slow_engine");
-
-				clearBoard();
+			function updatePower(value) {
+				document.getElementById('power-info').innerText = value;
 
 				let requestHeaders = new Headers();
 				requestHeaders.append("Content-Type", "application/json");
@@ -206,77 +201,50 @@ SOFTWARE.
 					method: "POST",
 					headers: requestHeaders,
 					mode: "same-origin",
-					body: JSON.stringify({
-						players: [
-							document.getElementById("playerX").value,
-							document.getElementById("playerO").value
-						]
-					})
+					body: "{ \"power\": " + value + "}"
 				};
 
-				let request = new Request("/games");
+				let request = new Request("/power");
 				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
-
-						if (response.status === 200) {
-							gameId = 0;
-							playerIds = [];
-							sinceMoveI = 0;
-							canAcceptMove = true;
-							canRefreshMoves = true;
-
-							refreshMoves();
-						}
-
-						return response.json();
+						return response.blob();
 					})
-					.then(function (result) {
-						console.log(result);
-						gameId = result.gameId;
-						document.getElementById("status").innerHTML += "gameId=" + gameId + "<br />";
+					.then(function (blob) {
+						return blob.text();
+					})
+					.then(function (text) {
+						console.log(text);
+						document.getElementById("status").innerHTML += text + "<br />";
 					});
 			}
 
-			function getMoves() {
+			function updateTurn(value) {
+				document.getElementById('turn-info').innerText = value;
+
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
 				let requestInit = {
-					method: "GET",
+					method: "POST",
+					headers: requestHeaders,
 					mode: "same-origin",
+					body: "{ \"turn\": " + value + "}"
 				};
 
-				let request = new Request("/games/" + gameId + "/moves?since=" + sinceMoveI);
+				let request = new Request("/turn");
 				return fetch(request, requestInit)
 					.then(function (response) {
 						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.json();
+						return response.blob();
 					})
-					.then(function (result) {
-						console.log(result);
-						showMoves(result.moves);
-						checkWinner(result.winner);
+					.then(function (blob) {
+						return blob.text();
+					})
+					.then(function (text) {
+						console.log(text);
+						document.getElementById("status").innerHTML += text + "<br />";
 					});
-			}
-
-			function showMoves(mvs) {
-				sinceMoveISaved = sinceMoveI;
-				mvs.forEach(mv => {
-					if (mv.i < sinceMoveISaved) {
-						return;
-					}
-
-					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
-
-					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
-					let html;
-					if (mv.i % 2 == 0) {
-						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
-					}
-					else {
-						html = "<span class=\"o\">&nbsp;O&nbsp;</span>";
-					}
-					document.getElementById(mv.move.row + "_" + mv.move.col).innerHTML = html;
-				});
-
 			}
 
 			function shutdown() {
