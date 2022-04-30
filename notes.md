@@ -28,20 +28,12 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
+Drive:
+  - Get power and turn on page reload.
+  - Enable negative power for reverse.
+
 GPIO:
   - measure distance
-
-UI
-
-x   |     |     |     |     |     |  x
---  | --  | --  | --  | --  | --  |  -
- 75 |  75 |  75 |  75 |  75 |  75 |  75
- 75 |  50 |  50 |  50 |  50 |  50 |  75
- 75 |  50 |  25 |  25 |  25 |  50 |  75
- 75 |  50 |  25 |  0  |  25 |  50 |  75
- 75 |  50 |  25 |  25 |  25 |  50 |  75
- 75 |  50 |  50 |  50 |  50 |  50 |  75
- 75 |  75 |  75 |  75 |  75 |  75 |  75
 
 
 ## Pick List

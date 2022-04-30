@@ -42,7 +42,9 @@ namespace abc { namespace samples {
 
 	template <typename Limits, typename Log>
 	inline car_endpoint<Limits, Log>::car_endpoint(endpoint_config* config, Log* log)
-		: base(config, log) {
+		: base(config, log)
+		, _power(0)
+		, _turn(0) {
 		reset_hat();
 	}
 
@@ -136,6 +138,9 @@ namespace abc { namespace samples {
 		}
 
 		_power = power;
+		if (power == 0) {
+			_turn = 0;
+		}
 		drive_verified();
 
 		// 200
@@ -224,6 +229,7 @@ namespace abc { namespace samples {
 		}
 
 		base::set_shutdown_requested();
+		reset_hat();
 
 		// 200
 		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
@@ -298,6 +304,10 @@ namespace abc { namespace samples {
 
 		left_power  += adjust;
 		right_power += adjust;
+
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "left_power = %3d, right_power = %3d", (int)left_power, (int)right_power);
+		}
 	}
 
 
@@ -327,11 +337,13 @@ namespace abc { namespace samples {
 			break;
 		}
 
-		if (_turn > 0) {
+		if (_turn < 0) {
 			delta = -delta;
 		}
 
-		base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "turn = %3d, delta = %3d", _turn, delta);
+		if (base::_log != nullptr) {
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "power = %3d, turn = %3d, delta = %3d", (int)_power, (int)_turn, (int)delta);
+		}
 
 		return delta;
 	}
