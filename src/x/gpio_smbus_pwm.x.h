@@ -54,7 +54,6 @@ namespace abc {
 		, _reg_pwm(reg_pwm)
 		, _reg_autoreload(reg_autoreload)
 		, _reg_prescaler(reg_prescaler)
-		, _duty_cycle(0)
 		, _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() Start.");
@@ -125,11 +124,6 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus_pwm::set_duty_cycle() Out of range", __TAG__);
 		}
 
-		if (duty_cycle == _duty_cycle) {
-			return;
-		}
-
-		_duty_cycle = duty_cycle;
 		gpio_smbus_clock_frequency_t capture_compare = gpio_pwm_duty_cycle::min;
 
 		if (duty_cycle == gpio_pwm_duty_cycle::min) {
@@ -139,7 +133,7 @@ namespace abc {
 			capture_compare = _autoreload;
 		}
 		else {
-			capture_compare = _min_pulse_width + (_duty_cycle * (_max_pulse_width - _min_pulse_width)) / gpio_pwm_duty_cycle::max;
+			capture_compare = _min_pulse_width + (duty_cycle * (_max_pulse_width - _min_pulse_width)) / gpio_pwm_duty_cycle::max;
 		}
 
 		if (_log != nullptr) {

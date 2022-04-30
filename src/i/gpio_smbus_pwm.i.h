@@ -73,7 +73,6 @@ namespace abc {
 		gpio_smbus_register_t			_reg_pwm;
 		gpio_smbus_register_t			_reg_autoreload;
 		gpio_smbus_register_t			_reg_prescaler;
-		gpio_pwm_duty_cycle_t			_duty_cycle;
 		Log*							_log;
 	};
 
