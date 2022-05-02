@@ -119,7 +119,7 @@ SOFTWARE.
 				
 						<tr>
 							<td>
-								<input id="power" type="range" min="0" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
+								<input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
 							</td>
 				
 							<td>
@@ -216,6 +216,11 @@ SOFTWARE.
 					.then(function (text) {
 						console.log(text);
 						document.getElementById("status").innerHTML += text + "<br />";
+
+						if (value == 0) {
+							document.getElementById('turn').value = 0;
+							document.getElementById('turn-info').innerText = 0;
+						}
 					});
 			}
 

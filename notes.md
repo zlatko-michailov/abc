@@ -30,10 +30,7 @@ experi. dc |   11 |   18 |   25
 ## To Do
 Drive:
   - Get power and turn on page reload.
-  - Enable negative power for reverse.
-
-GPIO:
-  - measure distance
+  - Measure distance constantly.
 
 
 ## Pick List

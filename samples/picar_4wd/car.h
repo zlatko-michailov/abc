@@ -40,12 +40,50 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
+	template <typename Log>
+	inline gpio_smbus_hat<Log>::gpio_smbus_hat(abc::gpio_chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log)
+		: base(addr, clock_frequency, requires_byte_swap, log)
+		, _chip(chip)
+		, _log(log) {
+		reset();
+	}
+
+
+	template <typename Log>
+	inline void gpio_smbus_hat<Log>::reset() {
+		abc::gpio_output_line<Log> reset_line(_chip, 21, _log);
+
+		reset_line.put_level(abc::gpio_level::low,  std::chrono::milliseconds(1));
+		reset_line.put_level(abc::gpio_level::high, std::chrono::milliseconds(3));
+	}
+
+	// --------------------------------------------------------------
+
+
 	template <typename Limits, typename Log>
 	inline car_endpoint<Limits, Log>::car_endpoint(endpoint_config* config, Log* log)
 		: base(config, log)
+
+		, _chip(0, "picar_4wd", log)
+		, _line_dir_front_left(&_chip, pos_line_dir_front_left, log)
+		, _line_dir_front_right(&_chip, pos_line_dir_front_right, log)
+		, _line_dir_rear_left(&_chip, pos_line_dir_rear_left, log)
+		, _line_dir_rear_right(&_chip, pos_line_dir_rear_right, log)
+
+		, _smbus(1, log)
+		, _hat(&_chip, smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, log)
+		, _pwm_wheel_front_left(&_smbus, _hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+								reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, log)
+		, _pwm_wheel_front_right(&_smbus, _hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+								reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, log)
+		, _pwm_wheel_rear_left(&_smbus, _hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+								reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, log)
+		, _pwm_wheel_rear_right(&_smbus, _hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+								reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, log)
+
+		, _direction(0)
 		, _power(0)
 		, _turn(0) {
-		reset_hat();
 	}
 
 
@@ -119,10 +157,10 @@ namespace abc { namespace samples {
 			}
 
 			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number <= 100)) {
+			if (token->item != abc::json::item::number || !(-100 <= token->value.number && token->value.number <= 100)) {
 				// Not a valid power.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected 0 <= number <= 100.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected -100 <= number <= 100.");
 				}
 
 				// 400
@@ -133,19 +171,24 @@ namespace abc { namespace samples {
 			power = token->value.number;
 		}
 
-		if (!verify_range(http, power, 0, 100, 25)) {
+		if (!verify_range(http, power, -100, 100, 25)) {
 			return;
 		}
 
-		_power = power;
+		_direction = abc::gpio_level::low;
 		if (power == 0) {
 			_turn = 0;
 		}
+		if (power < 0) {
+			_direction = abc::gpio_level::high;
+			power = -power;
+		}
+		_power = power;
 		drive_verified();
 
 		// 200
 		char body[abc::size::_256 + 1];
-		std::snprintf(body, sizeof(body), "power: power=%d, turn=%d", _power, _turn);
+		std::snprintf(body, sizeof(body), "power: direction=%d, power=%d, turn=%d", _direction, _power, _turn);
 		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
 	}
 
@@ -228,8 +271,8 @@ namespace abc { namespace samples {
 			return;
 		}
 
+		_hat.reset();
 		base::set_shutdown_requested();
-		reset_hat();
 
 		// 200
 		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
@@ -238,43 +281,21 @@ namespace abc { namespace samples {
 
 	template <typename Limits, typename Log>
 	inline void car_endpoint<Limits, Log>::drive_verified() {
-		constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
-		constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
-		constexpr bool								smbus_hat_requires_byte_swap	= true;
-		constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
-		constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
-		constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
-
-		constexpr abc::gpio_smbus_register_t		reg_wheel_front_left			= 0x0d;
-		constexpr abc::gpio_smbus_register_t		reg_wheel_front_right			= 0x0c;
-		constexpr abc::gpio_smbus_register_t		reg_wheel_rear_left				= 0x08;
-		constexpr abc::gpio_smbus_register_t		reg_wheel_rear_right			= 0x09;
-		constexpr abc::gpio_smbus_register_t		reg_timer_front_left			= reg_wheel_front_left / 4;
-		constexpr abc::gpio_smbus_register_t		reg_timer_front_right			= reg_wheel_front_right / 4;
-		constexpr abc::gpio_smbus_register_t		reg_timer_rear_left				= reg_wheel_rear_left / 4;
-		constexpr abc::gpio_smbus_register_t		reg_timer_rear_right			= reg_wheel_rear_right / 4;
-		constexpr abc::gpio_pwm_pulse_frequency_t	frequency						= 50; // 50 Hz
-
-		abc::gpio_smbus<log_ostream> smbus(1, base::_log);
-		abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, base::_log);
-
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
-															reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, base::_log);
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
-															reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, base::_log);
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
-															reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, base::_log);
-		abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
-															reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, base::_log);
-
 		std::int32_t left_power;
 		std::int32_t right_power;
 		get_side_powers(left_power, right_power);
 
-		pwm_wheel_front_left.set_duty_cycle(left_power);
-		pwm_wheel_front_right.set_duty_cycle(right_power);
-		pwm_wheel_rear_left.set_duty_cycle(left_power);
-		pwm_wheel_rear_right.set_duty_cycle(right_power);
+		_line_dir_front_left.put_level(_direction);
+		_pwm_wheel_front_left.set_duty_cycle(left_power);
+
+		_line_dir_front_right.put_level(_direction);
+		_pwm_wheel_front_right.set_duty_cycle(right_power);
+
+		_line_dir_rear_left.put_level(_direction);
+		_pwm_wheel_rear_left.set_duty_cycle(left_power);
+
+		_line_dir_rear_right.put_level(_direction);
+		_pwm_wheel_rear_right.set_duty_cycle(right_power);
 	}
 
 
@@ -346,16 +367,6 @@ namespace abc { namespace samples {
 		}
 
 		return delta;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline void car_endpoint<Limits, Log>::reset_hat() {
-		abc::gpio_chip<Log> chip(0, "picar_4wd", base::_log);
-		abc::gpio_output_line<Log> reset_line(&chip, 21, base::_log);
-
-		reset_line.put_level(abc::gpio_level::low,  std::chrono::milliseconds(1));
-		reset_line.put_level(abc::gpio_level::high, std::chrono::milliseconds(3));
 	}
 
 
