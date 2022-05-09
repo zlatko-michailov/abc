@@ -28,8 +28,15 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
+GPIO:
+  - gpio_ultrasonic
+    - get_distance<std::ratio>()
+  - gpio_motor<pwm>
+    - set_duty_cycle()
+    - set_direction()
+  - gpio_smbus_motor, gpio_emulator_motor
+  - gpio UT - optional
 Drive:
-  - Get power and turn on page reload.
   - Measure distance constantly.
 
 

@@ -38,8 +38,8 @@ namespace abc {
 
 	template <typename Log>
 	template <typename PulseWidthDuration>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
-		: _line(std::move(line))
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
+		: _line(chip, line_pos, log)
 		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
 		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
 		, _frequency(frequency)
@@ -67,8 +67,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(gpio_output_line<Log>&& line, gpio_pwm_pulse_frequency_t frequency, Log* log)
-		: gpio_pwm_emulator<Log>(std::move(line), gpio_pwm_duration(0), gpio_pwm_period(frequency), frequency, log) {
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log)
+		: gpio_pwm_emulator<Log>(chip, line_pos, gpio_pwm_duration(0), gpio_pwm_period(frequency), frequency, log) {
 	}
 
 

@@ -159,6 +159,32 @@ void turn_servo(log_ostream& log) {
 }
 
 
+void turn_servo_emulator(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+	using clock = std::chrono::steady_clock;
+	using microseconds = std::chrono::microseconds;
+	using milliseconds = std::chrono::milliseconds;
+
+	const microseconds min_pulse_width = microseconds(500);
+	const microseconds max_pulse_width = microseconds(2500);
+	const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
+
+	abc::gpio_pwm_emulator<log_ostream> pwm_servo(&chip, 5, min_pulse_width, max_pulse_width, frequency, &log);
+
+	const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
+
+	for (std::uint32_t duty_cycle : duty_cycles) {
+		const milliseconds duty_duration = milliseconds(250);
+		const milliseconds sleep_duration = milliseconds(500);
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+
+		pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
+
+		std::this_thread::sleep_for(sleep_duration);
+	}
+}
+
+
 void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	using milliseconds = std::chrono::milliseconds;
 
@@ -414,6 +440,7 @@ void run_all() {
 
 	// Servo - pwm output
 	turn_servo(log);
+	turn_servo_emulator(chip, log);
 
 	// Wheels - pwm output
 	turn_wheels(log);
