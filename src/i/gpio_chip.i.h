@@ -29,7 +29,6 @@ SOFTWARE.
 
 #include "../size.h"
 #include "gpio_base.i.h"
-#include "gpio_line.i.h"
 
 
 namespace abc {

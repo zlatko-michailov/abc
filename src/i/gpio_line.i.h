@@ -34,30 +34,6 @@ SOFTWARE.
 
 namespace abc {
 
-	using gpio_line_pos_t	= std::uint32_t;
-
-
-	// --------------------------------------------------------------
-
-
-
-	using gpio_level_t	= std::uint32_t;
-
-	namespace gpio_level {
-		static constexpr gpio_level_t mask			= 0x1;
-
-		static constexpr gpio_level_t low			= 0x0;
-		static constexpr gpio_level_t high			= 0x1;
-		static constexpr gpio_level_t invalid		= mask + 1;
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename Log>
-	class gpio_chip;
-
 	template <typename Log = null_log>
 	class gpio_line {
 	public:
