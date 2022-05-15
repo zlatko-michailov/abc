@@ -36,7 +36,6 @@ namespace abc {
 
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
-	using meters = std::ratio<1, 1>;
 	constexpr std::size_t sonic_speed = 340; // meters per second
 
 
@@ -54,7 +53,7 @@ namespace abc {
 	template <typename Log>
 	template <typename DistanceScale>
 	inline std::size_t gpio_ultrasonic<Log>::measure_distance(std::size_t max_distance) const noexcept {
-		static const microseconds timeout = sonic_duration<meters, microseconds>(2); // 1 meter (back and forth)
+		static const microseconds timeout = sonic_duration<DistanceScale, microseconds>(2 * max_distance); // back and forth
 
 		// Clear and send a pulse.
 		_trigger_line.put_level(gpio_level::low, microseconds(10));

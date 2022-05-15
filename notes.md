@@ -28,16 +28,19 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
+Drive:
+  - Use gpio_ultrasonic.
+  - Measure distance to obstacle constantly.
+  - Stop if too close.
+UI/endpoint:
+  - Get and show distance to obstacle.
 GPIO:
-  - gpio_ultrasonic
-    - get_distance<std::ratio>()
   - gpio_motor<pwm>
     - set_duty_cycle()
     - set_direction()
   - gpio_smbus_motor, gpio_emulator_motor
+  - gpio_grayscale
   - gpio UT - optional
-Drive:
-  - Measure distance constantly.
 
 
 ## Pick List
