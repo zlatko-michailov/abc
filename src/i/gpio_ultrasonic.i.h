@@ -25,10 +25,42 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
+#include <ratio>
+#include <chrono>
+#include <linux/gpio.h>
+
 #include "gpio_base.i.h"
 #include "gpio_chip.i.h"
 #include "gpio_line.i.h"
-#include "gpio_pwm_emulator.i.h"
-#include "gpio_smbus.i.h"
-#include "gpio_smbus_pwm.i.h"
-#include "gpio_ultrasonic.i.h"
+
+
+namespace abc {
+
+	template <typename Log = null_log>
+	class gpio_ultrasonic {
+	public:
+		gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log = nullptr);
+		gpio_ultrasonic(gpio_ultrasonic<Log>&& other) noexcept = default;
+		gpio_ultrasonic(const gpio_ultrasonic<Log>& other) = delete;
+
+	public:
+		template <typename DistanceScale>
+		std::size_t			measure_distance(std::size_t max_distance) const noexcept;
+
+	public: //private:
+		template <typename DistanceScale, typename Duration>
+		static std::size_t	sonic_distance(Duration duration) noexcept;
+		template <typename DistanceScale, typename Duration>
+		static Duration		sonic_duration(std::size_t distance) noexcept;
+
+	private:
+		gpio_output_line<Log>	_trigger_line;
+		gpio_input_line<Log>	_echo_line;
+		Log*					_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+}

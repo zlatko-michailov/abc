@@ -28,3 +28,4 @@ SOFTWARE.
 #include "x/gpio_pwm_emulator.x.h"
 #include "x/gpio_smbus.x.h"
 #include "x/gpio_smbus_pwm.x.h"
+#include "x/gpio_ultrasonic.x.h"
