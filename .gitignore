@@ -1,5 +1,6 @@
 abc.kdev4
 /.kdev4/
+/.vscode/*.log
 /dist/
 /hacks/
 /out/
