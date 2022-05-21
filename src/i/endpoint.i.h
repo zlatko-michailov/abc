@@ -174,6 +174,7 @@ namespace abc {
 	protected:
 		void				process_request(tcp_client_socket<Log>&& socket);
 		void				set_shutdown_requested();
+		bool				is_shutdown_requested() const;
 
 	protected:
 		endpoint_config*	_config;

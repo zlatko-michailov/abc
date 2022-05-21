@@ -328,6 +328,12 @@ namespace abc {
 	}
 
 
+	template <typename Limits, typename Log>
+	inline bool endpoint<Limits, Log>::is_shutdown_requested() const {
+		return _is_shutdown_requested.load();
+	}
+
+
 	// --------------------------------------------------------------
 
 
