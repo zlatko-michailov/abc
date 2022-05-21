@@ -37,21 +37,20 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Log = null_log>
+	template <typename DistanceScale, typename Log = null_log>
 	class gpio_ultrasonic {
 	public:
 		gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log = nullptr);
-		gpio_ultrasonic(gpio_ultrasonic<Log>&& other) noexcept = default;
-		gpio_ultrasonic(const gpio_ultrasonic<Log>& other) = delete;
+		gpio_ultrasonic(gpio_ultrasonic<DistanceScale, Log>&& other) noexcept = default;
+		gpio_ultrasonic(const gpio_ultrasonic<DistanceScale, Log>& other) = delete;
 
 	public:
-		template <typename DistanceScale>
 		std::size_t			measure_distance(std::size_t max_distance) const noexcept;
 
-	public: //private:
-		template <typename DistanceScale, typename Duration>
+	private:
+		template <typename Duration>
 		static std::size_t	sonic_distance(Duration duration) noexcept;
-		template <typename DistanceScale, typename Duration>
+		template <typename Duration>
 		static Duration		sonic_duration(std::size_t distance) noexcept;
 
 	private:

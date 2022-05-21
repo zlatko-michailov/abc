@@ -36,11 +36,11 @@ namespace abc {
 
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
-	constexpr std::size_t sonic_speed = 340; // meters per second
+	constexpr std::size_t sonic_speed = 343; // meters per second
 
 
-	template <typename Log>
-	inline gpio_ultrasonic<Log>::gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log)
+	template <typename DistanceScale, typename Log>
+	inline gpio_ultrasonic<DistanceScale, Log>::gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log)
 		: _trigger_line(chip, trigger_line_pos, log)
 		, _echo_line(chip, echo_line_pos, log)
 		, _log(log) {
@@ -50,10 +50,9 @@ namespace abc {
 	}
 
 
-	template <typename Log>
-	template <typename DistanceScale>
-	inline std::size_t gpio_ultrasonic<Log>::measure_distance(std::size_t max_distance) const noexcept {
-		static const microseconds timeout = sonic_duration<DistanceScale, microseconds>(2 * max_distance); // back and forth
+	template <typename DistanceScale, typename Log>
+	inline std::size_t gpio_ultrasonic<DistanceScale, Log>::measure_distance(std::size_t max_distance) const noexcept {
+		static const microseconds timeout = sonic_duration<microseconds>(2 * max_distance); // back and forth
 
 		// Clear and send a pulse.
 		_trigger_line.put_level(gpio_level::low, microseconds(10));
@@ -83,30 +82,26 @@ namespace abc {
 		clock::time_point echo_end_tp = clock::now();
 
 		if (level == gpio_level::invalid) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_ultrasonic::measure_distance() level = gpio_level::invalid, time_left = %llu us", (long long)time_left.count());
-			}
-
-			return 0;
+			return max_distance;
 		}
 
-		std::size_t distance_x2 = sonic_distance<DistanceScale>(std::chrono::duration_cast<microseconds>(echo_end_tp - echo_start_tp));
+		std::size_t distance_x2 = sonic_distance(std::chrono::duration_cast<microseconds>(echo_end_tp - echo_start_tp));
 		std::size_t distance = distance_x2 / 2;
 
 		return distance;
 	}
 
 
-	template <typename Log>
-	template <typename DistanceScale, typename Duration>
-	inline std::size_t gpio_ultrasonic<Log>::sonic_distance(Duration duration) noexcept {
+	template <typename DistanceScale, typename Log>
+	template <typename Duration>
+	inline std::size_t gpio_ultrasonic<DistanceScale, Log>::sonic_distance(Duration duration) noexcept {
 		return sonic_speed * duration.count() * (Duration::period::num * DistanceScale::den) / (Duration::period::den * DistanceScale::num);
 	}
 
 
-	template <typename Log>
-	template <typename DistanceScale, typename Duration>
-	inline Duration gpio_ultrasonic<Log>::sonic_duration(std::size_t distance) noexcept {
+	template <typename DistanceScale, typename Log>
+	template <typename Duration>
+	inline Duration gpio_ultrasonic<DistanceScale, Log>::sonic_duration(std::size_t distance) noexcept {
 		return Duration(distance * (DistanceScale::num * Duration::period::den) / (sonic_speed * DistanceScale::den * Duration::period::num));
 	}
 
