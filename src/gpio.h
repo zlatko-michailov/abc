@@ -29,3 +29,4 @@ SOFTWARE.
 #include "x/gpio_smbus.x.h"
 #include "x/gpio_smbus_pwm.x.h"
 #include "x/gpio_ultrasonic.x.h"
+#include "x/gpio_smbus_motor.x.h"

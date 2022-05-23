@@ -25,11 +25,47 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
+#include <ratio>
+#include <chrono>
+#include <linux/gpio.h>
+
 #include "gpio_base.i.h"
 #include "gpio_chip.i.h"
 #include "gpio_line.i.h"
-#include "gpio_pwm_emulator.i.h"
 #include "gpio_smbus.i.h"
 #include "gpio_smbus_pwm.i.h"
-#include "gpio_ultrasonic.i.h"
-#include "gpio_smbus_motor.i.h"
+
+
+namespace abc {
+
+	template <typename Log = null_log>
+	class gpio_smbus_motor {
+	public:
+		gpio_smbus_motor(const gpio_chip<Log>* chip, gpio_line_pos_t direction_line_pos,
+					gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+					gpio_pwm_pulse_frequency_t frequency,
+					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+					Log* log = nullptr);
+		gpio_smbus_motor(gpio_smbus_motor<Log>&& other) noexcept = default;
+		gpio_smbus_motor(const gpio_smbus_motor<Log>& other) = delete;
+
+	public:
+		void					set_forward(bool forward) noexcept;
+		bool					is_forward() const noexcept;
+
+		void					set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		gpio_pwm_duty_cycle_t	get_duty_cycle() const noexcept;
+
+	private:
+		gpio_output_line<Log>	_direction_line;
+		gpio_smbus_pwm<Log>		_pwm;
+		bool					_forward;
+		gpio_pwm_duty_cycle_t	_duty_cycle;
+		Log*					_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+}
