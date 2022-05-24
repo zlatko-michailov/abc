@@ -25,12 +25,43 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstdint>
+#include <ratio>
+#include <chrono>
+#include <linux/gpio.h>
+
 #include "gpio_base.i.h"
 #include "gpio_chip.i.h"
 #include "gpio_line.i.h"
-#include "gpio_pwm_emulator.i.h"
 #include "gpio_smbus.i.h"
 #include "gpio_smbus_pwm.i.h"
-#include "gpio_ultrasonic.i.h"
-#include "gpio_smbus_motor.i.h"
-#include "gpio_smbus_servo.i.h"
+
+
+namespace abc {
+
+	template <typename PwmDuration, typename Log = null_log>
+	class gpio_smbus_servo {
+	public:
+		template <typename PulseWidthDuration>
+		gpio_smbus_servo(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+					PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+					PwmDuration pwm_duration,
+					gpio_pwm_pulse_frequency_t frequency,
+					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
+					Log* log = nullptr);
+		gpio_smbus_servo(gpio_smbus_servo<PwmDuration, Log>&& other) noexcept = default;
+		gpio_smbus_servo(const gpio_smbus_servo<PwmDuration, Log>& other) = delete;
+
+	public:
+		void					set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+
+	private:
+		gpio_smbus_pwm<Log>		_pwm;
+		PwmDuration				_pwm_duration;
+		Log*					_log;
+	};
+
+
+	// --------------------------------------------------------------
+
+}
