@@ -94,13 +94,26 @@ namespace abc {
 	}
 
 	template <typename Log>
-	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) {
-		if (duty_cycle < gpio_pwm_duty_cycle::min || gpio_pwm_duty_cycle::max < duty_cycle) {
-			throw exception<std::logic_error, Log>("gpio_pwm_emulator::set_duty_cycle() Out of range", __TAG__);
-		}
-
+	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
 		if (duty_cycle == _duty_cycle) {
 			return;
+		}
+
+		if (duty_cycle < gpio_pwm_duty_cycle::min) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
+					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
+			}
+
+			duty_cycle = gpio_pwm_duty_cycle::min;
+		}
+		else if (duty_cycle > gpio_pwm_duty_cycle::max) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
+					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
+			}
+
+			duty_cycle = gpio_pwm_duty_cycle::max;
 		}
 
 		bool should_notify = (_duty_cycle == gpio_pwm_duty_cycle::min || _duty_cycle == gpio_pwm_duty_cycle::max);
@@ -116,7 +129,7 @@ namespace abc {
 
 	template <typename Log>
 	template <typename PwmDuration>
-	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
+	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept {
 		set_duty_cycle(duty_cycle);
 		std::this_thread::sleep_for(duration);
 		set_duty_cycle(gpio_pwm_duty_cycle::min);

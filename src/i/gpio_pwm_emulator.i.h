@@ -53,10 +53,10 @@ namespace abc {
 		virtual ~gpio_pwm_emulator() noexcept;
 
 	public:
-		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle);
+		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 		template <typename PwmDuration>
-		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration);
+		void		set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
 
 	private:
 		static void	thread_func(gpio_pwm_emulator* this_ptr) noexcept;

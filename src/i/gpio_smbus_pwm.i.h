@@ -56,10 +56,10 @@ namespace abc {
 		gpio_smbus_pwm(const gpio_smbus_pwm<Log>& other) = default;
 
 	public:
-		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle);
+		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 		template <typename PwmDuration>
-		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration);
+		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
 
 	public:
 		gpio_smbus<Log>*				_smbus;
