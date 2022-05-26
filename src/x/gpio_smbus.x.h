@@ -149,9 +149,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::put_nodata() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_nodata() Done.");
 		}
 
 		return true;
@@ -186,9 +184,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::put_byte() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_byte() Done.");
 		}
 
 		return true;
@@ -223,9 +219,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::put_word() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_word() Done.");
 		}
 
 		return true;
@@ -269,9 +263,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::put_block() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_block() Done.");
 		}
 
 		return true;
@@ -306,9 +298,7 @@ namespace abc {
 		byte = data.byte;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_noreg() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_noreg() Done.");
 		}
 
 		return true;
@@ -338,9 +328,7 @@ namespace abc {
 		word = target.requires_byte_swap() ? ((byte0 << 8) | byte1) : ((byte1 << 8) | byte0);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_noreg_2() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_noreg_2() Done.");
 		}
 
 		return true;
@@ -376,9 +364,7 @@ namespace abc {
 		byte = data.byte;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_byte() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_byte() Done.");
 		}
 
 		return true;
@@ -414,9 +400,7 @@ namespace abc {
 		word = target.requires_byte_swap() ? swap_bytes(data.word) : data.word;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_word() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_word() Done.");
 		}
 
 		return true;
@@ -462,9 +446,7 @@ namespace abc {
 		std::memmove(block, &data.block[1], data.block[0]);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::get_block() Done.");
-
-			return true;
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_block() Done.");
 		}
 
 		return true;
@@ -475,7 +457,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::ensure_address(gpio_smbus_address_t addr) noexcept {
 		if (_addr == addr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::ensure_address() Skip.");
+				_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::ensure_address() Skip.");
 
 				return true;
 			}
@@ -493,7 +475,7 @@ namespace abc {
 		_addr = addr;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::ensure_address() Done. _addr = 0x%2.2x", _addr);
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::ensure_address() Done. _addr = 0x%2.2x", _addr);
 		}
 
 		return true;
