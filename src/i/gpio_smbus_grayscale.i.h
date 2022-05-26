@@ -23,12 +23,43 @@ SOFTWARE.
 */
 
 
-#include "x/gpio_chip.x.h"
-#include "x/gpio_line.x.h"
-#include "x/gpio_pwm_emulator.x.h"
-#include "x/gpio_smbus.x.h"
-#include "x/gpio_smbus_pwm.x.h"
-#include "x/gpio_ultrasonic.x.h"
-#include "x/gpio_smbus_motor.x.h"
-#include "x/gpio_smbus_servo.x.h"
-#include "x/gpio_smbus_grayscale.x.h"
+#pragma once
+
+#include <cstdint>
+#include <ratio>
+#include <chrono>
+#include <linux/gpio.h>
+
+#include "gpio_base.i.h"
+#include "gpio_chip.i.h"
+#include "gpio_line.i.h"
+#include "gpio_smbus.i.h"
+#include "gpio_smbus_pwm.i.h"
+
+
+namespace abc {
+
+	template <typename Log = null_log>
+	class gpio_smbus_grayscale {
+	public:
+		gpio_smbus_grayscale(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
+					gpio_smbus_register_t reg_left, gpio_smbus_register_t reg_center, gpio_smbus_register_t reg_right,
+					Log* log = nullptr);
+		gpio_smbus_grayscale(gpio_smbus_grayscale<Log>&& other) noexcept = default;
+		gpio_smbus_grayscale(const gpio_smbus_grayscale<Log>& other) = delete;
+
+	public:
+		void					get_values(std::uint16_t& left, std::uint16_t& center, std::uint16_t& right) noexcept;
+
+	private:
+		gpio_smbus<Log>*		_smbus;
+		gpio_smbus_target<Log>	_smbus_target;
+		gpio_smbus_register_t	_reg_left;
+		gpio_smbus_register_t	_reg_center;
+		gpio_smbus_register_t	_reg_right;
+	};
+
+
+	// --------------------------------------------------------------
+
+}

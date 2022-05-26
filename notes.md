@@ -4,7 +4,13 @@
   - Chip - get chip and line info.
   - Line - get and put low/high signal level.
   - PWM Emulator - put variable signal level through a duty cycle.
+  - SMBus - control HATs.
+  - SMBus PWM - hardware-implemented variable signal.
 - Sample picar_4wd:
+  - Drive
+  - Turn
+  - Slow down and stop automatically
+ - Other examples:
   - Get chip and line info.
   - Get distance through the ultrasound sensor.
   - Turn the ultrasound sensor through its servo.
@@ -28,18 +34,7 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
-Drive:
-  - Use gpio_ultrasonic.
-  - Measure distance to obstacle constantly.
-  - Stop if too close.
-UI/endpoint:
-  - Get and show distance to obstacle.
 GPIO:
-  - gpio_motor<pwm>
-    - set_duty_cycle()
-    - set_direction()
-  - gpio_smbus_motor, gpio_emulator_motor
-  - gpio_grayscale
   - gpio UT - optional
 
 
