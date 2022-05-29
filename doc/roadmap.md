@@ -5,14 +5,18 @@ Up to [Documentation](README.md).
 ## 1.15.0
 - GPIO
 - SMBus
+- picar_4wd
 
 ## 1.16.0
-- Mac OS / clang
+- clang
 
 ## 1.17.0
 - doxygen
 
 ## 1.18.0
+- Self-driving
+
+## 1.19.0
 - SSL/TLS wrapper
 
 ## Pick List
