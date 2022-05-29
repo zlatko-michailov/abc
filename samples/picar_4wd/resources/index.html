@@ -107,16 +107,16 @@ SOFTWARE.
 							<td>
 								<div class="subtitle">Power</div>
 							</td>
-				
+
 							<td width="600px">
 								<div class="subtitle">Info</div>
 							</td>
-				
+
 							<td>
 								<div class="subtitle">Turn</div>
 							</td>
 						</tr>
-				
+
 						<tr>
 							<td>
 								<input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
@@ -138,6 +138,47 @@ SOFTWARE.
 										</td>
 										<td>
 											<span id="turn-info" class="readonly">0</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="readonly">Obstacle (cm):</span>
+										</td>
+										<td>
+											<span id="obstacle-info" class="readonly">0</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="readonly">Grayscale:</span>
+										</td>
+										<td>
+											<span id="grayscale-numeric-info" class="readonly">0</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input id="grayscale-info" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" />
+										</td>
+									</tr>
+
+									<tr>
+										<td>
+											<br />
+											<br />
+											<br />
+											<br />
+										</td>
+									</tr>
+
+									<tr>
+										<td>
+											<div class="subtitle">Servo</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input id="servo" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateServo(value)" />
 										</td>
 									</tr>
 								</table>
@@ -215,7 +256,7 @@ SOFTWARE.
 					})
 					.then(function (text) {
 						console.log(text);
-						document.getElementById("status").innerHTML += text + "<br />";
+						//document.getElementById("status").innerHTML += text + "<br />";
 
 						if (value == 0) {
 							document.getElementById('turn').value = 0;
@@ -248,7 +289,86 @@ SOFTWARE.
 					})
 					.then(function (text) {
 						console.log(text);
-						document.getElementById("status").innerHTML += text + "<br />";
+						//document.getElementById("status").innerHTML += text + "<br />";
+					});
+			}
+
+			function updateServo(value) {
+				document.getElementById('turn-info').innerText = value;
+
+				let requestHeaders = new Headers();
+				requestHeaders.append("Content-Type", "application/json");
+
+				let requestInit = {
+					method: "POST",
+					headers: requestHeaders,
+					mode: "same-origin",
+					body: "{ \"angle\": " + value + "}"
+				};
+
+				let request = new Request("/servo");
+				return fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.blob();
+					})
+					.then(function (blob) {
+						return blob.text();
+					})
+					.then(function (text) {
+						console.log(text);
+						//document.getElementById("status").innerHTML += text + "<br />";
+					});
+			}
+
+			function getAutos() {
+				let requestInit = {
+					method: "GET",
+					mode: "same-origin"
+				};
+
+				let request = new Request("/autos");
+				return fetch(request, requestInit)
+					.then(function (response) {
+						console.log("Received status " + response.status + ": " + response.statusText);
+						return response.json();
+					})
+					.then(function (result) {
+						console.log(result);
+						//document.getElementById("status").innerHTML += text + "<br />";
+
+						document.getElementById('obstacle-info').innerText = result.obstacle.distance;
+
+						let grayscaleNumeric = 0;
+						if ( (result.grayscale.left > 3 * result.grayscale.center && result.grayscale.left > 3 * result.grayscale.right)
+							|| (3 * result.grayscale.left < result.grayscale.center && 3 * result.grayscale.left < result.grayscale.right) ) {
+							grayscaleNumeric = -90;
+						}
+						else if ( (result.grayscale.right > 3 * result.grayscale.center && result.grayscale.right > 3 * result.grayscale.left)
+							|| (3 * result.grayscale.right < result.grayscale.center && 3 * result.grayscale.right < result.grayscale.left) ) {
+							grayscaleNumeric = 90;
+						}
+						else if ( (result.grayscale.left > 2 * result.grayscale.center && result.grayscale.left > 2 * result.grayscale.right)
+							|| (2 * result.grayscale.left < result.grayscale.center && 2 * result.grayscale.left < result.grayscale.right) ) {
+							grayscaleNumeric = -60;
+						}
+						else if ( (result.grayscale.right > 2 * result.grayscale.center && result.grayscale.right > 2 * result.grayscale.left)
+							|| (2 * result.grayscale.right < result.grayscale.center && 2 * result.grayscale.right < result.grayscale.left) ) {
+							grayscaleNumeric = 60;
+						}
+						else if ( (result.grayscale.left > 1.5 * result.grayscale.center && result.grayscale.left > 1.5 * result.grayscale.right)
+							|| (1.5 * result.grayscale.left < result.grayscale.center && 1.5 * result.grayscale.left < result.grayscale.right) ) {
+							grayscaleNumeric = -30;
+						}
+						else if ( (result.grayscale.right > 1.5 * result.grayscale.center && result.grayscale.right > 1.5 * result.grayscale.left)
+							|| (1.5 * result.grayscale.right < result.grayscale.center && 1.5 * result.grayscale.right < result.grayscale.left) ) {
+							grayscaleNumeric = 30;
+						}
+
+						document.getElementById('grayscale-numeric-info').innerText = grayscaleNumeric;
+						document.getElementById('grayscale-info').value = grayscaleNumeric;
+
+						setTimeout(getAutos, 500);
 					});
 			}
 
@@ -272,6 +392,8 @@ SOFTWARE.
 						}
 					});
 			}
+
+			getAutos();
 		</script>
 	</body>
 </html>

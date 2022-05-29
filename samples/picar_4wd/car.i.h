@@ -30,6 +30,7 @@ SOFTWARE.
 #include <chrono>
 #include <ratio>
 #include <thread>
+#include <atomic>
 
 #include "../../src/log.h"
 #include "../../src/endpoint.h"
@@ -46,11 +47,11 @@ namespace abc { namespace samples {
 
 
 	template <typename Log>
-	class gpio_smbus_hat : public abc::gpio_smbus_target<Log> {
+	class picar_4wd_hat : public abc::gpio_smbus_target<Log> {
 		using base = abc::gpio_smbus_target<Log>;
 
 	public:
-		gpio_smbus_hat(abc::gpio_chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log);
+		picar_4wd_hat(abc::gpio_chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log);
 
 	public:
 		void reset();
@@ -77,58 +78,50 @@ namespace abc { namespace samples {
 	private:
 		void			process_power(abc::http_server_stream<Log>& http, const char* method);
 		void			process_turn(abc::http_server_stream<Log>& http, const char* method);
+		void			process_autos(abc::http_server_stream<Log>& http, const char* method);
+		void			process_servo(abc::http_server_stream<Log>& http, const char* method);
 		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
 
 		template <typename T>
-		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step);
+		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step) noexcept;
 
-		void			drive_verified();
-		void			get_side_powers(std::int32_t& left_power, std::int32_t& right_power);
-		std::int32_t	get_delta_power();
+		void			drive_verified() noexcept;
+		void			get_side_powers(std::int32_t& left_power, std::int32_t& right_power) noexcept;
+		std::int32_t	get_delta_power() noexcept;
 
-		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);
-		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
-		bool			verify_header_json(abc::http_server_stream<Log>& http);
+		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method) noexcept;
+		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method) noexcept;
+		bool			verify_header_json(abc::http_server_stream<Log>& http) noexcept;
 
 	private:
-		static constexpr abc::gpio_line_pos_t				pos_line_dir_front_left			= 23;
-		static constexpr abc::gpio_line_pos_t				pos_line_dir_front_right		= 24;
-		static constexpr abc::gpio_line_pos_t				pos_line_dir_rear_left			= 13;
-		static constexpr abc::gpio_line_pos_t				pos_line_dir_rear_right			= 20;
+		static void		start_auto_loop(car_endpoint<Limits, Log>* this_ptr) noexcept;
+		void			auto_loop() noexcept;
+		void			auto_limit_power() noexcept;
 
-		static constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
-		static constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
-		static constexpr bool								smbus_hat_requires_byte_swap	= true;
-		static constexpr abc::gpio_smbus_register_t			smbus_hat_reg_base_pwm			= 0x20;
-		static constexpr abc::gpio_smbus_register_t			reg_base_autoreload				= 0x44;
-		static constexpr abc::gpio_smbus_register_t			reg_base_prescaler				= 0x40;
+	private:
+		abc::gpio_chip<Log>										_chip;
+		abc::gpio_smbus<Log>									_smbus;
+		picar_4wd_hat<Log>										_hat;
 
-		static constexpr abc::gpio_smbus_register_t			reg_wheel_front_left			= 0x0d;
-		static constexpr abc::gpio_smbus_register_t			reg_wheel_front_right			= 0x0c;
-		static constexpr abc::gpio_smbus_register_t			reg_wheel_rear_left				= 0x08;
-		static constexpr abc::gpio_smbus_register_t			reg_wheel_rear_right			= 0x09;
-		static constexpr abc::gpio_smbus_register_t			reg_timer_front_left			= reg_wheel_front_left / 4;
-		static constexpr abc::gpio_smbus_register_t			reg_timer_front_right			= reg_wheel_front_right / 4;
-		static constexpr abc::gpio_smbus_register_t			reg_timer_rear_left				= reg_wheel_rear_left / 4;
-		static constexpr abc::gpio_smbus_register_t			reg_timer_rear_right			= reg_wheel_rear_right / 4;
-		static constexpr abc::gpio_pwm_pulse_frequency_t	frequency						= 50; // 50 Hz
+		abc::gpio_smbus_motor<Log>								_motor_front_left;
+		abc::gpio_smbus_motor<Log>								_motor_front_right;
+		abc::gpio_smbus_motor<Log>								_motor_rear_left;
+		abc::gpio_smbus_motor<Log>								_motor_rear_right;
 
-		abc::gpio_chip<Log>				_chip;
-		abc::gpio_output_line<Log>		_line_dir_front_left;
-		abc::gpio_output_line<Log>		_line_dir_front_right;
-		abc::gpio_output_line<Log>		_line_dir_rear_left;
-		abc::gpio_output_line<Log>		_line_dir_rear_right;
+		abc::gpio_ultrasonic<std::centi, Log>					_ultrasonic;
+		abc::gpio_smbus_servo<std::chrono::milliseconds, Log>	_servo;
 
-		abc::gpio_smbus<Log>			_smbus;
-		gpio_smbus_hat<Log>				_hat;
-		abc::gpio_smbus_pwm<Log>		_pwm_wheel_front_left;
-		abc::gpio_smbus_pwm<Log>		_pwm_wheel_front_right;
-		abc::gpio_smbus_pwm<Log>		_pwm_wheel_rear_left;
-		abc::gpio_smbus_pwm<Log>		_pwm_wheel_rear_right;
+		abc::gpio_smbus_grayscale<Log>							_grayscale;
 
-		abc::gpio_level_t				_direction;
-		std::int32_t					_power;
-		std::int32_t					_turn;
+		bool													_forward;
+		std::int32_t											_power;
+		std::int32_t											_turn;
+		std::atomic<std::size_t>								_obstacle_cm;
+		std::atomic<std::uint16_t>								_grayscale_left;
+		std::atomic<std::uint16_t>								_grayscale_center;
+		std::atomic<std::uint16_t>								_grayscale_right;
+
+		std::thread												_auto_thread;
 	};
 
 

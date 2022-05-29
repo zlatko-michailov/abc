@@ -34,9 +34,26 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
-GPIO:
-  - gpio UT - optional
-
+picar_4wd
+Docs:
+  - Tutorials:
+    - GPIO - chip, line, smbus, smbus target
+    - PWM
+  - Ref
+    - gpio
+      - chip
+      - line
+      - smbus
+      - pwm_emulator
+      - smbus_pwm
+      - smbus_motor
+      - smbus_servo
+      - smbus_ultrasonic
+      - smbus_grayscale
+makefile
+release:
+  - version
+  - tagging
 
 ## Pick List
 - vmem:
