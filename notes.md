@@ -14,6 +14,8 @@
   - Get chip and line info.
   - Get distance through the ultrasound sensor.
   - Turn the ultrasound sensor through its servo.
+- Doc:
+  - GPIO
   
 Speed (all wheels):
   
@@ -34,24 +36,8 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
-picar_4wd
-Docs:
-  - Tutorials:
-    - GPIO - chip, line, smbus, smbus target
-    - PWM
-  - Ref
-    - gpio
-      - chip
-      - line
-      - smbus
-      - pwm_emulator
-      - smbus_pwm
-      - smbus_motor
-      - smbus_servo
-      - smbus_ultrasonic
-      - smbus_grayscale
 makefile
-release:
+Release:
   - version
   - tagging
 
