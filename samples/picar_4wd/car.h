@@ -143,7 +143,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline void car_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::process_rest_request: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10678, "car_endpoint::process_rest_request: Start.");
 		}
 
 		if (ascii::are_equal_i(resource, "/power")) {
@@ -163,11 +163,11 @@ namespace abc { namespace samples {
 		}
 		else {
 			// 404
-			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", __TAG__);
+			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", 0x10679);
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::process_rest_request: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1067a, "car_endpoint::process_rest_request: Done.");
 		}
 	}
 
@@ -195,11 +195,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::begin_object) {
 				// Not {.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1067b, "Content error: Expected '{'.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1067c);
 				return;
 			}
 
@@ -207,11 +207,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "power")) {
 				// Not "power".
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"power\".");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1067d, "Content error: Expected \"power\".");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1067e);
 				return;
 			}
 
@@ -219,11 +219,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::number || !(-100 <= token->value.number && token->value.number <= 100)) {
 				// Not a valid power.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected -100 <= number <= 100.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1067f, "Content error: Expected -100 <= number <= 100.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10680);
 				return;
 			}
 
@@ -248,7 +248,7 @@ namespace abc { namespace samples {
 		// 200
 		char body[abc::size::_256 + 1];
 		std::snprintf(body, sizeof(body), "power: forward=%d, power=%d, turn=%d", (int)_forward, (int)_power, (int)_turn);
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, 0x10681);
 	}
 
 
@@ -275,11 +275,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::begin_object) {
 				// Not {.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10682, "Content error: Expected '{'.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10683);
 				return;
 			}
 
@@ -287,11 +287,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "turn")) {
 				// Not "turn".
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"turn\".");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10684, "Content error: Expected \"turn\".");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10685);
 				return;
 			}
 
@@ -299,11 +299,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::number || !(-90 <= token->value.number && token->value.number <= 90)) {
 				// Not a valid turn.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected -90 <= number <= 90.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10686, "Content error: Expected -90 <= number <= 90.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10687);
 				return;
 			}
 
@@ -320,7 +320,7 @@ namespace abc { namespace samples {
 		// 200
 		char body[abc::size::_256 + 1];
 		std::snprintf(body, sizeof(body), "turn: power=%d, turn=%d", (int)_power, (int)_turn);
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, 0x10688);
 	}
 
 
@@ -360,7 +360,7 @@ namespace abc { namespace samples {
 
 		// Send the http response
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, __TAG__, "Sending response 200");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10689, "Sending response 200");
 		}
 
 		http.put_protocol(protocol::HTTP_11);
@@ -378,7 +378,7 @@ namespace abc { namespace samples {
 		http.put_body(body);
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car::process_autos: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1068a, "car::process_autos: Done.");
 		}
 	}
 
@@ -406,11 +406,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::begin_object) {
 				// Not {.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected '{'.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068b, "Content error: Expected '{'.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1068c);
 				return;
 			}
 
@@ -418,11 +418,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "angle")) {
 				// Not "servo".
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected \"angle\".");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068d, "Content error: Expected \"angle\".");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1068e);
 				return;
 			}
 
@@ -430,11 +430,11 @@ namespace abc { namespace samples {
 			if (token->item != abc::json::item::number || !(-90 <= token->value.number && token->value.number <= 90)) {
 				// Not a valid angle.
 				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "Content error: Expected -90 <= number <= 90.");
+					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068f, "Content error: Expected -90 <= number <= 90.");
 				}
 
 				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, __TAG__);
+				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10690);
 				return;
 			}
 
@@ -451,7 +451,7 @@ namespace abc { namespace samples {
 		// 200
 		char body[abc::size::_256 + 1];
 		std::snprintf(body, sizeof(body), "servo: angle=%d", (int)angle);
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, __TAG__);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, 0x10691);
 	}
 
 
@@ -466,7 +466,7 @@ namespace abc { namespace samples {
 		_auto_thread.join();
 
 		// 200
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", __TAG__);
+		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x10692);
 	}
 
 
@@ -521,7 +521,7 @@ namespace abc { namespace samples {
 		right_power += adjust;
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "left_power = %3d, right_power = %3d", (int)left_power, (int)right_power);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10693, "left_power = %3d, right_power = %3d", (int)left_power, (int)right_power);
 		}
 	}
 
@@ -557,7 +557,7 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "power = %3d, turn = %3d, delta = %3d", (int)_power, (int)_turn, (int)delta);
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10694, "power = %3d, turn = %3d, delta = %3d", (int)_power, (int)_turn, (int)delta);
 		}
 
 		return delta;
@@ -568,11 +568,11 @@ namespace abc { namespace samples {
 	inline bool car_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) noexcept {
 		if (!ascii::are_equal_i(method, method::GET)) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'GET'.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10695, "Method error: Expected 'GET'.");
 			}
 
 			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", __TAG__);
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", 0x10696);
 			return false;
 		}
 
@@ -584,11 +584,11 @@ namespace abc { namespace samples {
 	inline bool car_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) noexcept {
 		if (!ascii::are_equal_i(method, method::POST)) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Method error: Expected 'POST'.");
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10697, "Method error: Expected 'POST'.");
 			}
 
 			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", __TAG__);
+			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", 0x10698);
 			return false;
 		}
 
@@ -614,11 +614,11 @@ namespace abc { namespace samples {
 				if (has_content_type_json) {
 					// We've already received a Content-Type header.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Already received 'Content-Type'.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10699, "Header error: Already received 'Content-Type'.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x1069a);
 					return false;
 				}
 
@@ -628,11 +628,11 @@ namespace abc { namespace samples {
 				if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
 					// The Content-Type is not json.
 					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Header error: Expected `application/json` as 'Content-Type'.");
+						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1069b, "Header error: Expected `application/json` as 'Content-Type'.");
 					}
 
 					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", __TAG__);
+					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x1069c);
 					return false;
 				}
 
@@ -653,11 +653,11 @@ namespace abc { namespace samples {
 	inline bool car_endpoint<Limits, Log>::verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step) noexcept {
 		if (value < lo_bound || hi_bound < value || value % step != 0) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Range error: value = %d.", (int)value);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1069d, "Range error: value = %d.", (int)value);
 			}
 
 			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "Value not in range.", __TAG__);
+			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "Value not in range.", 0x1069e);
 			return false;
 		}
 
@@ -674,7 +674,7 @@ namespace abc { namespace samples {
 	template <typename Limits, typename Log>
 	inline void car_endpoint<Limits, Log>::auto_loop() noexcept {
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::auto_loop: Start.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1069f, "car_endpoint::auto_loop: Start.");
 		}
 
 		while (!base::is_shutdown_requested()) {
@@ -697,7 +697,7 @@ namespace abc { namespace samples {
 		}
 
 		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::auto_loop: Done.");
+			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x106a0, "car_endpoint::auto_loop: Done.");
 		}
 	}
 
@@ -724,7 +724,7 @@ namespace abc { namespace samples {
 
 		if (power < _power) {
 			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "car_endpoint::auto_limit: old_power=%d, new_power=%d.", (int)_power, (int)power);
+				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x106a1, "car_endpoint::auto_limit: old_power=%d, new_power=%d.", (int)_power, (int)power);
 			}
 
 			_power = power;

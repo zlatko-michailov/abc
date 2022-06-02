@@ -73,28 +73,28 @@ namespace abc {
 	template <typename Log>
 	inline void gpio_chip<Log>::init(const char* path, const char* consumer) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::init() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106b9, "gpio_chip::init() Start.");
 		}
 
 		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() path == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() path == nullptr", 0x106ba);
 		}
 
 		if (std::strlen(path) >= gpio_max_path) {
-			throw exception<std::logic_error, Log>("gpio_chip::int() path >= gpo_max_path", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::int() path >= gpo_max_path", 0x106bb);
 		}
 
 		if (consumer == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() consumer == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() consumer == nullptr", 0x106bc);
 		}
 
 		if (std::strlen(consumer) >= gpio_max_consumer) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() consumer >= gpio_max_consumer", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() consumer >= gpio_max_consumer", 0x106bd);
 		}
 
 		gpio_fd_t fd = open(path, O_RDONLY);
 		if (fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() open() < 0", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_chip::init() open() < 0", 0x106be);
 		}
 		close(fd);
 
@@ -102,7 +102,7 @@ namespace abc {
 		std::strncpy(_consumer, consumer, gpio_max_consumer);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::init() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106bf, "gpio_chip::init() Done.");
 		}
 	}
 
@@ -122,7 +122,7 @@ namespace abc {
 	template <typename Log>
 	inline gpio_chip_info gpio_chip<Log>::chip_info() const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::chip_info() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c0, "gpio_chip::chip_info() Start.");
 		}
 
 		gpio_chip_info info;
@@ -131,7 +131,7 @@ namespace abc {
 		gpio_fd_t fd = open(_path, O_RDONLY);
 		if (fd < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::chip_info() Could not open()");
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c1, "gpio_chip::chip_info() Could not open()");
 			}
 
 			return info;
@@ -143,7 +143,7 @@ namespace abc {
 		if (stat < 0)
 		{
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::chip_info() Could not ioctl()");
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c2, "gpio_chip::chip_info() Could not ioctl()");
 			}
 
 			return info;
@@ -152,7 +152,7 @@ namespace abc {
 		info.is_valid = true;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::chip_info() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c3, "gpio_chip::chip_info() Done.");
 		}
 
 		return info;
@@ -162,7 +162,7 @@ namespace abc {
 	template <typename Log>
 	inline gpio_line_info gpio_chip<Log>::line_info(gpio_line_pos_t pos) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::line_info() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c4, "gpio_chip::line_info() Start.");
 		}
 
 		gpio_line_info info;
@@ -176,7 +176,7 @@ namespace abc {
 		gpio_fd_t fd = open(_path, O_RDONLY);
 		if (fd < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not open()");
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c5, "gpio_chip::line_info() Could not open()");
 			}
 
 			return info;
@@ -188,7 +188,7 @@ namespace abc {
 		if (stat < 0)
 		{
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_chip::line_info() Could not ioctl()");
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c6, "gpio_chip::line_info() Could not ioctl()");
 			}
 
 			return info;
@@ -197,7 +197,7 @@ namespace abc {
 		info.is_valid = true;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_chip::line_info() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c7, "gpio_chip::line_info() Done.");
 		}
 
 		return info;

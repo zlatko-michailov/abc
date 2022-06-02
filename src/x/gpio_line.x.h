@@ -46,16 +46,16 @@ namespace abc {
 	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
 		: _log(log) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_line::gpio_line() Start.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x106c8, "gpio_line::gpio_line() Start.");
 		}
 
 		if (chip == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_line::gpio_line() chip == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_line::gpio_line() chip == nullptr", 0x106c9);
 		}
 
 		gpio_fd_t fd = open(chip->path(), O_RDONLY);
 		if (fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", 0x106ca);
 		}
 
 		gpio_line_request line_request{ 0 };
@@ -73,17 +73,17 @@ namespace abc {
 
 		int ret = ioctl(fd, gpio_ioctl::get_line, &line_request);
 		if (ret < 0) {
-			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl() < 0", __TAG__);
+			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl() < 0", 0x106cb);
 		}
 
 		if (close(fd) < 0) {
-			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() close(fd) < 0", __TAG__);
+			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() close(fd) < 0", 0x106cc);
 		}
 
 		_fd = line_request.fd;
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_line::gpio_line() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x106cd, "gpio_line::gpio_line() Done.");
 		}
 	}
 

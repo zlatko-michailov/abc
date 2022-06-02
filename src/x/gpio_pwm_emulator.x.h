@@ -49,19 +49,19 @@ namespace abc {
 		, _log(log)
 		, _thread(thread_func, this) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Start.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x106ce, "gpio_pwm_emulator::gpio_pwm_emulator() Start.");
 		}
 
 		if (min_pulse_width > max_pulse_width) {
-			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() min_pulse_width", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() min_pulse_width", 0x106cf);
 		}
 
 		if (max_pulse_width > _period) {
-			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() max_pulse_width", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() max_pulse_width", 0x106d0);
 		}
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::gpio_pwm_emulator() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x106d1, "gpio_pwm_emulator::gpio_pwm_emulator() Done.");
 		}
 	}
 
@@ -75,7 +75,7 @@ namespace abc {
 	template <typename Log>
 	inline gpio_pwm_emulator<Log>::~gpio_pwm_emulator() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::~gpio_pwm_emulator() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d2, "gpio_pwm_emulator::~gpio_pwm_emulator() Start.");
 		}
 
 		{
@@ -89,7 +89,7 @@ namespace abc {
 		_thread.join();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::~gpio_pwm_emulator() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d3, "gpio_pwm_emulator::~gpio_pwm_emulator() Done.");
 		}
 	}
 
@@ -101,7 +101,7 @@ namespace abc {
 
 		if (duty_cycle < gpio_pwm_duty_cycle::min) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106d4, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
 					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
 			}
 
@@ -109,7 +109,7 @@ namespace abc {
 		}
 		else if (duty_cycle > gpio_pwm_duty_cycle::max) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106d5, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
 					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
 			}
 
@@ -141,7 +141,7 @@ namespace abc {
 		using clock = std::chrono::steady_clock;
 
 		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::thread_func() Start.");
+			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d6, "gpio_pwm_emulator::thread_func() Start.");
 		}
 
 		bool quit = this_ptr->_quit;
@@ -150,7 +150,7 @@ namespace abc {
 		for (;;) {
 			if (quit) {
 				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::thread_func() Quitting.");
+					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d7, "gpio_pwm_emulator::thread_func() Quitting.");
 				}
 
 				this_ptr->_line.put_level(gpio_level::low);
@@ -199,7 +199,7 @@ namespace abc {
 		}
 
 		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_pwm_emulator::thread_func() Done.");
+			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d8, "gpio_pwm_emulator::thread_func() Done.");
 		}
 	}
 

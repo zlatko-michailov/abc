@@ -44,7 +44,7 @@ namespace abc {
 		, _reg_center(reg_center)
 		, _reg_right(reg_right) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_grayscale::gpio_smbus_grayscale() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10703, "gpio_smbus_grayscale::gpio_smbus_grayscale() Done.");
 		}
 	}
 

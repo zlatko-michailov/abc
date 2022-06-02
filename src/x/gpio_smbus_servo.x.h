@@ -45,7 +45,7 @@ namespace abc {
 		: _pwm(smbus, smbus_target, min_pulse_width, max_pulse_width, frequency, reg_pwm, reg_autoreload, reg_prescaler, log)
 		, _pwm_duration(pwm_duration) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_servo::gpio_smbus_servo() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x1070e, "gpio_smbus_servo::gpio_smbus_servo() Done.");
 		}
 	}
 

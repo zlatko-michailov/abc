@@ -45,7 +45,7 @@ namespace abc {
 		, _echo_line(chip, echo_line_pos, log)
 		, _log(log) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_ultrasonic::gpio_ultrasonic() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x1070f, "gpio_ultrasonic::gpio_ultrasonic() Done.");
 		}
 	}
 

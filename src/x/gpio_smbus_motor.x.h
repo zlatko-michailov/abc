@@ -45,7 +45,7 @@ namespace abc {
 		, _forward(true)
 		, _duty_cycle(gpio_pwm_duty_cycle::min) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motor::gpio_smbus_motor() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10704, "gpio_smbus_motor::gpio_smbus_motor() Done.");
 		}
 	}
 

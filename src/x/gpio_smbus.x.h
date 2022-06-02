@@ -65,7 +65,7 @@ namespace abc {
 	template <typename Log>
 	inline gpio_smbus<Log>::~gpio_smbus() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d9, "gpio_smbus::~gpio_smbus() Start.");
 		}
 
 		if (_fd >=0) {
@@ -73,7 +73,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::~gpio_smbus() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106da, "gpio_smbus::~gpio_smbus() Done.");
 		}
 	}
 
@@ -81,34 +81,34 @@ namespace abc {
 	template <typename Log>
 	inline void gpio_smbus<Log>::init(const char* path) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106db, "gpio_smbus::gpio_smbus() Start.");
 		}
 
 		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path == nullptr", 0x106dc);
 		}
 
 		if (std::strlen(path) >= gpio_max_path) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= gpio_max_path", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= gpio_max_path", 0x106dd);
 		}
 
 		_fd = open(path, O_RDWR);
 		if (_fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() open() < 0", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() open() < 0", 0x106de);
 		}
 
 		if (ioctl(_fd, I2C_FUNCS, &_functionality) < 0) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() I2C_FUNCS failed", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() I2C_FUNCS failed", 0x106df);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106e0, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
 		}
 
 		std::strncpy(_path, path, gpio_max_path);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106e1, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);
 		}
 	}
 
@@ -129,7 +129,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::put_nodata(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_nodata() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e2, "gpio_smbus::put_nodata() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -142,14 +142,14 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_nodata() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e3, "gpio_smbus::put_nodata() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_nodata() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106e4, "gpio_smbus::put_nodata() Done.");
 		}
 
 		return true;
@@ -160,7 +160,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::put_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t byte) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_byte() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e5, "gpio_smbus::put_byte() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -177,14 +177,14 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_byte() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e6, "gpio_smbus::put_byte() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_byte() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106e7, "gpio_smbus::put_byte() Done.");
 		}
 
 		return true;
@@ -195,7 +195,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::put_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t word) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_word() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e8, "gpio_smbus::put_word() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -212,14 +212,14 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_word() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e9, "gpio_smbus::put_word() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_word() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106ea, "gpio_smbus::put_word() Done.");
 		}
 
 		return true;
@@ -230,7 +230,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::put_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, const void* block, std::size_t size) noexcept {
 		if (size > I2C_SMBUS_BLOCK_MAX) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() size > I2C_SMBUS_BLOCK_MAX. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106eb, "gpio_smbus::put_block() size > I2C_SMBUS_BLOCK_MAX. errno = %d", errno);
 
 				return false;
 			}
@@ -238,7 +238,7 @@ namespace abc {
 
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106ec, "gpio_smbus::put_block() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -256,14 +256,14 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::put_block() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106ed, "gpio_smbus::put_block() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::put_block() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106ee, "gpio_smbus::put_block() Done.");
 		}
 
 		return true;
@@ -274,7 +274,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::get_noreg(const gpio_smbus_target<Log>& target, std::uint8_t& byte) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106ef, "gpio_smbus::get_noreg() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -289,7 +289,7 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f0, "gpio_smbus::get_noreg() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
@@ -298,7 +298,7 @@ namespace abc {
 		byte = data.byte;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_noreg() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106f1, "gpio_smbus::get_noreg() Done.");
 		}
 
 		return true;
@@ -310,7 +310,7 @@ namespace abc {
 		std:uint8_t byte0;
 		if (!get_noreg(target, byte0)) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg_2() byte0 failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f2, "gpio_smbus::get_noreg_2() byte0 failed. errno = %d", errno);
 
 				return false;
 			}
@@ -319,7 +319,7 @@ namespace abc {
 		std::uint8_t byte1;
 		if (!get_noreg(target, byte1)) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_noreg_2() byte1 failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f3, "gpio_smbus::get_noreg_2() byte1 failed. errno = %d", errno);
 
 				return false;
 			}
@@ -328,7 +328,7 @@ namespace abc {
 		word = target.requires_byte_swap() ? ((byte0 << 8) | byte1) : ((byte1 << 8) | byte0);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_noreg_2() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106f4, "gpio_smbus::get_noreg_2() Done.");
 		}
 
 		return true;
@@ -339,7 +339,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::get_byte(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint8_t& byte) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_byte() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f5, "gpio_smbus::get_byte() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -355,7 +355,7 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_byte() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f6, "gpio_smbus::get_byte() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
@@ -364,7 +364,7 @@ namespace abc {
 		byte = data.byte;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_byte() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106f7, "gpio_smbus::get_byte() Done.");
 		}
 
 		return true;
@@ -375,7 +375,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::get_word(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, std::uint16_t& word) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_word() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f8, "gpio_smbus::get_word() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -391,7 +391,7 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_word() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f9, "gpio_smbus::get_word() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
@@ -400,7 +400,7 @@ namespace abc {
 		word = target.requires_byte_swap() ? swap_bytes(data.word) : data.word;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_word() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106fa, "gpio_smbus::get_word() Done.");
 		}
 
 		return true;
@@ -411,7 +411,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::get_block(const gpio_smbus_target<Log>& target, gpio_smbus_register_t reg, void* block, std::size_t& size) noexcept {
 		if (!ensure_address(target.address())) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() ensure_address() failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106fb, "gpio_smbus::get_block() ensure_address() failed. errno = %d", errno);
 
 				return false;
 			}
@@ -428,7 +428,7 @@ namespace abc {
 
 		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() I2C_SMBUS failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106fc, "gpio_smbus::get_block() I2C_SMBUS failed. errno = %d", errno);
 
 				return false;
 			}
@@ -436,7 +436,7 @@ namespace abc {
 
 		if (data.block[0] > size) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::get_block() block[0] = %d, size = %d", data.block[0], (int)size);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x106fd, "gpio_smbus::get_block() block[0] = %d, size = %d", data.block[0], (int)size);
 
 				return false;
 			}
@@ -446,7 +446,7 @@ namespace abc {
 		std::memmove(block, &data.block[1], data.block[0]);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::get_block() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x106fe, "gpio_smbus::get_block() Done.");
 		}
 
 		return true;
@@ -457,7 +457,7 @@ namespace abc {
 	inline bool gpio_smbus<Log>::ensure_address(gpio_smbus_address_t addr) noexcept {
 		if (_addr == addr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::ensure_address() Skip.");
+				_log->put_any(category::abc::gpio, severity::abc::debug, 0x106ff, "gpio_smbus::ensure_address() Skip.");
 
 				return true;
 			}
@@ -466,7 +466,7 @@ namespace abc {
 		long laddr = addr;
 		if (ioctl(_fd, I2C_SLAVE_FORCE, laddr) < 0) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus::ensure_address() I2C_SLAVE failed. errno = %d", errno);
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x10700, "gpio_smbus::ensure_address() I2C_SLAVE failed. errno = %d", errno);
 
 				return false;
 			}
@@ -475,7 +475,7 @@ namespace abc {
 		_addr = addr;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus::ensure_address() Done. _addr = 0x%2.2x", _addr);
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10701, "gpio_smbus::ensure_address() Done. _addr = 0x%2.2x", _addr);
 		}
 
 		return true;
@@ -501,7 +501,7 @@ namespace abc {
 		, _requires_byte_swap(requires_byte_swap)
 		, _log(log) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_target::gpio_smbus_target() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10702, "gpio_smbus_target::gpio_smbus_target() Done.");
 		}
 	}
 

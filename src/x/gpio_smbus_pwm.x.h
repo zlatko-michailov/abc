@@ -56,17 +56,17 @@ namespace abc {
 		, _reg_prescaler(reg_prescaler)
 		, _log(log) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() Start.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10705, "gpio_smbus_pwm::gpio_smbus_pwm() Start.");
 		}
 
 		if (smbus == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_pwm::gpio_smbus_pwm() smbus == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus_pwm::gpio_smbus_pwm() smbus == nullptr", 0x10706);
 		}
 
 		// Adjust min/max_pulse_width to lock frequency.
 		if (_max_pulse_width != 0) {
 			if (log != nullptr) {
-				log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() (1) min = %lu, max = %lu.",
+				log->put_any(category::abc::gpio, severity::abc::debug, 0x10707, "gpio_smbus_pwm::gpio_smbus_pwm() (1) min = %lu, max = %lu.",
 					(long)_min_pulse_width, (long)_max_pulse_width);
 			}
 
@@ -74,7 +74,7 @@ namespace abc {
 			_max_pulse_width = (_max_pulse_width * _smbus_target.clock_frequency()) / gpio_pwm_duration::period::den;
 
 			if (log != nullptr) {
-				log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() (2) min = %lu, max = %lu.",
+				log->put_any(category::abc::gpio, severity::abc::debug, 0x10708, "gpio_smbus_pwm::gpio_smbus_pwm() (2) min = %lu, max = %lu.",
 					(long)_min_pulse_width, (long)_max_pulse_width);
 			}
 		}
@@ -96,7 +96,7 @@ namespace abc {
 		}
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() (3) period = %lu | autoreload = %lu | prescaler = %lu | min = %lu | max = %lu",
+			log->put_any(category::abc::gpio, severity::abc::debug, 0x10709, "gpio_smbus_pwm::gpio_smbus_pwm() (3) period = %lu | autoreload = %lu | prescaler = %lu | min = %lu | max = %lu",
 				(long)_period, (long)_autoreload, (long)_prescaler, (long)_min_pulse_width, (long)_max_pulse_width);
 		}
 
@@ -104,7 +104,7 @@ namespace abc {
 		_smbus->put_word(_smbus_target, _reg_prescaler, _prescaler - 1);
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_pwm::gpio_smbus_pwm() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x1070a, "gpio_smbus_pwm::gpio_smbus_pwm() Done.");
 		}
 	}
 
@@ -122,7 +122,7 @@ namespace abc {
 	inline void gpio_smbus_pwm<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
 		if (duty_cycle < gpio_pwm_duty_cycle::min) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x1070b, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
 					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
 			}
 
@@ -130,7 +130,7 @@ namespace abc {
 		}
 		else if (duty_cycle > gpio_pwm_duty_cycle::max) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
+				_log->put_any(category::abc::gpio, severity::abc::important, 0x1070c, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
 					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
 			}
 
@@ -150,7 +150,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_pwm::set_duty_cycle() capture_compare = %u", (unsigned)capture_compare);
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x1070d, "gpio_smbus_pwm::set_duty_cycle() capture_compare = %u", (unsigned)capture_compare);
 		}
 
 		_smbus->put_word(_smbus_target, _reg_pwm, capture_compare);

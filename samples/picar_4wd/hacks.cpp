@@ -46,11 +46,11 @@ void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_chip_info chip_info = chip.chip_info();
 
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "chip info:");
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  is_valid = %d", chip_info.is_valid);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  name     = %s", chip_info.name);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  label    = %s", chip_info.label);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  lines    = %u", chip_info.lines);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a2, "chip info:");
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a3, "  is_valid = %d", chip_info.is_valid);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a4, "  name     = %s", chip_info.name);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a5, "  label    = %s", chip_info.label);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a6, "  lines    = %u", chip_info.lines);
 	log.put_blank_line();
 }
 
@@ -61,12 +61,12 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 	for (abc::gpio_line_pos_t pos = 0; pos < chip_info.lines; pos++) {
 		abc::gpio_line_info line_info = chip.line_info(pos);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "line %2u info:", (unsigned)pos);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  is_valid = %d", line_info.is_valid);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  name     = %s", line_info.name);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  consumer = %s", line_info.consumer);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  flags    = %llx", (long long)line_info.flags);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "  in/out   = %s", (line_info.flags & abc::gpio_line_flag::output) != 0 ? "OUTPUT" : "INPUT");
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a7, "line %2u info:", (unsigned)pos);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a8, "  is_valid = %d", line_info.is_valid);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a9, "  name     = %s", line_info.name);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106aa, "  consumer = %s", line_info.consumer);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ab, "  flags    = %llx", (long long)line_info.flags);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::gpio_line_flag::output) != 0 ? "OUTPUT" : "INPUT");
 		log.put_blank_line();
 	}
 }
@@ -107,19 +107,19 @@ void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 		clock::time_point echo_end_tp = clock::now();
 
 		if (level == abc::gpio_level::invalid) {
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TIMEOUT us = %llu", (long long)timeout.count());
+			log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ad, "TIMEOUT us = %llu", (long long)timeout.count());
 			continue;
 		}
 
 		microseconds echo_us = std::chrono::duration_cast<microseconds>(echo_end_tp - echo_start_tp);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "us = %llu", (long long)echo_us.count());
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ae, "us = %llu", (long long)echo_us.count());
 
 		// Calculate roundtip at the speed of sound - 340 m/s.
 		double echo_s = echo_us.count() / (1000.0 * 1000.0);
 		double roundtrip_m = 340.0 * echo_s;
 		double roundtrip_cm = roundtrip_m * 100.0;
 		double distance_cm = roundtrip_cm / 2.0;
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "cm = %.2f", distance_cm);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106af, "cm = %.2f", distance_cm);
 		log.put_blank_line();
 
 		// Sleep for 1 sec between iterations.
@@ -150,7 +150,7 @@ void turn_servo(log_ostream& log) {
 		const milliseconds duty_duration = milliseconds(250);
 		const milliseconds sleep_duration = milliseconds(500);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b0, "duty_cycle = %u", duty_cycle);
 
 		pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
 
@@ -176,7 +176,7 @@ void turn_servo_emulator(const abc::gpio_chip<log_ostream>& chip, log_ostream& l
 		const milliseconds duty_duration = milliseconds(250);
 		const milliseconds sleep_duration = milliseconds(500);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b1, "duty_cycle = %u", duty_cycle);
 
 		pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
 
@@ -287,7 +287,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			count_rear_left  /= 2;
 			count_rear_right /= 2;
 
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+			log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b2, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 											(unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
 
 			total_count_rear_left  += count_rear_left;
@@ -297,8 +297,8 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 		total_count_rear_left  /= 5;
 		total_count_rear_right /= 5;
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "----------------------------------------------------------------------");
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b3, "----------------------------------------------------------------------");
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 										(unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
 		log.put_blank_line();
 
@@ -374,7 +374,7 @@ void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			duty_cycle_right += delta_duty_cycle;
 		}
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "deg = %3d, delta = %3d", deg, delta_duty_cycle);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b5, "deg = %3d, delta = %3d", deg, delta_duty_cycle);
 
 		pwm_wheel_front_left.set_duty_cycle(duty_cycle_left);
 		pwm_wheel_front_right.set_duty_cycle(duty_cycle_right);
@@ -413,7 +413,7 @@ void measure_grayscale(log_ostream& log) {
 		smbus.put_word(hat, reg_right, zero);
 		smbus.get_noreg_2(hat, right);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}

@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]) {
 		prog_path_len = prog_last_separator - argv[0];
 
 		if (prog_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
+			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x106b7,
 				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
 				max_path, prog_path_len);
 
@@ -68,7 +68,7 @@ int main(int argc, const char* argv[]) {
 	);
 	abc::samples::car_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
 
-	log.put_any(abc::category::abc::samples, abc::severity::warning, __TAG__, "Open a browser and navigate to http://<host>:30305/resources/index.html.");
+	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x106b8, "Open a browser and navigate to http://<host>:30305/resources/index.html.");
 	log.put_blank_line();
 
 	// Let the endpoint listen in a separate thread.
