@@ -2,6 +2,23 @@
 
 Up to [Documentation](README.md).
 
+## 1.15.0
+- Breaking Changes
+  - crc - moved to boneyard
+- Bugs
+  - none
+- Additions
+  - GPIO
+    - Plain GPIO
+      - `gpio_chip`, `gpio_input_line`, `gpio_output_line`, `gpio_pwm_emulator`
+    - SMBus
+      - `gpio_smbus`, `gpio_smbus_pwm`
+    - Specializations
+      - `gpio_ultrasonic`, `gpio_smbus_motor`, `gpio_smbus_servo`, `gpio_smbus_grayscale`
+  - picar_4wd - SunFounder PiCar 4WD
+- Refactoring
+  - socket - reduce logging verbosity
+
 ## 1.14.0
 - Breaking Changes
   - none

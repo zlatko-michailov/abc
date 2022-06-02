@@ -2,11 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.15.0
-- GPIO
-- SMBus
-- picar_4wd
-
 ## 1.16.0
 - clang
 
