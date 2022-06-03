@@ -36,8 +36,6 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
-Release:
-  - tagging
 
 ## Pick List
 - vmem:

@@ -15,7 +15,7 @@ The following sample demonstrates how to use GPIO:
 - [picar_4wd](../../samples/picar_4wd/car.h)
 
 ## Creating a `log_filter` and a `log_ostream`
-It is strongly recommended to pass in a `log_ostream` to the `endpoint`.
+It is strongly recommended to pass in a `log_ostream` to all `gpio_*` instances.
 Visit the [How to Log Diagnostics](diagnostics.md) tutorial if needed.
 
 ## Access a Chip
@@ -33,7 +33,7 @@ abc::gpio_chip chip("/dev/gpiochip0", "MyProgram", &log);
 ## Set/Read the Voltage Level on a Line
 Before you can use a line, you need to look up the chip/device's documentation to find the logical number/position of the line as well as its physical pin where the peripheral should be connected.
 
-First, construct a `gpio_output_line`:
+Once the peripheral is connected to the correct pin, construct a `gpio_output_line`:
 ``` c++
 abc::line_pos_t line_pos = 5;
 abc::gpio_output_line line(&chip, line_pos, &log);
