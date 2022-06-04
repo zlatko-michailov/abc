@@ -36,6 +36,9 @@ duty cycle |   12 |   16 |   25
 experi. dc |   11 |   18 |   25
 
 ## To Do
+- dev: clang
+  - Install on SUSE
+  - Install on Ubuntu
 
 ## Pick List
 - vmem:

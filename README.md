@@ -3,10 +3,11 @@
 
 `abc` is a C++ header-only library that complements the `std` library. The most notable `abc` entities are:
 - HTTP endpoint
-- socket (TCP and UDP)
+- TCP and UDP sockets
 - HTTP streams
 - JSON streams
-- virtual memory
+- Virtual memory
+- GPIO and SMBus
 
 Those entities enable a C++ daemon running on remote device to have a GUI as well as a REST API surface.
 
