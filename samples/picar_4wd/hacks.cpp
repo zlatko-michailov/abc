@@ -129,7 +129,6 @@ void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 
 
 void turn_servo(log_ostream& log) {
-	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 	using milliseconds = std::chrono::milliseconds;
 
@@ -160,7 +159,6 @@ void turn_servo(log_ostream& log) {
 
 
 void turn_servo_emulator(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
-	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 	using milliseconds = std::chrono::milliseconds;
 
@@ -234,7 +232,6 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_timer_rear_left	= reg_wheel_rear_left / 4;
 	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
 	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
-	const std::chrono::milliseconds duty_duration(500);
 
 	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
 														reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
@@ -311,7 +308,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
-void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void make_turns(log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_wheel_front_left	= 0x0d;
 	const abc::gpio_smbus_register_t reg_wheel_front_right	= 0x0c;
 	const abc::gpio_smbus_register_t reg_wheel_rear_left	= 0x08;
@@ -321,7 +318,6 @@ void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_timer_rear_left	= reg_wheel_rear_left / 4;
 	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
 	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
-	const std::chrono::milliseconds duty_duration(500);
 
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
@@ -393,7 +389,7 @@ void make_turns(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 void measure_grayscale(log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
-	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, &log);
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
 	const abc::gpio_smbus_register_t reg_left = 0x12;
 	const abc::gpio_smbus_register_t reg_center = 0x11;
@@ -449,7 +445,7 @@ void run_all() {
 	measure_speed(chip, log);
 
 	// Wheels - pwm output
-	make_turns(chip, log);
+	make_turns(log);
 
 	// Grayscale - pwm input
 	measure_grayscale(log);

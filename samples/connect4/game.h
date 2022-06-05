@@ -83,7 +83,7 @@ namespace abc { namespace samples {
 		_is_game_over		= false;
 		_winner				= player_id::none;
 		_current_player_id	= player_id::x;
-		_board_state		= { 0 };
+		_board_state		= { };
 		_move_count			= 0;
 		_log				= log;
 	}
@@ -151,7 +151,7 @@ namespace abc { namespace samples {
 		}
 		clear_move(move);
 
-		_winner == player_id::none;
+		_winner = player_id::none;
 		_is_game_over = false;
 
 		return true;
@@ -242,7 +242,7 @@ namespace abc { namespace samples {
 		}
 
 		count_t northwest_count = 0;
-		for (count_t i = 1; move.row + i < row_count && 0 <= move.col - i < col_count && has_move(_current_player_id, { move.row + i, move.col - i }); i++) {
+		for (count_t i = 1; move.row + i < row_count && 0 <= move.col - i && has_move(_current_player_id, { move.row + i, move.col - i }); i++) {
 			northwest_count++;
 		}
 
@@ -447,7 +447,6 @@ namespace abc { namespace samples {
 		}
 
 		move mid_next{ _game->board().col_size(col_count / 2), col_count / 2 };
-		move mid{ 0, col_count / 2 };
 		move right{ 0, col_count / 2 + 1 };
 		move left{ 0, col_count / 2 - 1 };
 
@@ -1062,7 +1061,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type) {
+	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* /*method*/, player_type_t& player_x_type, player_type_t& player_o_type) {
 		char players[2][abc::size::_64 + 1];
 		bool has_players = false;
 

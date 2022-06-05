@@ -298,7 +298,7 @@ namespace abc { namespace test { namespace http {
 	}
 
 
-	bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* parameter_name, const char* expected_parameter_value, abc::tag_t tag) {
+	bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* /*parameter_name*/, const char* expected_parameter_value, abc::tag_t /*tag*/) {
 		constexpr std::size_t buffer_size = 200;
 		char buffer[buffer_size + 1];
 		std::memset(buffer, 'x', buffer_size);
@@ -676,7 +676,6 @@ namespace abc { namespace test { namespace http {
 		abc::http_response_ostream<abc::test::log> ostream(&sb, context.log);
 
 		bool passed = true;
-		const char* input;
 
 		ostream.put_protocol("HTTP/1.1");
 		passed = verify_stream(context, ostream, 0x100dd) && passed;
@@ -684,7 +683,7 @@ namespace abc { namespace test { namespace http {
 		ostream.put_status_code("789");
 		passed = verify_stream(context, ostream, 0x100de) && passed;
 
-		ostream.put_reason_phrase("Somethig went wrong ");
+		ostream.put_reason_phrase("Something went wrong ");
 		passed = verify_stream(context, ostream, 0x100df) && passed;
 
 		ostream.put_header_name("Multi-Line-List");

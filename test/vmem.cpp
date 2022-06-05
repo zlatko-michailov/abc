@@ -881,7 +881,6 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
 		using Pool = PoolMin;
 		using List = abc::vmem_list<ItemMany, Pool, Log>;
-		using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
 
 		bool passed = true;
 
@@ -1284,7 +1283,6 @@ namespace abc { namespace test { namespace vmem {
 
 		abc::vmem_map_state map_state;
 		Map map(&map_state, &pool, context.log);
-		Key key;
 
 		passed = insert_vmem_map_items(context, map, 11) && passed;
 		// | (2)         | (3)         | (7)         | (8)         | (9)
@@ -1340,8 +1338,6 @@ namespace abc { namespace test { namespace vmem {
 							const abc::vmem_linked_const_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_const_iterator<Pool, abc::test::log>& expected_itr,
 							abc::vmem_linked_const_iterator<Pool, abc::test::log>& actual_itr) {
 		using Log = abc::test::log;
-		using Linked = abc::vmem_linked<Pool, Log>;
-		using Iterator = abc::vmem_linked_iterator<Pool, Log>;
 
 		bool passed = true;
 
@@ -1364,7 +1360,6 @@ namespace abc { namespace test { namespace vmem {
 	bool verify_linked_pages(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked,
 							const std::pair<LinkedPageData, abc::vmem_linked_const_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len) {
 		using Log = abc::test::log;
-		using Linked = abc::vmem_linked<Pool, Log>;
 		using Iterator = abc::vmem_linked_const_iterator<Pool, Log>;
 
 		bool passed = true;

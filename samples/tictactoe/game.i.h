@@ -42,14 +42,13 @@ namespace abc { namespace samples {
 	// --------------------------------------------------------------
 
 
-	constexpr std::size_t row_count = 3;
-	constexpr std::size_t col_count = 3;
-
 	using board_state_t = std::uint32_t;
-
 	using score_calc_t = std::int16_t;
-
 	using score_t = std::int8_t;
+	using move_t = std::int32_t;
+
+	constexpr move_t row_count = 3;
+	constexpr move_t col_count = 3;
 
 	namespace score {
 		constexpr score_t none	= -1;
@@ -128,8 +127,8 @@ namespace abc { namespace samples {
 
 
 	struct move {
-		int		row;
-		int		col;
+		move_t	row;
+		move_t	col;
 
 		bool	is_valid() const;
 	};
@@ -170,8 +169,8 @@ namespace abc { namespace samples {
 		bool				_is_game_over		= false;
 		player_id_t			_winner				= player_id::none;
 		player_id_t			_current_player_id	= player_id::x;
-		board_state_t		_board_state		= { 0 };
-		unsigned			_move_count			= 0;
+		board_state_t		_board_state		= { };
+		move_t				_move_count			= 0;
 	};
 
 

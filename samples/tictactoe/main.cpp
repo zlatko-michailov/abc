@@ -42,7 +42,7 @@ abc::samples::vmem_bundle* abc::samples::player_agent::_vmem = nullptr;
 // --------------------------------------------------------------
 
 
-int main(int argc, const char* argv[]) {
+int main(int /*argc*/, const char* argv[]) {
 	std::srand(std::time(nullptr));
 
 	// Create a log.

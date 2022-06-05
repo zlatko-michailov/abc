@@ -51,8 +51,8 @@ namespace abc {
 	inline vmem_pool<MaxMappedPages, Log>::vmem_pool(const char* file_path, Log* log)
 		: _ready(false)
 		, _mapped_page_count(0)
-		, _mapped_pages{ 0 }
-		, _mapped_page_totals{ 0 }
+		, _mapped_pages{ }
+		, _mapped_page_totals{ }
 		, _log(log) {
 
 		if (_log != nullptr) {
@@ -375,7 +375,7 @@ namespace abc {
 				(long long)page_pos, (long long)page_off);
 		}
 
-		std::uint8_t blank_page[vmem_page_size] = { 0 };
+		std::uint8_t blank_page[vmem_page_size] = { };
 		ssize_t wb = write(_fd, blank_page, vmem_page_size);
 
 		if (wb != vmem_page_size) {
@@ -626,7 +626,7 @@ namespace abc {
 			_mapped_pages[empty_i] = _mapped_pages[i];
 
 			// Zero out this slot.
-			_mapped_pages[i] = { 0 };
+			_mapped_pages[i] = { };
 			_mapped_pages[i].ptr = nullptr;
 
 			// Find the next empty slot.
@@ -652,7 +652,7 @@ namespace abc {
 		void* ptr = _mapped_pages[i].ptr;
 
 		// Zero out the slot.
-		_mapped_pages[i] = { 0 };
+		_mapped_pages[i] = { };
 		_mapped_pages[i].ptr = nullptr;
 
 		if (_log != nullptr) {

@@ -135,7 +135,7 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_WRITE;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BYTE;
@@ -166,10 +166,10 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 		data.byte = byte;
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_WRITE;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BYTE_DATA;
@@ -201,10 +201,10 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 		data.word = target.requires_byte_swap() ? swap_bytes(word) : word;
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_WRITE;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_WORD_DATA;
@@ -244,11 +244,11 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 		data.block[0] = static_cast<std::uint8_t>(size);
 		std::memmove(&data.block[1], block, size);
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_WRITE;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BLOCK_DATA;
@@ -280,9 +280,9 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_READ;
 		msg.size = I2C_SMBUS_BYTE;
 		msg.data = &data;
@@ -307,7 +307,7 @@ namespace abc {
 
 	template <typename Log>
 	inline bool gpio_smbus<Log>::get_noreg_2(const gpio_smbus_target<Log>& target, std::uint16_t& word) noexcept {
-		std:uint8_t byte0;
+		std::uint8_t byte0;
 		if (!get_noreg(target, byte0)) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f2, "gpio_smbus::get_noreg_2() byte0 failed. errno = %d", errno);
@@ -345,9 +345,9 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_READ;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BYTE_DATA;
@@ -381,9 +381,9 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_READ;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_WORD_DATA;
@@ -417,10 +417,10 @@ namespace abc {
 			}
 		}
 
-		i2c_smbus_data data = { 0 };
+		i2c_smbus_data data{ };
 		data.block[0] = static_cast<std::uint8_t>(size);
 
-		i2c_smbus_ioctl_data msg = { 0 };
+		i2c_smbus_ioctl_data msg{ };
 		msg.read_write = I2C_SMBUS_READ;
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BLOCK_DATA;

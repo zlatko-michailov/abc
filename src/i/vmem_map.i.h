@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -99,7 +100,7 @@ namespace abc {
 
 	template <typename Key, typename T, typename Pool, typename Log>
 	struct vmem_map_result2 {
-		vmem_map_result2(nullptr_t) noexcept;
+		vmem_map_result2(std::nullptr_t) noexcept;
 		vmem_map_result2(const vmem_map_result2& other) = default;
 		vmem_map_result2(vmem_map_result2&& other) noexcept = default;
 

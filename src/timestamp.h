@@ -293,12 +293,6 @@ namespace abc {
 		time_count_t nanoseconds = remaining % nanosecond_count;
 		remaining = remaining / millisecond_count;
 
-		time_count_t microseconds = remaining % microsecond_count;
-		remaining = remaining / millisecond_count;
-
-		time_count_t milliseconds = remaining % millisecond_count;
-		remaining = remaining / millisecond_count;
-
 		time_count_t seconds = remaining % second_count;
 		remaining = remaining / second_count;
 

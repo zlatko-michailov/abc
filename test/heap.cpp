@@ -47,7 +47,7 @@ namespace abc { namespace test { namespace heap {
 	static counter_t	array_aligned_nothrow_count			= 0;
 
 
-	bool start_heap_allocation(test_context<abc::test::log>& context) {
+	bool start_heap_allocation(test_context<abc::test::log>& /*context*/) {
 		instance_unaligned_throw_count		= 0;
 		instance_aligned_throw_count		= 0;
 		instance_unaligned_nothrow_count	= 0;

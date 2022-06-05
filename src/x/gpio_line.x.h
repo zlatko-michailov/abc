@@ -58,7 +58,7 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", 0x106ca);
 		}
 
-		gpio_line_request line_request{ 0 };
+		gpio_line_request line_request{ };
 #if ((__ABC__GPIO_VER) == 2)
 		line_request.num_lines = 1;
 		line_request.offsets[0] = pos;
@@ -98,7 +98,7 @@ namespace abc {
 
 	template <typename Log>
 	inline gpio_level_t gpio_line<Log>::get_level() const noexcept {
-		gpio_line_values values{ 0 };
+		gpio_line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
 		values.mask = gpio_level::mask;
 #endif		
@@ -142,7 +142,7 @@ namespace abc {
 			return gpio_level::invalid;
 		}
 
-		gpio_line_values values{ 0 };
+		gpio_line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
 		values.mask = gpio_level::mask;
 		values.bits = (level & gpio_level::mask);

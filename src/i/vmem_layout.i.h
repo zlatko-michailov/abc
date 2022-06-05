@@ -55,9 +55,9 @@ namespace abc {
 
 	template <typename T, typename Header = vmem_noheader>
 	struct vmem_container_page : public vmem_linked_page {
-		Header				header				= { 0 };
+		Header				header				= { };
 		vmem_item_pos_t		item_count			= 0;
-		T					items[1]			= { 0 };
+		T					items[1]			= { };
 	};
 
 
@@ -68,15 +68,15 @@ namespace abc {
 
 	template <typename Key>
 	struct vmem_map_key {
-		Key						key				= { 0 };
-		vmem_page_pos_t			page_pos		= { 0 };
+		Key						key				= { };
+		vmem_page_pos_t			page_pos		= { };
 	};
 
 
 	template <typename Key, typename T>
 	struct vmem_map_value {
-		Key						key				= { 0 };
-		T						value			= { 0 };
+		Key						key				= { };
+		T						value			= { };
 	};
 
 

@@ -59,7 +59,7 @@ using vmem_list = abc::vmem_list<vmem_list_item, vmem_pool, log_ostream>;
 void work_with_list(abc::vmem_list_state* list_state, vmem_pool* pool, log_ostream* log, const char* list_name, std::size_t items_to_add);
 
 
-int main(int argc, const char* argv[]) {
+int main(int /*argc*/, const char* argv[]) {
 	// Create a log.
 	abc::log_filter filter(abc::severity::optional);
 	log_ostream log(std::cout.rdbuf(), &filter);
@@ -130,7 +130,7 @@ void work_with_list(abc::vmem_list_state* list_state, vmem_pool* pool, log_ostre
 	// Add more items.
 	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10344, "Adding...");
 	for (std::size_t i = 0; i < items_to_add; i++) {
-		vmem_list_item item { (std::uint64_t)(size + i), { 0 } };
+		vmem_list_item item { (std::uint64_t)(size + i), { } };
 
 		list.insert(list.end(), item);
 		log->put_any(abc::category::abc::samples, abc::severity::important, 0x10345, "%llu", (long long)item.data);

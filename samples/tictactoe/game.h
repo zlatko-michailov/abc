@@ -83,7 +83,7 @@ namespace abc { namespace samples {
 		_is_game_over		= false;
 		_winner				= player_id::none;
 		_current_player_id	= player_id::x;
-		_board_state		= { 0 };
+		_board_state		= { };
 		_move_count			= 0;
 	}
 
@@ -122,7 +122,7 @@ namespace abc { namespace samples {
 		}
 		clear_move(move);
 
-		_winner == player_id::none;
+		_winner = player_id::none;
 		_is_game_over = false;
 
 		return true;
@@ -298,8 +298,8 @@ namespace abc { namespace samples {
 		int best_score = -1;
 
 		// For simplicity, try cells in order.
-		for (int r = 0; r < row_count; r++) {
-			for (int c = 0; c < col_count; c++) {
+		for (move_t r = 0; r < row_count; r++) {
+			for (move_t c = 0; c < col_count; c++) {
 				move mv{ r, c };
 
 				if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
@@ -355,8 +355,8 @@ namespace abc { namespace samples {
 			score_calc_t none_count = 0;
 			score_calc_t score_sum = 0;
 
-			for (int r = 0; r < row_count; r++) {
-				for (int c = 0; c < col_count; c++) {
+			for (move_t r = 0; r < row_count; r++) {
+				for (move_t c = 0; c < col_count; c++) {
 					if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
 						score_calc_t curr_score = itr->value[r][c];
 
@@ -380,8 +380,8 @@ namespace abc { namespace samples {
 			if (max_count > 0) {
 				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-				for (int r = 0; r < row_count; r++) {
-					for (int c = 0; c < col_count; c++) {
+				for (move_t r = 0; r < row_count; r++) {
+					for (move_t c = 0; c < col_count; c++) {
 						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none && itr->value[r][c] == score::max) {
 							if (--rand_i == 0) {
 								return move{ r, c };
@@ -406,8 +406,8 @@ namespace abc { namespace samples {
 
 				score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
 
-				for (int r = 0; r < row_count; r++) {
-					for (int c = 0; c < col_count; c++) {
+				for (move_t r = 0; r < row_count; r++) {
+					for (move_t c = 0; c < col_count; c++) {
 						score_calc_t curr_score = itr->value[r][c];
 
 						if (_game->board().get_move(move{ r, c }) == abc::samples::player_id::none) {
@@ -842,7 +842,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type) {
+	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* /*method*/, player_type_t& player_x_type, player_type_t& player_o_type) {
 		char players[2][abc::size::_64 + 1];
 		bool has_players = false;
 

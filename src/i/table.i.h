@@ -45,7 +45,6 @@ namespace abc {
 
 	public:
 		table_ostream(std::streambuf* sb);
-		table_ostream(table_ostream&& other) = default;
 
 	public:
 		void put_line(const char* line, std::size_t line_size = size::strlen) noexcept;

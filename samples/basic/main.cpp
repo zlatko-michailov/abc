@@ -36,7 +36,7 @@ using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>
 using limits = abc::endpoint_limits;
 
 
-int main(int argc, const char* argv[]) {
+int main(int /*argc*/, const char* argv[]) {
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::important);
 	log_ostream log(std::cout.rdbuf(), &filter);

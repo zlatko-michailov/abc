@@ -193,7 +193,7 @@ namespace abc { namespace samples {
 		bool				_is_game_over		= false;
 		player_id_t			_winner				= player_id::none;
 		player_id_t			_current_player_id	= player_id::x;
-		board_state_t		_board_state		= { 0 };
+		board_state_t		_board_state		= { };
 		unsigned			_move_count			= 0;
 		log_ostream*		_log				= nullptr;
 	};

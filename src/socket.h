@@ -43,10 +43,10 @@ namespace abc {
 
 	template <typename Log>
 	inline _basic_socket<Log>::_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
-		: _handle(handle)
-		, _kind(kind)
+		: _kind(kind)
 		, _family(family)
 		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
+		, _handle(handle)
 		, _log(log) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
 			throw exception<std::logic_error, Log>("_basic_socket::_basic_socket(kind)", 0x10004, log);
@@ -131,7 +131,7 @@ namespace abc {
 
 	template <typename Log>
 	inline addrinfo	_basic_socket<Log>::hints() const noexcept {
-		addrinfo hints = { 0 };
+		addrinfo hints{ };
 
 		hints.ai_family		= _family;
 		hints.ai_socktype	= _kind;
@@ -350,7 +350,7 @@ namespace abc {
 
 			sent_size = 0;
 		}
-		else if (sent_size < size) {
+		else if ((std::size_t)sent_size < size) {
 			if (log_local != nullptr) {
 				log_local->put_any(category::abc::socket, severity::important, 0x10440, "_client_socket::send() sent_size=%l", (long)sent_size);
 			}
@@ -395,7 +395,7 @@ namespace abc {
 
 			received_size = 0;
 		}
-		else if (received_size < size) {
+		else if ((std::size_t)received_size < size) {
 			if (log_local != nullptr) {
 				log_local->put_any(category::abc::socket, severity::important, 0x10442, "_client_socket::receive() received_size=%l", (long)received_size);
 			}

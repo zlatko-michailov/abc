@@ -118,7 +118,7 @@ namespace abc {
 
 		if (_level_stack[_level_top] != level) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%zu', top=%u, pop=%u", _level_top + 1, _level_stack[_level_top], level);
+				_log->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%zu', top=%u, pop=%u", _level_top + 1, (unsigned)_level_stack[_level_top], (unsigned)level);
 			}
 
 			return false;

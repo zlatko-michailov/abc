@@ -39,13 +39,13 @@ SOFTWARE.
 namespace abc {
 
 	inline gpio_chip_info::gpio_chip_info() noexcept
-		: gpio_chip_info_base{0}
+		: gpio_chip_info_base{ }
 		, is_valid(false) {
 	}
 
 
 	inline gpio_line_info::gpio_line_info() noexcept
-		: gpio_line_info_base{0}
+		: gpio_line_info_base{ }
 		, is_valid(false) {
 	}
 

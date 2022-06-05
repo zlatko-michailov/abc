@@ -75,8 +75,8 @@ namespace abc {
 	template <std::size_t Size>
 	inline line_ostream<Size>::line_ostream(table_ostream* table)
 		: base(&_sb)
-		, _sb(nullptr, 0, 0, _buffer, 0, Size)
 		, _table(table)
+		, _sb(nullptr, 0, 0, _buffer, 0, Size)
 		, _pcount(0) {
 	}
 

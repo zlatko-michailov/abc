@@ -203,7 +203,7 @@ namespace abc {
 	}
 
 	template <std::size_t Size, typename Clock>
-	inline void test_line_ostream<Size, Clock>::put_props(category_t category, severity_t severity, tag_t tag) noexcept {
+	inline void test_line_ostream<Size, Clock>::put_props(category_t /*category*/, severity_t severity, tag_t /*tag*/) noexcept {
 		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
 		char buf_severity[2 * severity::abc::debug + 1];

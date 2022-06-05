@@ -58,7 +58,7 @@ namespace abc {
 
 
 	template <typename Key, typename T, typename Pool, typename Log>
-	vmem_map_result2<Key, T, Pool, Log>::vmem_map_result2(nullptr_t) noexcept
+	vmem_map_result2<Key, T, Pool, Log>::vmem_map_result2(std::nullptr_t) noexcept
 		: iterator(nullptr)
 		, ok(false) {
 	}

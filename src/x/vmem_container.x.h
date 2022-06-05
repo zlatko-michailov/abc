@@ -1050,12 +1050,12 @@ namespace abc {
 		vmem_linked<Pool, Log> linked(_state, _pool, _log);
 
 		vmem_linked_iterator<Pool, Log> itr(&linked, page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
-		vmem_linked_iterator<Pool, Log> next_itr = linked.erase(itr);
+		linked.erase(itr);
 		bool ok = true;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::optional, 0x1047c, "vmem_container::erase_page_pos() Done. ok=%d, page_pos=0x%llx",
-				ok, (long long)page_pos);
+				(int)ok, (long long)page_pos);
 		}
 
 		return ok;
