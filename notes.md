@@ -1,44 +1,21 @@
 ## Done
-- CRC: Moved to boneyard.
-- GPIO:
-  - Chip - get chip and line info.
-  - Line - get and put low/high signal level.
-  - PWM Emulator - put variable signal level through a duty cycle.
-  - SMBus - control HATs.
-  - SMBus PWM - hardware-implemented variable signal.
-- Sample picar_4wd:
-  - Drive
-  - Turn
-  - Slow down and stop automatically
- - Other examples:
-  - Get chip and line info.
-  - Get distance through the ultrasound sensor.
-  - Turn the ultrasound sensor through its servo.
-- Doc:
-  - GPIO
-  
-Speed (all wheels):
-  
-duty cycle |   25 |   50 |   75 |  100
----------- |   -- |   -- |   -- |  ---
- c / 200ms |    3 |    7 |   11 |   14
- c / sec   |   15 |   35 |   55 |   70
- r / sec   | 0.75 | 1.75 | 2.75 | 3.50
- cm / sec  | 15.6 | 36.3 | 57.0 | 72.6
-
-Turn:
-
-deg        |   30 |   45 |   60
----        |   -- |   -- |   --
-rad        | 0.52 | 0.79 | 1.05
-delta / 2  |  7.4 | 11.2 | 14.9
-duty cycle |   12 |   16 |   25
-experi. dc |   11 |   18 |   25
+- Breaking change:
+  - Predicate ...
+- Code fixups:
+  - Remove unused variables.
+  - Zero initialization.
+Build:
+  - Add warnings
+  - Compile with Clang and GCC
+  - Switch default to compiler to Clang.
+  - Make the build configurable.
 
 ## To Do
-- dev: clang
-  - Install on SUSE
-  - Install on Ubuntu
+- Release
+  - releases
+  - roadmap
+  - tag
+  - version
 
 ## Pick List
 - vmem:
@@ -77,6 +54,25 @@ experi. dc |   11 |   18 |   25
 
 PID PPID PS
 ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$/\1 \2 \3/'
+
+
+Speed (all wheels):
+  
+duty cycle |   25 |   50 |   75 |  100
+---------- |   -- |   -- |   -- |  ---
+ c / 200ms |    3 |    7 |   11 |   14
+ c / sec   |   15 |   35 |   55 |   70
+ r / sec   | 0.75 | 1.75 | 2.75 | 3.50
+ cm / sec  | 15.6 | 36.3 | 57.0 | 72.6
+
+Turn:
+
+deg        |   30 |   45 |   60
+---        |   -- |   -- |   --
+rad        | 0.52 | 0.79 | 1.05
+delta / 2  |  7.4 | 11.2 | 14.9
+duty cycle |   12 |   16 |   25
+experi. dc |   11 |   18 |   25
 
 
 -----------------------------------------

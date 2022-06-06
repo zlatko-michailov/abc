@@ -108,10 +108,8 @@ namespace abc {
 		std::size_t	skip_crlf();
 
 		std::size_t	get_bytes(char* buffer, std::size_t size);
-		template <typename Predicate>
-		std::size_t	get_chars(Predicate&& predicate, char* buffer, std::size_t size);
-		template <typename Predicate>
-		std::size_t	skip_chars(Predicate&& predicate);
+		std::size_t	get_chars(CharPredicate&& predicate, char* buffer, std::size_t size);
+		std::size_t	skip_chars(CharPredicate&& predicate);
 		char		get_char();
 		char		peek_char();
 	};
@@ -149,8 +147,7 @@ namespace abc {
 		std::size_t	put_space();
 
 		std::size_t	put_bytes(const char* buffer, std::size_t size);
-		template <typename Predicate>
-		std::size_t	put_chars(Predicate&& predicate, const char* buffer, std::size_t size);
+		std::size_t	put_chars(CharPredicate&& predicate, const char* buffer, std::size_t size);
 		std::size_t put_char(char ch);
 
 		std::size_t skip_spaces_in_header_value(const char* buffer, std::size_t size);

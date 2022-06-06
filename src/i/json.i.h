@@ -135,10 +135,8 @@ namespace abc {
 		std::size_t		get_digits(char* buffer, std::size_t size);
 		std::size_t		skip_spaces();
 
-		template <typename Predicate>
-		std::size_t		get_chars(Predicate&& predicate, char* buffer, std::size_t size);
-		template <typename Predicate>
-		std::size_t		skip_chars(Predicate&& predicate);
+		std::size_t		get_chars(CharPredicate&& predicate, char* buffer, std::size_t size);
+		std::size_t		skip_chars(CharPredicate&& predicate);
 		char			get_char();
 		char			peek_char();
 	};

@@ -583,8 +583,7 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	template <typename Predicate>
-	inline std::size_t json_istream<MaxLevels, Log>::get_chars(Predicate&& predicate, char* buffer, std::size_t size) {
+	inline std::size_t json_istream<MaxLevels, Log>::get_chars(CharPredicate&& predicate, char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
 		while (base::is_good() && predicate(peek_char())) {
@@ -602,8 +601,7 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	template <typename Predicate>
-	inline std::size_t json_istream<MaxLevels, Log>::skip_chars(Predicate&& predicate) {
+	inline std::size_t json_istream<MaxLevels, Log>::skip_chars(CharPredicate&& predicate) {
 		std::size_t gcount = 0;
 		
 		while (base::is_good() && predicate(peek_char())) {

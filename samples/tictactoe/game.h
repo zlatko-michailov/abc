@@ -783,19 +783,14 @@ namespace abc { namespace samples {
 		endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
 
 		endpoint_player_id_t endpoint_player_x_id = 0;
-		bool is_endpoint_player_x_claimed = true;
-
 		endpoint_player_id_t endpoint_player_o_id = 0;
-		bool is_endpoint_player_o_claimed = true;
 
 		if (player_x_type == player_type::external) {
 			endpoint_player_x_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
-			is_endpoint_player_x_claimed = false;
 		}
 
 		if (player_o_type == player_type::external) {
 			endpoint_player_o_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
-			is_endpoint_player_o_claimed = false;
 		}
 
 		_games[game_i].reset(endpoint_game_id, player_x_type, endpoint_player_x_id, player_o_type, endpoint_player_o_id, base::_log);

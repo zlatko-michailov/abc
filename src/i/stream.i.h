@@ -32,6 +32,12 @@ SOFTWARE.
 
 namespace abc {
 
+	using CharPredicate = bool (*) (char);
+
+
+	// --------------------------------------------------------------
+
+
 	template <typename Stream>
 	class _stream : protected Stream {
 		using base = Stream;
