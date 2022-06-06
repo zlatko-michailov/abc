@@ -26,9 +26,12 @@
 PROJECT = abc
 VERSION = 1.15.0
 CPP = clang++
-DEBUG = -ggdb
-CPPOPTIONS = $(DEBUG) --std=c++11 -Wall -Wextra -Wpedantic -Wno-array-bounds -D_FILE_OFFSET_BITS=64
-LINKOPTIONS = -lstdc++ -lpthread
+CPP_OPT_DEBUG = -ggdb
+CPP_OPT_STD = --std=c++11
+CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
+CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
+CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS)
+CPP_LINK_OPTIONS = -lstdc++ -lpthread
 SUBDIR_SRC = src
 SUBDIR_TEST = test
 SUBDIR_OUT = out
@@ -77,33 +80,33 @@ build_samples: build_product
 	#
 	# ---------- Begin building basic ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SAMPLE_BASIC) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SAMPLE_BASIC) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/*.cpp $(CPP_LINK_OPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	# ---------- Done building basic ----------
 	#
 	# ---------- Begin building vmem ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/$(SAMPLE_VMEM) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/$(SAMPLE_VMEM) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/*.cpp $(CPP_LINK_OPTIONS)
 	# ---------- Done building vmem ----------
 	#
 	# ---------- Begin building tictactoe ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SAMPLE_TICTACTOE) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/*.cpp $(CPP_LINK_OPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	# ---------- Done building tictactoe ----------
 	#
 	# ---------- Begin building connect4 ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SAMPLE_CONNECT4) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SAMPLE_CONNECT4) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/*.cpp $(CPP_LINK_OPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	# ---------- Done building connect4 ----------
 	#
 	# ---------- Begin building picar_4wd ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SAMPLE_PICAR_4WD) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SAMPLE_PICAR_4WD) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/*.cpp $(CPP_LINK_OPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
 	# ---------- Done building picar_4wd ----------
@@ -114,7 +117,7 @@ build_samples: build_product
 build_test: build_product
 	#
 	# ---------- Begin building tests ----------
-	$(CPP) $(CPPOPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) $(CURDIR)/$(SUBDIR_TEST)/*.cpp $(LINKOPTIONS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) $(CURDIR)/$(SUBDIR_TEST)/*.cpp $(CPP_LINK_OPTIONS)
 	# ---------- Done building tests ----------
 	#
 
@@ -125,7 +128,7 @@ build_product: clean
 	# ---------- Done building product ----------
 	#
 
-clean:
+clean: vars
 	#
 	# ---------- Begin cleaning ----------
 	rm -fdr $(CURDIR)/$(SUBDIR_OUT)
@@ -138,5 +141,18 @@ clean:
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_BIN)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)/$(SUBDIR_SAMPLES)
 	# ---------- Done cleaning ----------
+	#
+
+vars:
+	#
+	# ---------- Begin vars ----------
+	# CPP = $(CPP)
+	# CPP_OPT_DEBUG = $(CPP_OPT_DEBUG)
+	# CPP_OPT_STD = $(CPP_OPT_STD)
+	# CPP_OPT_WARN = $(CPP_OPT_WARN)
+	# CPP_OPT_FILE_OFFSET_BITS = $(CPP_OPT_FILE_OFFSET_BITS)
+	# CPP_OPTIONS = $(CPP_OPTIONS)
+	# CPP_LINK_OPTIONS = $(CPP_LINK_OPTIONS)
+	# ---------- Done vars ----------
 	#
 
