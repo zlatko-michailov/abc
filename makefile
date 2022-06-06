@@ -25,7 +25,7 @@
 
 PROJECT = abc
 VERSION = 1.15.0
-CPP = clang++
+CPP = g++
 CPP_OPT_DEBUG = -ggdb
 CPP_OPT_STD = --std=c++11
 CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
