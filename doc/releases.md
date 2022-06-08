@@ -2,6 +2,21 @@
 
 Up to [Documentation](README.md).
 
+## 1.16.0
+- Breaking Changes
+  - Template parameter `Predicate` in `json_istream` and `http_istream` has become strictly `CharPredicate`.
+- Bugs
+  - Zero initialization.
+  - Conditions in game samples.
+- Additions
+  - Configurable compiler and options
+    - `make CPP_OPT_STD=--std=c++17`
+  - Support for `clang`
+    - `make CPP=clang++`
+  - Add warnings.
+- Refactoring
+  - Unused variables removed.
+
 ## 1.15.0
 - Breaking Changes
   - crc - moved to boneyard

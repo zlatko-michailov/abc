@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 1.15.0
+VERSION = 1.16.0
 CPP = g++
 CPP_OPT_DEBUG = -ggdb
 CPP_OPT_STD = --std=c++11

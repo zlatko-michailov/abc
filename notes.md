@@ -1,21 +1,6 @@
 ## Done
-- Breaking change:
-  - Predicate ...
-- Code fixups:
-  - Remove unused variables.
-  - Zero initialization.
-Build:
-  - Add warnings
-  - Compile with Clang and GCC
-  - Switch default to compiler to Clang.
-  - Make the build configurable.
 
 ## To Do
-- Release
-  - releases
-  - roadmap
-  - tag
-  - version
 
 ## Pick List
 - vmem:

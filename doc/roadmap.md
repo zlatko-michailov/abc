@@ -2,9 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.16.0
-- clang
-
 ## 1.17.0
 - doxygen
 
