@@ -13,7 +13,7 @@ The following `abc` features use POSIX API:
   - Ubuntu x64
 - Linux on Raspberry Pi 4
   - openSUSE arm64
-  - Raspbian (Debian) arm32
+  - Raspberry Pi OS arm32
 - Windows 10 x64 on PC, with [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) enabled.
   - openSUSE x64
   - Ubuntu x64
@@ -21,7 +21,12 @@ The following `abc` features use POSIX API:
 ## Packages
 The library itself doesn't need anything beyond the `std` C++ 11 headers and the POSIX-specific headers mentioned above.
 According to the [GCC documentation](https://gcc.gnu.org/projects/cxx-status.html#cxx11), GCC C++ 4.8.1 or later should suffice.
-`abc` has been compiled with GCC C++ 9 and GCC C++ 10.
+`abc` has been compiled with Clang 10 and 11, as well as with GCC 7 through 9.
+
+Although Clang is supported, the default compiler remains GCC.
+That is due to a bug in Clang 7, which is the default Clang version on Raspberry Pi 4.
+
+A compiler of choice may be used by passing in a `CPP` variable to `make`.
 
 To build the tests and the samples, some essential packages are needed, which your system may already have.
 
@@ -41,10 +46,10 @@ sudo apt update
 ### Install Packages
 openSUSE
 ```
-sudo zypper install gcc-c++ make git zip unzip
+sudo zypper install clang gcc-c++ make git zip unzip
 ```
 
 Ubuntu
 ```
-sudo apt install g++ make git zip unzip
+sudo apt install clang g++ make git zip unzip
 ```

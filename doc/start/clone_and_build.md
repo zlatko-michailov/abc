@@ -36,8 +36,16 @@ git checkout dev
 > Note: The library itself has nothing to build - it is a header-only library.
 What is being built is tests and samples.
 
+To build with default options:
 ```
 make
+```
+
+The first thing the build prints is the values of configurable variables.
+You can pass in custom values if needed.
+For instance, to build with Clang:
+```
+make CPP=clang++
 ```
 
 That will build the tests and the samples.
