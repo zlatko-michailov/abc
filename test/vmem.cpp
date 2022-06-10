@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#include <array>
+
 #include "inc/vmem.h"
 
 

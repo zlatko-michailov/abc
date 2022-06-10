@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <iostream>
 #include <cstring>
+#include <array>
 
 #include "../../src/log.h"
 #include "../../src/vmem.h"
