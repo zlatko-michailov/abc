@@ -25,6 +25,7 @@
 
 PROJECT = abc
 VERSION = 1.16.0
+
 CPP = g++
 CPP_OPT_DEBUG = -ggdb
 CPP_OPT_STD = --std=c++11
@@ -32,6 +33,7 @@ CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
 CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
 CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS)
 CPP_LINK_OPTIONS = -lstdc++ -lpthread
+
 SUBDIR_SRC = src
 SUBDIR_TEST = test
 SUBDIR_OUT = out
@@ -39,12 +41,22 @@ SUBDIR_INCLUDE = include
 SUBDIR_BIN = bin
 SUBDIR_SAMPLES = samples
 SUBDIR_RESOURCES = resources
+
 SAMPLE_BASIC = basic
 SAMPLE_VMEM = vmem
 SAMPLE_TICTACTOE = tictactoe
 SAMPLE_CONNECT4 = connect4
 SAMPLE_PICAR_4WD = picar_4wd
+
 PROG_TEST = $(PROJECT)_test
+
+UNAME = $(shell uname)
+DEPS_BUILD_SAMPLES_COMMON = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4)
+ifeq "$(UNAME)" "Linux"
+	DEPS_BUILD_SAMPLES = $(DEPS_BUILD_SAMPLES_COMMON)  build_sample_$(SAMPLE_PICAR_4WD)
+else
+	DEPS_BUILD_SAMPLES = $(DEPS_BUILD_SAMPLES_COMMON)
+endif
 
 
 all: test
@@ -74,9 +86,16 @@ pack: build_product build_test build_samples
 	# ---------- Done packing ----------
 	#
 
-build_samples: build_product
+build_samples: build_product build_samples_begin $(DEPS_BUILD_SAMPLES)
+	#
+	# ---------- Done building samples ----------
+	#
+
+build_samples_begin:
 	#
 	# ---------- Begin building samples ----------
+
+build_sample_$(SAMPLE_BASIC): build_product
 	#
 	# ---------- Begin building basic ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)
@@ -84,11 +103,15 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_BASIC)/$(SUBDIR_RESOURCES)
 	# ---------- Done building basic ----------
+
+build_sample_$(SAMPLE_VMEM): build_product
 	#
 	# ---------- Begin building vmem ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)
 	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/$(SAMPLE_VMEM) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_VMEM)/*.cpp $(CPP_LINK_OPTIONS)
 	# ---------- Done building vmem ----------
+
+build_sample_$(SAMPLE_TICTACTOE): build_product
 	#
 	# ---------- Begin building tictactoe ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)
@@ -96,6 +119,8 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TICTACTOE)/$(SUBDIR_RESOURCES)
 	# ---------- Done building tictactoe ----------
+
+build_sample_$(SAMPLE_CONNECT4): build_product
 	#
 	# ---------- Begin building connect4 ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)
@@ -103,6 +128,8 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_CONNECT4)/$(SUBDIR_RESOURCES)
 	# ---------- Done building connect4 ----------
+
+build_sample_$(SAMPLE_PICAR_4WD): build_product
 	#
 	# ---------- Begin building picar_4wd ----------
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)
@@ -110,9 +137,6 @@ build_samples: build_product
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
 	# ---------- Done building picar_4wd ----------
-	#
-	# ---------- Done building samples ----------
-	#
 
 build_test: build_product
 	#
