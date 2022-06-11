@@ -8,12 +8,15 @@ Up to [Documentation](README.md).
 - Bugs
   - Zero initialization.
   - Conditions in game samples.
+  - Accurate `#include`s.
 - Additions
   - Configurable compiler and options
     - `make CPP_OPT_STD=--std=c++17`
   - Support for `clang`
     - `make CPP=clang++`
   - Add warnings.
+  - Builds on Mac OS.
+  - Conditional compilation based on OS.
 - Refactoring
   - Unused variables removed.
 
