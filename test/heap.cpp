@@ -35,8 +35,6 @@ namespace abc { namespace test { namespace heap {
 	bool verify_heap_allocation(test_context<abc::test::log>& context, tag_t tag);
 
 
-	using counter_t = std::int32_t;
-
 	static counter_t	instance_unaligned_throw_count		= 0;
 	static counter_t	instance_aligned_throw_count		= 0;
 	static counter_t	instance_unaligned_nothrow_count	= 0;
@@ -66,8 +64,8 @@ namespace abc { namespace test { namespace heap {
 	}
 
 
-	bool ignore_heap_allocation(test_context<abc::test::log>& context, tag_t tag) {
-		instance_unaligned_throw_count--;
+	bool ignore_heap_allocations(counter_t count, test_context<abc::test::log>& context, tag_t tag) {
+		instance_unaligned_throw_count -= count;
 
 		return verify_heap_allocation(context, tag);
 	}

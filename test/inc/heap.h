@@ -33,9 +33,11 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace heap {
 
+	using counter_t = std::int32_t;
+
 	bool start_heap_allocation(test_context<abc::test::log>& context);
 	bool test_heap_allocation(test_context<abc::test::log>& context);
-	bool ignore_heap_allocation(test_context<abc::test::log>& context, tag_t tag);
+	bool ignore_heap_allocations(counter_t count, test_context<abc::test::log>& context, tag_t tag);
 
 }}}
 

@@ -26,12 +26,21 @@
 PROJECT = abc
 VERSION = 1.16.0
 
+UNAME = $(shell uname)
+ifeq "$(UNAME)" "Linux"
+	CPP_OPT_UNAME = -D__ABC__LINUX=1
+else ifeq "$(UNAME)" "Darwin"
+	CPP_OPT_UNAME = -D__ABC__MACOS=1
+else
+	CPP_OPT_UNAME = -D__ABC__WINDOWS=1
+endif
+
 CPP = g++
 CPP_OPT_DEBUG = -ggdb
 CPP_OPT_STD = --std=c++11
 CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
 CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
-CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS)
+CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS) $(CPP_OPT_UNAME)
 CPP_LINK_OPTIONS = -lstdc++ -lpthread
 
 SUBDIR_SRC = src
@@ -50,7 +59,6 @@ SAMPLE_PICAR_4WD = picar_4wd
 
 PROG_TEST = $(PROJECT)_test
 
-UNAME = $(shell uname)
 DEPS_BUILD_SAMPLES_COMMON = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4)
 ifeq "$(UNAME)" "Linux"
 	DEPS_BUILD_SAMPLES = $(DEPS_BUILD_SAMPLES_COMMON)  build_sample_$(SAMPLE_PICAR_4WD)
@@ -170,11 +178,14 @@ clean: vars
 vars:
 	#
 	# ---------- Begin vars ----------
+	# UNAME = $(UNAME)
+	#
 	# CPP = $(CPP)
 	# CPP_OPT_DEBUG = $(CPP_OPT_DEBUG)
 	# CPP_OPT_STD = $(CPP_OPT_STD)
 	# CPP_OPT_WARN = $(CPP_OPT_WARN)
 	# CPP_OPT_FILE_OFFSET_BITS = $(CPP_OPT_FILE_OFFSET_BITS)
+	# CPP_OPT_UNAME = $(CPP_OPT_UNAME)
 	# CPP_OPTIONS = $(CPP_OPTIONS)
 	# CPP_LINK_OPTIONS = $(CPP_LINK_OPTIONS)
 	# ---------- Done vars ----------
