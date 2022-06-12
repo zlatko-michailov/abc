@@ -67,20 +67,20 @@ else
 endif
 
 
-all: test
+all: pack test
 	#
 	# ---------- Done all ----------
 	#
 	#
 
-test: pack
+test: build_product build_test
 	#
 	# ---------- Begin testing ----------
 	$(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST)
 	# ---------- Done testing ----------
 	#
 
-pack: build_product build_test build_samples
+pack: build_product build_test build_samples build_doc
 	#
 	# ---------- Begin packing ----------
 	cp $(CURDIR)/LICENSE  $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(VERSION)
@@ -92,6 +92,13 @@ pack: build_product build_test build_samples
 	ln -s $(VERSION)/$(SUBDIR_BIN) $(CURDIR)/$(SUBDIR_OUT)/$(PROJECT)/$(SUBDIR_BIN)
 	cd $(CURDIR)/$(SUBDIR_OUT); zip -ry9 $(PROJECT)_$(VERSION).zip $(PROJECT); cd $(CURDIR)
 	# ---------- Done packing ----------
+	#
+
+build_doc:
+	#
+	# ---------- Begin doxygen ----------
+	doxygen $(CURDIR)/bin/doxygen.conf
+	# ---------- Done doxygen ----------
 	#
 
 build_samples: build_product build_samples_begin $(DEPS_BUILD_SAMPLES)

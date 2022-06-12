@@ -46,10 +46,10 @@ sudo apt update
 ### Install Packages
 openSUSE
 ```
-sudo zypper install clang gcc-c++ make git zip unzip
+sudo zypper install clang gcc-c++ make git zip unzip doxygen
 ```
 
 Ubuntu
 ```
-sudo apt install clang g++ make git zip unzip
+sudo apt install clang g++ make git zip unzip doxygen
 ```

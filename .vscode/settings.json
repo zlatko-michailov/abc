@@ -89,6 +89,7 @@
 		"bitness",
 		"chrono",
 		"connectionless",
+		"doxygen",
 		"filebuf",
 		"grayscale",
 		"istream",
