@@ -91,6 +91,7 @@
 		"connectionless",
 		"doxygen",
 		"filebuf",
+		"gpio",
 		"grayscale",
 		"istream",
 		"michailov",
