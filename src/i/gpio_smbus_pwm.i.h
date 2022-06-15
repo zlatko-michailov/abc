@@ -39,40 +39,138 @@ SOFTWARE.
 
 namespace abc {
 
+	/**
+	 * @brief		PWM peripheral connected over SMBus. For motors and servo, it is better to use `gpio_smbus_motor` and `gpio_smbus_servo`.
+	 * 
+	 * @tparam Log Logging facility.
+	 */
 	template <typename Log = null_log>
 	class gpio_smbus_pwm {
 	public:
+		/**
+		 * @brief						Constructor for servo-like PWM peripherals.
+		 * 
+		 * @tparam PulseWidthDuration	`std::duration` type of the pulse width duration.
+		 * @param smbus					Pointer to a `gpio_smbus` instance.
+		 * @param smbus_target			SMBus target representing the HAT to which the peripheral is connected.
+		 * @param min_pulse_width		Minimum pulse width duration.
+		 * @param max_pulse_width		Maximum pulse width duration.
+		 * @param frequency				Duty cycle frequency.
+		 * @param reg_pwm				Duty cycle register on the HAT.
+		 * @param reg_autoreload		ARR register on the HAT.
+		 * @param reg_prescaler			Prescaler register on the HAT.
+		 * @param log					Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		template <typename PulseWidthDuration>
 		gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
 					PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
 					gpio_pwm_pulse_frequency_t frequency,
 					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
 					Log* log = nullptr);
+
+		/**
+		 * @brief						Constructor for motor-like PWM peripherals.
+		 * 
+		 * @param smbus					Pointer to a `gpio_smbus` instance.
+		 * @param smbus_target			SMBus target representing the HAT to which the peripheral is connected.
+		 * @param frequency				Duty cycle frequency.
+		 * @param reg_pwm				Duty cycle register on the HAT.
+		 * @param reg_autoreload		ARR register on the HAT.
+		 * @param reg_prescaler			Prescaler register on the HAT.
+		 * @param log					Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
 					gpio_pwm_pulse_frequency_t frequency,
 					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
 					Log* log = nullptr);
+
+		/**
+		 * @brief						Move constructor.
+		 */
 		gpio_smbus_pwm(gpio_smbus_pwm<Log>&& other) noexcept = default;
+
+		/**
+		 * @brief						Copy constructor.
+		 */
 		gpio_smbus_pwm(const gpio_smbus_pwm<Log>& other) = default;
 
 	public:
-		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		/**
+		 * @brief						Sets the duty cycle and returns immediately.
+		 * 
+		 * @param duty_cycle			Duty cycle. Must be between 0 and 100.
+		 */
+		void							set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
+		/**
+		 * @brief						Sets the duty cycle and waits for the given duration.
+		 * 
+		 * @tparam PwmDuration			`std::duration` type.
+		 * @param duty_cycle			Duty cycle. Must be between 0 and 100.
+		 * @param duration				Sleep duration.
+		 */
 		template <typename PwmDuration>
-		void	set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
+		void							set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
 
 	public:
+		/**
+		 * @brief						Pointer to the `gpio_smbus` instance passed in to the constructor.
+		 */
 		gpio_smbus<Log>*				_smbus;
+
+		/**
+		 * @brief						Copy of the `gpio_smbus_target` passed in to the constructor.
+		 */
 		gpio_smbus_target<Log>			_smbus_target;
+
+		/**
+		 * @brief						Minimum pulse width if passed in to the constructor.
+		 */
 		gpio_smbus_clock_frequency_t	_min_pulse_width;
+
+		/**
+		 * @brief						Maximum pulse width if passed in to the constructor.
+		 */
 		gpio_smbus_clock_frequency_t	_max_pulse_width;
+
+		/**
+		 * @brief						PWM frequency passed in to the constructor.
+		 */
 		gpio_pwm_pulse_frequency_t		_frequency;
+
+		/**
+		 * @brief						Calculated PWM period.
+		 */
 		gpio_smbus_clock_frequency_t	_period;
+
+		/**
+		 * @brief						Calculated ARR.
+		 */
 		gpio_smbus_clock_frequency_t	_autoreload;
+
+		/**
+		 * @brief						Calculated prescaler.
+		 */
 		gpio_smbus_clock_frequency_t	_prescaler;
+
+		/**
+		 * @brief						PWM register on the HAT.
+		 */
 		gpio_smbus_register_t			_reg_pwm;
+
+		/**
+		 * @brief						ARR register on the HAT.
+		 */
 		gpio_smbus_register_t			_reg_autoreload;
+
+		/**
+		 * @brief						Prescaler register on the HAT.
+		 */
 		gpio_smbus_register_t			_reg_prescaler;
+
+		/**
+		 * @brief						The log passed in to the constructor.
+		 */
 		Log*							_log;
 	};
 

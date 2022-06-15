@@ -39,9 +39,30 @@ SOFTWARE.
 
 namespace abc {
 
+	/**
+	 * @brief				Wrapper around `gpio_smbus_pwm` representing a servo connected over SMBus.
+	 * 
+	 * @tparam PwmDuration	`std::duration` type of the duty cycle duration.
+	 * @tparam Log			Logging facility.
+	 */
 	template <typename PwmDuration, typename Log = null_log>
 	class gpio_smbus_servo {
 	public:
+		/**
+		 * @brief						Constructor.
+		 * 
+		 * @tparam PulseWidthDuration	`std::duration` type of the pulse width duration.
+		 * @param smbus					Pointer to a `gpio_smbus` instance.
+		 * @param smbus_target			SMBus target representing the HAT to which the servo is connected.
+		 * @param min_pulse_width		Minimum pulse width duration.
+		 * @param max_pulse_width		Maximum pulse width duration.
+		 * @param pwm_duration			Duty cycle duration.
+		 * @param frequency				Duty cycle frequency.
+		 * @param reg_pwm				Duty cycle register on the HAT for the servo connection.
+		 * @param reg_autoreload		ARR register on the HAT for the servo connection.
+		 * @param reg_prescaler			Prescaler register on the HAT for the servo connection.
+		 * @param log					Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		template <typename PulseWidthDuration>
 		gpio_smbus_servo(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
 					PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
@@ -49,16 +70,37 @@ namespace abc {
 					gpio_pwm_pulse_frequency_t frequency,
 					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
 					Log* log = nullptr);
+
+		/**
+		 * @brief						Move constructor.
+		 */
 		gpio_smbus_servo(gpio_smbus_servo<PwmDuration, Log>&& other) noexcept = default;
+
 		gpio_smbus_servo(const gpio_smbus_servo<PwmDuration, Log>& other) = delete;
 
 	public:
-		void					set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		/**
+		 * @brief						Sets the duty cycle object
+		 * 
+		 * @param duty_cycle			Duty cycle. Must be between 0 and 100.
+		 */
+		void							set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 	private:
-		gpio_smbus_pwm<Log>		_pwm;
-		PwmDuration				_pwm_duration;
-		Log*					_log;
+		/**
+		 * @brief						`gpio_smbus_pwm` instance representing the PWM peripheral.
+		 */
+		gpio_smbus_pwm<Log>				_pwm;
+
+		/**
+		 * @brief						Duty cycle duration.
+		 */
+		PwmDuration						_pwm_duration;
+
+		/**
+		 * @brief						The log passed in to the constructor.
+		 */
+		Log*							_log;
 	};
 
 

@@ -46,10 +46,10 @@ sudo apt update
 ### Install Packages
 openSUSE
 ```
-sudo zypper install clang gcc-c++ make git zip unzip doxygen
+sudo zypper install clang gcc-c++ make git zip unzip doxygen graphviz
 ```
 
 Ubuntu
 ```
-sudo apt install clang g++ make git zip unzip doxygen
+sudo apt install clang g++ make git zip unzip doxygen graphviz
 ```
