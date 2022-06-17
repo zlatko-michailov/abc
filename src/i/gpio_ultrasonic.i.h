@@ -37,26 +37,80 @@ SOFTWARE.
 
 namespace abc {
 
+	/**
+	 * @brief						Combination of a `gpio_output_line` (trigger) and a `gpio_input_line` (echo) to measure distance to the nearest obstacle.
+	 * 
+	 * @tparam DistanceScale		`std::ratio` type for the distance.
+	 * @tparam Log					Logging facility.
+	 */
 	template <typename DistanceScale, typename Log = null_log>
 	class gpio_ultrasonic {
 	public:
+		/**
+		 * @brief					Constructor.
+		 * 
+		 * @param chip				Pointer to the GPIO chip where the lines are surfaced.
+		 * @param trigger_line_pos	Chip-specific position of the output (trigger) line.
+		 * @param echo_line_pos		Chip-specific position of the input (echo) line.
+		 * @param log				Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log = nullptr);
+
+		/**
+		 * @brief					Move constructor.
+		 */
 		gpio_ultrasonic(gpio_ultrasonic<DistanceScale, Log>&& other) noexcept = default;
+
+		/**
+		 * @brief					Copy constructor.
+		 */
 		gpio_ultrasonic(const gpio_ultrasonic<DistanceScale, Log>& other) = delete;
 
 	public:
-		std::size_t			measure_distance(std::size_t max_distance) const noexcept;
+		/**
+		 * @brief					Measures the distance to the nearest obstacle.
+		 * 
+		 * @param max_distance		Maximum distance that this call should wait for.
+		 * @return					Actual distance upon success. `max_distance` otherwise.  
+		 */
+		std::size_t					measure_distance(std::size_t max_distance) const noexcept;
 
 	private:
+		/**
+		 * @brief					Static helper that calculates the distance sound travels for the given time.
+		 * 
+		 * @tparam Duration			`std::duration` type.
+		 * @param duration			Duration of time.
+		 * @return					Distance = sonic speed * `duration`.
+		 */
 		template <typename Duration>
-		static std::size_t	sonic_distance(Duration duration) noexcept;
+		static std::size_t			sonic_distance(Duration duration) noexcept;
+
+		/**
+		 * @brief					Static helper that calculates the time needed for sound to travel the given distance.
+		 * 
+		 * @tparam Duration			`std::duration` type.
+		 * @param distance			Distance.
+		 * @return					Duration = `distance` / sonic speed.
+		 */
 		template <typename Duration>
-		static Duration		sonic_duration(std::size_t distance) noexcept;
+		static Duration				sonic_duration(std::size_t distance) noexcept;
 
 	private:
-		gpio_output_line<Log>	_trigger_line;
-		gpio_input_line<Log>	_echo_line;
-		Log*					_log;
+		/**
+		 * @brief					GPIO output (trigger) line.
+		 */
+		gpio_output_line<Log>		_trigger_line;
+
+		/**
+		 * @brief					GPIO input (echo) line.
+		 */
+		gpio_input_line<Log>		_echo_line;
+
+		/**
+		 * @brief					The log passed in to the constructor.
+		 */
+		Log*						_log;
 	};
 
 
