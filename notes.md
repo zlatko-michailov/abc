@@ -1,7 +1,12 @@
 ## Done
 
 ## To Do
-
+- Un-internalize name:
+  - _istream
+  - _ostream
+  - _http_istream
+  - _http_ostream
+  
 ## Pick List
 - vmem:
   - check

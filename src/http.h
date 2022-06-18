@@ -73,12 +73,6 @@ namespace abc {
 
 
 	template <typename Log>
-	inline void _http_state<Log>::set_next(http::item_t item) noexcept {
-		_next = item;
-	}
-
-
-	template <typename Log>
 	inline Log* _http_state<Log>::log() const noexcept {
 		return _log;
 	}
@@ -101,7 +95,7 @@ namespace abc {
 	template <typename Log>
 	inline void _http_istream<Log>::set_gstate(std::size_t gcount, http::item_t next) {
 		base::set_gcount(gcount);
-		state::set_next(next);
+		state::reset(next);
 	}
 
 
@@ -402,7 +396,7 @@ namespace abc {
 	template <typename Log>
 	inline void _http_ostream<Log>::set_pstate(http::item_t next) {
 		base::flush();
-		state::set_next(next);
+		state::reset(next);
 	}
 
 
@@ -789,12 +783,12 @@ namespace abc {
 
 
 	template <typename Log>
-	inline const char* http_request_istream<Log>::get_resource_parameter(char* buffer, std::size_t size, const char* parameter_name) {
+	inline const char* http_request_istream<Log>::get_resource_parameter(const char* buffer, std::size_t size, const char* parameter_name) {
 		const char* const end = buffer + size;
 		const std::size_t parameter_name_len = std::strlen(parameter_name);
  
 		// path\0param1=...\0param2=...\0\0
-		char* param = buffer + std::strlen(buffer) + 1;
+		const char* param = buffer + std::strlen(buffer) + 1;
 
 		while (param < end && *param != '\0') {
 			if (std::strncmp(param, parameter_name, parameter_name_len) == 0 && param[parameter_name_len] == '=') {
