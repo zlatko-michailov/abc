@@ -34,12 +34,11 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief	`endpoint` settings.
+	 * @brief						`endpoint` settings.
 	 */
 	struct endpoint_config {
 		/**
 		 * @brief					Constructor. Properties can only be set at construction.
-		 * 
 		 * @param port				Port number to listen at.
 		 * @param listen_queue_size	Maximum number of new connections pending to be processed.
 		 * @param root_dir			Local directory that is the root for static files.
@@ -48,67 +47,67 @@ namespace abc {
 		endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix);
 
 		/**
-		 * @brief			Port number to listen at.
+		 * @brief					Port number to listen at.
 		 */
-		const char* const	port;
+		const char* const port;
 
 		/**
-		 * @brief			Maximum number of new connections pending to be processed.
+		 * @brief					Maximum number of new connections pending to be processed.
 		 */
-		const std::size_t	listen_queue_size;
+		const std::size_t listen_queue_size;
 
 		/**
-		 * @brief			Local directory that is the root for static files.
+		 * @brief					Local directory that is the root for static files.
 		 */
-		const char* const	root_dir;
+		const char* const root_dir;
 
 		/**
-		 * @brief			Length of `root_dir`.
+		 * @brief					Length of `root_dir`.
 		 */
-		const std::size_t	root_dir_len;
+		const std::size_t root_dir_len;
 
 		/**
-		 * @brief			Virtual path that maps to the root directory.
+		 * @brief					Virtual path that maps to the root directory.
 		 */
-		const char* const	files_prefix;
+		const char* const files_prefix;
 
 		/**
-		 * @brief			Length of `files_prefix`.
+		 * @brief					Length of `files_prefix`.
 		 */
-		const std::size_t	files_prefix_len;
+		const std::size_t files_prefix_len;
 	};
 
 
 	// --------------------------------------------------------------
 
 	/**
-	 * @brief	Default limits for `endpoint` parse buffers.
+	 * @brief		Default limits for `endpoint` parse buffers.
 	 */
 	struct endpoint_limits {
 		/**
-		 * @brief						Maximum http method size - for GET, POST, DELETE, ...
+		 * @brief	Maximum http method size - for GET, POST, DELETE, ...
 		 */
-		static constexpr std::size_t	method_size		= abc::size::_32;
+		static constexpr std::size_t method_size = abc::size::_32;
 
 		/**
-		 * @brief						Maximum http resource size - for URL.
+		 * @brief	Maximum http resource size - for URL.
 		 */
-		static constexpr std::size_t	resource_size		= abc::size::k2;
+		static constexpr std::size_t resource_size = abc::size::k2;
 
 		/**
-		 * @brief						Maximum http protocol size - for http, https, ...
+		 * @brief	Maximum http protocol size - for http, https, ...
 		 */
-		static constexpr std::size_t	protocol_size		= abc::size::_16;
+		static constexpr std::size_t protocol_size = abc::size::_16;
 
 		/**
-		 * @brief						Maximum http resource chunk size - for sending resources.
+		 * @brief	Maximum http resource chunk size - for sending resources.
 		 */
-		static constexpr std::size_t	file_chunk_size	= abc::size::k1;
+		static constexpr std::size_t file_chunk_size = abc::size::k1;
 
 		/**
-		 * @brief						Maximum http fsize size - for 64-bit numbers.
+		 * @brief	Maximum http fsize size - for 64-bit numbers.
 		 */
-		static constexpr std::size_t	fsize_size			= abc::size::_32;
+		static constexpr std::size_t fsize_size = abc::size::_32;
 	};
 
 
@@ -209,11 +208,8 @@ namespace abc {
 	/**
 	 * @brief					Base http endpoint.
 	 * @details					This class supports the most common functionality - static files and `POST /shutdown`.
-	 * 							To handle other REST requests or special files, a derived class must be used.
-	 * 
 	 * @tparam Limits			Endpoint limits.
 	 * @tparam Log				Logging facility.
-	 * 
 	 * @see endpoint_limits
 	 * @see log_ostream
 	 */
@@ -222,7 +218,6 @@ namespace abc {
 	public:
 		/**
 		 * @brief				Constructor.
-		 * 
 		 * @param config		Pointer to an `endpoint_config` instance. Required.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
@@ -231,50 +226,44 @@ namespace abc {
 	public:
 		/**
 		 * @brief				Starts the endpoint on a separate thread.
-		 * 
 		 * @return				`std::future<void>` that will get set after a `POST /shutdown` is received from a client.
 		 */
-		std::future<void>		start_async();
+		std::future<void> start_async();
 
 		/**
 		 * @brief				Starts the endpoint on the current thread.
 		 * @details				This thread will block until a `POST /shutdown` is received from a client.
 		 */
-		void					start();
+		void start();
 
 	protected:
 		/**
 		 * @brief				Processes a GET request for a static file.
-		 * 
 		 * @param http			Reference to a `http_server_stream`. 
 		 * @param method		Http request method. Must be "GET".
 		 * @param resource		Virtual path to the file.
 		 * @param path			Local path to the file.
 		 */
-		virtual void			process_file_request(http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
+		virtual void process_file_request(http_server_stream<Log>& http, const char* method, const char* resource, const char* path);
 
 		/**
 		 * @brief				Processes a REST request.
-		 * 
 		 * @param http			Reference to a `http_server_stream`.
 		 * @param method		Http request method.
 		 * @param resource		Virtual resource path.
 		 */
-		virtual void			process_rest_request(http_server_stream<Log>& http, const char* method, const char* resource);
+		virtual void process_rest_request(http_server_stream<Log>& http, const char* method, const char* resource);
 
 		/**
 		 * @brief				Checks if the resource is a static file.
-		 * 
 		 * @param method		Http request method.
 		 * @param resource		Virtual resource path.
-		 * 
 		 * @return				Whether the resource is a static file.
 		 */
-		virtual bool			is_file_request(const char* method, const char* resource);
+		virtual bool is_file_request(const char* method, const char* resource);
 
 		/**
 		 * @brief				Sends a response with the given content.
-		 * 
 		 * @param http			Reference to a `http_server_stream`.
 		 * @param status_code	Http status code.
 		 * @param reason_phrase	Http status reason phrase.
@@ -282,64 +271,59 @@ namespace abc {
 		 * @param body			Http response body.
 		 * @param tag			Logging tag provided by the caller, so that this response could be tracked as part of the call flow.
 		 */
-		virtual void			send_simple_response(http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, tag_t tag);
+		virtual void send_simple_response(http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, tag_t tag);
 
 		/**
 		 * @brief				Determines the http response Content-Type based on the file extension.
-		 * 
 		 * @param path			Path (virtual or local) with an extension.
-		 * 
 		 * @return				The value for the Content-Type response header.
 		 */
-		virtual const char*		get_content_type_from_path(const char* path);
+		virtual const char* get_content_type_from_path(const char* path);
 
 	protected:
 		/**
 		 * @brief				Processes (any kind of) a request.
 		 * @details				This is the top-level method that reads the http request line, and calls either `process_file_request()` or `process_rest_request()`.
-		 * 
 		 * @param socket		Connection/client socket to read the request from and to send the response to.
 		 */
-		void					process_request(tcp_client_socket<Log>&& socket);
+		void process_request(tcp_client_socket<Log>&& socket);
 
 		/**
 		 * @brief				Sets the "shutdown requested" flag.
 		 */
-		void					set_shutdown_requested();
+		void set_shutdown_requested();
 
 		/**
-		 * @brief				Gets the "shutdown requested" flag.
-		 * 
-		 * @return				The state of the "shutdown flag".
+		 * @brief				Returns the state of the "shutdown requested" flag.
 		 */
-		bool					is_shutdown_requested() const;
+		bool is_shutdown_requested() const;
 
 	protected:
 		/**
 		 * @brief				The config settings pass in to the constructor.
 		 */
-		endpoint_config*		_config;
+		endpoint_config* _config;
 
 		/**
 		 * @brief				The log passed in to the constructor.
 		 */
-		Log*					_log;
+		Log* _log;
 
 	private:
 		/**
 		 * @brief				The `std::promise` that is returned by `start_async()`, which gets signaled when shutdown is requested.
 		 */
-		std::promise<void>		_promise;
+		std::promise<void> _promise;
 
 		/**
 		 * @brief				Number of requests currently in progress.
 		 */
-		std::atomic_int32_t		_requests_in_progress;
+		std::atomic_int32_t _requests_in_progress;
 
 		/**
 		 * @brief				Flag that gets set when `POST /shutdown` is received.
 		 */
-		std::atomic_bool		_is_shutdown_requested;
+		std::atomic_bool _is_shutdown_requested;
 	};
 
 
