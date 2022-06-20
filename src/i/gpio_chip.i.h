@@ -34,7 +34,7 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief	Wrapper around the corresponding Linux kernel struct.
+	 * @brief		Wrapper around the corresponding Linux kernel struct.
 	 */
 	struct gpio_chip_info : public gpio_chip_info_base {
 		/**
@@ -45,12 +45,12 @@ namespace abc {
 		/**
 		 * @brief	Flag whether the struct has been successfully populated.
 		 */
-		bool		is_valid;
+		bool is_valid;
 	};
 
 
 	/**
-	 * @brief	Wrapper around the corresponding Linux kernel struct.
+	 * @brief		Wrapper around the corresponding Linux kernel struct.
 	 */
 	struct gpio_line_info : public gpio_line_info_base {
 		/**
@@ -61,7 +61,7 @@ namespace abc {
 		/**
 		 * @brief	Flag whether the struct has been successfully populated.
 		 */
-		bool		is_valid;
+		bool is_valid;
 	};
 
 
@@ -69,16 +69,14 @@ namespace abc {
 
 
 	/**
-	 * @brief		GPIO chip.
-	 * 
-	 * @tparam Log	Logging facility.
+	 * @brief						GPIO chip.
+	 * @tparam Log					Logging facility.
 	 */
 	template <typename Log = null_log>
 	class gpio_chip {
 	public:
 		/**
 		 * @brief					Constructor. Identifies the GPIO chip device by number - `/dev/gpiochip0`.
-		 * 
 		 * @param dev_gpiochip_pos	GPIO chip device number.
 		 * @param consumer			Label of the consumer that is using this device.
 		 * @param log				Pointer to a `Log` instance. May be `nullptr`.
@@ -87,7 +85,6 @@ namespace abc {
 
 		/**
 		 * @brief					Constructor. Identifies the GPIO chip device by path - `/dev/gpiochip0`.
-		 * 
 		 * @param path				GPIO chip device path.
 		 * @param consumer			Label of the consumer that is using this device.
 		 * @param log				Pointer to a `Log` instance. May be `nullptr`.
@@ -107,7 +104,6 @@ namespace abc {
 	private:
 		/**
 		 * @brief					Internal initializer. Called from the constructor. 
-		 * 
 		 * @param path				GPIO chip device path.
 		 * @param consumer			Label of the consumer that is using this device.
 		 */
@@ -117,41 +113,40 @@ namespace abc {
 		/**
 		 * @brief					Returns the GPIO chip device path.
 		 */
-		const char* 				path() const noexcept;
+		const char* path() const noexcept;
 
 		/**
 		 * @brief					Returns the label of the consumer that is using this device.
 		 */
-		const char* 				consumer() const noexcept;
+		const char* consumer() const noexcept;
 
 	public:
 		/**
 		 * @brief					Returns the `gpio_chip_info` for this chip.
 		 */
-		gpio_chip_info				chip_info() const noexcept;
+		gpio_chip_info chip_info() const noexcept;
 
 		/**
 		 * @brief					Returns the `gpio_line_info` for the identified line.
-		 * 
 		 * @param pos				Chip-specific position of the requested line.
 		 */
-		gpio_line_info				line_info(gpio_line_pos_t pos) const noexcept;
+		gpio_line_info line_info(gpio_line_pos_t pos) const noexcept;
 
 	private:
 		/**
 		 * @brief					Copy of the GPIO chip device path.
 		 */
-		char						_path[gpio_max_path];
+		char _path[gpio_max_path];
 
 		/**
 		 * @brief					Copy of the consumer label.
 		 */
-		char						_consumer[gpio_max_consumer];
+		char _consumer[gpio_max_consumer];
 
 		/**
 		 * @brief					The log passed in to the constructor.
 		 */
-		Log*						_log;
+		Log* _log;
 	};
 
 

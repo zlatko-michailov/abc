@@ -35,16 +35,14 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief		Base GPIO line. Should not be used directly. Either `gpio_input_line` or `gpio_output_line` should be used.
-	 * 
-	 * @tparam Log	Logging facility.
+	 * @brief				Base GPIO line. Should not be used directly. Either `gpio_input_line` or `gpio_output_line` should be used.
+	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
 	class gpio_line {
 	public:
 		/**
 		 * @brief			Constructor.
-		 * 
 		 * @param chip		Pointer to the owning `gpio_chip` instance.
 		 * @param pos		Chip-specific line position.
 		 * @param flags		Line flags.
@@ -58,7 +56,7 @@ namespace abc {
 		gpio_line(gpio_line<Log>&& other) noexcept = default;
 
 		/**
-		 * @brief			Copy constructor.
+		 * @brief			Deleted.
 		 */
 		gpio_line(const gpio_line<Log>& other) = delete;
 
@@ -71,51 +69,45 @@ namespace abc {
 		/**
 		 * @brief			Returns the current level on the line.
 		 */
-		gpio_level_t		get_level() const noexcept;
+		gpio_level_t get_level() const noexcept;
 
 		/**
 		 * @brief			Wait until the current level on the line matches the expected one.
-		 * 
 		 * @tparam Duration	`std::duration` type.
 		 * @param level		Expected level.
 		 * @param timeout	Timeout.
-		 * 
 		 * @return			The expected level if there was match, or `invalid` if the wait timed out. 
 		 */
 		template <typename Duration>
-		gpio_level_t		expect_level(gpio_level_t level, Duration timeout) const noexcept;
+		gpio_level_t expect_level(gpio_level_t level, Duration timeout) const noexcept;
 
 		/**
 		 * @brief			Set the current level on the line.
-		 * 
 		 * @param level		Desired level.
-		 * 
 		 * @return			The desired level upon success, or `invalid` upon failure.
 		 */
-		gpio_level_t		put_level(gpio_level_t level) const noexcept;
+		gpio_level_t put_level(gpio_level_t level) const noexcept;
 
 		/**
 		 * @brief			Sets the current level on the line, and blocks for the specified duration
-		 * 
 		 * @tparam Duration	`std::duration` type.
 		 * @param level		Desired level.
 		 * @param duration	Duration.
-		 * 
 		 * @return			The desired level upon success, or `invalid` upon failure.
 		 */
 		template <typename Duration>
-		gpio_level_t		put_level(gpio_level_t level, Duration duration) const noexcept;
+		gpio_level_t put_level(gpio_level_t level, Duration duration) const noexcept;
 
 	private:
 		/**
 		 * @brief			The line's device file descriptor.
 		 */
-		gpio_fd_t			_fd		= -1;
+		gpio_fd_t _fd = -1;
 
 		/**
 		 * @brief			The log passed in to the constructor.
 		 */
-		Log*				_log;
+		Log* _log;
 	};
 
 
@@ -124,7 +116,6 @@ namespace abc {
 
 	/**
 	 * @brief				GPIO input line.
-	 * 
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
@@ -134,15 +125,21 @@ namespace abc {
 	public:
 		/**
 		 * @brief			Constructor.
-		 * 
 		 * @see gpio_line
 		 */
 		gpio_input_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		gpio_level_t	put_level(gpio_level_t level) const noexcept = delete;
+		/**
+		 * @brief			Deleted.
+		 */
+		gpio_level_t put_level(gpio_level_t level) const noexcept = delete;
+
+		/**
+		 * @brief			Deleted.
+		 */
 		template <typename Duration>
-		gpio_level_t	put_level(gpio_level_t level, Duration duration) const noexcept = delete;
+		gpio_level_t put_level(gpio_level_t level, Duration duration) const noexcept = delete;
 	};
 
 
@@ -151,7 +148,6 @@ namespace abc {
 
 	/**
 	 * @brief				GPIO output line.
-	 * 
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
@@ -161,15 +157,21 @@ namespace abc {
 	public:
 		/**
 		 * @brief			Constructor.
-		 * 
 		 * @see gpio_line
 		 */
 		gpio_output_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
 
 	public:
-		gpio_level_t	get_level() const noexcept = delete;
+		/**
+		 * @brief			Deleted.
+		 */
+		gpio_level_t get_level() const noexcept = delete;
+
+		/**
+		 * @brief			Deleted.
+		 */
 		template <typename Duration>
-		gpio_level_t	expect_level(gpio_level_t level, Duration timeout) const noexcept = delete;
+		gpio_level_t expect_level(gpio_level_t level, Duration timeout) const noexcept = delete;
 	};
 
 
