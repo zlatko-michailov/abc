@@ -51,7 +51,6 @@ namespace abc {
 
 	/**
 	 * @brief			Returns the duration of the PWM period in `gpio_pwm_duration` units based on the given frequency.
-	 * 
 	 * @param frequency	Frequency in Hz (ticks per second).
 	 */
 	constexpr gpio_pwm_duration gpio_pwm_period(gpio_pwm_pulse_frequency_t frequency) noexcept {

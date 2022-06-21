@@ -40,21 +40,21 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief		PWM emulator over a regular GPIO output line.
-	 * @details		The emulation uses cycles on the main CPU, which may affect accuracy of the PWM as well as the overall responsiveness of the program.
-	 * 				PWM emulation should only be used when no HAT that supports PWM is available.
-	 * 
-	 * @tparam Log	Logging facility.
+	 * @brief								PWM emulator over a regular GPIO output line.
+	 * @details								The emulation uses cycles on the main CPU, which may affect accuracy of the PWM as well as the overall responsiveness of the program.
+	 * 										PWM emulation should only be used when no HAT that supports PWM is available.
+	 * @tparam Log							Logging facility.
 	 */
 	template <typename Log = null_log>
 	class gpio_pwm_emulator {
-		// Break const level sleeps periodically to prevent notification misses.
+		/**
+		 * @brief							Break const level sleeps periodically to prevent notification misses.
+		 */
 		const std::chrono::milliseconds	const_level_period = std::chrono::milliseconds(200);
 
 	public:
 		/**
 		 * @brief							Constructor for servos or other peripherals where the pulse width must be within a given range.
-		 * 
 		 * @tparam PulseWidthDuration		`std::duration` type.
 		 * @param chip						Pointer to the `gpio_chip` instance that owns the GPIO line.
 		 * @param line_pos					Chip-specific line position.
@@ -68,7 +68,6 @@ namespace abc {
 
 		/**
 		 * @brief							Constructor for motors or other peripherals where the pulse width is not restricted.
-		 * 
 		 * @param chip						Pointer to the `gpio_chip` instance that owns the GPIO line.
 		 * @param line_pos					Chip-specific line position.
 		 * @param frequency					Signal frequency.
@@ -79,12 +78,12 @@ namespace abc {
 		/**
 		 * @brief							Move constructor.
 		 */
-		gpio_pwm_emulator(gpio_pwm_emulator<Log>&& other) = default;
+		gpio_pwm_emulator(gpio_pwm_emulator<Log>&& other) noexcept = default;
 
 		/**
-		 * @brief							Copy constructor.
+		 * @brief							Deleted.
 		 */
-		gpio_pwm_emulator(const gpio_pwm_emulator<Log>& other) = default;
+		gpio_pwm_emulator(const gpio_pwm_emulator<Log>& other) = delete;
 
 		/**
 		 * @brief							Destructor.
@@ -94,87 +93,84 @@ namespace abc {
 	public:
 		/**
 		 * @brief							Sets the duty cycle using a separate thread. Returns immediately.
-		 * 
 		 * @param duty_cycle				Duty cycle. Must be between 0 and 100.
 		 */
-		void								set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 		/**
 		 * @brief							Sets the duty cycle and keeps it for the given duration. Then, sets it to 0.
-		 * 
 		 * @tparam PwmDuration				`std::duration` type.
 		 * @param duty_cycle				Duty cycle. Must be between 0 and 100.
 		 * @param duration					Duration for which to keep the given duty cycle.
 		 */
 		template <typename PwmDuration>
-		void								set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
+		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
 
 	private:
 		/**
 		 * @brief							Thread function that does the PWM emulation.
-		 * 
 		 * @param this_ptr					Pointer to the owning instance.
 		 */
-		static void							thread_func(gpio_pwm_emulator* this_ptr) noexcept;
+		static void thread_func(gpio_pwm_emulator* this_ptr) noexcept;
 
 	private:
 		/**
 		 * @brief							GPIO output line over which PWM is emulated.
 		 */
-		gpio_output_line<Log>				_line;
+		gpio_output_line<Log> _line;
 
 		// Parameters
 		/**
 		 * @brief							Minimum pulse width.
 		 */
-		gpio_pwm_duration					_min_pulse_width;
+		gpio_pwm_duration _min_pulse_width;
 
 		/**
 		 * @brief							Maximum pulse width.
 		 */
-		gpio_pwm_duration					_max_pulse_width;
+		gpio_pwm_duration _max_pulse_width;
 
 		/**
 		 * @brief							Signal frequency.
 		 */
-		gpio_pwm_pulse_frequency_t			_frequency;
+		gpio_pwm_pulse_frequency_t _frequency;
 
 		/**
 		 * @brief							Calculated period.
 		 */
-		gpio_pwm_duration					_period;
+		gpio_pwm_duration _period;
 
 		// Sync
 		/**
 		 * @brief							Mutex needed for `_control_condition`.
 		 */
-		std::mutex							_control_mutex;
+		std::mutex _control_mutex;
 
 		/**
 		 * @brief							Condition variable used to save CPU cycles when the duty cycle is min or max.
 		 */
-		std::condition_variable				_control_condition;
+		std::condition_variable _control_condition;
 
 		// Controlables
 		/**
 		 * @brief							Duty cycle.
 		 */
-		std::atomic<gpio_pwm_duty_cycle_t>	_duty_cycle;
+		std::atomic<gpio_pwm_duty_cycle_t> _duty_cycle;
 
 		/**
 		 * @brief							"Quit requested" flag.
 		 */
-		std::atomic<bool>					_quit;
+		std::atomic<bool> _quit;
 
 		/**
 		 * @brief							The log passed in to the constructor.
 		 */
-		Log*								_log;
+		Log* _log;
 
 		/**
 		 * @brief							The thread on which PWM is emulated.
 		 */
-		std::thread							_thread;
+		std::thread _thread;
 	};
 
 
