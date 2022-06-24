@@ -45,6 +45,8 @@ namespace abc {
 
 	public:
 		table_ostream(std::streambuf* sb);
+		table_ostream(table_ostream&& other);
+		table_ostream(const table_ostream& other) = delete;
 
 	public:
 		void put_line(const char* line, std::size_t line_size = size::strlen) noexcept;
@@ -66,7 +68,8 @@ namespace abc {
 	public:
 		line_ostream();
 		line_ostream(table_ostream* table);
-		line_ostream(line_ostream&& other) = default;
+		line_ostream(line_ostream<Size>&& other);
+		line_ostream(const line_ostream<Size>& other) = delete;
 		~line_ostream() noexcept;
 
 	public:

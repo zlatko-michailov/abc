@@ -65,10 +65,16 @@ int main() {
 				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
 				{ "test_buffer_streambuf_move",						abc::test::streambuf::test_buffer_streambuf_move },
 			} },
+			{ "stream", {
+				{ "test_istream_move",								abc::test::stream::test_istream_move },
+				{ "test_ostream_move",								abc::test::stream::test_ostream_move },
+			} },
 			{ "table", {
 				{ "test_table_line_debug",							abc::test::table::test_table_line_debug },
 				{ "test_table_line_diag",							abc::test::table::test_table_line_diag },
 				{ "test_table_line_test",							abc::test::table::test_table_line_test },
+				{ "test_table_ostream_move",						abc::test::table::test_table_ostream_move },
+				{ "test_line_ostream_move",							abc::test::table::test_line_ostream_move },
 			} },
 			{ "http", {
 				{ "test_http_request_istream_extraspaces",			abc::test::http::test_http_request_istream_extraspaces },

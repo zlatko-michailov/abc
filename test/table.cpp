@@ -222,5 +222,46 @@ namespace abc { namespace test { namespace table {
 		return passed;
 	}
 
+
+	bool test_table_ostream_move(test_context<abc::test::log>& context) {
+		char actual[abc::size::_256 + 1];
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+
+		bool passed = true;
+
+		table_ostream os1(&sb);
+		os1.put_line("first\n");
+		os1.flush();
+		passed = context.are_equal(actual, "first\n", __TAG__) && passed;
+
+		table_ostream os2(std::move(os1));
+		os2.put_line("second\n");
+		os2.flush();
+		passed = context.are_equal(actual, "first\nsecond\n", __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_line_ostream_move(test_context<abc::test::log>& context) {
+		char actual[abc::size::_256 + 1];
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+
+		bool passed = true;
+
+		table_ostream table(&sb);
+		line_ostream<> os1(&table);
+		os1.put_any("first");
+		os1.flush();
+		passed = context.are_equal(actual, "first\n", __TAG__) && passed;
+
+		line_ostream<> os2(std::move(os1));
+		os2.put_any("second");
+		os2.flush();
+		passed = context.are_equal(actual, "first\nsecond\n", __TAG__) && passed;
+
+		return passed;
+	}
+
 }}}
 

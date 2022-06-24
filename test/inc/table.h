@@ -35,6 +35,8 @@ namespace abc { namespace test { namespace table {
 	bool test_table_line_debug(test_context<abc::test::log>& context);
 	bool test_table_line_diag(test_context<abc::test::log>& context);
 	bool test_table_line_test(test_context<abc::test::log>& context);
+	bool test_table_ostream_move(test_context<abc::test::log>& context);
+	bool test_line_ostream_move(test_context<abc::test::log>& context);
 
 }}}
 

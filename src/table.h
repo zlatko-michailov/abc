@@ -39,6 +39,11 @@ namespace abc {
 	}
 
 
+	inline table_ostream::table_ostream(table_ostream&& other)
+		: base(std::move(other)) {
+	}
+
+
 	inline void table_ostream::put_line(const char* line, std::size_t line_size) noexcept {
 		if (line_size == size::strlen) {
 			line_size = std::strlen(line);
@@ -78,6 +83,16 @@ namespace abc {
 		, _table(table)
 		, _sb(nullptr, 0, 0, _buffer, 0, Size)
 		, _pcount(0) {
+	}
+
+
+	template <std::size_t Size>
+	inline line_ostream<Size>::line_ostream(line_ostream<Size>&& other)
+		: base(std::move(other))
+		, _table(other._table)
+		, _sb(std::move(other._sb))
+		, _pcount(other._pcount) {
+		std::memmove(_buffer, other._buffer, sizeof(char) * (Size + 2));
 	}
 
 
