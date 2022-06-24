@@ -37,6 +37,17 @@ namespace abc {
 	public:
 		basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept;
 		basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+		basic_buffer_streambuf(basic_buffer_streambuf<Char>&& other) noexcept;
+		basic_buffer_streambuf(const basic_buffer_streambuf<Char>& other) = delete;
+
+	private:
+		void reset(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+
+	private:
+		Char* _get_begin_ptr;
+		Char* _get_end_ptr;
+		Char* _put_begin_ptr;
+		Char* _put_end_ptr;
 	};
 
 
@@ -56,6 +67,23 @@ namespace abc {
 	template <typename Char>
 	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept
 		: std::basic_streambuf<Char>() {
+		reset(get_begin_ptr, get_end_ptr, put_begin_ptr, put_end_ptr);
+	}
+
+
+	template <typename Char>
+	inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(basic_buffer_streambuf<Char>&& other) noexcept
+		: basic_buffer_streambuf<Char>(other._get_begin_ptr, other._get_end_ptr, other._put_begin_ptr, other._put_end_ptr) {
+	}
+
+
+	template <typename Char>
+	inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept {
+		_put_begin_ptr = put_begin_ptr;
+		_put_end_ptr   = put_end_ptr;
+		_get_begin_ptr = get_begin_ptr;
+		_get_end_ptr   = get_end_ptr;
+
 		base::setg(get_begin_ptr, get_begin_ptr, get_end_ptr);
 		base::setp(put_begin_ptr, put_end_ptr);
 	}

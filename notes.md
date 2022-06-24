@@ -1,11 +1,25 @@
 ## Done
 
 ## To Do
-- Un-internalize name:
-  - _istream
-  - _ostream
-  - _http_istream
-  - _http_ostream
+- Bugfix:
+  - buffer_streambuf move constructor
+  - _stream, _istream, _ostream move constructor
+  - _table_ostream move constructor
+  - _line_ostream move constructor
+    - unit test for each derived stream 
+- Copy constructor - either `default` or `delete`
+- doxygen
+  - Aligning
+    - Whole class
+    - 1 space between return type and method name
+    - No blank line before @return
+    - No blank line after @brief/@details
+- Breaking change:
+  - Un-internalize name:
+    - _istream
+    - _ostream
+    - _http_istream
+    - _http_ostream
   
 ## Pick List
 - vmem:

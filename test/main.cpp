@@ -63,6 +63,7 @@ int main() {
 			{ "streambuf", {
 				{ "test_buffer_streambuf_1_char",					abc::test::streambuf::test_buffer_streambuf_1_char },
 				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
+				{ "test_buffer_streambuf_move",						abc::test::streambuf::test_buffer_streambuf_move },
 			} },
 			{ "table", {
 				{ "test_table_line_debug",							abc::test::table::test_table_line_debug },

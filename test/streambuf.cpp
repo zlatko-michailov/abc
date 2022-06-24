@@ -41,11 +41,34 @@ namespace abc { namespace test { namespace streambuf {
 	}
 
 
+	bool test_buffer_streambuf_move(test_context<abc::test::log>& context) {
+		const char* expected = "Test move constructor";
+
+		char medium[abc::size::_256 + 1];
+		std::memset(medium, 0, sizeof(medium));
+
+		bool passed = true;
+
+		abc::buffer_streambuf sb1(medium, 0, sizeof(medium), medium, 0, sizeof(medium));
+		std::ostream out(&sb1);
+		out.write(expected, std::strlen(expected) + 1);
+		passed = context.are_equal(medium, expected, __TAG__) && passed;
+
+		abc::buffer_streambuf sb2(std::move(sb1));
+		std::istream in(&sb2);
+		char actual[abc::size::_256 + 1];
+		in.read(actual, std::strlen(expected) + 1);
+		passed = context.are_equal(actual, expected, __TAG__) && passed;
+
+		return passed;
+	}
+
+
 	bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) {
-		char expected[200];
+		char expected[abc::size::_256 + 1];
 		std::strncpy(expected, text, sizeof(expected));
 
-		char actual[200];
+		char actual[abc::size::_256 + 1];
 		std::memset(actual, 0, sizeof(actual));
 
 		abc::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
