@@ -38,6 +38,13 @@ namespace abc {
 
 
 	template <typename Stream>
+	inline _stream<Stream>::_stream(_stream<Stream>&& other)
+		: base(std::move(other)) {
+		base::rdbuf(other.rdbuf());
+	}
+
+
+	template <typename Stream>
 	inline void _stream<Stream>::reset() {
 		base::clear(base::goodbit);
 	}
@@ -128,6 +135,11 @@ namespace abc {
 	}
 
 
+	inline _istream::_istream(_istream&& other)
+		: base(std::move(other)) {
+	}
+
+
 	inline void _istream::reset() {
 		base::reset();
 		_gcount = 0;
@@ -149,6 +161,11 @@ namespace abc {
 
 	inline _ostream::_ostream(std::streambuf* sb)
 		: base(sb) {
+	}
+
+
+	inline _ostream::_ostream(_ostream&& other)
+		: base(std::move(other)) {
 	}
 
 

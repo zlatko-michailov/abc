@@ -44,6 +44,8 @@ namespace abc {
 
 	protected:
 		_stream(std::streambuf* sb);
+		_stream(_stream<Stream>&& other);
+		_stream(const _stream& other) = delete;
 
 	public:
 		std::streambuf*	rdbuf() const;
@@ -73,6 +75,8 @@ namespace abc {
 
 	protected:
 		_istream(std::streambuf* sb);
+		_istream(_istream&& other);
+		_istream(const _istream& other) = delete;
 
 	public:
 		std::size_t		gcount() const noexcept;
@@ -80,6 +84,7 @@ namespace abc {
 	protected:
 		void			reset();
 		void			set_gcount(std::size_t gcount) noexcept;
+
 	private:
 		std::size_t		_gcount;
 	};
@@ -93,6 +98,8 @@ namespace abc {
 
 	protected:
 		_ostream(std::streambuf* sb);
+		_ostream(_ostream&& other);
+		_ostream(const _ostream& other) = delete;
 
 	public:
 		void			flush();

@@ -55,5 +55,11 @@ namespace abc { namespace test {
 		return passed;
 	}
 
-}}
+
+namespace stream {
+
+	bool test_istream_move(test_context<abc::test::log>& context);
+	bool test_ostream_move(test_context<abc::test::log>& context);
+
+}}}
 
