@@ -48,6 +48,12 @@ namespace abc {
 
 
 	template <std::size_t Size, typename Clock>
+	inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other)
+		: base(std::move(other)) {
+	}
+
+
+	template <std::size_t Size, typename Clock>
 	inline void debug_line_ostream<Size, Clock>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept {
 		va_list vlist;
 		va_start(vlist, format);
@@ -104,6 +110,12 @@ namespace abc {
 	template <std::size_t Size, typename Clock>
 	inline diag_line_ostream<Size, Clock>::diag_line_ostream(table_ostream* table)
 		: base(table) {
+	}
+
+
+	template <std::size_t Size, typename Clock>
+	inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other)
+		: base(std::move(other)) {
 	}
 
 
@@ -168,6 +180,12 @@ namespace abc {
 
 
 	template <std::size_t Size, typename Clock>
+	inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other)
+		: base(std::move(other)) {
+	}
+
+
+	template <std::size_t Size, typename Clock>
 	inline void test_line_ostream<Size, Clock>::put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept {
 		va_list vlist;
 		va_start(vlist, format);
@@ -221,6 +239,13 @@ namespace abc {
 	inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, Filter* filter)
 		: base(sb)
 		, _filter(filter) {
+	}
+
+
+	template <typename Line, typename Filter>
+	inline log_ostream<Line, Filter>::log_ostream(log_ostream&& other)
+		: base(std::move(other))
+		, _filter(other._filter) {
 	}
 
 

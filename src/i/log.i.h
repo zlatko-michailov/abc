@@ -101,21 +101,75 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					`line_ostream` specialization for debug logging.
+	 * @tparam Size				Maximum line size.
+	 * @tparam Clock			Clock for obtaining a timestamp.
+	 */
 	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class debug_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 
 	public:
+		/**
+		 * @brief				Default constructor.
+		 */
 		debug_line_ostream();
+
+		/**
+		 * @brief				Constructor.
+		 * @param table			Pointer to a `table_ostream` instance to write the line to.
+		 */
 		debug_line_ostream(table_ostream* table);
-		debug_line_ostream(debug_line_ostream&& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
+		debug_line_ostream(debug_line_ostream&& other);
+
+		/**
+		 * @brief				Deleted.
+		 */
+		debug_line_ostream(const debug_line_ostream& other) = delete;
 
 	public:
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param ...			Message arguments.
+		 */
 		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param vlist			Message arguments.
+		 */
 		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+
+		/**
+		 * @brief				Write binary buffer as a sequence of hexadecimal bytes.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param buffer		Data buffer.
+		 * @param buffer_size	Content size.
+		 */
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
+		/**
+		 * @brief				Writes the static properties of a long entry.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 */
 		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
@@ -123,21 +177,75 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					`line_ostream` specialization for diagnostic logging.
+	 * @tparam Size				Maximum line size.
+	 * @tparam Clock			Clock for obtaining a timestamp.
+	 */
 	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class diag_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 
 	public:
+		/**
+		 * @brief				Default constructor.
+		 */
 		diag_line_ostream();
+
+		/**
+		 * @brief				Constructor.
+		 * @param table			Pointer to a `table_ostream` instance to write the line to.
+		 */
 		diag_line_ostream(table_ostream* table);
-		diag_line_ostream(diag_line_ostream&& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
+		diag_line_ostream(diag_line_ostream&& other);
+
+		/**
+		 * @brief				Deleted.
+		 */
+		diag_line_ostream(const diag_line_ostream& other) = delete;
 
 	public:
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param ...			Message arguments.
+		 */
 		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param vlist			Message arguments.
+		 */
 		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+
+		/**
+		 * @brief				Write binary buffer as a sequence of hexadecimal bytes.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param buffer		Data buffer.
+		 * @param buffer_size	Content size.
+		 */
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
+		/**
+		 * @brief				Writes the static properties of a long entry.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 */
 		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
@@ -145,21 +253,75 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					`line_ostream` specialization for test logging.
+	 * @tparam Size				Maximum line size.
+	 * @tparam Clock			Clock for obtaining a timestamp.
+	 */
 	template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
 	class test_line_ostream : public line_ostream<Size> {
 		using base = line_ostream<Size>;
 
 	public:
+		/**
+		 * @brief				Default constructor.
+		 */
 		test_line_ostream();
+
+		/**
+		 * @brief				Constructor.
+		 * @param table			Pointer to a `table_ostream` instance to write the line to.
+		 */
 		test_line_ostream(table_ostream* table);
-		test_line_ostream(test_line_ostream&& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
+		test_line_ostream(test_line_ostream&& other);
+
+		/**
+		 * @brief				Deleted.
+		 */
+		test_line_ostream(const test_line_ostream& other) = delete;
 
 	public:
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param ...			Message arguments.
+		 */
 		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param vlist			Message arguments.
+		 */
 		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+
+		/**
+		 * @brief				Write binary buffer as a sequence of hexadecimal bytes.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param buffer		Data buffer.
+		 * @param buffer_size	Content size.
+		 */
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	protected:
+		/**
+		 * @brief				Writes the static properties of a long entry.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 */
 		void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
 	};
 
@@ -167,53 +329,142 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					`table_ostream` specialization for logging.
+	 * @tparam Line				`line_ostream` specialization.
+	 * @tparam Filter			Line filter.
+	 */
 	template <typename Line, typename Filter>
 	class log_ostream : public table_ostream {
 		using base = table_ostream;
 
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param sb			Pointer to a `std::streambuf` instance to write to.
+		 * @param filter		Pointer to a `Filter` instance.
+		 */
 		log_ostream(std::streambuf* sb, Filter* filter);
-		log_ostream(log_ostream&& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
+		log_ostream(log_ostream&& other);
+
+		/**
+		 * @brief				Deleted.
+		 */
+		log_ostream(const log_ostream& other) = delete;
 
 	public:
-		Filter*	filter() noexcept;
+		/**
+		 * @brief				Returns the pointer to the `Filter` instance.
+		 */
+		Filter* filter() noexcept;
 
 	public:
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param ...			Message arguments.
+		 */
 		void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+
+		/**
+		 * @brief				Write a formatted message.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param format		Message format.
+		 * @param vlist			Message arguments.
+		 */
 		void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+
+		/**
+		 * @brief				Write binary buffer as a sequence of hexadecimal bytes.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 * @param tag			Entry tag.
+		 * @param buffer		Data buffer.
+		 * @param buffer_size	Content size.
+		 */
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
 	private:
-		Filter*	_filter;
+		/**
+		 * @brief				Pointer to the `Filter` instance passed in to the constructor.
+		 */
+		Filter* _filter;
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Line filter.
+	 */
 	class log_filter {
 	public:
+		/**
+		 * @brief				Default constructor.
+		 */
 		log_filter() noexcept = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		log_filter(log_filter&& other) noexcept = default;
 
+		/**
+		 * @brief				Copy constructor.
+		 */
+		log_filter(const log_filter& other) noexcept = default;
+
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param min_severity	Minimum severity for a line to be written.
+		 */
 		log_filter(severity_t min_severity) noexcept;
 
 	public:
-		severity_t	min_severity() const noexcept;
-		severity_t	min_severity(severity_t min_severity) noexcept;
+		/**
+		 * @brief				Returns the minimum severity.
+		 */
+		severity_t min_severity() const noexcept;
+
+		/**
+		 * @brief				Sets the minimum severity.
+		 */
+		severity_t min_severity(severity_t min_severity) noexcept;
 
 	public:
+		/**
+		 * @brief				Returns whether an entry with the given `category` and `severity` passes the filter.
+		 * @param category		Category.
+		 * @param severity		Severity.
+		 * @return				true = passes. false = filtered out. 
+		 */
 		bool is_enabled(category_t category, severity_t severity) const noexcept;
 
 	private:
-		severity_t	_min_severity;
+		/**
+		 * @brief				Minimum severity for a line to be written.
+		 */
+		severity_t _min_severity;
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief	`log_ostream` specialization that doesn't log anything.
+	 */
 	using null_log = log_ostream<diag_line_ostream<0>, log_filter>;
 
 }

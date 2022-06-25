@@ -44,7 +44,7 @@ namespace abc {
 
 	protected:
 		_stream(std::streambuf* sb);
-		_stream(_stream<Stream>&& other);
+		_stream(_stream&& other);
 		_stream(const _stream& other) = delete;
 
 	public:

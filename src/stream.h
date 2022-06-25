@@ -38,7 +38,7 @@ namespace abc {
 
 
 	template <typename Stream>
-	inline _stream<Stream>::_stream(_stream<Stream>&& other)
+	inline _stream<Stream>::_stream(_stream&& other)
 		: base(std::move(other)) {
 		base::rdbuf(other.rdbuf());
 	}
