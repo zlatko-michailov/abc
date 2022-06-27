@@ -713,6 +713,159 @@ namespace abc { namespace test { namespace http {
 
 
 	template <typename HttpStream>
+	bool http_request_istream_move(test_context<abc::test::log>& context) {
+		char content[] =
+			"GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		HttpStream istream1(&sb, context.log);
+
+		char buffer[1024];
+		bool passed = true;
+
+		istream1.get_method(buffer, sizeof(buffer));
+		passed = verify_string(context, buffer, "GET", static_cast<abc::http_request_istream<abc::test::log>&>(istream1), __TAG__) && passed;
+
+		HttpStream istream2(std::move(istream1));
+
+		istream2.get_resource(buffer, sizeof(buffer));
+		passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", static_cast<abc::http_request_istream<abc::test::log>&>(istream2), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	template <typename HttpStream>
+	bool http_request_ostream_move(test_context<abc::test::log>& context) {
+		const char expected[] =
+			"POST http://a.com/b?c=d HTTP/1.1\r\n";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		HttpStream ostream1(&sb, context.log);
+
+		bool passed = true;
+
+		ostream1.put_method("POST");
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream1), __TAG__) && passed;
+
+		HttpStream ostream2(std::move(ostream1));
+
+		ostream2.put_resource("http://a.com/b?c=d");
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+
+		ostream2.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	template <typename HttpStream>
+	bool http_response_istream_move(test_context<abc::test::log>& context) {
+		char content[] =
+			"HTTP/1.1 302\r\n"
+			"\r\n";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		HttpStream istream1(&sb, context.log);
+
+		char buffer[1024];
+		bool passed = true;
+
+		istream1.get_protocol(buffer, sizeof(buffer));
+		passed = verify_string(context, buffer, "HTTP/1.1", static_cast<abc::http_response_istream<abc::test::log>&>(istream1), __TAG__) && passed;
+
+		HttpStream istream2(std::move(istream1));
+
+		istream2.get_status_code(buffer, sizeof(buffer));
+		passed = verify_string(context, buffer, "302", static_cast<abc::http_response_istream<abc::test::log>&>(istream2), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	template <typename HttpStream>
+	bool http_response_ostream_move(test_context<abc::test::log>& context) {
+		const char expected[] =
+			"HTTP/1.1 200 OK\r\n";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		HttpStream ostream1(&sb, context.log);
+
+		bool passed = true;
+
+		ostream1.put_protocol("HTTP/1.1");
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream1), __TAG__) && passed;
+
+		HttpStream ostream2(std::move(ostream1));
+
+		ostream2.put_status_code("200");
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+
+		ostream2.put_reason_phrase("OK");
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	bool test_http_request_istream_move(test_context<abc::test::log>& context) {
+		return http_request_istream_move<abc::http_request_istream<abc::test::log>>(context);
+	}
+
+
+	bool test_http_request_ostream_move(test_context<abc::test::log>& context) {
+		return http_request_ostream_move<abc::http_request_ostream<abc::test::log>>(context);
+	}
+
+
+	bool test_http_response_istream_move(test_context<abc::test::log>& context) {
+		return http_response_istream_move<abc::http_response_istream<abc::test::log>>(context);
+	}
+
+
+	bool test_http_response_ostream_move(test_context<abc::test::log>& context) {
+		return http_response_ostream_move<abc::http_response_ostream<abc::test::log>>(context);
+	}
+
+
+	bool test_http_client_stream_move(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		passed = http_request_ostream_move<abc::http_client_stream<abc::test::log>>(context) && passed;
+		passed = http_response_istream_move<abc::http_client_stream<abc::test::log>>(context) && passed;
+
+		return passed;
+	}
+
+
+	bool test_http_server_stream_move(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		passed = http_request_istream_move<abc::http_server_stream<abc::test::log>>(context) && passed;
+		passed = http_response_ostream_move<abc::http_server_stream<abc::test::log>>(context) && passed;
+
+		return passed;
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename HttpStream>
 	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const HttpStream& stream, tag_t tag) {
 		bool passed = true;
 

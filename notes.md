@@ -1,13 +1,16 @@
 ## Done
-
-## To Do
 - Bugfix:
   - buffer_streambuf move constructor
   - _stream, _istream, _ostream move constructor
   - _table_ostream move constructor
   - _line_ostream move constructor
-    - unit test for each derived stream 
-- Copy constructor - either `default` or `delete`
+  - log_ostream, debug_line_ostream, diag_line_ostream, test_line_ostream move constructor
+  - http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
+
+## To Do
+- Bugfix:
+  - _http_istream, _http_ostream, http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
+- Copy constructor - explicit
 - doxygen
   - Aligning
     - Whole class

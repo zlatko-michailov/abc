@@ -52,5 +52,12 @@ namespace abc { namespace test { namespace http {
 	bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context);
 	bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context);
 
+	bool test_http_request_istream_move(test_context<abc::test::log>& context);
+	bool test_http_request_ostream_move(test_context<abc::test::log>& context);
+	bool test_http_response_istream_move(test_context<abc::test::log>& context);
+	bool test_http_response_ostream_move(test_context<abc::test::log>& context);
+	bool test_http_client_stream_move(test_context<abc::test::log>& context);
+	bool test_http_server_stream_move(test_context<abc::test::log>& context);
+
 }}}
 

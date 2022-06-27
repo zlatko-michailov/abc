@@ -36,7 +36,7 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline _http_state<Log>::_http_state(http::item_t next, Log* log)
+	inline _http_state<Log>::_http_state(http::item_t next, Log* log) noexcept
 		: _next(next)
 		, _log(log) {
 		if (_log != nullptr) {
@@ -89,6 +89,13 @@ namespace abc {
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::http, severity::abc::debug, 0x1003e, "_http_istream::_http_istream()");
 		}
+	}
+
+
+	template <typename Log>
+	inline _http_istream<Log>::_http_istream(_http_istream&& other)
+		: base(std::move(other))
+		, state(std::move(other)) {
 	}
 
 
@@ -390,6 +397,13 @@ namespace abc {
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::http, severity::abc::debug, 0x10047, "_http_ostream::_http_ostream()");
 		}
+	}
+
+
+	template <typename Log>
+	inline _http_ostream<Log>::_http_ostream(_http_ostream&& other)
+		: base(std::move(other))
+		, state(std::move(other)) {
 	}
 
 
@@ -706,6 +720,12 @@ namespace abc {
 
 
 	template <typename Log>
+	inline http_request_istream<Log>::http_request_istream(http_request_istream&& other)
+		: base(std::move(other)) {
+	}
+
+
+	template <typename Log>
 	inline void http_request_istream<Log>::reset() {
 		base::reset(http::item::method);
 	}
@@ -818,6 +838,12 @@ namespace abc {
 
 
 	template <typename Log>
+	inline http_request_ostream<Log>::http_request_ostream(http_request_ostream&& other)
+		: base(std::move(other)) {
+	}
+
+
+	template <typename Log>
 	inline void http_request_ostream<Log>::reset() {
 		base::reset(http::item::method);
 	}
@@ -897,6 +923,12 @@ namespace abc {
 
 
 	template <typename Log>
+	inline http_response_istream<Log>::http_response_istream(http_response_istream&& other)
+		: base(std::move(other)) {
+	}
+
+
+	template <typename Log>
 	inline void http_response_istream<Log>::reset() {
 		base::reset(http::item::protocol);
 	}
@@ -962,6 +994,12 @@ namespace abc {
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::http, severity::abc::debug, 0x10061, "http_response_ostream::http_response_ostream()");
 		}
+	}
+
+
+	template <typename Log>
+	inline http_response_ostream<Log>::http_response_ostream(http_response_ostream&& other)
+		: base(std::move(other)) {
 	}
 
 
@@ -1045,9 +1083,26 @@ namespace abc {
 
 
 	template <typename Log>
+	inline http_client_stream<Log>::http_client_stream(http_client_stream&& other)
+		: http_request_ostream<Log>(std::move(other))
+		, http_response_istream<Log>(std::move(other)) {
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Log>
 	inline http_server_stream<Log>::http_server_stream(std::streambuf* sb, Log* log)
 		: http_request_istream<Log>(sb, log)
 		, http_response_ostream<Log>(sb, log) {
+	}
+
+
+	template <typename Log>
+	inline http_server_stream<Log>::http_server_stream(http_server_stream&& other)
+		: http_request_istream<Log>(std::move(other))
+		, http_response_ostream<Log>(std::move(other)) {
 	}
 
 }
