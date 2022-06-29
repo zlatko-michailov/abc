@@ -79,105 +79,370 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				Internal. State keeper.
+	 * @tparam MaxLevels	Maximum levels of nesting. Needed to define the stack.
+	 * @tparam Log			Logging facility.
+	 */
 	template <std::size_t MaxLevels, typename Log>
 	class _json_state {
 	protected:
+		/**
+		 * @brief			Constructor.
+		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		_json_state(Log* log);
+
+		/**
+		 * @brief			Move constructor.
+		 */
 		_json_state(_json_state&& other) = default;
 
+		/**
+		 * @brief			Copy constructor.
+		 */
+		_json_state(const _json_state& other) = default;
+
 	public:
-		std::size_t		levels() const noexcept;
-		json::level_t	top_level() const noexcept;
+		/**
+		 * @brief			Returns the current number of nesting levels.
+		 */
+		std::size_t levels() const noexcept;
+
+		/**
+		 * @brief			Returns the current nesting level - object or array.
+		 */
+		json::level_t top_level() const noexcept;
 
 	protected:
-		void			reset() noexcept;
-		bool			expect_property() const noexcept;
-		void			set_expect_property(bool expect) noexcept;
-		bool			push_level(json::level_t level) noexcept;
-		bool			pop_level(json::level_t level) noexcept;
+		/**
+		 * @brief			Resets the state.
+		 */
+		void reset() noexcept;
 
-		Log*			log() const noexcept;
+		/**
+		 * @brief			Returns whether a property name is expected.
+		 */
+		bool expect_property() const noexcept;
+
+		/**
+		 * @brief			Sets whether a property name is expected.
+		 */
+		void set_expect_property(bool expect) noexcept;
+
+		/**
+		 * @brief			Pushes a nesting level into the stack.
+		 * @param level		Level - object or array.
+		 * @return			true = success. false = error. 
+		 */
+		bool push_level(json::level_t level) noexcept;
+
+		/**
+		 * @brief			Checks whether the nesting level at the top matches the given one, and pops it from the stack.
+		 * @param level		Level - object or array.
+		 * @return			true = success. false = error.
+		 */
+		bool pop_level(json::level_t level) noexcept;
+
+		/**
+		 * @brief			Returns the Log pointer.
+		 */
+		Log* log() const noexcept;
 
 	private:
-		bool					_expect_property;
-		std::size_t				_level_top;
-		std::bitset<MaxLevels>	_level_stack;
-		Log*					_log;
+		/**
+		 * @brief			Flag whether a property name is expected.
+		 */
+		bool _expect_property;
+
+		/**
+		 * @brief			Current top position on the stack.
+		 */
+		std::size_t _level_top;
+
+		/**
+		 * @brief			Nesting level stack.
+		 */
+		std::bitset<MaxLevels> _level_stack;
+
+		/**
+		 * @brief			The log passed in to the constructor.
+		 */
+		Log* _log;
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				JSON input stream.
+	 * @tparam MaxLevels	Maximum nesting levels - object/array.
+	 * @tparam Log			Logging facility.
+	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
 	class json_istream : public _istream, public _json_state<MaxLevels, Log> {
 		using base  = _istream;
 		using state = _json_state<MaxLevels, Log>;
 
 	public:
+		/**
+		 * @brief			Constructor.
+		 * @param sb		`std::streambuf` to read from.
+		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		json_istream(std::streambuf* sb, Log* log = nullptr);
-		json_istream(json_istream&& other) = default;
+
+		/**
+		 * @brief			Move constructor.
+		 */
+		json_istream(json_istream&& other);
+
+		/**
+		 * @brief			Deleted.
+		 */
+		json_istream(const json_istream& other) = delete;
 
 	public:
-		void			get_token(json::token_t* buffer, std::size_t size);
-		json::item_t	skip_value();
+		/**
+		 * @brief			Reads a JSON token from the stream, and copies it into the given buffer.
+		 * @param buffer	Buffer to copy to.
+		 * @param size		Buffer size.
+		 */
+		void get_token(json::token_t* buffer, std::size_t size);
+
+		/**
+		 * @brief			Skips a JSON value from the stream.
+		 * @return			The type of value skipped.
+		 */
+		json::item_t skip_value();
 
 	protected:
-		json::item_t	get_or_skip_token(json::token_t* buffer, std::size_t size);
-		void			get_or_skip_number(double* buffer);
-		std::size_t		get_or_skip_string(char* buffer, std::size_t size);
+		/**
+		 * @brief			Gets or skips a JSON token from the stream.
+		 * @param buffer	If `nullptr`, the next token will be skipped. Otherwise, the next token will be copied to  the buffer.
+		 * @param size		Buffer size.
+		 * @return			The type of token.
+		 */
+		json::item_t get_or_skip_token(json::token_t* buffer, std::size_t size);
+
+		/**
+		 * @brief			Gets or skips a JSON number from the stream.
+		 * @param buffer	If `nullptr`, the next number will be skipped. Otherwise, the next number will be copied to the buffer.
+		 */
+		void get_or_skip_number(double* buffer);
+
+		/**
+		 * @brief			Gets or skips a JSON string from the stream.
+		 * @param buffer	If `nullptr`, the next string will be skipped. Otherwise, the next string will be copied to the buffer.
+		 * @param size		Buffer size.
+		 * @return			The length of the string.
+		 */
+		std::size_t get_or_skip_string(char* buffer, std::size_t size);
 
 	protected:
-		void			get_literal(const char* literal);
-		char			get_escaped_char();
-		std::size_t		get_or_skip_string_content(char* buffer, std::size_t size);
-		std::size_t		get_hex(char* buffer, std::size_t size);
-		std::size_t		get_digits(char* buffer, std::size_t size);
-		std::size_t		skip_spaces();
+		/**
+		 * @brief			Reads the specified literal (any sequence of chars) from the stream.
+		 * @details			If the input does not match exactly, the "bad" flag on the stream is set.
+		 * @param literal	Sequence of chars.
+		 */
+		void get_literal(const char* literal);
 
-		std::size_t		get_chars(CharPredicate&& predicate, char* buffer, std::size_t size);
-		std::size_t		skip_chars(CharPredicate&& predicate);
-		char			get_char();
-		char			peek_char();
+		/**
+		 * @brief			Reads an escape char. Note: For `\u????` escape sequences, only `\u00??` are supported.
+		 * @return			The char.
+		 */
+		char get_escaped_char();
+
+		/**
+		 * @brief			Gets or skips the inner part of a string.
+		 * @param buffer	If `nullptr` the content is skipped. Otherwise, the content is copied to the buffer.
+		 * @param size		Buffer size.
+		 * @return			The length of the content read. 
+		 */
+		std::size_t get_or_skip_string_content(char* buffer, std::size_t size);
+
+		/**
+		 * @brief			Read a hexadecimal number from the stream and copies it to the buffer.
+		 * @param buffer	Buffer to copy to.
+		 * @param size		Buffer size.
+		 * @return			Number of chars read.
+		 */
+		std::size_t get_hex(char* buffer, std::size_t size);
+
+		/**
+		 * @brief			Read a decimal number from the stream and copies it to the buffer.
+		 * @param buffer	Buffer to copy to.
+		 * @param size		Buffer size.
+		 * @return			Number of chars read.
+		 */
+		std::size_t get_digits(char* buffer, std::size_t size);
+
+		/**
+		 * @brief			Skips a sequence of spaces from the stream.
+		 * @return			Number of chars skipped.
+		 */
+		std::size_t skip_spaces();
+
+		/**
+		 * @brief			Reads a sequence of chars that match a predicate and copies it to the buffer.
+		 * @param predicate	Predicate.
+		 * @param buffer	Buffer
+		 * @param size		Buffer size.
+		 * @return			Number of chars read.
+		 */
+		std::size_t get_chars(CharPredicate&& predicate, char* buffer, std::size_t size);
+
+		/**
+		 * @brief			Skips a sequence of chars that match a predicate.
+		 * @param predicate	Predicate.
+		 * @return			Number of chars read.
+		 */
+		std::size_t skip_chars(CharPredicate&& predicate);
+
+		/**
+		 * @brief			Reads a char from the stream.
+		 * @return			The char read.
+		 */
+		char get_char();
+
+		/**
+		 * @brief			Returns the next char from the stream without advancing.
+		 */
+		char peek_char();
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				JSON output stream.
+	 * @tparam MaxLevels	Maximum nesting levels - object/array.
+	 * @tparam Log			Logging facility.
+	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
 	class json_ostream : public _ostream, public _json_state<MaxLevels, Log> {
 		using base  = _ostream;
 		using state = _json_state<MaxLevels, Log>;
 
 	public:
+		/**
+		 * @brief			Constructor.
+		 * @param sb		`std::streambuf` to read from.
+		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
+		 */
 		json_ostream(std::streambuf* sb, Log* log = nullptr);
-		json_ostream(json_ostream&& other) = default;
+
+		/**
+		 * @brief			Move constructor.
+		 */
+		json_ostream(json_ostream&& other);
+
+		/**
+		 * @brief			Deleted.
+		 */
+		json_ostream(const json_ostream& other) = delete;
 
 	public:
-		void			put_token(const json::token_t* buffer, std::size_t size = size::strlen);
+		/**
+		 * @brief			Writes a JSON token to the stream from the buffer.
+		 * @param buffer	Buffer.
+		 * @param size		Content size.
+		 */
+		void put_token(const json::token_t* buffer, std::size_t size = size::strlen);
 
-		void			put_space();
-		void			put_tab();
-		void			put_cr();
-		void			put_lf();
+		/**
+		 * @brief			Writes a space to the stream.
+		 */
+		void put_space();
 
-		void			put_null();
-		void			put_boolean(bool value);
-		void			put_number(double value);
-		void			put_string(const char* buffer, std::size_t size = size::strlen);
-		void			put_property(const char* buffer, std::size_t size = size::strlen);
-		void			put_begin_array();
-		void			put_end_array();
-		void			put_begin_object();
-		void			put_end_object();
+		/**
+		 * @brief			Writes a tab to the stream.
+		 */
+		void put_tab();
+
+		/**
+		 * @brief			Writes a CR to the stream.
+		 */
+		void put_cr();
+
+		/**
+		 * @brief			Writes a LF to the stream.
+		 */
+		void put_lf();
+
+		/**
+		 * @brief			Writes `null` to the stream.
+		 */
+		void put_null();
+
+		/**
+		 * @brief			Writes a boolean value to the stream.
+		 * @param value		The value to write.
+		 */
+		void put_boolean(bool value);
+
+		/**
+		 * @brief			Writes a number value to the stream.
+		 * @param value		The value to write.
+		 */
+		void put_number(double value);
+
+		/**
+		 * @brief			Writes a string value to the stream.
+		 * @param buffer	The string to write.
+		 * @param size		String length.
+		 */
+		void put_string(const char* buffer, std::size_t size = size::strlen);
+
+		/**
+		 * @brief			Writes a property name to the stream.
+		 * @param buffer	The property name to write.
+		 * @param size		Property name length.
+		 */
+		void put_property(const char* buffer, std::size_t size = size::strlen);
+
+		/**
+		 * @brief			Writes `[` to the stream.
+		 */
+		void put_begin_array();
+
+		/**
+		 * @brief			Writes `]` to the stream.
+		 */
+		void put_end_array();
+
+		/**
+		 * @brief			Writes `{` to the stream.
+		 */
+		void put_begin_object();
+
+		/**
+		 * @brief			Writes `}` to the stream.
+		 */
+		void put_end_object();
 
 	public:
-		std::size_t		put_chars(const char* buffer, std::size_t size);
-		std::size_t		put_char(char ch);
+		/**
+		 * @brief			Writes a sequence of chars to the stream.
+		 * @param buffer	The sequence to write.
+		 * @param size		Sequence length.
+		 */
+		std::size_t put_chars(const char* buffer, std::size_t size);
+
+		/**
+		 * @brief			Writes a char to the stream.
+		 * @param ch		Char to write.
+		 * @return			1 = success. 0 = error.
+		 */
+		std::size_t put_char(char ch);
 
 	private:
-		bool			_skip_comma;
+		/**
+		 * @brief			State flag whether comma `,` should be written before the next value. true = skip. false = write.
+		 */
+		bool _skip_comma;
 	};
 
 }

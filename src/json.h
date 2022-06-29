@@ -150,6 +150,13 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
+	inline json_istream<MaxLevels, Log>::json_istream(json_istream&& other)
+		: base(std::move(other))
+		, state(std::move(other)) {
+	}
+
+
+	template <std::size_t MaxLevels, typename Log>
 	inline void json_istream<MaxLevels, Log>::get_token(json::token_t* buffer, std::size_t size) {
 		Log* log_local = state::log();
 
@@ -644,11 +651,20 @@ namespace abc {
 	template <std::size_t MaxLevels, typename Log>
 	inline json_ostream<MaxLevels, Log>::json_ostream(std::streambuf* sb, Log* log)
 		: base(sb)
-		, state(log) {
+		, state(log)
+		, _skip_comma(false) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::json, severity::abc::debug, 0x10114, "json_ostream::json_ostream()");
 		}
+	}
+
+
+	template <std::size_t MaxLevels, typename Log>
+	inline json_ostream<MaxLevels, Log>::json_ostream(json_ostream&& other)
+		: base(std::move(other))
+		, state(std::move(other))
+		, _skip_comma(other._skip_comma) {
 	}
 
 

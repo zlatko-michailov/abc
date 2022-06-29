@@ -2132,6 +2132,73 @@ namespace abc { namespace test { namespace json {
 	// --------------------------------------------------------------
 
 
+	bool test_json_istream_move(test_context<abc::test::log>& context) {
+		char content[] =
+			"false 42 ";
+
+		abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+		abc::json_istream<abc::size::_64, abc::test::log> istream1(&sb, context.log);
+
+		char buffer[101];
+		abc::json::token_t* token = (abc::json::token_t*)buffer;
+		bool passed = true;
+
+		std::size_t size = sizeof(abc::json::item_t) + sizeof(bool);
+
+		istream1.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::boolean, istream1, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->value.boolean, false, istream1, __TAG__, "%u", size) && passed;
+
+		abc::json_istream<abc::size::_64, abc::test::log> istream2(std::move(istream1));
+
+		size = sizeof(abc::json::item_t) + sizeof(double);
+
+		istream2.get_token(token, sizeof(buffer));
+		passed = verify_value(context, token->item, abc::json::item::number, istream2, __TAG__, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, 42.0, istream2, __TAG__, "%f", size) && passed;
+
+		return passed;
+	}
+
+
+	bool test_json_ostream_move(test_context<abc::test::log>& context) {
+		char expected[] =
+			"true 42";
+
+		char actual [1024 + 1];
+
+		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
+
+		char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
+		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+
+		bool passed = true;
+
+		abc::json_ostream<abc::size::_64, abc::test::log> ostream1(&sb, context.log);
+
+		token->item = abc::json::item::boolean;
+		token->value.boolean = true;
+		ostream1.put_token(token);
+		passed = verify_stream(context, ostream1, __TAG__) && passed;
+
+		abc::json_ostream<abc::size::_64, abc::test::log> ostream2(std::move(ostream1));
+		ostream2.put_space();
+
+		token->item = abc::json::item::number;
+		token->value.number = 42.0;
+		ostream2.put_token(token);
+		passed = verify_stream(context, ostream2, __TAG__) && passed;
+
+		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+
+		return passed;
+	}
+
+
+	// --------------------------------------------------------------
+
+
 	template <typename JsonStream>
 	static bool verify_string(test_context<abc::test::log>& context, const char* actual, const char* expected, const JsonStream& stream, tag_t tag) {
 		bool passed = true;

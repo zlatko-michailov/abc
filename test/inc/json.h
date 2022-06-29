@@ -72,5 +72,8 @@ namespace abc { namespace test { namespace json {
 	bool test_json_ostream_mixed_01(test_context<abc::test::log>& context);
 	bool test_json_ostream_mixed_02(test_context<abc::test::log>& context);
 
+	bool test_json_istream_move(test_context<abc::test::log>& context);
+	bool test_json_ostream_move(test_context<abc::test::log>& context);
+
 }}}
 

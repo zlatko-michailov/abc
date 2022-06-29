@@ -95,6 +95,12 @@ int main() {
 				{ "test_http_response_istream_realworld_01",		abc::test::http::test_http_response_istream_realworld_01 },
 				{ "test_http_response_istream_realworld_02",		abc::test::http::test_http_response_istream_realworld_02 },
 				{ "test_http_response_ostream_bodytext",			abc::test::http::test_http_response_ostream_bodytext },
+				{ "test_http_request_istream_move",					abc::test::http::test_http_request_istream_move },
+				{ "test_http_request_ostream_move",					abc::test::http::test_http_request_ostream_move },
+				{ "test_http_response_istream_move",				abc::test::http::test_http_response_istream_move },
+				{ "test_http_response_ostream_move",				abc::test::http::test_http_response_ostream_move },
+				{ "test_http_client_stream_move",					abc::test::http::test_http_client_stream_move },
+				{ "test_http_server_stream_move",					abc::test::http::test_http_server_stream_move },
 			} },
 			{ "json", {
 				{ "test_json_istream_null",							abc::test::json::test_json_istream_null },
@@ -134,6 +140,8 @@ int main() {
 				{ "test_json_ostream_object_03",					abc::test::json::test_json_ostream_object_03 },
 				{ "test_json_ostream_mixed_01",						abc::test::json::test_json_ostream_mixed_01 },
 				{ "test_json_ostream_mixed_02",						abc::test::json::test_json_ostream_mixed_02 },
+				{ "test_json_istream_move",							abc::test::json::test_json_istream_move },
+				{ "test_json_ostream_move",							abc::test::json::test_json_ostream_move },
 			} },
 			{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
