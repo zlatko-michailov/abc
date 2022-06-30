@@ -40,16 +40,14 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief		Wrapper around `gpio_smbus_pwm` representing a motor connected over SMBus.
-	 * 
-	 * @tparam Log	Logging facility.
+	 * @brief							Wrapper around `gpio_smbus_pwm` representing a motor connected over SMBus.
+	 * @tparam Log						Logging facility.
 	 */
 	template <typename Log = null_log>
 	class gpio_smbus_motor {
 	public:
 		/**
 		 * @brief						Constructor.
-		 * 
 		 * @param chip					Pointer to a `gpio_chip` instance where the direction line is.
 		 * @param direction_line_pos	Chip-specific position of the direction line.
 		 * @param smbus					Pointer to a `gpio_smbus` instance.
@@ -71,58 +69,59 @@ namespace abc {
 		 */
 		gpio_smbus_motor(gpio_smbus_motor<Log>&& other) noexcept = default;
 
+		/**
+		 * @brief						Deleted.
+		 */
 		gpio_smbus_motor(const gpio_smbus_motor<Log>& other) = delete;
 
 	public:
 		/**
 		 * @brief						Set the direction on the motor.
-		 * 
 		 * @param forward				true = forward. false = backward.
 		 */
-		void							set_forward(bool forward) noexcept;
+		void set_forward(bool forward) noexcept;
 
 		/**
 		 * @brief						Returns whether the motor is set to turn forward.
 		 */
-		bool							is_forward() const noexcept;
+		bool is_forward() const noexcept;
 
 		/**
 		 * @brief						Sets the duty cycle on the motor.
-		 * 
 		 * @param duty_cycle			Duty cycle value. Must be between 0 and 100.
 		 */
-		void							set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 		/**
 		 * @brief						Returns the duty cycle on the motor.
 		 */
-		gpio_pwm_duty_cycle_t			get_duty_cycle() const noexcept;
+		gpio_pwm_duty_cycle_t get_duty_cycle() const noexcept;
 
 	private:
 		/**
 		 * @brief						`gpio_output_line` instance representing the direction line.
 		 */
-		gpio_output_line<Log>			_direction_line;
+		gpio_output_line<Log> _direction_line;
 
 		/**
 		 * @brief						`gpio_smbus_pwm` instance representing the PWM peripheral.
 		 */
-		gpio_smbus_pwm<Log>				_pwm;
+		gpio_smbus_pwm<Log> _pwm;
 
 		/**
 		 * @brief						Current direction of the motor.
 		 */
-		bool							_forward;
+		bool _forward;
 
 		/**
 		 * @brief						Current duty cycle on the motor.
 		 */
-		gpio_pwm_duty_cycle_t			_duty_cycle;
+		gpio_pwm_duty_cycle_t _duty_cycle;
 
 		/**
 		 * @brief						The log passed in to the constructor.
 		 */
-		Log*							_log;
+		Log* _log;
 	};
 
 
