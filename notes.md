@@ -1,5 +1,6 @@
 ## Done
 - Bugfix:
+  - timestamp - time parts
   - buffer_streambuf move constructor
   - _stream, _istream, _ostream move constructor
   - _table_ostream move constructor

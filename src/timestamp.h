@@ -291,7 +291,7 @@ namespace abc {
 		time_count_t remaining = nanoseconds_since_midnight % nanoseconds_per_day;
 
 		time_count_t nanoseconds = remaining % nanosecond_count;
-		remaining = remaining / millisecond_count;
+		remaining = remaining / nanosecond_count;
 
 		time_count_t seconds = remaining % second_count;
 		remaining = remaining / second_count;
