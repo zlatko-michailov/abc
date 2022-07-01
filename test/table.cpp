@@ -333,8 +333,8 @@ namespace abc { namespace test { namespace table {
 	bool test_line_debug_move(test_context<abc::test::log>& context) {
 		using Line = abc::debug_line_ostream<abc::size::k1, abc::test::clock>;
 
-		const char* line1_pattern = "2020-10-15 09:23:20.789 | %16s | ffff | 1 |                1 | first\n";
-		const char* line2_pattern = "2020-10-15 09:23:20.789 | %16s | ffff | 1 |                1 | first\n2020-10-15 09:23:20.789 | %16s | ffff | 3 |                2 | second\n";
+		const char* line1_pattern = "2020-10-15 12:34:56.789 | %16s | ffff | 1 |                1 | first\n";
+		const char* line2_pattern = "2020-10-15 12:34:56.789 | %16s | ffff | 1 |                1 | first\n2020-10-15 12:34:56.789 | %16s | ffff | 3 |                2 | second\n";
 
 		return _test_line_move<Line>(context, line1_pattern, line2_pattern);
 	}
@@ -343,8 +343,8 @@ namespace abc { namespace test { namespace table {
 	bool test_line_diag_move(test_context<abc::test::log>& context) {
 		using Line = abc::diag_line_ostream<abc::size::k1, abc::test::clock>;
 
-		const char* line1_pattern = "2020-10-15T09:23:20.789Z,%s,ffff,1,1,first\n";
-		const char* line2_pattern = "2020-10-15T09:23:20.789Z,%s,ffff,1,1,first\n2020-10-15T09:23:20.789Z,%s,ffff,3,2,second\n";
+		const char* line1_pattern = "2020-10-15T12:34:56.789Z,%s,ffff,1,1,first\n";
+		const char* line2_pattern = "2020-10-15T12:34:56.789Z,%s,ffff,1,1,first\n2020-10-15T12:34:56.789Z,%s,ffff,3,2,second\n";
 
 		return _test_line_move<Line>(context, line1_pattern, line2_pattern);
 	}
@@ -353,8 +353,8 @@ namespace abc { namespace test { namespace table {
 	bool test_line_test_move(test_context<abc::test::log>& context) {
 		using Line = abc::test_line_ostream<abc::size::k1, abc::test::clock>;
 
-		const char* line1_pattern = "2020-10-15 09:23:20.789 first\n";
-		const char* line2_pattern = "2020-10-15 09:23:20.789 first\n2020-10-15 09:23:20.789     second\n";
+		const char* line1_pattern = "2020-10-15 12:34:56.789 first\n";
+		const char* line2_pattern = "2020-10-15 12:34:56.789 first\n2020-10-15 12:34:56.789     second\n";
 
 		return _test_line_move<Line>(context, line1_pattern, line2_pattern);
 	}
