@@ -35,14 +35,14 @@ namespace abc { namespace test { namespace heap {
 	bool verify_heap_allocation(test_context<abc::test::log>& context, tag_t tag);
 
 
-	static counter_t	instance_unaligned_throw_count		= 0;
-	static counter_t	instance_aligned_throw_count		= 0;
-	static counter_t	instance_unaligned_nothrow_count	= 0;
-	static counter_t	instance_aligned_nothrow_count		= 0;
-	static counter_t	array_unaligned_throw_count			= 0;
-	static counter_t	array_aligned_throw_count			= 0;
-	static counter_t	array_unaligned_nothrow_count		= 0;
-	static counter_t	array_aligned_nothrow_count			= 0;
+	counter_t	instance_unaligned_throw_count		= 0;
+	counter_t	instance_aligned_throw_count		= 0;
+	counter_t	instance_unaligned_nothrow_count	= 0;
+	counter_t	instance_aligned_nothrow_count		= 0;
+	counter_t	array_unaligned_throw_count			= 0;
+	counter_t	array_aligned_throw_count			= 0;
+	counter_t	array_unaligned_nothrow_count		= 0;
+	counter_t	array_aligned_nothrow_count			= 0;
 
 
 	bool start_heap_allocation(test_context<abc::test::log>& /*context*/) {
@@ -64,8 +64,8 @@ namespace abc { namespace test { namespace heap {
 	}
 
 
-	bool ignore_heap_allocations(counter_t count, test_context<abc::test::log>& context, tag_t tag) {
-		instance_unaligned_throw_count -= count;
+	bool ignore_heap_allocations(counter_t& counter, counter_t delta, test_context<abc::test::log>& context, tag_t tag) {
+		counter -= delta;
 
 		return verify_heap_allocation(context, tag);
 	}

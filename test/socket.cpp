@@ -73,7 +73,7 @@ namespace abc { namespace test { namespace socket {
 		abc::test::heap::counter_t closure_allocation_count = 1;
 #endif
 
-		passed = abc::test::heap::ignore_heap_allocations(closure_allocation_count, context, 0x100e6) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e6) && passed; // Lambda closure
 
 		abc::socket::address client_address;
 		std::uint16_t content_length;
@@ -137,7 +137,7 @@ namespace abc { namespace test { namespace socket {
 		abc::test::heap::counter_t closure_allocation_count = 1;
 #endif
 
-		passed = abc::test::heap::ignore_heap_allocations(closure_allocation_count, context, 0x100e7) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e7) && passed; // Lambda closure
 
 		abc::tcp_client_socket<abc::test::log> client = server.accept();
 
@@ -199,7 +199,7 @@ namespace abc { namespace test { namespace socket {
 		abc::test::heap::counter_t closure_allocation_count = 1;
 #endif
 
-		passed = abc::test::heap::ignore_heap_allocations(closure_allocation_count, context, 0x100e8) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e8) && passed; // Lambda closure
 
 		abc::tcp_client_socket<abc::test::log> client = server.accept();
 
@@ -325,7 +325,7 @@ namespace abc { namespace test { namespace socket {
 		abc::test::heap::counter_t closure_allocation_count = 1;
 #endif
 
-		passed = abc::test::heap::ignore_heap_allocations(closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
 
 		abc::tcp_client_socket<abc::test::log> client = server.accept();
 

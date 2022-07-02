@@ -25,30 +25,17 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/exception.h"
-#include "../../src/tag.h"
+#include "../../src/size.h"
+#include "../../src/multifile.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace heap {
+namespace abc { namespace test { namespace multifile {
 
-	using counter_t = std::int32_t;
-
-
-	extern counter_t	instance_unaligned_throw_count;
-	extern counter_t	instance_aligned_throw_count;
-	extern counter_t	instance_unaligned_nothrow_count;
-	extern counter_t	instance_aligned_nothrow_count;
-	extern counter_t	array_unaligned_throw_count;
-	extern counter_t	array_aligned_throw_count;
-	extern counter_t	array_unaligned_nothrow_count;
-	extern counter_t	array_aligned_nothrow_count;
-
-
-	bool start_heap_allocation(test_context<abc::test::log>& context);
-	bool test_heap_allocation(test_context<abc::test::log>& context);
-	bool ignore_heap_allocations(counter_t& counter, counter_t delta, test_context<abc::test::log>& context, tag_t tag);
+	bool test_multifile_move(test_context<abc::test::log>& context);
+	bool test_duration_multifile_move(test_context<abc::test::log>& context);
+	bool test_size_multifile_move(test_context<abc::test::log>& context);
 
 }}}
 

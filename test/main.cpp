@@ -31,6 +31,7 @@ SOFTWARE.
 #include "inc/ascii.h"
 #include "inc/timestamp.h"
 #include "inc/streambuf.h"
+#include "inc/multifile.h"
 #include "inc/table.h"
 #include "inc/socket.h"
 #include "inc/http.h"
@@ -64,6 +65,11 @@ int main() {
 				{ "test_buffer_streambuf_1_char",					abc::test::streambuf::test_buffer_streambuf_1_char },
 				{ "test_buffer_streambuf_N_chars",					abc::test::streambuf::test_buffer_streambuf_N_chars },
 				{ "test_buffer_streambuf_move",						abc::test::streambuf::test_buffer_streambuf_move },
+			} },
+			{ "multifile", {
+				{ "test_multifile_move",							abc::test::multifile::test_multifile_move },
+				{ "test_duration_multifile_move",					abc::test::multifile::test_duration_multifile_move },
+				{ "test_size_multifile_move",						abc::test::multifile::test_size_multifile_move },
 			} },
 			{ "stream", {
 				{ "test_istream_move",								abc::test::stream::test_istream_move },

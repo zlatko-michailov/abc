@@ -36,6 +36,14 @@ SOFTWARE.
 
 namespace abc {
 
+	static constexpr const char*	filename_format = "%4.4u%2.2u%2.2u_%2.2u%2.2u%2.2u";
+	static constexpr std::size_t	filename_length = 15;
+	static constexpr char			path_separator  = '/';
+
+
+	// --------------------------------------------------------------
+
+
 	template <std::size_t MaxPath, typename Clock, typename Log>
 	inline multifile_streambuf<MaxPath, Clock, Log>::multifile_streambuf(const char* path, std::ios_base::openmode mode, Log* log)
 		: base()
@@ -89,8 +97,14 @@ namespace abc {
 		std::filebuf* op = base::open(_path, _mode);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::multifile, severity::abc::optional, 0x102b3, "multifile_streambuf::reopen() Open path=%s, succes=%u", _path, op != nullptr);
+			_log->put_any(category::abc::multifile, severity::abc::optional, 0x102b3, "multifile_streambuf::reopen() Open path=%s, success=%u", _path, op != nullptr);
 		}
+	}
+
+
+	template <std::size_t MaxPath, typename Clock, typename Log>
+	inline const char* multifile_streambuf<MaxPath, Clock, Log>::path() const noexcept {
+		return _path;
 	}
 
 

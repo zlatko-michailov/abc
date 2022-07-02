@@ -40,16 +40,13 @@ namespace abc {
 	class multifile_streambuf : public std::filebuf {
 		using base = std::filebuf;
 
-		static constexpr const char*	filename_format = "%4.4u%2.2u%2.2u_%2.2u%2.2u%2.2u";
-		static constexpr std::size_t	filename_length = 15;
-		static constexpr char			path_separator  = '/';
-
 	public:
 		multifile_streambuf(const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
 		multifile_streambuf(multifile_streambuf&& other) noexcept;
 
 	public:
 		void					reopen();
+		const char*				path() const noexcept;
 
 	private:
 		char					_path[MaxPath + 1];
