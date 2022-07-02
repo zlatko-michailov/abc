@@ -58,7 +58,7 @@ namespace abc { namespace test { namespace stream {
 	bool test_istream_move(test_context<abc::test::log>& context) {
 		char expected[abc::size::_256 + 1] = "first second";
 		abc::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
-		char actual[abc::size::_256 + 1];
+		char actual[abc::size::_256 + 1] = { };
 
 		bool passed = true;
 
