@@ -51,7 +51,7 @@ namespace abc {
 		constexpr const char* light_gray	= "37m";
 		constexpr const char* dark_gray		= "1;30m";
 		constexpr const char* light_red		= "1;31m";
-		constexpr const char* yello			= "1;33m";
+		constexpr const char* yellow		= "1;33m";
 		constexpr const char* light_cyan	= "1;36m";
 	}
 
@@ -405,7 +405,7 @@ namespace abc {
 
 
 	/**
-	 * @brief					Line filter.
+	 * @brief					Log line filter.
 	 */
 	class log_filter {
 	public:
@@ -463,7 +463,7 @@ namespace abc {
 
 
 	/**
-	 * @brief	`log_ostream` specialization that doesn't log anything.
+	 * @brief					`log_ostream` specialization that doesn't log anything.
 	 */
 	using null_log = log_ostream<diag_line_ostream<0>, log_filter>;
 
