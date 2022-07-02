@@ -44,8 +44,7 @@ namespace abc { namespace test { namespace streambuf {
 	bool test_buffer_streambuf_move(test_context<abc::test::log>& context) {
 		const char* expected = "Test move constructor";
 
-		char medium[abc::size::_256 + 1];
-		std::memset(medium, 0, sizeof(medium));
+		char medium[abc::size::_256 + 1] = { };
 
 		bool passed = true;
 

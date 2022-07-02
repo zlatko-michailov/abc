@@ -56,8 +56,7 @@ namespace abc { namespace test { namespace stream {
 
 
 	bool test_istream_move(test_context<abc::test::log>& context) {
-		char expected[abc::size::_256 + 1];
-		std::strcpy(expected, "first second");
+		char expected[abc::size::_256 + 1] = "first second";
 		abc::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
 		char actual[abc::size::_256 + 1];
 
@@ -76,7 +75,7 @@ namespace abc { namespace test { namespace stream {
 
 
 	bool test_ostream_move(test_context<abc::test::log>& context) {
-		char actual[abc::size::_256 + 1];
+		char actual[abc::size::_256 + 1] = { };
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
 		bool passed = true;

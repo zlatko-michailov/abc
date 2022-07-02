@@ -224,9 +224,8 @@ namespace abc { namespace test { namespace table {
 
 
 	bool test_table_move(test_context<abc::test::log>& context) {
-		char actual[abc::size::_256 + 1];
+		char actual[abc::size::_256 + 1] = { };
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
-		std::memset(actual, 0, sizeof(actual));
 
 		bool passed = true;
 
@@ -251,9 +250,8 @@ namespace abc { namespace test { namespace table {
 
 		Filter filter(abc::severity::optional);
 
-		char actual[abc::size::_256 + 1];
+		char actual[abc::size::_256 + 1] = { };
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
-		std::memset(actual, 0, sizeof(actual));
 
 		bool passed = true;
 
@@ -272,9 +270,8 @@ namespace abc { namespace test { namespace table {
 
 
 	bool test_line_move(test_context<abc::test::log>& context) {
-		char actual[abc::size::_256 + 1];
+		char actual[abc::size::_256 + 1] = { };
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
-		std::memset(actual, 0, sizeof(actual));
 
 		bool passed = true;
 
@@ -303,9 +300,8 @@ namespace abc { namespace test { namespace table {
 		thread_id_line_ostream thread_id;
 		thread_id.put_thread_id(std::this_thread::get_id());
 
-		char actual[abc::size::k1 + 1];
+		char actual[abc::size::k1 + 1] = { };
 		abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
-		std::memset(actual, 0, sizeof(actual));
 
 		char expected[abc::size::k1 + 1];
 

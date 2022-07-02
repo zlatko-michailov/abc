@@ -44,8 +44,7 @@ namespace abc { namespace test { namespace multifile {
 		out2.write("two ", 4);
 		out2.flush();
 
-		char actual[abc::size::_256 + 1];
-		std::memset(actual, 0, sizeof(actual));
+		char actual[abc::size::_256 + 1] = { };
 
 		std::filebuf sbin;
 		sbin.open(path, std::ios_base::in);
