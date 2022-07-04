@@ -152,7 +152,7 @@ int main() {
 			{ "socket", {
 				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
 				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
-				{ "test_tcp_socket_stream",							abc::test::socket::test_tcp_socket_stream },
+				{ "test_tcp_socket_stream_move",					abc::test::socket::test_tcp_socket_stream_move },
 				{ "test_http_json_socket_stream",					abc::test::socket::test_http_json_socket_stream },
 			} },
 			{ "vmem", {

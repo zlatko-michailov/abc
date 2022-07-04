@@ -229,6 +229,8 @@ namespace abc {
 
 	public:
 		socket_streambuf(Socket* socket, Log* log = nullptr);
+		socket_streambuf(socket_streambuf&& other) noexcept;
+		socket_streambuf(const socket_streambuf& other) = delete;
 
 	protected:
 		virtual int_type	underflow() override;

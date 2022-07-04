@@ -506,7 +506,7 @@ namespace abc {
 
 	template <typename Socket, typename Log>
 	inline socket_streambuf<Socket, Log>::socket_streambuf(Socket* socket, Log* log)
-		: std::streambuf()
+		: base()
 		, _socket(socket)
 		, _log(log) {
 		if (socket == nullptr) {
@@ -515,6 +515,22 @@ namespace abc {
 
 		setg(&_get_ch, &_get_ch, &_get_ch);
 		setp(&_put_ch, &_put_ch + 1);
+	}
+
+
+	template <typename Socket, typename Log>
+	inline socket_streambuf<Socket, Log>::socket_streambuf(socket_streambuf&& other) noexcept
+		: base()
+		, _socket(other._socket)
+		, _log(other._log)
+		, _get_ch(other._get_ch)
+		, _put_ch(other._put_ch) {
+		setg(&_get_ch, &_get_ch, &_get_ch);
+		setp(&_put_ch, &_put_ch + 1);
+
+		other._socket = nullptr;
+		other.setg(nullptr, nullptr, nullptr);
+		other.setp(nullptr, nullptr);
 	}
 
 

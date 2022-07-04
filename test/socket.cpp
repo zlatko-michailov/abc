@@ -160,7 +160,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_socket_stream(test_context<abc::test::log>& context) {
+	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context) {
 		const char server_port[] = "31236";
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
@@ -172,15 +172,19 @@ namespace abc { namespace test { namespace socket {
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket<abc::test::log> client(context.log);
-				client.connect("localhost", server_port);
+				abc::tcp_client_socket<abc::test::log> client1(context.log);
+				client1.connect("localhost", server_port);
 
-				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
-				std::istream client_in(&sb);
-				std::ostream client_out(&sb);
+				abc::tcp_client_socket<abc::test::log> client2(std::move(client1));
+
+				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb1(&client2, context.log);
+				std::ostream client_out(&sb1);
 
 				client_out << request_content << "\n";
 				client_out.flush();
+
+				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb2(std::move(sb1));
+				std::istream client_in(&sb2);
 
 				char content[1024];
 				client_in.getline(content, sizeof(content) - 1);
