@@ -223,6 +223,16 @@ namespace abc {
 		 */
 		endpoint(endpoint_config* config, Log* log);
 
+		/**
+		 * @brief				Move Constructor.
+		 */
+		endpoint(endpoint<Limits, Log>&& other) noexcept = default;
+
+		/**
+		 * @brief				Deleted.
+		 */
+		endpoint(const endpoint<Limits, Log>& other) = delete;
+
 	public:
 		/**
 		 * @brief				Starts the endpoint on a separate thread.
