@@ -40,17 +40,15 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief				Wrapper around `gpio_smbus_pwm` representing a servo connected over SMBus.
-	 * 
-	 * @tparam PwmDuration	`std::duration` type of the duty cycle duration.
-	 * @tparam Log			Logging facility.
+	 * @brief							Wrapper around `gpio_smbus_pwm` representing a servo connected over SMBus.
+	 * @tparam PwmDuration				`std::duration` type of the duty cycle duration.
+	 * @tparam Log						Logging facility.
 	 */
 	template <typename PwmDuration, typename Log = null_log>
 	class gpio_smbus_servo {
 	public:
 		/**
 		 * @brief						Constructor.
-		 * 
 		 * @tparam PulseWidthDuration	`std::duration` type of the pulse width duration.
 		 * @param smbus					Pointer to a `gpio_smbus` instance.
 		 * @param smbus_target			SMBus target representing the HAT to which the servo is connected.
@@ -76,31 +74,33 @@ namespace abc {
 		 */
 		gpio_smbus_servo(gpio_smbus_servo<PwmDuration, Log>&& other) noexcept = default;
 
+		/**
+		 * @brief						Deleted.
+		 */
 		gpio_smbus_servo(const gpio_smbus_servo<PwmDuration, Log>& other) = delete;
 
 	public:
 		/**
 		 * @brief						Sets the duty cycle object
-		 * 
 		 * @param duty_cycle			Duty cycle. Must be between 0 and 100.
 		 */
-		void							set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
+		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
 
 	private:
 		/**
 		 * @brief						`gpio_smbus_pwm` instance representing the PWM peripheral.
 		 */
-		gpio_smbus_pwm<Log>				_pwm;
+		gpio_smbus_pwm<Log> _pwm;
 
 		/**
 		 * @brief						Duty cycle duration.
 		 */
-		PwmDuration						_pwm_duration;
+		PwmDuration _pwm_duration;
 
 		/**
 		 * @brief						The log passed in to the constructor.
 		 */
-		Log*							_log;
+		Log* _log;
 	};
 
 
