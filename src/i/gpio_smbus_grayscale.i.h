@@ -40,16 +40,14 @@ SOFTWARE.
 namespace abc {
 
 	/**
-	 * @brief		Grayscale sensor connected over SMBus.
-	 * 
-	 * @tparam Log	Logging facility.
+	 * @brief					Grayscale sensor connected over SMBus.
+	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
 	class gpio_smbus_grayscale {
 	public:
 		/**
 		 * @brief				Constructor.
-		 * 
 		 * @param smbus			Pointer to a `gpio_smbus` instance.
 		 * @param smbus_target	SMBus target representing the HAT to which the grayscale sensor is connected.
 		 * @param reg_left		HAT register of the left sensor.
@@ -66,43 +64,45 @@ namespace abc {
 		 */
 		gpio_smbus_grayscale(gpio_smbus_grayscale<Log>&& other) noexcept = default;
 
+		/**
+		 * @brief				Deleted.
+		 */
 		gpio_smbus_grayscale(const gpio_smbus_grayscale<Log>& other) = delete;
 
 	public:
 		/**
 		 * @brief				Gets the current values of the three sensors.
-		 * 
 		 * @param left			Left sensor value.
 		 * @param center		Center sensor value.
 		 * @param right			Right sensor value.
 		 */
-		void					get_values(std::uint16_t& left, std::uint16_t& center, std::uint16_t& right) noexcept;
+		void get_values(std::uint16_t& left, std::uint16_t& center, std::uint16_t& right) noexcept;
 
 	private:
 		/**
 		 * @brief				Pointer to the `gpio_smbus` instance passed in to the constructor.
 		 */
-		gpio_smbus<Log>*		_smbus;
+		gpio_smbus<Log>* _smbus;
 
 		/**
 		 * @brief				Copy of the `gpio_smbus_target` passed in to the constructor.
 		 */
-		gpio_smbus_target<Log>	_smbus_target;
+		gpio_smbus_target<Log> _smbus_target;
 
 		/**
 		 * @brief				HAT register of the left sensor.
 		 */
-		gpio_smbus_register_t	_reg_left;
+		gpio_smbus_register_t _reg_left;
 
 		/**
 		 * @brief				HAT register of the center sensor.
 		 */
-		gpio_smbus_register_t	_reg_center;
+		gpio_smbus_register_t _reg_center;
 
 		/**
 		 * @brief				HAT register of the right sensor.
 		 */
-		gpio_smbus_register_t	_reg_right;
+		gpio_smbus_register_t _reg_right;
 	};
 
 
