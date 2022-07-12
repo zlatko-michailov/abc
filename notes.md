@@ -10,8 +10,6 @@
   - json_istream, json_ostream move constructor
 
 ## To Do
-- Bugfix:
-  - _http_istream, _http_ostream, http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
 - Copy constructor - explicit
 - doxygen
   - Aligning
@@ -25,6 +23,7 @@
     - _ostream
     - _http_istream
     - _http_ostream
+  - Untabify
   
 ## Pick List
 - vmem:

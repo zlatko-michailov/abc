@@ -55,61 +55,61 @@ namespace abc {
 
 
 	/**
-	 * @brief			Internal. http semantic state. 
-	 * @tparam Log		Logging facility.
+	 * @brief				Internal. http semantic state. 
+	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
 	class _http_state {
 	protected:
 		/**
-		 * @brief		Constructor.
-		 * @param next	Next item.
-		 * @param log	Pointer to a `Log` instance. May be `nullptr`.
+		 * @brief			Constructor.
+		 * @param next		Next item.
+		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		_http_state(http::item_t next, Log* log) noexcept;
 
 		/**
-		 * @brief		Move constructor.
+		 * @brief			Move constructor.
 		 */
 		_http_state(_http_state&& other) = default;
 
 		/**
-		 * @brief		Copy constructor.
+		 * @brief			Copy constructor.
 		 */
 		_http_state(const _http_state& other) = default;
 
 	public:
 		/**
-		 * @brief		Returns the next expected item.
+		 * @brief			Returns the next expected item.
 		 */
 		http::item_t next() const noexcept;
 
 	protected:
 		/**
-		 * @brief		Resets the next item.
-		 * @param next	Next item.
+		 * @brief			Resets the next item.
+		 * @param next		Next item.
 		 */
 		void reset(http::item_t next);
 
 		/**
-		 * @brief		Throws if `item` doesn't match `next()`.
-		 * @param item	Item to verify.
+		 * @brief			Throws if `item` doesn't match `next()`.
+		 * @param item		Item to verify.
 		 */
 		void assert_next(http::item_t item);
 
 		/**
-		 * @brief		Returns the log passed in to the constructor.
+		 * @brief			Returns the log passed in to the constructor.
 		 */
 		Log* log() const noexcept;
 
 	private:
 		/**
-		 * @brief		The next expected item.
+		 * @brief			The next expected item.
 		 */
 		http::item_t _next;
 
 		/**
-		 * @brief		The log passed in to the constructor.
+		 * @brief			The log passed in to the constructor.
 		 */
 		Log* _log;
 	};
