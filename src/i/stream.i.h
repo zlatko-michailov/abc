@@ -38,71 +38,185 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				Common stream functionality.
+	 * @tparam Stream		Base stream class.
+	 */
 	template <typename Stream>
 	class _stream : protected Stream {
 		using base = Stream;
 
 	protected:
+		/**
+		 * @brief			Constructor.
+		 * @param sb		Pointer to a `std::streambuf` implementation. 
+		 */
 		_stream(std::streambuf* sb);
+
+		/**
+		 * @brief			Move constructor.
+		 */
 		_stream(_stream&& other);
+
+		/**
+		 * @brief			Deleted.
+		 */
 		_stream(const _stream& other) = delete;
 
 	public:
-		std::streambuf*	rdbuf() const;
+		/**
+		 * @brief			Returns the pointer to `std::streambuf` passed in to the constructor.
+		 */
+		std::streambuf* rdbuf() const;
 
-		bool			eof() const;
-		bool			good() const;
-		bool			bad() const;
-		bool			fail() const;
-		bool			operator!() const;
-						operator bool() const;
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		bool eof() const;
+
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		bool good() const;
+
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		bool bad() const;
+
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		bool fail() const;
+
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		bool operator!() const;
+
+		/**
+		 * @brief			Delegates to the corresponding getter on the base stream.
+		 */
+		operator bool() const;
 
 	protected:
-		void			reset();
-		bool			is_good() const;
-		void			set_bad();
-		void			set_bad_if(bool condition);
-		void			set_fail();
-		void			set_fail_if(bool condition);
+		/**
+		 * @brief			Resets all state bits on the base stream.
+		 */
+		void reset();
+
+		/**
+		 * @brief			Returns if reading can continue from this stream.
+		 */
+		bool is_good() const;
+
+		/**
+		 * @brief			Sets the bad bits on the base stream.
+		 */
+		void set_bad();
+
+		/**
+		 * @brief			Sets the bad bits on the base stream if the condition is `true`.
+		 * @param condition	Condition.
+		 */
+		void set_bad_if(bool condition);
+
+		/**
+		 * @brief			Sets the fail bit on the base stream.
+		 */
+		void set_fail();
+
+		/**
+		 * @brief			Sets the fail bit on the base stream if the condition is `true`.
+		 * @param condition	Condition.
+		 */
+		void set_fail_if(bool condition);
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				Common input stream functionality.
+	 */
 	class _istream : public _stream<std::istream> {
 		using base = _stream<std::istream>;
 
 	protected:
+		/**
+		 * @brief			Constructor.
+		 * @param sb		Pointer to a `std::streambuf` implementation. 
+		 */
 		_istream(std::streambuf* sb);
+
+		/**
+		 * @brief			Move constructor.
+		 */
 		_istream(_istream&& other);
+
+		/**
+		 * @brief			Deleted.
+		 */
 		_istream(const _istream& other) = delete;
 
 	public:
-		std::size_t		gcount() const noexcept;
+		/**
+		 * @brief			Returns the number of chars read by the last read operation.
+		 */
+		std::size_t gcount() const noexcept;
 
 	protected:
-		void			reset();
-		void			set_gcount(std::size_t gcount) noexcept;
+		/**
+		 * @brief			Resets the `gcount`.
+		 */
+		void reset();
+
+		/**
+		 * @brief			Sets the `gcount` to the specified value.
+		 * @param gcount	New value.
+		 */
+		void set_gcount(std::size_t gcount) noexcept;
 
 	private:
-		std::size_t		_gcount;
+		/**
+		 * @brief			The number of chars read by the last read operation.
+		 */
+		std::size_t _gcount;
 	};
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief				Common output stream functionality.
+	 */
 	class _ostream : public _stream<std::ostream> {
 		using base = _stream<std::ostream>;
 
 	protected:
+		/**
+		 * @brief			Constructor.
+		 * @param sb		Pointer to a `std::streambuf` implementation. 
+		 */
 		_ostream(std::streambuf* sb);
+
+		/**
+		 * @brief			Move constructor.
+		 */
 		_ostream(_ostream&& other);
+
+		/**
+		 * @brief			Deleted.
+		 */
 		_ostream(const _ostream& other) = delete;
 
 	public:
-		void			flush();
+		/**
+		 * @brief			Delegates to the `flush()` of the base stream.
+		 */
+		void flush();
 	};
 
 }
