@@ -39,6 +39,9 @@ namespace abc {
 	// ..............................................................
 
 
+	/**
+	 * @brief			Empty struct to represent no page header.
+	 */
 	struct vmem_noheader {
 	};
 
@@ -46,6 +49,9 @@ namespace abc {
 	// ..............................................................
 
 
+	/**
+	 * @brief			Base linked page.
+	 */
 	struct vmem_linked_page {
 		vmem_page_pos_t		page_pos			= vmem_page_pos_nil;
 		vmem_page_pos_t		prev_page_pos		= vmem_page_pos_nil;
@@ -53,6 +59,12 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief			Common container page.
+	 * @details			Includes a `vmem_linked_page` at the beginning.
+	 * @tparam T		Item type.
+	 * @tparam Header	Custom page header.
+	 */
 	template <typename T, typename Header = vmem_noheader>
 	struct vmem_container_page : public vmem_linked_page {
 		Header				header				= { };
@@ -61,30 +73,53 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief			List page.
+	 * @details			Same as `vmem_container_page`.
+	 * @tparam T		Item type.
+	 */
 	template <typename T>
 	struct vmem_list_page : public vmem_container_page<T, vmem_noheader> {
 	};
 
 
+	/**
+	 * @brief			Item on a map key page.
+	 * @tparam Key		Key type.
+	 */
 	template <typename Key>
 	struct vmem_map_key {
-		Key						key				= { };
-		vmem_page_pos_t			page_pos		= { };
+		Key					key					= { };
+		vmem_page_pos_t		page_pos			= { };
 	};
 
 
+	/**
+	 * @brief			Item on a map value page.
+	 * @tparam Key		Key type.
+	 * @tparam T		Value type.
+	 */
 	template <typename Key, typename T>
 	struct vmem_map_value {
-		Key						key				= { };
-		T						value			= { };
+		Key					key					= { };
+		T					value				= { };
 	};
 
 
+	/**
+	 * @brief			Map key page.
+	 * @tparam Key		Key type.
+	 */
 	template <typename Key>
 	struct vmem_map_key_page : public vmem_container_page<vmem_map_key<Key>, vmem_noheader> {
 	};
 
 
+	/**
+	 * @brief			Map value page.
+	 * @tparam Key		Key type.
+	 * @tparam T		Value type.
+	 */
 	template <typename Key, typename T>
 	struct vmem_map_value_page : public vmem_container_page<vmem_map_value<Key, T>, vmem_noheader> {
 	};
@@ -93,26 +128,45 @@ namespace abc {
 	// ..............................................................
 
 
+	/**
+	 * @brief			Linked pages state.
+	 */
 	struct vmem_linked_state {
 		vmem_page_pos_t		front_page_pos		= vmem_page_pos_nil;
 		vmem_page_pos_t		back_page_pos		= vmem_page_pos_nil;
 	};
 
 
+	/**
+	 * @brief			Common container state.
+	 * @details			Includes a `vmem_linked_state` at the beginning.
+	 */
 	struct vmem_container_state : public vmem_linked_state {
 		vmem_item_pos_t		item_size			= 0;
 		vmem_page_pos_t		total_item_count	= 0;
 	};
 
 
+	/**
+	 * @brief			List state.
+	 * @details			Same as `vmem_container_state`.
+	 */
 	struct vmem_list_state : public vmem_container_state {
 	};
 
 
+	/**
+	 * @brief			Stack state.
+	 * @details			Same as `vmem_container_state`.
+	 */
 	struct vmem_stack_state : public vmem_container_state {
 	};
 
 
+	/**
+	 * @brief			Map state.
+	 * @details			Consists of a stack of key lists, and a value list.
+	 */
 	struct vmem_map_state {
 		vmem_stack_state		keys;
 		vmem_container_state	values;
@@ -122,6 +176,10 @@ namespace abc {
 	// ..............................................................
 
 
+	/**
+	 * @brief			Root page.
+	 * @details			Not linked. Always at position 0.
+	 */
 	struct vmem_root_page {
 		const vmem_version_t	version			= 2;
 		const char				signature[10]	= "abc::vmem";
