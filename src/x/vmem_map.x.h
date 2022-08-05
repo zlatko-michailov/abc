@@ -432,7 +432,7 @@ namespace abc {
 					key_level_result2 keys_result;
 					if (is_insert) {
 						// page_leads[0] - insert; new page
-						// page_leads[1] - supplemental; used only when a new level is created
+						// page_leads[1] - original; used only when a new level is created
 						
 						vmem_item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
 						if (parent_item_pos == vmem_item_pos_nil) {

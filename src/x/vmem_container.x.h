@@ -54,20 +54,21 @@ namespace abc {
 	template <typename T>
 	template <typename Other>
 	vmem_container_page_lead<T>::vmem_container_page_lead(const Other& other) noexcept
-		: vmem_container_page_lead(other.operation, other.items[0].key, other.items[1].key, other.page_pos) {
+		: vmem_container_page_lead(other.operation, other.page_pos, other.items[0].key, other.items[1].key) {
 	}
 
 
 	template <typename T>
 	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, vmem_page_pos_t page_pos) noexcept
 		: operation(operation)
-		, page_pos(page_pos) {
+		, page_pos(page_pos)
+		, items { } {
 	}
 
 
 	template <typename T>
 	template <typename Key>
-	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, const Key& items_0_key, const Key& items_1_key, vmem_page_pos_t page_pos) noexcept
+	vmem_container_page_lead<T>::vmem_container_page_lead(vmem_container_page_lead_operation_t operation, vmem_page_pos_t page_pos, const Key& items_0_key, const Key& items_1_key) noexcept
 		: vmem_container_page_lead(operation, page_pos) {
 		vmem_copy(items[0].key, items_0_key);
 		vmem_copy(items[1].key, items_1_key);
@@ -524,10 +525,10 @@ namespace abc {
 			}
 
 			// page_leads[0] - insert; new page
-			// page_leads[1] - supplemental; used only when a new level is created
+			// page_leads[1] - original; used only when a new level is created
 			result.page_leads[0] = page_lead(vmem_container_page_lead_operation::insert, new_page.pos());
 			vmem_copy(result.page_leads[0].items[0], new_container_page->items[0]);
-			result.page_leads[1] = page_lead(vmem_container_page_lead_operation::supplemental, itr.page_pos());
+			result.page_leads[1] = page_lead(vmem_container_page_lead_operation::original, itr.page_pos());
 			vmem_copy(result.page_leads[1].items[0], container_page->items[0]);
 		}
 
