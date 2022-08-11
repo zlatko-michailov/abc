@@ -171,8 +171,8 @@ namespace abc {
 		 * @details				Used for `vmem_map` where only the key of each item is used.
 		 * @param operation		Operation performed on the page.
 		 * @param page_pos		Position of the page.
-		 * @param item_0_key	The key of item[0].
-		 * @param item_1_key	The key of item[1].
+		 * @param items_0_key	The key of item[0].
+		 * @param items_1_key	The key of item[1].
 		 */
 		template <typename Key>
 		vmem_container_page_lead(vmem_container_page_lead_operation_t operation, vmem_page_pos_t page_pos, const Key& items_0_key, const Key& items_1_key) noexcept;
@@ -447,7 +447,7 @@ namespace abc {
 		bool insert_page_after(vmem_page_pos_t after_page_pos, vmem_page<Pool, Log>& new_page, vmem_container_page<T, Header>*& new_container_page) noexcept;
 
 		/**
-		 * @brief				Evaluates the balancing policy.
+		 * @brief				Evaluates the balancing policy on insert.
 		 * @param itr			Iterator to insert at.
 		 * @param container_page Pointer to a `vmem_container_page` to insert to.
 		 * @return				`true` if an insert is subject to balancing items; `false` otherwise.
@@ -456,29 +456,114 @@ namespace abc {
 
 	// erase() helpers
 	private:
-		result2					erase_nostate(const_iterator itr) noexcept;
-		result2					erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		result2					balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
-		bool					erase_page(vmem_page<Pool, Log>& page) noexcept;
-		bool					erase_page_pos(vmem_page_pos_t page_pos) noexcept;
-		bool					should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept;
+		/**
+		 * @brief				Erases an item at an iterator without modifying the container's state.
+		 * @param itr			Iterator.
+		 * @return				`result2`. 
+		 */
+		result2 erase_nostate(const_iterator itr) noexcept;
+
+		/**
+		 * @brief				Erases an item from a page that has more than one item.
+		 * @param itr			Iterator.
+		 * @param container_page Pointer to a `vmem_container_page`.
+		 * @return				`result2`. 
+		 */
+		result2 erase_from_many(const_iterator itr, vmem_container_page<T, Header>* container_page) noexcept;
+
+		/**
+		 * @brief				Merges the items of the given page with one of its adjacent pages.
+		 * @param itr			Iterator.
+		 * @param page			Page to be merged as a reference to `vmem_page`.
+		 * @param container_page Page to be merged as a pointer to a `vmem_container_page`
+		 * @return				`result2`. 
+		 */
+		result2 balance_merge(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
+
+		/**
+		 * @brief				Merges the items of the given page with the one following it.
+		 * @param itr			Iterator.
+		 * @param page			Page to be merged as a reference to `vmem_page`.
+		 * @param container_page Page to be merged as a pointer to a `vmem_container_page`
+		 * @return				`result2`. 
+		 */
+		result2 balance_merge_next(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
+
+		/**
+		 * @brief				Merges the items of the given page with the one preceding it.
+		 * @param itr			Iterator.
+		 * @param page			Page to be merged as a reference to `vmem_page`.
+		 * @param container_page Page to be merged as a pointer to a `vmem_container_page`
+		 * @return				`result2`. 
+		 */
+		result2 balance_merge_prev(const_iterator itr, vmem_page<Pool, Log>& page, vmem_container_page<T, Header>* container_page) noexcept;
+
+		/**
+		 * @brief				Unlinks a page from the container, and puts it on the pool's free page list.
+		 * @param page			Page to be erased as a reference to `vmem_page`.
+		 * @return				`true` = success; `false` = error.
+		 */
+		bool erase_page(vmem_page<Pool, Log>& page) noexcept;
+
+		/**
+		 * @brief				Unlinks a page from the container.
+		 * @param page_pos		Page position.
+		 * @return				`true` = success; `false` = error.
+		 */
+		bool erase_page_pos(vmem_page_pos_t page_pos) noexcept;
+
+		/**
+		 * @brief				Evaluates the balancing policy on erase.
+		 * @param container_page Pointer to a `vmem_container_page` to erase from.
+		 * @param item_pos 
+		 * @return				`true` if an erase is subject to balancing items; `false` otherwise.
+		 */
+		bool should_balance_erase(const vmem_container_page<T, Header>* container_page, vmem_item_pos_t item_pos) const noexcept;
 
 	private:
 		friend iterator_state;
 		friend const_iterator;
 		friend iterator;
 
-		iterator				next(const iterator_state& itr) const noexcept;
-		iterator				prev(const iterator_state& itr) const noexcept;
-		pointer					at(const iterator_state& itr) const noexcept;
+		/**
+		 * @brief				Returns the iterator immediately following a given one.  
+		 * @param itr			Iterator.
+		 */
+		iterator next(const iterator_state& itr) const noexcept;
+
+		/**
+		 * @brief				Returns the iterator immediately preceding a given one.  
+		 * @param itr			Iterator.
+		 */
+		iterator prev(const iterator_state& itr) const noexcept;
+
+		/**
+		 * @brief				Dereferences an iterator.
+		 * @param itr			Iterator.
+		 * @return				`vmem_ptr`. 
+		 */
+		pointer at(const iterator_state& itr) const noexcept;
 
 	private:
-		iterator				begin_itr() const noexcept;
-		iterator				end_itr() const noexcept;
-		reverse_iterator		rend_itr() const noexcept;
-		reverse_iterator		rbegin_itr() const noexcept;
+		/**
+		 * @brief				Returns an iterator referencing the first item.
+		 */
+		iterator begin_itr() const noexcept;
+
+		/**
+		 * @brief				Returns an iterator referencing past the last item.
+		 */
+		iterator end_itr() const noexcept;
+
+		/**
+		 * @brief				Returns a reverse iterator referencing the last item.
+		 */
+		reverse_iterator rend_itr() const noexcept;
+
+		/**
+		 * @brief				Returns an iterator referencing before the first item.
+		 */
+		reverse_iterator rbegin_itr() const noexcept;
 
 	private:
 		vmem_container_state*	_state;

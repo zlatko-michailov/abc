@@ -11,19 +11,12 @@
 
 ## To Do
 - Copy constructor - explicit
-- doxygen
-  - Aligning
-    - Whole class
-    - 1 space between return type and method name
-    - No blank line before @return
-    - No blank line after @brief/@details
 - Breaking change:
   - Un-internalize name:
     - _istream
     - _ostream
     - _http_istream
     - _http_ostream
-  - Why vmem_container_page_lead contains whole items? Can those be just keys?
   - Untabify
   
 ## Pick List
