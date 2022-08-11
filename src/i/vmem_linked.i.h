@@ -198,25 +198,44 @@ namespace abc {
 		friend iterator;
 
 		/**
-		 * @brief				Returns the iterator next to the given one.
+		 * @brief				Returns the iterator immediately following a given one.  
+		 * @param itr			Iterator.
 		 */
 		iterator next(const iterator_state& itr) const noexcept;
 
 		/**
-		 * @brief				Returns the iterator previous to the given one.
+		 * @brief				Returns the iterator immediately preceding a given one.  
+		 * @param itr			Iterator.
 		 */
 		iterator prev(const iterator_state& itr) const noexcept;
 
 		/**
-		 * @brief				Dereferences the given iterator.
+		 * @brief				Dereferences an iterator.
+		 * @param itr			Iterator.
+		 * @return				`vmem_ptr`. 
 		 */
 		pointer at(const iterator_state& itr) const noexcept;
 
 	private:
-		iterator				begin_itr() const noexcept;
-		iterator				end_itr() const noexcept;
-		reverse_iterator		rend_itr() const noexcept;
-		reverse_iterator		rbegin_itr() const noexcept;
+		/**
+		 * @brief				Returns an iterator referencing the first page.
+		 */
+		iterator begin_itr() const noexcept;
+
+		/**
+		 * @brief				Returns an iterator referencing past the last page.
+		 */
+		iterator end_itr() const noexcept;
+
+		/**
+		 * @brief				Returns a reverse iterator referencing the last page.
+		 */
+		reverse_iterator rend_itr() const noexcept;
+
+		/**
+		 * @brief				Returns a reverse iterator referencing before the first page.
+		 */
+		reverse_iterator rbegin_itr() const noexcept;
 
 	private:
 		vmem_linked_state*		_state;

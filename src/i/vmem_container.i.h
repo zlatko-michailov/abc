@@ -561,7 +561,7 @@ namespace abc {
 		reverse_iterator rend_itr() const noexcept;
 
 		/**
-		 * @brief				Returns an iterator referencing before the first item.
+		 * @brief				Returns a reverse iterator referencing before the first item.
 		 */
 		reverse_iterator rbegin_itr() const noexcept;
 
