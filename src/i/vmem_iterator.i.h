@@ -32,27 +32,68 @@ SOFTWARE.
 
 namespace abc {
 
+	/**
+	 * @brief					Iterator edge - special positions.
+	 */
 	using vmem_iterator_edge_t = std::uint8_t;
 
 	namespace vmem_iterator_edge {
+		/**
+		 * @brief				Not an edge.
+		 */
 		constexpr vmem_iterator_edge_t	none	= 0;
-		constexpr vmem_iterator_edge_t	rbegin	= 1; // before front
-		constexpr vmem_iterator_edge_t	end		= 2; // after back
+
+		/**
+		 * @brief				Before front.
+		 */
+		constexpr vmem_iterator_edge_t	rbegin	= 1;
+
+		/**
+		 * @brief				After back.
+		 */
+		constexpr vmem_iterator_edge_t	end		= 2;
 	}
 
 
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Generic iterator state. For internal use.
+	 * @details					This class does the heavy lifting for iterators.
+	 * @tparam Container		Container.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Container, typename Pool, typename Log = null_log>
 	class _vmem_iterator_state {
 	public:
 		using container					= Container;
 
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param container		Container.
+		 * @param page_pos		Page position.
+		 * @param item_pos		Item position.
+		 * @param edge			Edge.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		_vmem_iterator_state<Container, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
-		_vmem_iterator_state<Container, Pool, Log>(const _vmem_iterator_state<Container, Pool, Log>& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		_vmem_iterator_state<Container, Pool, Log>(_vmem_iterator_state<Container, Pool, Log>&& other) noexcept = default;
+
+		/**
+		 * @brief				Copy constructor.
+		 */
+		_vmem_iterator_state<Container, Pool, Log>(const _vmem_iterator_state<Container, Pool, Log>& other) = default;
+
+		/**
+		 * @brief				Default-like constructor.
+		 */
 		_vmem_iterator_state<Container, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
@@ -68,17 +109,42 @@ namespace abc {
 		_vmem_iterator_state<Container, Pool, Log>&		operator --(int) noexcept;
 
 	public:
-		bool											is_valid() const noexcept;
-		bool											can_deref() const noexcept;
+		/**
+		 * @brief				Checks whether this iterator state is associated with a container.
+		 */
+		bool is_valid() const noexcept;
+
+		/**
+		 * @brief				Checks whether this iterator state can be dereferenced.
+		 */
+		bool can_deref() const noexcept;
 
 	private:
-		_vmem_iterator_state<Container, Pool, Log>&		inc() noexcept;
-		_vmem_iterator_state<Container, Pool, Log>&		dec() noexcept;
+		/**
+		 * @brief				Increments this iterator state, and returns a self reference.
+		 */
+		_vmem_iterator_state<Container, Pool, Log>& inc() noexcept;
+
+		/**
+		 * @brief				Decrements this iterator state, and returns a self reference.
+		 */
+		_vmem_iterator_state<Container, Pool, Log>& dec() noexcept;
 
 	public:
-		vmem_page_pos_t									page_pos() const noexcept;
-		vmem_item_pos_t									item_pos() const noexcept;
-		vmem_iterator_edge_t							edge() const noexcept;
+		/**
+		 * @brief				Returns the page position.
+		 */
+		vmem_page_pos_t page_pos() const noexcept;
+
+		/**
+		 * @brief				Returns the item position.
+		 */
+		vmem_item_pos_t item_pos() const noexcept;
+
+		/**
+		 * @brief				Returns the edge.
+		 */
+		vmem_iterator_edge_t edge() const noexcept;
 
 	protected:
 		const Container*								_container;
@@ -89,6 +155,15 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief					Generic iterator. For internal use.
+	 * @details					This class is a stateless wrapper around `_vmem_iterator_state`.
+	 * @tparam Base				Base class - a `_vmem_iterator_state` specialization.
+	 * @tparam Container		Container.
+	 * @tparam T				Item type.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Base, typename Container, typename T, typename Pool, typename Log = null_log>
 	class _vmem_iterator : public Base {
 	public:
@@ -99,9 +174,29 @@ namespace abc {
 		using const_reference			= const T&;
 
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param container		Container
+		 * @param page_pos		Page position.
+		 * @param item_pos		Item position.
+		 * @param edge			Edge.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		_vmem_iterator<Base, Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
-		_vmem_iterator<Base, Container, T, Pool, Log>(const _vmem_iterator<Base, Container, T, Pool, Log>& other) = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		_vmem_iterator<Base, Container, T, Pool, Log>(_vmem_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+
+		/**
+		 * @brief				Copy constructor.
+		 */
+		_vmem_iterator<Base, Container, T, Pool, Log>(const _vmem_iterator<Base, Container, T, Pool, Log>& other) = default;
+
+		/**
+		 * @brief				Default-like constructor.
+		 */
 		_vmem_iterator<Base, Container, T, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
@@ -117,15 +212,36 @@ namespace abc {
 	private:
 		friend Container;
 
+		/**
+		 * @brief				Returns a `vmem_ptr` pointing at the item in memory, if the iterator is valid.
+		 */
 		pointer											ptr() const noexcept;
+
+		/**
+		 * @brief				Returns a reference to the item in memory, if the iterator is valid. Otherwise, it throws.
+		 */
 		reference										deref() const;
 	};
 
 
+	/**
+	 * @brief					Generic const iterator.
+	 * @tparam Container		Container.
+	 * @tparam T				Item type.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Container, typename T, typename Pool, typename Log = null_log>
 	using vmem_const_iterator = _vmem_iterator<_vmem_iterator_state<Container, Pool, Log>, Container, const T, Pool, Log>;
 
 
+	/**
+	 * @brief					Generic iterator.
+	 * @tparam Container		Container.
+	 * @tparam T				Item type.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Container, typename T, typename Pool, typename Log = null_log>
 	using vmem_iterator = _vmem_iterator<vmem_const_iterator<Container, T, Pool, Log>, Container, T, Pool, Log>;
 
