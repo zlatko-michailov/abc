@@ -8,15 +8,17 @@
   - log_ostream, debug_line_ostream, diag_line_ostream, test_line_ostream move constructor
   - http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
   - json_istream, json_ostream move constructor
+- Copy constructor - explicit
 
 ## To Do
-- Copy constructor - explicit
 - Breaking change:
   - Un-internalize name:
     - _istream
     - _ostream
     - _http_istream
     - _http_ostream
+    - _vmem_iterator*
+    - vmem_mapped_page
   - Untabify
   
 ## Pick List
