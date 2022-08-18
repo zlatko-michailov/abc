@@ -18,7 +18,7 @@
     - _http_istream
     - _http_ostream
     - _vmem_iterator*
-    - vmem_mapped_page
+    - vmem_mapped_page*
   - Untabify
   
 ## Pick List

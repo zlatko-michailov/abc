@@ -79,62 +79,239 @@ namespace abc {
 	class vmem_linked;
 
 
+	/**
+	 * @brief					Virtual memory (vmem) pool.
+	 * @details					Every pool is persisted to a file.
+	 * @tparam MaxMappedPages	Maximum number of pages that could be mapped in memory at the same time.
+	 * 							Once this limit is reached, the pool fails to lock any more pages until one or more locked pages get unlocked. 
+	 * @tparam Log				Logging facility.
+	 */
 	template <std::size_t MaxMappedPages, typename Log = null_log>
 	class vmem_pool {
 		using Pool = vmem_pool<MaxMappedPages, Log>;
 
 	public:
-		static constexpr std::size_t	max_mapped_pages() noexcept;
+		/**
+		 * @brief				Returns the `MaxMappedPages` limit.
+		 */
+		static constexpr std::size_t max_mapped_pages() noexcept;
 
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param file_path		Path to the pool file.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
 	private:
 		friend vmem_page<Pool, Log>;
 
-		vmem_page_pos_t				alloc_page() noexcept;
-		void						free_page(vmem_page_pos_t page_pos) noexcept;
+		/**
+		 * @brief				Allocates a page.
+		 * @details				Tries to reuse a free page if there are any. Otherwise, adds a new page to the pool. 
+		 * @return				The position of the allocated page. 
+		 */
+		vmem_page_pos_t alloc_page() noexcept;
 
-		void*						lock_page(vmem_page_pos_t page_pos) noexcept;
-		bool						unlock_page(vmem_page_pos_t page_pos) noexcept;
+		/**
+		 * @brief				Frees a page by adding it to the list of free pages.
+		 * @param page_pos		Page position.
+		 */
+		void free_page(vmem_page_pos_t page_pos) noexcept;
+
+		/**
+		 * @brief				Locks a page in memory
+		 * @details				Once a page is locked, its contents can be addressed by regular pointers.
+		 * @param page_pos		Page position.
+		 * @return				Pointer to the first byte of the page.
+		 */
+		void* lock_page(vmem_page_pos_t page_pos) noexcept;
+
+		/**
+		 * @brief				Unlocks a page in memory.
+		 * @details				A page may be locked multiple times.
+		 * 						Once the last lock is removed, the contents of the page can no longer be addressed by regular pointers.
+		 * @param page_pos		Page position.
+		 * @return				`true` = success; `false` = error.
+		 */
+		bool unlock_page(vmem_page_pos_t page_pos) noexcept;
 
 	private:
 		friend vmem_linked<Pool, Log>;
 
-		void						clear_linked(vmem_linked<Pool, Log>& linked);
+		/**
+		 * @brief				Frees up all pages of the `vmem_linked` struct at once.
+		 * @param linked		Reference to a `vmem_linked` instance.
+		 */
+		void clear_linked(vmem_linked<Pool, Log>& linked);
 
 	// Constructor helpers
 	private:
-		void						verify_args_or_throw(const char* file_path);
-		bool						open_pool_or_throw(const char* file_path);
-		void						init_pool_or_throw();
-		void						create_root_page_or_throw();
-		void						create_start_page_or_throw();
-		void						verify_pool_or_throw();
-		void						verify_root_page_or_throw();
-		void						verify_start_page_or_throw();
+		/**
+		 * @brief				Verifies arguments before opening the pool file. Throws on error.
+		 * @param file_path		Pool file path.
+		 */
+		void verify_args_or_throw(const char* file_path);
+
+		/**
+		 * @brief				Opens the pool file, and verifies its essential pages. Throws on error. An empty file is acceptable.
+		 * @param file_path		Pool file path.
+		 * @return				`true` = the pool file is already initialized; `false` = the pool file needs initialization.
+		 */
+		bool open_pool_or_throw(const char* file_path);
+
+		/**
+		 * @brief				Initializes an empty pool file. Throws on error.
+		 */
+		void init_pool_or_throw();
+
+		/**
+		 * @brief				Creates the root page on an empty pool file. Throws on error.
+		 */
+		void create_root_page_or_throw();
+
+		/**
+		 * @brief				Creates the start page on an empty pool file. Throws on error.
+		 */
+		void create_start_page_or_throw();
+
+		/**
+		 * @brief				Verifies the essential pages on an existing pool file. Throws on error.
+		 */
+		void verify_pool_or_throw();
+
+		/**
+		 * @brief				Verifies the root page on an existing pool file. Throws on error.
+		 */
+		void verify_root_page_or_throw();
+
+		/**
+		 * @brief				Verifies the start page on an existing pool file. Throws on error.
+		 */
+		void verify_start_page_or_throw();
 
 	// alloc_page() / free_page() helpers
 	private:
-		vmem_page_pos_t				pop_free_page_pos() noexcept;
-		void						push_free_page_pos(vmem_page_pos_t page_pos) noexcept;
-		vmem_page_pos_t				create_page() noexcept;
+		/**
+		 * @brief				Pops a free page from the pool's list of free pages, and returns its position.
+		 * @return				The position of the popped page.
+		 */
+		vmem_page_pos_t pop_free_page_pos() noexcept;
+
+		/**
+		 * @brief				Pushes a page to the pool's list of free pages.
+		 * @param page_pos		Page position.
+		 */
+		void push_free_page_pos(vmem_page_pos_t page_pos) noexcept;
+
+		/**
+		 * @brief				Unconditionally creates a new page on the pool file, and returns its position.
+		 * @return				The position of the new page.
+		 */
+		vmem_page_pos_t create_page() noexcept;
 
 	// lock_page() / unlock_page() helpers
 	private:
-		bool						find_mapped_page(vmem_page_pos_t page_pos, std::size_t& i) noexcept;
-		bool						has_mapping_capacity() noexcept;
-		std::size_t					make_mapping_capacity() noexcept;
-		std::size_t					make_mapping_capacity(vmem_page_hit_count_t min_keep_count) noexcept;
-		bool						should_keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count) noexcept;
-		void						keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i) noexcept;
-		void						unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count) noexcept;
-		void*						lock_mapped_page(std::size_t i) noexcept;
-		void						unlock_mapped_page(std::size_t i) noexcept;
-		void*						map_new_page(std::size_t i, vmem_page_pos_t page_pos) noexcept;
-		void						optimize_mapped_page(std::size_t i) noexcept;
-		std::size_t					next_empty_i(std::size_t i, std::size_t empty_i) noexcept;
-		void						log_totals() noexcept;
+		/**
+		 * @brief				Tries to find a mapped page.
+		 * @param page_pos		Page position.
+		 * @param i				Output. The position of the page on the array of mapped pages.
+		 * @return				`true` = found; `false` = not found.
+		 */
+		bool find_mapped_page(vmem_page_pos_t page_pos, std::size_t& i) noexcept;
+
+		/**
+		 * @brief				Checks whether there is capacity for at least one more page on the array of mapped pages.
+		 */
+		bool has_mapping_capacity() noexcept;
+
+		/**
+		 * @brief				Frees unlocked mapped pages.
+		 * @details				First tries to free unlocked mapped pages with a keep count below the current average.
+		 * 						If no page gets freed, it tries to free all unlocked mapped pages.
+		 * @return				The count of unmapped pages.
+		 */
+		std::size_t make_mapping_capacity() noexcept;
+
+		/**
+		 * @brief				Frees unlocked mapped pages with a keep count below the given minimum.
+		 * @param min_keep_count Minimum keep count for an unlocked mapped page to be kept.
+		 * @return				The count of unmapped pages.
+		 */
+		std::size_t make_mapping_capacity(vmem_page_hit_count_t min_keep_count) noexcept;
+
+		/**
+		 * @brief				Checks weather an unlock mapped page meets the required minimum keep count.
+		 * @param i				Position on the array of mapped pages.
+		 * @param min_keep_count Minimum keep count.
+		 */
+		bool should_keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count) noexcept;
+
+		/**
+		 * @brief				Keeps an unlocked mapped page.
+		 * @details				Subtracts the minimum keep count from the mapped page's keep count, so that eventually the page would get unmapped after a few rounds.
+		 * 						Separately, if a valid position of an empty slot is provided, the kept page is moved to that slot, and this slot becomes the new empty one.
+		 * 						This process bubbles empty slots to the end of the array of mapped pages.
+		 * @param i				Position on the array of mapped pages.
+		 * @param min_keep_count Minimum keep count.
+		 * @param empty_i		Input/output. The lowest position of an empty item on the array of mapped pages.
+		 */
+		void keep_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i) noexcept;
+
+		/**
+		 * @brief				Unconditionally unmaps a  mapped page.
+		 * @param i				Position on the array of mapped pages.
+		 * @param min_keep_count Minimum keep count.
+		 * @param empty_i		Output. If this is the first unmapped page, this argument is set to `i`.
+		 * @param unmapped_count Input/output. Current count of unmapped pages. This counter gets incremented once.
+		 */
+		void unmap_mapped_page(std::size_t i, vmem_page_hit_count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count) noexcept;
+
+		/**
+		 * @brief				Locks a mapped page, and returns a pointer to the page's content.
+		 * @details				Increments the lock count and the keep count of the mapped page.
+		 * @param i				Position on the array of mapped pages.
+		 * @return				Pointer to the beginning of the page.
+		 */
+		void* lock_mapped_page(std::size_t i) noexcept;
+
+		/**
+		 * @brief				Unlocks a mapped page.
+		 * @details				Decrements the lock count of the mapped page.
+		 * 						If the lock count becomes zero, i.e. if all locks have been released, the page is synced to the file.
+		 * @param i				Position on the array of mapped pages.
+		 */
+		void unlock_mapped_page(std::size_t i) noexcept;
+
+		/**
+		 * @brief				Maps and locks a page in memory.
+		 * @param i				Position on the array of mapped pages.
+		 * @param page_pos		Page position.
+		 * @return				Pointer to the beginning of the page.
+		 */
+		void* map_new_page(std::size_t i, vmem_page_pos_t page_pos) noexcept;
+
+		/**
+		 * @brief				Swaps a mapped page with another one that has a lower position on the array of mapped pages and a lower keep count.
+		 * @details				This process keeps mapped pages with high keep counts, i.e. frequently used pages, closer to the beginning of the array,
+		 * 						so that they can be found using fewer comparisons.
+		 * @param i				Position on the array of mapped pages.
+		 */
+		void optimize_mapped_page(std::size_t i) noexcept;
+
+		/**
+		 * @brief				Tries to find an empty slot on the array of mapped pages before a given position `i`.
+		 * @param i				Position on the array of mapped pages.
+		 * @param empty_i		Lower bound (exclusive) for the sought empty position.
+		 * @return				The lowest position of an empty slot on the array of mapped pages, or `i` if no such empty slot exists.
+		 */
+		std::size_t next_empty_i(std::size_t i, std::size_t empty_i) noexcept;
+
+		/**
+		 * @brief				Logs performance stats.
+		 */
+		void log_totals() noexcept;
 
 	private:
 		bool						_ready;

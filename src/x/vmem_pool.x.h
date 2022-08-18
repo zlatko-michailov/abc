@@ -533,7 +533,7 @@ namespace abc {
 
 		// Since this process is not cheap - it requires a scan of all the pages - we don't unmap a single page per run.
 		// Instead, we unmap as many pages that match a certain condition.  
-		// This is to to avoid doing this process too frequently while still keeping frequently used pages mapped.
+		// This is to avoid doing this process too frequently while still keeping frequently used pages mapped.
 		// To enforce some fairness, we subtract the min_keep_count from the keep_count of each page that will be kept.
 
 		// First try to unmap the pages with a keep_count below the average.
