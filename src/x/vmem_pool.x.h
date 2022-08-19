@@ -97,6 +97,46 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
+	inline vmem_pool<MaxMappedPages, Log>::~vmem_pool() noexcept {
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::~vmem_pool() Start");
+		}
+
+		if (_ready) {
+			if (_fd < 0) {
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::important, __TAG__, "vmem_pool::~vmem_pool() _ready=true, _fd<0");
+				}
+
+				return;
+			}
+
+			for (std::size_t i = 0; i < _mapped_page_count; i++) {
+				std::size_t dummy_unmapped_count = 0;
+				std::size_t dummy_empty_i = _mapped_page_count;
+
+				if (_log != nullptr) {
+					_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::~vmem_pool() Unmap page i=%zu", i);
+				}
+				unmap_mapped_page(i, _mapped_pages[i].keep_count + 1, dummy_empty_i, dummy_unmapped_count);
+			}
+
+			if (_log != nullptr) {
+				_log->put_any(category::abc::vmem, severity::abc::optional, __TAG__, "vmem_pool::~vmem_pool() Close file fd=%d", _fd);
+			}
+			close(_fd);
+		}
+
+		_ready = false;
+		_fd = -1;
+		_mapped_page_count = 0;
+
+		if (_log != nullptr) {
+			_log->put_any(category::abc::vmem, severity::abc::important, __TAG__, "vmem_pool::~vmem_pool() Done");
+		}
+	}
+
+	template <std::size_t MaxMappedPages, typename Log>
 	inline void vmem_pool<MaxMappedPages, Log>::verify_args_or_throw(const char* file_path) {
 		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
 			throw exception<std::logic_error, Log>("vmem_pool::verify_args_or_throw<MaxMappedPages>", 0x104ac);

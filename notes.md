@@ -8,7 +8,7 @@
   - log_ostream, debug_line_ostream, diag_line_ostream, test_line_ostream move constructor
   - http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
   - json_istream, json_ostream move constructor
-  - vmem_pool move constructor
+  - vmem_pool move constructor, destructor
 - Copy constructor - explicit
 
 ## To Do

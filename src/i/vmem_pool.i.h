@@ -109,6 +109,11 @@ namespace abc {
 		 */
 		vmem_pool<MaxMappedPages, Log>(vmem_pool<MaxMappedPages, Log>&& other) noexcept;
 
+		/**
+		 * @brief				Destructor.
+		 */
+		~vmem_pool<MaxMappedPages, Log>() noexcept;
+
 	private:
 		friend vmem_page<Pool, Log>;
 
