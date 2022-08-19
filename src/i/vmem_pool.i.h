@@ -104,6 +104,11 @@ namespace abc {
 		 */
 		vmem_pool<MaxMappedPages, Log>(const char* file_path, Log* log = nullptr);
 
+		/**
+		 * @brief				Move constructor.
+		 */
+		vmem_pool<MaxMappedPages, Log>(vmem_pool<MaxMappedPages, Log>&& other) noexcept;
+
 	private:
 		friend vmem_page<Pool, Log>;
 
@@ -326,13 +331,18 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Virtual memory (vmem) page.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Pool, typename Log = null_log>
 	class vmem_page {
 	public:
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
-		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
 		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
+		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
 		vmem_page<Pool, Log>(std::nullptr_t) noexcept;
 
 		~vmem_page<Pool, Log>() noexcept;

@@ -78,6 +78,25 @@ namespace abc {
 
 
 	template <std::size_t MaxMappedPages, typename Log>
+	inline vmem_pool<MaxMappedPages, Log>::vmem_pool(vmem_pool<MaxMappedPages, Log>&& other) noexcept 
+		: _ready(other._ready)
+		, _fd(other._fd)
+		, _mapped_page_count(other._mapped_page_count)
+		, _mapped_page_totals(std::move(other._mapped_page_totals))
+		, _log(other._log) {
+
+		std::memmove(_mapped_pages, other._mapped_pages, sizeof(_mapped_pages));
+
+		other._ready = false;
+		other._fd = -1;
+		other._mapped_page_count = 0;
+		std::memset(other._mapped_pages, 0, sizeof(other._mapped_pages));
+		other._mapped_page_totals = { };
+		other._log = nullptr;
+	}
+
+
+	template <std::size_t MaxMappedPages, typename Log>
 	inline void vmem_pool<MaxMappedPages, Log>::verify_args_or_throw(const char* file_path) {
 		if (Pool::max_mapped_pages() < vmem_min_mapped_pages) {
 			throw exception<std::logic_error, Log>("vmem_pool::verify_args_or_throw<MaxMappedPages>", 0x104ac);

@@ -1335,6 +1335,33 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_pool_move(test_context<abc::test::log>& context) {
+		using Pool = PoolFree;
+
+		bool passed = true;
+
+		Pool pool1("out/test/pool_move.vmem", context.log);
+		Pool pool2(std::move(pool1));
+
+		{
+			// Page Fail
+			////abc::vmem_page<Pool, Log> pageFail(&pool1, context.log);
+			////passed = context.are_equal(pageFail.ptr() == nullptr, true, __TAG__, "%d") && passed;
+		}
+
+		{
+			// Page 2
+			abc::vmem_page<Pool, Log> page2(&pool2, context.log);
+			passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+
+			page2.free();
+		}
+
+		return passed;
+	}
+
+
 	template <typename Pool>
 	bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked, abc::vmem_page_pos_t expected_page_pos, LinkedPageData data,
 							const abc::vmem_linked_const_iterator<Pool, abc::test::log>& itr, const abc::vmem_linked_const_iterator<Pool, abc::test::log>& expected_itr,
