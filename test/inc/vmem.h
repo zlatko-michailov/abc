@@ -55,5 +55,6 @@ namespace abc { namespace test { namespace vmem {
 	bool test_vmem_map_clear(test_context<abc::test::log>& context);
 
 	bool test_vmem_pool_move(test_context<abc::test::log>& context);
+	bool test_vmem_page_move(test_context<abc::test::log>& context);
 }}}
 

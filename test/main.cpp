@@ -48,7 +48,6 @@ int main() {
 				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
 			} },
 
-#if 0
 			{ "ascii", {
 				{ "test_ascii_equal",								abc::test::ascii::test_ascii_equal },
 				{ "test_ascii_equal_n",								abc::test::ascii::test_ascii_equal_n },
@@ -156,9 +155,7 @@ int main() {
 				{ "test_tcp_socket_stream_move",					abc::test::socket::test_tcp_socket_stream_move },
 				{ "test_http_json_socket_stream",					abc::test::socket::test_http_json_socket_stream },
 			} },
-#endif
 			{ "vmem", {
-#if 0
 				{ "test_vmem_pool_fit",								abc::test::vmem::test_vmem_pool_fit },
 				{ "test_vmem_pool_exceed",							abc::test::vmem::test_vmem_pool_exceed },
 				{ "test_vmem_pool_reopen",							abc::test::vmem::test_vmem_pool_reopen },
@@ -175,8 +172,8 @@ int main() {
 				{ "test_vmem_map_insertmany",						abc::test::vmem::test_vmem_map_insertmany },
 				{ "test_vmem_map_erase",							abc::test::vmem::test_vmem_map_erase },
 				{ "test_vmem_map_clear",							abc::test::vmem::test_vmem_map_clear },
-#endif
 				{ "test_vmem_pool_move",							abc::test::vmem::test_vmem_pool_move },
+				{ "test_vmem_page_move",							abc::test::vmem::test_vmem_page_move },
 			} },
 
 			{ "post-tests", {

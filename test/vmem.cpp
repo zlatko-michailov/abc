@@ -1345,8 +1345,8 @@ namespace abc { namespace test { namespace vmem {
 
 		{
 			// Page Fail
-			////abc::vmem_page<Pool, Log> pageFail(&pool1, context.log);
-			////passed = context.are_equal(pageFail.ptr() == nullptr, true, __TAG__, "%d") && passed;
+			abc::vmem_page<Pool, Log> pageFail(&pool1, context.log);
+			passed = context.are_equal(pageFail.ptr() == nullptr, true, __TAG__, "%d") && passed;
 		}
 
 		{
@@ -1357,6 +1357,35 @@ namespace abc { namespace test { namespace vmem {
 
 			page2.free();
 		}
+
+		return passed;
+	}
+
+
+	bool test_vmem_page_move(test_context<abc::test::log>& context) {
+		using Pool = PoolFree;
+
+		bool passed = true;
+
+		Pool pool("out/test/page_move.vmem", context.log);
+
+		// Page 2
+		abc::vmem_page<Pool, Log> page2(&pool, context.log);
+		passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+
+		int* ptrActual = reinterpret_cast<int*>(page2.ptr());
+		*ptrActual = 42; 
+
+		abc::vmem_page<Pool, Log> page2Moved(std::move(page2));
+		passed = context.are_equal(page2Moved.ptr() != nullptr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal((long long)page2Moved.pos(), 2LL, __TAG__, "0x%llx") && passed;
+		passed = context.are_equal(*(int*)page2Moved.ptr(), 42, __TAG__, "%d") && passed;
+
+		passed = context.are_equal(page2.ptr() == nullptr, true, __TAG__, "%d") && passed;
+		passed = context.are_equal((long long)page2.pos(), -1LL, __TAG__, "0x%llx") && passed;
+
+		page2Moved.free();
 
 		return passed;
 	}
