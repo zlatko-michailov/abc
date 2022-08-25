@@ -344,12 +344,42 @@ namespace abc {
 	template <typename Pool, typename Log = null_log>
 	class vmem_page {
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @details				Maps a free page, if there are any. Otherwise, allocates a new page at the end of the pool. Locks the page.
+		 * @param pool			Pointer to a Pool instance.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		vmem_page<Pool, Log>(Pool* pool, Log* log = nullptr);
+
+		/**
+		 * @brief				Constructor.
+		 * @details				Maps and locks a specific page.
+		 * @param pool			Pointer to a Pool instance.
+		 * @param page_pos		Page position. If `vmem_page_pos_nil`, a free/new page is mapped.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		vmem_page<Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, Log* log = nullptr);
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		vmem_page<Pool, Log>(vmem_page<Pool, Log>&& other) noexcept;
+
+		/**
+		 * @brief				Copy constructor.
+		 */
 		vmem_page<Pool, Log>(const vmem_page<Pool, Log>& other) noexcept;
+
+		/**
+		 * @brief				Constructor.
+		 * @details				Constructs an invalid page. Does not map any page.
+		 */
 		vmem_page<Pool, Log>(std::nullptr_t) noexcept;
 
+		/**
+		 * @brief				Destructor.
+		 */
 		~vmem_page<Pool, Log>() noexcept;
 
 	public:
@@ -357,19 +387,59 @@ namespace abc {
 		vmem_page<Pool, Log>&		operator =(vmem_page<Pool, Log>&& other) noexcept;
 
 	public:
-		Pool*						pool() const noexcept;
-		vmem_page_pos_t				pos() const noexcept;
-		void*						ptr() noexcept;
-		const void*					ptr() const noexcept;
+		/**
+		 * @brief				Returns the pointer to the Pool instance passed in to the constructor.
+		 */
+		Pool* pool() const noexcept;
+
+		/**
+		 * @brief				Returns the page's position in the pool
+		 */
+		vmem_page_pos_t pos() const noexcept;
+
+		/**
+		 * @brief				Returns a pointer the page's mapped area in memory.
+		 */
+		void* ptr() noexcept;
+
+		/**
+		 * @brief				Returns a `const` pointer the page's mapped area in memory.
+		 */
+		const void* ptr() const noexcept;
 
 	public:
-		void						free() noexcept;
+		/**
+		 * @brief				Frees the page
+		 * @details				Adds the page to the list of free pages.
+		 */
+		void free() noexcept;
 
 	private:
-		bool						alloc() noexcept;
-		bool						lock() noexcept;
-		void						unlock() noexcept;
-		void						invalidate() noexcept;
+		/**
+		 * @brief				Allocates a pool page for this instance.
+		 * @return				`true` = success; `false` = error.
+		 */
+		bool alloc() noexcept;
+
+		/**
+		 * @brief				Locks this page in memory.
+		 * @details				A page's pointer may be used only after the page has been locked.
+		 * 						A page may be called multiple times. It gets unlocked after the lock count goes down to `0`.
+		 * @return				`true` = success; `false` = error.
+		 */
+		bool lock() noexcept;
+
+		/**
+		 * @brief				Unlocks this page.
+		 * @details				Decrements the page's lock count. When the lock count drops down to `0`, the page's mapped are is sync'd to the disk, and is no longer valid.
+		 */
+		void unlock() noexcept;
+
+		/**
+		 * @brief				Unconditionally invalidates the page.
+		 * @details				If the instance had associated resources, they will remain orphan.
+		 */
+		void invalidate() noexcept;
 
 	protected:
 		Pool*						_pool;
