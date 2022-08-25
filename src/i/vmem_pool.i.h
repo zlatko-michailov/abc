@@ -393,7 +393,7 @@ namespace abc {
 		Pool* pool() const noexcept;
 
 		/**
-		 * @brief				Returns the page's position in the pool
+		 * @brief				Returns the page's position in the pool.
 		 */
 		vmem_page_pos_t pos() const noexcept;
 
@@ -452,14 +452,44 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Virtual memory (vmem) pointer.
+	 * @tparam T				Type of pointed item.
+	 * @tparam Pool				Pool.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename T, typename Pool, typename Log = null_log>
 	class vmem_ptr {
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @details				Contains a `vmem_page` instance for the referenced page to keep it locked. 
+		 * @param pool			Pointer to a Pool instance.
+		 * @param page_pos		Page position.
+		 * @param item_pos		Byte position on the page.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
-		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		vmem_ptr<T, Pool, Log>(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
+
+		/**
+		 * @brief				Copy constructor.
+		 */
+		vmem_ptr<T, Pool, Log>(const vmem_ptr<T, Pool, Log>& other) noexcept = default;
+
+		/**
+		 * @brief				Constructor.
+		 * @details				Constructs an invalid/null pointer.
+		 */
 		vmem_ptr<T, Pool, Log>(std::nullptr_t) noexcept;
 
+		/**
+		 * @brief				Destructor.
+		 */
 		~vmem_ptr<T, Pool, Log>() = default;
 
 	public:
@@ -467,19 +497,61 @@ namespace abc {
 		vmem_ptr<T, Pool, Log>&		operator =(vmem_ptr<T, Pool, Log>&& other) noexcept = default;
 
 	public:
-		Pool*						pool() const noexcept;
-		vmem_page_pos_t				page_pos() const noexcept;
-		vmem_item_pos_t				item_pos() const noexcept;
-									operator T*() noexcept;
-									operator const T*() const noexcept;
-		T*							operator ->() noexcept;
-		const T*					operator ->() const noexcept;
-		T&							operator *();
-		const T&					operator *() const;
+		/**
+		 * @brief				Returns the pointer to the Pool instance passed in to the constructor.
+		 */
+		Pool* pool() const noexcept;
+
+		/**
+		 * @brief				Returns the pointer's page position in the pool.
+		 */
+		vmem_page_pos_t page_pos() const noexcept;
+
+		/**
+		 * @brief				Returns the pointer's byte position on the page.
+		 */
+		vmem_item_pos_t item_pos() const noexcept;
+
+		/**
+		 * @brief				Returns a typed pointer.
+		 */
+		operator T*() noexcept;
+
+		/**
+		 * @brief				Returns a typed pointer.
+		 */
+		operator const T*() const noexcept;
+
+		/**
+		 * @brief				Returns a typed pointer.
+		 */
+		T* operator ->() noexcept;
+
+		/**
+		 * @brief				Returns a typed pointer.
+		 */
+		const T* operator ->() const noexcept;
+
+		/**
+		 * @brief				Returns a typed reference.
+		 */
+		T& operator *();
+
+		/**
+		 * @brief				Returns a typed reference.
+		 */
+		const T& operator *() const;
 
 	private:
-		T*							ptr() const noexcept;
-		T&							deref() const;
+		/**
+		 * @brief				Returns a typed pointer.
+		 */
+		T* ptr() const noexcept;
+
+		/**
+		 * @brief				Returns a typed reference.
+		 */
+		T& deref() const;
 
 	protected:
 		vmem_page<Pool, Log>		_page;

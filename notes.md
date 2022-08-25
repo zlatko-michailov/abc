@@ -12,6 +12,8 @@
 - Copy constructor - explicit
 
 ## To Do
+- `vmem_ptr`:
+  - Rename `item_pos` to `byte_pos`.
 - Breaking change:
   - Un-internalize name:
     - _istream
