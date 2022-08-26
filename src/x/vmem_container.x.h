@@ -1193,12 +1193,12 @@ namespace abc {
 
 	template <typename T, typename Header, typename Pool, typename Log>
 	inline typename vmem_container<T, Header, Pool, Log>::pointer vmem_container<T, Header, Pool, Log>::at(const iterator_state& itr) const noexcept {
-		vmem_item_pos_t item_pos =
+		vmem_item_pos_t byte_pos =
 			itr.item_pos() == vmem_item_pos_nil ?
 				vmem_item_pos_nil :
 				items_pos() + (itr.item_pos() * sizeof(T));
 
-		return pointer(_pool, itr.page_pos(), item_pos, _log);
+		return pointer(_pool, itr.page_pos(), byte_pos, _log);
 	}
 
 

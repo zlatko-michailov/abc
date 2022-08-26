@@ -1096,9 +1096,9 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline vmem_ptr<T, Pool, Log>::vmem_ptr(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log)
+	inline vmem_ptr<T, Pool, Log>::vmem_ptr(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t byte_pos, Log* log)
 		: _page(page_pos != vmem_page_pos_nil ? vmem_page<Pool, Log>(pool, page_pos, log) : vmem_page<Pool, Log>(nullptr))
-		, _item_pos(item_pos)
+		, _byte_pos(byte_pos)
 		, _log(log) {
 	}
 
@@ -1122,8 +1122,8 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	vmem_item_pos_t vmem_ptr<T, Pool, Log>::item_pos() const noexcept {
-		return _item_pos;
+	vmem_item_pos_t vmem_ptr<T, Pool, Log>::byte_pos() const noexcept {
+		return _byte_pos;
 	}
 
 
@@ -1165,13 +1165,13 @@ namespace abc {
 
 	template <typename T, typename Pool, typename Log>
 	T* vmem_ptr<T, Pool, Log>::ptr() const noexcept {
-		char* page_ptr = reinterpret_cast<char*>(const_cast<void*>(_page.ptr()));
+		const char* page_ptr = reinterpret_cast<const char*>(_page.ptr());
 
-		if (page_ptr == nullptr || _item_pos == vmem_item_pos_nil) {
+		if (page_ptr == nullptr || _byte_pos == vmem_item_pos_nil) {
 			return nullptr;
 		}
 
-		return reinterpret_cast<T*>(page_ptr + _item_pos);
+		return const_cast<T*>(reinterpret_cast<const T*>(page_ptr + _byte_pos));
 	}
 
 

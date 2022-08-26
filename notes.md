@@ -1,5 +1,5 @@
 ## Done
-- Bugfix:
+- Bugfixes:
   - timestamp - time parts
   - buffer_streambuf move constructor
   - _stream, _istream, _ostream move constructor
@@ -10,18 +10,19 @@
   - json_istream, json_ostream move constructor
   - vmem_pool move constructor, destructor
 - Copy constructor - explicit
+Breaking change:
+  - `vmem_ptr`:
+    - Rename `item_pos` to `byte_pos`.
 
 ## To Do
-- `vmem_ptr`:
-  - Rename `item_pos` to `byte_pos`.
 - Breaking change:
-  - Un-internalize name:
+  - Uninternalize name:
     - _istream
     - _ostream
     - _http_istream
     - _http_ostream
     - _vmem_iterator*
-    - vmem_mapped_page*
+    - _vmem_mapped_page*
   - Untabify
   
 ## Pick List

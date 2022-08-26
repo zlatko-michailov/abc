@@ -193,7 +193,7 @@ namespace abc {
 	inline typename _vmem_iterator<Base, Container, T, Pool, Log>::pointer _vmem_iterator<Base, Container, T, Pool, Log>::ptr() const noexcept {
 		if (Base::is_valid()) {
 			typename Container::pointer ptr = const_cast<Container*>(Base::_container)->at(*this);
-			return pointer(ptr.pool(), ptr.page_pos(), ptr.item_pos(), Base::_log);
+			return pointer(ptr.pool(), ptr.page_pos(), ptr.byte_pos(), Base::_log);
 		}
 		
 		return pointer(nullptr);

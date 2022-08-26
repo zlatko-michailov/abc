@@ -466,10 +466,10 @@ namespace abc {
 		 * @details				Contains a `vmem_page` instance for the referenced page to keep it locked. 
 		 * @param pool			Pointer to a Pool instance.
 		 * @param page_pos		Page position.
-		 * @param item_pos		Byte position on the page.
+		 * @param byte_pos		Byte position on the page.
 		 * @param log			Pointer to a `log_ostream` instance.
 		 */
-		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, Log* log = nullptr);
+		vmem_ptr<T, Pool, Log>(Pool* pool, vmem_page_pos_t page_pos, vmem_item_pos_t byte_pos, Log* log = nullptr);
 
 		/**
 		 * @brief				Move constructor.
@@ -510,7 +510,7 @@ namespace abc {
 		/**
 		 * @brief				Returns the pointer's byte position on the page.
 		 */
-		vmem_item_pos_t item_pos() const noexcept;
+		vmem_item_pos_t byte_pos() const noexcept;
 
 		/**
 		 * @brief				Returns a typed pointer.
@@ -555,7 +555,7 @@ namespace abc {
 
 	protected:
 		vmem_page<Pool, Log>		_page;
-		vmem_item_pos_t				_item_pos;
+		vmem_item_pos_t				_byte_pos;
 		Log*						_log;
 	};
 
