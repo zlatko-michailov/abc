@@ -51,8 +51,8 @@ namespace abc { namespace test { namespace stream {
 		}
 	};
 
-	using test_istream = test_stream<abc::_istream>;
-	using test_ostream = test_stream<abc::_ostream>;
+	using test_istream = test_stream<abc::istream>;
+	using test_ostream = test_stream<abc::ostream>;
 
 
 	bool test_istream_move(test_context<abc::test::log>& context) {

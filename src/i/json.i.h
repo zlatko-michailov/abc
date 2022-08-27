@@ -181,8 +181,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
-	class json_istream : public _istream, public _json_state<MaxLevels, Log> {
-		using base  = _istream;
+	class json_istream : public istream, public _json_state<MaxLevels, Log> {
+		using base  = istream;
 		using state = _json_state<MaxLevels, Log>;
 
 	public:
@@ -322,8 +322,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
-	class json_ostream : public _ostream, public _json_state<MaxLevels, Log> {
-		using base  = _ostream;
+	class json_ostream : public ostream, public _json_state<MaxLevels, Log> {
+		using base  = ostream;
 		using state = _json_state<MaxLevels, Log>;
 
 	public:

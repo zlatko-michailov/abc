@@ -140,7 +140,7 @@ namespace abc {
 	/**
 	 * @brief				Common input stream functionality.
 	 */
-	class _istream : public stream<std::istream> {
+	class istream : public stream<std::istream> {
 		using base = stream<std::istream>;
 
 	protected:
@@ -148,17 +148,17 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @param sb		Pointer to a `std::streambuf` implementation. 
 		 */
-		_istream(std::streambuf* sb);
+		istream(std::streambuf* sb);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_istream(_istream&& other);
+		istream(istream&& other);
 
 		/**
 		 * @brief			Deleted.
 		 */
-		_istream(const _istream& other) = delete;
+		istream(const istream& other) = delete;
 
 	public:
 		/**
@@ -192,7 +192,7 @@ namespace abc {
 	/**
 	 * @brief				Common output stream functionality.
 	 */
-	class _ostream : public stream<std::ostream> {
+	class ostream : public stream<std::ostream> {
 		using base = stream<std::ostream>;
 
 	protected:
@@ -200,17 +200,17 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @param sb		Pointer to a `std::streambuf` implementation. 
 		 */
-		_ostream(std::streambuf* sb);
+		ostream(std::streambuf* sb);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_ostream(_ostream&& other);
+		ostream(ostream&& other);
 
 		/**
 		 * @brief			Deleted.
 		 */
-		_ostream(const _ostream& other) = delete;
+		ostream(const ostream& other) = delete;
 
 	public:
 		/**

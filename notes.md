@@ -2,7 +2,7 @@
 - Bugfixes:
   - timestamp - time parts
   - buffer_streambuf move constructor
-  - stream, _istream, _ostream move constructor
+  - stream, istream, ostream move constructor
   - _table_ostream move constructor
   - _line_ostream move constructor
   - log_ostream, debug_line_ostream, diag_line_ostream, test_line_ostream move constructor
@@ -15,12 +15,12 @@ Breaking change:
     - Rename `item_pos` to `byte_pos`.
   - Uninternalize name:
     - _stream
+    - _istream
+    - _ostream
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - _istream
-    - _ostream
     - _http_istream
     - _http_ostream
     - _vmem_iterator*

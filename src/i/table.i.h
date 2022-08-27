@@ -40,8 +40,8 @@ namespace abc {
 	/**
 	 * @brief				Output stream that puts lines.
 	 */
-	class table_ostream : public _ostream {
-		using base = _ostream;
+	class table_ostream : public ostream {
+		using base = ostream;
 
 	public:
 		/**
@@ -91,8 +91,8 @@ namespace abc {
 	 * @tparam Size			Size of the line buffer.
 	 */
 	template <std::size_t Size = size::k2>
-	class line_ostream : public _ostream {
-		using base = _ostream;
+	class line_ostream : public ostream {
+		using base = ostream;
 
 	public:
 		/**

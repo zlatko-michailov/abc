@@ -123,8 +123,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class _http_istream : public _istream, public _http_state<Log> {
-		using base  = _istream;
+	class _http_istream : public istream, public _http_state<Log> {
+		using base  = istream;
 		using state = _http_state<Log>;
 
 	protected:
@@ -281,8 +281,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class _http_ostream : public _ostream, public _http_state<Log> {
-		using base  = _ostream;
+	class _http_ostream : public ostream, public _http_state<Log> {
+		using base  = ostream;
 		using state = _http_state<Log>;
 
 	protected:

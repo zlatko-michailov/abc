@@ -129,29 +129,29 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline _istream::_istream(std::streambuf* sb)
+	inline istream::istream(std::streambuf* sb)
 		: base(sb)
 		, _gcount(0) {
 	}
 
 
-	inline _istream::_istream(_istream&& other)
+	inline istream::istream(istream&& other)
 		: base(std::move(other)) {
 	}
 
 
-	inline void _istream::reset() {
+	inline void istream::reset() {
 		base::reset();
 		_gcount = 0;
 	}
 
 
-	inline std::size_t _istream::gcount() const noexcept {
+	inline std::size_t istream::gcount() const noexcept {
 		return _gcount;
 	}
 
 
-	inline void _istream::set_gcount(std::size_t gcount) noexcept {
+	inline void istream::set_gcount(std::size_t gcount) noexcept {
 		_gcount = gcount;
 	}
 
@@ -159,17 +159,17 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline _ostream::_ostream(std::streambuf* sb)
+	inline ostream::ostream(std::streambuf* sb)
 		: base(sb) {
 	}
 
 
-	inline _ostream::_ostream(_ostream&& other)
+	inline ostream::ostream(ostream&& other)
 		: base(std::move(other)) {
 	}
 
 
-	inline void _ostream::flush() {
+	inline void ostream::flush() {
 		base::flush();
 	}
 
