@@ -32,80 +32,80 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Stream>
-	inline _stream<Stream>::_stream(std::streambuf* sb)
+	inline stream<Stream>::stream(std::streambuf* sb)
 		: base(sb) {
 	}
 
 
 	template <typename Stream>
-	inline _stream<Stream>::_stream(_stream&& other)
+	inline stream<Stream>::stream(stream&& other)
 		: base(std::move(other)) {
 		base::rdbuf(other.rdbuf());
 	}
 
 
 	template <typename Stream>
-	inline void _stream<Stream>::reset() {
+	inline void stream<Stream>::reset() {
 		base::clear(base::goodbit);
 	}
 
 
 	template <typename Stream>
-	inline std::streambuf* _stream<Stream>::rdbuf() const {
+	inline std::streambuf* stream<Stream>::rdbuf() const {
 		return base::rdbuf();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::eof() const {
+	inline bool stream<Stream>::eof() const {
 		return base::eof();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::good() const {
+	inline bool stream<Stream>::good() const {
 		return base::good();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::bad() const {
+	inline bool stream<Stream>::bad() const {
 		return base::bad();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::fail() const {
+	inline bool stream<Stream>::fail() const {
 		return base::fail();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::operator!() const {
+	inline bool stream<Stream>::operator!() const {
 		return base::operator!();
 	}
 
 
 	template <typename Stream>
-	inline _stream<Stream>::operator bool() const {
+	inline stream<Stream>::operator bool() const {
 		return base::operator bool();
 	}
 
 
 	template <typename Stream>
-	inline bool _stream<Stream>::is_good() const {
+	inline bool stream<Stream>::is_good() const {
 		return base::good() && !Stream::eof();
 	}
 
 
 	template <typename Stream>
-	inline void _stream<Stream>::set_bad() {
+	inline void stream<Stream>::set_bad() {
 		base::clear(base::badbit | base::failbit);
 	}
 
 
 	template <typename Stream>
-	inline void _stream<Stream>::set_bad_if(bool condition) {
+	inline void stream<Stream>::set_bad_if(bool condition) {
 		if (condition) {
 			set_bad();
 		}
@@ -113,13 +113,13 @@ namespace abc {
 
 
 	template <typename Stream>
-	inline void _stream<Stream>::set_fail() {
+	inline void stream<Stream>::set_fail() {
 		base::setstate(base::failbit);
 	}
 
 
 	template <typename Stream>
-	inline void _stream<Stream>::set_fail_if(bool condition) {
+	inline void stream<Stream>::set_fail_if(bool condition) {
 		if (condition) {
 			set_fail();
 		}

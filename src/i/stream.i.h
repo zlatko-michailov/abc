@@ -43,7 +43,7 @@ namespace abc {
 	 * @tparam Stream		Base stream class.
 	 */
 	template <typename Stream>
-	class _stream : protected Stream {
+	class stream : protected Stream {
 		using base = Stream;
 
 	protected:
@@ -51,17 +51,17 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @param sb		Pointer to a `std::streambuf` implementation. 
 		 */
-		_stream(std::streambuf* sb);
+		stream(std::streambuf* sb);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_stream(_stream&& other);
+		stream(stream&& other);
 
 		/**
 		 * @brief			Deleted.
 		 */
-		_stream(const _stream& other) = delete;
+		stream(const stream& other) = delete;
 
 	public:
 		/**
@@ -140,8 +140,8 @@ namespace abc {
 	/**
 	 * @brief				Common input stream functionality.
 	 */
-	class _istream : public _stream<std::istream> {
-		using base = _stream<std::istream>;
+	class _istream : public stream<std::istream> {
+		using base = stream<std::istream>;
 
 	protected:
 		/**
@@ -192,8 +192,8 @@ namespace abc {
 	/**
 	 * @brief				Common output stream functionality.
 	 */
-	class _ostream : public _stream<std::ostream> {
-		using base = _stream<std::ostream>;
+	class _ostream : public stream<std::ostream> {
+		using base = stream<std::ostream>;
 
 	protected:
 		/**
