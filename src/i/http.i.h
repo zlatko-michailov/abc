@@ -123,7 +123,7 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class _http_istream : public istream, public _http_state<Log> {
+	class http_istream : public istream, public _http_state<Log> {
 		using base  = istream;
 		using state = _http_state<Log>;
 
@@ -134,17 +134,17 @@ namespace abc {
 		 * @param next		Next expected item.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_http_istream(std::streambuf* sb, http::item_t next, Log* log);
+		http_istream(std::streambuf* sb, http::item_t next, Log* log);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_http_istream(_http_istream&& other);
+		http_istream(http_istream&& other);
 
 		/**
 		 * @brief			Deleted.
 		 */
-		_http_istream(const _http_istream& other) = delete;
+		http_istream(const http_istream& other) = delete;
 
 	public:
 		/**
@@ -448,8 +448,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
-	class http_request_istream : public _http_istream<Log> {
-		using base  = _http_istream<Log>;
+	class http_request_istream : public http_istream<Log> {
+		using base  = http_istream<Log>;
 
 	public:
 		/**
@@ -581,8 +581,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
-	class http_response_istream : public _http_istream<Log> {
-		using base  = _http_istream<Log>;
+	class http_response_istream : public http_istream<Log> {
+		using base  = http_istream<Log>;
 
 	public:
 		/**

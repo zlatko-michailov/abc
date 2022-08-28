@@ -17,14 +17,15 @@ Breaking change:
     - _stream
     - _istream
     - _ostream
+    - _http_istream
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - _http_istream
     - _http_ostream
     - _vmem_iterator*
     - _vmem_mapped_page*
+    - Re-examine others
   - Untabify
   
 ## Pick List

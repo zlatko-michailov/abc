@@ -82,35 +82,35 @@ namespace abc {
 
 
 	template <typename Log>
-	inline _http_istream<Log>::_http_istream(std::streambuf* sb, http::item_t next, Log* log)
+	inline http_istream<Log>::http_istream(std::streambuf* sb, http::item_t next, Log* log)
 		: base(sb)
 		, state(next, log) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::debug, 0x1003e, "_http_istream::_http_istream()");
+			log_local->put_any(category::abc::http, severity::abc::debug, 0x1003e, "http_istream::http_istream()");
 		}
 	}
 
 
 	template <typename Log>
-	inline _http_istream<Log>::_http_istream(_http_istream&& other)
+	inline http_istream<Log>::http_istream(http_istream&& other)
 		: base(std::move(other))
 		, state(std::move(other)) {
 	}
 
 
 	template <typename Log>
-	inline void _http_istream<Log>::set_gstate(std::size_t gcount, http::item_t next) {
+	inline void http_istream<Log>::set_gstate(std::size_t gcount, http::item_t next) {
 		base::set_gcount(gcount);
 		state::reset(next);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_protocol(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_protocol(char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::debug, 0x1003f, "_http_istream::get_protocol() >>>");
+			log_local->put_any(category::abc::http, severity::abc::debug, 0x1003f, "http_istream::get_protocol() >>>");
 		}
 
 		state::assert_next(http::item::protocol);
@@ -159,7 +159,7 @@ namespace abc {
 		skip_spaces();
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10040, "_http_istream::get_protocol() <<< protocol='%s', gcount=%zu", buffer, gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10040, "http_istream::get_protocol() <<< protocol='%s', gcount=%zu", buffer, gcount);
 		}
 
 		return gcount;
@@ -167,10 +167,10 @@ namespace abc {
 
 
 	template <typename Log>
-	inline void _http_istream<Log>::get_header_name(char* buffer, std::size_t size) {
+	inline void http_istream<Log>::get_header_name(char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::debug, 0x10041, "_http_istream::get_header_name() >>>");
+			log_local->put_any(category::abc::http, severity::abc::debug, 0x10041, "http_istream::get_header_name() >>>");
 		}
 
 		state::assert_next(http::item::header_name);
@@ -197,16 +197,16 @@ namespace abc {
 		set_gstate(gcount, http::item::header_value);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10042, "_http_istream::get_header_name() <<< header_name='%s', gcount=%zu", buffer, gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10042, "http_istream::get_header_name() <<< header_name='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
 
 	template <typename Log>
-	inline void _http_istream<Log>::get_header_value(char* buffer, std::size_t size) {
+	inline void http_istream<Log>::get_header_value(char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::debug, 0x10043, "_http_istream::get_header_value() >>>");
+			log_local->put_any(category::abc::http, severity::abc::debug, 0x10043, "http_istream::get_header_value() >>>");
 		}
 
 		state::assert_next(http::item::header_value);
@@ -240,16 +240,16 @@ namespace abc {
 		set_gstate(gcount, http::item::header_name);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10044, "_http_istream::get_header_value() <<< header_value='%s', gcount=%zu", buffer, gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10044, "http_istream::get_header_value() <<< header_value='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
 
 	template <typename Log>
-	inline void _http_istream<Log>::get_body(char* buffer, std::size_t size) {
+	inline void http_istream<Log>::get_body(char* buffer, std::size_t size) {
 		Log* log_local = state::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::debug, 0x10045, "_http_istream::get_body() >>>");
+			log_local->put_any(category::abc::http, severity::abc::debug, 0x10045, "http_istream::get_body() >>>");
 		}
 
 		state::assert_next(http::item::body);
@@ -259,49 +259,49 @@ namespace abc {
 		set_gstate(gcount, http::item::body);
 
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::http, severity::abc::optional, 0x10046, "_http_istream::get_body() <<< body='%s', gcount=%zu", buffer, gcount);
+			log_local->put_any(category::abc::http, severity::abc::optional, 0x10046, "http_istream::get_body() <<< body='%s', gcount=%zu", buffer, gcount);
 		}
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_token(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_token(char* buffer, std::size_t size) {
 		return get_chars(ascii::http::is_token, buffer, size);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_prints(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_prints(char* buffer, std::size_t size) {
 		return get_chars(ascii::is_abcprint, buffer, size);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_prints_and_spaces(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_prints_and_spaces(char* buffer, std::size_t size) {
 		return get_chars(ascii::is_abcprint_or_space, buffer, size);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_alphas(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_alphas(char* buffer, std::size_t size) {
 		return get_chars(ascii::is_alpha, buffer, size);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_digits(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_digits(char* buffer, std::size_t size) {
 		return get_chars(ascii::is_digit, buffer, size);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::skip_spaces() {
+	inline std::size_t http_istream<Log>::skip_spaces() {
 		return skip_chars(ascii::is_space);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::skip_crlf() {
+	inline std::size_t http_istream<Log>::skip_crlf() {
 		char ch = get_char();
 		if (ch != '\r') {
 			base::set_fail();
@@ -319,7 +319,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_bytes(char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_bytes(char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
 		while (base::is_good() && gcount < size) {
@@ -331,7 +331,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::get_chars(CharPredicate&& predicate, char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_chars(CharPredicate&& predicate, char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
 		while (base::is_good() && predicate(peek_char())) {
@@ -349,7 +349,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t _http_istream<Log>::skip_chars(CharPredicate&& predicate) {
+	inline std::size_t http_istream<Log>::skip_chars(CharPredicate&& predicate) {
 		std::size_t gcount = 0;
 		
 		while (base::is_good() && predicate(peek_char())) {
@@ -362,7 +362,7 @@ namespace abc {
 	
 	
 	template <typename Log>
-	inline char _http_istream<Log>::get_char() {
+	inline char http_istream<Log>::get_char() {
 		char ch = peek_char();
 
 		if (base::is_good()) {
@@ -374,7 +374,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline char _http_istream<Log>::peek_char() {
+	inline char http_istream<Log>::peek_char() {
 		char ch = base::peek();
 
 		if (!ascii::is_ascii(ch)) {
@@ -777,7 +777,7 @@ namespace abc {
 
 	template <typename Log>
 	inline void http_request_istream<Log>::get_protocol(char* buffer, std::size_t size) {
-		std::size_t gcount = _http_istream<Log>::get_protocol(buffer, size);
+		std::size_t gcount = http_istream<Log>::get_protocol(buffer, size);
 
 		base::skip_crlf();
 
@@ -936,7 +936,7 @@ namespace abc {
 
 	template <typename Log>
 	inline void http_response_istream<Log>::get_protocol(char* buffer, std::size_t size) {
-		std::size_t gcount = _http_istream<Log>::get_protocol(buffer, size);
+		std::size_t gcount = http_istream<Log>::get_protocol(buffer, size);
 
 		base::set_gstate(gcount, http::item::status_code);
 	}
