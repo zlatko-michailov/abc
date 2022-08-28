@@ -281,7 +281,7 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class _http_ostream : public ostream, public _http_state<Log> {
+	class http_ostream : public ostream, public _http_state<Log> {
 		using base  = ostream;
 		using state = _http_state<Log>;
 
@@ -292,17 +292,17 @@ namespace abc {
 		 * @param next		Next expected item.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_http_ostream(std::streambuf* sb, http::item_t next, Log* log);
+		http_ostream(std::streambuf* sb, http::item_t next, Log* log);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_http_ostream(_http_ostream&& other);
+		http_ostream(http_ostream&& other);
 
 		/**
 		 * @brief			Deleted.
 		 */
-		_http_ostream(const _http_ostream& other) = delete;
+		http_ostream(const http_ostream& other) = delete;
 
 	public:
 		/**
@@ -523,8 +523,8 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log = null_log>
-	class http_request_ostream : public _http_ostream<Log> {
-		using base  = _http_ostream<Log>;
+	class http_request_ostream : public http_ostream<Log> {
+		using base  = http_ostream<Log>;
 
 	public:
 		/**
@@ -639,8 +639,8 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
-	class http_response_ostream : public _http_ostream<Log> {
-		using base  = _http_ostream<Log>;
+	class http_response_ostream : public http_ostream<Log> {
+		using base  = http_ostream<Log>;
 
 	public:
 		/**

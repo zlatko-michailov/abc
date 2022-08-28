@@ -18,11 +18,11 @@ Breaking change:
     - _istream
     - _ostream
     - _http_istream
+    - _http_ostream
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - _http_ostream
     - _vmem_iterator*
     - _vmem_mapped_page*
     - Re-examine others
