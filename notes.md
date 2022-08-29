@@ -23,7 +23,6 @@ Breaking change:
 ## To Do
 - doxygen
   - basic_buffer_streambuf
-  - token_t, value_t
   - test_context
   - test_suite
   - _vmem_mapped_page

@@ -55,6 +55,9 @@ namespace abc {
 		}
 
 
+		/**
+		 * @brief			JSON value union.
+		 */
 		union value_t {
 			bool	boolean;
 			double	number;
@@ -62,6 +65,9 @@ namespace abc {
 			char	property[1];
 		};
 		
+		/**
+		 * @brief			JSON token.
+		 */
 		struct token_t {
 			item_t	item;
 			value_t	value;
