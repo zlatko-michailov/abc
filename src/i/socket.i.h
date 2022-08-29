@@ -86,9 +86,12 @@ namespace abc {
 		}
 
 
+		/**
+		 * @brief				Convenience wrapper around `sockaddr`.
+		 */
 		struct address {
-			sockaddr		value;
-			socklen_t		size = sizeof(sockaddr);
+			sockaddr			value;
+			socklen_t			size = sizeof(sockaddr);
 		};
 
 		using backlog_size_t = int;

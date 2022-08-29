@@ -22,7 +22,6 @@ Breaking change:
 
 ## To Do
 - doxygen
-  - address (socket)
   - basic_buffer_streambuf
   - token_t, value_t
   - test_context
