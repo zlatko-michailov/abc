@@ -21,14 +21,26 @@ Breaking change:
     - _http_ostream
 
 ## To Do
+- doxygen
+  - address (socket)
+  - basic_buffer_streambuf
+  - token_t, value_t
+  - test_context
+  - test_suite
+  - _vmem_mapped_page
 - Breaking change:
   - Uninternalize name:
-    - _vmem_iterator*
-    - _vmem_mapped_page*
-    - Re-examine others
-  - Untabify
+    - _vmem_iterator
+    - ? _vmem_iterator_state
+    - _vmem_mapped_page
+    - ? _vmem_mapped_page_totals
+    - ? _http_state
+    - ? _json_state
+    - _basic_socket
+    - _client_socket
   
 ## Pick List
+ - Untabify
 - vmem:
   - check
     - No data loss

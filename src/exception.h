@@ -40,14 +40,28 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Wrapper around `Exception` that logs upon constructions to track the origin of the exception.
+	 * @tparam Exception		Base exception type.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Exception, typename Log = null_log>
 	class exception : public Exception {
 
 	public:
+		/**
+		 * @brief				Constructor.
+		 * @param message		Error message.
+		 * @param tag			Unique tag.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 */
 		exception(const char* message, tag_t tag, Log* log = nullptr);
 
 	public:
-		tag_t	tag() const noexcept;
+		/**
+		 * @brief				Returns the tag passed in to the constructor.
+		 */
+		tag_t tag() const noexcept;
 
 	private:
 		tag_t	_tag;
