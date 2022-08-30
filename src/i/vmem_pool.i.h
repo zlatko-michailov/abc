@@ -51,6 +51,9 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Information about a mapped vmem page.
+	 */
 	struct _vmem_mapped_page {
 		vmem_page_pos_t			pos;
 		void*					ptr;
@@ -59,6 +62,9 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief					Performance counters of a vmem pool.
+	 */
 	struct _vmem_mapped_page_totals {
 		vmem_page_hit_count_t	keep_count;
 		vmem_page_hit_count_t	hit_count;

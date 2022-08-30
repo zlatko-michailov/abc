@@ -24,8 +24,6 @@ Breaking change:
 - doxygen
   - test_context
   - test_suite
-  - _vmem_mapped_page
-  - _vmem_mapped_page_totals
 - Breaking change:
   - Uninternalize name:
     - _vmem_iterator
