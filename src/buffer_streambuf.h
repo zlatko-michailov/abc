@@ -30,14 +30,44 @@ SOFTWARE.
 
 namespace abc {
 
+	/**
+	 * @brief					`std::streambuf` implementation over a char buffer.
+	 * @details					The buffer is neither contained nor kept alive by this instance.
+	 * @tparam Char				Char type, e.g. `char` or `wchar_t`.
+	 */
 	template <typename Char>
 	class basic_buffer_streambuf : public std::basic_streambuf<Char> {
 		using base = std::basic_streambuf<Char>;
 
 	public:
+		/**
+		 * @brief				Constructor, using positions.
+		 * @param get_buffer	"Get" buffer.
+		 * @param get_begin_pos	"Begin" position on the "get" buffer.
+		 * @param get_end_pos	"End" position on the "get" buffer.
+		 * @param put_buffer	"Put" buffer.
+		 * @param put_begin_pos	"Begin" position on the "put" buffer.
+		 * @param put_end_pos	"Enc" position on the "put" buffer.
+		 */
 		basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept;
+
+		/**
+		 * @brief				Constructor, using pointers.
+		 * @param get_begin_ptr	Pointer to the "begin" item on the "get" buffer.
+		 * @param get_end_ptr	Pointer to the "end" item on the "get" buffer.
+		 * @param put_begin_ptr	Pointer to the "begin" item on the "put" buffer.
+		 * @param put_end_ptr	Pointer to the "end" item on the "put" buffer.
+		 */
 		basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+
+		/**
+		 * @brief				Move constructor.
+		 */
 		basic_buffer_streambuf(basic_buffer_streambuf<Char>&& other) noexcept;
+
+		/**
+		 * @brief				Deleted.
+		 */
 		basic_buffer_streambuf(const basic_buffer_streambuf<Char>& other) = delete;
 
 	private:
@@ -51,7 +81,14 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief					`std::streambuf` implementation over a `char` buffer.
+	 */
 	using buffer_streambuf = basic_buffer_streambuf<char>;
+
+	/**
+	 * @brief					`std::streambuf` implementation over a `wchar_t` buffer.
+	 */
 	using wbuffer_streambuf = basic_buffer_streambuf<wchar_t>;
 
 
