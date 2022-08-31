@@ -48,13 +48,50 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Utility passed into each test method to perform verification and logging.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	struct test_context {
+		/**
+		 * @brief				Constructor.
+		 * @param category_name	Test category name.
+		 * @param method_name	Test method name.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 */
 		test_context(const char* category_name, const char* method_name, Log* log, seed_t seed = seed::random) noexcept;
 
+		/**
+		 * @brief				Verifies an actual value matches the expected one.
+		 * @tparam Value		Type of the value.
+		 * @param actual		Actual value.
+		 * @param expected		Expected value.
+		 * @param tag			Unique tag.
+		 * @param format		C-style format to print a value of type `Value`.
+		 * @return				`true` = pass; `false` = fail.
+		 */
 		template <typename Value>
 		bool are_equal(const Value& actual, const Value& expected, tag_t tag, const char* format);
+
+		/**
+		 * @brief				Verifies an actual string value matches the expected one.
+		 * @param actual		Actual string value.
+		 * @param expected		Expected string value.
+		 * @param tag			Unique tag.
+		 * @return				`true` = pass; `false` = fail.
+		 */
 		bool are_equal(const char* actual, const char* expected, tag_t tag);
+
+		/**
+		 * @brief				Verifies an actual binary blob matches the expected one.
+		 * @param actual		Actual blob.
+		 * @param expected		Expected blob.
+		 * @param size			Siz of the blob.
+		 * @param tag			Unique tag.
+		 * @return				`true` = pass; `false` = fail.
+		 */
 		bool are_equal(const void* actual, const void* expected, std::size_t size, tag_t tag);
 
 		const char*		category_name;
@@ -67,15 +104,31 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Bare test method.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	using test_method = std::function<bool(test_context<Log>&)>;
 
+	/**
+	 * @brief					Pair of a name and a test method.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	using named_test_method = std::pair<std::string, test_method<Log>>;
 
+	/**
+	 * @brief					Bare collection of named test methods.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	using test_category = std::vector<named_test_method<Log>>;
 
+	/**
+	 * @brief					Pair of a name and a collection of named test methods.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	using named_test_category = std::pair<std::string, test_category<Log>>;
 
@@ -83,12 +136,37 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	/**
+	 * @brief					Complete test suite.
+	 * @tparam Log				Logging facility.
+	 */
 	template <typename Log>
 	struct test_suite {
+		/**
+		 * @brief				Default constructor.
+		 */
 		test_suite() noexcept = default;
+
+		/**
+		 * @brief				Constructor. Vector version.
+		 * @param categories	Collection of named categories.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 */
 		test_suite(std::vector<named_test_category<Log>>&& categories, Log* log, seed_t seed) noexcept;
+
+		/**
+		 * @brief				Constructor. initializer list version.
+		 * @param init			Initializer list of named categories.
+		 * @param log			Pointer to a `log_ostream` instance.
+		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 */
 		test_suite(std::initializer_list<named_test_category<Log>> init, Log* log, seed_t seed) noexcept;
 
+		/**
+		 * @brief				Executes all test methods of all test categories.
+		 * @return				`true` = pass; `false` = fail.
+		 */
 		bool run() noexcept;
 
 		std::vector<named_test_category<Log>>	categories;

@@ -21,9 +21,6 @@ Breaking change:
     - _http_ostream
 
 ## To Do
-- doxygen
-  - test_context
-  - test_suite
 - Breaking change:
   - Uninternalize name:
     - _vmem_iterator
