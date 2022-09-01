@@ -36,34 +36,34 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline _basic_socket<Log>::_basic_socket(socket::kind_t kind, socket::family_t family, Log* log)
-		: _basic_socket(socket::handle::invalid, kind, family, log) {
+	inline basic_socket<Log>::basic_socket(socket::kind_t kind, socket::family_t family, Log* log)
+		: basic_socket(socket::handle::invalid, kind, family, log) {
 	}
 
 
 	template <typename Log>
-	inline _basic_socket<Log>::_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
+	inline basic_socket<Log>::basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
 		: _kind(kind)
 		, _family(family)
 		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
 		, _handle(handle)
 		, _log(log) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
-			throw exception<std::logic_error, Log>("_basic_socket::_basic_socket(kind)", 0x10004, log);
+			throw exception<std::logic_error, Log>("basic_socket::basic_socket(kind)", 0x10004, log);
 		}
 
 		if (family != socket::family::ipv4 && family != socket::family::ipv6) {
-			throw exception<std::logic_error, Log>("_basic_socket::_basic_socket(family)", 0x10005, log);
+			throw exception<std::logic_error, Log>("basic_socket::basic_socket(family)", 0x10005, log);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10006, "_basic_socket::_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x10006, "basic_socket::basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
 
 	template <typename Log>
-	inline _basic_socket<Log>::_basic_socket(_basic_socket&& other) noexcept {
+	inline basic_socket<Log>::basic_socket(basic_socket&& other) noexcept {
 		_kind = other._kind;
 		_family = other._family;
 		_protocol = other._protocol;
@@ -73,32 +73,32 @@ namespace abc {
 		other._handle = socket::handle::invalid;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "_basic_socket::_basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "basic_socket::basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
 
 	template <typename Log>
-	inline _basic_socket<Log>::~_basic_socket() noexcept {
+	inline basic_socket<Log>::~basic_socket() noexcept {
 		close();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10008, "_basic_socket::~_basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x10008, "basic_socket::~basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 		}
 	}
 
 
 	template <typename Log>
-	inline bool _basic_socket<Log>::is_open() const noexcept {
+	inline bool basic_socket<Log>::is_open() const noexcept {
 		return _handle != socket::handle::invalid;
 	}
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::close() noexcept {
+	inline void basic_socket<Log>::close() noexcept {
 		if (is_open()) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::debug, 0x10009, "_basic_socket::close()");
+				_log->put_any(category::abc::socket, severity::abc::debug, 0x10009, "basic_socket::close()");
 			}
 
 			::shutdown(_handle, SHUT_RDWR);
@@ -110,9 +110,9 @@ namespace abc {
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::open() {
+	inline void basic_socket<Log>::open() {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000a, "_basic_socket::open() start");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000a, "basic_socket::open() start");
 		}
 
 		close();
@@ -120,17 +120,17 @@ namespace abc {
 		_handle = ::socket(_family, _kind, _protocol);
 
 		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("_basic_socket::open() ::socket()", 0x1000b, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::open() ::socket()", 0x1000b, _log);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000c, "_basic_socket::open() done");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000c, "basic_socket::open() done");
 		}
 	}
 
 
 	template <typename Log>
-	inline addrinfo	_basic_socket<Log>::hints() const noexcept {
+	inline addrinfo	basic_socket<Log>::hints() const noexcept {
 		addrinfo hints{ };
 
 		hints.ai_family		= _family;
@@ -143,28 +143,28 @@ namespace abc {
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::bind(const char* port) {
+	inline void basic_socket<Log>::bind(const char* port) {
 		bind(any_host(), port);
 	}
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::bind(const char* host, const char* port) {
+	inline void basic_socket<Log>::bind(const char* host, const char* port) {
 		tie(host, port, socket::tie::bind);
 	}
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::tie(const char* host, const char* port, socket::tie_t tt) {
+	inline void basic_socket<Log>::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000d, "_basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000d, "basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 
 		if (!is_open()) {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() is_open()", 0x1000e, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() is_open()", 0x1000e, _log);
 		}
 
 		addrinfo hnt = hints();
@@ -177,7 +177,7 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() ::getaddrinfo()", 0x1000f, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() ::getaddrinfo()", 0x1000f, _log);
 		}
 
 		bool is_done = false;
@@ -197,36 +197,36 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() bind()/connect()", 0x10010, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() bind()/connect()", 0x10010, _log);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::optional, 0x10011, "_basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log->put_any(category::abc::socket, severity::abc::optional, 0x10011, "basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 	}
 
 
 	template <typename Log>
-	inline void _basic_socket<Log>::tie(const socket::address& address, socket::tie_t tt) {
+	inline void basic_socket<Log>::tie(const socket::address& address, socket::tie_t tt) {
 		if (!is_open()) {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() is_open()", 0x10012, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() is_open()", 0x10012, _log);
 		}
 
 		socket::error_t err = tie(address.value, address.size, tt);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() bind() / connect()", 0x10013, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() bind() / connect()", 0x10013, _log);
 		}
 	}
 
 
 	template <typename Log>
-	inline socket::error_t _basic_socket<Log>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
+	inline socket::error_t basic_socket<Log>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("_basic_socket::tie() !is_open()", 0x10014, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie() !is_open()", 0x10014, _log);
 		}
 
 		const int on = 1;
@@ -241,7 +241,7 @@ namespace abc {
 				return ::connect(handle(), &addr, addr_len);
 
 			default:
-				throw exception<std::logic_error, Log>("_basic_socket::tie(tt)", 0x10015, _log);
+				throw exception<std::logic_error, Log>("basic_socket::tie(tt)", 0x10015, _log);
 		}
 
 		return socket::error::any;
@@ -249,7 +249,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline const char* _basic_socket<Log>::any_host() const noexcept {
+	inline const char* basic_socket<Log>::any_host() const noexcept {
 		switch (_family) {
 			case socket::family::ipv4:
 				return "0.0.0.0";
@@ -264,31 +264,31 @@ namespace abc {
 
 
 	template <typename Log>
-	inline socket::kind_t _basic_socket<Log>::kind() const noexcept {
+	inline socket::kind_t basic_socket<Log>::kind() const noexcept {
 		return _kind;
 	}
 
 
 	template <typename Log>
-	inline socket::family_t _basic_socket<Log>::family() const noexcept {
+	inline socket::family_t basic_socket<Log>::family() const noexcept {
 		return _family;
 	}
 
 
 	template <typename Log>
-	inline socket::protocol_t _basic_socket<Log>::protocol() const noexcept {
+	inline socket::protocol_t basic_socket<Log>::protocol() const noexcept {
 		return _protocol;
 	}
 
 
 	template <typename Log>
-	inline socket::handle_t _basic_socket<Log>::handle() const noexcept {
+	inline socket::handle_t basic_socket<Log>::handle() const noexcept {
 		return _handle;
 	}
 
 
 	template <typename Log>
-	inline Log* _basic_socket<Log>::log() const noexcept {
+	inline Log* basic_socket<Log>::log() const noexcept {
 		return _log;
 	}
 
@@ -298,13 +298,13 @@ namespace abc {
 
 	template <typename Log>
 	inline client_socket<Log>::client_socket(socket::kind_t kind, socket::family_t family, Log* log)
-		: _basic_socket<Log>(kind, family, log) {
+		: basic_socket<Log>(kind, family, log) {
 	}
 
 
 	template <typename Log>
 	inline client_socket<Log>::client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
-		: _basic_socket<Log>(handle, kind, family, log) {
+		: basic_socket<Log>(handle, kind, family, log) {
 	}
 
 
@@ -457,7 +457,7 @@ namespace abc {
 
 	template <typename Log>
 	inline tcp_server_socket<Log>::tcp_server_socket(socket::family_t family, Log* log)
-		: _basic_socket<Log>(socket::kind::stream, family, log) {
+		: basic_socket<Log>(socket::kind::stream, family, log) {
 	}
 
 

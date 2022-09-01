@@ -20,11 +20,11 @@ Breaking change:
     - _http_istream
     - _http_ostream
     - _client_socket
+    - _basic_socket
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - _basic_socket
     - _vmem_iterator
     - ? _vmem_iterator_state
     - _vmem_mapped_page

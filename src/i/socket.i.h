@@ -106,7 +106,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log>
-	class _basic_socket {
+	class basic_socket {
 	protected:
 		/**
 		 * @brief				Constructor.
@@ -114,7 +114,7 @@ namespace abc {
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_basic_socket(socket::kind_t kind, socket::family_t family, Log* log);
+		basic_socket(socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Constructor.
@@ -123,22 +123,22 @@ namespace abc {
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
+		basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Move constructor.
 		 */
-		_basic_socket(_basic_socket&& other) noexcept;
+		basic_socket(basic_socket&& other) noexcept;
 
 		/**
 		 * @brief				Deleted.
 		 */
-		_basic_socket(const _basic_socket& other) = delete;
+		basic_socket(const basic_socket& other) = delete;
 
 		/**
 		 * @brief				Destructor.
 		 */
-		~_basic_socket() noexcept;
+		~basic_socket() noexcept;
 
 	public:
 		/**
@@ -267,8 +267,8 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log>
-	class client_socket : public _basic_socket<Log> {
-		using base = _basic_socket<Log>;
+	class client_socket : public basic_socket<Log> {
+		using base = basic_socket<Log>;
 
 	protected:
 		/**
@@ -431,8 +431,8 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
-	class tcp_server_socket : public _basic_socket<Log> {
-		using base = _basic_socket<Log>;
+	class tcp_server_socket : public basic_socket<Log> {
+		using base = basic_socket<Log>;
 
 	public:
 		/**
