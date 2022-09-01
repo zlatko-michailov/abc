@@ -297,44 +297,44 @@ namespace abc {
 
 
 	template <typename Log>
-	inline _client_socket<Log>::_client_socket(socket::kind_t kind, socket::family_t family, Log* log)
+	inline client_socket<Log>::client_socket(socket::kind_t kind, socket::family_t family, Log* log)
 		: _basic_socket<Log>(kind, family, log) {
 	}
 
 
 	template <typename Log>
-	inline _client_socket<Log>::_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
+	inline client_socket<Log>::client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
 		: _basic_socket<Log>(handle, kind, family, log) {
 	}
 
 
 	template <typename Log>
-	inline void _client_socket<Log>::connect(const char* host, const char* port) {
+	inline void client_socket<Log>::connect(const char* host, const char* port) {
 		base::tie(host, port, socket::tie::connect);
 	}
 
 
 	template <typename Log>
-	inline void _client_socket<Log>::connect(const socket::address& address) {
+	inline void client_socket<Log>::connect(const socket::address& address) {
 		base::tie(address, socket::tie::connect);
 	}
 
 
 	template <typename Log>
-	inline std::size_t _client_socket<Log>::send(const void* buffer, std::size_t size, socket::address* address) {
+	inline std::size_t client_socket<Log>::send(const void* buffer, std::size_t size, socket::address* address) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10016, "_client_socket::send() >>> size=%zu", size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10016, "client_socket::send() >>> size=%zu", size);
 		}
 
 		if (!base::is_open()) {
-			throw exception<std::logic_error, Log>("_client_socket::send() !is_open()", 0x10017, log_local);
+			throw exception<std::logic_error, Log>("client_socket::send() !is_open()", 0x10017, log_local);
 		}
 
 		ssize_t sent_size;
 		if (address != nullptr) {
 			if (base::kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, Log>("_client_socket::send() !dgram", 0x10018, log_local);
+				throw exception<std::logic_error, Log>("client_socket::send() !dgram", 0x10018, log_local);
 			}
 
 			sent_size = ::sendto(base::handle(), buffer, size, 0, &address->value, address->size);
@@ -345,20 +345,20 @@ namespace abc {
 
 		if (sent_size < 0) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x1043f, "_client_socket::send() sent_size=%l", (long)sent_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x1043f, "client_socket::send() sent_size=%l", (long)sent_size);
 			}
 
 			sent_size = 0;
 		}
 		else if ((std::size_t)sent_size < size) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10440, "_client_socket::send() sent_size=%l", (long)sent_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10440, "client_socket::send() sent_size=%l", (long)sent_size);
 			}
 		}
 
 		if (log_local != nullptr) {
 			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10066, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001b, "_client_socket::send() <<< size=%zu, sent_size=%l", size, sent_size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001b, "client_socket::send() <<< size=%zu, sent_size=%l", size, sent_size);
 		}
 
 		return sent_size;
@@ -366,20 +366,20 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t _client_socket<Log>::receive(void* buffer, std::size_t size, socket::address* address) {
+	inline std::size_t client_socket<Log>::receive(void* buffer, std::size_t size, socket::address* address) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001c, "_client_socket::receive() >>> size=%zu", size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001c, "client_socket::receive() >>> size=%zu", size);
 		}
 
 		if (!base::is_open()) {
-			throw exception<std::logic_error, Log>("_client_socket::receive() !is_open()", 0x1001d, log_local);
+			throw exception<std::logic_error, Log>("client_socket::receive() !is_open()", 0x1001d, log_local);
 		}
 
 		ssize_t received_size;
 		if (address != nullptr) {
 			if (base::kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, Log>("_client_socket::receive() !dgram", 0x1001e, log_local);
+				throw exception<std::logic_error, Log>("client_socket::receive() !dgram", 0x1001e, log_local);
 			}
 
 			 received_size = ::recvfrom(base::handle(), buffer, size, 0, &address->value, &address->size);
@@ -390,20 +390,20 @@ namespace abc {
 
 		if (received_size < 0) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10441, "_client_socket::receive() received_size=%l", (long)received_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10441, "client_socket::receive() received_size=%l", (long)received_size);
 			}
 
 			received_size = 0;
 		}
 		else if ((std::size_t)received_size < size) {
 			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10442, "_client_socket::receive() received_size=%l", (long)received_size);
+				log_local->put_any(category::abc::socket, severity::important, 0x10442, "client_socket::receive() received_size=%l", (long)received_size);
 			}
 		}
 
 		if (log_local != nullptr) {
 			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10067, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10021, "_client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10021, "client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
 		}
 
 		return received_size;
@@ -421,7 +421,7 @@ namespace abc {
 
 	template <typename Log>
 	inline udp_socket<Log>::udp_socket(socket::family_t family, Log* log)
-		: _client_socket<Log>(socket::kind::dgram, family, log) {
+		: client_socket<Log>(socket::kind::dgram, family, log) {
 	}
 
 
@@ -436,13 +436,13 @@ namespace abc {
 
 	template <typename Log>
 	inline tcp_client_socket<Log>::tcp_client_socket(socket::family_t family, Log* log)
-		: _client_socket<Log>(socket::kind::stream, family, log) {
+		: client_socket<Log>(socket::kind::stream, family, log) {
 	}
 
 
 	template <typename Log>
 	inline tcp_client_socket<Log>::tcp_client_socket(socket::handle_t handle, socket::family_t family, Log* log)
-		: _client_socket<Log>(handle, socket::kind::stream, family, log) {
+		: client_socket<Log>(handle, socket::kind::stream, family, log) {
 	}
 
 

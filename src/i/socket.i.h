@@ -267,7 +267,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log>
-	class _client_socket : public _basic_socket<Log> {
+	class client_socket : public _basic_socket<Log> {
 		using base = _basic_socket<Log>;
 
 	protected:
@@ -277,7 +277,7 @@ namespace abc {
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_client_socket(socket::kind_t kind, socket::family_t family, Log* log);
+		client_socket(socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Constructor.
@@ -286,17 +286,17 @@ namespace abc {
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
+		client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Move constructor.
 		 */
-		_client_socket(_client_socket&& other) noexcept = default;
+		client_socket(client_socket&& other) noexcept = default;
 
 		/**
 		 * @brief				Deleted.
 		 */
-		_client_socket(const _client_socket& other) = delete;
+		client_socket(const client_socket& other) = delete;
 
 	public:
 		/**
@@ -340,8 +340,8 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
-	class udp_socket : public _client_socket<Log> {
-		using base = _client_socket<Log>;
+	class udp_socket : public client_socket<Log> {
+		using base = client_socket<Log>;
 
 	public:
 		/**
@@ -382,8 +382,8 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
-	class tcp_client_socket : public _client_socket<Log> {
-		using base = _client_socket<Log>;
+	class tcp_client_socket : public client_socket<Log> {
+		using base = client_socket<Log>;
 
 	public:
 		/**
@@ -479,7 +479,7 @@ namespace abc {
 
 	/**
 	 * @brief					`std::streambuf` specialization that is backed by a socket.
-	 * @tparam Socket			`_client_socket`.
+	 * @tparam Socket			`client_socket`.
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Socket, typename Log = null_log>
@@ -489,7 +489,7 @@ namespace abc {
 	public:
 		/**
 		 * @brief				Constructor.
-		 * @param socket		Pointer to a `_client_socket` instance.
+		 * @param socket		Pointer to a `client_socket` instance.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		socket_streambuf(Socket* socket, Log* log = nullptr);
@@ -526,7 +526,7 @@ namespace abc {
 
 	private:
 		/**
-		 * @brief				The `_client_socket` pointer passed in to the constructor.
+		 * @brief				The `client_socket` pointer passed in to the constructor.
 		 */
 		Socket* _socket;
 
