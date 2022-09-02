@@ -165,7 +165,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Base, typename Container, typename T, typename Pool, typename Log = null_log>
-	class _vmem_iterator : public Base {
+	class vmem_basic_iterator : public Base {
 	public:
 		using value_type				= T;
 		using pointer					= vmem_ptr<T, Pool, Log>;
@@ -182,26 +182,26 @@ namespace abc {
 		 * @param edge			Edge.
 		 * @param log			Pointer to a `log_ostream` instance.
 		 */
-		_vmem_iterator<Base, Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept;
 
 		/**
 		 * @brief				Move constructor.
 		 */
-		_vmem_iterator<Base, Container, T, Pool, Log>(_vmem_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(vmem_basic_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
 
 		/**
 		 * @brief				Copy constructor.
 		 */
-		_vmem_iterator<Base, Container, T, Pool, Log>(const _vmem_iterator<Base, Container, T, Pool, Log>& other) = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) = default;
 
 		/**
 		 * @brief				Default-like constructor.
 		 */
-		_vmem_iterator<Base, Container, T, Pool, Log>(std::nullptr_t) noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(std::nullptr_t) noexcept;
 
 	public:
-		_vmem_iterator<Base, Container, T, Pool, Log>&	operator =(const _vmem_iterator<Base, Container, T, Pool, Log>& other) noexcept = default;
-		_vmem_iterator<Base, Container, T, Pool, Log>&	operator =(_vmem_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>&	operator =(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) noexcept = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>&	operator =(vmem_basic_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
 
 	public:
 		pointer											operator ->() noexcept;
@@ -232,7 +232,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Container, typename T, typename Pool, typename Log = null_log>
-	using vmem_const_iterator = _vmem_iterator<_vmem_iterator_state<Container, Pool, Log>, Container, const T, Pool, Log>;
+	using vmem_const_iterator = vmem_basic_iterator<_vmem_iterator_state<Container, Pool, Log>, Container, const T, Pool, Log>;
 
 
 	/**
@@ -243,7 +243,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Container, typename T, typename Pool, typename Log = null_log>
-	using vmem_iterator = _vmem_iterator<vmem_const_iterator<Container, T, Pool, Log>, Container, T, Pool, Log>;
+	using vmem_iterator = vmem_basic_iterator<vmem_const_iterator<Container, T, Pool, Log>, Container, T, Pool, Log>;
 
 
 	// --------------------------------------------------------------

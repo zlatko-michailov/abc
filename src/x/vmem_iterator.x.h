@@ -154,43 +154,43 @@ namespace abc {
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline _vmem_iterator<Base, Container, T, Pool, Log>::_vmem_iterator(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
 		: Base(container, page_pos, item_pos, edge, log) {
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline _vmem_iterator<Base, Container, T, Pool, Log>::_vmem_iterator(std::nullptr_t) noexcept
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(std::nullptr_t) noexcept
 		: Base(nullptr) {
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename _vmem_iterator<Base, Container, T, Pool, Log>::pointer _vmem_iterator<Base, Container, T, Pool, Log>::operator ->() noexcept {
+	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ->() noexcept {
 		return ptr();
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename _vmem_iterator<Base, Container, T, Pool, Log>::const_pointer _vmem_iterator<Base, Container, T, Pool, Log>::operator ->() const noexcept {
+	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::const_pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ->() const noexcept {
 		return ptr();
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline T& _vmem_iterator<Base, Container, T, Pool, Log>::operator *() {
+	inline T& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator *() {
 		return deref();
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline const T& _vmem_iterator<Base, Container, T, Pool, Log>::operator *() const {
+	inline const T& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator *() const {
 		return deref();
 	}
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename _vmem_iterator<Base, Container, T, Pool, Log>::pointer _vmem_iterator<Base, Container, T, Pool, Log>::ptr() const noexcept {
+	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::ptr() const noexcept {
 		if (Base::is_valid()) {
 			typename Container::pointer ptr = const_cast<Container*>(Base::_container)->at(*this);
 			return pointer(ptr.pool(), ptr.page_pos(), ptr.byte_pos(), Base::_log);
@@ -201,7 +201,7 @@ namespace abc {
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline T& _vmem_iterator<Base, Container, T, Pool, Log>::deref() const {
+	inline T& vmem_basic_iterator<Base, Container, T, Pool, Log>::deref() const {
 		vmem_ptr<T, Pool, Log> p = ptr();
 
 		if (p == nullptr) {

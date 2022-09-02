@@ -21,11 +21,11 @@ Breaking change:
     - _http_ostream
     - _client_socket
     - _basic_socket
+    - _vmem_iterator
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - _vmem_iterator
     - ? _vmem_iterator_state
     - _vmem_mapped_page
     - ? _vmem_mapped_page_totals
