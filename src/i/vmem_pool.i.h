@@ -54,7 +54,7 @@ namespace abc {
 	/**
 	 * @brief					Information about a mapped vmem page.
 	 */
-	struct _vmem_mapped_page {
+	struct vmem_mapped_page {
 		vmem_page_pos_t			pos;
 		void*					ptr;
 		vmem_page_hit_count_t	lock_count;
@@ -333,7 +333,7 @@ namespace abc {
 		bool						_ready;
 		int							_fd;
 		std::size_t					_mapped_page_count;
-		_vmem_mapped_page			_mapped_pages[MaxMappedPages];
+		vmem_mapped_page			_mapped_pages[MaxMappedPages];
 		_vmem_mapped_page_totals	_mapped_page_totals;
 		Log*						_log;
 	};

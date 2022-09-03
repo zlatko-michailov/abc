@@ -814,7 +814,7 @@ namespace abc {
 				}
 
 				// Swap.
-				_vmem_mapped_page temp = _mapped_pages[j];
+				vmem_mapped_page temp = _mapped_pages[j];
 				_mapped_pages[j] = _mapped_pages[i];
 				_mapped_pages[i] = temp;
 
