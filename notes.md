@@ -21,16 +21,16 @@ Breaking change:
     - _http_ostream
     - _client_socket
     - _basic_socket
-    - _vmem_iterator
+    - _vmem_iterator -> vmem_basic_iterator
+    - _vmem_iterator_state -> vmem_basic_iterator_state
 
 ## To Do
 - Breaking change:
   - Uninternalize name:
-    - ? _vmem_iterator_state
     - _vmem_mapped_page
-    - ? _vmem_mapped_page_totals
-    - ? _http_state
-    - ? _json_state
+    - _vmem_mapped_page_totals
+    - _http_state
+    - _json_state
   
 ## Pick List
  - Untabify

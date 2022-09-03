@@ -158,7 +158,7 @@ namespace abc {
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Key, typename T, typename Pool, typename Log = null_log>
-	using vmem_map_iterator_state = _vmem_iterator_state<vmem_map<Key, T, Pool, Log>, Pool, Log>;
+	using vmem_map_iterator_state = vmem_basic_iterator_state<vmem_map<Key, T, Pool, Log>, Pool, Log>;
 
 
 	/**

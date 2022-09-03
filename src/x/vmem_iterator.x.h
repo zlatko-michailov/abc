@@ -34,7 +34,7 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>::_vmem_iterator_state(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
+	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
 		: _container(container)
 		, _page_pos(page_pos)
 		, _item_pos(item_pos)
@@ -42,21 +42,21 @@ namespace abc {
 		, _log(log) {
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10604, "_vmem_iterator_state::_vmem_iterator_state() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10604, "vmem_basic_iterator_state::vmem_basic_iterator_state() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
 		}
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>::_vmem_iterator_state(std::nullptr_t) noexcept
-		: _vmem_iterator_state<Container, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, nullptr) {
+	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(std::nullptr_t) noexcept
+		: vmem_basic_iterator_state<Container, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, nullptr) {
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline bool _vmem_iterator_state<Container, Pool, Log>::operator ==(const _vmem_iterator_state<Container, Pool, Log>& other) const noexcept {
+	inline bool vmem_basic_iterator_state<Container, Pool, Log>::operator ==(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10605, "_vmem_iterator_state::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
+			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10605, "vmem_basic_iterator_state::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
 				(long long)_page_pos, _item_pos, _edge, (long long)other._page_pos, other._item_pos, other._edge);
 		}
 
@@ -68,25 +68,25 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline bool _vmem_iterator_state<Container, Pool, Log>::operator !=(const _vmem_iterator_state<Container, Pool, Log>& other) const noexcept {
+	inline bool vmem_basic_iterator_state<Container, Pool, Log>::operator !=(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept {
 		return !operator ==(other);
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::operator ++() noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator ++() noexcept {
 		return inc();
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::operator ++(int) noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator ++(int) noexcept {
 		return inc();
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::inc() noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::inc() noexcept {
 		if (is_valid()) {
 			*this = _container->next(*this);
 		}
@@ -96,19 +96,19 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::operator --() noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator --() noexcept {
 		return dec();
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::operator --(int) noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator --(int) noexcept {
 		return dec();
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline _vmem_iterator_state<Container, Pool, Log>& _vmem_iterator_state<Container, Pool, Log>::dec() noexcept {
+	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::dec() noexcept {
 		if (is_valid()) {
 			*this = _container->prev(*this);
 		}
@@ -118,13 +118,13 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline bool _vmem_iterator_state<Container, Pool, Log>::is_valid() const noexcept {
+	inline bool vmem_basic_iterator_state<Container, Pool, Log>::is_valid() const noexcept {
 		return _container != nullptr;
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline bool _vmem_iterator_state<Container, Pool, Log>::can_deref() const noexcept {
+	inline bool vmem_basic_iterator_state<Container, Pool, Log>::can_deref() const noexcept {
 		return is_valid()
 			&& _page_pos != vmem_page_pos_nil
 			&& _item_pos != vmem_item_pos_nil
@@ -133,19 +133,19 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline vmem_page_pos_t _vmem_iterator_state<Container, Pool, Log>::page_pos() const noexcept {
+	inline vmem_page_pos_t vmem_basic_iterator_state<Container, Pool, Log>::page_pos() const noexcept {
 		return _page_pos;
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline vmem_item_pos_t _vmem_iterator_state<Container, Pool, Log>::item_pos() const noexcept {
+	inline vmem_item_pos_t vmem_basic_iterator_state<Container, Pool, Log>::item_pos() const noexcept {
 		return _item_pos;
 	}
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline vmem_iterator_edge_t _vmem_iterator_state<Container, Pool, Log>::edge() const noexcept {
+	inline vmem_iterator_edge_t vmem_basic_iterator_state<Container, Pool, Log>::edge() const noexcept {
 		return _edge;
 	}
 

@@ -86,7 +86,7 @@ namespace abc {
 	class vmem_container;
 
 	template <typename T, typename Header, typename Pool, typename Log = null_log>
-	using vmem_container_iterator_state = _vmem_iterator_state<vmem_container<T, Header, Pool, Log>, Pool, Log>;
+	using vmem_container_iterator_state = vmem_basic_iterator_state<vmem_container<T, Header, Pool, Log>, Pool, Log>;
 
 	template <typename T, typename Header, typename Pool, typename Log = null_log>
 	using vmem_container_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
