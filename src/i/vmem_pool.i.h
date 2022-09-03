@@ -65,7 +65,7 @@ namespace abc {
 	/**
 	 * @brief					Performance counters of a vmem pool.
 	 */
-	struct _vmem_mapped_page_totals {
+	struct vmem_mapped_page_totals {
 		vmem_page_hit_count_t	keep_count;
 		vmem_page_hit_count_t	hit_count;
 		vmem_page_hit_count_t	miss_count;
@@ -334,7 +334,7 @@ namespace abc {
 		int							_fd;
 		std::size_t					_mapped_page_count;
 		vmem_mapped_page			_mapped_pages[MaxMappedPages];
-		_vmem_mapped_page_totals	_mapped_page_totals;
+		vmem_mapped_page_totals		_mapped_page_totals;
 		Log*						_log;
 	};
 
