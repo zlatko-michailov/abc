@@ -38,20 +38,20 @@ SOFTWARE.
 namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
-	inline _json_state<MaxLevels, Log>::_json_state(Log* log)
+	inline json_state<MaxLevels, Log>::json_state(Log* log)
 		: _expect_property(false)
 		, _level_top(size::invalid)
 		, _log(log) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::json, severity::abc::debug, 0x100f9, "_json_state::_json_state()");
+			_log->put_any(category::abc::json, severity::abc::debug, 0x100f9, "json_state::json_state()");
 		}
 	}
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline void _json_state<MaxLevels, Log>::reset() noexcept {
+	inline void json_state<MaxLevels, Log>::reset() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::json, severity::abc::debug, 0x100fa, "_json_state::reset()");
+			_log->put_any(category::abc::json, severity::abc::debug, 0x100fa, "json_state::reset()");
 		}
 
 		_expect_property = false;
@@ -60,19 +60,19 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline std::size_t _json_state<MaxLevels, Log>::levels() const noexcept {
+	inline std::size_t json_state<MaxLevels, Log>::levels() const noexcept {
 		return _level_top + 1;
 	}
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline json::level_t _json_state<MaxLevels, Log>::top_level() const noexcept {
+	inline json::level_t json_state<MaxLevels, Log>::top_level() const noexcept {
 		return 0 <= _level_top && _level_top < MaxLevels ? _level_stack[_level_top] : json::level::array;
 	}
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline bool _json_state<MaxLevels, Log>::expect_property() const noexcept {
+	inline bool json_state<MaxLevels, Log>::expect_property() const noexcept {
 		return
 			_expect_property
 			&& 0 <= _level_top
@@ -82,7 +82,7 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline void _json_state<MaxLevels, Log>::set_expect_property(bool expect) noexcept {
+	inline void json_state<MaxLevels, Log>::set_expect_property(bool expect) noexcept {
 		_expect_property =
 			expect
 			&& 0 <= _level_top
@@ -92,10 +92,10 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline bool _json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
+	inline bool json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
 		if (_level_top + 1 < 0 || _level_top + 1 >= MaxLevels) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fb, "_json_state::push_level() levels='%zu', MaxLevels=%zu", _level_top + 1, MaxLevels);
+				_log->put_any(category::abc::json, severity::important, 0x100fb, "json_state::push_level() levels='%zu', MaxLevels=%zu", _level_top + 1, MaxLevels);
 			}
 
 			return false;
@@ -107,10 +107,10 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline bool _json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
+	inline bool json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
 		if (_level_top < 0 || _level_top >= MaxLevels) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fc, "_json_state::pop_level() levels='%zu'", _level_top + 1);
+				_log->put_any(category::abc::json, severity::important, 0x100fc, "json_state::pop_level() levels='%zu'", _level_top + 1);
 			}
 
 			return false;
@@ -118,7 +118,7 @@ namespace abc {
 
 		if (_level_stack[_level_top] != level) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::json, severity::important, 0x100fd, "_json_state::pop_level() levels='%zu', top=%u, pop=%u", _level_top + 1, (unsigned)_level_stack[_level_top], (unsigned)level);
+				_log->put_any(category::abc::json, severity::important, 0x100fd, "json_state::pop_level() levels='%zu', top=%u, pop=%u", _level_top + 1, (unsigned)_level_stack[_level_top], (unsigned)level);
 			}
 
 			return false;
@@ -130,7 +130,7 @@ namespace abc {
 
 
 	template <std::size_t MaxLevels, typename Log>
-	inline Log* _json_state<MaxLevels, Log>::log() const noexcept {
+	inline Log* json_state<MaxLevels, Log>::log() const noexcept {
 		return _log;
 	}
 

@@ -26,11 +26,9 @@ Breaking change:
     - _vmem_mapped_page
     - _vmem_mapped_page_totals
     - _http_state
+    - _json_state
 
 ## To Do
-- Breaking change:
-  - Uninternalize name:
-    - _json_state
   
 ## Pick List
  - Untabify

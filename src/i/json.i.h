@@ -91,23 +91,23 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <std::size_t MaxLevels, typename Log>
-	class _json_state {
+	class json_state {
 	protected:
 		/**
 		 * @brief			Constructor.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_json_state(Log* log);
+		json_state(Log* log);
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_json_state(_json_state&& other) = default;
+		json_state(json_state&& other) = default;
 
 		/**
 		 * @brief			Copy constructor.
 		 */
-		_json_state(const _json_state& other) = default;
+		json_state(const json_state& other) = default;
 
 	public:
 		/**
@@ -187,9 +187,9 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
-	class json_istream : public istream, public _json_state<MaxLevels, Log> {
+	class json_istream : public istream, public json_state<MaxLevels, Log> {
 		using base  = istream;
-		using state = _json_state<MaxLevels, Log>;
+		using state = json_state<MaxLevels, Log>;
 
 	public:
 		/**
@@ -328,9 +328,9 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <std::size_t MaxLevels = size::_64, typename Log = null_log>
-	class json_ostream : public ostream, public _json_state<MaxLevels, Log> {
+	class json_ostream : public ostream, public json_state<MaxLevels, Log> {
 		using base  = ostream;
-		using state = _json_state<MaxLevels, Log>;
+		using state = json_state<MaxLevels, Log>;
 
 	public:
 		/**
