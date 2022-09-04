@@ -36,19 +36,19 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline _http_state<Log>::_http_state(http::item_t next, Log* log) noexcept
+	inline http_state<Log>::http_state(http::item_t next, Log* log) noexcept
 		: _next(next)
 		, _log(log) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::http, severity::abc::debug, 0x1003b, "_http_state::_http_state()");
+			_log->put_any(category::abc::http, severity::abc::debug, 0x1003b, "http_state::http_state()");
 		}
 	}
 
 
 	template <typename Log>
-	inline void _http_state<Log>::reset(http::item_t next) {
+	inline void http_state<Log>::reset(http::item_t next) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::http, severity::abc::debug, 0x1003c, "_http_state::reset() next=%u", next);
+			_log->put_any(category::abc::http, severity::abc::debug, 0x1003c, "http_state::reset() next=%u", next);
 		}
 
 		_next = next;
@@ -56,16 +56,16 @@ namespace abc {
 
 
 	template <typename Log>
-	inline http::item_t _http_state<Log>::next() const noexcept {
+	inline http::item_t http_state<Log>::next() const noexcept {
 		return _next;
 	}
 
 
 	template <typename Log>
-	inline void _http_state<Log>::assert_next(http::item_t item) {
+	inline void http_state<Log>::assert_next(http::item_t item) {
 		if (_next != item) {
 			char buffer[100];
-			std::snprintf(buffer, sizeof(buffer), "_http_state::assert_next(): actual=%u, expected=%u", _next, item);
+			std::snprintf(buffer, sizeof(buffer), "http_state::assert_next(): actual=%u, expected=%u", _next, item);
 
 			throw exception<std::logic_error, Log>(buffer, 0x1003d, _log);
 		}
@@ -73,7 +73,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline Log* _http_state<Log>::log() const noexcept {
+	inline Log* http_state<Log>::log() const noexcept {
 		return _log;
 	}
 

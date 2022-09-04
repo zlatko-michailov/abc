@@ -59,24 +59,24 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class _http_state {
+	class http_state {
 	protected:
 		/**
 		 * @brief			Constructor.
 		 * @param next		Next item.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		_http_state(http::item_t next, Log* log) noexcept;
+		http_state(http::item_t next, Log* log) noexcept;
 
 		/**
 		 * @brief			Move constructor.
 		 */
-		_http_state(_http_state&& other) = default;
+		http_state(http_state&& other) = default;
 
 		/**
 		 * @brief			Copy constructor.
 		 */
-		_http_state(const _http_state& other) = default;
+		http_state(const http_state& other) = default;
 
 	public:
 		/**
@@ -123,9 +123,9 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class http_istream : public istream, public _http_state<Log> {
+	class http_istream : public istream, public http_state<Log> {
 		using base  = istream;
-		using state = _http_state<Log>;
+		using state = http_state<Log>;
 
 	protected:
 		/**
@@ -281,9 +281,9 @@ namespace abc {
 	 * @tparam Log			Logging facility.
 	 */
 	template <typename Log>
-	class http_ostream : public ostream, public _http_state<Log> {
+	class http_ostream : public ostream, public http_state<Log> {
 		using base  = ostream;
-		using state = _http_state<Log>;
+		using state = http_state<Log>;
 
 	protected:
 		/**
