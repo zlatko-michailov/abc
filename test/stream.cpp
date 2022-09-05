@@ -64,11 +64,11 @@ namespace abc { namespace test { namespace stream {
 
 		test_istream is1(&sb);
 		is1.get(actual, 6);
-		passed = context.are_equal(actual, "first ", __TAG__) && passed;
+		passed = context.are_equal(actual, "first ", 0x1072b) && passed;
 
 		test_istream is2(std::move(is1));
 		is1.get(actual, 6);
-		passed = context.are_equal(actual, "second", __TAG__) && passed;
+		passed = context.are_equal(actual, "second", 0x1072c) && passed;
 
 		return passed;
 	}
@@ -83,12 +83,12 @@ namespace abc { namespace test { namespace stream {
 		test_ostream os1(&sb);
 		os1.put("first ");
 		os1.flush();
-		passed = context.are_equal(actual, "first ", __TAG__) && passed;
+		passed = context.are_equal(actual, "first ", 0x1072d) && passed;
 
 		test_ostream os2(std::move(os1));
 		os2.put("second");
 		os2.flush();
-		passed = context.are_equal(actual, "first second", __TAG__) && passed;
+		passed = context.are_equal(actual, "first second", 0x1072e) && passed;
 
 		return passed;
 	}

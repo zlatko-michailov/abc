@@ -726,12 +726,12 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream1.get_method(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "GET", static_cast<abc::http_request_istream<abc::test::log>&>(istream1), __TAG__) && passed;
+		passed = verify_string(context, buffer, "GET", static_cast<abc::http_request_istream<abc::test::log>&>(istream1), 0x10715) && passed;
 
 		HttpStream istream2(std::move(istream1));
 
 		istream2.get_resource(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", static_cast<abc::http_request_istream<abc::test::log>&>(istream2), __TAG__) && passed;
+		passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", static_cast<abc::http_request_istream<abc::test::log>&>(istream2), 0x10716) && passed;
 
 		return passed;
 	}
@@ -751,17 +751,17 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		ostream1.put_method("POST");
-		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream1), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream1), 0x10717) && passed;
 
 		HttpStream ostream2(std::move(ostream1));
 
 		ostream2.put_resource("http://a.com/b?c=d");
-		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), 0x10718) && passed;
 
 		ostream2.put_protocol("HTTP/1.1");
-		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_request_ostream<abc::test::log>&>(ostream2), 0x10719) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x1071a) && passed;
 
 		return passed;
 	}
@@ -781,12 +781,12 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		istream1.get_protocol(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "HTTP/1.1", static_cast<abc::http_response_istream<abc::test::log>&>(istream1), __TAG__) && passed;
+		passed = verify_string(context, buffer, "HTTP/1.1", static_cast<abc::http_response_istream<abc::test::log>&>(istream1), 0x1071b) && passed;
 
 		HttpStream istream2(std::move(istream1));
 
 		istream2.get_status_code(buffer, sizeof(buffer));
-		passed = verify_string(context, buffer, "302", static_cast<abc::http_response_istream<abc::test::log>&>(istream2), __TAG__) && passed;
+		passed = verify_string(context, buffer, "302", static_cast<abc::http_response_istream<abc::test::log>&>(istream2), 0x1071c) && passed;
 
 		return passed;
 	}
@@ -806,17 +806,17 @@ namespace abc { namespace test { namespace http {
 		bool passed = true;
 
 		ostream1.put_protocol("HTTP/1.1");
-		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream1), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream1), 0x1071d) && passed;
 
 		HttpStream ostream2(std::move(ostream1));
 
 		ostream2.put_status_code("200");
-		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), 0x1071e) && passed;
 
 		ostream2.put_reason_phrase("OK");
-		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), __TAG__) && passed;
+		passed = verify_stream(context, static_cast<abc::http_response_ostream<abc::test::log>&>(ostream2), 0x1071f) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10720) && passed;
 
 		return passed;
 	}

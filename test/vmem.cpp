@@ -1346,14 +1346,14 @@ namespace abc { namespace test { namespace vmem {
 		{
 			// Page Fail
 			abc::vmem_page<Pool, Log> pageFail(&pool1, context.log);
-			passed = context.are_equal(pageFail.ptr() == nullptr, true, __TAG__, "%d") && passed;
+			passed = context.are_equal(pageFail.ptr() == nullptr, true, 0x10739, "%d") && passed;
 		}
 
 		{
 			// Page 2
 			abc::vmem_page<Pool, Log> page2(&pool2, context.log);
-			passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
-			passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+			passed = context.are_equal(page2.ptr() != nullptr, true, 0x1073a, "%d") && passed;
+			passed = context.are_equal((long long)page2.pos(), 2LL, 0x1073b, "0x%llx") && passed;
 
 			page2.free();
 		}
@@ -1371,19 +1371,19 @@ namespace abc { namespace test { namespace vmem {
 
 		// Page 2
 		abc::vmem_page<Pool, Log> page2(&pool, context.log);
-		passed = context.are_equal(page2.ptr() != nullptr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal((long long)page2.pos(), 2LL, __TAG__, "0x%llx") && passed;
+		passed = context.are_equal(page2.ptr() != nullptr, true, 0x1073c, "%d") && passed;
+		passed = context.are_equal((long long)page2.pos(), 2LL, 0x1073d, "0x%llx") && passed;
 
 		int* ptrActual = reinterpret_cast<int*>(page2.ptr());
 		*ptrActual = 42; 
 
 		abc::vmem_page<Pool, Log> page2Moved(std::move(page2));
-		passed = context.are_equal(page2Moved.ptr() != nullptr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal((long long)page2Moved.pos(), 2LL, __TAG__, "0x%llx") && passed;
-		passed = context.are_equal(*(int*)page2Moved.ptr(), 42, __TAG__, "%d") && passed;
+		passed = context.are_equal(page2Moved.ptr() != nullptr, true, 0x1073e, "%d") && passed;
+		passed = context.are_equal((long long)page2Moved.pos(), 2LL, 0x1073f, "0x%llx") && passed;
+		passed = context.are_equal(*(int*)page2Moved.ptr(), 42, 0x10740, "%d") && passed;
 
-		passed = context.are_equal(page2.ptr() == nullptr, true, __TAG__, "%d") && passed;
-		passed = context.are_equal((long long)page2.pos(), -1LL, __TAG__, "0x%llx") && passed;
+		passed = context.are_equal(page2.ptr() == nullptr, true, 0x10741, "%d") && passed;
+		passed = context.are_equal((long long)page2.pos(), -1LL, 0x10742, "0x%llx") && passed;
 
 		page2Moved.free();
 

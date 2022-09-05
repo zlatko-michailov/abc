@@ -232,12 +232,12 @@ namespace abc { namespace test { namespace table {
 		abc::table_ostream os1(&sb);
 		os1.put_line("first\n");
 		os1.flush();
-		passed = context.are_equal(actual, "first\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "first\n", 0x10731) && passed;
 
 		abc::table_ostream os2(std::move(os1));
 		os2.put_line("second\n");
 		os2.flush();
-		passed = context.are_equal(actual, "first\nsecond\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "first\nsecond\n", 0x10732) && passed;
 
 		return passed;
 	}
@@ -258,12 +258,12 @@ namespace abc { namespace test { namespace table {
 		Log os1(&sb, &filter);
 		os1.put_line("third\n");
 		os1.flush();
-		passed = context.are_equal(actual, "third\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "third\n", 0x10733) && passed;
 
 		Log os2(std::move(os1));
 		os2.put_line("fourth\n");
 		os2.flush();
-		passed = context.are_equal(actual, "third\nfourth\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "third\nfourth\n", 0x10734) && passed;
 
 		return passed;
 	}
@@ -279,12 +279,12 @@ namespace abc { namespace test { namespace table {
 		abc::line_ostream<> os1(&table);
 		os1.put_any("first");
 		os1.flush();
-		passed = context.are_equal(actual, "first\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "first\n", 0x10735) && passed;
 
 		abc::line_ostream<> os2(std::move(os1));
 		os2.put_any("second");
 		os2.flush();
-		passed = context.are_equal(actual, "first\nsecond\n", __TAG__) && passed;
+		passed = context.are_equal(actual, "first\nsecond\n", 0x10736) && passed;
 
 		return passed;
 	}
@@ -313,14 +313,14 @@ namespace abc { namespace test { namespace table {
 		os1.flush();
 
 		std::snprintf(expected, sizeof(expected), line1_pattern, thread_id.get());
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal(actual, expected, 0x10737) && passed;
 
 		Line os2(std::move(os1));
 		os2.put_any(abc::category::any, abc::severity::important, 0x02, "second");
 		os2.flush();
 
 		std::snprintf(expected, sizeof(expected), line2_pattern, thread_id.get(), thread_id.get());
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal(actual, expected, 0x10738) && passed;
 
 		return passed;
 	}

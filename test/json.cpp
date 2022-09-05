@@ -2147,16 +2147,16 @@ namespace abc { namespace test { namespace json {
 		std::size_t size = sizeof(abc::json::item_t) + sizeof(bool);
 
 		istream1.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::boolean, istream1, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.boolean, false, istream1, __TAG__, "%u", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::boolean, istream1, 0x10721, "%x", size) && passed;
+		passed = verify_value(context, token->value.boolean, false, istream1, 0x10722, "%u", size) && passed;
 
 		abc::json_istream<abc::size::_64, abc::test::log> istream2(std::move(istream1));
 
 		size = sizeof(abc::json::item_t) + sizeof(double);
 
 		istream2.get_token(token, sizeof(buffer));
-		passed = verify_value(context, token->item, abc::json::item::number, istream2, __TAG__, "%x", size) && passed;
-		passed = verify_value(context, token->value.number, 42.0, istream2, __TAG__, "%f", size) && passed;
+		passed = verify_value(context, token->item, abc::json::item::number, istream2, 0x10723, "%x", size) && passed;
+		passed = verify_value(context, token->value.number, 42.0, istream2, 0x10724, "%f", size) && passed;
 
 		return passed;
 	}
@@ -2180,7 +2180,7 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::boolean;
 		token->value.boolean = true;
 		ostream1.put_token(token);
-		passed = verify_stream(context, ostream1, __TAG__) && passed;
+		passed = verify_stream(context, ostream1, 0x10725) && passed;
 
 		abc::json_ostream<abc::size::_64, abc::test::log> ostream2(std::move(ostream1));
 		ostream2.put_space();
@@ -2188,9 +2188,9 @@ namespace abc { namespace test { namespace json {
 		token->item = abc::json::item::number;
 		token->value.number = 42.0;
 		ostream2.put_token(token);
-		passed = verify_stream(context, ostream2, __TAG__) && passed;
+		passed = verify_stream(context, ostream2, 0x10726) && passed;
 
-		passed = context.are_equal(actual, expected, std::strlen(expected), __TAG__) && passed;
+		passed = context.are_equal(actual, expected, std::strlen(expected), 0x10727) && passed;
 
 		return passed;
 	}

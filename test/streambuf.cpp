@@ -51,13 +51,13 @@ namespace abc { namespace test { namespace streambuf {
 		abc::buffer_streambuf sb1(medium, 0, sizeof(medium), medium, 0, sizeof(medium));
 		std::ostream out(&sb1);
 		out.write(expected, std::strlen(expected) + 1);
-		passed = context.are_equal(medium, expected, __TAG__) && passed;
+		passed = context.are_equal(medium, expected, 0x1072f) && passed;
 
 		abc::buffer_streambuf sb2(std::move(sb1));
 		std::istream in(&sb2);
 		char actual[abc::size::_256 + 1];
 		in.read(actual, std::strlen(expected) + 1);
-		passed = context.are_equal(actual, expected, __TAG__) && passed;
+		passed = context.are_equal(actual, expected, 0x10730) && passed;
 
 		return passed;
 	}

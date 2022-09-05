@@ -31,7 +31,7 @@ namespace abc { namespace test { namespace multifile {
 
 	template <typename Streambuf>
 	bool test_move(Streambuf& sb1, test_context<abc::test::log>& context) {
-		abc::test::heap::ignore_heap_allocations(abc::test::heap::array_unaligned_throw_count, 1, context, __TAG__); // std::filebuf::open()
+		abc::test::heap::ignore_heap_allocations(abc::test::heap::array_unaligned_throw_count, 1, context, 0x10728); // std::filebuf::open()
 		std::ostream out1(&sb1);
 		out1.write("one ", 4);
 		out1.flush();
@@ -48,13 +48,13 @@ namespace abc { namespace test { namespace multifile {
 
 		std::filebuf sbin;
 		sbin.open(path, std::ios_base::in);
-		abc::test::heap::ignore_heap_allocations(abc::test::heap::array_unaligned_throw_count, 1, context, __TAG__); // std::filebuf::open()
+		abc::test::heap::ignore_heap_allocations(abc::test::heap::array_unaligned_throw_count, 1, context, 0x10729); // std::filebuf::open()
 		std::istream in(&sbin);
 		in.read(actual, 8);
 
 		bool passed = true;
 
-		passed = context.are_equal(actual, "one two ", __TAG__) && passed;
+		passed = context.are_equal(actual, "one two ", 0x1072a) && passed;
 
 		return passed;
 	}
