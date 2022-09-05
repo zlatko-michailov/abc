@@ -2,17 +2,18 @@
 
 Up to [Documentation](README.md).
 
-## 1.17.0
-- doxygen
-
 ## 1.18.0
-- Self-driving
+- Self-driving - location
 
 ## 1.19.0
-- SSL/TLS wrapper
+- Self-driving - shapes of obstacles
+
+## 1.20.0
+- SSL/TLS streambuf
 
 ## Pick List
-- Virtual memory:
+- Untabify
+- `vmem_pool`:
   - `check`
   - `repair`
   - `rebuild`

@@ -2,6 +2,44 @@
 
 Up to [Documentation](README.md).
 
+## 1.17.0
+- Breaking Changes
+  - `vmem_ptr` - rename `item_pos` to `byte_pos`.
+  - Uninternalize type names
+    - `_stream` -> `stream`
+    - `_istream` -> `istream`
+    - `_ostream` -> `ostream`
+    - `_http_istream` -> `http_istream`
+    - `_http_ostream` -> `http_ostream`
+    - `_client_socket` -> `client_socket`
+    - `_basic_socket` -> `basic_socket`
+    - `_vmem_iterator` -> `vmem_basic_iterator`
+    - `_vmem_iterator_state` -> `vmem_basic_iterator_state`
+    - `_vmem_mapped_page` -> `vmem_mapped_page`
+    - `_vmem_mapped_page_totals` -> `vmem_mapped_page_totals`
+    - `_http_state` -> `http_state`
+    - `_json_state` -> `json_state`
+- Bugs
+  - Move constructors
+    - `buffer_streambuf`
+    - `stream`, `istream`, `ostream`
+    - `table_ostream`, `line_ostream`
+    - `log_ostream`, `..._line_ostream`
+    - `http_..._stream`
+    - `json_..._stream`
+    - `..._multifile_streambuf`
+    - `..._socket`
+    - `endpoint`
+    - `vmem_pool`
+  - `vmem_pool` - destructor
+  - `timestamp` - time parts
+  - `color::yellow`
+- Additions
+  - none
+- Refactoring
+  - Add doxygen annotations for all classes and most of their methods.
+  - Tests - simplify buffer initializations.
+
 ## 1.16.0
 - Breaking Changes
   - Template parameter `Predicate` in `json_istream` and `http_istream` has become strictly `CharPredicate`.

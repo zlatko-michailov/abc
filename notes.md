@@ -1,37 +1,9 @@
 ## Done
-- Bugfixes:
-  - timestamp - time parts
-  - buffer_streambuf move constructor
-  - stream, istream, ostream move constructor
-  - _table_ostream move constructor
-  - _line_ostream move constructor
-  - log_ostream, debug_line_ostream, diag_line_ostream, test_line_ostream move constructor
-  - http_request_istream, http_request_ostream, http_response_istream, http_response_ostream, http_client_stream, http_server_stream move constructor
-  - json_istream, json_ostream move constructor
-  - vmem_pool move constructor, destructor
-- Copy constructor - explicit
-Breaking change:
-  - `vmem_ptr`:
-    - Rename `item_pos` to `byte_pos`.
-  - Uninternalize name:
-    - _stream
-    - _istream
-    - _ostream
-    - _http_istream
-    - _http_ostream
-    - _client_socket
-    - _basic_socket
-    - _vmem_iterator -> vmem_basic_iterator
-    - _vmem_iterator_state -> vmem_basic_iterator_state
-    - _vmem_mapped_page
-    - _vmem_mapped_page_totals
-    - _http_state
-    - _json_state
 
 ## To Do
-  
+
 ## Pick List
- - Untabify
+- Untabify
 - vmem:
   - check
     - No data loss
