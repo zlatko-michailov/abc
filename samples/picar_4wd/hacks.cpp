@@ -245,29 +245,39 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_input_line<log_ostream> speed_rear_left(&chip, 25, &log);
 	abc::gpio_input_line<log_ostream> speed_rear_right(&chip, 4, &log);
 
-	const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
+	const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100 }; ////{ 25, 50, 75, 100, 75, 50, 25 };
 	for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
 		const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
 		const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
 
-		pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
-		pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
+		////pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
+		////pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
 		pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
 		pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
 
 		std::size_t total_count_rear_left  = 0;
 		std::size_t total_count_rear_right = 0;
 
-		for (int b = 0; b < 5; b++) {
+		constexpr std::size_t reps = 2;
+
+		for (std::size_t b = 0; b < reps; b++) {
 			std::size_t count_rear_left  = 0;
 			std::size_t count_rear_right = 0;
 
 			abc::gpio_level_t level_prev_rear_left	= abc::gpio_level::invalid;
 			abc::gpio_level_t level_prev_rear_right	= abc::gpio_level::invalid;
 
-			for (int c = 0; c < 200; c++) {
+			char bit_rear_left[101] = { };
+			char bit_rear_right[101] = { };
+
+			for (std::size_t c = 0; c < 100; c++) {
 				abc::gpio_level_t level_curr_rear_left	= speed_rear_left.get_level();
 				abc::gpio_level_t level_curr_rear_right	= speed_rear_right.get_level();
+
+				if (c < 100) {
+					bit_rear_left[c] = '0' + level_curr_rear_left;
+					bit_rear_right[c] = '0' + level_curr_rear_right;
+				}
 
 				const std::size_t change_rear_left  = level_prev_rear_left  != level_curr_rear_left  ? 1 : 0;
 				const std::size_t change_rear_right = level_prev_rear_right != level_curr_rear_right ? 1 : 0;
@@ -278,11 +288,14 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 				level_prev_rear_left  = level_curr_rear_left;
 				level_prev_rear_right = level_curr_rear_right;
 
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				std::this_thread::sleep_for(std::chrono::milliseconds(2));
 			}
 
 			count_rear_left  /= 2;
 			count_rear_right /= 2;
+
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left =%s", bit_rear_left);
+			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "right=%s", bit_rear_right);
 
 			log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b2, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 											(unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
@@ -291,8 +304,8 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			total_count_rear_right += count_rear_right;
 		}
 
-		total_count_rear_left  /= 5;
-		total_count_rear_right /= 5;
+		total_count_rear_left  = (total_count_rear_left + reps / 2) / reps;
+		total_count_rear_right = (total_count_rear_right + reps / 2) / reps;
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b3, "----------------------------------------------------------------------");
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
@@ -427,6 +440,7 @@ void run_all() {
 	// Init hat
 	reset_hat(chip, log);
 
+#if 0
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
@@ -440,13 +454,19 @@ void run_all() {
 
 	// Wheels - pwm output
 	turn_wheels(log);
+#endif
 
-	// Speed - binary input
+	// Speed - photo interrupter
 	measure_speed(chip, log);
+
+#if 0
+	// Speed - accelerometer
+	measure_accel_and_spin(log);
 
 	// Wheels - pwm output
 	make_turns(log);
 
 	// Grayscale - pwm input
 	measure_grayscale(log);
+#endif
 }
