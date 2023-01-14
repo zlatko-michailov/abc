@@ -27,6 +27,7 @@ SOFTWARE.
 #include <chrono>
 #include <ratio>
 #include <vector>
+#include <cmath>
 
 #include "../../src/gpio.h"
 
@@ -245,6 +246,9 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_input_line<log_ostream> speed_rear_left(&chip, 25, &log);
 	abc::gpio_input_line<log_ostream> speed_rear_right(&chip, 4, &log);
 
+	std::size_t grand_total_count_rear_left  = 0;
+	std::size_t grand_total_count_rear_right = 0;
+
 	const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100 }; ////{ 25, 50, 75, 100, 75, 50, 25 };
 	for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
 		const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
@@ -304,6 +308,9 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			total_count_rear_right += count_rear_right;
 		}
 
+		grand_total_count_rear_left  += total_count_rear_left;
+		grand_total_count_rear_right += total_count_rear_right;
+
 		total_count_rear_left  = (total_count_rear_left + reps / 2) / reps;
 		total_count_rear_right = (total_count_rear_right + reps / 2) / reps;
 
@@ -314,13 +321,257 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 										(unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
 		log.put_blank_line();
-
 	}
+
+	std::size_t dist_left  = (21 * grand_total_count_rear_left)  / 10;
+	std::size_t dist_right = (21 * grand_total_count_rear_right) / 10;
+
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
+									(unsigned)grand_total_count_rear_left, (unsigned)dist_left, (unsigned)grand_total_count_rear_right, (unsigned)dist_right);
+	log.put_blank_line();
 
 	pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 	pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 	pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 	pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+}
+
+
+inline int mod(int i, int n) {
+	return (i + n) % n;
+}
+
+void measure_accel_and_spin_original(log_ostream& log) {
+	abc::gpio_smbus<log_ostream> smbus(1, &log);
+
+	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+
+	const abc::gpio_smbus_register_t reg_wheel_front_left	= 0x0d;
+	const abc::gpio_smbus_register_t reg_wheel_front_right	= 0x0c;
+	const abc::gpio_smbus_register_t reg_wheel_rear_left	= 0x08;
+	const abc::gpio_smbus_register_t reg_wheel_rear_right	= 0x09;
+	const abc::gpio_smbus_register_t reg_timer_front_left	= reg_wheel_front_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_front_right	= reg_wheel_front_right / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_left	= reg_wheel_rear_left / 4;
+	const abc::gpio_smbus_register_t reg_timer_rear_right	= reg_wheel_rear_right / 4;
+	const abc::gpio_pwm_pulse_frequency_t frequency			= 50; // 50 Hz
+
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+														reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+														reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+														reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
+	abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+														reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+
+	constexpr abc::gpio_smbus_address_t			smbus_accel_addr				= 0x68;
+	constexpr abc::gpio_smbus_clock_frequency_t	smbus_accel_clock_frequency		= 1 * std::kilo::num; // Not true, but doesn't matter.
+	constexpr bool								smbus_accel_requires_byte_swap	= true;
+
+	abc::gpio_smbus_target<log_ostream> accel(smbus_accel_addr, smbus_accel_clock_frequency, smbus_accel_requires_byte_swap, &log);
+
+	const abc::gpio_smbus_register_t reg_pwr_mgmt_1		= 0x6b;
+	const abc::gpio_smbus_register_t reg_gyro_config	= 0x1b;
+	const abc::gpio_smbus_register_t reg_accel_config	= 0x1c;
+	////const abc::gpio_smbus_register_t reg_int			= 0x3a;
+	const abc::gpio_smbus_register_t reg_accel_xout_h	= 0x3b;
+	////const abc::gpio_smbus_register_t reg_accel_xout_l	= 0x3c;
+	const abc::gpio_smbus_register_t reg_accel_yout_h	= 0x3d;
+	const abc::gpio_smbus_register_t reg_accel_zout_h	= 0x3f;
+	const abc::gpio_smbus_register_t reg_gyro_zout_h	= 0x47;
+
+	smbus.put_byte(accel, reg_pwr_mgmt_1, 0x03);		// Gyro Z clock
+	smbus.put_byte(accel, reg_accel_config, 0x02 << 3);	// +/-8 g
+	smbus.put_byte(accel, reg_gyro_config, 0x02 << 3);	// +/-1000 dps
+
+	constexpr std::uint16_t mask = 0xffffU; //0xff80U;
+	constexpr double g = 100.0 * 9.8;
+
+	constexpr std::int32_t reps_base = 50;
+
+	std::int32_t base_accel_x = 0;
+	std::int32_t base_accel_y = 0;
+	std::int32_t base_accel_z = 0;
+	std::int32_t base_gyro_z = 0;
+	for (int c = 0; c < reps_base; c++) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::uint16_t w;
+
+		smbus.get_word(accel, reg_accel_xout_h, w);
+		std::int16_t accel_x = static_cast<std::int16_t>(w & mask);
+		base_accel_x += accel_x;
+
+		smbus.get_word(accel, reg_accel_yout_h, w);
+		std::int16_t accel_y = static_cast<std::int16_t>(w & mask);
+		base_accel_y += accel_y;
+
+		smbus.get_word(accel, reg_accel_zout_h, w);
+		std::int16_t accel_z = static_cast<std::int16_t>(w & mask);
+		base_accel_z += accel_z;
+
+		smbus.get_word(accel, reg_gyro_zout_h, w);
+		std::int16_t gyro_z = static_cast<std::int16_t>(w & mask);
+		base_gyro_z += gyro_z;
+
+		//// log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
+		////	(int)accel_x, ((double)accel_x * 8.0) / (double)0x8000U, (int)gyro_z, (double)gyro_z / 1000.0);
+	}
+
+	base_accel_x /= reps_base;
+	base_accel_y /= reps_base;
+	base_accel_z /= reps_base;
+	base_gyro_z /= reps_base;
+	log.put_blank_line();
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "BASE accel_x = %8.3f | BASE accel_y = %8.3f | BASE accel_z = %8.3f | BASE gyro_z = %8.3f", 
+		((double)base_accel_x * 8.0) / (double)0x8000U, ((double)base_accel_y * 8.0) / (double)0x8000U, ((double)base_accel_z * 8.0) / (double)0x8000U, (double)base_gyro_z / 1000.0);
+	log.put_blank_line();
+
+
+	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
+	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
+	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
+
+	std::int32_t total_accel_x = 0;
+	std::int32_t total_gyro_z = 0;
+	double curr_speed = 0;
+	double total_distance = 0;
+
+	constexpr int sample_size = 5;
+
+	////std::int16_t accel_x_sample[sample_size]{ };
+	////std::size_t accel_x_sample_i = 0;
+	////std::int32_t accel_x_sample_sum = 0;
+
+	std::int16_t gyro_z_sample[sample_size]{ };
+	std::size_t gyro_z_sample_i = 0;
+	std::int32_t gyro_z_sample_sum = 0;
+
+	constexpr std::int16_t reps = 200;
+	for (int rep = 0; rep < reps; rep++) {
+		if (rep == 0) {
+			pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
+			pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
+			pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
+			pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
+			log.put_blank_line();
+		}
+
+		if (rep == reps - 25 - 1) {
+			pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+			pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+			pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+			pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+			log.put_blank_line();
+		}
+
+		std::int32_t accel_x = 0;
+		std::int32_t accel_y = 0;
+		std::int32_t accel_z = 0;
+		std::int32_t accel_x_sample_avg;
+		////std::int32_t accel_y_sample_avg;
+		////std::int32_t accel_z_sample_avg;
+		std::int32_t gyro_z_sample_avg;
+		double raw_accel_x;
+		double raw_accel_y;
+		double raw_accel_z;
+
+		std::chrono::system_clock::time_point tp_begin = std::chrono::system_clock::now();
+
+		constexpr std::int16_t inner_reps = 1; ////3;
+		for (std::int16_t r = 0; r < inner_reps; r++) {
+			std::uint16_t w;
+
+			smbus.get_word(accel, reg_accel_xout_h, w);
+			std::int32_t accel_x_temp = static_cast<std::int16_t>(w & mask) - base_accel_x;
+			accel_x += accel_x_temp;
+
+			smbus.get_word(accel, reg_accel_yout_h, w);
+			std::int32_t accel_y_temp = static_cast<std::int16_t>(w & mask) - base_accel_y;
+			accel_y += accel_y_temp;
+
+			smbus.get_word(accel, reg_accel_zout_h, w);
+			std::int32_t accel_z_temp = static_cast<std::int16_t>(w & mask) - base_accel_z;
+			accel_z += accel_z_temp;
+
+			smbus.get_word(accel, reg_gyro_zout_h, w);
+			std::int32_t gyro_z = static_cast<std::int16_t>(w & mask) - base_gyro_z;
+			gyro_z_sample_sum += gyro_z;
+			if (rep >= sample_size) {
+				gyro_z_sample_sum -= gyro_z_sample[gyro_z_sample_i];
+			}
+			gyro_z_sample_avg = gyro_z_sample_sum / (rep < sample_size ? rep + 1 : sample_size);
+			gyro_z_sample[gyro_z_sample_i] = gyro_z_sample_avg;
+			gyro_z_sample_i = (gyro_z_sample_i + 1) % sample_size;
+			total_gyro_z += gyro_z_sample_avg;
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+
+		accel_x /= inner_reps;
+		accel_y /= inner_reps;
+		accel_z /= inner_reps;
+		raw_accel_x = ((double)accel_x * 8.0) / (double)0x8000U;
+		raw_accel_y = ((double)accel_y * 8.0) / (double)0x8000U;
+		raw_accel_z = ((double)accel_z * 8.0) / (double)0x8000U;
+
+#if 0
+		if (rep >= sample_size) {
+			accel_x_sample_sum -= accel_x_sample[accel_x_sample_i];
+		}
+		accel_x_sample_avg = (accel_x_sample_sum + accel_x) / (rep < sample_size ?  rep + 1 : sample_size);
+		accel_x_sample_sum += accel_x_sample_avg;
+		accel_x_sample[accel_x_sample_i] = accel_x_sample_avg;
+		accel_x_sample_i = (accel_x_sample_i + 1) % sample_size;
+		total_accel_x += accel_x_sample_avg;
+#endif
+
+		////accel_x_sample[rep % sample_size] = accel_x;
+		/*if (rep >= sample_size - 1) {
+			accel_x_sample[(rep - 2) % sample_size] = 
+				(
+					-3 * accel_x_sample[(rep - 4) % sample_size] 
+					+12 * accel_x_sample[(rep - 3) % sample_size]
+					+17 * accel_x_sample[(rep - 2) % sample_size]
+					+12 * accel_x_sample[(rep - 1) % sample_size]
+					-3 * accel_x_sample[rep % sample_size]
+				)
+				/ 35;
+		}*/
+
+		/*if (rep < sample_size / 2) {
+			accel_x_sample_avg = 0;
+		}
+		else {
+			accel_x_sample_avg = accel_x_sample[(rep - sample_size / 2) % sample_size];
+		}*/
+		accel_x_sample_avg = accel_x;
+		total_accel_x += accel_x_sample_avg;
+
+		std::chrono::system_clock::time_point tp_end = std::chrono::system_clock::now();
+		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(tp_end - tp_begin);
+
+		double sec = (double)ms.count() / 1000.0;
+		double curr_accel_x = ((double)accel_x_sample_avg * 8.0) / (double)0x8000U;
+		////curr_accel_x = std::round(curr_accel_x * 10000.0) / 10000.0;
+		total_distance += (curr_speed * sec) + (curr_accel_x * g * sec * sec / 2.0);
+		curr_speed += curr_accel_x * g * sec;
+
+		////log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
+		////	(int)accel_x, ((double)accel_x * 8.0) / (double)0x8000U, (int)gyro_z, (double)gyro_z / 1000.0);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "raw_accel_x = %8.3f | raw_accel_y = %8.3f | raw_accel_z = %8.3f | curr_accel = %8.3f | curr_speed = %8.3f | total_dist = %8.3f | ms = %zu", 
+			raw_accel_x, raw_accel_y, raw_accel_z, curr_accel_x, curr_speed, total_distance, (size_t)ms.count());
+	}
+
+	std::int16_t avg_accel_x = total_accel_x / reps;
+	std::int16_t avg_gyro_z = total_gyro_z / reps;
+	log.put_blank_line();
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TOTAL accel_x_raw = %d | TOTAL accel_x_g = %f | TOTAL gyro_z_raw = %d | TOTAL gyro_z_dps = %f", 
+		(int)total_accel_x, ((double)total_accel_x * 8.0) / (double)0x8000U, (int)total_gyro_z, (double)total_gyro_z / 1000.0);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "AVG accel_x_raw = %d | AVG accel_x_g = %f | AVG gyro_z_raw = %d | AVG gyro_z_dps = %f", 
+		(int)avg_accel_x, ((double)avg_accel_x * 8.0) / (double)0x8000U, (int)avg_gyro_z, (double)avg_gyro_z / 1000.0);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed = %f | total_dist = %f", 
+		curr_speed, total_distance);
 }
 
 
@@ -357,96 +608,120 @@ void measure_accel_and_spin(log_ostream& log) {
 	const abc::gpio_smbus_register_t reg_pwr_mgmt_1		= 0x6b;
 	const abc::gpio_smbus_register_t reg_gyro_config	= 0x1b;
 	const abc::gpio_smbus_register_t reg_accel_config	= 0x1c;
+	////const abc::gpio_smbus_register_t reg_int			= 0x3a;
 	const abc::gpio_smbus_register_t reg_accel_xout_h	= 0x3b;
+	////const abc::gpio_smbus_register_t reg_accel_xout_l	= 0x3c;
+	const abc::gpio_smbus_register_t reg_accel_yout_h	= 0x3d;
+	const abc::gpio_smbus_register_t reg_accel_zout_h	= 0x3f;
 	const abc::gpio_smbus_register_t reg_gyro_zout_h	= 0x47;
 
 	smbus.put_byte(accel, reg_pwr_mgmt_1, 0x03);		// Gyro Z clock
 	smbus.put_byte(accel, reg_accel_config, 0x02 << 3);	// +/-8 g
 	smbus.put_byte(accel, reg_gyro_config, 0x02 << 3);	// +/-1000 dps
 
+	constexpr double g = 100.0 * 9.8;
+
 	constexpr std::int32_t reps_base = 100;
 
-	std::int32_t base_accel_x = 0;
-	std::int32_t base_gyro_z = 0;
+	std::int32_t base_accel_x = 0.130 * (double)0x8000U / 8.0;
+	std::int32_t base_accel_y = 0.014 * (double)0x8000U / 8.0;
+	std::int32_t base_accel_z = 0.825 * (double)0x8000U / 8.0;
+	std::int32_t base_gyro_z  = 0.055 * (double)0x8000U / 8.0;
+#ifdef SKIP_BASE
 	for (int c = 0; c < reps_base; c++) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		std::uint16_t w;
 
 		smbus.get_word(accel, reg_accel_xout_h, w);
-		std::int16_t accel_x = static_cast<std::int16_t>(w);
-		base_accel_x += accel_x;
+		std::int16_t accel_x_temp = static_cast<std::int16_t>(w);
+		base_accel_x += accel_x_temp;
+
+		smbus.get_word(accel, reg_accel_yout_h, w);
+		std::int16_t accel_y_temp = static_cast<std::int16_t>(w);
+		base_accel_y += accel_y_temp;
+
+		smbus.get_word(accel, reg_accel_zout_h, w);
+		std::int16_t accel_z_temp = static_cast<std::int16_t>(w);
+		base_accel_z += accel_z_temp;
 
 		smbus.get_word(accel, reg_gyro_zout_h, w);
-		std::int16_t gyro_z = static_cast<std::int16_t>(w);
-		base_gyro_z += gyro_z;
+		std::int16_t gyro_z_temp = static_cast<std::int16_t>(w);
+		base_gyro_z += gyro_z_temp;
 
-		////log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
+		//// log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
 		////	(int)accel_x, ((double)accel_x * 8.0) / (double)0x8000U, (int)gyro_z, (double)gyro_z / 1000.0);
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
 	base_accel_x /= reps_base;
+	base_accel_y /= reps_base;
+	base_accel_z /= reps_base;
 	base_gyro_z /= reps_base;
+#endif
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "BASE accel_x_raw = %d | BASE accel_x_g = %f | BASE gyro_z_raw = %d | BASE gyro_z_dps = %f", 
-		(int)base_accel_x, ((double)base_accel_x * 8.0) / (double)0x8000U, (int)base_gyro_z, (double)base_gyro_z / 1000.0);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "BASE accel_x = %8.3f | BASE accel_y = %8.3f | BASE accel_z = %8.3f | BASE gyro_z = %8.3f", 
+		((double)base_accel_x * 8.0) / (double)0x8000U, ((double)base_accel_y * 8.0) / (double)0x8000U, ((double)base_accel_z * 8.0) / (double)0x8000U, (double)base_gyro_z / 1000.0);
+	log.put_blank_line();
 
-
-	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 25;
+	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
 
-	constexpr std::int16_t reps = 500;
-	constexpr double sec = 0.001;
-	constexpr double g = 100 * 9.8;
-	std::int16_t total_accel_x = 0;
-	std::int16_t total_gyro_z = 0;
 	double curr_speed = 0;
 	double total_distance = 0;
-	for (int c = 0; c < reps; c++) {
-		std::uint16_t w;
-		double curr_accel;
 
-		smbus.get_word(accel, reg_accel_xout_h, w);
-		std::int16_t accel_x = static_cast<std::int16_t>(w) - base_accel_x;
-		total_accel_x += accel_x;
-		curr_accel = (double)accel_x * 8.0 * g / (double)0x8000U;
-		total_distance += (sec * curr_speed) + (sec * sec * curr_accel / 2);
-		curr_speed += curr_accel * sec;
+	std::chrono::system_clock::time_point tp_begin = std::chrono::system_clock::now();
+	
+	constexpr std::int16_t reps = 300;
+	for (int rep = 0; rep < reps; rep++) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
-		smbus.get_word(accel, reg_gyro_zout_h, w);
-		std::int16_t gyro_z = static_cast<std::int16_t>(w) - base_gyro_z;
-		total_gyro_z += gyro_z;
-
-		////log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
-		////	(int)accel_x, ((double)accel_x * 8.0) / (double)0x8000U, (int)gyro_z, (double)gyro_z / 1000.0);
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_accel = %8.3f | curr_speed = %8.3f | total_dist = %8.6f", 
-			curr_accel, curr_speed, total_distance);
-
-		if (c == 0) {
+		if (rep == 0) {
 			pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
 			pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
 			pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
 			pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
+			log.put_blank_line();
 		}
 
-		if (c == reps - 100) {
+		if (rep == reps - 25 - 1) {
 			pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 			pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 			pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 			pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+			log.put_blank_line();
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::uint16_t w;
+
+		smbus.get_word(accel, reg_accel_xout_h, w);
+		std::int32_t accel_x = static_cast<std::int16_t>(w) - base_accel_x;
+
+		////smbus.get_word(accel, reg_accel_yout_h, w);
+		////std::int32_t accel_y = static_cast<std::int16_t>(w) - base_accel_y;
+
+		////smbus.get_word(accel, reg_accel_zout_h, w);
+		////std::int32_t accel_z = static_cast<std::int16_t>(w) - base_accel_z;
+
+		smbus.get_word(accel, reg_gyro_zout_h, w);
+		std::int32_t gyro_z = static_cast<std::int16_t>(w) - base_gyro_z;
+
+		std::chrono::system_clock::time_point tp_end = std::chrono::system_clock::now();
+		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(tp_end - tp_begin);
+		tp_begin = std::chrono::system_clock::now();
+
+		double sec = (double)ms.count() / 1000.0;
+		double curr_accel_x = ((double)accel_x * 8.0) / (double)0x8000U;
+		double new_speed = curr_speed + (curr_accel_x * g * sec);
+		total_distance += (curr_speed + new_speed) * sec / 2.0;
+		curr_speed = new_speed;
+
+		////log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel_x_raw = %d | accel_x_g = %f | gyro_z_raw = %d | gyro_z_dps = %f", 
+		////	(int)accel_x, ((double)accel_x * 8.0) / (double)0x8000U, (int)gyro_z, (double)gyro_z / 1000.0);
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_accel_x = %8.3f | curr_speed = %8.3f | total_dist = %8.3f | ms = %zu", 
+			curr_accel_x, curr_speed, total_distance, (size_t)ms.count());
 	}
 
-	std::int16_t avg_accel_x = total_accel_x / reps;
-	std::int16_t avg_gyro_z = total_gyro_z / reps;
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "TOTAL accel_x_raw = %d | TOTAL accel_x_g = %f | TOTAL gyro_z_raw = %d | TOTAL gyro_z_dps = %f", 
-		(int)total_accel_x, ((double)total_accel_x * 8.0) / (double)0x8000U, (int)total_gyro_z, (double)total_gyro_z / 1000.0);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "AVG accel_x_raw = %d | AVG accel_x_g = %f | AVG gyro_z_raw = %d | AVG gyro_z_dps = %f", 
-		(int)avg_accel_x, ((double)avg_accel_x * 8.0) / (double)0x8000U, (int)avg_gyro_z, (double)avg_gyro_z / 1000.0);
 	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed = %f | total_dist = %f", 
 		curr_speed, total_distance);
 }
@@ -586,14 +861,14 @@ void run_all() {
 	// Wheels - pwm output
 	turn_wheels(log);
 
-#endif
 	// Speed - photo interrupter
 	measure_speed(chip, log);
+#endif
 
-#if 0
 	// Speed - accelerometer
 	measure_accel_and_spin(log);
 
+#if 0
 	// Wheels - pwm output
 	make_turns(log);
 
