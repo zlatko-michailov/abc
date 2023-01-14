@@ -28,6 +28,8 @@ SOFTWARE.
 #include <cstdint>
 #include <linux/gpio.h>
 
+#include "log.i.h"
+
 
 namespace abc {
 
