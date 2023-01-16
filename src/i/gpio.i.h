@@ -35,3 +35,4 @@ SOFTWARE.
 #include "gpio_smbus_motor.i.h"
 #include "gpio_smbus_servo.i.h"
 #include "gpio_smbus_grayscale.i.h"
+#include "gpio_smbus_motion.i.h"
