@@ -54,11 +54,11 @@ namespace abc {
 		}
 
 		_smbus->put_byte(_smbus_target, reg_pwr_mgmt_1, 0x00);			// internal 8MHz oscillator
-		_smbus->put_byte(_smbus_target, reg_config, 0x06);				// Max filter - 5Hz, 20ms delay
+		_smbus->put_byte(_smbus_target, reg_config, 0x03);				// Filter - 44Hz, 5ms delay
 		_smbus->put_byte(_smbus_target, reg_config_accel, 0x03 << 3);	// +/-16g
 		_smbus->put_byte(_smbus_target, reg_config_gyro, 0x03 << 3);	// +/-2000 degrees/sec
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion::gpio_smbus_motion() Start.");
@@ -70,7 +70,7 @@ namespace abc {
 	inline void gpio_smbus_motion<Log>::calibrate(gpio_smbus_motion_channel_t mask) noexcept {
 		gpio_smbus_motion_measurements measurements{ };
 
-		constexpr int reps = 1; 
+		constexpr int reps = 5; 
 		for (int rep = 0; rep < reps; rep++) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
