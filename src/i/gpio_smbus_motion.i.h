@@ -57,6 +57,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
+	using gpio_smbus_motion_value_t = double;
+
 	/**
 	 * @brief					Values, ready to use, from the motion sensor.
 	 */
@@ -64,37 +66,39 @@ namespace abc {
 		/**
 		 * @brief				Acceleration. Units: cm/sec^2. Range: -/+16 g.
 		 */
-		double accel_x		= 0.0;
-		double accel_y		= 0.0;
-		double accel_z		= 0.0;
+		gpio_smbus_motion_value_t accel_x		= 0.0;
+		gpio_smbus_motion_value_t accel_y		= 0.0;
+		gpio_smbus_motion_value_t accel_z		= 0.0;
 
 		/**
 		 * @brief				Gyro. Units: degrees/sec. Range: -/+2000.
 		 */
-		double gyro_x		= 0.0;
-		double gyro_y		= 0.0;
-		double gyro_z		= 0.0;
+		gpio_smbus_motion_value_t gyro_x		= 0.0;
+		gpio_smbus_motion_value_t gyro_y		= 0.0;
+		gpio_smbus_motion_value_t gyro_z		= 0.0;
 
 		/**
 		 * @brief				Temperature. Units: degrees C.
 		 */
-		double temperature	= 0.0;
+		gpio_smbus_motion_value_t temperature	= 0.0;
 	};
 
+
+	using gpio_smbus_motion_measurement_t = std::int16_t;
 
 	/**
 	 * @brief					Raw measurements from the sensor's channels.
 	 */
 	struct gpio_smbus_motion_measurements {
-		std::uint16_t accel_x		= 0;
-		std::uint16_t accel_y		= 0;
-		std::uint16_t accel_z		= 0;
+		gpio_smbus_motion_measurement_t accel_x		= 0;
+		gpio_smbus_motion_measurement_t accel_y		= 0;
+		gpio_smbus_motion_measurement_t accel_z		= 0;
 
-		std::uint16_t gyro_x		= 0;
-		std::uint16_t gyro_y		= 0;
-		std::uint16_t gyro_z		= 0;
+		gpio_smbus_motion_measurement_t gyro_x		= 0;
+		gpio_smbus_motion_measurement_t gyro_y		= 0;
+		gpio_smbus_motion_measurement_t gyro_z		= 0;
 
-		std::uint16_t temperature	= 0;
+		gpio_smbus_motion_measurement_t temperature	= 0;
 	};
 
 
@@ -108,37 +112,38 @@ namespace abc {
 	template <typename Log = null_log>
 	class gpio_smbus_motion {
 	private:
-		static constexpr gpio_smbus_register_t			reg_pwr_mgmt_1		= 0x6b;
+		static constexpr gpio_smbus_register_t				reg_pwr_mgmt_1		= 0x6b;
 
-		static constexpr gpio_smbus_register_t			reg_config_gyro		= 0x1b;
-		static constexpr gpio_smbus_register_t			reg_config_accel	= 0x1c;
+		static constexpr gpio_smbus_register_t				reg_config			= 0x1a;
+		static constexpr gpio_smbus_register_t				reg_config_gyro		= 0x1b;
+		static constexpr gpio_smbus_register_t				reg_config_accel	= 0x1c;
 
-		static constexpr gpio_smbus_register_t			reg_accel_x			= 0x3b;
-		static constexpr gpio_smbus_register_t			reg_accel_y			= 0x3d;
-		static constexpr gpio_smbus_register_t			reg_accel_z			= 0x3f;
+		static constexpr gpio_smbus_register_t				reg_accel_x			= 0x3b;
+		static constexpr gpio_smbus_register_t				reg_accel_y			= 0x3d;
+		static constexpr gpio_smbus_register_t				reg_accel_z			= 0x3f;
 
-		static constexpr gpio_smbus_register_t			reg_gyro_x			= 0x43;
-		static constexpr gpio_smbus_register_t			reg_gyro_y			= 0x45;
-		static constexpr gpio_smbus_register_t			reg_gyro_z			= 0x47;
+		static constexpr gpio_smbus_register_t				reg_gyro_x			= 0x43;
+		static constexpr gpio_smbus_register_t				reg_gyro_y			= 0x45;
+		static constexpr gpio_smbus_register_t				reg_gyro_z			= 0x47;
 
-		static constexpr gpio_smbus_register_t			reg_temperature		= 0x41;
-
-
-		// --------------------------------------------------------------
-
-
-		static constexpr double							g					= 100.0 * 9.8067;	// cm/sec^2
-		static constexpr double							max_measurement		= 0x7fffU;
-		static constexpr double							max_accel			= 16 * g;			// 16 g
-		static constexpr double							max_gyro			= 2000;				// 2000 degrees / sec
+		static constexpr gpio_smbus_register_t				reg_temperature		= 0x41;
 
 
 		// --------------------------------------------------------------
 
 
-		static constexpr gpio_smbus_address_t			addr				= 0x68;
-		static constexpr gpio_smbus_clock_frequency_t	clock_frequency		= 1 * std::kilo::num; // Not true, but doesn't matter.
-		static constexpr bool							requires_byte_swap	= true;
+		static constexpr gpio_smbus_motion_measurement_t	g					= 100.0 * 9.8067;	// cm/sec^2
+		static constexpr gpio_smbus_motion_measurement_t	max_measurement		= 0x7fffU;
+		static constexpr gpio_smbus_motion_measurement_t	max_accel			= 16 * g;			// 16 g
+		static constexpr gpio_smbus_motion_measurement_t	max_gyro			= 2000;				// 2000 degrees / sec
+
+
+		// --------------------------------------------------------------
+
+
+		static constexpr gpio_smbus_address_t				addr				= 0x68;
+		static constexpr gpio_smbus_clock_frequency_t		clock_frequency		= 1 * std::kilo::num; // Not true, but doesn't matter.
+		static constexpr bool								requires_byte_swap	= true;
 
 
 		// --------------------------------------------------------------
@@ -208,7 +213,7 @@ namespace abc {
 		 * @param calibration	Raw calibration measurement.
 		 * @param max_value		Max value for this channel.
 		*/
-		double get_value_from_measurement(std::uint16_t measurement, std::uint16_t calibration, double max_value) noexcept;
+		gpio_smbus_motion_value_t get_value_from_measurement(gpio_smbus_motion_measurement_t measurement, gpio_smbus_motion_measurement_t calibration, gpio_smbus_motion_value_t max_value) noexcept;
 
 		/**
 		 * @brief				Returns a reference to the raw calibration measurements.

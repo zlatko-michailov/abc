@@ -53,9 +53,12 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus_motion::gpio_smbus_motion() smbus == nullptr", __TAG__);
 		}
 
-		_smbus->put_byte(_smbus_target, reg_pwr_mgmt_1, 0x03);			// gyro z clock
-		_smbus->put_byte(_smbus_target, reg_config_accel, 0x03 << 3);	// +/-16 g
+		_smbus->put_byte(_smbus_target, reg_pwr_mgmt_1, 0x00);			// internal 8MHz oscillator
+		_smbus->put_byte(_smbus_target, reg_config, 0x06);				// Max filter - 5Hz, 20ms delay
+		_smbus->put_byte(_smbus_target, reg_config_accel, 0x03 << 3);	// +/-16g
 		_smbus->put_byte(_smbus_target, reg_config_gyro, 0x03 << 3);	// +/-2000 degrees/sec
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion::gpio_smbus_motion() Start.");
@@ -65,7 +68,34 @@ namespace abc {
 
 	template <typename Log>
 	inline void gpio_smbus_motion<Log>::calibrate(gpio_smbus_motion_channel_t mask) noexcept {
-		get_measurements(mask & ~gpio_smbus_motion_channel::temperature, _calibration);
+		gpio_smbus_motion_measurements measurements{ };
+
+		constexpr int reps = 1; 
+		for (int rep = 0; rep < reps; rep++) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+			gpio_smbus_motion_measurements temp{ };
+			get_measurements(mask & ~gpio_smbus_motion_channel::temperature, temp);
+
+			_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+				mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
+
+			measurements.accel_x += temp.accel_x;
+			measurements.accel_y += temp.accel_y;
+			measurements.accel_z += temp.accel_z;
+
+			measurements.gyro_x += temp.gyro_x;
+			measurements.gyro_y += temp.gyro_y;
+			measurements.gyro_z += temp.gyro_z;
+		}
+
+		_calibration.accel_x = measurements.accel_x / reps;
+		_calibration.accel_y = measurements.accel_y / reps;
+		_calibration.accel_z = measurements.accel_z / reps;
+
+		_calibration.gyro_x = measurements.gyro_x / reps;
+		_calibration.gyro_y = measurements.gyro_y / reps;
+		_calibration.gyro_z = measurements.gyro_z / reps;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
@@ -91,33 +121,41 @@ namespace abc {
 	template <typename Log>
 	inline void gpio_smbus_motion<Log>::get_measurements(gpio_smbus_motion_channel_t mask, gpio_smbus_motion_measurements& measurements) noexcept {
 		measurements = { };
+		std::uint16_t temp_ui16;
 
 		if ((mask & gpio_smbus_motion_channel::accel_x) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_x, measurements.accel_x);
+			_smbus->get_word(_smbus_target, reg_accel_x, temp_ui16);
+			measurements.accel_x = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::accel_y) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_y, measurements.accel_y);
+			_smbus->get_word(_smbus_target, reg_accel_y, temp_ui16);
+			measurements.accel_y = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::accel_z) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_z, measurements.accel_z);
+			_smbus->get_word(_smbus_target, reg_accel_z, temp_ui16);
+			measurements.accel_z = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::gyro_x) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_x, measurements.gyro_x);
+			_smbus->get_word(_smbus_target, reg_gyro_x, temp_ui16);
+			measurements.gyro_x = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::gyro_y) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_y, measurements.gyro_y);
+			_smbus->get_word(_smbus_target, reg_gyro_y, temp_ui16);
+			measurements.gyro_y = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::gyro_z) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_z, measurements.gyro_z);
+			_smbus->get_word(_smbus_target, reg_gyro_z, temp_ui16);
+			measurements.gyro_z = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if ((mask & gpio_smbus_motion_channel::temperature) != 0) {
-			_smbus->get_word(_smbus_target, reg_temperature, measurements.temperature);
+			_smbus->get_word(_smbus_target, reg_temperature, temp_ui16);
+			measurements.temperature = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
 		}
 
 		if (_log != nullptr) {
@@ -129,6 +167,8 @@ namespace abc {
 
 	template <typename Log>
 	inline void gpio_smbus_motion<Log>::get_values_from_measurements(gpio_smbus_motion_channel_t mask, const gpio_smbus_motion_measurements& measurements, const gpio_smbus_motion_measurements& calibration, gpio_smbus_motion_values& values) noexcept {
+		values = { };
+
 		if ((mask & gpio_smbus_motion_channel::accel_x) != 0) {
 			values.accel_x = get_value_from_measurement(measurements.accel_x, calibration.accel_x, max_accel);
 		}
@@ -154,7 +194,7 @@ namespace abc {
 		}
 
 		if ((mask & gpio_smbus_motion_channel::temperature) != 0) {
-			values.temperature = static_cast<double>(static_cast<std::int16_t>(measurements.temperature)) / 340.0 + 36.53;
+			values.temperature = static_cast<gpio_smbus_motion_value_t>(static_cast<gpio_smbus_motion_measurement_t>(measurements.temperature)) / 340.0 + 36.53;
 		}
 
 		if (_log != nullptr) {
@@ -165,9 +205,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline double gpio_smbus_motion<Log>::get_value_from_measurement(std::uint16_t measurement, std::uint16_t calibration, double max_value) noexcept {
-		std::int16_t calibrated_measurement = static_cast<std::int16_t>(measurement) - static_cast<std::int16_t>(calibration);
-		double value = max_value * static_cast<double>(calibrated_measurement) / max_measurement;
+	inline gpio_smbus_motion_value_t gpio_smbus_motion<Log>::get_value_from_measurement(gpio_smbus_motion_measurement_t measurement, gpio_smbus_motion_measurement_t calibration, gpio_smbus_motion_value_t max_value) noexcept {
+		gpio_smbus_motion_value_t value = max_value * static_cast<gpio_smbus_motion_value_t>(measurement - calibration) / max_measurement;
 
 		return value;
 	}
