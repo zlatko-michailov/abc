@@ -58,7 +58,7 @@ namespace abc {
 		_smbus->put_byte(_smbus_target, reg_config_accel, 0x03 << 3);	// +/-16g
 		_smbus->put_byte(_smbus_target, reg_config_gyro, 0x03 << 3);	// +/-2000 degrees/sec
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion::gpio_smbus_motion() Start.");

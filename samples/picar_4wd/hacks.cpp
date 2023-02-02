@@ -392,8 +392,11 @@ void measure_accel_and_spin(log_ostream& log) {
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
 
 	bool is_driving = false;
-	double curr_speed = 0;
-	double total_distance = 0;
+	double old_accel = 0;
+	double old_speed_1 = 0;
+	double old_speed_2 = 0;
+	double distance_1 = 0;
+	double distance_2 = 0;
 
 	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(1000);
 	const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
@@ -428,17 +431,25 @@ void measure_accel_and_spin(log_ostream& log) {
 		tp_begin_iteration = std::chrono::system_clock::now();
 
 		double sec = static_cast<double>(ms.count()) / 1000.0;
-		double new_speed = curr_speed + (values.accel_x * sec);
-		total_distance += (curr_speed + new_speed) * sec / 2.0;
-		curr_speed = new_speed;
+		double new_accel = values.accel_x;
+		double accel_accel = (new_accel - old_accel) / sec;
+		double new_speed_1 = old_speed_1 + (new_accel * sec);
+		double new_speed_2 = old_speed_2 + (old_accel * sec) + (accel_accel * sec * sec / 2.0);
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_accel_x = %8.3f | curr_speed = %8.3f | total_dist = %8.3f | ms = %zu", 
-			values.accel_x, curr_speed, total_distance, (std::size_t)ms.count());
+		distance_1 += (old_speed_1 * sec) + (new_accel * sec * sec / 2.0);
+		distance_2 += (old_speed_1 * sec) + (old_accel * sec * sec / 2.0) + (accel_accel * sec * sec * sec / 6.0);
+
+		old_accel = new_accel;
+		old_speed_1 = new_speed_1;
+		old_speed_2 = new_speed_2;
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel = %8.3f | speed_1 = %8.3f | speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | ms = %zu", 
+			new_accel, new_speed_1, new_speed_2, distance_1, distance_2, (std::size_t)ms.count());
 	}
 
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed = %f | total_dist = %f", 
-		curr_speed, total_distance);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed_1 = %f | curr_speed_2 = %f | dist_1 = %f | dist_2 = %f", 
+		old_speed_1, old_speed_2, distance_1, distance_2);
 }
 
 
