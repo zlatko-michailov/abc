@@ -1,6 +1,15 @@
 ## Done
+- gpio_smbus_motion
 
 ## To Do
+- location
+  - ? return to origin
+- drive
+
+- doc:
+  - gpio_smbus_motion
+  - location
+  - drive
 
 ## Pick List
 - Untabify

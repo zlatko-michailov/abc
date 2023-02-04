@@ -389,7 +389,7 @@ void measure_accel_and_spin(log_ostream& log) {
 
 	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
-	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
+	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle / 2;
 
 	bool is_driving = false;
 	double old_accel = 0;
@@ -397,8 +397,9 @@ void measure_accel_and_spin(log_ostream& log) {
 	double old_speed_2 = 0;
 	double distance_1 = 0;
 	double distance_2 = 0;
+	double orientation = 0;
 
-	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(1000);
+	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(2 * 1000);
 	const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
 
 	std::chrono::system_clock::time_point tp_begin_drive = std::chrono::system_clock::now();
@@ -424,13 +425,14 @@ void measure_accel_and_spin(log_ostream& log) {
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-		motion.get_values(abc::gpio_smbus_motion_channel::accel_x, values);
+		motion.get_values(abc::gpio_smbus_motion_channel::accel_x | abc::gpio_smbus_motion_channel::gyro_z, values);
 
 		std::chrono::system_clock::time_point tp_end_iteration = std::chrono::system_clock::now();
 		std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(tp_end_iteration - tp_begin_iteration);
 		tp_begin_iteration = std::chrono::system_clock::now();
 
 		double sec = static_cast<double>(ms.count()) / 1000.0;
+
 		double new_accel = values.accel_x;
 		double accel_accel = (new_accel - old_accel) / sec;
 		double new_speed_1 = old_speed_1 + (new_accel * sec);
@@ -443,13 +445,15 @@ void measure_accel_and_spin(log_ostream& log) {
 		old_speed_1 = new_speed_1;
 		old_speed_2 = new_speed_2;
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel = %8.3f | speed_1 = %8.3f | speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | ms = %zu", 
-			new_accel, new_speed_1, new_speed_2, distance_1, distance_2, (std::size_t)ms.count());
+		orientation += values.gyro_z * sec;
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel = %8.3f | speed_1 = %8.3f | speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | gyro = %3.0f | orient = %4.0f | ms = %zu", 
+			new_accel, new_speed_1, new_speed_2, distance_1, distance_2, values.gyro_z, orientation, (std::size_t)ms.count());
 	}
 
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed_1 = %f | curr_speed_2 = %f | dist_1 = %f | dist_2 = %f", 
-		old_speed_1, old_speed_2, distance_1, distance_2);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed_1 = %8.3f | curr_speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | orient = %4.0f", 
+		old_speed_1, old_speed_2, distance_1, distance_2, orientation);
 }
 
 
