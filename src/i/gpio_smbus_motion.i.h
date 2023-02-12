@@ -104,9 +104,18 @@ namespace abc {
 
 	// --------------------------------------------------------------
 
+	namespace gpio_smbus_motion_const {
+		/**
+		 * @brief				 The standard gravity acceleration constant.
+		 */
+		static constexpr gpio_smbus_motion_value_t g = 9.80665; // m / sec^2
+	}
+
 
 	/**
 	 * @brief					Motion sensor MPU-6000/MPU-6050, a.k.a. MPU-60X0, sensor connected over SMBus.
+	 * @details					Accelerations: range = [-16 .. +16], units = g (1 g = 9.80665 m / sec^2).
+	 * 							Gyros: range = [-2000 .. +2000], units = degrees / sec.
 	 * @tparam Log				Logging facility.
 	 */
 	template <typename Log = null_log>
@@ -132,10 +141,9 @@ namespace abc {
 		// --------------------------------------------------------------
 
 
-		static constexpr gpio_smbus_motion_measurement_t	g					= 100.0 * 9.8067;	// cm/sec^2
 		static constexpr gpio_smbus_motion_measurement_t	max_measurement		= 0x7fffU;
-		static constexpr gpio_smbus_motion_measurement_t	max_accel			= 16 * g;			// 16 g
-		static constexpr gpio_smbus_motion_measurement_t	max_gyro			= 2000;				// 2000 degrees / sec
+		static constexpr gpio_smbus_motion_measurement_t	max_accel			= 16;		// 16 g
+		static constexpr gpio_smbus_motion_measurement_t	max_gyro			= 2000;		// 2000 degrees / sec
 
 
 		// --------------------------------------------------------------
@@ -186,6 +194,7 @@ namespace abc {
 
 		/**
 		 * @brief				Gets the normalized values of the sensor's channels.
+		 * @details				See the class description for information on the ranges.
 		 * @param mask			Bit mask of channels of interest.
 		 * @param values		Normalized values returned.
 		*/
@@ -193,6 +202,7 @@ namespace abc {
 
 		/**
 		 * @brief				Gets the raw measurements of the sensor's channels.
+		 * @details				See the class description for information on the ranges.
 		 * @param mask			Bit mask of channels of interest.
 		 * @param measurements	Raw measurements returned.
 		*/

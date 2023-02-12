@@ -387,9 +387,11 @@ void measure_accel_and_spin(log_ostream& log) {
 	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "PRE accel_x = %8.3f | accel_y = %8.3f | accel_z = %8.3f | gyro_x = %8.3f | gyro_y = %8.3f | gyro_z = %8.3f | temp = %5.2f",
 		values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
+	constexpr abc::gpio_smbus_motion_value_t g = abc::gpio_smbus_motion_const::g * std::centi::den; // Scale to: cm / sec^2
+
 	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
-	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle / 2;
+	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
 
 	bool is_driving = false;
 	double old_accel = 0;
@@ -399,7 +401,7 @@ void measure_accel_and_spin(log_ostream& log) {
 	double distance_2 = 0;
 	double orientation = 0;
 
-	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(2 * 1000);
+	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(1 * 1000);
 	const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
 
 	std::chrono::system_clock::time_point tp_begin_drive = std::chrono::system_clock::now();
@@ -433,7 +435,7 @@ void measure_accel_and_spin(log_ostream& log) {
 
 		double sec = static_cast<double>(ms.count()) / 1000.0;
 
-		double new_accel = values.accel_x;
+		double new_accel = values.accel_x * g;
 		double accel_accel = (new_accel - old_accel) / sec;
 		double new_speed_1 = old_speed_1 + (new_accel * sec);
 		double new_speed_2 = old_speed_2 + (old_accel * sec) + (accel_accel * sec * sec / 2.0);
