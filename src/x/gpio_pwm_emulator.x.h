@@ -79,8 +79,6 @@ namespace abc {
 		}
 
 		{
-			std::lock_guard<std::mutex> lock(_control_mutex);
-
 			_quit = true;
 
 			_control_condition.notify_all();
