@@ -181,7 +181,7 @@ namespace abc {
 		/**
 		 * @brief				Deleted.
 		 */
-		gpio_smbus_motion(const gpio_smbus_motor<Log>& other) = delete;
+		gpio_smbus_motion(const gpio_smbus_motion<Log>& other) = delete;
 
 	public:
 		/**
