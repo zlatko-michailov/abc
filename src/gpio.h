@@ -33,3 +33,4 @@ SOFTWARE.
 #include "x/gpio_smbus_servo.x.h"
 #include "x/gpio_smbus_grayscale.x.h"
 #include "x/gpio_smbus_motion.x.h"
+#include "x/gpio_smbus_motion_tracker.x.h"

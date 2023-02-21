@@ -2,8 +2,9 @@
 - gpio_smbus_motion
 
 ## To Do
-- location
-  - <DistanceScale>
+- motion_tracker
+  - Use in hacks
+  - Use in sample
 - drive
 
 - doc:

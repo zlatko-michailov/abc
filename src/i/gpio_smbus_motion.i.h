@@ -109,6 +109,11 @@ namespace abc {
 		 * @brief				 The standard gravity acceleration constant.
 		 */
 		static constexpr gpio_smbus_motion_value_t g = 9.80665; // m / sec^2
+
+		/**
+		 * @brief				 The pi constant = 180 degrees in radians.
+		 */
+		static constexpr gpio_smbus_motion_value_t pi = 3.14159265; // rad
 	}
 
 
