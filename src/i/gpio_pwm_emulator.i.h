@@ -111,7 +111,7 @@ namespace abc {
 		 * @brief							Thread function that does the PWM emulation.
 		 * @param this_ptr					Pointer to the owning instance.
 		 */
-		static void thread_func(gpio_pwm_emulator* this_ptr) noexcept;
+		static void thread_func(gpio_pwm_emulator<Log>* this_ptr) noexcept;
 
 	private:
 		/**
