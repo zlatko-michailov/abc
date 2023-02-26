@@ -90,7 +90,7 @@ namespace abc {
 
 	template <typename DistanceScale, typename Log>
 	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::stop() {
-		_run = stop;
+		_run = false;
 
 		// The thread is running. There is no need to notify it.
 	}
@@ -223,7 +223,7 @@ namespace abc {
 				// Do the calculations.
 
 				// Calculate seconds as a floating point number.
-				std::chrono::microseconds::rep microsec = std::chrono::duration_cast<std::chrono::microseconds>(curr_time_point - prev_time_point).count;
+				std::chrono::microseconds::rep microsec = std::chrono::duration_cast<std::chrono::microseconds>(curr_time_point - prev_time_point).count();
 				gpio_smbus_motion_value_t sec = (static_cast<gpio_smbus_motion_value_t>(microsec) / std::micro::den) * std::micro::num;
 				
 				gpio_smbus_motion_value_t accel_accel = (curr_accel - prev_accel) / sec;
