@@ -67,7 +67,7 @@ namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
 	inline json::level_t json_state<MaxLevels, Log>::top_level() const noexcept {
-		return 0 <= _level_top && _level_top < MaxLevels ? _level_stack[_level_top] : json::level::array;
+		return _level_top < MaxLevels ? _level_stack[_level_top] : json::level::array;
 	}
 
 
@@ -75,7 +75,6 @@ namespace abc {
 	inline bool json_state<MaxLevels, Log>::expect_property() const noexcept {
 		return
 			_expect_property
-			&& 0 <= _level_top
 			&& _level_top < MaxLevels
 			&& _level_stack[_level_top] == json::level::object;
 	}
@@ -85,7 +84,6 @@ namespace abc {
 	inline void json_state<MaxLevels, Log>::set_expect_property(bool expect) noexcept {
 		_expect_property =
 			expect
-			&& 0 <= _level_top
 			&& _level_top < MaxLevels
 			&& _level_stack[_level_top] == json::level::object;
 	}
@@ -93,7 +91,7 @@ namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
 	inline bool json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
-		if (_level_top + 1 < 0 || _level_top + 1 >= MaxLevels) {
+		if (_level_top + 1 >= MaxLevels) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::json, severity::important, 0x100fb, "json_state::push_level() levels='%zu', MaxLevels=%zu", _level_top + 1, MaxLevels);
 			}
@@ -108,7 +106,7 @@ namespace abc {
 
 	template <std::size_t MaxLevels, typename Log>
 	inline bool json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
-		if (_level_top < 0 || _level_top >= MaxLevels) {
+		if (_level_top >= MaxLevels) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::json, severity::important, 0x100fc, "json_state::pop_level() levels='%zu'", _level_top + 1);
 			}

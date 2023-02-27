@@ -104,7 +104,7 @@ namespace abc {
 
 	template <std::size_t Size>
 	inline const char* line_ostream<Size>::get() noexcept {
-		if (0 <= _pcount && _pcount <= Size) {
+		if (_pcount <= Size) {
 			_buffer[_pcount] = ends;
 		}
 
@@ -114,7 +114,7 @@ namespace abc {
 
 	template <std::size_t Size>
 	inline void line_ostream<Size>::flush() noexcept {
-		if (0 <= _pcount && _pcount <= Size) {
+		if (_pcount <= Size) {
 			_buffer[_pcount++] = endl;
 			_buffer[_pcount] = ends;
 		}
