@@ -107,7 +107,15 @@ namespace abc {
 		template <typename PwmDuration>
 		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept;
 
-	public:
+	private:
+		/**
+		 * @brief						Calculates ARR from a PWM period.
+		 * @details						Returns a number that is close to sqrt(period) and is round to 1000.
+		 * @param						PWM period.
+		 */
+		static gpio_smbus_clock_frequency_t get_autoreload_from_period(gpio_smbus_clock_frequency_t period) noexcept;
+
+	private:
 		/**
 		 * @brief						Pointer to the `gpio_smbus` instance passed in to the constructor.
 		 */

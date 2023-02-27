@@ -81,9 +81,7 @@ namespace abc {
 
 		// Calculate auto_reload and prescaler.
 		_period = _smbus_target.clock_frequency() / _frequency;
-		gpio_smbus_clock_frequency_t sqrt_period =  static_cast<gpio_smbus_clock_frequency_t>(std::lround(std::sqrt(_period)));
-
-		_autoreload = (sqrt_period / 100U) * 100U;
+		_autoreload = get_autoreload_from_period(_period);
 		_prescaler = _period / _autoreload;
 
 		// Adjust min/max_pulse_width by auto_reload and prescaler.
@@ -162,6 +160,20 @@ namespace abc {
 		set_duty_cycle(duty_cycle);
 		std::this_thread::sleep_for(duration);
 		set_duty_cycle(gpio_pwm_duty_cycle::min);
+	}
+
+
+	template <typename Log>
+	inline gpio_smbus_clock_frequency_t gpio_smbus_pwm<Log>::get_autoreload_from_period(gpio_smbus_clock_frequency_t period) noexcept {
+		std::uint64_t u64_period = static_cast<std::uint64_t>(period);
+
+		int autoreload_bit_count = 0;
+		while (u64_period != 0) {
+			u64_period >>= 2;
+			autoreload_bit_count++;
+		}
+
+		return static_cast<gpio_smbus_clock_frequency_t>(((1ULL << autoreload_bit_count) / 1000ULL) * 1000ULL);
 	}
 
 
