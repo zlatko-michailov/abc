@@ -1,5 +1,6 @@
 ## Done
 - gpio_smbus_motion
+- gpio_smbus_motion_tracker
 
 ## To Do
 - motion_tracker

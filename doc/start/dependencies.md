@@ -12,9 +12,9 @@ The following `abc` features use POSIX API:
   - openSUSE x64
   - Ubuntu x64
 - Linux on Raspberry Pi 4
-  - openSUSE arm64
-  - Raspberry Pi OS arm32
-- Windows 10 x64 on PC, with [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) enabled.
+  - openSUSE aarch64
+  - Raspberry Pi OS aarch32
+- Windows 11 x64 and Windows 10 x64 on PC, with [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) enabled.
   - openSUSE x64
   - Ubuntu x64
 
@@ -52,4 +52,52 @@ sudo zypper install clang gcc-c++ make git zip unzip doxygen graphviz
 Ubuntu
 ```
 sudo apt install clang g++ make git zip unzip doxygen graphviz
+```
+
+## GPIO Setup
+There is nothing to do on Raspberry Pi OS.
+The packages that enable access to GPIO and SMBus should be installed.
+The user that is enabled on the box is the root, and has the necessary access.
+
+On other Linux distributions, a little extra work is needed.
+
+### Install Packages
+openSUSE
+```
+sudo zypper install libgpiod2 libgpiod-utils libi2c0 i2c-tools
+```
+
+Here are the original pages on openSUSE:
+- [GPIO](https://en.opensuse.org/openSUSE:GPIO)
+- [I2C](https://en.opensuse.org/openSUSE:I2C)
+ 
+### Grant Access to Non-root Users
+The Linux kernel creates device file at every boot with access only to the `root` user.
+If other users should be able to use GPIO and/or SMBus, access to those device files should be granted to those users using `chmod`.
+
+That could further be automated by executing a script upon boot.
+
+openSUSE
+
+Create `/etc/init.d/after.local` with the following content, or append these lines to it, if it already exists: 
+```
+#!/bin/sh
+sudo chmod go+rw /dev/gpio*
+sudo chmod go+rw /dev/i2c*
+
+```
+Make sure that file is executable:
+```
+sudo chmod 777 /etc/init.d/after.local
+```
+
+Reboot, and check that `chmod` has been applied:
+```
+ls -l /dev/gpio*
+ls -l /dev/i2c*
+```
+
+If it didn't work out, check the status of the `after-local` service:
+```
+sudo systemctl status after-local
 ```
