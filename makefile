@@ -41,7 +41,7 @@ CPP_OPT_STD = --std=c++11
 CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
 CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
 CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS) $(CPP_OPT_UNAME)
-CPP_LINK_OPTIONS = -lstdc++ -lpthread
+CPP_LINK_OPTIONS = -lstdc++ -lpthread -lm
 
 SUBDIR_SRC = src
 SUBDIR_TEST = test
