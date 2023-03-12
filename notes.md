@@ -10,7 +10,7 @@
 
 - doc:
   - gpio_smbus_motion
-  - location
+  - gpio_smbus_motion_tracker
   - drive
 
 ## Pick List

@@ -186,14 +186,14 @@ namespace abc {
 		std::atomic<bool> _quit;
 
 		/**
-		 * @brief				The thread on which PWM is emulated.
-		 */
-		std::thread _thread;
-
-		/**
 		 * @brief				The log passed in to the constructor.
 		 */
 		Log* _log;
+
+		/**
+		 * @brief				The thread on which motion is tracked.
+		 */
+		std::thread _thread;
 	};
 
 

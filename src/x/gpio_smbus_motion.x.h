@@ -77,7 +77,7 @@ namespace abc {
 			gpio_smbus_motion_measurements temp{ };
 			get_measurements(mask & ~gpio_smbus_motion_channel::temperature, temp);
 
-			_log->put_any(category::abc::gpio, severity::abc::important, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
 				mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
 
 			measurements.accel_x += temp.accel_x;

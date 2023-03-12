@@ -55,9 +55,9 @@ sudo apt install clang g++ make git zip unzip doxygen graphviz
 ```
 
 ## GPIO Setup
-There is nothing to do on Raspberry Pi OS.
-The packages that enable access to GPIO and SMBus should be installed.
-The user that is enabled on the box is the root, and has the necessary access.
+There should be nothing to do on Raspberry Pi OS.
+The packages that enable access to GPIO and SMBus should be preinstalled.
+The user that is enabled on the box is the root user, and has the necessary access.
 
 On other Linux distributions, a little extra work is needed.
 
@@ -72,14 +72,14 @@ Here are the original pages on openSUSE:
 - [I2C](https://en.opensuse.org/openSUSE:I2C)
  
 ### Grant Access to Non-root Users
-The Linux kernel creates device file at every boot with access only to the `root` user.
+The Linux kernel creates device files at every boot with access only to the `root` user.
 If other users should be able to use GPIO and/or SMBus, access to those device files should be granted to those users using `chmod`.
 
 That could further be automated by executing a script upon boot.
 
 openSUSE
 
-Create `/etc/init.d/after.local` with the following content, or append these lines to it, if it already exists: 
+Create `/etc/init.d/after.local` with the following content, or append these commands to it, if it already exists: 
 ```
 #!/bin/sh
 sudo chmod go+rw /dev/gpio*

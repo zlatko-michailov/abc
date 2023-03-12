@@ -366,8 +366,11 @@ void measure_accel_and_spin(log_ostream& log) {
 														reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
 
 	abc::gpio_smbus_motion<log_ostream> motion(&smbus, &log);
+	abc::gpio_smbus_motion_tracker<std::centi, log_ostream> motion_tracker(&motion, &log);
 
 	motion.calibrate(abc::gpio_smbus_motion_channel::all);
+
+#if 0
 	const abc::gpio_smbus_motion_measurements& calibration = motion.calibration();
 
 	const abc::gpio_smbus_motion_measurements zeros{ };
@@ -388,18 +391,21 @@ void measure_accel_and_spin(log_ostream& log) {
 		values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
 	constexpr abc::gpio_smbus_motion_value_t g = abc::gpio_smbus_motion_const::g * std::centi::den; // Scale to: cm / sec^2
+#endif
 
 	constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left	= duty_cycle;
 	const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right	= duty_cycle;
 
 	bool is_driving = false;
+#if 0
 	double old_accel = 0;
 	double old_speed_1 = 0;
 	double old_speed_2 = 0;
 	double distance_1 = 0;
 	double distance_2 = 0;
 	double orientation = 0;
+#endif
 
 	const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(1 * 1000);
 	const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
@@ -408,6 +414,7 @@ void measure_accel_and_spin(log_ostream& log) {
 	std::chrono::system_clock::time_point tp_begin_iteration = tp_begin_drive;
 
 	// Start	
+	motion_tracker.start();
 	is_driving = true;
 	pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
 	pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
@@ -425,8 +432,9 @@ void measure_accel_and_spin(log_ostream& log) {
 			log.put_blank_line();
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+#if 0
 		motion.get_values(abc::gpio_smbus_motion_channel::accel_x | abc::gpio_smbus_motion_channel::gyro_z, values);
 
 		std::chrono::system_clock::time_point tp_end_iteration = std::chrono::system_clock::now();
@@ -451,11 +459,24 @@ void measure_accel_and_spin(log_ostream& log) {
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "accel = %8.3f | speed_1 = %8.3f | speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | gyro = %3.0f | orient = %4.0f | ms = %zu", 
 			new_accel, new_speed_1, new_speed_2, distance_1, distance_2, values.gyro_z, orientation, (std::size_t)ms.count());
+#endif
+
+		tp_begin_iteration = std::chrono::system_clock::now();
+
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+			motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 	}
 
 	log.put_blank_line();
+#if 0
 	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "curr_speed_1 = %8.3f | curr_speed_2 = %8.3f | dist_1 = %8.3f | dist_2 = %8.3f | orient = %4.0f", 
 		old_speed_1, old_speed_2, distance_1, distance_2, orientation);
+#endif
+
+	motion_tracker.set_speed(0);
+	motion_tracker.stop();
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+		motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 }
 
 
