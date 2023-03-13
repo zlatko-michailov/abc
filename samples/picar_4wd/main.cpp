@@ -31,9 +31,11 @@ SOFTWARE.
 extern void run_all();
 
 
-int main(int /*argc*/, const char* argv[]) {
-	run_all();
-	return 0;
+int main(int argc, const char* argv[]) {
+	if (argc >= 2 && std::strcmp(argv[1], "hacks") == 0) { 
+		run_all();
+		return 0;
+	}
 
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::optional);
