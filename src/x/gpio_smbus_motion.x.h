@@ -70,12 +70,17 @@ namespace abc {
 	inline void gpio_smbus_motion<Log>::calibrate(gpio_smbus_motion_channel_t mask) noexcept {
 		gpio_smbus_motion_measurements measurements{ };
 
-		constexpr int reps = 5; 
-		for (int rep = 0; rep < reps; rep++) {
+		constexpr int reps_skip = 5;
+		constexpr int reps_take = 20;
+		for (int rep = 0; rep < reps_skip + reps_take; rep++) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 			gpio_smbus_motion_measurements temp{ };
 			get_measurements(mask & ~gpio_smbus_motion_channel::temperature, temp);
+
+			if (rep < reps_skip) {
+				continue;
+			}
 
 			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
 				mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
@@ -89,13 +94,13 @@ namespace abc {
 			measurements.gyro_z += temp.gyro_z;
 		}
 
-		_calibration.accel_x = measurements.accel_x / reps;
-		_calibration.accel_y = measurements.accel_y / reps;
-		_calibration.accel_z = measurements.accel_z / reps;
+		_calibration.accel_x = measurements.accel_x / reps_take;
+		_calibration.accel_y = measurements.accel_y / reps_take;
+		_calibration.accel_z = measurements.accel_z / reps_take;
 
-		_calibration.gyro_x = measurements.gyro_x / reps;
-		_calibration.gyro_y = measurements.gyro_y / reps;
-		_calibration.gyro_z = measurements.gyro_z / reps;
+		_calibration.gyro_x = measurements.gyro_x / reps_take;
+		_calibration.gyro_y = measurements.gyro_y / reps_take;
+		_calibration.gyro_z = measurements.gyro_z / reps_take;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",

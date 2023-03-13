@@ -234,7 +234,7 @@ namespace abc {
 
 				gpio_smbus_motion_value_t direction_rad = deg_to_rad(prev_direction);
 
-				if (std::abs(gyro) < 0.000001) {
+				if (std::abs(gyro) < 0.000001) { // 0.001 degrees / sec
 					// Straight line.
 					this_ptr->_depth = prev_depth + distance * std::cos(direction_rad);
 					this_ptr->_width = prev_width + distance * std::sin(direction_rad);
