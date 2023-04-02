@@ -3,6 +3,7 @@
 - gpio_smbus_motion_tracker
 
 ## To Do
+- Copyright 2023
 - motion_tracker
   - Use in sample
 - drive

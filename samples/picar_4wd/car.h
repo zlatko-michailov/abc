@@ -128,8 +128,10 @@ namespace abc { namespace samples {
 		, _servo(&_smbus, _hat, servo_pulse_width_min, servo_pulse_width_max,
 							servo_duty_duration, frequency,
 							reg_pwm_base + reg_servo, reg_autoreload_base + reg_timer_servo, reg_prescaler_base + reg_timer_servo, log)
-
 		, _grayscale(&_smbus, _hat, reg_grayscale_left, reg_grayscale_center, reg_grayscale_right, log)
+
+		, _motion(&_smbus, log)
+		, _motion_tracker(&_motion, log)
 
 		, _forward(true)
 		, _power(0)
@@ -137,6 +139,8 @@ namespace abc { namespace samples {
 		, _obstacle_cm(ultrasonic_max_cm)
 
 		, _auto_thread(start_auto_loop, this) {
+
+		_motion.calibrate(abc::gpio_smbus_motion_channel::all);
 	}
 
 
@@ -237,7 +241,14 @@ namespace abc { namespace samples {
 		_forward = true;
 		if (power == 0) {
 			_turn = 0;
+
+			_motion_tracker.set_speed(0);
+			_motion_tracker.stop();
 		}
+		else if (_power == 0) {
+			_motion_tracker.start();
+		}
+
 		if (power < 0) {
 			_forward = false;
 			power = -power;
@@ -350,6 +361,20 @@ namespace abc { namespace samples {
 				json.put_number(_grayscale_center.load());
 				json.put_property("right");
 				json.put_number(_grayscale_right.load());
+			json.put_end_object();
+			json.put_property("depth");
+			json.put_begin_object();
+				json.put_property("distance");
+				json.put_number(_motion_tracker.depth());
+				json.put_property("units");
+				json.put_string("cm");
+			json.put_end_object();
+			json.put_property("width");
+			json.put_begin_object();
+				json.put_property("distance");
+				json.put_number(_motion_tracker.width());
+				json.put_property("units");
+				json.put_string("cm");
 			json.put_end_object();
 		json.put_end_object();
 		json.put_char('\0');

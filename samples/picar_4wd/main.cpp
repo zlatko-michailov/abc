@@ -38,7 +38,7 @@ int main(int argc, const char* argv[]) {
 	}
 
 	// Create a log.
-	abc::log_filter filter(abc::severity::abc::optional);
+	abc::log_filter filter(abc::severity::optional);
 	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Use the path to this program to build the path to the pool file.

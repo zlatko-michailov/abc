@@ -110,8 +110,10 @@ namespace abc { namespace samples {
 
 		abc::gpio_ultrasonic<std::centi, Log>					_ultrasonic;
 		abc::gpio_smbus_servo<std::chrono::milliseconds, Log>	_servo;
-
 		abc::gpio_smbus_grayscale<Log>							_grayscale;
+
+		abc::gpio_smbus_motion<Log>								_motion;
+		abc::gpio_smbus_motion_tracker<std::centi, Log>			_motion_tracker;
 
 		bool													_forward;
 		std::int32_t											_power;

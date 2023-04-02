@@ -102,28 +102,69 @@ SOFTWARE.
 
 			<tr>
 				<td>
-					<table>
+					<table style="border-spacing: 50px;">
 						<tr>
 							<td>
-								<div class="subtitle">Power</div>
-							</td>
-
-							<td width="600px">
-								<div class="subtitle">Info</div>
+								<table>
+									<tr>
+										<td>
+											<div class="subtitle">Power</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
+										</td>
+									</tr>
+								</table>
 							</td>
 
 							<td>
-								<div class="subtitle">Turn</div>
+								<table>
+									<tr>
+										<td>
+											<div class="subtitle">Turn</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateTurn(value)" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<br />
+											<br />
+											<br />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<div class="subtitle">Servo</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input id="servo" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateServo(value)" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<br />
+											<br />
+											<br />
+										</td>
+									</tr>
+								</table>
 							</td>
-						</tr>
 
-						<tr>
 							<td>
-								<input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
-							</td>
-				
-							<td>
-								<table align="center">
+								<table>
+									<tr>
+										<td>
+											<div class="subtitle">Info</div>
+										</td>
+									</tr>
 									<tr>
 										<td>
 											<span class="readonly">Power:</span>
@@ -161,31 +202,28 @@ SOFTWARE.
 											<input id="grayscale-info" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" />
 										</td>
 									</tr>
-
 									<tr>
 										<td>
-											<br />
-											<br />
-											<br />
-											<br />
+											<span class="readonly">Depth (cm):</span>
 										</td>
-									</tr>
-
-									<tr>
 										<td>
-											<div class="subtitle">Servo</div>
+											<span id="depth-info" class="readonly">0</span>
 										</td>
 									</tr>
 									<tr>
 										<td>
-											<input id="servo" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateServo(value)" />
+											<span class="readonly">Width (cm):</span>
+										</td>
+										<td>
+											<span id="width-info" class="readonly">0</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<br />
 										</td>
 									</tr>
 								</table>
-							</td>
-				
-							<td>
-								<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateTurn(value)" />
 							</td>
 						</tr>
 					</table>
@@ -367,6 +405,9 @@ SOFTWARE.
 
 						document.getElementById('grayscale-numeric-info').innerText = grayscaleNumeric;
 						document.getElementById('grayscale-info').value = grayscaleNumeric;
+
+						document.getElementById('depth-info').innerText = Math.round(result.depth.distance);
+						document.getElementById('width-info').innerText = Math.round(result.width.distance);
 
 						setTimeout(getAutos, 500);
 					});
