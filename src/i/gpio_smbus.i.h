@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
@@ -192,6 +193,15 @@ namespace abc {
 		 */
 		bool ensure_address(gpio_smbus_address_t addr) noexcept;
 
+		/**
+		 * @brief						Calls `ioctl()` while a mutex is being acquired.
+		 * @tparam Arg					Argument type.
+		 * @param arg					Argument value. 
+		 * @return						The return value from `ioctl()`.
+		 */
+		template <typename Arg>
+		int safe_ioctl(int command, Arg arg) noexcept;
+
 	private:
 		/**
 		 * @brief						Swap the bytes of a word.
@@ -220,6 +230,11 @@ namespace abc {
 		 * @brief						Current target address.
 		 */
 		gpio_smbus_address_t _addr;
+
+		/**
+		 * @brief						ioctl() mutex. 
+		 */
+		std::mutex _ioctl_mutex;
 
 		/**
 		 * @brief						The log passed in to the constructor.

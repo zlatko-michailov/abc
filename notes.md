@@ -1,4 +1,5 @@
 ## Done
+- BUGFIX: smbus - lock ioctl()
 - gpio_smbus_motion
 - gpio_smbus_motion_tracker
 
@@ -12,6 +13,9 @@
   - gpio_smbus_motion
   - gpio_smbus_motion_tracker
   - drive
+
+- socket
+  - Rename handle to fd
 
 ## Pick List
 - Untabify

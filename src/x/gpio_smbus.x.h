@@ -97,7 +97,7 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() open() < 0", 0x106de);
 		}
 
-		if (ioctl(_fd, I2C_FUNCS, &_functionality) < 0) {
+		if (safe_ioctl(I2C_FUNCS, &_functionality) < 0) {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() I2C_FUNCS failed", 0x106df);
 		}
 
@@ -140,7 +140,7 @@ namespace abc {
 		msg.command = reg;
 		msg.size = I2C_SMBUS_BYTE;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e3, "gpio_smbus::put_nodata() I2C_SMBUS failed. errno = %d", errno);
 
@@ -175,7 +175,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BYTE_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e6, "gpio_smbus::put_byte() I2C_SMBUS failed. errno = %d", errno);
 
@@ -210,7 +210,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_WORD_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106e9, "gpio_smbus::put_word() I2C_SMBUS failed. errno = %d", errno);
 
@@ -254,7 +254,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BLOCK_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106ed, "gpio_smbus::put_block() I2C_SMBUS failed. errno = %d", errno);
 
@@ -287,7 +287,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BYTE;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f0, "gpio_smbus::get_noreg() I2C_SMBUS failed. errno = %d", errno);
 
@@ -353,7 +353,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BYTE_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f6, "gpio_smbus::get_byte() I2C_SMBUS failed. errno = %d", errno);
 
@@ -389,7 +389,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_WORD_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106f9, "gpio_smbus::get_word() I2C_SMBUS failed. errno = %d", errno);
 
@@ -426,7 +426,7 @@ namespace abc {
 		msg.size = I2C_SMBUS_BLOCK_DATA;
 		msg.data = &data;
 
-		if (ioctl(_fd, I2C_SMBUS, &msg) < 0) {
+		if (safe_ioctl(I2C_SMBUS, &msg) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x106fc, "gpio_smbus::get_block() I2C_SMBUS failed. errno = %d", errno);
 
@@ -464,7 +464,7 @@ namespace abc {
 		}
 
 		long laddr = addr;
-		if (ioctl(_fd, I2C_SLAVE_FORCE, laddr) < 0) {
+		if (safe_ioctl(I2C_SLAVE_FORCE, laddr) < 0) {
 			if (_log != nullptr) {
 				_log->put_any(category::abc::gpio, severity::abc::important, 0x10700, "gpio_smbus::ensure_address() I2C_SLAVE failed. errno = %d", errno);
 
@@ -479,6 +479,19 @@ namespace abc {
 		}
 
 		return true;
+	}
+
+
+	template <typename Log>
+	template <typename Arg>
+	int gpio_smbus<Log>::safe_ioctl(int command, Arg arg) noexcept {
+		try {
+			std::lock_guard<std::mutex> lock(_ioctl_mutex);
+			return ioctl(_fd, command, arg);
+		}
+		catch (...) {
+			return ENOLCK;
+		}
 	}
 
 
