@@ -80,6 +80,12 @@ namespace abc {
 
 
 	template <typename DistanceScale, typename Log>
+	inline bool gpio_smbus_motion_tracker<DistanceScale, Log>::is_running() const noexcept {
+		return _run;
+	}
+
+
+	template <typename DistanceScale, typename Log>
 	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::start() {
 		_run = true;
 
@@ -174,8 +180,13 @@ namespace abc {
 					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Stopping.");
 				}
 
-				// Reset speed.
+				// Reset kept measurements.
 				this_ptr->_speed = 0;
+				prev_accel = 0;
+				prev_gyro = 0;
+
+				// Sleep to let the inertia die.
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 				// Sleep until the owning instance fires the condition.
 				{

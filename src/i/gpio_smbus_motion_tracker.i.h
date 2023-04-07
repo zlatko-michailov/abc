@@ -69,6 +69,11 @@ namespace abc {
 
 	public:
 		/**
+		 * @brief				Returns `true` if the tracker is running.
+		 */
+		bool is_running() const noexcept;
+
+		/**
 		 * @brief				Starts/resumes tracking.
 		 * @details				Metrics are not reset.
 		 */
