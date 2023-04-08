@@ -238,23 +238,40 @@ namespace abc { namespace samples {
 			return;
 		}
 
+		// If changing direction, stop the vehicle and reset the motion tracker.
+		if (power * _power < 0) {
+			std::int32_t turn = _turn;
+
+			_power = 0;
+			_turn = 0;
+			drive_verified();
+
+			_motion_tracker.stop();
+
+			_turn = turn;
+		}
+
+		if (power != 0 && !_motion_tracker.is_running()) {
+			_motion_tracker.start();
+		}
+
 		_forward = true;
 		if (power == 0) {
 			_turn = 0;
-
-			_motion_tracker.set_speed(0);
-			_motion_tracker.stop();
-		}
-		else if (_power == 0) {
-			_motion_tracker.start();
 		}
 
 		if (power < 0) {
 			_forward = false;
 			power = -power;
 		}
+
 		_power = power;
 		drive_verified();
+
+		// If vehicle stopped, reset the motion tracker.
+		if (_power == 0) {
+			_motion_tracker.stop();
+		}
 
 		// 200
 		char body[abc::size::_256 + 1];
@@ -342,7 +359,7 @@ namespace abc { namespace samples {
 		}
 
 		// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-		char body[abc::size::_256 + 1];
+		char body[abc::size::_512 + 1];
 		abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
 		abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
 		json.put_begin_object();
