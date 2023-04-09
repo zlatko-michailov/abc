@@ -36,3 +36,7 @@ This is the recommended way to use PWM because it doesn't use any cycles on the 
 `gpio_smbus_ultrasonic` is a higher-level entity that measures distance to an obstacle by sending an ultrasound pulse using `gpio_line`s.
 
 `gpio_smbus_grayscale` is a higher-level entity that reads a 3-way grayscale channel using hardware PWM.
+
+`gpio_smbus_motion` is a higher-level entity that reads acceleration and turning measurements from a MPU-6000/6500 motion sensor (accelerometer) connected through SMBus.
+
+`gpio_smbus_motion_tracker` is a continuous tracker that reads measurements from a `gpio_smbus_motion` every 1 ms, and calculates relative location in terms of depth (forward) and width (lateral).

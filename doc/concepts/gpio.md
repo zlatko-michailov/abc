@@ -125,4 +125,6 @@ For convenience, `abc` provides some classes that represent frequently used high
 - `gpio_ultrasonic` - combines `gpio_output_line` that sends an ultrasonic pulse and a `gpio_input_line` that receives that pulse, and calculates the distance to the obstacle using the speed of sound.
 - `gpio_smbus_motor` - combines a `gpio_smbus_pwm` that sends variable power to a motor connected to a HAT and a plain `gpio_output_line` that controls the direction in which the motor spins.
 - `gpio_smbus_servo` - wraps around `gpio_smbus_pwm`.
-- `gpio_smbus_grayscale` - wraps around `gpio_smbus` and communicates with a grayscale sensor.
+- `gpio_smbus_grayscale` - communicates with a grayscale sensor connected through SMBus.
+- `gpio_smbus_motion` - communicates with a MPU-6000/6500 motion sensor (accelerometer).
+- `gpio_smbus_motion_tracker` - a continuous tracker (every 1 ms) of a `gpio_smbus_motion` that calculates speed, distance, and turning.

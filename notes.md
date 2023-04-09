@@ -5,11 +5,12 @@
 - sample picar_4wd - track location
 
 ## To Do
-- doc:
-  - gpio_smbus_motion
-  - gpio_smbus_motion_tracker
-  - drive
-
+- Prepare release
+  - Tag
+  - Releases
+  - Roadmap
+  - Notes
+  
 - socket
   - Rename handle to fd
 - drive
