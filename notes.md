@@ -7,9 +7,10 @@
 ## To Do
 - Prepare release
   - Tag
-  - Releases
-  - Roadmap
-  - Notes
+  - releases
+  - roadmap
+  - makefile
+  - notes
   
 - socket
   - Rename handle to fd
