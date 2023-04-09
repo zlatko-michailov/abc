@@ -2,13 +2,9 @@
 - BUGFIX: smbus - lock ioctl()
 - gpio_smbus_motion
 - gpio_smbus_motion_tracker
+- sample picar_4wd - track location
 
 ## To Do
-- Copyright 2023
-- motion_tracker
-  - Use in sample
-- drive
-
 - doc:
   - gpio_smbus_motion
   - gpio_smbus_motion_tracker
@@ -16,6 +12,7 @@
 
 - socket
   - Rename handle to fd
+- drive
 
 ## Pick List
 - Untabify
