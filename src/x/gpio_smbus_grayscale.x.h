@@ -44,11 +44,11 @@ namespace abc {
 		, _reg_center(reg_center)
 		, _reg_right(reg_right) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_grayscale::gpio_smbus_grayscale() Start.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10749, "gpio_smbus_grayscale::gpio_smbus_grayscale() Start.");
 		}
 
 		if (smbus == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_grayscale::gpio_smbus_grayscale() smbus == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus_grayscale::gpio_smbus_grayscale() smbus == nullptr", 0x1074a);
 		}
 
 		if (log != nullptr) {

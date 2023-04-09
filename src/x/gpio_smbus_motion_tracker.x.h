@@ -46,15 +46,15 @@ namespace abc {
 		, _log(log)
 		, _thread(thread_func, this) {
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Start.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10753, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Start.");
 		}
 
 		if (motion == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() motion", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() motion", 0x10754);
 		}
 
 		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Done.");
+			log->put_any(category::abc::gpio, severity::abc::optional, 0x10755, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Done.");
 		}
 	}
 
@@ -62,7 +62,7 @@ namespace abc {
 	template <typename DistanceScale, typename Log>
 	inline gpio_smbus_motion_tracker<DistanceScale, Log>::~gpio_smbus_motion_tracker() noexcept {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x10756, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Start.");
 		}
 
 		_quit = true;
@@ -74,7 +74,7 @@ namespace abc {
 		_thread.join();
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Done.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x10757, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Done.");
 		}
 	}
 
@@ -155,7 +155,7 @@ namespace abc {
 		using clock = std::chrono::steady_clock;
 
 		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Start.");
+			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x10758, "gpio_smbus_motion_tracker::thread_func() Start.");
 		}
 
 		// Previous motion values;
@@ -169,7 +169,7 @@ namespace abc {
 
 			if (quit) {
 				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Quitting (from running).");
+					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x10759, "gpio_smbus_motion_tracker::thread_func() Quitting (from running).");
 				}
 
 				break;
@@ -177,7 +177,7 @@ namespace abc {
 
 			if (!run) {
 				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Stopping.");
+					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075a, "gpio_smbus_motion_tracker::thread_func() Stopping.");
 				}
 
 				// Reset kept measurements.
@@ -199,14 +199,14 @@ namespace abc {
 
 				if (quit) {
 					if (this_ptr->_log != nullptr) {
-						this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Quitting (from sleeping).");
+						this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075b, "gpio_smbus_motion_tracker::thread_func() Quitting (from sleeping).");
 					}
 
 					break;
 				}
 
 				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Starting.");
+					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075c, "gpio_smbus_motion_tracker::thread_func() Starting.");
 				}
 
 				prev_time_point = clock::time_point();
@@ -273,7 +273,7 @@ namespace abc {
 		}
 
 		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion_tracker::thread_func() Done.");
+			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075d, "gpio_smbus_motion_tracker::thread_func() Done.");
 		}
 	}
 

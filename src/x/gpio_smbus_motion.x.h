@@ -46,11 +46,11 @@ namespace abc {
 		, _smbus_target(smbus_target)
 		, _log(log) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion::gpio_smbus_motion() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x1074b, "gpio_smbus_motion::gpio_smbus_motion() Start.");
 		}
 
 		if (smbus == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_motion::gpio_smbus_motion() smbus == nullptr", __TAG__);
+			throw exception<std::logic_error, Log>("gpio_smbus_motion::gpio_smbus_motion() smbus == nullptr", 0x1074c);
 		}
 
 		_smbus->put_byte(_smbus_target, reg_pwr_mgmt_1, 0x00);			// internal 8MHz oscillator
@@ -61,7 +61,7 @@ namespace abc {
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, __TAG__, "gpio_smbus_motion::gpio_smbus_motion() Start.");
+			_log->put_any(category::abc::gpio, severity::abc::optional, 0x1074d, "gpio_smbus_motion::gpio_smbus_motion() Start.");
 		}
 	}
 
@@ -82,7 +82,7 @@ namespace abc {
 				continue;
 			}
 
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x1074e, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
 				mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
 
 			measurements.accel_x += temp.accel_x;
@@ -103,7 +103,7 @@ namespace abc {
 		_calibration.gyro_z = measurements.gyro_z / reps_take;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x1074f, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
 				mask, _calibration.accel_x, _calibration.accel_y, _calibration.accel_z, _calibration.gyro_x, _calibration.gyro_y, _calibration.gyro_z, _calibration.temperature);
 		}
 	}
@@ -117,7 +117,7 @@ namespace abc {
 		get_values_from_measurements(mask, measurements, _calibration, values);
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::get_values() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10750, "gpio_smbus_motion::get_values() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
 				mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 		}
 	}
@@ -164,7 +164,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::get_measurements() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10751, "gpio_smbus_motion::get_measurements() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
 				mask, measurements.accel_x, measurements.accel_y, measurements.accel_z, measurements.gyro_x, measurements.gyro_y, measurements.gyro_z, measurements.temperature);
 		}
 	}
@@ -203,7 +203,7 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, __TAG__, "gpio_smbus_motion::get_values_from_measurements() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
+			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10752, "gpio_smbus_motion::get_values_from_measurements() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
 				mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 		}
 	}

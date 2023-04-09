@@ -298,8 +298,8 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			count_rear_left  /= 2;
 			count_rear_right /= 2;
 
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "left =%s", bit_rear_left);
-			log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "right=%s", bit_rear_right);
+			log.put_any(abc::category::abc::samples, abc::severity::important, 0x10743, "left =%s", bit_rear_left);
+			log.put_any(abc::category::abc::samples, abc::severity::important, 0x10744, "right=%s", bit_rear_right);
 
 			log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b2, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 											(unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
@@ -314,7 +314,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 		total_count_rear_left  = (total_count_rear_left + reps / 2) / reps;
 		total_count_rear_right = (total_count_rear_right + reps / 2) / reps;
 
-		////log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "----------------------------------------------------------------------");
+		////log.put_any(abc::category::abc::samples, abc::severity::important, 0x10745, "----------------------------------------------------------------------");
 		////std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b3, "----------------------------------------------------------------------");
@@ -326,7 +326,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	std::size_t dist_left  = (21 * grand_total_count_rear_left)  / 10;
 	std::size_t dist_right = (21 * grand_total_count_rear_right) / 10;
 
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x10746, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
 									(unsigned)grand_total_count_rear_left, (unsigned)dist_left, (unsigned)grand_total_count_rear_right, (unsigned)dist_right);
 	log.put_blank_line();
 
@@ -405,7 +405,7 @@ void measure_accel_and_spin(log_ostream& log) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		tp_begin_iteration = std::chrono::system_clock::now();
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x10747, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
 			motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 	}
 
@@ -414,7 +414,7 @@ void measure_accel_and_spin(log_ostream& log) {
 	motion_tracker.stop();
 
 	log.put_blank_line();
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x10748, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
 		motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 }
 
