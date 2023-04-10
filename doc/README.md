@@ -45,6 +45,8 @@ Provide the title and the link to the page along with as much information as you
   - [gpio_smbus_servo](ref/gpio.md)
   - [gpio_smbus_ultrasonic](ref/gpio.md)
   - [gpio_smbus_grayscale](ref/gpio.md)
+  - [gpio_smbus_motion](ref/gpio.md)
+  - [gpio_smbus_motion_tracker](ref/gpio.md)
 - [http](ref/http.md)
   - [http_request_istream](ref/http.md)
   - [http_request_ostream](ref/http.md)
