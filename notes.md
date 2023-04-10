@@ -1,17 +1,6 @@
 ## Done
-- BUGFIX: smbus - lock ioctl()
-- gpio_smbus_motion
-- gpio_smbus_motion_tracker
-- sample picar_4wd - track location
 
 ## To Do
-- Prepare release
-  - Tag
-  - releases
-  - roadmap
-  - makefile
-  - notes
-  
 - socket
   - Rename handle to fd
 - drive

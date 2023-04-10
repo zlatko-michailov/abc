@@ -2,14 +2,19 @@
 
 Up to [Documentation](README.md).
 
-## 1.18.0
-- Self-driving - location
-
 ## 1.19.0
-- Self-driving - shapes of obstacles
+- SSL/TLS socket.
 
-## 1.20.0
-- SSL/TLS streambuf
+## 2.0.0
+- Throw exception, return results.
+- Take `std::string_view` instead of buffer and size.
+- Consider heap allocations?
+
+## 2.1.0
+- Async continuations.
+
+## 2.2.0
+- Self-driving - shapes of obstacles
 
 ## Pick List
 - Untabify

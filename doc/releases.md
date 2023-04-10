@@ -2,6 +2,21 @@
 
 Up to [Documentation](README.md).
 
+## 1.18.0
+- Breaking Changes
+  - none.
+- Bugs
+  - Include `log.i.h` from gpio headers.
+  - Check the `smbus` pointer in the `gpio_smbus_grayscale` constructor.
+  - Fix deleted `gpio_smbus_motion` constructor.
+  - Synchronize calls to `ioctl()` in `gpio_smbus`.
+- Additions
+  - `gpio_smbus_motion`
+  - `gpio_smbus_motion_tracker`
+  - Sample picar_4wd - track location.
+- Refactoring
+  - None.
+
 ## 1.17.0
 - Breaking Changes
   - `vmem_ptr` - rename `item_pos` to `byte_pos`.
