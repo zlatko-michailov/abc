@@ -56,16 +56,17 @@ SAMPLE_VMEM = vmem
 SAMPLE_TICTACTOE = tictactoe
 SAMPLE_CONNECT4 = connect4
 SAMPLE_PICAR_4WD = picar_4wd
+SAMPLE_TLS = tls
 
 PROG_TEST = $(PROJECT)_test
 
-DEPS_BUILD_SAMPLES_COMMON = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4)
+DEPS_BUILD_SAMPLES = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4)
 ifeq "$(UNAME)" "Linux"
-	DEPS_BUILD_SAMPLES = $(DEPS_BUILD_SAMPLES_COMMON)  build_sample_$(SAMPLE_PICAR_4WD)
-else
-	DEPS_BUILD_SAMPLES = $(DEPS_BUILD_SAMPLES_COMMON)
+	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_PICAR_4WD)
 endif
-
+ifeq "$(firstword $(shell openssl version))" "OpenSSL"
+	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_TLS)
+endif
 
 all: pack test
 	#
@@ -151,6 +152,13 @@ build_sample_$(SAMPLE_PICAR_4WD): build_product
 	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SAMPLE_PICAR_4WD) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/*.cpp $(CPP_LINK_OPTIONS)
 	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
 	cp $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)/* $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_PICAR_4WD)/$(SUBDIR_RESOURCES)
+	# ---------- Done building picar_4wd ----------
+
+build_sample_$(SAMPLE_TLS): build_product
+	#
+	# ---------- Begin building tls ----------
+	mkdir $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TLS)
+	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_SAMPLES)/$(SAMPLE_TLS)/$(SAMPLE_TLS) $(CURDIR)/$(SUBDIR_SAMPLES)/$(SAMPLE_TLS)/*.cpp $(CPP_LINK_OPTIONS)
 	# ---------- Done building picar_4wd ----------
 
 build_test: build_product
