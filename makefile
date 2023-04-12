@@ -64,7 +64,7 @@ DEPS_BUILD_SAMPLES = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) bu
 ifeq "$(UNAME)" "Linux"
 	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_PICAR_4WD)
 endif
-ifeq "$(firstword $(shell openssl version))" "OpenSSL"
+ifeq "$(shell ls /usr/include/openssl/ssl.h)" "/usr/include/openssl/ssl.h"
 	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_TLS)
 endif
 
