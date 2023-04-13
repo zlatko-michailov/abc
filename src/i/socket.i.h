@@ -200,6 +200,12 @@ namespace abc {
 		 */
 		socket::error_t tie(const sockaddr& addr, socklen_t addr_length, socket::tie_t tt);
 
+	public:
+		/**
+		 * @brief				Returns the socket handle.
+		 */
+		socket::handle_t handle() const noexcept;
+
 	protected:
 		/**
 		 * @brief				Returns a family-specific representation of any host.
@@ -220,11 +226,6 @@ namespace abc {
 		 * @brief				Returns the socket protocol - TCP or UDP.
 		 */
 		socket::protocol_t protocol() const noexcept;
-
-		/**
-		 * @brief				Returns the socket handle.
-		 */
-		socket::handle_t handle() const noexcept;
 
 		/**
 		 * @brief				Returns the Log pointer.
