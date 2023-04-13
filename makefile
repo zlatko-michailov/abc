@@ -29,10 +29,17 @@ VERSION = 1.18.0
 UNAME = $(shell uname)
 ifeq "$(UNAME)" "Linux"
 	CPP_OPT_UNAME = -D__ABC__LINUX=1
+	DEPS_BUILD_SAMPLE_PICAR_4WD = build_sample_$(SAMPLE_PICAR_4WD)
 else ifeq "$(UNAME)" "Darwin"
 	CPP_OPT_UNAME = -D__ABC__MACOS=1
 else
 	CPP_OPT_UNAME = -D__ABC__WINDOWS=1
+endif
+
+ifeq "$(shell ls /usr/include/openssl/ssl.h)" "/usr/include/openssl/ssl.h"
+	CPP_OPT_OPENSSL = -D__ABC__OPENSSL=1
+	CPP_LINK_OPT_OPENSSL = -lssl
+	DEPS_BUILD_SAMPLE_TLS = build_sample_$(SAMPLE_TLS)
 endif
 
 CPP = g++
@@ -40,8 +47,8 @@ CPP_OPT_DEBUG = -ggdb
 CPP_OPT_STD = --std=c++11
 CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
 CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
-CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS) $(CPP_OPT_UNAME)
-CPP_LINK_OPTIONS = -lstdc++ -lpthread -lm
+CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS) $(CPP_OPT_UNAME) $(CPP_OPT_OPENSSL)
+CPP_LINK_OPTIONS = -lstdc++ -lpthread -lm $(CPP_LINK_OPT_OPENSSL)
 
 SUBDIR_SRC = src
 SUBDIR_TEST = test
@@ -60,13 +67,7 @@ SAMPLE_TLS = tls
 
 PROG_TEST = $(PROJECT)_test
 
-DEPS_BUILD_SAMPLES = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4)
-ifeq "$(UNAME)" "Linux"
-	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_PICAR_4WD)
-endif
-ifeq "$(shell ls /usr/include/openssl/ssl.h)" "/usr/include/openssl/ssl.h"
-	DEPS_BUILD_SAMPLES ::= $(DEPS_BUILD_SAMPLES)  build_sample_$(SAMPLE_TLS)
-endif
+DEPS_BUILD_SAMPLES = build_sample_$(SAMPLE_BASIC) build_sample_$(SAMPLE_VMEM) build_sample_$(SAMPLE_TICTACTOE) build_sample_$(SAMPLE_CONNECT4) $(DEPS_BUILD_SAMPLE_PICAR_4WD) $(DEPS_BUILD_SAMPLE_TLS)
 
 all: pack test
 	#
