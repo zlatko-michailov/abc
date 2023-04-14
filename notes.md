@@ -3,9 +3,14 @@
 ## To Do
 - socket
   - Rename handle to fd
-- drive
+
+## To Do Refactoring
+- exceptions!
+- assert
+- enum class
 
 ## Pick List
+- drive
 - Untabify
 - vmem:
   - check
@@ -40,6 +45,12 @@
 - ring
 - then
 
+
+## TLS
+1. Create a private key:
+`openssl genpkey -out samples/tls/pkey.pem -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes-256-cbc`
+2. Create a self-signed certificate:
+`openssl req -new -x509 -days 365 -key samples/tls/pkey.pem -out samples/tls/cert.pem -subj "/C=US/ST=Washington/L=Seattle/O=abc samples/CN=localhost"`
 
 PID PPID PS
 ps -el | sed -E -e 's/^. +. +([[:digit:]]+) +([[:digit:]]+) +.+ +([[:alpha:]]+)$/\1 \2 \3/'
