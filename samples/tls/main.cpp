@@ -34,13 +34,106 @@ SOFTWARE.
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
 
-int pem_passwd_cb(char* buf, int size, int /*rwflag*/, void* /*password*/)
-{
+int pem_passwd_cb(char* buf, int size, int /*rwflag*/, void* /*password*/) {
 	memset(buf, 0, size);
 	strncpy(buf, "server", size);
 	buf[size - 1] = '\0';
 
 	return(strlen(buf));
+}
+
+
+SSL_CTX* new_server_ssl_ctx (char path[], std::size_t prog_path_len_1, const char* cert_path, const char* pkey_path, log_ostream& log) {
+	const SSL_METHOD *method = TLS_server_method();
+	if (method == nullptr) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: method=%p", method);
+		return nullptr;
+	}
+
+	SSL_CTX *ctx = SSL_CTX_new(method);
+	if (ctx == nullptr) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: ctx=%p", ctx);
+		return nullptr;
+	}
+
+	SSL_CTX_set_default_passwd_cb(ctx, pem_passwd_cb);
+
+	std::strcpy(path + prog_path_len_1, cert_path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "cert_path='%s'", path);
+
+    int stat = SSL_CTX_use_certificate_file(ctx, path, SSL_FILETYPE_PEM);
+	if (stat <= 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: use_cert stat=%d", stat);
+		ERR_print_errors_fp(stderr);
+		SSL_CTX_free(ctx);
+		return nullptr;
+	}
+
+	std::strcpy(path + prog_path_len_1, pkey_path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "cert_path='%s'", path);
+
+    stat = SSL_CTX_use_PrivateKey_file(ctx, path, SSL_FILETYPE_PEM);
+	if (stat <= 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: use_pkey stat=%d", stat);
+		ERR_print_errors_fp(stderr);
+		SSL_CTX_free(ctx);
+		return nullptr;
+	}
+
+	return ctx;
+}
+
+
+int accept_client(SSL* ssl, abc::tcp_client_socket<log_ostream>& client, log_ostream& log) {
+	int stat = SSL_set_fd(ssl, client.handle());
+	if (stat <= 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: set_fd stat=%d", stat);
+		ERR_print_errors_fp(stderr);
+		return stat;
+	}
+
+	stat = SSL_accept(ssl);
+	if (stat <= 0) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: accept stat=%d", stat);
+		ERR_print_errors_fp(stderr);
+		return stat;
+	}
+
+	return 1;
+}
+
+
+void server(char* path, std::size_t prog_path_len_1, const char* cert_path, const char* pkey_path, log_ostream& log) {
+
+	const char* port = "31241";
+	abc::tcp_server_socket<log_ostream> server(&log);
+	server.bind(port);
+	server.listen(5);
+	
+	abc::tcp_client_socket<log_ostream> client = server.accept();
+
+
+	SSL_CTX *ctx = new_server_ssl_ctx(path, prog_path_len_1, cert_path, pkey_path, log);
+	if (ctx == nullptr) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: new_server_ctx=%p", ctx);
+		return;
+	}
+
+	SSL *ssl = SSL_new(ctx);
+	if (ctx == nullptr) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: new_ssl=%p", ssl);
+		SSL_CTX_free(ctx);
+		return;
+	}
+
+	accept_client(ssl, client, log);
+
+
+	std::cout << "Press ENTER to shut down server..." << std::endl;
+	std::cin.get();
+
+	SSL_free(ssl);
+	SSL_CTX_free(ctx);
 }
 
 
@@ -81,53 +174,11 @@ int main(int /*argc*/, const char* argv[]) {
 	}
 
 
-	const char* port = "31241";
-	abc::tcp_server_socket<log_ostream> server(&log);
-	server.bind(port);
-	server.listen(5);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Listening on port %s", port);
-
-	abc::tcp_client_socket<log_ostream> client = server.accept();
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "Client accepted");
-
-	int stat;
-	const SSL_METHOD *method = TLS_server_method();
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "method %p", method);
-
-	SSL_CTX *ctx = SSL_CTX_new(method);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "ctx %p", ctx);
-
-	SSL_CTX_set_default_passwd_cb(ctx, pem_passwd_cb);
-
-	std::strcpy(path + prog_path_len_1, cert_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "cert_path='%s'", path);
-
-    stat = SSL_CTX_use_certificate_file(ctx, path, SSL_FILETYPE_PEM);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "use_cert %s(%d)", (stat == 1 ? "OK" : "ERR"), stat);
-	ERR_print_errors_fp(stderr);
-
-	std::strcpy(path + prog_path_len_1, pkey_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "cert_path='%s'", path);
-
-    stat = SSL_CTX_use_PrivateKey_file(ctx, path, SSL_FILETYPE_PEM);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "use_privkey %s(%d)", (stat == 1 ? "OK" : "ERR"), stat);
- 	ERR_print_errors_fp(stderr);
-
-	SSL *ssl = SSL_new(ctx);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "ssl %p", ssl);
-
-	stat = SSL_set_fd(ssl, client.handle());
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "set_fd %s(%d)", (stat == 1 ? "OK" : "ERR"), stat);
+	server(path, prog_path_len_1, cert_path, pkey_path, log);
 
 
-	stat = SSL_accept(ssl);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "accept %s(%d)", (stat == 1 ? "OK" : "ERR"), stat);
-
-	std::cout << "Press ENTER to finish..." << std::endl;
+	std::cout << "Press ENTER to exit..." << std::endl;
 	std::cin.get();
-
-	SSL_free(ssl);
-	SSL_CTX_free(ctx);
 
 	return 0;
 }
