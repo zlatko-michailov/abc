@@ -126,13 +126,19 @@ void server(char* path, std::size_t prog_path_len_1, const char* cert_path, cons
 		return;
 	}
 
-	accept_client(ssl, client, log);
+	int stat = accept_client(ssl, client, log);
+	if (stat == 1) {
+		const char welcome[] = ">>> Welcome to abc!\n";
+		SSL_write(ssl, welcome, sizeof(welcome));
+	}
 
 
-	std::cout << "Press ENTER to shut down server..." << std::endl;
+	std::cout << "Press ENTER to shut down server socket..." << std::endl;
 	std::cin.get();
 
+	SSL_shutdown(ssl);
 	SSL_free(ssl);
+	
 	SSL_CTX_free(ctx);
 }
 
