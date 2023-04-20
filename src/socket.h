@@ -37,16 +37,16 @@ namespace abc {
 
 	template <typename Log>
 	inline basic_socket<Log>::basic_socket(socket::kind_t kind, socket::family_t family, Log* log)
-		: basic_socket(socket::handle::invalid, kind, family, log) {
+		: basic_socket(socket::fd::invalid, kind, family, log) {
 	}
 
 
 	template <typename Log>
-	inline basic_socket<Log>::basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
+	inline basic_socket<Log>::basic_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log)
 		: _kind(kind)
 		, _family(family)
 		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
-		, _handle(handle)
+		, _fd(fd)
 		, _log(log) {
 		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
 			throw exception<std::logic_error, Log>("basic_socket::basic_socket(kind)", 0x10004, log);
@@ -67,10 +67,10 @@ namespace abc {
 		_kind = other._kind;
 		_family = other._family;
 		_protocol = other._protocol;
-		_handle = other._handle;
+		_fd = other._fd;
 		_log = std::move(other._log);
 
-		other._handle = socket::handle::invalid;
+		other._fd = socket::fd::invalid;
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "basic_socket::basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
@@ -90,7 +90,7 @@ namespace abc {
 
 	template <typename Log>
 	inline bool basic_socket<Log>::is_open() const noexcept {
-		return _handle != socket::handle::invalid;
+		return _fd != socket::fd::invalid;
 	}
 
 
@@ -101,10 +101,10 @@ namespace abc {
 				_log->put_any(category::abc::socket, severity::abc::debug, 0x10009, "basic_socket::close()");
 			}
 
-			::shutdown(_handle, SHUT_RDWR);
-			::close(_handle);
+			::shutdown(_fd, SHUT_RDWR);
+			::close(_fd);
 
-			_handle = socket::handle::invalid;
+			_fd = socket::fd::invalid;
 		}
 	}
 
@@ -117,7 +117,7 @@ namespace abc {
 
 		close();
 
-		_handle = ::socket(_family, _kind, _protocol);
+		_fd = ::socket(_family, _kind, _protocol);
 
 		if (!is_open()) {
 			throw exception<std::runtime_error, Log>("basic_socket::open() ::socket()", 0x1000b, _log);
@@ -233,12 +233,12 @@ namespace abc {
 
 		switch(tt) {
 			case socket::tie::bind:
-				::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+				::setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
-				return ::bind(handle(), &addr, addr_len);
+				return ::bind(fd(), &addr, addr_len);
 
 			case socket::tie::connect:
-				return ::connect(handle(), &addr, addr_len);
+				return ::connect(fd(), &addr, addr_len);
 
 			default:
 				throw exception<std::logic_error, Log>("basic_socket::tie(tt)", 0x10015, _log);
@@ -282,8 +282,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline socket::handle_t basic_socket<Log>::handle() const noexcept {
-		return _handle;
+	inline socket::fd_t basic_socket<Log>::fd() const noexcept {
+		return _fd;
 	}
 
 
@@ -303,8 +303,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline client_socket<Log>::client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log)
-		: basic_socket<Log>(handle, kind, family, log) {
+	inline client_socket<Log>::client_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log)
+		: basic_socket<Log>(fd, kind, family, log) {
 	}
 
 
@@ -337,10 +337,10 @@ namespace abc {
 				throw exception<std::logic_error, Log>("client_socket::send() !dgram", 0x10018, log_local);
 			}
 
-			sent_size = ::sendto(base::handle(), buffer, size, 0, &address->value, address->size);
+			sent_size = ::sendto(base::fd(), buffer, size, 0, &address->value, address->size);
 		}
 		else {
-			sent_size = ::send(base::handle(), buffer, size, 0);
+			sent_size = ::send(base::fd(), buffer, size, 0);
 		}
 
 		if (sent_size < 0) {
@@ -382,10 +382,10 @@ namespace abc {
 				throw exception<std::logic_error, Log>("client_socket::receive() !dgram", 0x1001e, log_local);
 			}
 
-			 received_size = ::recvfrom(base::handle(), buffer, size, 0, &address->value, &address->size);
+			 received_size = ::recvfrom(base::fd(), buffer, size, 0, &address->value, &address->size);
 		}
 		else {
-			 received_size = ::recv(base::handle(), buffer, size, 0);
+			 received_size = ::recv(base::fd(), buffer, size, 0);
 		}
 
 		if (received_size < 0) {
@@ -441,8 +441,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline tcp_client_socket<Log>::tcp_client_socket(socket::handle_t handle, socket::family_t family, Log* log)
-		: client_socket<Log>(handle, socket::kind::stream, family, log) {
+	inline tcp_client_socket<Log>::tcp_client_socket(socket::fd_t fd, socket::family_t family, Log* log)
+		: client_socket<Log>(fd, socket::kind::stream, family, log) {
 	}
 
 
@@ -468,7 +468,7 @@ namespace abc {
 			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10022, "tcp_server_socket::listen() >>>");
 		}
 
-		socket::error_t err = ::listen(base::handle(), backlog_size);
+		socket::error_t err = ::listen(base::fd(), backlog_size);
 
 		if (err != socket::error::none) {
 			throw exception<std::runtime_error, Log>("tcp_server_socket::listen() ::listen()", 0x10023, log_local);
@@ -487,9 +487,9 @@ namespace abc {
 			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10025, "tcp_server_socket::accept() >>>");
 		}
 
-		socket::handle_t hnd = ::accept(base::handle(), nullptr, nullptr);
+		socket::fd_t hnd = ::accept(base::fd(), nullptr, nullptr);
 
-		if (hnd == socket::handle::invalid) {
+		if (hnd == socket::fd::invalid) {
 			throw exception<std::runtime_error, Log>("tcp_server_socket::accept() ::accept()", 0x10026, log_local);
 		}
 

@@ -63,10 +63,10 @@ namespace abc {
 		}
 
 
-		using handle_t = int;
+		using fd_t = int;
 
-		namespace handle {
-			constexpr handle_t	invalid	= -1;
+		namespace fd {
+			constexpr fd_t	invalid	= -1;
 		}
 
 
@@ -118,12 +118,12 @@ namespace abc {
 
 		/**
 		 * @brief				Constructor.
-		 * @param handle		Socket handle.
+		 * @param fd			Socket descriptor.
 		 * @param kind			Stream or datagram.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		basic_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
+		basic_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Move constructor.
@@ -202,9 +202,9 @@ namespace abc {
 
 	public:
 		/**
-		 * @brief				Returns the socket handle.
+		 * @brief				Returns the socket descriptor.
 		 */
-		socket::handle_t handle() const noexcept;
+		socket::fd_t fd() const noexcept;
 
 	protected:
 		/**
@@ -249,9 +249,9 @@ namespace abc {
 		socket::protocol_t _protocol;
 
 		/**
-		 * @brief				The socket handle.
+		 * @brief				The socket descriptor.
 		 */
-		socket::handle_t _handle;
+		socket::fd_t _fd;
 
 		/**
 		 * @brief				The Log pointer passed in to the constructor.
@@ -282,12 +282,12 @@ namespace abc {
 
 		/**
 		 * @brief				Constructor.
-		 * @param handle		Socket handle.
+		 * @param fd			Socket descriptor.
 		 * @param kind			Stream or datagram.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		client_socket(socket::handle_t handle, socket::kind_t kind, socket::family_t family, Log* log);
+		client_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log);
 
 		/**
 		 * @brief				Move constructor.
@@ -416,11 +416,11 @@ namespace abc {
 
 		/**
 		 * @brief				Internal constructor for accepted connections.
-		 * @param handle		Handle
+		 * @param fd			Descriptor.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		tcp_client_socket(socket::handle_t handle, socket::family_t family, Log* log);
+		tcp_client_socket(socket::fd_t fd, socket::family_t family, Log* log);
 	};
 
 

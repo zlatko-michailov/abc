@@ -1,4 +1,6 @@
 ## Done
+- Temporary? Sample tls
+- BREAKING: socket - Rename `handle()` to `fd()`. 
 
 ## To Do
 - socket

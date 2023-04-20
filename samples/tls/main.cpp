@@ -85,7 +85,7 @@ SSL_CTX* new_server_ssl_ctx (char path[], std::size_t prog_path_len_1, const cha
 
 
 int accept_client(SSL* ssl, abc::tcp_client_socket<log_ostream>& client, log_ostream& log) {
-	int stat = SSL_set_fd(ssl, client.handle());
+	int stat = SSL_set_fd(ssl, client.fd());
 	if (stat <= 0) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: set_fd stat=%d", stat);
 		ERR_print_errors_fp(stderr);
