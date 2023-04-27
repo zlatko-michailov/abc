@@ -5,10 +5,15 @@ Up to [Documentation](README.md).
 ## 1.19.0
 - SSL/TLS socket.
 
+## 1.20.0
+- vmem_string.
+- vmem_paged_string.
+
 ## 2.0.0
 - Throw exception, return results.
-- Take `std::string_view` instead of buffer and size.
-- Consider heap allocations?
+- Take `vmem_string` or `std::string_view` instead of buffer and size.
+- Lazily create a temp `vmem_pool`.
+- Override `operator new` to use the temp `vmem_pool`?
 
 ## 2.1.0
 - Async continuations.
