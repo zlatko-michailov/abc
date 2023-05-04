@@ -136,10 +136,11 @@ namespace abc {
 		 * @param cert_file_path Path to the certificate file. This is most typically public/unencrypted.
 		 * @param pkey_file_path Path to the private key file. This is typically password-encrypted.
 		 * @param pkey_file_password Password for the private key file.
+		 * @param is_security_enabled Allows the server to enforce security, e.g. to require client a certificate.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled = false, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
 
 		/**
 		 * @brief				Constructor.
@@ -147,9 +148,10 @@ namespace abc {
 		 * @param cert_file_path Path to the certificate file. This is most typically public/unencrypted.
 		 * @param pkey_file_path Path to the private key file. This is typically password-encrypted.
 		 * @param pkey_file_password Password for the private key file.
+		 * @param is_security_enabled Allows the server to enforce security, e.g. to require client a certificate.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, Log* log);
+		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, Log* log);
 
 		/**
 		 * @brief				Move constructor.
@@ -169,10 +171,9 @@ namespace abc {
 	public:
 		/**
 		 * @brief				Blocks until a client tries to connect.
-		 * @param is_security_enabled Allows the server to enforce security, e.g. to require client a certificate.
 		 * @return				New `openssl_tcp_client_socket` instance for the new connection.
 		 */
-		openssl_tcp_client_socket<Log> accept(bool is_security_enabled = false) const;
+		openssl_tcp_client_socket<Log> accept() const;
 
 	private:
 		/**
@@ -187,6 +188,11 @@ namespace abc {
 		 * @brief				Password for the private key file.
 		 */
 		char _pkey_file_password[max_password + 1];
+
+		/**
+		 * @brief				Allows the server to enforce security, e.g. to require client a certificate.
+		 */
+		bool _is_security_enabled = false;
 
 		/**
 		 * @brief				OpenSSL context.

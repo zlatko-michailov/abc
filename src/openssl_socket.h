@@ -177,14 +177,15 @@ namespace abc {
 
 
 	template <typename Log>
-	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, Log* log)
-		: openssl_tcp_server_socket<Log>(cert_file_path, pkey_file_path, pkey_file_password, socket::family::ipv4, log) {
+	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, Log* log)
+		: openssl_tcp_server_socket<Log>(cert_file_path, pkey_file_path, pkey_file_password, is_security_enabled, socket::family::ipv4, log) {
 	}
 
 
 	template <typename Log>
-	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, socket::family_t family, Log* log)
-		: base(family, log) {
+	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, socket::family_t family, Log* log)
+		: base(family, log)
+		, _is_security_enabled(is_security_enabled) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_server_socket::openssl_tcp_server_socket() >>>");
@@ -246,12 +247,12 @@ namespace abc {
 
 
 	template <typename Log>
-	inline openssl_tcp_client_socket<Log> openssl_tcp_server_socket<Log>::accept(bool is_security_enabled) const {
+	inline openssl_tcp_client_socket<Log> openssl_tcp_server_socket<Log>::accept() const {
 		Log* log_local = base::log();
 
 		socket::fd_t fd = base::accept_fd();
 
-		openssl_tcp_client_socket<Log> openssl_client(fd, _ctx, is_security_enabled, base::family(), base::log());
+		openssl_tcp_client_socket<Log> openssl_client(fd, _ctx, _is_security_enabled, base::family(), base::log());
 
 		int stat = SSL_accept(openssl_client._ssl);
 		if (stat <= 0) {
