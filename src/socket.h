@@ -73,18 +73,18 @@ namespace abc {
 		other._fd = socket::fd::invalid;
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "basic_socket::basic_socket(move) %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "basic_socket::basic_socket(move) %s, %s, fd=%d", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6", _fd);
 		}
 	}
 
 
 	template <typename Log>
 	inline basic_socket<Log>::~basic_socket() noexcept {
-		close();
-
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10008, "basic_socket::~basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x10008, "basic_socket::~basic_socket() %s, %s, is_open=%s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6", is_open() ? "true" : "false");
 		}
+
+		close();
 	}
 
 
@@ -482,14 +482,22 @@ namespace abc {
 
 	template <typename Log>
 	inline tcp_client_socket<Log> tcp_server_socket<Log>::accept() const {
+		socket::fd_t fd = accept_fd();
+
+		return tcp_client_socket<Log>(fd, base::family(), base::log());
+	}
+
+
+	template <typename Log>
+	inline socket::fd_t tcp_server_socket<Log>::accept_fd() const {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10025, "tcp_server_socket::accept() >>>");
 		}
 
-		socket::fd_t hnd = ::accept(base::fd(), nullptr, nullptr);
+		socket::fd_t fd = ::accept(base::fd(), nullptr, nullptr);
 
-		if (hnd == socket::fd::invalid) {
+		if (fd == socket::fd::invalid) {
 			throw exception<std::runtime_error, Log>("tcp_server_socket::accept() ::accept()", 0x10026, log_local);
 		}
 
@@ -497,7 +505,7 @@ namespace abc {
 			log_local->put_any(category::abc::socket, severity::abc::optional, 0x10027, "tcp_server_socket::accept() <<<");
 		}
 
-		return tcp_client_socket<Log>(hnd, base::family(), base::log());
+		return fd;
 	}
 
 

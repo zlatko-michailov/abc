@@ -472,6 +472,13 @@ namespace abc {
 		 * @return				New `tcp_client_socket` instance for the new connection.
 		 */
 		tcp_client_socket<Log> accept() const;
+
+	protected:
+		/**
+		 * @brief				Blocks until a client tries to connect.
+		 * @return				The fd of the new connection.
+		 */
+		socket::fd_t accept_fd() const;
 	};
 
 
