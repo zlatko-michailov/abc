@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include <cstring>
+#include <memory>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -150,6 +151,11 @@ void server(const char* cert_path, const char* pkey_path, const char* password, 
 
 	const char welcome[] = ">>> Welcome to abc!\n";
 	openssl_client.send(welcome, sizeof(welcome));
+
+	char response[8 + 1];
+	std::memset(response, 0, sizeof(response));
+	openssl_client.receive(response, sizeof(response) - 1);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, response);
 
 	std::cout << "Press ENTER to shut down server socket..." << std::endl;
 	std::cin.get();

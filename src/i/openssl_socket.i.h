@@ -83,10 +83,17 @@ namespace abc {
 		 * @brief				Sends the bytes from the buffer into the socket.
 		 * @param buffer		Data buffer. 
 		 * @param size			Buffer size.
-		 * @param address		Remote address. Must be `nullptr` or omitted.
 		 * @return				The number of bytes sent. `0` = error.
 		 */
-		std::size_t send(const void* buffer, std::size_t size, socket::address* address = nullptr);
+		std::size_t send(const void* buffer, std::size_t size);
+
+		/**
+		 * @brief				Receives the given number of bytes from the socket, and stores them into the buffer.
+		 * @param buffer		Data buffer. 
+		 * @param size			Buffer size.
+		 * @return				The number of bytes received. `0` = error.
+		 */
+		std::size_t receive(void* buffer, std::size_t size);
 
 	protected:
 		friend openssl_tcp_server_socket<Log>;

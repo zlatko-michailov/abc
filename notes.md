@@ -4,8 +4,10 @@
 
 ## To Do
 - openssl_socket
+  + connect()
   + test
   + `#ifdef`
+  + "BSD" -> "POSIX"
 - LetsEncrypt.org client
 
 ## To Do Refactoring

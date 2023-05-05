@@ -110,7 +110,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t openssl_tcp_client_socket<Log>::send(const void* buffer, std::size_t size, socket::address* address) {
+	inline std::size_t openssl_tcp_client_socket<Log>::send(const void* buffer, std::size_t size) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::send() >>> size=%zu", size);
@@ -124,13 +124,7 @@ namespace abc {
 			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::send() !_ssl", __TAG__, log_local);
 		}
 
-		int sent_size;
-		if (address != nullptr) {
-			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::send() address", __TAG__, log_local);
-		}
-		else {
-			sent_size = SSL_write(_ssl, buffer, (int)size);
-		}
+		int sent_size = SSL_write(_ssl, buffer, (int)size);
 
 		if (sent_size < 0) {
 			if (log_local != nullptr) {
@@ -151,6 +145,45 @@ namespace abc {
 		}
 
 		return sent_size;
+	}
+
+
+	template <typename Log>
+	inline std::size_t openssl_tcp_client_socket<Log>::receive(void* buffer, std::size_t size) {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::receive() >>> size=%zu", size);
+		}
+
+		if (!base::is_open()) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::receive() !is_open()", __TAG__, log_local);
+		}
+
+		if (_ssl == nullptr) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::receive() !_ssl", __TAG__, log_local);
+		}
+
+		int received_size = SSL_read(_ssl, buffer, (int)size);
+
+		if (received_size < 0) {
+			if (log_local != nullptr) {
+				log_local->put_any(category::abc::socket, severity::important, __TAG__, "openssl_tcp_client_socket::receive() received_size=%l", (long)received_size);
+			}
+
+			received_size = 0;
+		}
+		else if ((std::size_t)received_size < size) {
+			if (log_local != nullptr) {
+				log_local->put_any(category::abc::socket, severity::important, __TAG__, "openssl_tcp_client_socket::receive() received_size=%l", (long)received_size);
+			}
+		}
+
+		if (log_local != nullptr) {
+			log_local->put_binary(category::abc::socket, severity::abc::debug, __TAG__, buffer, size);
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
+		}
+
+		return received_size;
 	}
 
 
