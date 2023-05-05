@@ -3,8 +3,10 @@
 - BREAKING: socket - Rename `handle()` to `fd()`. 
 
 ## To Do
-- socket
-  - Rename handle to fd
+- openssl_socket
+  + test
+  + `#ifdef`
+- LetsEncrypt.org client
 
 ## To Do Refactoring
 - exceptions!

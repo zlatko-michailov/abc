@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
+#include <memory>
 
 #include "i/openssl_socket.i.h"
 #include "socket.h"
@@ -105,26 +106,6 @@ namespace abc {
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::~openssl_tcp_client_socket() <<<");
 		}
-	}
-
-
-	template <typename Log>
-	inline openssl_tcp_client_socket<Log>& openssl_tcp_client_socket<Log>::operator=(openssl_tcp_client_socket&& other) noexcept {
-		Log* log_local = base::log();
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::operator=(move) other._ssl=%p >>>", other._ssl);
-		}
-
-		_is_security_enabled = other._is_security_enabled;
-		_ssl = other._ssl;
-
-		other._ssl = nullptr;
-
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::operator=() _ssl=%p <<<", _ssl);
-		}
-
-		return *this;
 	}
 
 
@@ -224,6 +205,28 @@ namespace abc {
 
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_server_socket::openssl_tcp_server_socket() <<<");
+		}
+	}
+
+
+	template <typename Log>
+	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(openssl_tcp_server_socket&& other) noexcept
+		: base(std::move(other))
+		, _is_security_enabled(other._is_security_enabled)
+		, _ctx(other._ctx) {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_server_socket::openssl_tcp_server_socket(move) other._ctx=%p >>>", other._ctx);
+		}
+
+		std::memmove(_pkey_file_password, other._pkey_file_password, sizeof(_pkey_file_password));
+
+		other._is_security_enabled = false;
+		other._ctx = nullptr;
+		std::memset(other._pkey_file_password, 0, sizeof(other._pkey_file_password));
+
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_server_socket::openssl_tcp_server_socket(move) <<<");
 		}
 	}
 

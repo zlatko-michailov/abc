@@ -78,11 +78,6 @@ namespace abc {
 		 */
 		virtual ~openssl_tcp_client_socket() noexcept;
 
-		/**
-		 * @brief				Move assignment.
-		 */
-		openssl_tcp_client_socket& operator=(openssl_tcp_client_socket&& other) noexcept;
-
 	public:
 		/**
 		 * @brief				Sends the bytes from the buffer into the socket.
@@ -156,7 +151,7 @@ namespace abc {
 		/**
 		 * @brief				Move constructor.
 		 */
-		openssl_tcp_server_socket(openssl_tcp_server_socket&& other) noexcept = default; //// TODO:
+		openssl_tcp_server_socket(openssl_tcp_server_socket&& other) noexcept;
 
 		/**
 		 * @brief				Deleted.
