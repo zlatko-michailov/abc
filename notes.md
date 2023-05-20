@@ -8,6 +8,7 @@
   + test
   + `#ifdef`
   + "BSD" -> "POSIX"
+  + enable security - both client and server - SSL_CTX_set_verify
 - LetsEncrypt.org client
 
 ## To Do Refactoring

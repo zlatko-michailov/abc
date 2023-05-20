@@ -50,11 +50,11 @@ namespace abc {
 	public:
 		/**
 		 * @brief				Constructor.
-		 * @param is_security_enabled Allows the client to relax security, e.g. to accept self-signed certificates.
+		 * @param verify_server	Allows the client to accept self-signed certificates.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_client_socket(bool is_security_enabled = true, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		openssl_tcp_client_socket(bool verify_server = true, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
 
 		/**
 		 * @brief				Constructor.
@@ -80,6 +80,19 @@ namespace abc {
 
 	public:
 		/**
+		 * @brief				Connects the socket to the given port on the given host name.
+		 * @param host			Host name.
+		 * @param port			Port number (as a string).
+		 */
+		void connect(const char* host, const char* port);
+
+		/**
+		 * @brief				Connects the socket to the given address.
+		 * @param address		Address.
+		 */
+		void connect(const socket::address& address);
+
+		/**
 		 * @brief				Sends the bytes from the buffer into the socket.
 		 * @param buffer		Data buffer. 
 		 * @param size			Buffer size.
@@ -102,17 +115,22 @@ namespace abc {
 		 * @brief				Internal constructor for accepted connections.
 		 * @param fd			Descriptor.
 		 * @param ctx			OpenSSL server context.
-		 * @param is_security_enabled Allows the client to relax security, e.g. to accept self-signed certificates.
+		 * @param verify_server	Allows the client to accept self-signed certificates.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool is_security_enabled, socket::family_t family, Log* log);
+		openssl_tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family_t family, Log* log);
+
+		/**
+		 * @brief				Does the TLS handshake after the base socket has been connected.
+		 */
+		void connect_handshake();
 
 	private:
 		/**
 		 * @brief				Whether full security is enabled.
 		 */
-		bool _is_security_enabled = true;
+		bool _verify_server = true;
 
 		/**
 		 * @brief				OpenSSL state specific to this connection.
@@ -138,11 +156,11 @@ namespace abc {
 		 * @param cert_file_path Path to the certificate file. This is most typically public/unencrypted.
 		 * @param pkey_file_path Path to the private key file. This is typically password-encrypted.
 		 * @param pkey_file_password Password for the private key file.
-		 * @param is_security_enabled Allows the server to enforce security, e.g. to require client a certificate.
+		 * @param verify_client	Allows the server to require client a certificate.
 		 * @param family		IPv4 or IPv6.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled = false, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
+		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client = false, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
 
 		/**
 		 * @brief				Constructor.
@@ -150,10 +168,10 @@ namespace abc {
 		 * @param cert_file_path Path to the certificate file. This is most typically public/unencrypted.
 		 * @param pkey_file_path Path to the private key file. This is typically password-encrypted.
 		 * @param pkey_file_password Password for the private key file.
-		 * @param is_security_enabled Allows the server to enforce security, e.g. to require client a certificate.
+		 * @param verify_client	Allows the server to require client a certificate.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, Log* log);
+		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, Log* log);
 
 		/**
 		 * @brief				Move constructor.
@@ -194,7 +212,7 @@ namespace abc {
 		/**
 		 * @brief				Allows the server to enforce security, e.g. to require client a certificate.
 		 */
-		bool _is_security_enabled = false;
+		bool _verify_client = false;
 
 		/**
 		 * @brief				OpenSSL context.

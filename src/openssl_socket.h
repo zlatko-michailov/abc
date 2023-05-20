@@ -35,9 +35,9 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(bool is_security_enabled, socket::family_t family, Log* log)
+	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(bool verify_server, socket::family_t family, Log* log)
 		: base(family, log)
-		, _is_security_enabled(is_security_enabled) {
+		, _verify_server(verify_server) {
 	}
 
 
@@ -50,13 +50,14 @@ namespace abc {
 	template <typename Log>
 	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(openssl_tcp_client_socket&& other) noexcept
 		: base(std::move(other))
-		, _is_security_enabled(other._is_security_enabled)
+		, _verify_server(other._verify_server)
 		, _ssl(other._ssl) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::openssl_tcp_client_socket(move) other._ssl=%p >>>", other._ssl);
 		}
 
+		other._verify_server = true;
 		other._ssl = nullptr;
 
 		if (log_local != nullptr) {
@@ -66,9 +67,9 @@ namespace abc {
 
 
 	template <typename Log>
-	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool is_security_enabled, socket::family_t family, Log* log)
+	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family_t family, Log* log)
 		: base(fd, family, log)
-		, _is_security_enabled(is_security_enabled) {
+		, _verify_server(verify_server) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::openssl_tcp_client_socket() ctx=%p >>>", ctx);
@@ -191,15 +192,15 @@ namespace abc {
 
 
 	template <typename Log>
-	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, Log* log)
-		: openssl_tcp_server_socket<Log>(cert_file_path, pkey_file_path, pkey_file_password, is_security_enabled, socket::family::ipv4, log) {
+	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, Log* log)
+		: openssl_tcp_server_socket<Log>(cert_file_path, pkey_file_path, pkey_file_password, verify_client, socket::family::ipv4, log) {
 	}
 
 
 	template <typename Log>
-	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool is_security_enabled, socket::family_t family, Log* log)
+	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family_t family, Log* log)
 		: base(family, log)
-		, _is_security_enabled(is_security_enabled) {
+		, _verify_client(verify_client) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_server_socket::openssl_tcp_server_socket() >>>");
@@ -245,7 +246,7 @@ namespace abc {
 	template <typename Log>
 	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(openssl_tcp_server_socket&& other) noexcept
 		: base(std::move(other))
-		, _is_security_enabled(other._is_security_enabled)
+		, _verify_client(other._verify_client)
 		, _ctx(other._ctx) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
@@ -254,7 +255,7 @@ namespace abc {
 
 		std::memmove(_pkey_file_password, other._pkey_file_password, sizeof(_pkey_file_password));
 
-		other._is_security_enabled = false;
+		other._verify_client = false;
 		other._ctx = nullptr;
 		std::memset(other._pkey_file_password, 0, sizeof(other._pkey_file_password));
 
@@ -288,7 +289,8 @@ namespace abc {
 
 		socket::fd_t fd = base::accept_fd();
 
-		openssl_tcp_client_socket<Log> openssl_client(fd, _ctx, _is_security_enabled, base::family(), base::log());
+		const bool verify_server = false; // This value doesn't matter.
+		openssl_tcp_client_socket<Log> openssl_client(fd, _ctx, verify_server, base::family(), base::log());
 
 		int stat = SSL_accept(openssl_client._ssl);
 		if (stat <= 0) {

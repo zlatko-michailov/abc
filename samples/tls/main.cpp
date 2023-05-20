@@ -139,10 +139,10 @@ void openssl_server(const char* cert_path, const char* pkey_path, log_ostream& l
 
 void server(const char* cert_path, const char* pkey_path, const char* password, log_ostream& log) {
 	const char* port = "31241";
-	bool is_security_enabled = false;
+	bool verify_client = false;
 	int queue_size = 5;
 
-	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, is_security_enabled, &log);
+	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, &log);
 
 	openssl_server.bind(port);
 	openssl_server.listen(queue_size);
