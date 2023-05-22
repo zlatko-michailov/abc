@@ -6,7 +6,6 @@
 - openssl_socket
   + test
   + `#ifdef`
-  + "BSD" -> "POSIX"
 - LetsEncrypt.org client
 
 ## To Do Refactoring

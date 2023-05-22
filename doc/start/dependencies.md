@@ -4,7 +4,7 @@ Up to [Documentation](../README.md).
 
 ## POSIX OS
 The following `abc` features use POSIX API:
-- The `socket` classes use the BSD socket API.
+- The `socket` classes use the POSIX socket API.
 - `endpoint` uses the POSIX `stat` function.
 
 `abc` has been tested on:

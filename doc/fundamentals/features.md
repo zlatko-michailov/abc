@@ -10,7 +10,7 @@ Static files are used for implementing GUI - HTML, images, JavaScript, etc.
 The JavaScript can make REST requests back to the endpoint and to eventually update the GUI.
 
 ## Socket
-A group of `socket` classes, that wraps around the BSD socket API, is provided.
+A group of `socket` classes, that wraps around the POSIX socket API, is provided.
 
 Additionally, a `socket_streambuf` is provided, which allows `std::istream`, `std::ostream`, and any other stream that derives from them, to operate over `abc::tcp_client_socket` and `abc::udp_socket`.
 
