@@ -133,6 +133,11 @@ namespace abc {
 		bool _verify_server = true;
 
 		/**
+		 * @brief				OpenSSL context.
+		 */
+		SSL_CTX* _ctx = nullptr;
+
+		/**
 		 * @brief				OpenSSL state specific to this connection.
 		 */
 		SSL* _ssl = nullptr;

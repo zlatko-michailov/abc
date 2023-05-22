@@ -38,6 +38,31 @@ namespace abc {
 	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(bool verify_server, socket::family_t family, Log* log)
 		: base(family, log)
 		, _verify_server(verify_server) {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::openssl_tcp_client_socket() >>>");
+		}
+
+		const SSL_METHOD *method = TLS_client_method();
+		if (method == nullptr) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::openssl_tcp_client_socket() TLS_client_method()", __TAG__, log_local);
+		}
+
+		_ctx = SSL_CTX_new(method);
+		if (_ctx == nullptr) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::openssl_tcp_client_socket() SSL_CTX_new()", __TAG__, log_local);
+		}
+
+		SSL_CTX_set_verify(_ctx, _verify_server ? SSL_VERIFY_PEER : SSL_VERIFY_NONE, nullptr);
+
+		_ssl = SSL_new(_ctx);
+		if (_ssl == nullptr) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::openssl_tcp_client_socket() SSL_new()", __TAG__, log_local);
+		}
+
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::openssl_tcp_client_socket() <<<");
+		}
 	}
 
 
@@ -51,6 +76,7 @@ namespace abc {
 	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(openssl_tcp_client_socket&& other) noexcept
 		: base(std::move(other))
 		, _verify_server(other._verify_server)
+		, _ctx(other._ctx)
 		, _ssl(other._ssl) {
 		Log* log_local = base::log();
 		if (log_local != nullptr) {
@@ -58,6 +84,7 @@ namespace abc {
 		}
 
 		other._verify_server = true;
+		other._ctx = nullptr;
 		other._ssl = nullptr;
 
 		if (log_local != nullptr) {
@@ -104,8 +131,45 @@ namespace abc {
 			_ssl = nullptr;
 		}
 
+		if (_ctx != nullptr) {
+			SSL_CTX_free(_ctx);
+			_ctx = nullptr;
+		}
+
 		if (log_local != nullptr) {
 			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::~openssl_tcp_client_socket() <<<");
+		}
+	}
+
+
+	template <typename Log>
+	inline void openssl_tcp_client_socket<Log>::connect(const char* host, const char* port) {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect() >>>");
+		}
+
+		base::connect(host, port);
+		connect_handshake();
+
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect() <<<");
+		}
+	}
+
+
+	template <typename Log>
+	inline void openssl_tcp_client_socket<Log>::connect(const socket::address& address) {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect() >>>");
+		}
+
+		base::connect(address);
+		connect_handshake();
+
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect() <<<");
 		}
 	}
 
@@ -188,6 +252,43 @@ namespace abc {
 	}
 
 
+	template <typename Log>
+	inline void openssl_tcp_client_socket<Log>::connect_handshake() {
+		Log* log_local = base::log();
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect_handshake() >>>");
+		}
+
+		if (!base::is_open()) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::connect_handshake() !is_open()", __TAG__, log_local);
+		}
+
+		if (_ssl == nullptr) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::connect_handshake() !_ssl", __TAG__, log_local);
+		}
+
+		int stat = SSL_set_fd(_ssl, base::fd());
+		if (stat <= 0) {
+			throw exception<std::logic_error, Log>("openssl_tcp_client_socket::connect_handshake() SSL_set_fd()", __TAG__, log_local);
+		}
+
+		log_local->put_any(category::abc::socket, severity::important, __TAG__, "Before SSL_connect()");
+		int ret = SSL_connect(_ssl);
+		log_local->put_any(category::abc::socket, severity::important, __TAG__, "After SSL_connect() ret=%d", ret);
+
+		if (ret != 1) {
+			int err = SSL_get_error(_ssl, ret);
+			log_local->put_any(category::abc::socket, severity::important, __TAG__, "ERR=%d", err);
+
+			throw exception<std::runtime_error, Log>("openssl_tcp_client_socket::connect_handshake() SSL_connect()", __TAG__, log_local);
+		}
+
+		if (log_local != nullptr) {
+			log_local->put_any(category::abc::socket, severity::abc::debug, __TAG__, "openssl_tcp_client_socket::connect_handshake() <<<");
+		}
+	}
+
+
 	// --------------------------------------------------------------
 
 
@@ -223,6 +324,8 @@ namespace abc {
 		if (_ctx == nullptr) {
 			throw exception<std::logic_error, Log>("openssl_tcp_server_socket::openssl_tcp_server_socket() SSL_CTX_new()", __TAG__, log_local);
 		}
+
+		SSL_CTX_set_verify(_ctx, _verify_client ? SSL_VERIFY_PEER : SSL_VERIFY_NONE, nullptr);
 
 		SSL_CTX_set_default_passwd_cb(_ctx, pem_passwd_cb);
 		SSL_CTX_set_default_passwd_cb_userdata(_ctx, _pkey_file_password);

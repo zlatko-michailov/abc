@@ -25,6 +25,9 @@ SOFTWARE.
 
 #include <cstring>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -137,27 +140,65 @@ void openssl_server(const char* cert_path, const char* pkey_path, log_ostream& l
 	SSL_CTX_free(ctx);
 }
 
-void server(const char* cert_path, const char* pkey_path, const char* password, log_ostream& log) {
+
+void server(const char* cert_path, const char* pkey_path, const char* password, log_ostream* log, std::condition_variable* scenario_cond) {
 	const char* port = "31241";
 	bool verify_client = false;
 	int queue_size = 5;
 
-	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, &log);
+	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, log);
 
 	openssl_server.bind(port);
 	openssl_server.listen(queue_size);
 	
-	abc::openssl_tcp_client_socket<log_ostream> openssl_client = openssl_server.accept();
+	// accept() blocks. Unblock the client thread now.
+	scenario_cond->notify_one();
 
-	const char welcome[] = ">>> Welcome to abc!\n";
-	openssl_client.send(welcome, sizeof(welcome));
+	abc::openssl_tcp_client_socket<log_ostream> openssl_connection = openssl_server.accept();
 
-	char response[8 + 1];
-	std::memset(response, 0, sizeof(response));
-	openssl_client.receive(response, sizeof(response) - 1);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, response);
+	const char hello[] = ">>> Welcome to abc!\n";
+	uint len = sizeof(hello) - 1;
+	openssl_connection.send(&len, 2);
+	openssl_connection.send(hello, len);
+
+	char message[100 + 1];
+	std::memset(message, 0, sizeof(message));
+	len = 0;
+	openssl_connection.receive(&len, 2);
+	openssl_connection.receive(message, len);
+	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "SERVER: %u:%s", len, message);
 
 	std::cout << "Press ENTER to shut down server socket..." << std::endl;
+	std::cin.get();
+}
+
+void client(log_ostream* log, std::mutex* scenario_mutex, std::condition_variable* scenario_cond) {
+	const char* port = "31241";
+	bool verify_server = false;
+	const char* host = "localhost";
+
+	// Block until the server starts listening.
+	std::unique_lock<std::mutex> lock(*scenario_mutex);
+	scenario_cond->wait(lock);
+
+	abc::openssl_tcp_client_socket<log_ostream> openssl_client(verify_server, abc::socket::family::ipv4, log);
+
+	openssl_client.connect(host, port);
+
+	uint len = 0;
+	openssl_client.receive(&len, 2);
+
+	char message[100 + 1];
+	std::memset(message, 0, sizeof(message));
+	openssl_client.receive(message, len);
+	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "CLIENT: %u:%s", len, message);
+
+	const char hi[] = "<<< Thanks.";
+	len = sizeof(hi) - 1;
+	openssl_client.send(&len, 2);
+	openssl_client.send(hi, len);
+
+	std::cout << "Press ENTER to close client socket..." << std::endl;
 	std::cin.get();
 }
 
@@ -209,11 +250,13 @@ int main(int /*argc*/, const char* argv[]) {
 	std::strcpy(pkey_path + prog_path_len_1, pkey_file);
 	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "pkey_path='%s'", pkey_path);
 
-	server(cert_path, pkey_path, "server", log);
+	std::mutex scenario_mutex;
+	std::condition_variable scenario_cond;
+	std::thread server_thread(server, cert_path, pkey_path, "server", &log, &scenario_cond);
+	std::thread client_thread(client, &log, &scenario_mutex, &scenario_cond);
 
-
-	std::cout << "Press ENTER to exit..." << std::endl;
-	std::cin.get();
+	server_thread.join();
+	client_thread.join();
 
 	return 0;
 }
