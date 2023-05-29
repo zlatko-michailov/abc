@@ -82,7 +82,8 @@
 		"compare": "cpp",
 		"ranges": "cpp",
 		"stop_token": "cpp",
-		"codecvt": "cpp"
+		"codecvt": "cpp",
+		"cinttypes": "cpp"
 	},
 	"cSpell.enabled": true,
 	"cSpell.words": [

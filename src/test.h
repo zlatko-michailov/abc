@@ -60,8 +60,9 @@ namespace abc {
 		 * @param method_name	Test method name.
 		 * @param log			Pointer to a `log_ostream` instance.
 		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 * @param process_path	The path to the test process.
 		 */
-		test_context(const char* category_name, const char* method_name, Log* log, seed_t seed = seed::random) noexcept;
+		test_context(const char* category_name, const char* method_name, Log* log, seed_t seed, const char* process_path) noexcept;
 
 		/**
 		 * @brief				Verifies an actual value matches the expected one.
@@ -98,6 +99,7 @@ namespace abc {
 		const char* 	method_name;
 		Log*			log;
 		seed_t			seed;
+		const char*		process_path;
 	};
 
 
@@ -152,16 +154,18 @@ namespace abc {
 		 * @param categories	Collection of named categories.
 		 * @param log			Pointer to a `log_ostream` instance.
 		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 * @param process_path	The path to the test process.
 		 */
-		test_suite(std::vector<named_test_category<Log>>&& categories, Log* log, seed_t seed) noexcept;
+		test_suite(std::vector<named_test_category<Log>>&& categories, Log* log, seed_t seed, const char* process_path) noexcept;
 
 		/**
 		 * @brief				Constructor. initializer list version.
 		 * @param init			Initializer list of named categories.
 		 * @param log			Pointer to a `log_ostream` instance.
 		 * @param seed			Randomization seed. Used to repeat a previous test run.
+		 * @param process_path	The path to the test process.
 		 */
-		test_suite(std::initializer_list<named_test_category<Log>> init, Log* log, seed_t seed) noexcept;
+		test_suite(std::initializer_list<named_test_category<Log>> init, Log* log, seed_t seed, const char* process_path) noexcept;
 
 		/**
 		 * @brief				Executes all test methods of all test categories.
@@ -172,6 +176,7 @@ namespace abc {
 		std::vector<named_test_category<Log>>	categories;
 		Log*									log;
 		seed_t									seed;
+		const char*								process_path;
 
 	private:
 		void srand() noexcept;
@@ -182,11 +187,12 @@ namespace abc {
 
 
 	template <typename Log>
-	test_context<Log>::test_context(const char* category_name, const char* method_name, Log* log, seed_t seed) noexcept
+	test_context<Log>::test_context(const char* category_name, const char* method_name, Log* log, seed_t seed, const char* process_path) noexcept
 		: category_name(category_name)
 		, method_name(method_name)
 		, log(log)
-		, seed(seed) {
+		, seed(seed)
+		, process_path(process_path) {
 	}
 
 
@@ -274,17 +280,19 @@ namespace abc {
 
 
 	template <typename Log>
-	inline test_suite<Log>::test_suite(std::vector<named_test_category<Log>>&& categories, Log* log, seed_t seed) noexcept
+	inline test_suite<Log>::test_suite(std::vector<named_test_category<Log>>&& categories, Log* log, seed_t seed, const char* process_path) noexcept
 		: categories(std::move(categories))
 		, log(log)
-		, seed(seed) {
+		, seed(seed)
+		, process_path(process_path) {
 	}
 
 	template <typename Log>
-	inline test_suite<Log>::test_suite(std::initializer_list<named_test_category<Log>> init, Log* log, seed_t seed) noexcept
+	inline test_suite<Log>::test_suite(std::initializer_list<named_test_category<Log>> init, Log* log, seed_t seed, const char* process_path) noexcept
 		: categories(init.begin(), init.end())
 		, log(log)
-		, seed(seed) {
+		, seed(seed)
+		, process_path(process_path) {
 	}
 
 
@@ -317,7 +325,7 @@ namespace abc {
 				}
 
 				try {
-					test_context<Log> context(category_it->first.c_str(), method_it->first.c_str(), log, seed);
+					test_context<Log> context(category_it->first.c_str(), method_it->first.c_str(), log, seed, process_path);
 					method_passed = method_it->second(context);
 				}
 				catch(const std::exception& ex) {
