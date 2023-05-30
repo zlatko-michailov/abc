@@ -23,8 +23,10 @@ SOFTWARE.
 */
 
 
-#include <thread>
 #include <cctype>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "inc/http.h"
 #include "inc/json.h"
@@ -33,6 +35,41 @@ SOFTWARE.
 
 
 namespace abc { namespace test { namespace socket {
+
+	constexpr std::size_t max_path_size = abc::size::k1;
+	constexpr const char cert_filename[] = "cert.pem";
+	constexpr const char pkey_filename[] = "pkey.pem";
+	constexpr const char pkey_password[] = "server";
+	constexpr bool verify_client = false;
+	constexpr bool verify_server = false;
+
+
+	bool make_filepath(test_context<abc::test::log>& context, char* filepath, std::size_t filepath_size, const char* process_path, const char* filename) {
+		context.log->put_any(abc::category::abc::base, abc::severity::optional, __TAG__, "process_path='%s'", process_path);
+
+		std::size_t filename_len = std::strlen(filename); 
+		const char* process_last_separator = std::strrchr(process_path, '/');
+		std::size_t process_dir_len = 0;
+
+		if (process_last_separator != nullptr) {
+			process_dir_len = process_last_separator - process_path;
+			std::size_t filepath_len = process_dir_len + 1 + filename_len;
+
+			if (filepath_len >= filepath_size) {
+				context.log->put_any(abc::category::abc::base, abc::severity::important, __TAG__, "filepath_len=%zu >= filepath_size=%zu", filepath_len, filepath_size);
+
+				return false;
+			}
+
+			std::strncpy(filepath, process_path, process_dir_len + 1);
+		}
+
+		std::strcpy(filepath + process_dir_len + 1, filename);
+		context.log->put_any(abc::category::abc::base, abc::severity::optional, __TAG__, "filepath='%s'", filepath);
+
+		return true;
+	}
+
 
 	bool test_udp_sync_socket(test_context<abc::test::log>& context) {
 		const char server_port[] = "31234";
@@ -54,7 +91,7 @@ namespace abc { namespace test { namespace socket {
 
 				client.receive(&content_length, sizeof(std::uint16_t));
 
-				char content[1024];
+				char content[abc::size::k1];
 				client.receive(content, content_length);
 				content[content_length] = '\0';
 
@@ -79,7 +116,7 @@ namespace abc { namespace test { namespace socket {
 		std::uint16_t content_length;
 		server.receive(&content_length, sizeof(std::uint16_t), &client_address);
 
-		char content[1024];
+		char content[abc::size::k1];
 		server.receive(content, content_length);
 		content[content_length] = '\0';
 
@@ -97,19 +134,18 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_tcp_sync_socket(test_context<abc::test::log>& context) {
+	template <typename ServerSocket, typename ClientSocket>
+	bool tcp_sync_socket(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
 		const char server_port[] = "31235";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
-		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
+		std::thread client_thread([&client, &passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -118,7 +154,7 @@ namespace abc { namespace test { namespace socket {
 
 				client.receive(&content_length, sizeof(std::uint16_t));
 
-				char content[1024];
+				char content[abc::size::k1];
 				client.receive(content, content_length);
 				content[content_length] = '\0';
 
@@ -139,54 +175,81 @@ namespace abc { namespace test { namespace socket {
 
 		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e7) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = server.accept();
+		ClientSocket connection = server.accept();
 
 		std::uint16_t content_length;
-		client.receive(&content_length, sizeof(std::uint16_t));
+		connection.receive(&content_length, sizeof(std::uint16_t));
 
-		char content[1024];
-		client.receive(content, content_length);
+		char content[abc::size::k1];
+		connection.receive(content, content_length);
 		content[content_length] = '\0';
 
 		passed = context.are_equal(content, request_content, 0x1002d) && passed;
 
 		content_length = std::strlen(response_content);
-		client.send(&content_length, sizeof(std::uint16_t));
+		connection.send(&content_length, sizeof(std::uint16_t));
 
-		client.send(response_content, content_length);
+		connection.send(response_content, content_length);
 
 		client_thread.join();
 		return passed;
 	}
+	
+	bool test_tcp_sync_socket(test_context<abc::test::log>& context) {
+		abc::tcp_server_socket<abc::test::log> server(context.log);
+		abc::tcp_client_socket<abc::test::log> client(context.log);
+
+		return tcp_sync_socket(context, server, client);
+	}
 
 
-	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context) {
+	bool test_openssl_tcp_sync_socket(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+#ifdef __ABC__OPENSSL
+		char cert_path[max_path_size];
+		passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+
+		char pkey_path[max_path_size];
+		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+
+		if (passed) {
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
+
+			passed = passed && tcp_sync_socket(context, server, client);
+		}
+#endif
+		return passed;
+	}
+
+
+	template <typename ServerSocket, typename ClientSocket>
+	bool tcp_socket_stream_move(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client1) {
 		const char server_port[] = "31236";
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
 		bool passed = true;
 
-		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
-		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
+		std::thread client_thread([&passed, &context, &client1, server_port, request_content, response_content] () {
 			try {
-				abc::tcp_client_socket<abc::test::log> client1(context.log);
 				client1.connect("localhost", server_port);
 
-				abc::tcp_client_socket<abc::test::log> client2(std::move(client1));
+				ClientSocket client2(std::move(client1));
 
-				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb1(&client2, context.log);
+				abc::socket_streambuf<ClientSocket, abc::test::log> sb1(&client2, context.log);
 				std::ostream client_out(&sb1);
 
 				client_out << request_content << "\n";
 				client_out.flush();
 
-				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb2(std::move(sb1));
+				abc::socket_streambuf<ClientSocket, abc::test::log> sb2(std::move(sb1));
 				std::istream client_in(&sb2);
 
-				char content[1024];
+				char content[abc::size::k1];
 				client_in.getline(content, sizeof(content) - 1);
 				passed = context.are_equal(content, response_content, 0x10037) && passed;
 			}
@@ -205,20 +268,49 @@ namespace abc { namespace test { namespace socket {
 
 		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e8) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = server.accept();
+		ClientSocket connection = server.accept();
 
-		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
-		std::istream client_in(&sb);
-		std::ostream client_out(&sb);
+		abc::socket_streambuf<ClientSocket, abc::test::log> sb(&connection, context.log);
+		std::istream connection_in(&sb);
+		std::ostream connection_out(&sb);
 
-		char content[1024];
-		client_in.getline(content, sizeof(content) - 1);
+		char content[abc::size::k1];
+		connection_in.getline(content, sizeof(content) - 1);
 		passed = context.are_equal(content, request_content, 0x10039) && passed;
 
-		client_out << response_content << "\n";
-		client_out.flush();
+		connection_out << response_content << "\n";
+		connection_out.flush();
 
 		client_thread.join();
+		return passed;
+	}
+
+
+	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context) {
+		abc::tcp_server_socket<abc::test::log> server(context.log);
+		abc::tcp_client_socket<abc::test::log> client(context.log);
+
+		return tcp_socket_stream_move(context, server, client);
+	}
+
+
+	bool test_openssl_tcp_socket_stream_move(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+#ifdef __ABC__OPENSSL
+		char cert_path[max_path_size];
+		passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+
+		char pkey_path[max_path_size];
+		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+
+		if (passed) {
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
+
+			passed = passed && tcp_socket_stream_move(context, server, client);
+		}
+#endif
 		return passed;
 	}
 
@@ -269,7 +361,7 @@ namespace abc { namespace test { namespace socket {
 
 				// Receive response
 				{
-					char buffer[1024];
+					char buffer[abc::size::k1];
 
 					http.get_protocol(buffer, sizeof(buffer));
 					passed = context.are_equal(buffer, protocol, 0x100e9) && passed;
@@ -338,7 +430,7 @@ namespace abc { namespace test { namespace socket {
 
 		// Receive request
 		{
-			char buffer[1024];
+			char buffer[abc::size::k1];
 
 			http.get_method(buffer, sizeof(buffer));
 			passed = context.are_equal(buffer, request_method, 0x100f2) && passed;

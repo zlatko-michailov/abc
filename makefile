@@ -167,8 +167,9 @@ build_test: build_product
 	#
 	# ---------- Begin building tests ----------
 	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) $(CURDIR)/$(SUBDIR_TEST)/*.cpp $(CPP_LINK_OPTIONS)
+	cp $(CURDIR)/$(SUBDIR_TEST)/$(SUBDIR_RESOURCES)/*.pem $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)
 	# ---------- Done building tests ----------
-	#
+	#	
 
 build_product: clean
 	#
