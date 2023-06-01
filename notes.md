@@ -4,9 +4,10 @@
 
 ## To Do
 - openssl_socket
-  + test
-  + `#ifdef`
-- LetsEncrypt.org client
+  + Constructor parity
+- Sample tls
+  + Move to boneyard
+  + Remove from makefile
 
 ## To Do Refactoring
 - exceptions!

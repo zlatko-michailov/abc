@@ -71,7 +71,7 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_udp_sync_socket(test_context<abc::test::log>& context) {
+	bool test_udp_socket(test_context<abc::test::log>& context) {
 		const char server_port[] = "31234";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
@@ -135,7 +135,7 @@ namespace abc { namespace test { namespace socket {
 
 
 	template <typename ServerSocket, typename ClientSocket>
-	bool tcp_sync_socket(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
+	bool tcp_socket(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
 		const char server_port[] = "31235";
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
@@ -195,15 +195,15 @@ namespace abc { namespace test { namespace socket {
 		return passed;
 	}
 	
-	bool test_tcp_sync_socket(test_context<abc::test::log>& context) {
+	bool test_tcp_socket(test_context<abc::test::log>& context) {
 		abc::tcp_server_socket<abc::test::log> server(context.log);
 		abc::tcp_client_socket<abc::test::log> client(context.log);
 
-		return tcp_sync_socket(context, server, client);
+		return tcp_socket(context, server, client);
 	}
 
 
-	bool test_openssl_tcp_sync_socket(test_context<abc::test::log>& context) {
+	bool test_openssl_tcp_socket(test_context<abc::test::log>& context) {
 		bool passed = true;
 
 #ifdef __ABC__OPENSSL
@@ -217,7 +217,7 @@ namespace abc { namespace test { namespace socket {
 			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
-			passed = passed && tcp_sync_socket(context, server, client);
+			passed = passed && tcp_socket(context, server, client);
 		}
 #endif
 		return passed;
@@ -315,7 +315,8 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	bool test_http_json_socket_stream(test_context<abc::test::log>& context) {
+	template <typename ServerSocket, typename ClientSocket>
+	bool tcp_socket_http_json_stream(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
 		const char server_port[] = "31237";
 		const char protocol[] = "HTTP/1.1";
 		const char request_method[] = "POST";
@@ -328,18 +329,16 @@ namespace abc { namespace test { namespace socket {
 		const char response_header_value[] = "Response-Header-Value";
 		bool passed = true;
 
-		abc::tcp_server_socket<abc::test::log> server(context.log);
 		server.bind(server_port);
 		server.listen(5);
 
-		std::thread client_thread([&passed, &context, server_port,
+		std::thread client_thread([&passed, &context, &client, server_port,
 								protocol, request_method, request_resource, request_header_name, request_header_value,
 								response_status_code, response_reason_phrase, response_header_name, response_header_value] () {
 			try {
-				abc::tcp_client_socket<abc::test::log> client(context.log);
 				client.connect("localhost", server_port);
 
-				abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
+				abc::socket_streambuf<ClientSocket, abc::test::log> sb(&client, context.log);
 				abc::http_client_stream<abc::test::log> http(&sb, context.log);
 
 				// Send request
@@ -423,9 +422,9 @@ namespace abc { namespace test { namespace socket {
 
 		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
 
-		abc::tcp_client_socket<abc::test::log> client = server.accept();
+		ClientSocket connection = server.accept();
 
-		abc::socket_streambuf<abc::tcp_client_socket<abc::test::log>, abc::test::log> sb(&client, context.log);
+		abc::socket_streambuf<ClientSocket, abc::test::log> sb(&connection, context.log);
 		abc::http_server_stream<abc::test::log> http(&sb, context.log);
 
 		// Receive request
@@ -487,6 +486,35 @@ namespace abc { namespace test { namespace socket {
 		json.put_end_object();
 
 		client_thread.join();
+		return passed;
+	}
+
+
+	bool test_tcp_socket_http_json_stream(test_context<abc::test::log>& context) {
+		abc::tcp_server_socket<abc::test::log> server(context.log);
+		abc::tcp_client_socket<abc::test::log> client(context.log);
+
+		return tcp_socket_http_json_stream(context, server, client);
+	}
+
+
+	bool test_openssl_tcp_socket_http_json_stream(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+#ifdef __ABC__OPENSSL
+		char cert_path[max_path_size];
+		passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+
+		char pkey_path[max_path_size];
+		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+
+		if (passed) {
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
+
+			passed = passed && tcp_socket_http_json_stream(context, server, client);
+		}
+#endif
 		return passed;
 	}
 

@@ -151,13 +151,14 @@ int main(int /*argc*/, const char* argv[]) {
 				{ "test_json_ostream_move",							abc::test::json::test_json_ostream_move },
 			} },
 			{ "socket", {
-				{ "test_udp_sync_socket",							abc::test::socket::test_udp_sync_socket },
-				{ "test_tcp_sync_socket",							abc::test::socket::test_tcp_sync_socket },
+				{ "test_udp_socket",								abc::test::socket::test_udp_socket },
+				{ "test_tcp_socket",								abc::test::socket::test_tcp_socket },
 				{ "test_tcp_socket_stream_move",					abc::test::socket::test_tcp_socket_stream_move },
-				{ "test_http_json_socket_stream",					abc::test::socket::test_http_json_socket_stream },
+				{ "test_tcp_socket_http_json_stream",				abc::test::socket::test_tcp_socket_http_json_stream },
 #ifdef __ABC__OPENSSL
-				{ "test_openssl_tcp_sync_socket",					abc::test::socket::test_openssl_tcp_sync_socket },
+				{ "test_openssl_tcp_socket",						abc::test::socket::test_openssl_tcp_socket },
 				{ "test_openssl_tcp_socket_stream_move",			abc::test::socket::test_openssl_tcp_socket_stream_move },
+				{ "test_openssl_tcp_socket_http_json_stream",		abc::test::socket::test_openssl_tcp_socket_http_json_stream },
 #endif
 			} },
 			{ "vmem", {

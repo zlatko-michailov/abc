@@ -35,15 +35,14 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace socket {
 
-	bool test_udp_sync_socket(test_context<abc::test::log>& context);
+	bool test_udp_socket(test_context<abc::test::log>& context);
 
-	bool test_tcp_sync_socket(test_context<abc::test::log>& context);
-	bool test_openssl_tcp_sync_socket(test_context<abc::test::log>& context);
-
+	bool test_tcp_socket(test_context<abc::test::log>& context);
 	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context);
+	bool test_tcp_socket_http_json_stream(test_context<abc::test::log>& context);
+
+	bool test_openssl_tcp_socket(test_context<abc::test::log>& context);
 	bool test_openssl_tcp_socket_stream_move(test_context<abc::test::log>& context);
-
-	bool test_http_json_socket_stream(test_context<abc::test::log>& context);
-
+	bool test_openssl_tcp_socket_http_json_stream(test_context<abc::test::log>& context);
 }}}
 
