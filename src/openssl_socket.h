@@ -67,12 +67,6 @@ namespace abc {
 
 
 	template <typename Log>
-	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(Log* log)
-		: openssl_tcp_client_socket<Log>(true, socket::family::ipv4, log) {
-	}
-
-
-	template <typename Log>
 	inline openssl_tcp_client_socket<Log>::openssl_tcp_client_socket(openssl_tcp_client_socket&& other) noexcept
 		: base(std::move(other))
 		, _verify_server(other._verify_server)
@@ -290,12 +284,6 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
-
-
-	template <typename Log>
-	inline openssl_tcp_server_socket<Log>::openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, Log* log)
-		: openssl_tcp_server_socket<Log>(cert_file_path, pkey_file_path, pkey_file_password, verify_client, socket::family::ipv4, log) {
-	}
 
 
 	template <typename Log>

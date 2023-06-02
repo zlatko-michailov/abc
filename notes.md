@@ -1,10 +1,12 @@
 ## Done
-- Temporary? Sample tls
+- `openssl_tcp_server_socket`, `openssl_tcp_client_socket`.
 - BREAKING: socket - Rename `handle()` to `fd()`. 
+- BREAKING: socket - Remove constructors without `family` parameter.
 
 ## To Do
-- openssl_socket
-  + Constructor parity
+- `tls_tcp_*_socket` - template
+- Doc
+  + openssl
 - Sample tls
   + Move to boneyard
   + Remove from makefile

@@ -57,13 +57,6 @@ namespace abc {
 		openssl_tcp_client_socket(bool verify_server = true, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
 
 		/**
-		 * @brief				Constructor.
-		 * @details				Security is enabled and IPv4 is assumed.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		openssl_tcp_client_socket(Log* log);
-
-		/**
 		 * @brief				Move constructor.
 		 */
 		openssl_tcp_client_socket(openssl_tcp_client_socket&& other) noexcept;
@@ -166,17 +159,6 @@ namespace abc {
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client = false, socket::family_t family = socket::family::ipv4, Log* log = nullptr);
-
-		/**
-		 * @brief				Constructor.
-		 * @details				IPv4 is assumed.
-		 * @param cert_file_path Path to the certificate file. This is most typically public/unencrypted.
-		 * @param pkey_file_path Path to the private key file. This is typically password-encrypted.
-		 * @param pkey_file_password Password for the private key file.
-		 * @param verify_client	Allows the server to require client a certificate.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		openssl_tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, Log* log);
 
 		/**
 		 * @brief				Move constructor.

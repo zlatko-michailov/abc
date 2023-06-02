@@ -353,13 +353,6 @@ namespace abc {
 		udp_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
 
 		/**
-		 * @brief				Constructor.
-		 * @details				IPv4 is assumed.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		udp_socket(Log* log);
-
-		/**
 		 * @brief				Move constructor.
 		 */
 		udp_socket(udp_socket&& other) noexcept = default;
@@ -393,13 +386,6 @@ namespace abc {
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		tcp_client_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
-
-		/**
-		 * @brief				Constructor.
-		 * @details				IPv4 is assumed.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		tcp_client_socket(Log* log);
 
 		/**
 		 * @brief				Move constructor.
@@ -442,13 +428,6 @@ namespace abc {
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		tcp_server_socket(socket::family_t family = socket::family::ipv4, Log* log = nullptr);
-
-		/**
-		 * @brief				Constructor.
-		 * @details				IPv4 is assumed.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		tcp_server_socket(Log* log);
 
 		/**
 		 * @brief				Move constructor.

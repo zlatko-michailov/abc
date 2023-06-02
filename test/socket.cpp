@@ -77,12 +77,12 @@ namespace abc { namespace test { namespace socket {
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
 
-		abc::udp_socket<abc::test::log> server(context.log);
+		abc::udp_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
 		server.bind(server_port);
 
 		std::thread client_thread([&passed, &context, server_port, request_content, response_content] () {
 			try {
-				abc::udp_socket<abc::test::log> client(context.log);
+				abc::udp_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 				client.connect("localhost", server_port);
 
 				std::uint16_t content_length = std::strlen(request_content);
@@ -196,8 +196,8 @@ namespace abc { namespace test { namespace socket {
 	}
 	
 	bool test_tcp_socket(test_context<abc::test::log>& context) {
-		abc::tcp_server_socket<abc::test::log> server(context.log);
-		abc::tcp_client_socket<abc::test::log> client(context.log);
+		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
+		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
 		return tcp_socket(context, server, client);
 	}
@@ -214,7 +214,7 @@ namespace abc { namespace test { namespace socket {
 		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
 
 		if (passed) {
-			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
 			passed = passed && tcp_socket(context, server, client);
@@ -287,8 +287,8 @@ namespace abc { namespace test { namespace socket {
 
 
 	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context) {
-		abc::tcp_server_socket<abc::test::log> server(context.log);
-		abc::tcp_client_socket<abc::test::log> client(context.log);
+		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
+		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
 		return tcp_socket_stream_move(context, server, client);
 	}
@@ -305,7 +305,7 @@ namespace abc { namespace test { namespace socket {
 		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
 
 		if (passed) {
-			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
 			passed = passed && tcp_socket_stream_move(context, server, client);
@@ -491,8 +491,8 @@ namespace abc { namespace test { namespace socket {
 
 
 	bool test_tcp_socket_http_json_stream(test_context<abc::test::log>& context) {
-		abc::tcp_server_socket<abc::test::log> server(context.log);
-		abc::tcp_client_socket<abc::test::log> client(context.log);
+		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
+		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
 		return tcp_socket_http_json_stream(context, server, client);
 	}
@@ -509,7 +509,7 @@ namespace abc { namespace test { namespace socket {
 		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
 
 		if (passed) {
-			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, context.log);
+			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
 			passed = passed && tcp_socket_http_json_stream(context, server, client);

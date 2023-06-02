@@ -414,24 +414,12 @@ namespace abc {
 
 
 	template <typename Log>
-	inline udp_socket<Log>::udp_socket(Log* log)
-		: udp_socket<Log>(socket::family::ipv4, log) {
-	}
-
-
-	template <typename Log>
 	inline udp_socket<Log>::udp_socket(socket::family_t family, Log* log)
 		: client_socket<Log>(socket::kind::dgram, family, log) {
 	}
 
 
 	// --------------------------------------------------------------
-
-
-	template <typename Log>
-	inline tcp_client_socket<Log>::tcp_client_socket(Log* log)
-		: tcp_client_socket<Log>(socket::family::ipv4, log) {
-	}
 
 
 	template <typename Log>
@@ -447,12 +435,6 @@ namespace abc {
 
 
 	// --------------------------------------------------------------
-
-
-	template <typename Log>
-	inline tcp_server_socket<Log>::tcp_server_socket(Log* log)
-		: tcp_server_socket<Log>(socket::family::ipv4, log) {
-	}
 
 
 	template <typename Log>
