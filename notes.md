@@ -4,12 +4,8 @@
 - BREAKING: socket - Remove constructors without `family` parameter.
 
 ## To Do
-- `tls_tcp_*_socket` - template
 - Doc
   + openssl
-- Sample tls
-  + Move to boneyard
-  + Remove from makefile
 
 ## To Do Refactoring
 - exceptions!

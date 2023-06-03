@@ -28,8 +28,6 @@ SOFTWARE.
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 
 #include "../../src/log.h"
 #include "../../src/openssl_socket.h"
@@ -38,115 +36,12 @@ SOFTWARE.
 using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
 
 
-int openssl_pem_passwd_cb(char* buf, int size, int /*rwflag*/, void* /*password*/) {
-	memset(buf, 0, size);
-	strncpy(buf, "server", size);
-	buf[size - 1] = '\0';
-
-	return(strlen(buf));
-}
-
-
-SSL_CTX* openssl_new_server_ssl_ctx (const char* cert_path, const char* pkey_path, log_ostream& log) {
-	const SSL_METHOD *method = TLS_server_method();
-	if (method == nullptr) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: method=%p", method);
-		return nullptr;
-	}
-
-	SSL_CTX *ctx = SSL_CTX_new(method);
-	if (ctx == nullptr) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: ctx=%p", ctx);
-		return nullptr;
-	}
-
-	SSL_CTX_set_default_passwd_cb(ctx, openssl_pem_passwd_cb);
-
-    int stat = SSL_CTX_use_certificate_file(ctx, cert_path, SSL_FILETYPE_PEM);
-	if (stat <= 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: use_cert stat=%d", stat);
-		ERR_print_errors_fp(stderr);
-		SSL_CTX_free(ctx);
-		return nullptr;
-	}
-
-    stat = SSL_CTX_use_PrivateKey_file(ctx, pkey_path, SSL_FILETYPE_PEM);
-	if (stat <= 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: use_pkey stat=%d", stat);
-		ERR_print_errors_fp(stderr);
-		SSL_CTX_free(ctx);
-		return nullptr;
-	}
-
-	return ctx;
-}
-
-
-int openssl_accept_client(SSL* ssl, abc::tcp_client_socket<log_ostream>& client, log_ostream& log) {
-	int stat = SSL_set_fd(ssl, client.fd());
-	if (stat <= 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: set_fd stat=%d", stat);
-		ERR_print_errors_fp(stderr);
-		return stat;
-	}
-
-	stat = SSL_accept(ssl);
-	if (stat <= 0) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: accept stat=%d", stat);
-		ERR_print_errors_fp(stderr);
-		return stat;
-	}
-
-	return 1;
-}
-
-
-void openssl_server(const char* cert_path, const char* pkey_path, log_ostream& log) {
-
-	const char* port = "31241";
-	abc::tcp_server_socket<log_ostream> server(&log);
-	server.bind(port);
-	server.listen(5);
-	
-	abc::tcp_client_socket<log_ostream> client = server.accept();
-
-
-	SSL_CTX *ctx = openssl_new_server_ssl_ctx(cert_path, pkey_path, log);
-	if (ctx == nullptr) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: new_server_ctx=%p", ctx);
-		return;
-	}
-
-	SSL *ssl = SSL_new(ctx);
-	if (ctx == nullptr) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "ERR: new_ssl=%p", ssl);
-		SSL_CTX_free(ctx);
-		return;
-	}
-
-	int stat = openssl_accept_client(ssl, client, log);
-	if (stat == 1) {
-		const char welcome[] = ">>> Welcome to abc!\n";
-		SSL_write(ssl, welcome, sizeof(welcome));
-	}
-
-
-	std::cout << "Press ENTER to shut down server socket..." << std::endl;
-	std::cin.get();
-
-	SSL_shutdown(ssl);
-	SSL_free(ssl);
-	
-	SSL_CTX_free(ctx);
-}
-
-
 void server(const char* cert_path, const char* pkey_path, const char* password, log_ostream* log, std::condition_variable* scenario_cond) {
 	const char* port = "31241";
 	bool verify_client = false;
 	int queue_size = 5;
 
-	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, log);
+	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, abc::socket::family::ipv4, log);
 
 	openssl_server.bind(port);
 	openssl_server.listen(queue_size);
@@ -171,6 +66,7 @@ void server(const char* cert_path, const char* pkey_path, const char* password, 
 	std::cout << "Press ENTER to shut down server socket..." << std::endl;
 	std::cin.get();
 }
+
 
 void client(log_ostream* log, std::mutex* scenario_mutex, std::condition_variable* scenario_cond) {
 	const char* port = "31241";
