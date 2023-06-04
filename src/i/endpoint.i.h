@@ -43,8 +43,12 @@ namespace abc {
 		 * @param listen_queue_size	Maximum number of new connections pending to be processed.
 		 * @param root_dir			Local directory that is the root for static files.
 		 * @param files_prefix		Virtual path that maps to the root directory.
+		 * @param cert_file_path	Full path to the TLS certificate file.
+		 * @param pkey_file_path	Full path to the TLS private key file.
+		 * @param pkey_file_password Password for the TLS private key file.
 		 */
-		endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix);
+		endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix,
+						const char* cert_file_path = nullptr, const char* pkey_file_path = nullptr, const char* pkey_file_password = nullptr);
 
 		/**
 		 * @brief					Port number to listen at.
@@ -75,6 +79,22 @@ namespace abc {
 		 * @brief					Length of `files_prefix`.
 		 */
 		const std::size_t files_prefix_len;
+
+		/**
+		 * @brief					Full path to the TLS certificate file.
+		 */
+		const char* const cert_file_path;
+
+		/**
+		 * @brief					Full path to the TLS private key file.
+		 */
+		const char* const pkey_file_path;
+
+		/**
+		 * @brief					Password for the TLS private key file.
+		 */
+		const char* const pkey_file_password;
+
 	};
 
 

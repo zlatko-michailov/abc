@@ -72,7 +72,7 @@ namespace abc {
 		}
 
 		// Create a listener, bind to a port, and start listening.
-		abc::tcp_server_socket<Log> listener(_log);
+		abc::tcp_server_socket<Log> listener(socket::family::ipv4, _log);
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
 
@@ -337,7 +337,8 @@ namespace abc {
 	// --------------------------------------------------------------
 
 
-	inline endpoint_config::endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix)
+	inline endpoint_config::endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix,
+											const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password)
 		: port(port)
 
 		, listen_queue_size(listen_queue_size)
@@ -346,7 +347,11 @@ namespace abc {
 		, root_dir_len(root_dir != nullptr ? std::strlen(root_dir) : 0)
 
 		, files_prefix(files_prefix)
-		, files_prefix_len(files_prefix != nullptr ? std::strlen(files_prefix) : 0) {
+		, files_prefix_len(files_prefix != nullptr ? std::strlen(files_prefix) : 0)
+		
+		, cert_file_path(cert_file_path)
+		, pkey_file_path(pkey_file_path)
+		, pkey_file_password(pkey_file_password) {
 	}
 
 
