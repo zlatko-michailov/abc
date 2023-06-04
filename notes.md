@@ -4,8 +4,11 @@
 - BREAKING: socket - Remove constructors without `family` parameter.
 
 ## To Do
+- `endpoint`
+  + Over `openssl_socket` or over another TLS socket.
+  + Add to sample `tls`.
 - Doc
-  + openssl
+  + `endpoint`
 
 ## To Do Refactoring
 - exceptions!

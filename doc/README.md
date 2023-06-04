@@ -72,6 +72,8 @@ Provide the title and the link to the page along with as much information as you
   - [udp_socket](ref/socket.md)
   - [tcp_server_socket](ref/socket.md)
   - [tcp_client_socket](ref/socket.md)
+  - [openssl_tcp_server_socket](ref/openssl_socket.md)
+  - [openssl_tcp_client_socket](ref/openssl_socket.md)
 - [table](ref/table.md)
   - [table_ostream](ref/table.md)
   - [line_ostream](ref/table.md)

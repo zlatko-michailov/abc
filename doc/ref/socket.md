@@ -17,7 +17,7 @@ These are C++ wrappers around the POSIX socket C API.
 It can _listen_ and _accept_ client connections.
 
 `tcp_client_socket` is TCP client socket.
-It can _send_ and _receive_ bytes.
+It can _connect_ to a server and can _send_ and _receive_ bytes.
 
 Since UDP sockets are connectionless, they are symmetric - there is no client or server.
 Each side can _send_, and _receive_ bytes.
