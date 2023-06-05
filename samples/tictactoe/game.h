@@ -679,6 +679,12 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
+	inline abc::tcp_server_socket<Log> game_endpoint<Limits, Log>::create_server_socket() {
+		return abc::tcp_server_socket<Log>(socket::family::ipv4, base::_log);
+	}
+
+
+	template <typename Limits, typename Log>
 	inline void game_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (base::_log != nullptr) {
 			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105b9, "game_endpoint::process_rest_request: Start.");

@@ -282,8 +282,8 @@ namespace abc { namespace samples {
 
 
 	template <typename Limits, typename Log>
-	class game_endpoint : public endpoint<Limits, Log> {
-		using base = endpoint<Limits, Log>;
+	class game_endpoint : public endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log> {
+		using base = endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log>;
 
 		static constexpr std::size_t max_game_count = 1;
 
@@ -291,6 +291,7 @@ namespace abc { namespace samples {
 		game_endpoint(endpoint_config* config, Log* log);
 
 	protected:
+		virtual abc::tcp_server_socket<Log>	create_server_socket() override;
 		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
 
 	private:

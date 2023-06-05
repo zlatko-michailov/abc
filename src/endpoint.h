@@ -46,8 +46,8 @@ SOFTWARE.
 
 namespace abc {
 
-	template <typename Limits, typename Log>
-	inline endpoint<Limits, Log>::endpoint(endpoint_config* config, Log* log)
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline endpoint<ServerSocket, ClientSocket, Limits, Log>::endpoint(endpoint_config* config, Log* log)
 		: _config(config)
 		, _log(log)
 		, _requests_in_progress(0)
@@ -55,24 +55,30 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline std::future<void> endpoint<Limits, Log>::start_async() {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline std::future<void> endpoint<ServerSocket, ClientSocket, Limits, Log>::start_async() {
 		// We can't use std::async() here because we want to detach and return our own std::future.
-		std::thread(&endpoint<Limits, Log>::start, this).detach();
+		std::thread(start_thread_func, this).detach();
 
 		// Therefore, we return our own future.
 		return _promise.get_future();
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::start() {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::start_thread_func(endpoint<ServerSocket, ClientSocket, Limits, Log>* this_ptr) {
+		this_ptr->start();
+	}
+
+
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::start() {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102f1, "Started endpoint (%s)", _config->port);
 		}
 
 		// Create a listener, bind to a port, and start listening.
-		abc::tcp_server_socket<Log> listener(socket::family::ipv4, _log);
+		ServerSocket listener = create_server_socket();
 		listener.bind(_config->port);
 		listener.listen(_config->listen_queue_size);
 
@@ -83,20 +89,26 @@ namespace abc {
 
 		while (true) {
 			// Accept the next request and process it asynchronously.
-			abc::tcp_client_socket<Log> client = listener.accept();
-			std::thread(&endpoint<Limits, Log>::process_request, this, std::move(client)).detach();
+			ClientSocket connection = listener.accept();
+			std::thread(process_request_thread_func, this, std::move(connection)).detach();
 		}
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::process_request(tcp_client_socket<Log>&& socket) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::process_request_thread_func(endpoint<ServerSocket, ClientSocket, Limits, Log>* this_ptr, ClientSocket&& connection) {
+		this_ptr->process_request(std::move(connection));
+	}
+
+
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::process_request(ClientSocket&& connection) {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102de, "Begin handling request (%s)", _config->port);
 		}
 
-		// Create a socket_streambuf over the tcp_client_socket.
-		abc::socket_streambuf<tcp_client_socket<Log>, Log> sb(&socket);
+		// Create a socket_streambuf over the ClientSocket.
+		abc::socket_streambuf<ClientSocket, Log> sb(&connection);
 
 		// Create an hhtp_server_stream, which combines http_request_istream and http_response_ostream.
 		abc::http_server_stream<Log> http(&sb);
@@ -158,8 +170,8 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::process_file_request(abc::http_server_stream<Log>& http, const char* method, const char* /*resource*/, const char* path) {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102e4, "Received File Path = '%s'", path);
 		}
@@ -220,8 +232,8 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102ea, "Received REST");
 		}
@@ -234,8 +246,8 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::send_simple_response(abc::http_server_stream<Log>& http, const char* status_code, const char* reason_phrase, const char* content_type, const char* body, abc::tag_t tag) {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102ec, "Sending simple response");
 		}
@@ -266,8 +278,8 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline const char* endpoint<Limits, Log>::get_content_type_from_path(const char* path) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline const char* endpoint<ServerSocket, ClientSocket, Limits, Log>::get_content_type_from_path(const char* path) {
 		const char* ext = std::strrchr(path, '.');
 		if (ext == nullptr) {
 			return nullptr;
@@ -311,15 +323,15 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline bool endpoint<Limits, Log>::is_file_request(const char* method, const char* resource) {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline bool endpoint<ServerSocket, ClientSocket, Limits, Log>::is_file_request(const char* method, const char* resource) {
 		return ascii::are_equal_i_n(resource, _config->files_prefix, _config->files_prefix_len)
 			|| (ascii::are_equal_i(method, method::GET) && ascii::are_equal_i(resource, "/favicon.ico"));
 	}
 
 
-	template <typename Limits, typename Log>
-	inline void endpoint<Limits, Log>::set_shutdown_requested() {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void endpoint<ServerSocket, ClientSocket, Limits, Log>::set_shutdown_requested() {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102ed, "--- Shutdown requested ---");
 		}
@@ -328,8 +340,8 @@ namespace abc {
 	}
 
 
-	template <typename Limits, typename Log>
-	inline bool endpoint<Limits, Log>::is_shutdown_requested() const {
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline bool endpoint<ServerSocket, ClientSocket, Limits, Log>::is_shutdown_requested() const {
 		return _is_shutdown_requested.load();
 	}
 

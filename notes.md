@@ -2,6 +2,7 @@
 - `openssl_tcp_server_socket`, `openssl_tcp_client_socket`.
 - BREAKING: socket - Rename `handle()` to `fd()`. 
 - BREAKING: socket - Remove constructors without `family` parameter.
+- BREAKING: endpoint - Add template parameters for server and client sockets.
 
 ## To Do
 - `endpoint`

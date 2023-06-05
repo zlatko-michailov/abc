@@ -228,12 +228,14 @@ namespace abc {
 	/**
 	 * @brief					Base http endpoint.
 	 * @details					This class supports the most common functionality - static files and `POST /shutdown`.
+	 * @tparam ServerSocket		Server socket.
+	 * @tparam ClientSocket		Client/connection socket.
 	 * @tparam Limits			Endpoint limits.
 	 * @tparam Log				Logging facility.
 	 * @see endpoint_limits
 	 * @see log_ostream
 	 */
-	template <typename Limits, typename Log>
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
 	class endpoint {
 	public:
 		/**
@@ -246,12 +248,12 @@ namespace abc {
 		/**
 		 * @brief				Move Constructor.
 		 */
-		endpoint(endpoint<Limits, Log>&& other) noexcept = default;
+		endpoint(endpoint<ServerSocket, ClientSocket, Limits, Log>&& other) noexcept = default;
 
 		/**
 		 * @brief				Deleted.
 		 */
-		endpoint(const endpoint<Limits, Log>& other) = delete;
+		endpoint(const endpoint<ServerSocket, ClientSocket, Limits, Log>& other) = delete;
 
 	public:
 		/**
@@ -267,6 +269,11 @@ namespace abc {
 		void start();
 
 	protected:
+		/**
+		 * @brief				Creates and returns an instance of ServerSocket.
+		 */
+		virtual ServerSocket create_server_socket() = 0;
+
 		/**
 		 * @brief				Processes a GET request for a static file.
 		 * @param http			Reference to a `http_server_stream`. 
@@ -314,9 +321,9 @@ namespace abc {
 		/**
 		 * @brief				Processes (any kind of) a request.
 		 * @details				This is the top-level method that reads the http request line, and calls either `process_file_request()` or `process_rest_request()`.
-		 * @param socket		Connection/client socket to read the request from and to send the response to.
+		 * @param connection	Connection/client socket to read the request from and to send the response to.
 		 */
-		void process_request(tcp_client_socket<Log>&& socket);
+		void process_request(ClientSocket&& connection);
 
 		/**
 		 * @brief				Sets the "shutdown requested" flag.
@@ -327,6 +334,17 @@ namespace abc {
 		 * @brief				Returns the state of the "shutdown requested" flag.
 		 */
 		bool is_shutdown_requested() const;
+
+	private:
+		/**
+		 * @brief				Thread function for the 'start' thread.
+		 */
+		static void start_thread_func(endpoint<ServerSocket, ClientSocket, Limits, Log>* this_ptr);
+
+		/**
+		 * @brief				Thread function for the 'process_request' thread.
+		 */
+		static void process_request_thread_func(endpoint<ServerSocket, ClientSocket, Limits, Log>* this_ptr, ClientSocket&& connection);
 
 	protected:
 		/**
