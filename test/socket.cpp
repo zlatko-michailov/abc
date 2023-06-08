@@ -36,12 +36,12 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace socket {
 
-	constexpr std::size_t max_path_size = abc::size::k1;
-	constexpr const char cert_filename[] = "cert.pem";
-	constexpr const char pkey_filename[] = "pkey.pem";
-	constexpr const char pkey_password[] = "server";
-	constexpr bool verify_client = false;
-	constexpr bool verify_server = false;
+	static constexpr std::size_t max_path_size = abc::size::k1;
+	static constexpr const char cert_filename[] = "cert.pem";
+	static constexpr const char pkey_filename[] = "pkey.pem";
+	static constexpr const char pkey_password[] = "server";
+	static constexpr bool verify_client = false;
+	static constexpr bool verify_server = false;
 
 
 	bool make_filepath(test_context<abc::test::log>& context, char* filepath, std::size_t filepath_size, const char* process_path, const char* filename) {
@@ -315,130 +315,101 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
-	template <typename ServerSocket, typename ClientSocket>
-	bool tcp_socket_http_json_stream(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
-		const char server_port[] = "31237";
-		const char protocol[] = "HTTP/1.1";
-		const char request_method[] = "POST";
-		const char request_resource[] = "/scope/v1.0/api";
-		const char request_header_name[] = "Request-Header-Name";
-		const char request_header_value[] = "Request-Header-Value";
-		const char response_status_code[] = "200";
-		const char response_reason_phrase[] = "OK";
-		const char response_header_name[] = "Response-Header-Name";
-		const char response_header_value[] = "Response-Header-Value";
-		bool passed = true;
+	static constexpr const char server_port[] = "31237";
+	static constexpr const char protocol[] = "HTTP/1.1";
+	static constexpr const char request_method[] = "POST";
+	static constexpr const char request_resource[] = "/scope/v1.0/api";
+	static constexpr const char request_header_name[] = "Request-Header-Name";
+	static constexpr const char request_header_value[] = "Request-Header-Value";
+	static constexpr const char response_status_code[] = "200";
+	static constexpr const char response_reason_phrase[] = "OK";
+	static constexpr const char response_header_name[] = "Response-Header-Name";
+	static constexpr const char response_header_value[] = "Response-Header-Value";
 
-		server.bind(server_port);
-		server.listen(5);
+	template <typename ClientSocket>
+	void http_json_stream_client(bool& passed, test_context<abc::test::log>& context, ClientSocket& client) {
+		try {
+			client.connect("localhost", server_port);
 
-		std::thread client_thread([&passed, &context, &client, server_port,
-								protocol, request_method, request_resource, request_header_name, request_header_value,
-								response_status_code, response_reason_phrase, response_header_name, response_header_value] () {
-			try {
-				client.connect("localhost", server_port);
+			abc::socket_streambuf<ClientSocket, abc::test::log> sb(&client, context.log);
+			abc::http_client_stream<abc::test::log> http(&sb, context.log);
 
-				abc::socket_streambuf<ClientSocket, abc::test::log> sb(&client, context.log);
-				abc::http_client_stream<abc::test::log> http(&sb, context.log);
+			// Send request
+			{
+				http.put_method(request_method);
+				http.put_resource(request_resource);
+				http.put_protocol(protocol);
+				http.put_header_name(request_header_name);
+				http.put_header_value(request_header_value);
+				http.end_headers();
 
-				// Send request
-				{
-					http.put_method(request_method);
-					http.put_resource(request_resource);
-					http.put_protocol(protocol);
-					http.put_header_name(request_header_name);
-					http.put_header_value(request_header_value);
-					http.end_headers();
+				// Body (json)
+				abc::json_ostream<abc::size::_64, abc::test::log> json(&sb, context.log);
+				json.put_begin_object();
+					json.put_property("param");
+					json.put_string("foo");
+				json.put_end_object();
+			}
 
-					// Body (json)
-					abc::json_ostream<abc::size::_64, abc::test::log> json(&sb, context.log);
-					json.put_begin_object();
-						json.put_property("param");
-						json.put_string("foo");
-					json.put_end_object();
-				}
+			// Receive response
+			{
+				char buffer[abc::size::k1];
 
-				// Receive response
-				{
-					char buffer[abc::size::k1];
+				http.get_protocol(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, protocol, 0x100e9) && passed;
 
-					http.get_protocol(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, protocol, 0x100e9) && passed;
+				http.get_status_code(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_status_code, 0x100ea) && passed;
 
-					http.get_status_code(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, response_status_code, 0x100ea) && passed;
+				http.get_reason_phrase(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_reason_phrase, 0x100eb) && passed;
 
-					http.get_reason_phrase(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, response_reason_phrase, 0x100eb) && passed;
+				http.get_header_name(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_header_name, 0x100ec) && passed;
 
-					http.get_header_name(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, response_header_name, 0x100ec) && passed;
+				http.get_header_value(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, response_header_value, 0x100ed) && passed;
 
-					http.get_header_value(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, response_header_value, 0x100ed) && passed;
+				http.get_header_name(buffer, sizeof(buffer));
+				passed = context.are_equal(buffer, "", 0x100ee) && passed;
 
-					http.get_header_name(buffer, sizeof(buffer));
-					passed = context.are_equal(buffer, "", 0x100ee) && passed;
+				// Body (json)
+				abc::json_istream<abc::size::_64, abc::test::log> json(&sb, context.log);
+				abc::json::token_t* token = (abc::json::token_t*)buffer;
 
-					// Body (json)
-					abc::json_istream<abc::size::_64, abc::test::log> json(&sb, context.log);
-					abc::json::token_t* token = (abc::json::token_t*)buffer;
+				json.get_token(token, sizeof(buffer));
+				passed = context.are_equal(token->item, abc::json::item::begin_object, 0x102a0, "%u") && passed;
 
 					json.get_token(token, sizeof(buffer));
-					passed = context.are_equal(token->item, abc::json::item::begin_object, 0x102a0, "%u") && passed;
-
-						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::property, 0x102a1, "%u") && passed;
-						passed = context.are_equal(token->value.property, "n", 0x102a2) && passed;
-
-						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::number, 0x102a3, "%u") && passed;
-						passed = context.are_equal(token->value.number, 42.0, 0x102a4, "%g") && passed;
-
-						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::property, 0x102a5, "%u") && passed;
-						passed = context.are_equal(token->value.property, "s", 0x102a6) && passed;
-
-						json.get_token(token, sizeof(buffer));
-						passed = context.are_equal(token->item, abc::json::item::string, 0x102a7, "%u") && passed;
-						passed = context.are_equal(token->value.string, "bar", 0x102a8) && passed;
+					passed = context.are_equal(token->item, abc::json::item::property, 0x102a1, "%u") && passed;
+					passed = context.are_equal(token->value.property, "n", 0x102a2) && passed;
 
 					json.get_token(token, sizeof(buffer));
-					passed = context.are_equal(token->item, abc::json::item::end_object, 0x102a9, "%u") && passed;
-				}
+					passed = context.are_equal(token->item, abc::json::item::number, 0x102a3, "%u") && passed;
+					passed = context.are_equal(token->value.number, 42.0, 0x102a4, "%g") && passed;
+
+					json.get_token(token, sizeof(buffer));
+					passed = context.are_equal(token->item, abc::json::item::property, 0x102a5, "%u") && passed;
+					passed = context.are_equal(token->value.property, "s", 0x102a6) && passed;
+
+					json.get_token(token, sizeof(buffer));
+					passed = context.are_equal(token->item, abc::json::item::string, 0x102a7, "%u") && passed;
+					passed = context.are_equal(token->value.string, "bar", 0x102a8) && passed;
+
+				json.get_token(token, sizeof(buffer));
+				passed = context.are_equal(token->item, abc::json::item::end_object, 0x102a9, "%u") && passed;
 			}
-			catch (const std::exception& ex) {
-				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
-			}
-		});
+		}
+		catch (const std::exception& ex) {
+			context.log->put_any(abc::category::abc::base, abc::severity::important, 0x100f0, "client: EXCEPTION: %s", ex.what());
+		}
+	}
 
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#endif
 
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
-
-		ClientSocket connection = server.accept();
-
-		abc::socket_streambuf<ClientSocket, abc::test::log> sb(&connection, context.log);
-		abc::http_server_stream<abc::test::log> http(&sb, context.log);
-
+	void http_json_stream_server(bool& passed, test_context<abc::test::log>& context, abc::http_server_stream<abc::test::log>& http) {
 		// Receive request
 		{
 			char buffer[abc::size::k1];
-
-			http.get_method(buffer, sizeof(buffer));
-			passed = context.are_equal(buffer, request_method, 0x100f2) && passed;
-
-			http.get_resource(buffer, sizeof(buffer));
-			passed = context.are_equal(buffer, request_resource, 0x100f3) && passed;
-
-			http.get_protocol(buffer, sizeof(buffer));
-			passed = context.are_equal(buffer, protocol, 0x100f4) && passed;
 
 			http.get_header_name(buffer, sizeof(buffer));
 			passed = context.are_equal(buffer, request_header_name, 0x100f5) && passed;
@@ -450,7 +421,7 @@ namespace abc { namespace test { namespace socket {
 			passed = context.are_equal(buffer, "", 0x100f7) && passed;
 
 			// Body (json)
-			abc::json_istream<abc::size::_64, abc::test::log> json(&sb, context.log);
+			abc::json_istream<abc::size::_64, abc::test::log> json(static_cast<abc::http_request_istream<abc::test::log>&>(http).rdbuf(), context.log);
 			abc::json::token_t* token = (abc::json::token_t*)buffer;
 
 			json.get_token(token, sizeof(buffer));
@@ -477,13 +448,56 @@ namespace abc { namespace test { namespace socket {
 		http.end_headers();
 
 		// Body (json)
-		abc::json_ostream<abc::size::_64, abc::test::log> json(&sb, context.log);
+		abc::json_ostream<abc::size::_64, abc::test::log> json(static_cast<abc::http_response_ostream<abc::test::log>&>(http).rdbuf(), context.log);
 		json.put_begin_object();
 			json.put_property("n");
 			json.put_number(42.0);
 			json.put_property("s");
 			json.put_string("bar");
 		json.put_end_object();
+	}
+
+
+	template <typename ServerSocket, typename ClientSocket>
+	bool tcp_socket_http_json_stream(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
+		bool passed = true;
+
+		server.bind(server_port);
+		server.listen(5);
+
+		std::thread client_thread([&passed, &context, &client] () {
+			http_json_stream_client(passed, context, client);
+		});
+
+#if defined(__ABC__LINUX)
+		abc::test::heap::counter_t closure_allocation_count = 1;
+#elif defined(__ABC__MACOS)
+		abc::test::heap::counter_t closure_allocation_count = 3;
+#else
+		abc::test::heap::counter_t closure_allocation_count = 1;
+#endif
+
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
+
+		ClientSocket connection = server.accept();
+
+		abc::socket_streambuf<ClientSocket, abc::test::log> sb(&connection, context.log);
+		abc::http_server_stream<abc::test::log> http(&sb, context.log);
+
+		{
+			char buffer[abc::size::k1];
+
+			http.get_method(buffer, sizeof(buffer));
+			passed = context.are_equal(buffer, request_method, 0x100f2) && passed;
+
+			http.get_resource(buffer, sizeof(buffer));
+			passed = context.are_equal(buffer, request_resource, 0x100f3) && passed;
+
+			http.get_protocol(buffer, sizeof(buffer));
+			passed = context.are_equal(buffer, protocol, 0x100f4) && passed;
+		}
+
+		http_json_stream_server(passed, context, http);
 
 		client_thread.join();
 		return passed;

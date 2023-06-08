@@ -7,7 +7,8 @@
 ## To Do
 - `endpoint`
   + Over `openssl_socket` or over another TLS socket.
-  + Add to sample `tls`.
+  + Add tests - REST.
+  + Add to sample `tls`. (drop)
 - Doc
   + `endpoint`
 
