@@ -87,7 +87,7 @@ namespace abc {
 			_log->put_blank_line();
 		}
 
-		while (true) {
+		while (_requests_in_progress != 0 || !_is_shutdown_requested) {
 			// Accept the next request and process it asynchronously.
 			ClientSocket connection = listener.accept();
 			std::thread(process_request_thread_func, this, std::move(connection)).detach();
@@ -135,7 +135,7 @@ namespace abc {
 		}
 
 		// It's OK to read a request as long as we don't return a broken response.
-		if (_is_shutdown_requested.load()) {
+		if (_is_shutdown_requested) {
 			return;
 		}
 
@@ -159,7 +159,7 @@ namespace abc {
 			_log->put_blank_line();
 		}
 
-		if (--_requests_in_progress == 0 && _is_shutdown_requested.load()) {
+		if (--_requests_in_progress == 0 && _is_shutdown_requested) {
 			if (_log != nullptr) {
 				_log->put_blank_line();
 				_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102f3, "Stopped endpoint (%s)", _config->port);
@@ -336,13 +336,13 @@ namespace abc {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102ed, "--- Shutdown requested ---");
 		}
 
-		_is_shutdown_requested.store(true);
+		_is_shutdown_requested = true;
 	}
 
 
 	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
 	inline bool endpoint<ServerSocket, ClientSocket, Limits, Log>::is_shutdown_requested() const {
-		return _is_shutdown_requested.load();
+		return _is_shutdown_requested;
 	}
 
 

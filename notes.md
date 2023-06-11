@@ -3,12 +3,13 @@
 - BREAKING: socket - Rename `handle()` to `fd()`. 
 - BREAKING: socket - Remove constructors without `family` parameter.
 - BREAKING: endpoint - Add template parameters for server and client sockets.
+- BUGFIX: endpoint - Exit the main loop when no more requests.
 
 ## To Do
 - `endpoint`
   + Over `openssl_socket` or over another TLS socket.
   + Add tests - REST.
-  + Add to sample `tls`. (drop)
+  + ? Add to sample `tls`. (drop)
 - Doc
   + `endpoint`
 
