@@ -76,7 +76,7 @@ namespace abc {
 		: Exception(message)
 		, _tag(tag) {
 		if (log != nullptr) {
-			log->put_any(category::abc::exception, severity::warning, 0x10001, "Exception thrown! %s", message);
+			log->put_any(category::abc::exception, severity::warning, tag, "Exception thrown! %s", message);
 		}
 	}
 
