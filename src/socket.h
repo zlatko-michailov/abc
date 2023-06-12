@@ -157,14 +157,14 @@ namespace abc {
 	template <typename Log>
 	inline void basic_socket<Log>::tie(const char* host, const char* port, socket::tie_t tt) {
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000d, "basic_socket::tie() >>> %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000d, "basic_socket::tie(outer) >>> %s", tt == socket::tie::bind ? "bind" : "connect");
 		}
 
 		if (!is_open()) {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie() is_open()", 0x1000e, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) is_open()", 0x1000e, _log);
 		}
 
 		addrinfo hnt = hints();
@@ -177,7 +177,17 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("basic_socket::tie() ::getaddrinfo()", 0x1000f, _log);
+			if (_log != nullptr) {
+				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s(), getaddrinfo() err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
+			}
+
+			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) ::getaddrinfo()", 0x1000f, _log);
+		}
+
+		if (hostList == nullptr) {
+			if (_log != nullptr) {
+				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s(), getaddrinfo() nullptr", tt == socket::tie::bind ? "bind" : "connect");
+			}
 		}
 
 		bool is_done = false;
@@ -197,11 +207,15 @@ namespace abc {
 				close();
 			}
 
-			throw exception<std::runtime_error, Log>("basic_socket::tie() bind()/connect()", 0x10010, _log);
+			if (_log != nullptr) {
+				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s() !is_done", tt == socket::tie::bind ? "bind" : "connect");
+			}
+
+			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) bind()/connect()", 0x10010, _log);
 		}
 
 		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::optional, 0x10011, "basic_socket::tie() <<< %s", tt == socket::tie::bind ? "bind" : "connect");
+			_log->put_any(category::abc::socket, severity::abc::optional, 0x10011, "basic_socket::tie(outer) <<< %s()", tt == socket::tie::bind ? "bind" : "connect");
 		}
 	}
 
@@ -212,13 +226,17 @@ namespace abc {
 			open();
 		}
 		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie() is_open()", 0x10012, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie(inner) is_open()", 0x10012, _log);
 		}
 
 		socket::error_t err = tie(address.value, address.size, tt);
 
 		if (err != socket::error::none) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie() bind() / connect()", 0x10013, _log);
+			if (_log != nullptr) {
+				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(inner) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
+			}
+
+			throw exception<std::runtime_error, Log>("basic_socket::tie(inner) bind() / connect()", 0x10013, _log);
 		}
 	}
 
@@ -226,25 +244,41 @@ namespace abc {
 	template <typename Log>
 	inline socket::error_t basic_socket<Log>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
 		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie() !is_open()", 0x10014, _log);
+			throw exception<std::runtime_error, Log>("basic_socket::tie(innermost) !is_open()", 0x10014, _log);
 		}
 
 		const int on = 1;
+		socket::error_t err = socket::error::any;
 
 		switch(tt) {
 			case socket::tie::bind:
 				::setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
-				return ::bind(fd(), &addr, addr_len);
+				err = ::bind(fd(), &addr, addr_len);
+				break;
 
 			case socket::tie::connect:
-				return ::connect(fd(), &addr, addr_len);
+				err = ::connect(fd(), &addr, addr_len);
+				break;
 
 			default:
 				throw exception<std::logic_error, Log>("basic_socket::tie(tt)", 0x10015, _log);
 		}
 
-		return socket::error::any;
+		if (_log != nullptr) {
+			constexpr std::size_t max_addr_len = sizeof(addr.sa_data);
+			char addr_str[max_addr_len * 4 + 1];
+			std::memset(addr_str, 0, sizeof(addr_str));
+
+			std::size_t len = addr_len < max_addr_len ? addr_len : max_addr_len;
+			for (std::size_t i = 0; i < len; i++) {
+				std::sprintf(&addr_str[i * 4], "%3u ", addr.sa_data[i]);
+			}
+
+			_log->put_any(category::abc::socket, severity::abc::optional, __TAG__, "basic_socket::tie(innermost) %s(), err=%d, addr=%s", tt == socket::tie::bind ? "bind" : "connect", err, addr_str);
+		}
+
+		return err;
 	}
 
 
