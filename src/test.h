@@ -303,9 +303,9 @@ namespace abc {
 		bool all_passed = true;
 
 		if (log != nullptr) {
-			log->put_blank_line();
-			log->put_blank_line();
-			log->put_blank_line();
+			log->put_blank_line(category::any, severity::critical);
+			log->put_blank_line(category::any, severity::critical);
+			log->put_blank_line(category::any, severity::critical);
 		}
 
 		// Category
@@ -361,14 +361,14 @@ namespace abc {
 			}
 
 			if (log != nullptr) {
-				log->put_blank_line();
+				log->put_blank_line(category::any, severity::critical);
 			}
 			all_passed = all_passed && category_passed;
 		} // category
 
 		// Summary
 		if (log != nullptr) {
-			log->put_blank_line();
+			log->put_blank_line(category::any, severity::critical);
 			log->put_any(category::any, severity::critical, tag::none, ">>   %s%ssummary%s", color::begin, color::cyan, color::end);
 			log->put_any(category::any, severity::warning, tag::none, "seed = %u", seed);
 		}
@@ -385,9 +385,9 @@ namespace abc {
 		}
 
 		if (log != nullptr) {
-			log->put_blank_line();
-			log->put_blank_line();
-			log->put_blank_line();
+			log->put_blank_line(category::any, severity::critical);
+			log->put_blank_line(category::any, severity::critical);
+			log->put_blank_line(category::any, severity::critical);
 		}
 
 		return all_passed;

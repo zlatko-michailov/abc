@@ -393,6 +393,13 @@ namespace abc {
 		 */
 		void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
+		/**
+		 * @brief				Puts a new line.
+		 * @param category		Entry category.
+		 * @param severity		Entry severity.
+		 */
+		void put_blank_line(category_t category, severity_t severity) noexcept;
+
 	private:
 		/**
 		 * @brief				Pointer to the `Filter` instance passed in to the constructor.

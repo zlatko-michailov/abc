@@ -284,6 +284,14 @@ namespace abc {
 	}
 
 
+	template <typename Line, typename Filter>
+	inline void log_ostream<Line, Filter>::put_blank_line(category_t category, severity_t severity) noexcept {
+		if (_filter == nullptr || _filter->is_enabled(category, severity)) {
+			base::put_blank_line();
+		}
+	}
+
+
 	// --------------------------------------------------------------
 
 

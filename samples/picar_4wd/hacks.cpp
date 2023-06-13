@@ -46,13 +46,13 @@ constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
 void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_chip_info chip_info = chip.chip_info();
 
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a2, "chip info:");
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a3, "  is_valid = %d", chip_info.is_valid);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a4, "  name     = %s", chip_info.name);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a5, "  label    = %s", chip_info.label);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a6, "  lines    = %u", chip_info.lines);
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 }
 
 
@@ -68,7 +68,7 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106aa, "  consumer = %s", line_info.consumer);
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ab, "  flags    = %llx", (long long)line_info.flags);
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::gpio_line_flag::output) != 0 ? "OUTPUT" : "INPUT");
-		log.put_blank_line();
+		log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	}
 }
 
@@ -121,7 +121,7 @@ void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 		double roundtrip_cm = roundtrip_m * 100.0;
 		double distance_cm = roundtrip_cm / 2.0;
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106af, "cm = %.2f", distance_cm);
-		log.put_blank_line();
+		log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 
 		// Sleep for 1 sec between iterations.
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -320,7 +320,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b3, "----------------------------------------------------------------------");
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
 										(unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
-		log.put_blank_line();
+		log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	}
 
 	std::size_t dist_left  = (21 * grand_total_count_rear_left)  / 10;
@@ -328,7 +328,7 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x10746, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
 									(unsigned)grand_total_count_rear_left, (unsigned)dist_left, (unsigned)grand_total_count_rear_right, (unsigned)dist_right);
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 
 	pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 	pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
@@ -389,7 +389,7 @@ void measure_accel_and_spin(log_ostream& log) {
 	pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
 	pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
 	pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 
 	while (std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) < dur_drive + dur_inertia) {
 		if (is_driving && std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) >= dur_drive) {
@@ -399,7 +399,7 @@ void measure_accel_and_spin(log_ostream& log) {
 			pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 			pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 			pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-			log.put_blank_line();
+			log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -413,7 +413,7 @@ void measure_accel_and_spin(log_ostream& log) {
 	motion_tracker.set_speed(0);
 	motion_tracker.stop();
 
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x10748, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
 		motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 }

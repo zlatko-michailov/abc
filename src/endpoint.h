@@ -84,7 +84,7 @@ namespace abc {
 
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102f2, "Listening (%s)", _config->port);
-			_log->put_blank_line();
+			_log->put_blank_line(abc::category::abc::endpoint, abc::severity::abc::important);
 		}
 
 		while (_requests_in_progress != 0 || !_is_shutdown_requested) {
@@ -156,12 +156,12 @@ namespace abc {
 		if (_log != nullptr) {
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::optional, 0x102e2, "Response sent");
 			_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102e3, "End handling request (%s)", _config->port);
-			_log->put_blank_line();
+			_log->put_blank_line(abc::category::abc::endpoint, abc::severity::abc::important);
 		}
 
 		if (--_requests_in_progress == 0 && _is_shutdown_requested) {
 			if (_log != nullptr) {
-				_log->put_blank_line();
+				_log->put_blank_line(abc::category::abc::endpoint, abc::severity::abc::important);
 				_log->put_any(abc::category::abc::endpoint, abc::severity::abc::important, 0x102f3, "Stopped endpoint (%s)", _config->port);
 			}
 

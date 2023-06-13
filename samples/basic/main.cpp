@@ -72,7 +72,7 @@ int main(int /*argc*/, const char* argv[]) {
 	abc::samples::equations_endpoint<limits, log_ostream> endpoint(&config, &log);
 
 	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x102f5, "Open a browser and navigate to http://<host>:30301/resources/index.html.");
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::warning);
 
 	// Let the endpoint listen in a separate thread.
 	std::future<void> done = endpoint.start_async();

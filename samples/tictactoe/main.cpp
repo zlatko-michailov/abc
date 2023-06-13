@@ -121,7 +121,7 @@ int main(int /*argc*/, const char* argv[]) {
 	abc::samples::game_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
 
 	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x105a9, "Open a browser and navigate to http://<host>:30303/resources/index.html.");
-	log.put_blank_line();
+	log.put_blank_line(abc::category::abc::samples, abc::severity::warning);
 
 	// Let the endpoint listen in a separate thread.
 	std::future<void> done = endpoint.start_async();
