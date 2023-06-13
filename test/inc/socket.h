@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include "../../src/socket.h"
+#include "../../src/endpoint.h"
 #ifdef __ABC__OPENSSL
 #include "../../src/openssl_socket.h"
 #endif
@@ -41,8 +42,12 @@ namespace abc { namespace test { namespace socket {
 	bool test_tcp_socket_stream_move(test_context<abc::test::log>& context);
 	bool test_tcp_socket_http_json_stream(test_context<abc::test::log>& context);
 
+	bool test_http_endpoint_json_stream(test_context<abc::test::log>& context);
+
 	bool test_openssl_tcp_socket(test_context<abc::test::log>& context);
 	bool test_openssl_tcp_socket_stream_move(test_context<abc::test::log>& context);
 	bool test_openssl_tcp_socket_http_json_stream(test_context<abc::test::log>& context);
+
+	bool test_https_endpoint_json_stream(test_context<abc::test::log>& context);
 }}}
 

@@ -134,9 +134,11 @@ namespace abc { namespace test { namespace socket {
 	}
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename ServerSocket, typename ClientSocket>
-	bool tcp_socket(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
-		const char server_port[] = "31235";
+	bool tcp_socket(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client, const char* server_port) {
 		const char request_content[] = "Some request content.";
 		const char response_content[] = "The corresponding response content.";
 		bool passed = true;
@@ -199,7 +201,7 @@ namespace abc { namespace test { namespace socket {
 		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
 		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
-		return tcp_socket(context, server, client);
+		return tcp_socket(context, server, client, "31001");
 	}
 
 
@@ -217,16 +219,18 @@ namespace abc { namespace test { namespace socket {
 			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
-			passed = passed && tcp_socket(context, server, client);
+			passed = passed && tcp_socket(context, server, client, "31002");
 		}
 #endif
 		return passed;
 	}
 
 
+	// --------------------------------------------------------------
+
+
 	template <typename ServerSocket, typename ClientSocket>
-	bool tcp_socket_stream_move(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client1) {
-		const char server_port[] = "31236";
+	bool tcp_socket_stream_move(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client1, const char* server_port) {
 		const char request_content[] = "Some request line.";
 		const char response_content[] = "The corresponding response line.";
 		bool passed = true;
@@ -290,7 +294,7 @@ namespace abc { namespace test { namespace socket {
 		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
 		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
-		return tcp_socket_stream_move(context, server, client);
+		return tcp_socket_stream_move(context, server, client, "31003");
 	}
 
 
@@ -308,14 +312,16 @@ namespace abc { namespace test { namespace socket {
 			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
-			passed = passed && tcp_socket_stream_move(context, server, client);
+			passed = passed && tcp_socket_stream_move(context, server, client, "31004");
 		}
 #endif
 		return passed;
 	}
 
 
-	static constexpr const char server_port[] = "31237";
+	// --------------------------------------------------------------
+
+
 	static constexpr const char protocol[] = "HTTP/1.1";
 	static constexpr const char request_method[] = "POST";
 	static constexpr const char request_resource[] = "/scope/v1.0/api";
@@ -327,7 +333,7 @@ namespace abc { namespace test { namespace socket {
 	static constexpr const char response_header_value[] = "Response-Header-Value";
 
 	template <typename ClientSocket>
-	void http_json_stream_client(bool& passed, test_context<abc::test::log>& context, ClientSocket& client) {
+	void http_json_stream_client(bool& passed, test_context<abc::test::log>& context, ClientSocket& client, const char* server_port) {
 		try {
 			client.connect("localhost", server_port);
 
@@ -459,14 +465,14 @@ namespace abc { namespace test { namespace socket {
 
 
 	template <typename ServerSocket, typename ClientSocket>
-	bool tcp_socket_http_json_stream(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client) {
+	bool tcp_socket_http_json_stream(test_context<abc::test::log>& context, ServerSocket& server, ClientSocket& client, const char* server_port) {
 		bool passed = true;
 
 		server.bind(server_port);
 		server.listen(5);
 
-		std::thread client_thread([&passed, &context, &client] () {
-			http_json_stream_client(passed, context, client);
+		std::thread client_thread([&passed, &context, &client, server_port] () {
+			http_json_stream_client(passed, context, client, server_port);
 		});
 
 #if defined(__ABC__LINUX)
@@ -508,7 +514,7 @@ namespace abc { namespace test { namespace socket {
 		abc::tcp_server_socket<abc::test::log> server(abc::socket::family::ipv4, context.log);
 		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
 
-		return tcp_socket_http_json_stream(context, server, client);
+		return tcp_socket_http_json_stream(context, server, client, "31005");
 	}
 
 
@@ -526,11 +532,195 @@ namespace abc { namespace test { namespace socket {
 			abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
 			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
 
-			passed = passed && tcp_socket_http_json_stream(context, server, client);
+			passed = passed && tcp_socket_http_json_stream(context, server, client, "31006");
 		}
 #endif
 		return passed;
 	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	class test_endpoint : public abc::endpoint<ServerSocket, ClientSocket, Limits, Log> {
+		using base = abc::endpoint<ServerSocket, ClientSocket, Limits, Log>;
+
+	public:
+		test_endpoint(bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log);
+
+	protected:
+		virtual void process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
+
+	protected:
+		bool& _passed;
+		test_context<Log>& _context;
+	};
+
+
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline test_endpoint<ServerSocket, ClientSocket, Limits, Log>::test_endpoint(bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log)
+		: base(config, log)
+		, _passed(passed)
+		, _context(context) {
+	}
+
+
+	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
+	inline void test_endpoint<ServerSocket, ClientSocket, Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
+		_passed = _context.are_equal(method, request_method, __TAG__) && _passed;
+		_passed = _context.are_equal(resource, request_resource, __TAG__) && _passed;
+
+		http_json_stream_server(_passed, _context, http);
+
+		base::set_shutdown_requested();
+	}
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Limits, typename Log>
+	class test_http_endpoint : public test_endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log> {
+		using base = test_endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log>;
+
+	public:
+		test_http_endpoint(bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log);
+
+	protected:
+		virtual abc::tcp_server_socket<Log>	create_server_socket() override;
+	};
+
+
+	template <typename Limits, typename Log>
+	inline test_http_endpoint<Limits, Log>::test_http_endpoint(bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log)
+		: base(passed, context, config, log) {
+	}
+
+
+	template <typename Limits, typename Log>
+	inline abc::tcp_server_socket<Log> test_http_endpoint<Limits, Log>::create_server_socket() {
+		return abc::tcp_server_socket<Log>(abc::socket::family::ipv4, base::_log);
+	}
+
+
+	// --------------------------------------------------------------
+
+
+#ifdef __ABC__OPENSSL
+	template <typename Limits, typename Log>
+	class test_https_endpoint : public test_endpoint<abc::openssl_tcp_server_socket<Log>, abc::openssl_tcp_client_socket<Log>, Limits, Log> {
+		using base = test_endpoint<abc::openssl_tcp_server_socket<Log>, abc::openssl_tcp_client_socket<Log>, Limits, Log>;
+
+	public:
+		test_https_endpoint(const char* cert_path, const char* pkey_path, const char* pkey_password, bool verify_client,
+							bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log);
+
+	protected:
+		virtual abc::openssl_tcp_server_socket<Log>	create_server_socket() override;
+
+	protected:
+		const char* _cert_path;
+		const char* _pkey_path;
+		const char* _pkey_password;
+		bool _verify_client;
+	};
+
+
+	template <typename Limits, typename Log>
+	inline test_https_endpoint<Limits, Log>::test_https_endpoint(const char* cert_path, const char* pkey_path, const char* pkey_password, bool verify_client,
+																bool& passed, test_context<Log>& context, abc::endpoint_config* config, Log* log)
+		: base(passed, context, config, log)
+		, _cert_path(cert_path)
+		, _pkey_path(pkey_path)
+		, _pkey_password(pkey_password)
+		, _verify_client(verify_client) {
+	}
+
+
+	template <typename Limits, typename Log>
+	inline abc::openssl_tcp_server_socket<Log> test_https_endpoint<Limits, Log>::create_server_socket() {
+		return abc::openssl_tcp_server_socket<Log>(_cert_path, _pkey_path, _pkey_password, _verify_client, abc::socket::family::ipv4, base::_log);
+	}
+#endif
+
+
+	// --------------------------------------------------------------
+
+
+	template <typename Endpoint, typename ClientSocket>
+	bool endpoint_json_stream(bool& passed, test_context<abc::test::log>& context, Endpoint& endpoint, ClientSocket& client, const char* server_port) {
+		std::future<void> done = endpoint.start_async();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+		std::thread client_thread([&passed, &context, &client, server_port] () {
+			http_json_stream_client(passed, context, client, server_port);
+		});
+
+		client_thread.join();
+		done.wait();
+
+#if defined(__ABC__LINUX)
+		abc::test::heap::counter_t closure_allocation_count = 5;
+#elif defined(__ABC__MACOS)
+		abc::test::heap::counter_t closure_allocation_count = 3;
+#else
+		abc::test::heap::counter_t closure_allocation_count = 1;
+#endif
+
+		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
+
+		return passed;
+	}
+
+
+	bool test_http_endpoint_json_stream(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+		abc::endpoint_config config(
+			"31007",				// port
+			5,						// listen_queue_size
+			context.process_path,	// root_dir (Note: No trailing slash!)
+			"/resources/"			// files_prefix
+		);
+		test_http_endpoint<abc::endpoint_limits, abc::test::log> endpoint(passed, context, &config, context.log);
+		abc::tcp_client_socket<abc::test::log> client(abc::socket::family::ipv4, context.log);
+
+		passed = endpoint_json_stream(passed, context, endpoint, client, config.port) && passed;
+
+		return passed;
+	}
+
+
+	bool test_https_endpoint_json_stream(test_context<abc::test::log>& context) {
+		bool passed = true;
+
+#ifdef __ABC__OPENSSL
+		abc::endpoint_config config(
+			"31008",				// port
+			5,						// listen_queue_size
+			context.process_path,	// root_dir (Note: No trailing slash!)
+			"/resources/"			// files_prefix
+		);
+
+		char cert_path[max_path_size];
+		passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+
+		char pkey_path[max_path_size];
+		passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+
+		if (passed) {
+			test_https_endpoint<abc::endpoint_limits, abc::test::log> endpoint(cert_path, pkey_path, pkey_password, verify_client, passed, context, &config, context.log);
+			abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
+
+			passed = passed && endpoint_json_stream(passed, context, endpoint, client, config.port);
+		}
+#endif
+		return passed;
+	}
+
+
 
 }}}
 

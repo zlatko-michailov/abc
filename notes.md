@@ -7,9 +7,7 @@
 
 ## To Do
 - `endpoint`
-  + Over `openssl_socket` or over another TLS socket.
-  + Add tests - REST.
-  + ? Add to sample `tls`. (drop)
+  + Verify tests on Mac - allocations.
 - Doc
   + `endpoint`
 
