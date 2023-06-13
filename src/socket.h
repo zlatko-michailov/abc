@@ -266,16 +266,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			constexpr std::size_t max_addr_len = sizeof(addr.sa_data);
-			char addr_str[max_addr_len * 4 + 1];
-			std::memset(addr_str, 0, sizeof(addr_str));
-
-			std::size_t len = addr_len < max_addr_len ? addr_len : max_addr_len;
-			for (std::size_t i = 0; i < len; i++) {
-				std::sprintf(&addr_str[i * 4], "%3u ", addr.sa_data[i]);
-			}
-
-			_log->put_any(category::abc::socket, severity::abc::optional, __TAG__, "basic_socket::tie(innermost) %s(), err=%d, addr=%s", tt == socket::tie::bind ? "bind" : "connect", err, addr_str);
+			_log->put_binary(category::abc::socket, severity::abc::optional, __TAG__, addr.sa_data, addr_len);
+			_log->put_any(category::abc::socket, severity::abc::optional, __TAG__, "basic_socket::tie(innermost) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
 		}
 
 		return err;
