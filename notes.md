@@ -3,13 +3,18 @@
 - BREAKING: socket - Rename `handle()` to `fd()`. 
 - BREAKING: socket - Remove constructors without `family` parameter.
 - BREAKING: endpoint - Add template parameters for server and client sockets.
+- BREAKING: `log_ostream::put_blank_line()` requires category and  severity for filtering.
 - BUGFIX: endpoint - Exit the main loop when no more requests.
 
 ## To Do
 - `endpoint`
-  + Verify tests on Mac - allocations.
-- Doc
-  + `endpoint`
+  + Mac: Install OpenSSL
+  + Mac: Verify tests - allocations.
+- Release:
+  + Tag
+  + Roadmap
+  + Releases
+  + Makefile
 
 ## To Do Refactoring
 - exceptions!
