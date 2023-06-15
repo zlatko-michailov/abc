@@ -40,6 +40,10 @@ ifeq "$(shell ls /usr/include/openssl/ssl.h)" "/usr/include/openssl/ssl.h"
 	CPP_OPT_OPENSSL = -D__ABC__OPENSSL=1
 	CPP_LINK_OPT_OPENSSL = -lssl -lcrypto
 	DEPS_BUILD_SAMPLE_TLS = build_sample_$(SAMPLE_TLS)
+else ifeq "$(shell ls /usr/local/opt/openssl/include/openssl/ssl.h)" "/usr/local/opt/openssl/include/openssl/ssl.h"
+	CPP_OPT_OPENSSL = -D__ABC__OPENSSL=1 -I/usr/local/opt/openssl/include
+	CPP_LINK_OPT_OPENSSL = -lssl -lcrypto -L/usr/local/opt/openssl/lib
+	DEPS_BUILD_SAMPLE_TLS = build_sample_$(SAMPLE_TLS)
 endif
 
 CPP = g++

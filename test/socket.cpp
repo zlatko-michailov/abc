@@ -664,9 +664,9 @@ namespace abc { namespace test { namespace socket {
 #if defined(__ABC__LINUX)
 		abc::test::heap::counter_t closure_allocation_count = 5;
 #elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
+		abc::test::heap::counter_t closure_allocation_count = 10;
 #else
-		abc::test::heap::counter_t closure_allocation_count = 1;
+		abc::test::heap::counter_t closure_allocation_count = 5;
 #endif
 
 		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure

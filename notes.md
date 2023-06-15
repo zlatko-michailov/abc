@@ -49,6 +49,9 @@
 		context.log->filter()->min_severity(abc::severity::critical); ////
 ---
 
+  export LDFLAGS="-L/usr/local/opt/openssl/lib"
+  export CPPFLAGS="-I/usr/local/opt/openssl/include"
+
 
 - conf
 - flight (killbit)
