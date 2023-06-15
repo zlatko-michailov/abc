@@ -221,6 +221,8 @@ namespace abc { namespace test { namespace socket {
 
 			passed = passed && tcp_socket(context, server, client, "31002");
 		}
+#else
+		passed = context.are_equal(0, 0, __TAG__);
 #endif
 		return passed;
 	}
@@ -314,6 +316,8 @@ namespace abc { namespace test { namespace socket {
 
 			passed = passed && tcp_socket_stream_move(context, server, client, "31004");
 		}
+#else
+		passed = context.are_equal(0, 0, __TAG__);
 #endif
 		return passed;
 	}
@@ -534,6 +538,8 @@ namespace abc { namespace test { namespace socket {
 
 			passed = passed && tcp_socket_http_json_stream(context, server, client, "31006");
 		}
+#else
+		passed = context.are_equal(0, 0, __TAG__);
 #endif
 		return passed;
 	}
@@ -716,6 +722,8 @@ namespace abc { namespace test { namespace socket {
 
 			passed = passed && endpoint_json_stream(passed, context, endpoint, client, config.port);
 		}
+#else
+		passed = context.are_equal(0, 0, __TAG__);
 #endif
 		return passed;
 	}

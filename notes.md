@@ -7,9 +7,6 @@
 - BUGFIX: endpoint - Exit the main loop when no more requests.
 
 ## To Do
-- `endpoint`
-  + Mac: Install OpenSSL
-  + Mac: Verify tests - allocations.
 - Release:
   + Tag
   + Roadmap
