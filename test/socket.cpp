@@ -45,7 +45,7 @@ namespace abc { namespace test { namespace socket {
 
 
 	bool make_filepath(test_context<abc::test::log>& context, char* filepath, std::size_t filepath_size, const char* process_path, const char* filename) {
-		context.log->put_any(abc::category::abc::base, abc::severity::optional, __TAG__, "process_path='%s'", process_path);
+		context.log->put_any(abc::category::abc::base, abc::severity::optional, 0x1079d, "process_path='%s'", process_path);
 
 		std::size_t filename_len = std::strlen(filename); 
 		const char* process_last_separator = std::strrchr(process_path, '/');
@@ -56,7 +56,7 @@ namespace abc { namespace test { namespace socket {
 			std::size_t filepath_len = process_dir_len + 1 + filename_len;
 
 			if (filepath_len >= filepath_size) {
-				context.log->put_any(abc::category::abc::base, abc::severity::important, __TAG__, "filepath_len=%zu >= filepath_size=%zu", filepath_len, filepath_size);
+				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x1079e, "filepath_len=%zu >= filepath_size=%zu", filepath_len, filepath_size);
 
 				return false;
 			}
@@ -65,7 +65,7 @@ namespace abc { namespace test { namespace socket {
 		}
 
 		std::strcpy(filepath + process_dir_len + 1, filename);
-		context.log->put_any(abc::category::abc::base, abc::severity::optional, __TAG__, "filepath='%s'", filepath);
+		context.log->put_any(abc::category::abc::base, abc::severity::optional, 0x1079f, "filepath='%s'", filepath);
 
 		return true;
 	}
@@ -222,7 +222,7 @@ namespace abc { namespace test { namespace socket {
 			passed = passed && tcp_socket(context, server, client, "31002");
 		}
 #else
-		passed = context.are_equal(0, 0, __TAG__);
+		passed = context.are_equal(0, 0, 0x107a0);
 #endif
 		return passed;
 	}
@@ -317,7 +317,7 @@ namespace abc { namespace test { namespace socket {
 			passed = passed && tcp_socket_stream_move(context, server, client, "31004");
 		}
 #else
-		passed = context.are_equal(0, 0, __TAG__);
+		passed = context.are_equal(0, 0, 0x107a1);
 #endif
 		return passed;
 	}
@@ -539,7 +539,7 @@ namespace abc { namespace test { namespace socket {
 			passed = passed && tcp_socket_http_json_stream(context, server, client, "31006");
 		}
 #else
-		passed = context.are_equal(0, 0, __TAG__);
+		passed = context.are_equal(0, 0, 0x107a2);
 #endif
 		return passed;
 	}
@@ -574,8 +574,8 @@ namespace abc { namespace test { namespace socket {
 
 	template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
 	inline void test_endpoint<ServerSocket, ClientSocket, Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		_passed = _context.are_equal(method, request_method, __TAG__) && _passed;
-		_passed = _context.are_equal(resource, request_resource, __TAG__) && _passed;
+		_passed = _context.are_equal(method, request_method, 0x107a3) && _passed;
+		_passed = _context.are_equal(resource, request_resource, 0x107a4) && _passed;
 
 		http_json_stream_server(_passed, _context, http);
 
@@ -723,7 +723,7 @@ namespace abc { namespace test { namespace socket {
 			passed = passed && endpoint_json_stream(passed, context, endpoint, client, config.port);
 		}
 #else
-		passed = context.are_equal(0, 0, __TAG__);
+		passed = context.are_equal(0, 0, 0x107a5);
 #endif
 		return passed;
 	}

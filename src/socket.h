@@ -178,7 +178,7 @@ namespace abc {
 			}
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s(), getaddrinfo() err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
+				_log->put_any(category::abc::socket, severity::abc::important, 0x10797, "basic_socket::tie(outer) %s(), getaddrinfo() err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
 			}
 
 			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) ::getaddrinfo()", 0x1000f, _log);
@@ -186,7 +186,7 @@ namespace abc {
 
 		if (hostList == nullptr) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s(), getaddrinfo() nullptr", tt == socket::tie::bind ? "bind" : "connect");
+				_log->put_any(category::abc::socket, severity::abc::important, 0x10798, "basic_socket::tie(outer) %s(), getaddrinfo() nullptr", tt == socket::tie::bind ? "bind" : "connect");
 			}
 		}
 
@@ -208,7 +208,7 @@ namespace abc {
 			}
 
 			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(outer) %s() !is_done", tt == socket::tie::bind ? "bind" : "connect");
+				_log->put_any(category::abc::socket, severity::abc::important, 0x10799, "basic_socket::tie(outer) %s() !is_done", tt == socket::tie::bind ? "bind" : "connect");
 			}
 
 			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) bind()/connect()", 0x10010, _log);
@@ -233,7 +233,7 @@ namespace abc {
 
 		if (err != socket::error::none) {
 			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, __TAG__, "basic_socket::tie(inner) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
+				_log->put_any(category::abc::socket, severity::abc::important, 0x1079a, "basic_socket::tie(inner) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
 			}
 
 			throw exception<std::runtime_error, Log>("basic_socket::tie(inner) bind() / connect()", 0x10013, _log);
@@ -266,8 +266,8 @@ namespace abc {
 		}
 
 		if (_log != nullptr) {
-			_log->put_binary(category::abc::socket, severity::abc::optional, __TAG__, addr.sa_data, addr_len);
-			_log->put_any(category::abc::socket, severity::abc::optional, __TAG__, "basic_socket::tie(innermost) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
+			_log->put_binary(category::abc::socket, severity::abc::optional, 0x1079b, addr.sa_data, addr_len);
+			_log->put_any(category::abc::socket, severity::abc::optional, 0x1079c, "basic_socket::tie(innermost) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
 		}
 
 		return err;

@@ -61,7 +61,7 @@ void server(const char* cert_path, const char* pkey_path, const char* password, 
 	len = 0;
 	openssl_connection.receive(&len, 2);
 	openssl_connection.receive(message, len);
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "SERVER: %u:%s", len, message);
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x1075e, "SERVER: %u:%s", len, message);
 
 	std::cout << "Press ENTER to shut down server socket..." << std::endl;
 	std::cin.get();
@@ -87,7 +87,7 @@ void client(log_ostream* log, std::mutex* scenario_mutex, std::condition_variabl
 	char message[100 + 1];
 	std::memset(message, 0, sizeof(message));
 	openssl_client.receive(message, len);
-	log->put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "CLIENT: %u:%s", len, message);
+	log->put_any(abc::category::abc::samples, abc::severity::important, 0x1075f, "CLIENT: %u:%s", len, message);
 
 	const char hi[] = "<<< Thanks.";
 	len = sizeof(hi) - 1;
@@ -129,7 +129,7 @@ int main(int /*argc*/, const char* argv[]) {
 		std::size_t full_path_len = prog_path_len_1 + std::max(cert_file_len, pkey_file_len);
 
 		if (full_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__,
+			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x10760,
 				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
 				max_path, full_path_len);
 
@@ -141,10 +141,10 @@ int main(int /*argc*/, const char* argv[]) {
 	}
 
 	std::strcpy(cert_path + prog_path_len_1, cert_file);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "cert_path='%s'", cert_path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10761, "cert_path='%s'", cert_path);
 
 	std::strcpy(pkey_path + prog_path_len_1, pkey_file);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, __TAG__, "pkey_path='%s'", pkey_path);
+	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10762, "pkey_path='%s'", pkey_path);
 
 	std::mutex scenario_mutex;
 	std::condition_variable scenario_cond;
