@@ -2,9 +2,6 @@
 
 Up to [Documentation](README.md).
 
-## 1.19.0
-- SSL/TLS socket.
-
 ## 1.20.0
 - vmem_string.
 - vmem_paged_string.

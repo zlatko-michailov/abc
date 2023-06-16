@@ -1,17 +1,13 @@
 ## Done
-- `openssl_tcp_server_socket`, `openssl_tcp_client_socket`.
-- BREAKING: socket - Rename `handle()` to `fd()`. 
-- BREAKING: socket - Remove constructors without `family` parameter.
-- BREAKING: endpoint - Add template parameters for server and client sockets.
-- BREAKING: `log_ostream::put_blank_line()` requires category and  severity for filtering.
-- BUGFIX: endpoint - Exit the main loop when no more requests.
 
 ## To Do
 - Release:
   + Tag
-  + Roadmap
-  + Releases
   + Makefile
+
+## To Do vmem_string
+- vmem_string
+- Iterators
 
 ## To Do Refactoring
 - exceptions!

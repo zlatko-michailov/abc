@@ -2,6 +2,24 @@
 
 Up to [Documentation](README.md).
 
+## 1.19.0
+- Theme
+  - TLS - proof of feasibility.
+  - OpenSSL-based implementation.
+- Breaking Changes
+  - `*_socket` - Rename `handle()` to `fd()`. 
+  - `*_socket` - Remove constructors without `family` parameter.
+  - `endpoint` - Add template parameters for server and client sockets.
+  - `log_ostream` - `put_blank_line()` requires category and severity for filtering.
+- Bugs
+  - `endpoint` - Exit the main loop when no more requests.
+- Additions
+  - `openssl_tcp_server_socket`
+  - `openssl_tcp_client_socket`
+  - Test - `endpoint`
+- Refactoring
+  - None.
+
 ## 1.18.0
 - Breaking Changes
   - none.
