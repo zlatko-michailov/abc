@@ -1,18 +1,17 @@
 ## Done
 
 ## To Do
-- Release:
-  + Tag
-  + Makefile
+- vmem_basic_string
+- vmem_basic_string_streambuf
 
 ## To Do vmem_string
-- vmem_string
-- Iterators
 
 ## To Do Refactoring
+- internal docs
 - exceptions!
 - assert
 - enum class
+- abc log severities
 
 ## Pick List
 - drive

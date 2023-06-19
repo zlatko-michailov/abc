@@ -31,3 +31,4 @@ SOFTWARE.
 #include "vmem_container.i.h"
 #include "vmem_list.i.h"
 #include "vmem_map.i.h"
+#include "vmem_string.i.h"
