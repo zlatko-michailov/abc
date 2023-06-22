@@ -1104,8 +1104,8 @@ namespace abc {
 
 
 	template <typename T, typename Pool, typename Log>
-	inline vmem_ptr<T, Pool, Log>::vmem_ptr(std::nullptr_t) noexcept
-		: vmem_ptr<T, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, nullptr) {
+	inline vmem_ptr<T, Pool, Log>::vmem_ptr(std::nullptr_t, Log* log) noexcept
+		: vmem_ptr<T, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, log) {
 	}
 
 

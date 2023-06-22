@@ -490,8 +490,9 @@ namespace abc {
 		/**
 		 * @brief				Constructor.
 		 * @details				Constructs an invalid/null pointer.
+		 * @param log			Pointer to a `log_ostream` instance.
 		 */
-		vmem_ptr<T, Pool, Log>(std::nullptr_t) noexcept;
+		vmem_ptr<T, Pool, Log>(std::nullptr_t, Log* log = nullptr) noexcept;
 
 		/**
 		 * @brief				Destructor.

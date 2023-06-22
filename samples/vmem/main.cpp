@@ -105,9 +105,17 @@ int main(int /*argc*/, const char* argv[]) {
 	vmem_page start_page(&pool, abc::vmem_page_pos_start, &log);
 	vmem_start_page* start_page_ptr = reinterpret_cast<vmem_start_page*>(start_page.ptr());
 
-
 	work_with_list(&start_page_ptr->list1, &pool, &log, "list1", 1);
 	work_with_list(&start_page_ptr->list2, &pool, &log, "list2", 5);
+
+	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p1(&pool, abc::vmem_page_pos_start, 12, &log);
+	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p2(&pool, abc::vmem_page_pos_start, 12, &log);
+	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p3(&pool, abc::vmem_page_pos_start, 34, &log);
+	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p4(nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == p2) = %d", p1 == p2);
+	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == p3) = %d", p1 == p3);
+	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == nullptr) = %d", p1 == nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p4 == nullptr) = %d", p4 == nullptr);
 
 	return 0;
 }
