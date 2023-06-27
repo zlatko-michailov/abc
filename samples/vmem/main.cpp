@@ -50,11 +50,17 @@ using vmem_list_item = struct {
 using vmem_start_page = struct {
 	abc::vmem_list_state	list1;
 	abc::vmem_list_state	list2;
+	abc::vmem_list_state	list3;
+	abc::vmem_string_state	str1;
+	abc::vmem_string_state	str2;
 };
 
 #pragma pack(pop)
 
 using vmem_list = abc::vmem_list<vmem_list_item, vmem_pool, log_ostream>;
+using vmem_string = abc::vmem_string<vmem_pool, log_ostream>;
+using vmem_string_streambuf = abc::vmem_string_streambuf<vmem_pool, log_ostream>;
+using vmem_string_iterator = abc::vmem_string_iterator<vmem_pool, log_ostream>;
 
 
 void work_with_list(abc::vmem_list_state* list_state, vmem_pool* pool, log_ostream* log, const char* list_name, std::size_t items_to_add);
@@ -108,6 +114,7 @@ int main(int /*argc*/, const char* argv[]) {
 	work_with_list(&start_page_ptr->list1, &pool, &log, "list1", 1);
 	work_with_list(&start_page_ptr->list2, &pool, &log, "list2", 5);
 
+	// Compare vmem_ptr instances.
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p1(&pool, abc::vmem_page_pos_start, 12, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p2(&pool, abc::vmem_page_pos_start, 12, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p3(&pool, abc::vmem_page_pos_start, 34, &log);
@@ -116,6 +123,34 @@ int main(int /*argc*/, const char* argv[]) {
 	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == p3) = %d", p1 == p3);
 	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == nullptr) = %d", p1 == nullptr);
 	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p4 == nullptr) = %d", p4 == nullptr);
+
+	// List iterator
+	abc::vmem_list<int, vmem_pool, log_ostream> list3(&start_page_ptr->list3, &pool, &log);
+	list3.push_back(42);
+	list3.push_back(43);
+	list3.push_back(44);
+	for (auto itr = list3.begin(); itr != list3.end(); itr++) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%d", *itr);
+	}
+
+	// String iterator
+	vmem_string str1(&start_page_ptr->str1, &pool, &log);
+	str1.push_back('x');
+	str1.push_back('y');
+	str1.push_back('z');
+	for (vmem_string_iterator itr = str1.begin(); itr != str1.end(); ) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%c", *itr++);
+	}
+
+	// Work with streams over vmem_string.
+	vmem_string str2(&start_page_ptr->str2, &pool, &log);
+	////vmem_string_streambuf sb(&str2, &log);
+	////std::ostream ostrm(&sb);
+	////ostrm << "abc" << 12 << "xyz";
+	////std::istream istrm(&sb);
+	////std::string stdstr;
+	////istrm >> stdstr;
+	////log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, stdstr.c_str());
 
 	return 0;
 }
@@ -132,7 +167,7 @@ void work_with_list(abc::vmem_list_state* list_state, vmem_pool* pool, log_ostre
 	log->put_any(abc::category::abc::samples, abc::severity::important, 0x10342, "Initial size=%zu", size);
 
 	// Print the elements
-	for (vmem_list:: iterator itr = list.begin(); itr != list.end(); itr++) {
+	for (vmem_list::iterator itr = list.begin(); itr != list.end(); itr++) {
 		log->put_any(abc::category::abc::samples, abc::severity::important, 0x10343, "%lu", (long)itr->data);
 	}
 

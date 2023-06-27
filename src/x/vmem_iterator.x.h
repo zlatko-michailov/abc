@@ -48,8 +48,8 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(std::nullptr_t) noexcept
-		: vmem_basic_iterator_state<Container, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, nullptr) {
+	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(std::nullptr_t, Log* log) noexcept
+		: vmem_basic_iterator_state<Container, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, log) {
 	}
 
 
@@ -74,50 +74,6 @@ namespace abc {
 
 
 	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator ++() noexcept {
-		return inc();
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator ++(int) noexcept {
-		return inc();
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::inc() noexcept {
-		if (is_valid()) {
-			*this = _container->next(*this);
-		}
-
-		return *this;
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator --() noexcept {
-		return dec();
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::operator --(int) noexcept {
-		return dec();
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>& vmem_basic_iterator_state<Container, Pool, Log>::dec() noexcept {
-		if (is_valid()) {
-			*this = _container->prev(*this);
-		}
-
-		return *this;
-	}
-
-
-	template <typename Container, typename Pool, typename Log>
 	inline bool vmem_basic_iterator_state<Container, Pool, Log>::is_valid() const noexcept {
 		return _container != nullptr;
 	}
@@ -129,6 +85,12 @@ namespace abc {
 			&& _page_pos != vmem_page_pos_nil
 			&& _item_pos != vmem_item_pos_nil
 			&& _edge == vmem_iterator_edge::none;
+	}
+
+
+	template <typename Container, typename Pool, typename Log>
+	inline const Container* vmem_basic_iterator_state<Container, Pool, Log>::container() const noexcept {
+		return _container;
 	}
 
 
@@ -150,6 +112,12 @@ namespace abc {
 	}
 
 
+	template <typename Container, typename Pool, typename Log>
+	inline Log* vmem_basic_iterator_state<Container, Pool, Log>::log() const noexcept {
+		return _log;
+	}
+
+
 	// --------------------------------------------------------------
 
 
@@ -160,8 +128,79 @@ namespace abc {
 
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(std::nullptr_t) noexcept
-		: Base(nullptr) {
+	template <typename OtherIterator>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(const OtherIterator& other) noexcept
+		: Base(other.container(), other.page_pos(), other.item_pos(), other.edge(), other.log()) {
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(std::nullptr_t, Log* log) noexcept
+		: Base(nullptr, log) {
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline bool vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ==(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept {
+		return Base::operator ==(other);
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline bool vmem_basic_iterator<Base, Container, T, Pool, Log>::operator !=(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept {
+		return Base::operator !=(other);
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++() noexcept {
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "++itr");
+
+		if (Base::is_valid()) {
+			*this = Base::_container->next(*this);
+		}
+
+		return *this;
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++(int) noexcept {
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "itr++");
+
+		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
+
+		if (Base::is_valid()) {
+			*this = Base::_container->next(*this);
+		}
+
+		return thisCopy;
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --() noexcept {
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "--itr");
+
+		if (Base::is_valid()) {
+			*this = Base::_container->prev(*this);
+		}
+
+		return *this;
+	}
+
+
+	template <typename Base, typename Container, typename T, typename Pool, typename Log>
+	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --(int) noexcept {
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "itr--");
+
+		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
+
+		if (Base::is_valid()) {
+			*this = Base::_container->prev(*this);
+		}
+
+		return thisCopy;
 	}
 
 
@@ -207,6 +246,8 @@ namespace abc {
 		if (p == nullptr) {
 			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", 0x10606);
 		}
+
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "deref()");
 
 		return *p;
 	}

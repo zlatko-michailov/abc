@@ -92,7 +92,7 @@ namespace abc {
 	using vmem_container_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
 
 	template <typename T, typename Header, typename Pool, typename Log = null_log>
-	using vmem_container_const_iterator = vmem_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
+	using vmem_container_const_iterator = vmem_const_iterator<vmem_container<T, Header, Pool, Log>, T, Pool, Log>;
 
 
 	// --------------------------------------------------------------
@@ -227,6 +227,7 @@ namespace abc {
 		using iterator_state			= vmem_container_iterator_state<T, Header, Pool, Log>;
 
 	public:
+		using pool_type					= Pool;
 		using value_type				= T;
 		using pointer					= vmem_ptr<T, Pool, Log>;
 		using const_pointer				= vmem_ptr<const T, Pool, Log>;

@@ -59,6 +59,7 @@ namespace abc {
 		using iterator_state			= vmem_linked_iterator_state<Pool, Log>;
 
 	public:
+		using pool_type					= Pool;
 		using value_type				= vmem_page_pos_t;
 		using pointer					= vmem_ptr<value_type, Pool, Log>;
 		using const_pointer				= vmem_ptr<const value_type, Pool, Log>;

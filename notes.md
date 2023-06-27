@@ -1,4 +1,7 @@
 ## Done
+BUGFIX: *itr++
+BUGFIX: itr++
+Refactor iterator.
 
 ## To Do
 - vmem_basic_string

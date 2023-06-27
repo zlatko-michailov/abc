@@ -68,7 +68,7 @@ namespace abc {
 	template <typename Container, typename Pool, typename Log = null_log>
 	class vmem_basic_iterator_state {
 	public:
-		using container					= Container;
+		using container_type = Container;
 
 	public:
 		/**
@@ -94,8 +94,8 @@ namespace abc {
 		/**
 		 * @brief				Default-like constructor.
 		 */
-		vmem_basic_iterator_state<Container, Pool, Log>(std::nullptr_t) noexcept;
-
+		vmem_basic_iterator_state<Container, Pool, Log>(std::nullptr_t, Log* log = nullptr) noexcept;
+	
 	public:
 		vmem_basic_iterator_state<Container, Pool, Log>&	operator =(const vmem_basic_iterator_state<Container, Pool, Log>& other) noexcept = default;
 		vmem_basic_iterator_state<Container, Pool, Log>&	operator =(vmem_basic_iterator_state<Container, Pool, Log>&& other) noexcept = default;
@@ -103,10 +103,6 @@ namespace abc {
 	public:
 		bool												operator ==(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept;
 		bool												operator !=(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept;
-		vmem_basic_iterator_state<Container, Pool, Log>&	operator ++() noexcept;
-		vmem_basic_iterator_state<Container, Pool, Log>&	operator ++(int) noexcept;
-		vmem_basic_iterator_state<Container, Pool, Log>&	operator --() noexcept;
-		vmem_basic_iterator_state<Container, Pool, Log>&	operator --(int) noexcept;
 
 	public:
 		/**
@@ -119,18 +115,12 @@ namespace abc {
 		 */
 		bool can_deref() const noexcept;
 
-	private:
-		/**
-		 * @brief				Increments this iterator state, and returns a self reference.
-		 */
-		vmem_basic_iterator_state<Container, Pool, Log>& inc() noexcept;
-
-		/**
-		 * @brief				Decrements this iterator state, and returns a self reference.
-		 */
-		vmem_basic_iterator_state<Container, Pool, Log>& dec() noexcept;
-
 	public:
+		/**
+		 * @brief				Returns the container.
+		 */
+		const Container* container() const noexcept;
+
 		/**
 		 * @brief				Returns the page position.
 		 */
@@ -145,6 +135,11 @@ namespace abc {
 		 * @brief				Returns the edge.
 		 */
 		vmem_iterator_edge_t edge() const noexcept;
+
+		/**
+		 * @brief				Returns the log.
+		 */
+		Log* log() const noexcept;
 
 	protected:
 		const Container*								_container;
@@ -195,19 +190,33 @@ namespace abc {
 		vmem_basic_iterator<Base, Container, T, Pool, Log>(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) = default;
 
 		/**
+		 * @brief				Copy constructor from const_iterator.
+		 */
+		template <typename OtherIterator>
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(const OtherIterator& other) noexcept;
+
+		/**
 		 * @brief				Default-like constructor.
 		 */
-		vmem_basic_iterator<Base, Container, T, Pool, Log>(std::nullptr_t) noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>(std::nullptr_t, Log* log = nullptr) noexcept;
 
 	public:
-		vmem_basic_iterator<Base, Container, T, Pool, Log>&	operator =(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) noexcept = default;
-		vmem_basic_iterator<Base, Container, T, Pool, Log>&	operator =(vmem_basic_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>& operator =(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) noexcept = default;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>& operator =(vmem_basic_iterator<Base, Container, T, Pool, Log>&& other) noexcept = default;
 
 	public:
-		pointer											operator ->() noexcept;
-		const_pointer									operator ->() const noexcept;
-		reference										operator *();
-		const_reference									operator *() const;
+		bool operator ==(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept;
+		bool operator !=(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>& operator ++() noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>  operator ++(int) noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>& operator --() noexcept;
+		vmem_basic_iterator<Base, Container, T, Pool, Log>  operator --(int) noexcept;
+
+	public:
+		pointer         operator ->() noexcept;
+		const_pointer   operator ->() const noexcept;
+		reference       operator *();
+		const_reference operator *() const;
 
 	private:
 		friend Container;
@@ -215,12 +224,12 @@ namespace abc {
 		/**
 		 * @brief				Returns a `vmem_ptr` pointing at the item in memory, if the iterator is valid.
 		 */
-		pointer											ptr() const noexcept;
+		pointer ptr() const noexcept;
 
 		/**
 		 * @brief				Returns a reference to the item in memory, if the iterator is valid. Otherwise, it throws.
 		 */
-		reference										deref() const;
+		reference deref() const;
 	};
 
 
