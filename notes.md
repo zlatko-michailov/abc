@@ -1,11 +1,11 @@
 ## Done
 BUGFIX: *itr++
 BUGFIX: itr++
-Refactor iterator.
+Refactor iterator
+`vmem_basic_string`
+`vmem_basic_string_streambuf`
 
 ## To Do
-- vmem_basic_string
-- vmem_basic_string_streambuf
 
 ## To Do vmem_string
 

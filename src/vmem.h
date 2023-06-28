@@ -30,3 +30,4 @@ SOFTWARE.
 #include "x/vmem_container.x.h"
 #include "x/vmem_list.x.h"
 #include "x/vmem_map.x.h"
+#include "x/vmem_string.x.h"

@@ -119,10 +119,10 @@ int main(int /*argc*/, const char* argv[]) {
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p2(&pool, abc::vmem_page_pos_start, 12, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p3(&pool, abc::vmem_page_pos_start, 34, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p4(nullptr);
-	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == p2) = %d", p1 == p2);
-	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == p3) = %d", p1 == p3);
-	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p1 == nullptr) = %d", p1 == nullptr);
-	log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, "(p4 == nullptr) = %d", p4 == nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == p2) = %d", p1 == p2);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == p3) = %d", p1 == p3);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == nullptr) = %d", p1 == nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p4 == nullptr) = %d", p4 == nullptr);
 
 	// List iterator
 	abc::vmem_list<int, vmem_pool, log_ostream> list3(&start_page_ptr->list3, &pool, &log);
@@ -144,13 +144,18 @@ int main(int /*argc*/, const char* argv[]) {
 
 	// Work with streams over vmem_string.
 	vmem_string str2(&start_page_ptr->str2, &pool, &log);
-	////vmem_string_streambuf sb(&str2, &log);
-	////std::ostream ostrm(&sb);
-	////ostrm << "abc" << 12 << "xyz";
-	////std::istream istrm(&sb);
-	////std::string stdstr;
-	////istrm >> stdstr;
-	////log.put_any(abc::category::abc::samples, abc::severity::critical, __TAG__, stdstr.c_str());
+	vmem_string_streambuf sb(&str2, &log);
+	std::ostream ostrm(&sb);
+	ostrm << "abc" << 12 << "xyz";
+
+	for (vmem_string_iterator itr = str2.begin(); itr != str2.end(); itr++) {
+		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%c", *itr);
+	}
+
+	std::istream istrm(&sb);
+	std::string stdstr;
+	istrm >> stdstr;
+	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "'%s'", stdstr.c_str());
 
 	return 0;
 }

@@ -105,16 +105,16 @@ namespace abc {
     template <typename Char, typename Pool, typename Log = null_log>
 	class vmem_basic_string_streambuf : public std::basic_streambuf<Char> {
 		using base = std::basic_streambuf<Char>;
-        using string = vmem_basic_string<Char, Pool, Log>;
-        using iterator = vmem_basic_string_iterator<Char, Pool, Log>;
+        using String = vmem_basic_string<Char, Pool, Log>;
+        using Iterator = vmem_basic_string_iterator<Char, Pool, Log>;
 
 	public:
 		/**
 		 * @brief				Constructor.
-		 * @param socket		Pointer to a `client_socket` instance.
+		 * @param string		Pointer to a `String` instance.
 		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		vmem_basic_string_streambuf(string* string, Log* log = nullptr);
+		vmem_basic_string_streambuf(String* string, Log* log = nullptr);
 
 		/**
 		 * @brief				Move constructor.
@@ -128,17 +128,17 @@ namespace abc {
 
 	protected:
 		/**
-		 * @brief				Handler that reads a byte from the socket.
-		 * @return				The byte received.
+		 * @brief				Handler that reads a char from the string.
+		 * @return				The char received.
 		 */
-		virtual typename base::int_type underflow() override;
+		virtual typename std::basic_streambuf<Char>::int_type underflow() override;
 
 		/**
-		 * @brief				Handler that sends a byte to the socket.
-		 * @param ch			Byte to be sent.
+		 * @brief				Handler that appends a char to the string.
+		 * @param ch			Char to be sent.
 		 * @return				`ch`
 		 */
-		virtual typename base::int_type overflow(typename base::int_type ch) override;
+		virtual typename std::basic_streambuf<Char>::int_type overflow(typename base::int_type ch) override;
 
 		/**
 		 * @brief				Flushes.
@@ -148,19 +148,19 @@ namespace abc {
 
 	private:
 		/**
-		 * @brief				'get' iterator.
+		 * @brief				The String pointer passed in to the constructor.
 		 */
-		iterator _get_itr;
-
-		/**
-		 * @brief				'put' iterator.
-		 */
-		iterator _put_itr;
+		String* _string;
 
 		/**
 		 * @brief				The Log pointer passed in to the constructor.
 		 */
 		Log* _log;
+
+		/**
+		 * @brief				'get' iterator.
+		 */
+		Iterator _get_itr;
 
 		/**
 		 * @brief				Cached 'get' char.
@@ -172,5 +172,18 @@ namespace abc {
 		 */
 		Char _put_ch;
 	};
+
+
+	// --------------------------------------------------------------
+
+
+	/**
+	 * @brief					`std::streambuf` specialization that is backed by a `char` string.
+	 * @tparam Pool			    Pool.
+	 * @tparam Log				Logging facility.
+	 */
+    template <typename Pool, typename Log = null_log>
+	using vmem_string_streambuf = vmem_basic_string_streambuf<char, Pool, Log>;
+
 
 }

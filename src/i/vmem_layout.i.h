@@ -173,6 +173,13 @@ namespace abc {
 	};
 
 
+	/**
+	 * @brief			String state.
+	 * @details			Same as `vmem_list_state`.
+	 */
+	using vmem_string_state = vmem_list_state;
+
+
 	// ..............................................................
 
 
