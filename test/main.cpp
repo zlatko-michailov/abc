@@ -180,6 +180,8 @@ int main(int /*argc*/, const char* argv[]) {
 				{ "test_vmem_map_insertmany",						abc::test::vmem::test_vmem_map_insertmany },
 				{ "test_vmem_map_erase",							abc::test::vmem::test_vmem_map_erase },
 				{ "test_vmem_map_clear",							abc::test::vmem::test_vmem_map_clear },
+				{ "test_vmem_string_iterator",						abc::test::vmem::test_vmem_string_iterator },
+				{ "test_vmem_string_stream",						abc::test::vmem::test_vmem_string_stream },
 				{ "test_vmem_pool_move",							abc::test::vmem::test_vmem_pool_move },
 				{ "test_vmem_page_move",							abc::test::vmem::test_vmem_page_move },
 			} },

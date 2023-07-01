@@ -1335,6 +1335,71 @@ namespace abc { namespace test { namespace vmem {
 	}
 
 
+	bool test_vmem_string_iterator(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+		using String = abc::vmem_string<Pool, Log>;
+		using ConstIterator = abc::vmem_string_const_iterator<Pool, Log>; 
+
+		bool passed = true;
+
+		Pool pool("out/test/string_iterator.vmem", context.log);
+
+		abc::vmem_string_state string_state;
+		String str(&string_state, &pool, context.log);
+
+		const char* expected = "abc 12 xyz";
+
+		for (const char* ch = expected; *ch != '\0'; ch++) {
+			str.push_back(*ch);
+		}
+
+		const char* ch = expected;
+		for (ConstIterator itr = str.cbegin(); itr != str.cend(); itr++, ch++) {
+			passed = context.are_equal(*itr, *ch, __TAG__, "%c") && passed;
+		}
+		passed = context.are_equal('\0', *ch, __TAG__, "\\x%2.2x") && passed;
+
+		return passed;
+	}
+
+
+	bool test_vmem_string_stream(test_context<abc::test::log>& context) {
+		using Pool = PoolMin;
+		using String = abc::vmem_string<Pool, Log>;
+		using Streambuf = abc::vmem_string_streambuf<Pool, Log>;
+
+		bool passed = true;
+
+		Pool pool("out/test/string_stream.vmem", context.log);
+
+		abc::vmem_string_state string_state;
+		String str(&string_state, &pool, context.log);
+
+		int expected[] = {
+			42,
+			53,
+			99,
+			0
+		};
+
+		Streambuf sb(&str, context.log);
+		std::ostream ostrm(&sb);
+
+		for (const int* exp = expected; *exp != 0; exp++) {
+			ostrm << *exp << " ";
+		}
+
+		std::istream istrm(&sb);
+		for (int* exp = expected; *exp != 0; exp++) {
+			int actual = -1;
+			istrm >> actual;
+			passed = context.are_equal(actual, *exp, __TAG__, "%d") && passed;
+		}
+
+		return passed;
+	}
+
+
 	bool test_vmem_pool_move(test_context<abc::test::log>& context) {
 		using Pool = PoolFree;
 
