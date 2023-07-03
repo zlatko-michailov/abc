@@ -583,13 +583,13 @@ namespace abc {
 
 		iterator result = end_itr();
 
-		if (itr == end()) {
+		if (itr == static_cast<iterator_state>(end())) {
 			// Nothing to do.
 		}
-		else if (itr == rbegin()) {
+		else if (itr == static_cast<iterator_state>(rbegin())) {
 			result = begin_itr();
 		}
-		else if (itr == rend()) {
+		else if (itr == static_cast<iterator_state>(rend())) {
 			// Nothing to do.
 		}
 		else if (itr.page_pos() != vmem_page_pos_nil) {
@@ -626,13 +626,13 @@ namespace abc {
 
 		iterator result = rbegin_itr();
 
-		if (itr == rbegin()) {
+		if (itr == static_cast<iterator_state>(rbegin())) {
 			// Nothing to do.
 		}
-		else if (itr == begin()) {
+		else if (itr == static_cast<iterator_state>(begin())) {
 			// Nothing to do.
 		}
-		else if (itr == end()) {
+		else if (itr == static_cast<iterator_state>(end())) {
 			result = rend_itr();
 		}
 		else if (itr.page_pos() != vmem_page_pos_nil) {
