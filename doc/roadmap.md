@@ -2,15 +2,19 @@
 
 Up to [Documentation](README.md).
 
-## 1.20.0
-- vmem_string.
-- vmem_paged_string.
+> ATTENTION!  
+> The next release will be a complete rewrite.
+> Classes will start using `std` facilities as necessary, which may lead to dynamic memory allocation.
+> Methods will no longer return status codes.
+> Exceptions will be thrown when an operation cannot be performed.
 
 ## 2.0.0
-- Throw exception, return results.
-- Take `vmem_string` or `std::string_view` instead of buffer and size.
-- Lazily create a temp `vmem_pool`.
-- Override `operator new` to use the temp `vmem_pool`?
+- Nested namespaces.
+- Throw exceptions. Return results, not status codes.
+- Use `std` facilities. Allocate heap memory if necessary.
+- Improve logging and filtering.
+- Improve usability for `http` and `json`.
+- Implement basic SAL - at least `assert()`.
 
 ## 2.1.0
 - Async continuations.

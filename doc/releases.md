@@ -2,6 +2,22 @@
 
 Up to [Documentation](README.md).
 
+## 1.20.0
+- Theme
+  - `vmem_string`.
+  - Streaming in and out of `vmem_string`.
+- Breaking Changes
+  - `basic_iterator_state` - operators `++`, `--`, and `*` moved to `basic_iterator`.
+- Bugs
+  - `itr++` - postfix was always executing as prefix.
+  - `*itr++` - could cause crashes when used at the end of a container.
+- Additions
+  - `vmem_string`
+  - `vmem_string_streambuf`
+- Refactoring
+  - `basic_iterator`
+  - `basic_iterator_state`
+
 ## 1.19.0
 - Theme
   - TLS - proof of feasibility.

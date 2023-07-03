@@ -6,10 +6,15 @@ Refactor iterator
 `vmem_basic_string_streambuf`
 
 ## To Do
+-Prepare release
+  - Tag
+  - makefile
+- Main README - warn about the rewrite
 
 ## To Do vmem_string
 
 ## To Do Refactoring
+- clang
 - internal docs
 - exceptions!
 - assert
