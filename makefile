@@ -24,7 +24,7 @@
 
 
 PROJECT = abc
-VERSION = 1.19.0
+VERSION = 1.20.0
 
 UNAME = $(shell uname)
 ifeq "$(UNAME)" "Linux"
@@ -47,8 +47,9 @@ else ifeq "$(shell ls /usr/local/opt/openssl/include/openssl/ssl.h)" "/usr/local
 endif
 
 CPP = g++
+STD = c++11
 CPP_OPT_DEBUG = -ggdb
-CPP_OPT_STD = --std=c++11
+CPP_OPT_STD = --std=$(STD)
 CPP_OPT_WARN = -Wall -Wextra -Wpedantic -Wno-array-bounds
 CPP_OPT_FILE_OFFSET_BITS = -D_FILE_OFFSET_BITS=64
 CPP_OPTIONS = $(CPP_OPT_DEBUG) $(CPP_OPT_STD) $(CPP_OPT_WARN) $(CPP_OPT_FILE_OFFSET_BITS) $(CPP_OPT_UNAME) $(CPP_OPT_OPENSSL)
