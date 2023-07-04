@@ -154,7 +154,7 @@ namespace abc {
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
 	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++() noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "++itr");
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107ae, "++itr");
 
 		if (Base::is_valid()) {
 			*this = Base::_container->next(*this);
@@ -166,7 +166,7 @@ namespace abc {
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
 	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++(int) noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "itr++");
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107af, "itr++");
 
 		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
 
@@ -180,7 +180,7 @@ namespace abc {
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
 	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --() noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "--itr");
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b0, "--itr");
 
 		if (Base::is_valid()) {
 			*this = Base::_container->prev(*this);
@@ -192,7 +192,7 @@ namespace abc {
 
 	template <typename Base, typename Container, typename T, typename Pool, typename Log>
 	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --(int) noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "itr--");
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b1, "itr--");
 
 		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
 
@@ -247,7 +247,7 @@ namespace abc {
 			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", 0x10606);
 		}
 
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, __TAG__, "deref()");
+		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b2, "deref()");
 
 		return *p;
 	}

@@ -41,7 +41,7 @@ namespace abc {
 		, _get_ch(0)
 		, _put_ch(0) {
 		if (string == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_basic_string_streambuf::vmem_basic_string_streambuf(string)", __TAG__, _log);
+			throw exception<std::logic_error, Log>("vmem_basic_string_streambuf::vmem_basic_string_streambuf(string)", 0x107b3, _log);
 		}
 
 		base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);

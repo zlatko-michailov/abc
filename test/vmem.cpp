@@ -1355,9 +1355,9 @@ namespace abc { namespace test { namespace vmem {
 
 		const char* ch = expected;
 		for (ConstIterator itr = str.cbegin(); itr != str.cend(); itr++, ch++) {
-			passed = context.are_equal(*itr, *ch, __TAG__, "%c") && passed;
+			passed = context.are_equal(*itr, *ch, 0x107b4, "%c") && passed;
 		}
-		passed = context.are_equal('\0', *ch, __TAG__, "\\x%2.2x") && passed;
+		passed = context.are_equal('\0', *ch, 0x107b5, "\\x%2.2x") && passed;
 
 		return passed;
 	}
@@ -1393,7 +1393,7 @@ namespace abc { namespace test { namespace vmem {
 		for (int* exp = expected; *exp != 0; exp++) {
 			int actual = -1;
 			istrm >> actual;
-			passed = context.are_equal(actual, *exp, __TAG__, "%d") && passed;
+			passed = context.are_equal(actual, *exp, 0x107b6, "%d") && passed;
 		}
 
 		return passed;

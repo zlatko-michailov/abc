@@ -119,10 +119,10 @@ int main(int /*argc*/, const char* argv[]) {
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p2(&pool, abc::vmem_page_pos_start, 12, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p3(&pool, abc::vmem_page_pos_start, 34, &log);
 	abc::vmem_ptr<std::uint8_t, vmem_pool, log_ostream> p4(nullptr);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == p2) = %d", p1 == p2);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == p3) = %d", p1 == p3);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p1 == nullptr) = %d", p1 == nullptr);
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "(p4 == nullptr) = %d", p4 == nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x107a6, "(p1 == p2) = %d", p1 == p2);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x107a7, "(p1 == p3) = %d", p1 == p3);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x107a8, "(p1 == nullptr) = %d", p1 == nullptr);
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x107a9, "(p4 == nullptr) = %d", p4 == nullptr);
 
 	// List iterator
 	abc::vmem_list<int, vmem_pool, log_ostream> list3(&start_page_ptr->list3, &pool, &log);
@@ -130,7 +130,7 @@ int main(int /*argc*/, const char* argv[]) {
 	list3.push_back(43);
 	list3.push_back(44);
 	for (auto itr = list3.begin(); itr != list3.end(); itr++) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%d", *itr);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x107aa, "%d", *itr);
 	}
 
 	// String iterator
@@ -139,7 +139,7 @@ int main(int /*argc*/, const char* argv[]) {
 	str1.push_back('y');
 	str1.push_back('z');
 	for (vmem_string_iterator itr = str1.begin(); itr != str1.end(); ) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%c", *itr++);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x107ab, "%c", *itr++);
 	}
 
 	// Work with streams over vmem_string.
@@ -149,13 +149,13 @@ int main(int /*argc*/, const char* argv[]) {
 	ostrm << "abc" << 12 << "xyz";
 
 	for (vmem_string_iterator itr = str2.begin(); itr != str2.end(); itr++) {
-		log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "%c", *itr);
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x107ac, "%c", *itr);
 	}
 
 	std::istream istrm(&sb);
 	std::string stdstr;
 	istrm >> stdstr;
-	log.put_any(abc::category::abc::samples, abc::severity::important, __TAG__, "'%s'", stdstr.c_str());
+	log.put_any(abc::category::abc::samples, abc::severity::important, 0x107ad, "'%s'", stdstr.c_str());
 
 	return 0;
 }
