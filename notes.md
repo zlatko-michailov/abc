@@ -6,20 +6,23 @@ Refactor iterator
 `vmem_basic_string_streambuf`
 
 ## To Do
--Prepare release
-  - Tag
-  - makefile
 - Main README - warn about the rewrite
 
 ## To Do vmem_string
 
 ## To Do Refactoring
-- clang
+- copy src and samples to boneyard
 - internal docs
+- sub-namespaces
+- log severities
 - exceptions!
-- assert
+- assert (sal)
 - enum class
-- abc log severities
+- std classes
+- LogPtr template parameters
+- clang
+- spaces?
+- doxygen comment alignment?
 
 ## Pick List
 - drive
