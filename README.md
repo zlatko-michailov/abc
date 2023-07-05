@@ -1,4 +1,12 @@
 # abc
+> ATTENTION!
+>
+> The next release will be a complete rewrite.  
+> While the entities will remain the same, there will be many breaking changes.
+> Plan your adoption accordingly.
+
+___
+
 > For a complete guide on `abc`, please visit the project's [Documentation](doc/README.md).
 
 `abc` is a C++ header-only library that complements the `std` library. The most notable `abc` entities are:

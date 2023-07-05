@@ -6,9 +6,6 @@ Refactor iterator
 `vmem_basic_string_streambuf`
 
 ## To Do
-- Main README - warn about the rewrite
-
-## To Do vmem_string
 
 ## To Do Refactoring
 - copy src and samples to boneyard
