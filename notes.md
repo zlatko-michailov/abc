@@ -8,9 +8,11 @@ Refactor iterator
 ## To Do
 
 ## To Do Refactoring
-- copy src and samples to boneyard
 - internal docs
 - sub-namespaces
+- spaces
+- doxygen comment alignment
+- copy src and samples to boneyard
 - log severities
 - exceptions!
 - assert (sal)
@@ -18,8 +20,6 @@ Refactor iterator
 - std classes
 - LogPtr template parameters
 - clang
-- spaces?
-- doxygen comment alignment?
 
 ## Pick List
 - drive
