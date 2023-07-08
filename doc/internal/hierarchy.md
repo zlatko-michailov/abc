@@ -2,9 +2,11 @@
 
 Up to [Documentation](README.md).
 
+
 - __abc ::__
     - ascii.h
     - size.h
+    - util.h
     - __streambuf ::__
         - buffer.h
         - multifile.h
