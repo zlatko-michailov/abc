@@ -4,8 +4,8 @@ Up to [Documentation](README.md).
 
 
 - __abc ::__
-    - ascii.h
     - size.h
+    - ascii.h
     - util.h
     - __streambuf ::__
         - buffer.h
@@ -16,10 +16,9 @@ Up to [Documentation](README.md).
     - __diag ::__
         - tag.h
         - timestamp.h
-        - exception.h
         - log.h
-    - __sal ::__
-        - sal.h
+        - exception.h
+        - assert.h
     - __net ::__
         - socket.h
         - http.h
@@ -57,3 +56,8 @@ Up to [Documentation](README.md).
             - motion_tracker.h
     - __test ::__
         - test.h
+
+## Dependency
+A class may depend on other classes:
+- from the same sub-namespace, or
+- from sub-namespaces defined above its sub-namespace on the diagram

@@ -1,14 +1,15 @@
 ## Done
-BUGFIX: *itr++
-BUGFIX: itr++
-Refactor iterator
-`vmem_basic_string`
-`vmem_basic_string_streambuf`
+- internal doc pages. UNLINKED!
 
 ## To Do
+- Link the internal docs.
 
 ## To Do Refactoring
 - internal docs
+  - log
+    - exceptions
+    - severities
+    - filters
 - sub-namespaces
 - spaces
 - doxygen comment alignment
