@@ -25,33 +25,15 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-
 
 namespace abc {
 
     /**
-     * @brief Named constants that can be used anywhere `std::size_t` is expected.
+     * @brief Constructs and returns a temporary copy (`xvalue`) of the given source instance.
      */
-    namespace size {
-        constexpr std::size_t invalid = SIZE_MAX;
-        constexpr std::size_t strlen = invalid;
-
-        constexpr std::size_t _16  =  16;
-        constexpr std::size_t _32  =  32;
-        constexpr std::size_t _64  =  64;
-        constexpr std::size_t _128 = 128;
-        constexpr std::size_t _256 = 256;
-        constexpr std::size_t _512 = 512;
-
-        constexpr std::size_t k1   = 1024;
-        constexpr std::size_t k2   =  2 * k1;
-        constexpr std::size_t k4   =  4 * k1;
-        constexpr std::size_t k8   =  8 * k1;
-        constexpr std::size_t k16  = 16 * k1;
-        constexpr std::size_t k32  = 32 * k1;
-        constexpr std::size_t k64  = 64 * k1;
+    template <typename T>
+    inline T copy(const T& source) {
+        return T(source);
     }
 
 }
