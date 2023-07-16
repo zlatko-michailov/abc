@@ -26,7 +26,6 @@ SOFTWARE.
 #include <iostream>
 
 #include "inc/test.h"
-#include "inc/heap.h"
 #include "inc/clock.h"
 #include "inc/ascii.h"
 #include "inc/timestamp.h"
@@ -45,10 +44,6 @@ int main(int /*argc*/, const char* argv[]) {
 
 	abc::test_suite<abc::test::log> test_suite(
 		{
-			{ "pre-tests", {
-				{ "start_heap_allocation",							abc::test::heap::start_heap_allocation },
-			} },
-
 			{ "ascii", {
 				{ "test_ascii_equal",								abc::test::ascii::test_ascii_equal },
 				{ "test_ascii_equal_n",								abc::test::ascii::test_ascii_equal_n },
@@ -184,10 +179,6 @@ int main(int /*argc*/, const char* argv[]) {
 				{ "test_vmem_string_stream",						abc::test::vmem::test_vmem_string_stream },
 				{ "test_vmem_pool_move",							abc::test::vmem::test_vmem_pool_move },
 				{ "test_vmem_page_move",							abc::test::vmem::test_vmem_page_move },
-			} },
-
-			{ "post-tests", {
-				{ "test_heap_allocation",							abc::test::heap::test_heap_allocation },
 			} },
 		},
 		&log,

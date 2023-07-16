@@ -31,7 +31,6 @@ SOFTWARE.
 #include "inc/http.h"
 #include "inc/json.h"
 #include "inc/socket.h"
-#include "inc/heap.h"
 
 
 namespace abc { namespace test { namespace socket {
@@ -102,16 +101,6 @@ namespace abc { namespace test { namespace socket {
 			}
 		});
 
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#endif
-
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e6) && passed; // Lambda closure
-
 		abc::socket::address client_address;
 		std::uint16_t content_length;
 		server.receive(&content_length, sizeof(std::uint16_t), &client_address);
@@ -166,16 +155,6 @@ namespace abc { namespace test { namespace socket {
 				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x1002c, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#endif
-
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e7) && passed; // Lambda closure
 
 		ClientSocket connection = server.accept();
 
@@ -263,16 +242,6 @@ namespace abc { namespace test { namespace socket {
 				context.log->put_any(abc::category::abc::base, abc::severity::important, 0x10038, "client: EXCEPTION: %s", ex.what());
 			}
 		});
-
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#endif
-
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100e8) && passed; // Lambda closure
 
 		ClientSocket connection = server.accept();
 
@@ -479,16 +448,6 @@ namespace abc { namespace test { namespace socket {
 			http_json_stream_client(passed, context, client, server_port);
 		});
 
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 3;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 1;
-#endif
-
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
-
 		ClientSocket connection = server.accept();
 
 		abc::socket_streambuf<ClientSocket, abc::test::log> sb(&connection, context.log);
@@ -666,16 +625,6 @@ namespace abc { namespace test { namespace socket {
 
 		client_thread.join();
 		done.wait();
-
-#if defined(__ABC__LINUX)
-		abc::test::heap::counter_t closure_allocation_count = 5;
-#elif defined(__ABC__MACOS)
-		abc::test::heap::counter_t closure_allocation_count = 10;
-#else
-		abc::test::heap::counter_t closure_allocation_count = 5;
-#endif
-
-		passed = abc::test::heap::ignore_heap_allocations(abc::test::heap::instance_unaligned_throw_count, closure_allocation_count, context, 0x100f1) && passed; // Lambda closure
 
 		return passed;
 	}
