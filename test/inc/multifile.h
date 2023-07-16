@@ -26,16 +26,16 @@ SOFTWARE.
 #pragma once
 
 #include "../../src/size.h"
-#include "../../src/multifile.h"
+#include "../../src/multifile_streambuf.h"
 
 #include "test.h"
 
 
 namespace abc { namespace test { namespace multifile {
 
-	bool test_multifile_move(test_context<abc::test::log>& context);
-	bool test_duration_multifile_move(test_context<abc::test::log>& context);
-	bool test_size_multifile_move(test_context<abc::test::log>& context);
+	bool test_multifile_streambuf_move(test_context<abc::test::log>& context);
+	bool test_duration_multifile_streambuf_move(test_context<abc::test::log>& context);
+	bool test_size_multifile_streambuf_move(test_context<abc::test::log>& context);
 
 }}}
 

@@ -31,161 +31,150 @@ SOFTWARE.
 #include "timestamp.h"
 #include "exception.h"
 #include "tag.h"
-#include "i/multifile.i.h"
+#include "i/multifile_streambuf.i.h"
 
 
 namespace abc {
 
-	static constexpr const char*	filename_format = "%4.4u%2.2u%2.2u_%2.2u%2.2u%2.2u";
-	static constexpr std::size_t	filename_length = 15;
-	static constexpr char			path_separator  = '/';
+    template <typename Clock>
+    inline multifile_streambuf<Clock>::multifile_streambuf(std::string&& path, std::ios_base::openmode mode)
+        : base()
+        , _path(std::move(path))
+        , _mode(mode) {
+
+        static constexpr char path_separator = '/';
+
+        // Ensure a trailing separator.
+        if (_path.back() != path_separator) {
+            _path.push_back(path_separator);
+        }
+
+        _filename_start = _path.cend();
+
+        reopen();
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename Clock>
+    inline multifile_streambuf<Clock>::multifile_streambuf(multifile_streambuf&& other) noexcept
+        : base(std::move(static_cast<base&&>(other)))
+        , _path(std::move(other._path))
+        , _filename_start(std::move(other._filename_start))
+        , _mode(other._mode) {
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline multifile_streambuf<MaxPath, Clock, Log>::multifile_streambuf(const char* path, std::ios_base::openmode mode, Log* log)
-		: base()
-		, _mode(mode)
-		, _log(log) {
-		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("multifile_streambuf::multifile_streambuf(path)", 0x102b0, log);
-		}
+    template <typename Clock>
+    inline void multifile_streambuf<Clock>::reopen() {
+        if (base::is_open()) {
+            base::close();
+        }
 
-		_path_length = std::strlen(path);
-		if (_path_length + 1 + filename_length > MaxPath) {
-			throw exception<std::logic_error, Log>("multifile_streambuf::multifile_streambuf(std::strlen(path))", 0x102b1, log);
-		}
-
-		std::strncpy(_path, path, _path_length);
-		if (_path[_path_length - 1] != path_separator) {
-			_path[_path_length++] = path_separator;
-		}
-
-		reopen();
-	}
+        update_filename();
+        base::open(_path, _mode);
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline multifile_streambuf<MaxPath, Clock, Log>::multifile_streambuf(multifile_streambuf&& other) noexcept
-		: base(std::move(other)) {
-		std::strncpy(_path, other._path, MaxPath);
-		_path_length = other._path_length;
-		_mode = other._mode;
-		_log = other._log;
-
-		other._path[0] = 0;
-		other._path_length = 0;
-		other._log = nullptr;
-	}
+    template <typename Clock>
+    inline const std::string& multifile_streambuf<Clock>::path() const noexcept {
+        return _path;
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline void multifile_streambuf<MaxPath, Clock, Log>::reopen() {
-		if (base::is_open()) {
-			base::close();
+    template <typename Clock>
+    inline void multifile_streambuf<Clock>::update_filename() {
+        static constexpr const char* filename_format = "%4.4u%2.2u%2.2u_%2.2u%2.2u%2.2u.txt";
+        static constexpr std::size_t filename_length = 19;
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::multifile, severity::abc::debug, 0x102b2, "multifile_streambuf::reopen() Close path=%s", _path);
-			}
-		}
+        timestamp<Clock> ts;
 
-		timestamp<Clock> ts;
-		std::snprintf(_path + _path_length, MaxPath - _path_length, filename_format, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds());
+        char filename[filename_length + 1];
+        std::snprintf(filename, sizeof(filename), filename_format, ts.year(), ts.month(), ts.day(), ts.hours(), ts.minutes(), ts.seconds());
 
-		std::filebuf* op = base::open(_path, _mode);
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::multifile, severity::abc::optional, 0x102b3, "multifile_streambuf::reopen() Open path=%s, success=%u", _path, op != nullptr);
-		}
-	}
+        _path.replace(_filename_start, _path.cend(), filename);
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline const char* multifile_streambuf<MaxPath, Clock, Log>::path() const noexcept {
-		return _path;
-	}
+    // --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+    template <typename Clock>
+    inline duration_multifile_streambuf<Clock>::duration_multifile_streambuf(typename Clock::duration duration, std::string&& path, std::ios_base::openmode mode)
+        : base(std::move(path), mode)
+        , _duration(duration)
+        , _ts() {
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline duration_multifile_streambuf<MaxPath, Clock, Log>::duration_multifile_streambuf(typename Clock::duration duration, const char* path, std::ios_base::openmode mode, Log* log)
-		: base(path, mode, log)
-		, _duration(duration)
-		, _ts() {
-	}
+    template <typename Clock>
+    inline void duration_multifile_streambuf<Clock>::reopen() {
+        base::reopen();
+
+        _ts = timestamp<Clock>();
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline void duration_multifile_streambuf<MaxPath, Clock, Log>::reopen() {
-		base::reopen();
+    template <typename Clock>
+    inline int duration_multifile_streambuf<Clock>::sync() {
+        base::sync();
 
-		_ts = timestamp<Clock>();
-	}
+        // This is where we check if we have to start a bew file.
+        timestamp<Clock> ts;
+        if (ts - _ts >= _duration) {
+            reopen();
+        }
 
-
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline int duration_multifile_streambuf<MaxPath, Clock, Log>::sync() {
-		base::sync();
-
-		timestamp<Clock> ts;
-		if (ts - _ts >= _duration) {
-			reopen();
-		}
-
-		return 0;
-	}
+        return 0;
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline size_multifile_streambuf<MaxPath, Clock, Log>::size_multifile_streambuf(std::size_t size, const char* path, std::ios_base::openmode mode, Log* log)
-		: base(path, mode, log)
-		, _size(size)
-		, _current_size(0) {
-	}
+    template <typename Clock>
+    inline size_multifile_streambuf<Clock>::size_multifile_streambuf(std::size_t size, std::string&& path, std::ios_base::openmode mode)
+        : base(std::move(path), mode)
+        , _size(size)
+        , _current_size(0) {
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline void size_multifile_streambuf<MaxPath, Clock, Log>::reopen() {
-		base::reopen();
+    template <typename Clock>
+    inline void size_multifile_streambuf<Clock>::reopen() {
+        base::reopen();
 
-		_current_size = 0;
-	}
-
-
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline std::streamsize size_multifile_streambuf<MaxPath, Clock, Log>::xsputn(const char* s, std::streamsize count) {
-		_current_size += count;
-
-		return base::xsputn(s, count);
-	}
+        _current_size = 0;
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline int size_multifile_streambuf<MaxPath, Clock, Log>::sync() {
-		_current_size += pcount();
+    template <typename Clock>
+    inline std::streamsize size_multifile_streambuf<Clock>::xsputn(const char* s, std::streamsize count) {
+        _current_size += count;
 
-		base::sync();
-
-		if (_current_size >= _size) {
-			reopen();
-		}
-
-		return 0;
-	}
+        return base::xsputn(s, count);
+    }
 
 
-	template <std::size_t MaxPath, typename Clock, typename Log>
-	inline std::size_t size_multifile_streambuf<MaxPath, Clock, Log>::pcount() const noexcept {
-		return base::pptr() - base::pbase();
-	}
+    template <typename Clock>
+    inline int size_multifile_streambuf<Clock>::sync() {
+        _current_size += pcount();
+
+        base::sync();
+
+        // This is where we check if we have to start a bew file.
+        if (_current_size >= _size) {
+            reopen();
+        }
+
+        return 0;
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename Clock>
+    inline std::size_t size_multifile_streambuf<Clock>::pcount() const noexcept {
+        return base::pptr() - base::pbase();
+    }
+
+
+    // --------------------------------------------------------------
 }

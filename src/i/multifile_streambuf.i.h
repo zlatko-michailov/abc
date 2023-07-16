@@ -29,204 +29,202 @@ SOFTWARE.
 #include <fstream>
 #include <chrono>
 #include <ios>
+#include <string>
 
-#include "log.i.h"
 #include "timestamp.i.h"
 
 
 namespace abc {
 
-	/**
-	 * @brief					`streambuf` specialization that is backed by files whose names are made of timestamps.
-	 * @tparam MaxPath			Maximum length of the file path.
-	 * @tparam Clock			Clock to generate a timestamp.
-	 * @tparam Log				Logging facility.
-	 */
-	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
-	class multifile_streambuf : public std::filebuf {
-		using base = std::filebuf;
+    /**
+     * @brief        `streambuf` specialization that is backed by files whose names are made of timestamps.
+     * @tparam Clock  Clock to generate a timestamp.
+     */
+    template <typename Clock = std::chrono::system_clock>
+    class multifile_streambuf
+        : public std::filebuf {
 
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param path			Path to an existing folder 
-		 * @param mode			`std::ios_base::openmode`
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		multifile_streambuf(const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
+        using base = std::filebuf;
 
-		/**
-		 * @brief				Move constructor.
-		 */
-		multifile_streambuf(multifile_streambuf&& other) noexcept;
+    public:
+        /**
+         * @brief      Constructor.
+         * @param path Path to an existing folder 
+         * @param mode `std::ios_base::openmode`
+         */
+        multifile_streambuf(std::string&& path, std::ios_base::openmode mode = std::ios_base::out);
 
-		/**
-		 * @brief				Deleted.
-		 */
-		multifile_streambuf(const multifile_streambuf& other) = delete;
+        /**
+         * @brief Move constructor.
+         */
+        multifile_streambuf(multifile_streambuf&& other) noexcept;
 
-	public:
-		/**
-		 * @brief				Closes the current file, and opens a new file.
-		 */
-		void reopen();
+        /**
+         * @brief Deleted.
+         */
+        multifile_streambuf(const multifile_streambuf& other) = delete;
 
-		/**
-		 * @brief				Returns the full path of the current file.
-		 */
-		const char* path() const noexcept;
+    public:
+        /**
+         * @brief Closes the current file, and opens a new file.
+         */
+        void reopen();
 
-	private:
-		/**
-		 * @brief				Buffer to store the file path.
-		 */
-		char _path[MaxPath + 1];
+        /**
+         * @brief Returns the full path of the current file.
+         */
+        const std::string& path() const noexcept;
 
-		/**
-		 * @brief				Length of the path to the parent folder.
-		 */
-		std::size_t _path_length;
+    private:
+        /**
+         * @brief Updates the file name to the current timestamp.
+         */
+        void update_filename();
 
-		/**
-		 * @brief				`std::ios_base::openmode`.
-		 */
-		std::ios_base::openmode _mode;
+    private:
+        /**
+         * @brief The full path to the file.
+         */
+        std::string _path;
 
-		/**
-		 * @brief				The log passed in to the constructor.
-		 */
-		Log* _log;
-	};
+        /**
+         * @brief Iterator pointing at the place in the path where the file name starts.
+         */
+        std::string::const_iterator _filename_start;
 
-
-	// --------------------------------------------------------------
+        /**
+         * @brief `std::ios_base::openmode`.
+         */
+        std::ios_base::openmode _mode;
+    };
 
 
-	/**
-	 * @brief					`multifile_streambuf` specialization that is backed by files whose names are made of timestamps.
-	 * @details					Automatically closes and reopens a new file when the given time duration has passed. 
-	 * @tparam MaxPath			Maximum length of the file path.
-	 * @tparam Clock			Clock to generate a timestamp.
-	 * @tparam Log				Logging facility.
-	 */
-	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
-	class duration_multifile_streambuf : public multifile_streambuf<MaxPath, Clock, Log> {
-		using base = multifile_streambuf<MaxPath, Clock, Log>;
-
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param duration		Duration limit of the file.
-		 * @param path			Path to an existing folder 
-		 * @param mode			`std::ios_base::openmode`
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		duration_multifile_streambuf(typename Clock::duration duration, const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
-
-		/**
-		 * @brief				Move constructor.
-		 */
-		duration_multifile_streambuf(duration_multifile_streambuf&& other) noexcept = default;
-
-		/**
-		 * @brief				Deleted.
-		 */
-		duration_multifile_streambuf(const duration_multifile_streambuf& other) = delete;
-
-	public:
-		/**
-		 * @brief				Closes the current file, and opens a new file.
-		 */
-		void reopen();
-
-	protected:
-		/**
-		 * @brief				Handler that checks the duration, and calls `reopen()` if needed.
-		 */
-		virtual int sync() override;
-
-	private:
-		/**
-		 * @brief				The duration passed in to the constructor.
-		 */
-		const typename Clock::duration _duration;
-
-		/**
-		 * @brief				The creation timestamp of the current file.
-		 */
-		timestamp<Clock> _ts;
-	};
+    // --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+    /**
+     * @brief        `multifile_streambuf` specialization that is backed by files whose names are made of timestamps.
+     * @details      Automatically closes and reopens a new file when the given time duration has passed. 
+     * @tparam Clock Clock to generate a timestamp.
+     */
+    template <typename Clock = std::chrono::system_clock>
+    class duration_multifile_streambuf
+        : public multifile_streambuf<Clock> {
+
+        using base = multifile_streambuf<Clock>;
+
+    public:
+        /**
+         * @brief          Constructor.
+         * @param duration Duration limit of the file.
+         * @param path     Path to an existing folder 
+         * @param mode     `std::ios_base::openmode`
+         */
+        duration_multifile_streambuf(typename Clock::duration duration, std::string&& path, std::ios_base::openmode mode = std::ios_base::out);
+
+        /**
+         * @brief Move constructor.
+         */
+        duration_multifile_streambuf(duration_multifile_streambuf&& other) noexcept = default;
+
+        /**
+         * @brief Deleted.
+         */
+        duration_multifile_streambuf(const duration_multifile_streambuf& other) = delete;
+
+    public:
+        /**
+         * @brief Closes the current file, and opens a new file.
+         */
+        void reopen();
+
+    protected:
+        /**
+         * @brief Handler that checks the duration, and calls `reopen()` if needed.
+         */
+        virtual int sync() override;
+
+    private:
+        /**
+         * @brief The duration passed in to the constructor.
+         */
+        const typename Clock::duration _duration;
+
+        /**
+         * @brief The creation timestamp of the current file.
+         */
+        timestamp<Clock> _ts;
+    };
 
 
-	/**
-	 * @brief					`multifile_streambuf` specialization that is backed by files whose names are made of timestamps.
-	 * @details					Automatically closes and reopens a new file when the given time duration has passed. 
-	 * @tparam MaxPath			Maximum length of the file path.
-	 * @tparam Clock			Clock to generate a timestamp.
-	 * @tparam Log				Logging facility.
-	 */
-	template <std::size_t MaxPath = size::k2, typename Clock = std::chrono::system_clock, typename Log = null_log>
-	class size_multifile_streambuf : public multifile_streambuf<MaxPath, Clock, Log> {
-		using base = multifile_streambuf<MaxPath, Clock, Log>;
+    // --------------------------------------------------------------
 
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param size			Size limit of the file.
-		 * @param path			Path to an existing folder 
-		 * @param mode			`std::ios_base::openmode`
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		size_multifile_streambuf(std::size_t size, const char* path, std::ios_base::openmode mode = std::ios_base::out, Log* log = nullptr);
 
-		/**
-		 * @brief				Move constructor.
-		 */
-		size_multifile_streambuf(size_multifile_streambuf&& other) noexcept = default;
+    /**
+     * @brief        `multifile_streambuf` specialization that is backed by files whose names are made of timestamps.
+     * @details      Automatically closes and reopens a new file when the given time duration has passed. 
+     * @tparam Clock Clock to generate a timestamp.
+     */
+    template <typename Clock = std::chrono::system_clock>
+    class size_multifile_streambuf
+        : public multifile_streambuf<Clock> {
 
-		/**
-		 * @brief				Deleted.
-		 */
-		size_multifile_streambuf(const size_multifile_streambuf& other) = delete;
+        using base = multifile_streambuf<Clock>;
 
-	public:
-		/**
-		 * @brief				Closes the current file, and opens a new file.
-		 */
-		void reopen();
+    public:
+        /**
+         * @brief      Constructor.
+         * @param size Size limit of the file.
+         * @param path Path to an existing folder 
+         * @param mode `std::ios_base::openmode`
+         */
+        size_multifile_streambuf(std::size_t size, std::string&& path, std::ios_base::openmode mode = std::ios_base::out);
 
-	protected:
-		/**
-		 * @brief				Handler that counts the chars put out at once.
-		 * @param s				Char sequence to put out. 
-		 * @param count			Count of chars.
-		 */
-		virtual std::streamsize xsputn(const char* s, std::streamsize count) override;
+        /**
+         * @brief Move constructor.
+         */
+        size_multifile_streambuf(size_multifile_streambuf&& other) noexcept = default;
 
-		/**
-		 * @brief				Handler that checks the size, and calls `reopen()` if needed.
-		 */
-		virtual int sync() override;
+        /**
+         * @brief Deleted.
+         */
+        size_multifile_streambuf(const size_multifile_streambuf& other) = delete;
 
-	protected:
-		/**
-		 * @brief				Overrides the default pcount calculation.
-		 */
-		std::size_t pcount() const noexcept;
+    public:
+        /**
+         * @brief Closes the current file, and opens a new file.
+         */
+        void reopen();
 
-	private:
-		/**
-		 * @brief				The size passed in to the constructor.
-		 */
-		const std::size_t _size;
+    protected:
+        /**
+         * @brief       Handler that counts the chars put out at once.
+         * @param s     Char sequence to put out. 
+         * @param count Count of chars.
+         */
+        virtual std::streamsize xsputn(const char* s, std::streamsize count) override;
 
-		/**
-		 * @brief				Current file size.
-		 */
-		std::size_t _current_size;
-	};
+        /**
+         * @brief Handler that checks the size, and calls `reopen()` if needed.
+         */
+        virtual int sync() override;
+
+    protected:
+        /**
+         * @brief Overrides the default pcount calculation.
+         */
+        std::size_t pcount() const noexcept;
+
+    private:
+        /**
+         * @brief The size passed in to the constructor.
+         */
+        const std::size_t _size;
+
+        /**
+         * @brief Current file size.
+         */
+        std::size_t _current_size;
+    };
 
 }

@@ -30,8 +30,17 @@ Provide the title and the link to the page along with as much information as you
 - [Roadmap](roadmap.md)
 
 ## Class Reference
-- [ascii](ref/ascii.md)
-- [buffer_streambuf](ref/buffer_streambuf.md)
+- `abc ::`
+  - [size](ref/size.md)
+  - [ascii](ref/ascii.md)
+  - [timestamp](ref/timestamp.md)
+  - [util](ref/util.md) __TODO:__
+  - [buffer_streambuf](ref/buffer_streambuf.md)
+  - [multifile_streambuf](ref/multifile_streambuf.md)
+  - [duration_multifile_streambuf](ref/multifile_streambuf.md)
+  - [size_multifile_streambuf](ref/multifile_streambuf.md)
+  - `stream ::`
+  - `diag ::`
 - [endpoint](ref/endpoint.md)
 - [exception](ref/exception.md)
 - [gpio](ref/gpio.md)
@@ -62,11 +71,6 @@ Provide the title and the link to the page along with as much information as you
   - [debug_line_ostream](ref/log.md)
   - [diag_line_ostream](ref/log.md)
   - [test_line_ostream](ref/log.md)
-- [multifile](ref/multifile.md)
-  - [multifile_streambuf](ref/multifile.md)
-  - [duration_multifile_streambuf](ref/multifile.md)
-  - [size_multifile_streambuf](ref/multifile.md)
-- [size](ref/size.md)
 - [sockets](ref/socket.md)
   - [socket_streambuf](ref/socket.md)
   - [udp_socket](ref/socket.md)
@@ -78,7 +82,6 @@ Provide the title and the link to the page along with as much information as you
   - [table_ostream](ref/table.md)
   - [line_ostream](ref/table.md)
 - [test](ref/test.md)
-- [timestamp](ref/timestamp.md)
 - [vmem](ref/vmem.md)
   - [vmem_pool](ref/vmem.md)
   - [vmem_page](ref/vmem.md)

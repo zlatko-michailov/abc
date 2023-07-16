@@ -4,13 +4,13 @@ Up to [Documentation](README.md).
 
 
 - __abc ::__
+    - __i__
     - size.h
     - ascii.h
+    - timestamp.h
     - util.h
-    - __streambuf ::__
-        - __i__
-        - buffer.h
-        - multifile.h
+    - buffer_streambuf.h
+    - multifile_streambuf.h
     - __stream ::__
         - __i__
         - stream.h
@@ -18,7 +18,6 @@ Up to [Documentation](README.md).
     - __diag ::__
         - __i__
         - tag.h
-        - timestamp.h
         - log.h
         - exception.h
         - assert.h
@@ -28,9 +27,7 @@ Up to [Documentation](README.md).
         - http.h
         - json.h
         - endpoint.h
-        - __streambuf ::__
-            - __i__
-            - socket.h
+        - socket_streambuf.h
         - __openssl ::__
             - __i__
             - socket.h
@@ -45,9 +42,7 @@ Up to [Documentation](README.md).
         - map.h
         - string.h
         - util.h
-        - __streambuf ::__
-            - __i__
-            - string.h
+        - string_streambuf.h
     - __gpio ::__
         - __i__
         - base.h
