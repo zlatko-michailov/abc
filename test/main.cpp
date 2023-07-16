@@ -30,7 +30,7 @@ SOFTWARE.
 #include "inc/ascii.h"
 #include "inc/timestamp.h"
 #include "inc/streambuf.h"
-#include "inc/multifile.h"
+#include "inc/multifile_streambuf.h"
 #include "inc/table.h"
 #include "inc/socket.h"
 #include "inc/http.h"
