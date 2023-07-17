@@ -28,62 +28,62 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace streambuf {
 
-	static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text);
+    static bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text);
 
 
-	bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context) {
-		return test_buffer_streambuf(context, "x");
-	}
+    bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context) {
+        return test_buffer_streambuf(context, "x");
+    }
 
 
-	bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context) {
-		return test_buffer_streambuf(context, "This is a slightly longer text");
-	}
+    bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context) {
+        return test_buffer_streambuf(context, "This is a slightly longer text");
+    }
 
 
-	bool test_buffer_streambuf_move(test_context<abc::test::log>& context) {
-		const char* expected = "Test move constructor";
+    bool test_buffer_streambuf_move(test_context<abc::test::log>& context) {
+        const char* expected = "Test move constructor";
 
-		char medium[abc::size::_256 + 1] = { };
+        char medium[abc::size::_256 + 1] = { };
 
-		bool passed = true;
+        bool passed = true;
 
-		abc::buffer_streambuf sb1(medium, 0, sizeof(medium), medium, 0, sizeof(medium));
-		std::ostream out(&sb1);
-		out.write(expected, std::strlen(expected) + 1);
-		passed = context.are_equal(medium, expected, 0x1072f) && passed;
+        abc::buffer_streambuf sb1(medium, 0, sizeof(medium), medium, 0, sizeof(medium));
+        std::ostream out(&sb1);
+        out.write(expected, std::strlen(expected) + 1);
+        passed = context.are_equal(medium, expected, 0x1072f) && passed;
 
-		abc::buffer_streambuf sb2(std::move(sb1));
-		std::istream in(&sb2);
-		char actual[abc::size::_256 + 1];
-		in.read(actual, std::strlen(expected) + 1);
-		passed = context.are_equal(actual, expected, 0x10730) && passed;
+        abc::buffer_streambuf sb2(std::move(sb1));
+        std::istream in(&sb2);
+        char actual[abc::size::_256 + 1];
+        in.read(actual, std::strlen(expected) + 1);
+        passed = context.are_equal(actual, expected, 0x10730) && passed;
 
-		return passed;
-	}
+        return passed;
+    }
 
 
-	bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) {
-		char expected[abc::size::_256 + 1];
-		std::strncpy(expected, text, sizeof(expected));
+    bool test_buffer_streambuf(test_context<abc::test::log>& context, const char* text) {
+        char expected[abc::size::_256 + 1];
+        std::strncpy(expected, text, sizeof(expected));
 
-		char actual[abc::size::_256 + 1];
-		std::memset(actual, 0, sizeof(actual));
+        char actual[abc::size::_256 + 1];
+        std::memset(actual, 0, sizeof(actual));
 
-		abc::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
+        abc::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
 
-		std::istream in(&sb);
-		std::ostream out(&sb);
+        std::istream in(&sb);
+        std::ostream out(&sb);
 
-		while (!in.eof()) {
-			char ch = in.get();
-			if (!in.eof()) {
-				out.put(ch);
-			}
-		}
+        while (!in.eof()) {
+            char ch = in.get();
+            if (!in.eof()) {
+                out.put(ch);
+            }
+        }
 
-		return context.are_equal(actual, expected, 0x1003a);
-	}
+        return context.are_equal(actual, expected, 0x1003a);
+    }
 
 }}}
 
