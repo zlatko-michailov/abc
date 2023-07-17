@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 
-#include "inc/streambuf.h"
+#include "inc/buffer_streambuf.h"
 
 
 namespace abc { namespace test { namespace streambuf {

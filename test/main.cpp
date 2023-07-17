@@ -29,7 +29,7 @@ SOFTWARE.
 #include "inc/clock.h"
 #include "inc/ascii.h"
 #include "inc/timestamp.h"
-#include "inc/streambuf.h"
+#include "inc/buffer_streambuf.h"
 #include "inc/multifile_streambuf.h"
 #include "inc/table.h"
 #include "inc/socket.h"
@@ -57,7 +57,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_after_year_2000_before_mar_1_timestamp",     abc::test::timestamp::test_after_year_2000_before_mar_1_timestamp },
                 { "test_after_year_2000_after_mar_1_timestamp",      abc::test::timestamp::test_after_year_2000_after_mar_1_timestamp },
             } },
-            { "streambuf", {
+            { "buffer_streambuf", {
                 { "test_buffer_streambuf_1_char",                    abc::test::streambuf::test_buffer_streambuf_1_char },
                 { "test_buffer_streambuf_N_chars",                   abc::test::streambuf::test_buffer_streambuf_N_chars },
                 { "test_buffer_streambuf_move",                      abc::test::streambuf::test_buffer_streambuf_move },

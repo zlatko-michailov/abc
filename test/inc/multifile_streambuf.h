@@ -33,9 +33,9 @@ SOFTWARE.
 
 namespace abc { namespace test { namespace multifile {
 
-	bool test_multifile_streambuf_move(test_context<abc::test::log>& context);
-	bool test_duration_multifile_streambuf_move(test_context<abc::test::log>& context);
-	bool test_size_multifile_streambuf_move(test_context<abc::test::log>& context);
+    bool test_multifile_streambuf_move(test_context<abc::test::log>& context);
+    bool test_duration_multifile_streambuf_move(test_context<abc::test::log>& context);
+    bool test_size_multifile_streambuf_move(test_context<abc::test::log>& context);
 
 }}}
 
