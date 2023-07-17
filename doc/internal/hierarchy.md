@@ -9,7 +9,7 @@ Up to [Documentation](README.md).
     - ascii.h
     - timestamp.h
     - util.h
-    - buffer_streambuf.h __NEXT. RENAME TEST FILES__
+    - buffer_streambuf.h
     - multifile_streambuf.h
     - stream.h
     - table_stream.h __NEXT. NEEDS WORK. RENAME TO table_stream__
