@@ -8,13 +8,11 @@ Up to [Documentation](README.md).
     - size.h
     - ascii.h
     - timestamp.h
-    - util.h
-    - buffer_streambuf.h
+    - util.h __NEXT TO CHECK IN__
+    - buffer_streambuf.h __RENAME TEST FILES__
     - multifile_streambuf.h
-    - __stream ::__
-        - __i__
         - stream.h
-        - table.h
+        - table_stream.h __NEXT. NEEDS WORK. RENAME TO table_stream__
     - __diag ::__
         - __i__
         - tag.h

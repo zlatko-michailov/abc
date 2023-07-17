@@ -34,7 +34,7 @@ Provide the title and the link to the page along with as much information as you
   - [size](ref/size.md)
   - [ascii](ref/ascii.md)
   - [timestamp](ref/timestamp.md)
-  - [util](ref/util.md) __TODO:__
+  - [util](ref/util.md)
   - [buffer_streambuf](ref/buffer_streambuf.md)
   - [multifile_streambuf](ref/multifile_streambuf.md)
   - [duration_multifile_streambuf](ref/multifile_streambuf.md)
