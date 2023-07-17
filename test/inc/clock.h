@@ -32,35 +32,35 @@ SOFTWARE.
 
 namespace abc { namespace test {
 
-	class clock {
-	public:
-		using rep			= std::int64_t;
-		using period		= std::nano;
-		using duration		= std::chrono::duration<rep, period>;
-		using time_point	= std::chrono::time_point<clock>;
+    class clock {
+    public:
+        using rep        = std::int64_t;
+        using period     = std::nano;
+        using duration   = std::chrono::duration<rep, period>;
+        using time_point = std::chrono::time_point<clock>;
 
-	public:
-		static time_point now() noexcept;
-	};
+    public:
+        static time_point now() noexcept;
+    };
 
 
-	inline clock::time_point clock::now() noexcept {
-		constexpr clock::rep nanoseconds_per_millisecond = 1000LL * 1000LL;
-		constexpr clock::rep nanoseconds_per_second = 1000LL * nanoseconds_per_millisecond;
-		constexpr clock::rep nanoseconds_per_minute = 60LL * nanoseconds_per_second;
-		constexpr clock::rep nanoseconds_per_hour = 60LL * nanoseconds_per_minute;
-		constexpr clock::rep nanoseconds_per_day = 24LL * nanoseconds_per_hour;
-		constexpr clock::rep nanoseconds_per_year = 365LL * nanoseconds_per_day;
+    inline clock::time_point clock::now() noexcept {
+        constexpr clock::rep nanoseconds_per_millisecond = 1000LL * 1000LL;
+        constexpr clock::rep nanoseconds_per_second = 1000LL * nanoseconds_per_millisecond;
+        constexpr clock::rep nanoseconds_per_minute = 60LL * nanoseconds_per_second;
+        constexpr clock::rep nanoseconds_per_hour = 60LL * nanoseconds_per_minute;
+        constexpr clock::rep nanoseconds_per_day = 24LL * nanoseconds_per_hour;
+        constexpr clock::rep nanoseconds_per_year = 365LL * nanoseconds_per_day;
 
-		// 2020-10-15 12:34:56.789
-		return time_point(
-			std::chrono::nanoseconds(
-				50LL * nanoseconds_per_year +
-				300LL * nanoseconds_per_day +
-				12LL * nanoseconds_per_hour +
-				34LL * nanoseconds_per_minute +
-				56LL * nanoseconds_per_second +
-				789LL * nanoseconds_per_millisecond));
-	}
+        // 2020-10-15 12:34:56.789
+        return time_point(
+            std::chrono::nanoseconds(
+                50LL  * nanoseconds_per_year +
+                300LL * nanoseconds_per_day +
+                12LL  * nanoseconds_per_hour +
+                34LL  * nanoseconds_per_minute +
+                56LL  * nanoseconds_per_second +
+                789LL * nanoseconds_per_millisecond));
+    }
 }}
 
