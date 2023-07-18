@@ -29,7 +29,7 @@ SOFTWARE.
 #include <cstring>
 
 #include "stream.h"
-#include "i/table.i.h"
+#include "i/table_stream.i.h"
 
 
 namespace abc {
@@ -92,6 +92,7 @@ namespace abc {
 		, _table(other._table)
 		, _sb(std::move(other._sb))
 		, _pcount(other._pcount) {
+
 		std::memmove(_buffer, other._buffer, sizeof(char) * (Size + 2));
 	}
 

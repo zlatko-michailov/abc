@@ -34,7 +34,7 @@ SOFTWARE.
 
 #include "../tag.h"
 #include "timestamp.i.h"
-#include "table.i.h"
+#include "table_stream.i.h"
 
 
 namespace abc {

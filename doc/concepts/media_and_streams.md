@@ -31,7 +31,7 @@ Follow the links to read more about each class.
 - [`json`](../ref/json.md) - a group of streams:
   - [`json_istream`](../ref/json.md)
   - [`json_ostream`](../ref/json.md)
-- [`table_ostream`](../ref/table.md) - an output stream of lines.
+- [`table_ostream`](../ref/table_stream.md) - an output stream of lines.
   - [`log_ostream`](../ref/log.md) - a specialization for logging.
 - [`line_ostream`](../ref/line.md) - an output stream of chars.
   - [`debug_line_ostream`](../ref/log.md) - a specialization for human-readable diagnostics.

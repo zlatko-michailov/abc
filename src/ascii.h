@@ -30,6 +30,12 @@ SOFTWARE.
 
 namespace abc {
 
+    using CharPredicate = bool (*) (char);
+
+
+    // --------------------------------------------------------------
+
+
     /**
      * @brief Character utilities.
      */

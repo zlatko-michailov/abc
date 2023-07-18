@@ -30,7 +30,7 @@ SOFTWARE.
 
 #include "timestamp.h"
 #include "buffer_streambuf.h"
-#include "table.h"
+#include "table_stream.h"
 #include "i/log.i.h"
 
 namespace abc {

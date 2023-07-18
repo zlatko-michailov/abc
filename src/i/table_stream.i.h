@@ -38,45 +38,47 @@ SOFTWARE.
 namespace abc {
 
     /**
-     * @brief                Output stream that puts lines.
+     * @brief Output stream that puts lines.
      */
-    class table_ostream : public ostream {
+    class table_ostream
+        : public ostream {
+
         using base = ostream;
 
     public:
         /**
-         * @brief            New line literal.
+         * @brief New line literal.
          */
         static constexpr char endl = '\n';
 
     public:
         /**
-         * @brief            Constructor.
-         * @param sb        Pointer to a `std::streambuf` implementation. 
+         * @brief    Constructor.
+         * @param sb Pointer to a `std::streambuf` implementation. 
          */
         table_ostream(std::streambuf* sb);
 
         /**
-         * @brief            Move constructor.
+         * @brief Move constructor.
          */
         table_ostream(table_ostream&& other);
 
         /**
-         * @brief            Deleted.
+         * @brief Deleted.
          */
         table_ostream(const table_ostream& other) = delete;
 
     public:
         /**
-         * @brief            Puts a line.
-         * @details            A new line char is assumed to already contain a trailing new line char.
-         * @param line        Buffer to put.
-         * @param line_size    Buffer size. Optional for null-terminated strings.
+         * @brief           Puts a line.
+         * @details         A new line char is assumed to already contain a trailing new line char.
+         * @param line      Buffer to put.
+         * @param line_size Buffer size. Optional for null-terminated strings.
          */
         void put_line(const char* line, std::size_t line_size = size::strlen) noexcept;
 
         /**
-         * @brief            Puts a new line.
+         * @brief Puts a new line.
          */
         void put_blank_line() noexcept;
     };
@@ -86,120 +88,122 @@ namespace abc {
 
 
     /**
-     * @brief                Output stream that puts chars into a line buffer.
-     * @details                The built line buffer is put through a `table_ostream` upon `flush()`.
-     * @tparam Size            Size of the line buffer.
+     * @brief       Output stream that puts chars into a line buffer.
+     * @details     The built line buffer is put through a `table_ostream` upon `flush()`.
+     * @tparam Size Size of the line buffer.
      */
     template <std::size_t Size = size::k2>
-    class line_ostream : public ostream {
+    class line_ostream
+        : public ostream {
+
         using base = ostream;
 
     public:
         /**
-         * @brief            New line literal.
+         * @brief New line literal.
          */
         static constexpr char endl = '\n';
 
         /**
-         * @brief            End of stream/string literal.
+         * @brief End of stream/string literal.
          */
         static constexpr char ends = '\0';
 
     public:
         /**
-         * @brief            Default constructor.
+         * @brief Default constructor.
          */
         line_ostream();
 
         /**
-         * @brief            Constructor.
-         * @param table        Pointer to a `table_ostream` implementation where the built line buffer should be put upon `flush()`.
+         * @brief       Constructor.
+         * @param table Pointer to a `table_ostream` implementation where the built line buffer should be put upon `flush()`.
          */
         line_ostream(table_ostream* table);
 
         /**
-         * @brief            Move constructor.
+         * @brief Move constructor.
          */
         line_ostream(line_ostream<Size>&& other);
 
         /**
-         * @brief            Deleted.
+         * @brief Deleted.
          */
         line_ostream(const line_ostream<Size>& other) = delete;
 
         /**
-         * @brief            Destructor.
+         * @brief Destructor.
          */
         ~line_ostream() noexcept;
 
     public:
         /**
-         * @brief            Appends a null char, and returns the line buffer.
+         * @brief Appends a null char, and returns the line buffer.
          */
         const char* get() noexcept;
 
         /**
-         * @brief            Appends a new line char and a null char, and puts the line buffer to the `table_ostream`.
+         * @brief Appends a new line char and a null char, and puts the line buffer to the `table_ostream`.
          * 
          */
         void flush() noexcept;
 
         /**
-         * @brief            Puts a formatted string.
-         * @param format    Format.
-         * @param ...        Variable arguments.
+         * @brief        Puts a formatted string.
+         * @param format Format.
+         * @param ...    Variable arguments.
          */
         void put_any(const char* format, ...) noexcept;
 
         /**
-         * @brief            Puts a formatted string.
-         * @param format    Format.
-         * @param vlist        Variable arguments.
+         * @brief        Puts a formatted string.
+         * @param format Format.
+         * @param vlist  Variable arguments.
          */
         void put_anyv(const char* format, va_list vlist) noexcept;
 
         /**
-         * @brief            Puts a formatted `timestamp` value.
-         * @tparam Clock    Clock of the timestamp.
-         * @param ts        `timestamp` value.
-         * @param format    Format.
+         * @brief        Puts a formatted `timestamp` value.
+         * @tparam Clock Clock of the timestamp.
+         * @param ts     `timestamp` value.
+         * @param format Format.
          */
         template <typename Clock>
         void put_timestamp(const timestamp<Clock>& ts, const char* format) noexcept;
 
         /**
-         * @brief            Puts a thread ID.
-         * @param thread_id    Thread ID.
+         * @brief           Puts a thread ID.
+         * @param thread_id Thread ID.
          * @param format    Should be a variation of `"%s"`. Optional.
          */
         void put_thread_id(std::thread::id thread_id, const char* format = "%s") noexcept;
 
         /**
-         * @brief                Puts a binary buffer.
+         * @brief               Puts a binary buffer.
          * @param buffer        Buffer.
-         * @param buffer_size    Buffer size.
-         * @param buffer_offset    Start offset. Gets updated.
+         * @param buffer_size   Buffer size.
+         * @param buffer_offset Start offset. Gets updated.
          */
         bool put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
 
     private:
         /**
-         * @brief            The `table_ostream` pointer passed in to the constructor.
+         * @brief The `table_ostream` pointer passed in to the constructor.
          */
         table_ostream* _table;
 
         /**
-         * @brief            Line buffer.
+         * @brief Line buffer.
          */
         char _buffer[Size + 2];
 
         /**
-         * @brief            `buffer_streambuf` around the line buffer, which must be passed to the base constructor.
+         * @brief `buffer_streambuf` around the line buffer, which must be passed to the base constructor.
          */
         buffer_streambuf _sb;
 
         /**
-         * @brief            Count of chars written to the buffer.
+         * @brief Count of chars written to the buffer.
          */
         std::size_t _pcount;
     };

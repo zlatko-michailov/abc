@@ -9,13 +9,13 @@ That is why it is a core concept in `abc`.
 At top-level, there is a [`log_ostream`](../ref/log.md) instance.
 The program developer should keep that instance alive, and should pass it to other class instances that support diagnostics.
 
-The job of [`log_ostream`](../ref/log.md) is to put the desired subset of log lines into the underlying [`table_ostream`](../ref/table.md).
+The job of [`log_ostream`](../ref/log.md) is to put the desired subset of log lines into the underlying [`table_ostream`](../ref/table_stream.md).
 It does that by orchestrating a _Line_ instance and a _Filter_ instance.
-If the _Filter_ instance decides that the diagnostic entry should be persisted, the _Line_ instance formats it, and the [`log_ostream`](../ref/log.md) puts it into the underlying [`table_ostream`](../ref/table.md).
+If the _Filter_ instance decides that the diagnostic entry should be persisted, the _Line_ instance formats it, and the [`log_ostream`](../ref/log.md) puts it into the underlying [`table_ostream`](../ref/table_stream.md).
 Otherwise, the diagnostic entry is thrown away.
 
 ## Line
-While any class that exposes the same public methods as [`line_ostream`](../ref/table.md) could be used as a _Line_ template parameter, it is recommended to derive from the existing [`line_ostream`](../ref/table.md).
+While any class that exposes the same public methods as [`line_ostream`](../ref/table_stream.md) could be used as a _Line_ template parameter, it is recommended to derive from the existing [`line_ostream`](../ref/table_stream.md).
 
 There are three such derived classes provided out of the box:
 

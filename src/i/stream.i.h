@@ -32,12 +32,6 @@ SOFTWARE.
 
 namespace abc {
 
-    using CharPredicate = bool (*) (char);
-
-
-    // --------------------------------------------------------------
-
-
     /**
      * @brief         Common stream functionality.
      * @tparam Stream Base stream class.

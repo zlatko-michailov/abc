@@ -31,7 +31,7 @@ SOFTWARE.
 #include "inc/timestamp.h"
 #include "inc/buffer_streambuf.h"
 #include "inc/multifile_streambuf.h"
-#include "inc/table.h"
+#include "inc/table_stream.h"
 #include "inc/socket.h"
 #include "inc/http.h"
 #include "inc/json.h"
@@ -71,7 +71,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_istream_move",                               abc::test::stream::test_istream_move },
                 { "test_ostream_move",                               abc::test::stream::test_ostream_move },
             } },
-            { "table", {
+            { "table_stream", {
                 { "test_line_debug",                                 abc::test::table::test_line_debug },
                 { "test_line_diag",                                  abc::test::table::test_line_diag },
                 { "test_line_test",                                  abc::test::table::test_line_test },

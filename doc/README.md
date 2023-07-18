@@ -30,17 +30,26 @@ Provide the title and the link to the page along with as much information as you
 - [Roadmap](roadmap.md)
 
 ## Class Reference
-- `abc ::`
-  - [size](ref/size.md)
-  - [ascii](ref/ascii.md)
-  - [timestamp](ref/timestamp.md)
-  - [util](ref/util.md)
-  - [buffer_streambuf](ref/buffer_streambuf.md)
-  - [multifile_streambuf](ref/multifile_streambuf.md)
-  - [duration_multifile_streambuf](ref/multifile_streambuf.md)
-  - [size_multifile_streambuf](ref/multifile_streambuf.md)
-  - `stream ::`
-  - `diag ::`
+### Namespace `abc`
+
+- [size](ref/size.md)
+- [ascii](ref/ascii.md)
+- [timestamp](ref/timestamp.md)
+- [util](ref/util.md)
+-
+- [buffer_streambuf](ref/buffer_streambuf.md)
+- [multifile_streambuf](ref/multifile_streambuf.md)
+- [duration_multifile_streambuf](ref/multifile_streambuf.md)
+- [size_multifile_streambuf](ref/multifile_streambuf.md)
+-
+- [stream](ref/stream.md)
+- [istream](ref/stream.md)
+- [ostream](ref/stream.md)
+- [table_ostream](ref/table_stream.md)
+- [line_ostream](ref/table_stream.md)
+
+### Namespace `abc::diag`
+
 - [endpoint](ref/endpoint.md)
 - [exception](ref/exception.md)
 - [gpio](ref/gpio.md)
@@ -78,9 +87,6 @@ Provide the title and the link to the page along with as much information as you
   - [tcp_client_socket](ref/socket.md)
   - [openssl_tcp_server_socket](ref/openssl_socket.md)
   - [openssl_tcp_client_socket](ref/openssl_socket.md)
-- [table](ref/table.md)
-  - [table_ostream](ref/table.md)
-  - [line_ostream](ref/table.md)
 - [test](ref/test.md)
 - [vmem](ref/vmem.md)
   - [vmem_pool](ref/vmem.md)

@@ -6,16 +6,16 @@ Up to [Documentation](README.md).
 - __abc ::__
     - __i__
     - size.h
-    - ascii.h
+    - ascii.h __TODO: CharPredicate__
     - timestamp.h
     - util.h
     - buffer_streambuf.h
     - multifile_streambuf.h
     - stream.h
-    - table_stream.h __NEXT. NEEDS WORK. RENAME table TO table_stream__
+    - table_stream.h
     - __diag ::__
         - __i__
-        - tag.h
+        - tag.h __NEXT__
         - log.h
         - exception.h
         - assert.h
