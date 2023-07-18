@@ -12,7 +12,7 @@ Up to [Documentation](README.md).
     - buffer_streambuf.h
     - multifile_streambuf.h
     - stream.h
-    - table_stream.h __NEXT. NEEDS WORK. RENAME TO table_stream__
+    - table_stream.h __NEXT. NEEDS WORK. RENAME table TO table_stream__
     - __diag ::__
         - __i__
         - tag.h

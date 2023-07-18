@@ -25,153 +25,153 @@ SOFTWARE.
 
 #pragma once
 
-#include "log.h"
 #include "i/stream.i.h"
 
 
 namespace abc {
 
-	template <typename Stream>
-	inline stream<Stream>::stream(std::streambuf* sb)
-		: base(sb) {
-	}
+    template <typename Stream>
+    inline stream<Stream>::stream(std::streambuf* sb)
+        : base(sb) {
+    }
 
 
-	template <typename Stream>
-	inline stream<Stream>::stream(stream&& other)
-		: base(std::move(other)) {
-		base::rdbuf(other.rdbuf());
-	}
+    template <typename Stream>
+    inline stream<Stream>::stream(stream&& other)
+        : base(std::move(other)) {
+
+        base::rdbuf(other.rdbuf());
+    }
 
 
-	template <typename Stream>
-	inline void stream<Stream>::reset() {
-		base::clear(base::goodbit);
-	}
+    template <typename Stream>
+    inline void stream<Stream>::reset() {
+        base::clear(base::goodbit);
+    }
 
 
-	template <typename Stream>
-	inline std::streambuf* stream<Stream>::rdbuf() const {
-		return base::rdbuf();
-	}
+    template <typename Stream>
+    inline std::streambuf* stream<Stream>::rdbuf() const {
+        return base::rdbuf();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::eof() const {
-		return base::eof();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::eof() const {
+        return base::eof();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::good() const {
-		return base::good();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::good() const {
+        return base::good();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::bad() const {
-		return base::bad();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::bad() const {
+        return base::bad();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::fail() const {
-		return base::fail();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::fail() const {
+        return base::fail();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::operator!() const {
-		return base::operator!();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::operator!() const {
+        return base::operator!();
+    }
 
 
-	template <typename Stream>
-	inline stream<Stream>::operator bool() const {
-		return base::operator bool();
-	}
+    template <typename Stream>
+    inline stream<Stream>::operator bool() const {
+        return base::operator bool();
+    }
 
 
-	template <typename Stream>
-	inline bool stream<Stream>::is_good() const {
-		return base::good() && !Stream::eof();
-	}
+    template <typename Stream>
+    inline bool stream<Stream>::is_good() const {
+        return base::good() && !Stream::eof();
+    }
 
 
-	template <typename Stream>
-	inline void stream<Stream>::set_bad() {
-		base::clear(base::badbit | base::failbit);
-	}
+    template <typename Stream>
+    inline void stream<Stream>::set_bad() {
+        base::clear(base::badbit | base::failbit);
+    }
 
 
-	template <typename Stream>
-	inline void stream<Stream>::set_bad_if(bool condition) {
-		if (condition) {
-			set_bad();
-		}
-	}
+    template <typename Stream>
+    inline void stream<Stream>::set_bad_if(bool condition) {
+        if (condition) {
+            set_bad();
+        }
+    }
 
 
-	template <typename Stream>
-	inline void stream<Stream>::set_fail() {
-		base::setstate(base::failbit);
-	}
+    template <typename Stream>
+    inline void stream<Stream>::set_fail() {
+        base::setstate(base::failbit);
+    }
 
 
-	template <typename Stream>
-	inline void stream<Stream>::set_fail_if(bool condition) {
-		if (condition) {
-			set_fail();
-		}
-	}
+    template <typename Stream>
+    inline void stream<Stream>::set_fail_if(bool condition) {
+        if (condition) {
+            set_fail();
+        }
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	inline istream::istream(std::streambuf* sb)
-		: base(sb)
-		, _gcount(0) {
-	}
+    inline istream::istream(std::streambuf* sb)
+        : base(sb)
+        , _gcount(0) {
+    }
 
 
-	inline istream::istream(istream&& other)
-		: base(std::move(other)) {
-	}
+    inline istream::istream(istream&& other)
+        : base(std::move(other)) {
+    }
 
 
-	inline void istream::reset() {
-		base::reset();
-		_gcount = 0;
-	}
+    inline void istream::reset() {
+        base::reset();
+        _gcount = 0;
+    }
 
 
-	inline std::size_t istream::gcount() const noexcept {
-		return _gcount;
-	}
+    inline std::size_t istream::gcount() const noexcept {
+        return _gcount;
+    }
 
 
-	inline void istream::set_gcount(std::size_t gcount) noexcept {
-		_gcount = gcount;
-	}
+    inline void istream::set_gcount(std::size_t gcount) noexcept {
+        _gcount = gcount;
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	inline ostream::ostream(std::streambuf* sb)
-		: base(sb) {
-	}
+    inline ostream::ostream(std::streambuf* sb)
+        : base(sb) {
+    }
 
 
-	inline ostream::ostream(ostream&& other)
-		: base(std::move(other)) {
-	}
+    inline ostream::ostream(ostream&& other)
+        : base(std::move(other)) {
+    }
 
 
-	inline void ostream::flush() {
-		base::flush();
-	}
+    inline void ostream::flush() {
+        base::flush();
+    }
 
 }
 
