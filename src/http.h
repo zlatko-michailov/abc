@@ -331,7 +331,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t http_istream<Log>::get_chars(ascii::predicate&& predicate, char* buffer, std::size_t size) {
+	inline std::size_t http_istream<Log>::get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size) {
 		std::size_t gcount = 0;
 
 		while (base::is_good() && predicate(peek_char())) {
@@ -349,7 +349,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t http_istream<Log>::skip_chars(ascii::predicate&& predicate) {
+	inline std::size_t http_istream<Log>::skip_chars(ascii::predicate_t&& predicate) {
 		std::size_t gcount = 0;
 		
 		while (base::is_good() && predicate(peek_char())) {
@@ -653,7 +653,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline std::size_t http_ostream<Log>::put_chars(ascii::predicate&& predicate, const char* buffer, std::size_t size) {
+	inline std::size_t http_ostream<Log>::put_chars(ascii::predicate_t&& predicate, const char* buffer, std::size_t size) {
 		std::size_t pcount = 0;
 
 		while (base::is_good() && pcount < size && predicate(buffer[pcount])) {

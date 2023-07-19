@@ -34,7 +34,7 @@ namespace abc {
      * @brief Character utilities.
      */
     namespace ascii {
-        using predicate = bool (*) (char);
+        using predicate_t = bool (*) (char);
 
         inline bool is_between(char ch, char low, char high) noexcept {
             return low <= ch && ch <= high;

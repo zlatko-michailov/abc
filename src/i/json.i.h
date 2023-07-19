@@ -297,14 +297,14 @@ namespace abc {
 		 * @param size		Buffer size.
 		 * @return			Number of chars read.
 		 */
-		std::size_t get_chars(ascii::predicate&& predicate, char* buffer, std::size_t size);
+		std::size_t get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size);
 
 		/**
 		 * @brief			Skips a sequence of chars that match a predicate.
 		 * @param predicate	Predicate.
 		 * @return			Number of chars read.
 		 */
-		std::size_t skip_chars(ascii::predicate&& predicate);
+		std::size_t skip_chars(ascii::predicate_t&& predicate);
 
 		/**
 		 * @brief			Reads a char from the stream.
