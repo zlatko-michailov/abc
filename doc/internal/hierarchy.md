@@ -6,7 +6,7 @@ Up to [Documentation](README.md).
 - __abc ::__
     - __i__
     - size.h
-    - ascii.h __TODO: CharPredicate__
+    - ascii.h
     - timestamp.h
     - util.h
     - buffer_streambuf.h

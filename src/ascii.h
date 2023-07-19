@@ -30,16 +30,12 @@ SOFTWARE.
 
 namespace abc {
 
-    using CharPredicate = bool (*) (char);
-
-
-    // --------------------------------------------------------------
-
-
     /**
      * @brief Character utilities.
      */
     namespace ascii {
+        using predicate = bool (*) (char);
+
         inline bool is_between(char ch, char low, char high) noexcept {
             return low <= ch && ch <= high;
         }

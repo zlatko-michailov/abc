@@ -251,14 +251,14 @@ namespace abc {
 		 * @param size		Buffer size.
 		 * @return			The count of chars read. 
 		 */
-		std::size_t get_chars(CharPredicate&& predicate, char* buffer, std::size_t size);
+		std::size_t get_chars(ascii::predicate&& predicate, char* buffer, std::size_t size);
 
 		/**
 		 * @brief			Skips a sequence of chars that match a predicate.
 		 * @param predicate	Predicate.
 		 * @return			The count of chars read. 
 		 */
-		std::size_t skip_chars(CharPredicate&& predicate);
+		std::size_t skip_chars(ascii::predicate&& predicate);
 
 		/**
 		 * @brief			Gets the next char from the stream and moves forward.
@@ -413,7 +413,7 @@ namespace abc {
 		 * @param size		Content size.
 		 * @return			The count of chars written. 
 		 */
-		std::size_t put_chars(CharPredicate&& predicate, const char* buffer, std::size_t size);
+		std::size_t put_chars(ascii::predicate&& predicate, const char* buffer, std::size_t size);
 
 		/**
 		 * @brief			Writes a char to the http stream.
