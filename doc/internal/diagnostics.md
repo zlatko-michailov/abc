@@ -12,7 +12,7 @@ __Streambuf classes do not log.__
 That is because the log may be using that streambuf, and there is a possibility for an infinite loop and/or a process crash.
 
 
-## Severity
+## Level
 In order to keep the reading of logs manageable, a guideline has to be defined and followed across all classes.
 Here it is:
 - `critical` - The program is terminating.
@@ -38,8 +38,8 @@ __Filtering must be cheap and quick.__
 
 Filtering is supported on 2 dimensions:
 
-### By Severity
-Messages with severities below a given one are not logged.
+### By Level
+Messages with levels below a given one are not logged.
 
 ### By Origin
 Given a bit mask and an origin, messages whose mask-matching bits don't match the origin are not logged.

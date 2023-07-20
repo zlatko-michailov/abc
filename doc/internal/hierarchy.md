@@ -15,10 +15,10 @@ Up to [Documentation](README.md).
     - table_stream.h
     - __diag ::__
         - __i__
-        - tag.h __NEXT__
-        - log.h
+        - tag.h
+        - log_ostream.h __NEXT. TODO: Rename `severity` to `level`.__
         - exception.h
-        - assert.h
+        - log.h __TODO: Base + asserts.__
     - __net ::__
         - __i__
         - socket.h

@@ -27,63 +27,65 @@ SOFTWARE.
 
 #include <stdexcept>
 
-#include "tag.h"
+#include "diag/tag.h"
 #include "i/log.i.h"
 
 
 namespace abc {
 
-	// logic_error
-	// runtime_error
+    // logic_error
+    // runtime_error
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	/**
-	 * @brief					Wrapper around `Exception` that logs upon constructions to track the origin of the exception.
-	 * @tparam Exception		Base exception type.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Exception, typename Log = null_log>
-	class exception : public Exception {
+    /**
+     * @brief            Wrapper around `Exception` that logs upon constructions to track the origin of the exception.
+     * @tparam Exception Base exception type.
+     * @tparam Log       Logging facility.
+     */
+    template <typename Exception, typename Log = null_log>
+    class exception
+        : public Exception {
 
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param message		Error message.
-		 * @param tag			Unique tag.
-		 * @param log			Pointer to a `log_ostream` instance.
-		 */
-		exception(const char* message, tag_t tag, Log* log = nullptr);
+    public:
+        /**
+         * @brief         Constructor.
+         * @param message Error message.
+         * @param tag     Unique tag.
+         * @param log     Pointer to a `log_ostream` instance.
+         */
+        exception(const char* message, tag_t tag, Log* log = nullptr);
 
-	public:
-		/**
-		 * @brief				Returns the tag passed in to the constructor.
-		 */
-		tag_t tag() const noexcept;
+    public:
+        /**
+         * @brief Returns the tag passed in to the constructor.
+         */
+        tag_t tag() const noexcept;
 
-	private:
-		tag_t	_tag;
-	};
-
-
-	// --------------------------------------------------------------
+    private:
+        tag_t _tag;
+    };
 
 
-	template <typename Exception, typename Log>
-	inline exception<Exception, Log>::exception(const char* message, tag_t tag, Log* log)
-		: Exception(message)
-		, _tag(tag) {
-		if (log != nullptr) {
-			log->put_any(category::abc::exception, severity::warning, tag, "Exception thrown! %s", message);
-		}
-	}
+    // --------------------------------------------------------------
 
 
-	template <typename Exception, typename Log>
-	inline tag_t exception<Exception, Log>::tag() const noexcept {
-		return _tag;
-	}
+    template <typename Exception, typename Log>
+    inline exception<Exception, Log>::exception(const char* message, tag_t tag, Log* log)
+        : Exception(message)
+        , _tag(tag) {
+
+        if (log != nullptr) {
+            log->put_any(category::abc::exception, severity::warning, tag, "Exception thrown! %s", message);
+        }
+    }
+
+
+    template <typename Exception, typename Log>
+    inline tag_t exception<Exception, Log>::tag() const noexcept {
+        return _tag;
+    }
 
 }

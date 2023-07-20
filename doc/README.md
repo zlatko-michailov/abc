@@ -36,12 +36,12 @@ Provide the title and the link to the page along with as much information as you
 - [ascii](ref/ascii.md)
 - [timestamp](ref/timestamp.md)
 - [util](ref/util.md)
-- --
+-
 - [buffer_streambuf](ref/buffer_streambuf.md)
 - [multifile_streambuf](ref/multifile_streambuf.md)
 - [duration_multifile_streambuf](ref/multifile_streambuf.md)
 - [size_multifile_streambuf](ref/multifile_streambuf.md)
-- --
+-
 - [stream](ref/stream.md)
 - [istream](ref/stream.md)
 - [ostream](ref/stream.md)
@@ -50,8 +50,18 @@ Provide the title and the link to the page along with as much information as you
 
 ### Namespace `abc::diag`
 
-- [endpoint](ref/endpoint.md)
+- [tag](ref/tag.md) __TODO:__
+-
+- [log_ostream](ref/log.md) __TODO: sal__
+- [debug_line_ostream](ref/log.md)
+- [diag_line_ostream](ref/log.md)
+- [test_line_ostream](ref/log.md)
+-
 - [exception](ref/exception.md)
+
+### Namespace `abc::net`
+
+- [endpoint](ref/endpoint.md)
 - [gpio](ref/gpio.md)
   - [gpio_chip](ref/gpio.md)
   - [gpio_line](ref/gpio.md)
@@ -75,11 +85,6 @@ Provide the title and the link to the page along with as much information as you
 - [json](ref/json.md)
   - [json_istream](ref/json.md)
   - [json_ostream](ref/json.md)
-- [log](ref/log.md)
-  - [log_ostream](ref/log.md)
-  - [debug_line_ostream](ref/log.md)
-  - [diag_line_ostream](ref/log.md)
-  - [test_line_ostream](ref/log.md)
 - [sockets](ref/socket.md)
   - [socket_streambuf](ref/socket.md)
   - [udp_socket](ref/socket.md)
