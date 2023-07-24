@@ -29,7 +29,6 @@ SOFTWARE.
 #include <memory>
 
 #include "exception.h"
-#include "tag.h"
 #include "i/socket.i.h"
 
 

@@ -30,7 +30,6 @@ SOFTWARE.
 
 #include "timestamp.h"
 #include "exception.h"
-#include "tag.h"
 #include "i/multifile_streambuf.i.h"
 
 

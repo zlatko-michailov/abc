@@ -16,7 +16,7 @@ Up to [Documentation](README.md).
     - __diag ::__
         - __i__
         - tag.h
-        - log_ostream.h __NEXT. TODO: Rename `severity` to `level`.__
+        - log_ostream.h __NEXT. TODO: Rename `severity` to `level`, `category` to `origin`.__
         - exception.h
         - log.h __TODO: Base + asserts.__
     - __net ::__
