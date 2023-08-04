@@ -3,6 +3,9 @@
 
 ## To Do
 - Link the internal docs.
+- log:
+  - Rename `category` to `origin`.
+  - Rename `severity` to `level`.
 
 ## To Do Refactoring
 - internal docs

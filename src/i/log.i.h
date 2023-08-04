@@ -77,6 +77,7 @@ namespace abc {
     }
 
 
+    //// TODO: Remove
     using category_t = std::uint16_t;
 
     namespace category {
@@ -102,8 +103,8 @@ namespace abc {
 
 
     /**
-     * @brief          `line_ostream` specialization for debug logging.
-     * @tparam Size   Maximum line size.
+     * @brief        `line_ostream` specialization for debug logging.
+     * @tparam Size  Maximum line size.
      * @tparam Clock Clock for obtaining a timestamp.
      */
     template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
@@ -136,43 +137,47 @@ namespace abc {
 
     public:
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param ...      Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param ...       Message arguments.
          */
-        void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
 
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param vlist    Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param vlist     Message arguments.
          */
-        void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
-         * @param category    Entry category.
+         * @param origin      Entry origin.
+         * @param suborigin   Entry suborigin, e.g. method.
          * @param severity    Entry severity.
          * @param tag         Entry tag.
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
     protected:
         /**
-         * @brief          Writes the static properties of a long entry.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
+         * @brief           Writes the static properties of a long entry.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
          */
-        void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
+        void put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept;
     };
 
 
@@ -214,43 +219,47 @@ namespace abc {
 
     public:
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param ...      Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param ...       Message arguments.
          */
-        void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
 
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param vlist    Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param vlist     Message arguments.
          */
-        void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
-         * @param category    Entry category.
+         * @param origin      Entry origin.
+         * @param suborigin   Entry suborigin, e.g. method.
          * @param severity    Entry severity.
          * @param tag         Entry tag.
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
     protected:
         /**
-         * @brief          Writes the static properties of a long entry.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
+         * @brief           Writes the static properties of a long entry.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
          */
-        void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
+        void put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept;
     };
 
 
@@ -292,43 +301,47 @@ namespace abc {
 
     public:
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param ...      Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param ...       Message arguments.
          */
-        void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
 
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param vlist    Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param vlist     Message arguments.
          */
-        void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
-         * @param category    Entry category.
+         * @param origin      Entry origin.
+         * @param suborigin   Entry suborigin, e.g. method.
          * @param severity    Entry severity.
          * @param tag         Entry tag.
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
     protected:
         /**
-         * @brief          Writes the static properties of a long entry.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
+         * @brief           Writes the static properties of a long entry.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
          */
-        void put_props(category_t category, severity_t severity, tag_t tag) noexcept;
+        void put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept;
     };
 
 
@@ -372,41 +385,44 @@ namespace abc {
 
     public:
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param ...      Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param ...       Message arguments.
          */
-        void put_any(category_t category, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
 
         /**
-         * @brief          Write a formatted message.
-         * @param category Entry category.
-         * @param severity Entry severity.
-         * @param tag      Entry tag.
-         * @param format   Message format.
-         * @param vlist    Message arguments.
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param vlist     Message arguments.
          */
-        void put_anyv(category_t category, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
-         * @param category    Entry category.
+         * @param origin      Entry origin.
+         * @param suborigin   Entry suborigin, e.g. method.
          * @param severity    Entry severity.
          * @param tag         Entry tag.
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(category_t category, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
 
         /**
          * @brief          Puts a new line.
-         * @param category Entry category.
+         * @param origin   Entry origin.
          * @param severity Entry severity.
          */
-        void put_blank_line(category_t category, severity_t severity) noexcept;
+        void put_blank_line(const char* origin, severity_t severity) noexcept;
 
     private:
         /**
@@ -420,9 +436,12 @@ namespace abc {
 
 
     /**
-     * @brief Log line filter.
+     * @brief                  Log line filter.
+     * @tparam OriginPrefixStr String type for origin_prefix.
      */
+    template <typename OriginPrefixStr>
     class log_filter {
+
     public:
         /**
          * @brief Default constructor.
@@ -441,45 +460,53 @@ namespace abc {
 
     public:
         /**
-         * @brief              Constructor.
-         * @param min_severity Minimum severity for a line to be written.
+         * @brief               Constructor.
+         * @param origin_prefix Origin prefix for a line to be written.
+         * @param min_severity  Minimum severity for a line to be written.
          */
-        log_filter(severity_t min_severity) noexcept;
+        log_filter(OriginPrefixStr&& origin_prefix, severity_t min_severity) noexcept;
 
     public:
+        /**
+         * @brief Returns the origin prefix.
+         */
+        const OriginPrefixStr& origin_prefix() const noexcept;
+
         /**
          * @brief Returns the minimum severity.
          */
         severity_t min_severity() const noexcept;
 
+    public:
+        /**
+         * @brief Sets the origin prefix.
+         */
+        void origin_prefix(OriginPrefixStr&& origin_prefix) noexcept;
+
         /**
          * @brief Sets the minimum severity.
          */
-        severity_t min_severity(severity_t min_severity) noexcept;
+        void min_severity(severity_t min_severity) noexcept;
 
     public:
         /**
-         * @brief          Returns whether an entry with the given `category` and `severity` passes the filter.
-         * @param category Category.
+         * @brief          Returns whether an entry with the given origin and `severity` passes the filter.
+         * @param origin   Origin.
          * @param severity Severity.
          * @return         `true` = passes. `false` = filtered out. 
          */
-        bool is_enabled(category_t category, severity_t severity) const noexcept;
+        bool is_enabled(const char* origin, severity_t severity) const noexcept;
 
     private:
+        /**
+         * @brief Origin prefix for a line to be written.
+         */
+        OriginPrefixStr _origin_prefix;
+
         /**
          * @brief Minimum severity for a line to be written.
          */
         severity_t _min_severity;
     };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief `log_ostream` specialization that doesn't log anything.
-     */
-    using null_log = log_ostream<diag_line_ostream<0>, log_filter>;
 
 }
