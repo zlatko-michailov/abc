@@ -1,5 +1,6 @@
 ## Done
 - internal doc pages. UNLINKED!
+- `diag_ready`
 
 ## To Do
 - Link the internal docs.

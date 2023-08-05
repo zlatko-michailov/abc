@@ -28,9 +28,9 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
-#include "timestamp.h"
-#include "buffer_streambuf.h"
-#include "table_stream.h"
+#include "../timestamp.h"
+#include "../buffer_streambuf.h"
+#include "../table_stream.h"
 #include "i/log.i.h"
 
 namespace abc {

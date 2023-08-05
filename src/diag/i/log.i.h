@@ -32,9 +32,9 @@ SOFTWARE.
 #include <cstdarg>
 #include <thread>
 
-#include "../diag/tag.h"
-#include "timestamp.i.h"
-#include "table_stream.i.h"
+#include "../../i/timestamp.i.h"
+#include "../../i/table_stream.i.h"
+#include "../tag.h"
 
 
 namespace abc {
