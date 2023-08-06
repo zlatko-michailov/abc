@@ -25,26 +25,48 @@ SOFTWARE.
 
 #pragma once
 
-#include "i/exception.i.h"
-#include "log.h"
+#include <cstddef>
+#include <stdexcept>
+
+#include "../tag.h"
 
 
 namespace abc {
 
-    template <typename Exception, typename LogPtr>
-    inline exception<Exception, LogPtr>::exception(const char* origin, const char* message, tag_t tag, LogPtr&& log)
-        : Exception(message)
-        , _tag(tag) {
-
-        if (log != nullptr) {
-            log->put_any(origin, severity::warning, tag, "Exception thrown! %s", message);
-        }
-    }
+    // logic_error
+    // runtime_error
 
 
-    template <typename Exception, typename LogPtr>
-    inline tag_t exception<Exception, LogPtr>::tag() const noexcept {
-        return _tag;
-    }
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief            Wrapper around `Exception` that logs upon constructions to track the origin of the exception.
+     * @tparam Exception Base exception type.
+     * @tparam Log       Logging facility.
+     */
+    template <typename Exception, typename LogPtr = std::nullptr_t>
+    class exception
+        : public Exception {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param origin  Thrower's origin.
+         * @param message Error message.
+         * @param tag     Unique tag.
+         * @param log     Pointer to a `log_ostream` instance.
+         */
+        exception(const char* origin, const char* message, tag_t tag, LogPtr&& log = nullptr);
+
+    public:
+        /**
+         * @brief Returns the tag passed in to the constructor.
+         */
+        tag_t tag() const noexcept;
+
+    private:
+        tag_t _tag;
+    };
 
 }

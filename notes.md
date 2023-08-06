@@ -3,6 +3,7 @@
 - `diag_ready`
 
 ## To Do
+- Put classes from the diag subfolder into a diag subnamespace.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.
