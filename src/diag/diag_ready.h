@@ -28,6 +28,7 @@ SOFTWARE.
 #include "../../util.h"
 #include "i/diag_ready.i.h"
 #include "log.h"
+#include "exception.h"
 
 
 namespace abc {
@@ -77,6 +78,13 @@ namespace abc {
         if (_log != nullptr) {
             _log->put_blank_line(c_str(_origin), severity);
         }
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    template <typename Exception>
+    inline void diag_ready<OriginStr, LogPtr>::throw_exception(const char* message, tag_t tag) {
+        throw exception<Exception, LogPtr>(_origin, message, tag, _log);
     }
 
 }

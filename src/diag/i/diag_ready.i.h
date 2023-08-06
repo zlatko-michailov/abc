@@ -37,7 +37,7 @@ namespace abc {
      * @tparam OriginStr String type for origin.
      * @tparam LogPtr    Pointer type to `log_ostream`.
      */
-    template <typename OriginStr, typename LogPtr>
+    template <typename OriginStr, typename LogPtr = std::nullptr_t>
     class diag_ready {
 
     protected:
@@ -94,6 +94,15 @@ namespace abc {
          * @param severity Entry severity.
          */
         void put_blank_line(severity_t severity) noexcept;
+
+        /**
+         * @brief            Throws an exception with the given base type, message, and tag.
+         * @tparam Exception Exception base type.
+         * @param message    Message.
+         * @param tag        Origination tag.
+         */
+        template <typename Exception>
+        void throw_exception(const char* message, tag_t tag);
 
     private:
         OriginStr _origin;
