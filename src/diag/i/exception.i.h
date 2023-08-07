@@ -31,7 +31,7 @@ SOFTWARE.
 #include "../tag.h"
 
 
-namespace abc {
+namespace abc { namespace diag {
 
     // logic_error
     // |-- assert_error
@@ -147,4 +147,4 @@ namespace abc {
 
     // --------------------------------------------------------------
 
-}
+} }

@@ -33,7 +33,7 @@ SOFTWARE.
 #include "../table_stream.h"
 #include "i/log.i.h"
 
-namespace abc {
+namespace abc { namespace diag {
 
 	template <std::size_t Size, typename Clock>
 	inline debug_line_ostream<Size, Clock>::debug_line_ostream()
@@ -355,4 +355,4 @@ namespace abc {
 		return severity <= other;
 	}
 
-}
+} }

@@ -28,7 +28,7 @@ SOFTWARE.
 #include <cstdint>
 
 
-namespace abc {
+namespace abc { namespace diag {
 
 	using tag_t = std::uint64_t;
 
@@ -36,7 +36,7 @@ namespace abc {
 		constexpr tag_t none = 0;
 	}
 
-}
 
+    constexpr tag_t __TAG__ = 0;
 
-constexpr abc::tag_t __TAG__ = 0;
+} }

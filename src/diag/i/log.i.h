@@ -37,7 +37,7 @@ SOFTWARE.
 #include "../tag.h"
 
 
-namespace abc {
+namespace abc { namespace diag {
 
     namespace color {
         constexpr const char* begin      = "\x1b[";
@@ -512,4 +512,4 @@ namespace abc {
         severity_t _min_severity;
     };
 
-}
+} }

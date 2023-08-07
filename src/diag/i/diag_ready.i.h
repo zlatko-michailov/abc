@@ -30,7 +30,7 @@ SOFTWARE.
 #include "log.i.h"
 
 
-namespace abc {
+namespace abc { namespace diag {
 
     /**
      * @brief            Diagnostics facility used by classes.
@@ -136,4 +136,4 @@ namespace abc {
         LogPtr _log;
     };
 
-}
+} }

@@ -31,7 +31,7 @@ SOFTWARE.
 #include "exception.h"
 
 
-namespace abc {
+namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline diag_ready<OriginStr, LogPtr>::diag_ready(OriginStr&& origin, LogPtr&& log) noexcept
@@ -111,4 +111,4 @@ namespace abc {
         }
     }
 
-}
+} }

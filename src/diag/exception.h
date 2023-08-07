@@ -29,7 +29,7 @@ SOFTWARE.
 #include "log.h"
 
 
-namespace abc {
+namespace abc { namespace diag {
 
     template <typename Exception, typename LogPtr>
     inline exception<Exception, LogPtr>::exception(const char* origin, const char* message, tag_t tag, LogPtr&& log)
@@ -47,4 +47,4 @@ namespace abc {
         return _tag;
     }
 
-}
+} }

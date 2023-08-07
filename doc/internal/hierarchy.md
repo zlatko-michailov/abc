@@ -18,7 +18,7 @@ Up to [Documentation](README.md).
         - tag.h
         - log.h
         - exception.h
-        - diag_ready.h __TODO: Base + asserts.__
+        - diag_ready.h
     - __net ::__
         - __i__
         - socket.h __NEXT. TODO:__
