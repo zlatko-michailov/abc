@@ -63,9 +63,12 @@ namespace abc {
         constexpr severity_t critical      = 0x1;
         constexpr severity_t warning       = 0x2;
         constexpr severity_t important     = 0x3;
-        constexpr severity_t optional      = 0x4;
-        constexpr severity_t debug         = 0x5;
+        constexpr severity_t callstack     = 0x4;
+        constexpr severity_t optional      = 0x5;
+        constexpr severity_t debug         = 0x6;
+        constexpr severity_t verbose       = 0x7;
 
+        //// TODO: Remove
         namespace abc {
             constexpr severity_t important = 0x6;
             constexpr severity_t optional  = 0x7;

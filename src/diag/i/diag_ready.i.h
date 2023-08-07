@@ -104,6 +104,33 @@ namespace abc {
         template <typename Exception>
         void throw_exception(const char* message, tag_t tag);
 
+        /**
+         * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
+         * @details          Use this facility to assert general assumptions in the middle of a method.
+         * @param condition  Asserted condition.
+         * @param message    Message.
+         * @param tag        Origination tag.
+         */
+        void assert(bool condition, const char* message, tag_t tag);
+
+        /**
+         * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
+         * @details          Use this facility to assert assumptions about expected/input state.
+         * @param condition  Asserted condition.
+         * @param message    Message.
+         * @param tag        Origination tag.
+         */
+        void expect(bool condition, const char* message, tag_t tag);
+
+        /**
+         * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
+         * @details          Use this facility to assert assumptions about ensured/output state.
+         * @param condition  Asserted condition.
+         * @param message    Message.
+         * @param tag        Origination tag.
+         */
+        void ensure(bool condition, const char* message, tag_t tag);
+
     private:
         OriginStr _origin;
         LogPtr _log;

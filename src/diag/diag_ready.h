@@ -87,4 +87,28 @@ namespace abc {
         throw exception<Exception, LogPtr>(_origin, message, tag, _log);
     }
 
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::assert(bool condition, const char* message, tag_t tag) {
+        if (!condition) {
+            throw_exception<assert_error>(message, tag);
+        }
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::expect(bool condition, const char* message, tag_t tag) {
+        if (!condition) {
+            throw_exception<expect_error>(message, tag);
+        }
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::ensure(bool condition, const char* message, tag_t tag) {
+        if (!condition) {
+            throw_exception<ensure_error>(message, tag);
+        }
+    }
+
 }

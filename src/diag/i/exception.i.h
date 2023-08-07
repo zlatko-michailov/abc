@@ -34,6 +34,10 @@ SOFTWARE.
 namespace abc {
 
     // logic_error
+    // |-- assert_error
+    //     |-- expect_error
+    //     |-- ensure_error
+    //  
     // runtime_error
 
 
@@ -59,6 +63,11 @@ namespace abc {
          */
         exception(const char* origin, const char* message, tag_t tag, LogPtr&& log = nullptr);
 
+        /**
+         * @brief Copy constructor.
+         */
+        exception(const exception& other) noexcept = default;
+
     public:
         /**
          * @brief Returns the tag passed in to the constructor.
@@ -68,5 +77,74 @@ namespace abc {
     private:
         tag_t _tag;
     };
+
+
+    // --------------------------------------------------------------
+
+
+    class assert_error
+        : public std::logic_error {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param message Error message.
+         */
+        assert_error(const char* message)
+            : std::logic_error(message) {
+        }
+
+        /**
+         * @brief Copy constructor.
+         */
+        assert_error(const assert_error& other) noexcept = default;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    class expect_error
+        : public assert_error {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param message Error message.
+         */
+        expect_error(const char* message)
+            : assert_error(message) {
+        }
+
+        /**
+         * @brief Copy constructor.
+         */
+        expect_error(const expect_error& other) noexcept = default;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    class ensure_error
+        : public assert_error {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param message Error message.
+         */
+        ensure_error(const char* message)
+            : assert_error(message) {
+        }
+
+        /**
+         * @brief Copy constructor.
+         */
+        ensure_error(const ensure_error& other) noexcept = default;
+    };
+
+
+    // --------------------------------------------------------------
 
 }

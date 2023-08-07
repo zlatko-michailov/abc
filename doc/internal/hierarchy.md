@@ -17,11 +17,11 @@ Up to [Documentation](README.md).
         - __i__
         - tag.h
         - log.h
-        - exception.h __NEXT. TODO:__
+        - exception.h
         - diag_ready.h __TODO: Base + asserts.__
     - __net ::__
         - __i__
-        - socket.h
+        - socket.h __NEXT. TODO:__
         - http.h
         - json.h
         - endpoint.h
