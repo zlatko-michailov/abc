@@ -35,273 +35,273 @@ SOFTWARE.
 
 namespace abc { namespace diag {
 
-	template <std::size_t Size, typename Clock>
-	inline debug_line_ostream<Size, Clock>::debug_line_ostream()
-		: base() {
-	}
+    template <std::size_t Size, typename Clock>
+    inline debug_line_ostream<Size, Clock>::debug_line_ostream()
+        : base() {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline debug_line_ostream<Size, Clock>::debug_line_ostream(table_ostream* table)
-		: base(table) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline debug_line_ostream<Size, Clock>::debug_line_ostream(table_ostream* table)
+        : base(table) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other)
-		: base(std::move(other)) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other)
+        : base(std::move(other)) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void debug_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
-		va_list vlist;
-		va_start(vlist, format);
+    template <std::size_t Size, typename Clock>
+    inline void debug_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+        va_list vlist;
+        va_start(vlist, format);
 
-		put_anyv(origin, suborigin, severity, tag, format, vlist);
+        put_anyv(origin, suborigin, severity, tag, format, vlist);
 
-		va_end(vlist);
-	}
+        va_end(vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void debug_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
-		put_props(origin, suborigin, severity, tag);
+    template <std::size_t Size, typename Clock>
+    inline void debug_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+        put_props(origin, suborigin, severity, tag);
 
-		base::put_anyv(format, vlist);
-	}
+        base::put_anyv(format, vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void debug_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
-		std::size_t buffer_offset = 0;
-		bool hasMore = true;
+    template <std::size_t Size, typename Clock>
+    inline void debug_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+        std::size_t buffer_offset = 0;
+        bool hasMore = true;
 
-		while (hasMore) {
-			if (buffer_offset != 0) {
-				base::flush();
-			}
+        while (hasMore) {
+            if (buffer_offset != 0) {
+                base::flush();
+            }
 
-			put_props(origin, suborigin, severity, tag);
+            put_props(origin, suborigin, severity, tag);
 
-			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
-		}
-	}
+            hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
+        }
+    }
 
-	template <std::size_t Size, typename Clock>
-	inline void debug_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
-		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
-		base::put_thread_id(std::this_thread::get_id(), " %16s |");
-		base::put_any(" %1.1x |", severity);
-		base::put_any(" %16llx | ", tag);
-		base::put_any(" %s |", origin);
-		base::put_any(" %s |", suborigin);
-	}
+    template <std::size_t Size, typename Clock>
+    inline void debug_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
+        base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
+        base::put_thread_id(std::this_thread::get_id(), " %16s |");
+        base::put_any(" %1.1x |", severity);
+        base::put_any(" %16llx | ", tag);
+        base::put_any(" %s |", origin);
+        base::put_any(" %s |", suborigin);
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	template <std::size_t Size, typename Clock>
-	inline diag_line_ostream<Size, Clock>::diag_line_ostream()
-		: base() {
-	}
+    template <std::size_t Size, typename Clock>
+    inline diag_line_ostream<Size, Clock>::diag_line_ostream()
+        : base() {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline diag_line_ostream<Size, Clock>::diag_line_ostream(table_ostream* table)
-		: base(table) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline diag_line_ostream<Size, Clock>::diag_line_ostream(table_ostream* table)
+        : base(table) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other)
-		: base(std::move(other)) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other)
+        : base(std::move(other)) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void diag_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
-		va_list vlist;
-		va_start(vlist, format);
+    template <std::size_t Size, typename Clock>
+    inline void diag_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+        va_list vlist;
+        va_start(vlist, format);
 
-		put_anyv(origin, suborigin, severity, tag, format, vlist);
+        put_anyv(origin, suborigin, severity, tag, format, vlist);
 
-		va_end(vlist);
-	}
+        va_end(vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void diag_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
-		put_props(origin, suborigin, severity, tag);
+    template <std::size_t Size, typename Clock>
+    inline void diag_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+        put_props(origin, suborigin, severity, tag);
 
-		base::put_anyv(format, vlist);
-	}
+        base::put_anyv(format, vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void diag_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
-		std::size_t buffer_offset = 0;
-		bool hasMore = true;
+    template <std::size_t Size, typename Clock>
+    inline void diag_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+        std::size_t buffer_offset = 0;
+        bool hasMore = true;
 
-		while (hasMore) {
-			if (buffer_offset != 0) {
-				base::flush();
-			}
+        while (hasMore) {
+            if (buffer_offset != 0) {
+                base::flush();
+            }
 
-			put_props(origin, suborigin, severity, tag);
+            put_props(origin, suborigin, severity, tag);
 
-			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
-		}
-	}
+            hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
+        }
+    }
 
-	template <std::size_t Size, typename Clock>
-	inline void diag_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
-		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ,");
-		base::put_thread_id(std::this_thread::get_id(), "%s,");
-		base::put_any("%.1x,", severity);
-		base::put_any("%llx,", (unsigned long long)tag);
-		base::put_any("%s,", origin);
-		base::put_any("%s,", suborigin);
-	}
+    template <std::size_t Size, typename Clock>
+    inline void diag_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
+        base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ,");
+        base::put_thread_id(std::this_thread::get_id(), "%s,");
+        base::put_any("%.1x,", severity);
+        base::put_any("%llx,", (unsigned long long)tag);
+        base::put_any("%s,", origin);
+        base::put_any("%s,", suborigin);
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	template <std::size_t Size, typename Clock>
-	inline test_line_ostream<Size, Clock>::test_line_ostream()
-		: base() {
-	}
+    template <std::size_t Size, typename Clock>
+    inline test_line_ostream<Size, Clock>::test_line_ostream()
+        : base() {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline test_line_ostream<Size, Clock>::test_line_ostream(table_ostream* table)
-		: base(table) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline test_line_ostream<Size, Clock>::test_line_ostream(table_ostream* table)
+        : base(table) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other)
-		: base(std::move(other)) {
-	}
+    template <std::size_t Size, typename Clock>
+    inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other)
+        : base(std::move(other)) {
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void test_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
-		va_list vlist;
-		va_start(vlist, format);
+    template <std::size_t Size, typename Clock>
+    inline void test_line_ostream<Size, Clock>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+        va_list vlist;
+        va_start(vlist, format);
 
-		put_anyv(origin, suborigin, severity, tag, format, vlist);
+        put_anyv(origin, suborigin, severity, tag, format, vlist);
 
-		va_end(vlist);
-	}
+        va_end(vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void test_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
-		put_props(origin, suborigin, severity, tag);
+    template <std::size_t Size, typename Clock>
+    inline void test_line_ostream<Size, Clock>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+        put_props(origin, suborigin, severity, tag);
 
-		base::put_anyv(format, vlist);
-	}
+        base::put_anyv(format, vlist);
+    }
 
 
-	template <std::size_t Size, typename Clock>
-	inline void test_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
-		std::size_t buffer_offset = 0;
-		bool hasMore = true;
+    template <std::size_t Size, typename Clock>
+    inline void test_line_ostream<Size, Clock>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+        std::size_t buffer_offset = 0;
+        bool hasMore = true;
 
-		while (hasMore) {
-			if (buffer_offset != 0) {
-				base::flush();
-			}
+        while (hasMore) {
+            if (buffer_offset != 0) {
+                base::flush();
+            }
 
-			put_props(origin, suborigin, severity, tag);
+            put_props(origin, suborigin, severity, tag);
 
-			hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
-		}
-	}
+            hasMore = base::put_binary(buffer, buffer_size, buffer_offset);
+        }
+    }
 
-	template <std::size_t Size, typename Clock>
-	inline void test_line_ostream<Size, Clock>::put_props(const char* /*origin*/, const char* /*suborigin*/, severity_t severity, tag_t /*tag*/) noexcept {
-		base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
+    template <std::size_t Size, typename Clock>
+    inline void test_line_ostream<Size, Clock>::put_props(const char* /*origin*/, const char* /*suborigin*/, severity_t severity, tag_t /*tag*/) noexcept {
+        base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
-		char buf_severity[2 * severity::abc::debug + 1];
-		severity = severity <= severity::abc::debug ? severity : severity::abc::debug;
-		std::memset(buf_severity, ' ', 2 * severity);
-		buf_severity[2 * (severity - 1)] = '\0';
-		base::put_any(buf_severity);
-	}
+        char buf_severity[2 * severity::abc::debug + 1];
+        severity = severity <= severity::abc::debug ? severity : severity::abc::debug;
+        std::memset(buf_severity, ' ', 2 * severity);
+        buf_severity[2 * (severity - 1)] = '\0';
+        base::put_any(buf_severity);
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	template <typename Line, typename Filter>
-	inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, Filter* filter)
-		: base(sb)
-		, _filter(filter) {
-	}
+    template <typename Line, typename Filter>
+    inline log_ostream<Line, Filter>::log_ostream(std::streambuf* sb, Filter* filter)
+        : base(sb)
+        , _filter(filter) {
+    }
 
 
-	template <typename Line, typename Filter>
-	inline log_ostream<Line, Filter>::log_ostream(log_ostream&& other)
-		: base(std::move(other))
-		, _filter(other._filter) {
-	}
+    template <typename Line, typename Filter>
+    inline log_ostream<Line, Filter>::log_ostream(log_ostream&& other)
+        : base(std::move(other))
+        , _filter(other._filter) {
+    }
 
 
-	template <typename Line, typename Filter>
-	inline Filter* log_ostream<Line, Filter>::filter() noexcept {
-		return _filter;
-	}
+    template <typename Line, typename Filter>
+    inline Filter* log_ostream<Line, Filter>::filter() noexcept {
+        return _filter;
+    }
 
 
-	template <typename Line, typename Filter>
-	inline void log_ostream<Line, Filter>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
-		va_list vlist;
-		va_start(vlist, format);
+    template <typename Line, typename Filter>
+    inline void log_ostream<Line, Filter>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+        va_list vlist;
+        va_start(vlist, format);
 
-		put_anyv(origin, suborigin, severity, tag, format, vlist);
+        put_anyv(origin, suborigin, severity, tag, format, vlist);
 
-		va_end(vlist);
-	}
+        va_end(vlist);
+    }
 
 
-	template <typename Line, typename Filter>
-	inline void log_ostream<Line, Filter>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
-		if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-			Line line(this);
-			line.put_anyv(origin, suborigin, severity, tag, format, vlist);
-		}
-	}
+    template <typename Line, typename Filter>
+    inline void log_ostream<Line, Filter>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+        if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
+            Line line(this);
+            line.put_anyv(origin, suborigin, severity, tag, format, vlist);
+        }
+    }
 
 
-	template <typename Line, typename Filter>
-	inline void log_ostream<Line, Filter>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
-		if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-			Line line(this);
-			line.put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
-		}
-	}
+    template <typename Line, typename Filter>
+    inline void log_ostream<Line, Filter>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+        if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
+            Line line(this);
+            line.put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
+        }
+    }
 
 
-	template <typename Line, typename Filter>
-	inline void log_ostream<Line, Filter>::put_blank_line(const char* origin, severity_t severity) noexcept {
-		if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-			base::put_blank_line();
-		}
-	}
+    template <typename Line, typename Filter>
+    inline void log_ostream<Line, Filter>::put_blank_line(const char* origin, severity_t severity) noexcept {
+        if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
+            base::put_blank_line();
+        }
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
     template <typename OriginPrefixStr>
-	inline log_filter<OriginPrefixStr>::log_filter(OriginPrefixStr&& origin_prefix, severity_t min_severity) noexcept
-		: _origin_prefix(std::move(origin_prefix))
+    inline log_filter<OriginPrefixStr>::log_filter(OriginPrefixStr&& origin_prefix, severity_t min_severity) noexcept
+        : _origin_prefix(std::move(origin_prefix))
         , _min_severity(min_severity) {
-	}
+    }
 
 
     template <typename OriginPrefixStr>
@@ -311,26 +311,26 @@ namespace abc { namespace diag {
 
 
     template <typename OriginPrefixStr>
-	inline severity_t log_filter<OriginPrefixStr>::min_severity() const noexcept {
-		return _min_severity;
-	}
+    inline severity_t log_filter<OriginPrefixStr>::min_severity() const noexcept {
+        return _min_severity;
+    }
 
 
     template <typename OriginPrefixStr>
-	inline void log_filter<OriginPrefixStr>::origin_prefix(OriginPrefixStr&& origin_prefix) noexcept {
+    inline void log_filter<OriginPrefixStr>::origin_prefix(OriginPrefixStr&& origin_prefix) noexcept {
         _origin_prefix = std::move(origin_prefix);
-	}
+    }
 
 
     template <typename OriginPrefixStr>
-	inline void log_filter<OriginPrefixStr>::min_severity(severity_t min_severity) noexcept {
-		_min_severity = min_severity;
-	}
+    inline void log_filter<OriginPrefixStr>::min_severity(severity_t min_severity) noexcept {
+        _min_severity = min_severity;
+    }
 
 
     template <typename OriginPrefixStr>
-	inline bool log_filter<OriginPrefixStr>::is_enabled(const char* origin, severity_t severity) const noexcept {
-		if (!abc::severity::is_higher_or_equal(severity, _min_severity)) {
+    inline bool log_filter<OriginPrefixStr>::is_enabled(const char* origin, severity_t severity) const noexcept {
+        if (!abc::severity::is_higher_or_equal(severity, _min_severity)) {
             return false;
         }
 
@@ -340,19 +340,19 @@ namespace abc { namespace diag {
 
         return std::strlen(origin) >= _origin_prefix.length()
             && std::strncmp(origin, _origin_prefix.c_str(), _origin_prefix.length()) == 0;
-	}
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	inline bool severity::is_higher(severity_t severity, severity_t other) noexcept {
-		return severity < other;
-	}
+    inline bool severity::is_higher(severity_t severity, severity_t other) noexcept {
+        return severity < other;
+    }
 
 
-	inline bool severity::is_higher_or_equal(severity_t severity, severity_t other) noexcept {
-		return severity <= other;
-	}
+    inline bool severity::is_higher_or_equal(severity_t severity, severity_t other) noexcept {
+        return severity <= other;
+    }
 
 } }

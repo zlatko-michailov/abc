@@ -30,11 +30,11 @@ SOFTWARE.
 
 namespace abc { namespace diag {
 
-	using tag_t = std::uint64_t;
+    using tag_t = std::uint64_t;
 
-	namespace tag {
-		constexpr tag_t none = 0;
-	}
+    namespace tag {
+        constexpr tag_t none = 0;
+    }
 
 
     constexpr tag_t __TAG__ = 0;
