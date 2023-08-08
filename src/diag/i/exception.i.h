@@ -33,12 +33,12 @@ SOFTWARE.
 
 namespace abc { namespace diag {
 
-    // logic_error
-    // |-- assert_error
-    //     |-- expect_error
-    //     |-- ensure_error
-    //  
-    // runtime_error
+    // std::exception
+    // |__ std::logic_error
+    // |   |__ assert_error
+    // |       |__ expect_error
+    // |       |__ ensure_error
+    // |__ std::runtime_error
 
 
     // --------------------------------------------------------------
