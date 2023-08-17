@@ -35,8 +35,9 @@ namespace abc { namespace diag {
     namespace tag {
         constexpr tag_t none = 0;
     }
-
-
-    constexpr tag_t __TAG__ = 0;
-
 } }
+
+
+
+constexpr abc::diag::tag_t __TAG__ = 0;
+
