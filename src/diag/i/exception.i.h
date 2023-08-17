@@ -55,13 +55,14 @@ namespace abc { namespace diag {
 
     public:
         /**
-         * @brief         Constructor.
-         * @param origin  Thrower's origin.
-         * @param message Error message.
-         * @param tag     Unique tag.
-         * @param log     Pointer to a `log_ostream` instance.
+         * @brief           Constructor.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param origin    Thrower's origin.
+         * @param tag       Unique tag.
+         * @param message   Error message.
+         * @param log       Pointer to a `log_ostream` instance.
          */
-        exception(const char* origin, const char* message, tag_t tag, LogPtr&& log = nullptr);
+        exception(const char* origin, const char* suborigin, tag_t tag, const char* message, const LogPtr& log = nullptr);
 
         /**
          * @brief Copy constructor.

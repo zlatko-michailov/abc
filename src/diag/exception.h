@@ -32,12 +32,12 @@ SOFTWARE.
 namespace abc { namespace diag {
 
     template <typename Exception, typename LogPtr>
-    inline exception<Exception, LogPtr>::exception(const char* origin, const char* message, tag_t tag, LogPtr&& log)
+    inline exception<Exception, LogPtr>::exception(const char* origin, const char* suborigin, tag_t tag, const char* message, const LogPtr& log)
         : Exception(message)
         , _tag(tag) {
 
         if (log != nullptr) {
-            log->put_any(origin, severity::warning, tag, "Exception thrown! %s", message);
+            log->put_any(origin, suborigin, severity::warning, tag, "Exception thrown! %s", message);
         }
     }
 
