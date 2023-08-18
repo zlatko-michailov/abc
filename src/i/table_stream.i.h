@@ -109,6 +109,11 @@ namespace abc {
          */
         static constexpr char ends = '\0';
 
+        /**
+         * @brief The size of the line.
+         */
+        static constexpr std::size_t size = Size;
+
     public:
         /**
          * @brief Default constructor.

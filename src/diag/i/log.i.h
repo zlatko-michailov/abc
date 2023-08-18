@@ -363,6 +363,9 @@ namespace abc { namespace diag {
         using base = table_ostream;
 
     public:
+        using line_type = Line;
+
+    public:
         /**
          * @brief        Constructor.
          * @param sb     Pointer to a `std::streambuf` instance to write to.
@@ -426,6 +429,11 @@ namespace abc { namespace diag {
          * @param severity Entry severity.
          */
         void put_blank_line(const char* origin, severity_t severity) noexcept;
+
+        /**
+         * @brief Returns a new line.
+         */
+        line_type line() const noexcept;
 
     private:
         /**

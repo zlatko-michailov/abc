@@ -294,6 +294,12 @@ namespace abc { namespace diag {
     }
 
 
+    template <typename Line, typename Filter>
+    inline log_ostream<Line, Filter>::line_type log_ostream<Line, Filter>::line() const noexcept {
+        return line_type(this);
+    }
+
+
     // --------------------------------------------------------------
 
 
