@@ -19,6 +19,9 @@ Up to [Documentation](README.md).
         - log.h
         - exception.h
         - diag_ready.h
+    - __test ::__
+        - __i__
+        - test.h __NEXT__
     - __net ::__
         - __i__
         - socket.h __NEXT. TODO:__
@@ -57,9 +60,6 @@ Up to [Documentation](README.md).
             - grayscale.h
             - motion.h
             - motion_tracker.h
-    - __test ::__
-        - __i__
-        - test.h
 
 ## Dependency
 A class may depend on other classes:

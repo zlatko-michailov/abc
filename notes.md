@@ -3,6 +3,8 @@
 - `diag_ready`
 
 ## To Do
+- socket:
+  - Move to subnamespace `net`.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.
