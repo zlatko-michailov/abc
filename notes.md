@@ -3,6 +3,7 @@
 - `diag_ready`
 
 ## To Do
+- UNTABIFY each file before making changes!
 - socket:
   - Move to subnamespace `net`.
 - Link the internal docs.
