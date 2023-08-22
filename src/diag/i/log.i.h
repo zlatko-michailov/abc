@@ -352,11 +352,11 @@ namespace abc { namespace diag {
 
 
     /**
-     * @brief         `table_ostream` specialization for logging.
-     * @tparam Line   `line_ostream` specialization.
-     * @tparam Filter Line filter.
+     * @brief            `table_ostream` specialization for logging.
+     * @tparam Line      `line_ostream` specialization.
+     * @tparam FilterPtr Pointer to line filter.
      */
-    template <typename Line, typename Filter>
+    template <typename Line, typename FilterPtr>
     class log_ostream
         : public table_ostream {
 
@@ -371,7 +371,7 @@ namespace abc { namespace diag {
          * @param sb     Pointer to a `std::streambuf` instance to write to.
          * @param filter Pointer to a `Filter` instance.
          */
-        log_ostream(std::streambuf* sb, Filter* filter);
+        log_ostream(std::streambuf* sb, FilterPtr&& filter);
 
         /**
          * @brief Move constructor.
@@ -387,7 +387,7 @@ namespace abc { namespace diag {
         /**
          * @brief Returns the pointer to the `Filter` instance.
          */
-        Filter* filter() noexcept;
+        const FilterPtr& filter() const noexcept;
 
     public:
         /**
@@ -439,7 +439,7 @@ namespace abc { namespace diag {
         /**
          * @brief Pointer to the `Filter` instance passed in to the constructor.
          */
-        Filter* _filter;
+        FilterPtr _filter;
     };
 
 
