@@ -98,38 +98,96 @@ namespace abc { namespace diag {
         /**
          * @brief            Throws an exception with the given base type, message, and tag.
          * @tparam Exception Exception base type.
-         * @param message    Message.
+         * @param suborigin  Entry suborigin, e.g. method.
          * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param ...        Message arguments.
          */
         template <typename Exception>
-        void throw_exception(const char* message, tag_t tag);
+        void throw_exception(const char* suborigin, tag_t tag, const char* format, ...);
+
+        /**
+         * @brief            Throws an exception with the given base type, message, and tag.
+         * @tparam Exception Exception base type.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param vlist      Message arguments.
+         */
+        template <typename Exception>
+        void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist);
 
         /**
          * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
          * @details          Use this facility to assert general assumptions in the middle of a method.
+         * @param suborigin  Entry suborigin, e.g. method.
          * @param condition  Asserted condition.
-         * @param message    Message.
          * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param ...        Message arguments.
          */
-        void assert(bool condition, const char* message, tag_t tag);
+        void assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+
+        /**
+         * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
+         * @details          Use this facility to assert general assumptions in the middle of a method.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Asserted condition.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param vlist      Message arguments.
+         */
+        void assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
 
         /**
          * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
          * @details          Use this facility to assert assumptions about expected/input state.
+         * @param suborigin  Entry suborigin, e.g. method.
          * @param condition  Asserted condition.
-         * @param message    Message.
          * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param ...        Message arguments.
          */
-        void expect(bool condition, const char* message, tag_t tag);
+        void expect(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+
+        /**
+         * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
+         * @details          Use this facility to assert assumptions about expected/input state.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Asserted condition.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param vlist      Message arguments.
+         */
+        void expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
 
         /**
          * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
          * @details          Use this facility to assert assumptions about ensured/output state.
+         * @param suborigin  Entry suborigin, e.g. method.
          * @param condition  Asserted condition.
-         * @param message    Message.
          * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param ...        Message arguments.
          */
-        void ensure(bool condition, const char* message, tag_t tag);
+        void ensure(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+
+        /**
+         * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
+         * @details          Use this facility to assert assumptions about ensured/output state.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Asserted condition.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param vlist      Message arguments.
+         */
+        void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
+
+    protected:
+        /**
+         * @brief Returns the Log pointer.
+         */
+        const LogPtr& log() const noexcept;
 
     private:
         OriginStr _origin;

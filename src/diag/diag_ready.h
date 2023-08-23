@@ -48,12 +48,12 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::put_any(const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
-		va_list vlist;
-		va_start(vlist, format);
+        va_list vlist;
+        va_start(vlist, format);
 
-		put_anyv(suborigin, severity, tag, format, vlist);
+        put_anyv(suborigin, severity, tag, format, vlist);
 
-		va_end(vlist);
+        va_end(vlist);
     }
 
 
@@ -83,32 +83,84 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     template <typename Exception>
-    inline void diag_ready<OriginStr, LogPtr>::throw_exception(const char* message, tag_t tag) {
-        throw exception<Exception, LogPtr>(_origin, message, tag, _log);
+    inline void diag_ready<OriginStr, LogPtr>::throw_exception(const char* suborigin, tag_t tag, const char* format, ...) {
+        va_list vlist;
+        va_start(vlist, format);
+
+        throw_exceptionv(suborigin, tag, format, vlist);
+
+        va_end(vlist);
     }
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::assert(bool condition, const char* message, tag_t tag) {
+    template <typename Exception>
+    inline void diag_ready<OriginStr, LogPtr>::throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist) {
+        char message[size::k2];
+        std::vsnprintf(message, sizeof(message) / sizeof(char), format, vlist);
+
+        throw exception<Exception, LogPtr>(c_str(_origin), suborigin, tag, message, _log);
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...) {
+        va_list vlist;
+        va_start(vlist, format);
+
+        assertv(suborigin, tag, format, vlist);
+
+        va_end(vlist);
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) {
         if (!condition) {
-            throw_exception<assert_error>(message, tag);
+            throw_exceptionv<assert_error>(suborigin, tag, format, vlist);
         }
     }
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::expect(bool condition, const char* message, tag_t tag) {
+    inline void diag_ready<OriginStr, LogPtr>::expect(const char* suborigin, bool condition, tag_t tag, const char* format, ...) {
+        va_list vlist;
+        va_start(vlist, format);
+
+        expectv(suborigin, condition, tag, format, vlist);
+
+        va_end(vlist);
+    }
+
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) {
         if (!condition) {
-            throw_exception<expect_error>(message, tag);
+            throw_exception<expect_error>(suborigin, tag, format, vlist);
         }
     }
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::ensure(bool condition, const char* message, tag_t tag) {
+    inline void diag_ready<OriginStr, LogPtr>::ensure(const char* suborigin, bool condition, tag_t tag, const char* format, ...) {
+        va_list vlist;
+        va_start(vlist, format);
+
+        ensurev(suborigin, condition, tag, format, vlist);
+
+        va_end(vlist);
+    }
+
+    template <typename OriginStr, typename LogPtr>
+    inline void diag_ready<OriginStr, LogPtr>::ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) {
         if (!condition) {
-            throw_exception<ensure_error>(message, tag);
+            throw_exception<ensure_error>(suborigin, tag, format, vlist);
         }
+    }
+
+    template <typename OriginStr, typename LogPtr>
+    inline const LogPtr& diag_ready<OriginStr, LogPtr>::log() const noexcept {
+        return _log;
     }
 
 } }
