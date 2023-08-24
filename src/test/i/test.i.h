@@ -33,6 +33,7 @@ SOFTWARE.
 #include <utility>
 #include <initializer_list>
 
+#include "../../diag/i/diag_ready.i.h"
 #include "../../diag/i/log.i.h"
 
 
@@ -53,7 +54,13 @@ namespace abc { namespace test {
      * @tparam LogPtr Pointer to a logging facility.
      */
     template <typename LogPtr>
-    struct context {
+    class context
+        : protected diag::diag_ready<const char*, const LogPtr&> {
+
+    protected:
+        using diag_base = diag::diag_ready<const char*, const LogPtr&>;
+
+    public:
         /**
          * @brief               Constructor.
          * @param category_name Test category name.
@@ -62,7 +69,7 @@ namespace abc { namespace test {
          * @param seed          Randomization seed. Used to repeat a previous test run.
          * @param process_path  The path to the test process.
          */
-        context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path) noexcept;
+        context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path);
 
         /**
          * @brief          Verifies an actual value matches the expected one.
@@ -100,6 +107,7 @@ namespace abc { namespace test {
         const LogPtr& log;
         seed_t        seed;
         const char*   process_path;
+        std::string   suborigin;
     };
 
 
@@ -144,7 +152,13 @@ namespace abc { namespace test {
      * @tparam LogPtr      Pointer to a logging facility.
      */
     template <typename ProcessStr, typename LogPtr>
-    struct suite {
+    class suite
+        : protected diag::diag_ready<const char*, LogPtr> {
+
+    protected:
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    public:
         /**
          * @brief Default constructor.
          */
@@ -157,7 +171,7 @@ namespace abc { namespace test {
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path) noexcept;
+        suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief              Constructor. initializer list version.
@@ -166,7 +180,7 @@ namespace abc { namespace test {
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path) noexcept;
+        suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief  Executes all test methods of all test categories.
@@ -175,7 +189,6 @@ namespace abc { namespace test {
         bool run() noexcept;
 
         std::vector<named_category<LogPtr>> categories;
-        LogPtr                              log;
         seed_t                              seed;
         ProcessStr                          process_path;
 

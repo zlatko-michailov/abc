@@ -25,14 +25,12 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/test.h"
+#include <string>
+
+#include "../../src/test/test.h"
 
 
-namespace abc { namespace test {
-
-    using log_line = abc::test_line_ostream<>;
-    using log_filter = abc::log_filter;
-    using log = abc::log_ostream<log_line, log_filter>;
-
-}}
-
+using test_log_line = abc::diag::test_line_ostream<>;
+using test_log_filter = abc::diag::log_filter<const char*>;
+using test_log = abc::diag::log_ostream<test_log_line, test_log_filter*>;
+using test_suite = abc::test::suite<const char*, test_log*>;

@@ -26,18 +26,23 @@ SOFTWARE.
 #pragma once
 
 #include "i/test.i.h"
+#include "../diag/diag_ready.h"
 #include "../diag/log.h"
 
 
 namespace abc { namespace test {
 
     template <typename LogPtr>
-    context<LogPtr>::context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path) noexcept
-        : category_name(category_name)
+    context<LogPtr>::context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path)
+        : diag_base("abc::test::context", log)
+        , category_name(category_name)
         , method_name(method_name)
         , log(log)
         , seed(seed)
-        , process_path(process_path) {
+        , process_path(process_path)
+        , suborigin(category_name) {
+
+        suborigin.append("::").append(method_name);
     }
 
 
@@ -51,15 +56,11 @@ namespace abc { namespace test {
         char line_format[size::k2];
         if (!are_equal) {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%s, expected=%s)", format, format);
-            if (log != nullptr) {
-                log->put_any(category::any, severity::important, tag, line_format, actual, expected);
-            }
+            diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
         }
         else {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%s, expected=%s)", format, format);
-            if (log != nullptr) {
-                log->put_any(category::any, severity::optional, tag, line_format, actual, expected);
-            }
+            diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
         }
 
         return are_equal;
@@ -75,15 +76,11 @@ namespace abc { namespace test {
         char line_format[size::k2];
         if (!are_equal) {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-            if (log != nullptr) {
-                log->put_any(category::any, severity::important, tag, line_format, actual, expected);
-            }
+            diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
         }
         else {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-            if (log != nullptr) {
-                log->put_any(category::any, severity::optional, tag, line_format, actual, expected);
-            }
+            diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
         }
 
         return are_equal;
@@ -111,15 +108,11 @@ namespace abc { namespace test {
             char line_format[size::k2];
             if (!are_equal) {
                 std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-                if (log != nullptr) {
-                    log->put_any(category::any, severity::important, tag, line_format, line_actual.get(), line_expected.get());
-                }
+                diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, line_actual.get(), line_expected.get());
             }
             else {
                 std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-                if (log != nullptr) {
-                    log->put_any(category::any, severity::optional, tag, line_format, line_actual.get(), line_expected.get());
-                }
+                diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, line_actual.get(), line_expected.get());
             }
         }
 
@@ -131,18 +124,18 @@ namespace abc { namespace test {
 
 
     template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path) noexcept
-        : categories(std::move(categories))
-        , log(std::move(log))
+    inline suite<ProcessStr, LogPtr>::suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
+        : diag_base("abc::test::suite", std::move(log))
+        , categories(std::move(categories))
         , seed(seed)
         , process_path(std::move(process_path)) {
     }
 
 
     template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path) noexcept
-        : categories(init.begin(), init.end())
-        , log(std::move(log))
+    inline suite<ProcessStr, LogPtr>::suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
+        : diag_base("abc::test::suite", std::move(log))
+        , categories(init.begin(), init.end())
         , seed(seed)
         , process_path(std::move(process_path)) {
     }
@@ -150,55 +143,45 @@ namespace abc { namespace test {
 
     template <typename ProcessStr, typename LogPtr>
     inline bool suite<ProcessStr, LogPtr>::run() noexcept {
+        constexpr const char* suborigin = "run";
+
         srand();
 
         bool all_passed = true;
 
-        if (log != nullptr) {
-            log->put_blank_line(category::any, severity::critical);
-            log->put_blank_line(category::any, severity::critical);
-            log->put_blank_line(category::any, severity::critical);
-        }
+        diag_base::put_blank_line(diag::severity::critical);
+        diag_base::put_blank_line(diag::severity::critical);
+        diag_base::put_blank_line(diag::severity::critical);
 
         // Category
         for (auto category_itr = categories.begin(); category_itr != categories.end(); category_itr++) {
             bool category_passed = true;
 
-            if (log != nullptr) {
-                log->put_any(category::any, severity::critical, diag::tag::none, ">>   %s%s%s%s", color::begin, color::cyan, category_itr->first.c_str(), color::end);
-            }
+            diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, ">>   %s%s%s%s", diag::color::begin, diag::color::cyan, category_itr->first.c_str(), diag::color::end);
 
             // Method
             for (auto method_itr = category_itr->second.begin(); method_itr != category_itr->second.end(); method_itr++) {
                 bool method_passed = true;
 
-                if (log != nullptr) {
-                    log->put_any(category::any, severity::warning, diag::tag::none, ">>   %s", method_itr->first.c_str());
-                }
+                diag_base::put_any(suborigin, diag::severity::warning, diag::tag::none, ">>   %s", method_itr->first.c_str());
 
                 try {
-                    context<LogPtr> context(category_itr->first.c_str(), method_itr->first.c_str(), log, seed, c_str(process_path));
+                    context<LogPtr> context(category_itr->first.c_str(), method_itr->first.c_str(), diag_base::log(), seed, c_str(process_path));
 
                     // Execute
                     method_passed = method_itr->second(context);
                 }
                 catch(const std::exception& ex) {
                     method_passed = false;
-                    if (log != nullptr) {
-                        log->put_any(category::any, severity::critical, diag::tag::none, "    %s%sEXCEPTION%s %s", color::begin, color::red, color::end, ex.what());
-                    }
+                    diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "    %s%sEXCEPTION%s %s", diag::color::begin, diag::color::red, diag::color::end, ex.what());
                 }
 
                 // Method outcome
                 if (method_passed) {
-                    if (log != nullptr) {
-                        log->put_any(category::any, severity::critical, diag::tag::none, "  %s%sPASS%s %s", color::begin, color::green, color::end, method_itr->first.c_str());
-                    }
+                    diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "  %s%sPASS%s %s", diag::color::begin, diag::color::green, diag::color::end, method_itr->first.c_str());
                 }
                 else {
-                    if (log != nullptr) {
-                        log->put_any(category::any, severity::critical, diag::tag::none, "  %s%sFAIL%s %s", color::begin, color::red, color::end, method_itr->first.c_str());
-                    }
+                    diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "  %s%sFAIL%s %s", diag::color::begin, diag::color::red, diag::color::end, method_itr->first.c_str());
                 }
 
                 category_passed = category_passed && method_passed;
@@ -206,46 +189,32 @@ namespace abc { namespace test {
 
             // Category outcome
             if (category_passed) {
-                if (log != nullptr) {
-                    log->put_any(category::any, severity::critical, diag::tag::none, "%s%sPASS%s %s%s%s%s", color::begin, color::green, color::end, color::begin, color::cyan, category_itr->first.c_str(), color::end);
-                }
+                diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "%s%sPASS%s %s%s%s%s", diag::color::begin, diag::color::green, diag::color::end, diag::color::begin, diag::color::cyan, category_itr->first.c_str(), diag::color::end);
             }
             else {
-                if (log != nullptr) {
-                    log->put_any(category::any, severity::critical, diag::tag::none, "%s%sFAIL%s %s%s%s%s", color::begin, color::red, color::end, color::begin, color::cyan, category_itr->first.c_str(), color::end);
-                }
+                diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "%s%sFAIL%s %s%s%s%s", diag::color::begin, diag::color::red, diag::color::end, diag::color::begin, diag::color::cyan, category_itr->first.c_str(), diag::color::end);
             }
 
-            if (log != nullptr) {
-                log->put_blank_line(category::any, severity::critical);
-            }
+            diag_base::put_blank_line(diag::severity::critical);
             all_passed = all_passed && category_passed;
         } // category
 
         // Summary
-        if (log != nullptr) {
-            log->put_blank_line(category::any, severity::critical);
-            log->put_any(category::any, severity::critical, diag::tag::none, ">>   %s%ssummary%s", color::begin, color::cyan, color::end);
-            log->put_any(category::any, severity::warning, diag::tag::none, "seed = %u", seed);
-        }
+        diag_base::put_blank_line(diag::severity::critical);
+        diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, ">>   %s%ssummary%s", diag::color::begin, diag::color::cyan, diag::color::end);
+        diag_base::put_any(suborigin, diag::severity::warning, diag::tag::none, "seed = %u", seed);
 
         // Suite outcome
         if (all_passed) {
-            if (log != nullptr) {
-                log->put_any(category::any, severity::critical, diag::tag::none, "%s%sPASS%s %s%ssummary%s", color::begin, color::green, color::end, color::begin, color::cyan, color::end);
-            }
+            diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "%s%sPASS%s %s%ssummary%s", diag::color::begin, diag::color::green, diag::color::end, diag::color::begin, diag::color::cyan, diag::color::end);
         }
         else {
-            if (log != nullptr) {
-                log->put_any(category::any, severity::critical, diag::tag::none, "%s%sFAIL%s %s%ssummary%s", color::begin, color::red, color::end, color::begin, color::cyan, color::end);
-            }
+            diag_base::put_any(suborigin, diag::severity::critical, diag::tag::none, "%s%sFAIL%s %s%ssummary%s", diag::color::begin, diag::color::red, diag::color::end, diag::color::begin, diag::color::cyan, diag::color::end);
         }
 
-        if (log != nullptr) {
-            log->put_blank_line(category::any, severity::critical);
-            log->put_blank_line(category::any, severity::critical);
-            log->put_blank_line(category::any, severity::critical);
-        }
+        diag_base::put_blank_line(diag::severity::critical);
+        diag_base::put_blank_line(diag::severity::critical);
+        diag_base::put_blank_line(diag::severity::critical);
 
         return all_passed;
     }

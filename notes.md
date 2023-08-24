@@ -4,8 +4,14 @@
 
 ## To Do
 - UNTABIFY each file before making changes!
+- test::context:
+  - Derive from diag_ready.
+- test
+  - main
+  - tests down to http
 - socket:
   - Move to subnamespace `net`.
+
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.

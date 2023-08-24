@@ -295,7 +295,7 @@ namespace abc { namespace diag {
 
 
     template <typename Line, typename FilterPtr>
-    inline log_ostream<Line, FilterPtr>::line_type log_ostream<Line, FilterPtr>::line() const noexcept {
+    inline typename log_ostream<Line, FilterPtr>::line_type log_ostream<Line, FilterPtr>::line() const noexcept {
         return line_type(this);
     }
 
@@ -336,7 +336,7 @@ namespace abc { namespace diag {
 
     template <typename OriginPrefixStr>
     inline bool log_filter<OriginPrefixStr>::is_enabled(const char* origin, severity_t severity) const noexcept {
-        if (!abc::severity::is_higher_or_equal(severity, _min_severity)) {
+        if (!severity::is_higher_or_equal(severity, _min_severity)) {
             return false;
         }
 
