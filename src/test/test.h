@@ -25,9 +25,10 @@ SOFTWARE.
 
 #pragma once
 
-#include "i/test.i.h"
+#include "../util.h"
 #include "../diag/diag_ready.h"
 #include "../diag/log.h"
+#include "i/test.i.h"
 
 
 namespace abc { namespace test {

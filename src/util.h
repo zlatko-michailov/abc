@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstring>
 
 namespace abc {
 
@@ -50,6 +51,39 @@ namespace abc {
      */
     inline const char* c_str(const std::string& str) noexcept {
         return str.c_str();
+    }
+
+
+    /**
+     * @brief Returns `true` if a string is empty.
+     */
+    inline bool is_empty_str(const char* str) noexcept {
+        return str == nullptr
+            || *str == '\0';
+    }
+
+
+    /**
+     * @brief Returns `true` if a string is empty.
+     */
+    inline bool is_empty_str(const std::string& str) noexcept {
+        return str.empty();
+    }
+
+
+    /**
+     * @brief Returns the length of a string.
+     */
+    inline std::size_t str_length(const char* str) noexcept {
+        return str == nullptr ? 0 : std::strlen(str);
+    }
+
+
+    /**
+     * @brief Returns the length of a string.
+     */
+    inline std::size_t str_length(const std::string& str) noexcept {
+        return str.length();
     }
 
 }

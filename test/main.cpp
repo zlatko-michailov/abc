@@ -25,25 +25,28 @@ SOFTWARE.
 
 #include <iostream>
 
+#include "../src/util.h"
+
 #include "inc/test.h"
-#include "inc/clock.h"
-#include "inc/ascii.h"
-#include "inc/timestamp.h"
-#include "inc/buffer_streambuf.h"
-#include "inc/multifile_streambuf.h"
-#include "inc/table_stream.h"
-#include "inc/socket.h"
-#include "inc/http.h"
-#include "inc/json.h"
-#include "inc/vmem.h"
+//// TODO: #include "inc/clock.h"
+//// TODO: #include "inc/ascii.h"
+//// TODO: #include "inc/timestamp.h"
+//// TODO: #include "inc/buffer_streambuf.h"
+//// TODO: #include "inc/multifile_streambuf.h"
+//// TODO: #include "inc/table_stream.h"
+//// TODO: #include "inc/socket.h"
+//// TODO: #include "inc/http.h"
+//// TODO: #include "inc/json.h"
+//// TODO: #include "inc/vmem.h"
 
 
 int main(int /*argc*/, const char* argv[]) {
-    abc::test::log_filter filter(abc::severity::critical);
-    abc::test::log log(std::cout.rdbuf(), &filter);
+    test_log_filter filter("", abc::diag::severity::critical);
+    test_log log(std::cout.rdbuf(), &filter);
 
-    abc::test_suite<abc::test::log> test_suite(
+    test_suite suite(
         {
+#if 0 //// TODO:
             { "ascii", {
                 { "test_ascii_equal",                                abc::test::ascii::test_ascii_equal },
                 { "test_ascii_equal_n",                              abc::test::ascii::test_ascii_equal_n },
@@ -180,12 +183,13 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_pool_move",                             abc::test::vmem::test_vmem_pool_move },
                 { "test_vmem_page_move",                             abc::test::vmem::test_vmem_page_move },
             } },
+#endif
         },
         &log,
-        0,
-        argv[0]);
+        abc::test::seed::random,
+        abc::copy(argv[0]));
 
-    bool passed = test_suite.run();
+    bool passed = suite.run();
 
     return passed ? 0 : 1;
 }

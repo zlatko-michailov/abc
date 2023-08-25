@@ -341,11 +341,15 @@ namespace abc { namespace diag {
         }
 
         if (origin == nullptr) {
-            return _origin_prefix.empty();
+            return is_empty_str(_origin_prefix);
         }
 
-        return std::strlen(origin) >= _origin_prefix.length()
-            && std::strncmp(origin, _origin_prefix.c_str(), _origin_prefix.length()) == 0;
+        if (is_empty_str(_origin_prefix)) {
+            return false;
+        }
+
+        return std::strlen(origin) >= str_length(_origin_prefix)
+            && std::strncmp(origin, c_str(_origin_prefix), str_length(_origin_prefix)) == 0;
     }
 
 
