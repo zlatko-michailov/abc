@@ -36,4 +36,20 @@ namespace abc {
         return T(source);
     }
 
+
+    /**
+     * @brief Returns a C-style string.
+     */
+    inline const char* c_str(const char* str) noexcept {
+        return str;
+    }
+
+
+    /**
+     * @brief Returns a C-style string.
+     */
+    inline const char* c_str(const std::string& str) noexcept {
+        return str.c_str();
+    }
+
 }
