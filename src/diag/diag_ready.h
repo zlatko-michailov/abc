@@ -108,7 +108,7 @@ namespace abc { namespace diag {
         va_list vlist;
         va_start(vlist, format);
 
-        assertv(suborigin, tag, format, vlist);
+        assertv(suborigin, condition, tag, format, vlist);
 
         va_end(vlist);
     }

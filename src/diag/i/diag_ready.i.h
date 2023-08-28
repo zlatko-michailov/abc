@@ -40,7 +40,7 @@ namespace abc { namespace diag {
     template <typename OriginStr, typename LogPtr = std::nullptr_t>
     class diag_ready {
 
-    protected:
+    public:
         /**
          * @brief         Constructor.
          * @param origin  Origin string.
@@ -58,7 +58,7 @@ namespace abc { namespace diag {
          */
         diag_ready(const diag_ready& other) = delete;
 
-    protected:
+    public:
         /**
          * @brief           Write a formatted message.
          * @param suborigin Entry suborigin, e.g. method.
