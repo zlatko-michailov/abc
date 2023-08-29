@@ -34,3 +34,4 @@ using test_log_line = abc::diag::test_line_ostream<>;
 using test_log_filter = abc::diag::log_filter<const char*>;
 using test_log = abc::diag::log_ostream<test_log_line, test_log_filter*>;
 using test_suite = abc::test::suite<const char*, test_log*>;
+using test_context = abc::test::context<test_log*>;

@@ -34,11 +34,10 @@ SOFTWARE.
 namespace abc { namespace test {
 
     template <typename LogPtr>
-    context<LogPtr>::context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path)
-        : diag_base("abc::test::context", log)
-        , category_name(category_name)
+    context<LogPtr>::context(const char* category_name, const char* method_name, suite_diag<LogPtr>& diag, seed_t seed, const char* process_path)
+        : category_name(category_name)
         , method_name(method_name)
-        , log(log)
+        , diag(diag)
         , seed(seed)
         , process_path(process_path)
         , suborigin(category_name) {
@@ -57,11 +56,11 @@ namespace abc { namespace test {
         char line_format[size::k2];
         if (!are_equal) {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%s, expected=%s)", format, format);
-            diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
+            diag.put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
         }
         else {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%s, expected=%s)", format, format);
-            diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
+            diag.put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
         }
 
         return are_equal;
@@ -77,11 +76,11 @@ namespace abc { namespace test {
         char line_format[size::k2];
         if (!are_equal) {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-            diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
+            diag.put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, actual, expected);
         }
         else {
             std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-            diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
+            diag.put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, actual, expected);
         }
 
         return are_equal;
@@ -109,11 +108,11 @@ namespace abc { namespace test {
             char line_format[size::k2];
             if (!are_equal) {
                 std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Fail: are_equal(actual=%%s, expected=%%s)");
-                diag_base::put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, line_actual.get(), line_expected.get());
+                diag.put_any(suborigin.c_str(), abc::diag::severity::important, tag, line_format, line_actual.get(), line_expected.get());
             }
             else {
                 std::snprintf(line_format, sizeof(line_format) / sizeof(char), "Pass: are_equal(actual=%%s, expected=%%s)");
-                diag_base::put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, line_actual.get(), line_expected.get());
+                diag.put_any(suborigin.c_str(), abc::diag::severity::optional, tag, line_format, line_actual.get(), line_expected.get());
             }
         }
 
@@ -125,7 +124,7 @@ namespace abc { namespace test {
 
 
     template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
+    inline suite<ProcessStr, LogPtr>::suite(named_categories<LogPtr>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
         : diag_base("abc::test::suite", std::move(log))
         , categories(std::move(categories))
         , seed(seed)
@@ -167,7 +166,7 @@ namespace abc { namespace test {
                 diag_base::put_any(suborigin, diag::severity::warning, diag::tag::none, ">>   %s", method_itr->first.c_str());
 
                 try {
-                    context<LogPtr> context(category_itr->first.c_str(), method_itr->first.c_str(), diag_base::log(), seed, c_str(process_path));
+                    context<LogPtr> context(category_itr->first.c_str(), method_itr->first.c_str(), *this, seed, c_str(process_path));
 
                     // Execute
                     method_passed = method_itr->second(context);

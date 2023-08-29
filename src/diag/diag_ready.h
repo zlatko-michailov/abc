@@ -60,7 +60,7 @@ namespace abc { namespace diag {
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
         if (_log != nullptr) {
-            _log->put_any(c_str(_origin), suborigin, severity, tag, format, vlist);
+            _log->put_anyv(c_str(_origin), suborigin, severity, tag, format, vlist);
         }
     }
 

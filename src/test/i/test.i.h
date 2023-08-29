@@ -50,26 +50,33 @@ namespace abc { namespace test {
 
 
     /**
+     * @brief  The `diag_ready` specialization that `suite` creates and passes to `context`.
+     * @tparam LogPtr Pointer to a logging facility.
+     */
+    template <typename LogPtr>
+    using suite_diag = diag::diag_ready<const char*, LogPtr>;
+
+
+    // --------------------------------------------------------------
+
+
+    /**
      * @brief         Temporary accessor passed into each test method to perform verification and logging.
      * @tparam LogPtr Pointer to a logging facility.
      */
     template <typename LogPtr>
-    class context
-        : protected diag::diag_ready<const char*, const LogPtr&> {
-
-    protected:
-        using diag_base = diag::diag_ready<const char*, const LogPtr&>;
+    class context {
 
     public:
         /**
          * @brief               Constructor.
          * @param category_name Test category name.
          * @param method_name   Test method name.
-         * @param log           Pointer to a `log_ostream` instance.
+         * @param diag          Reference to `diag::diag_ready`.
          * @param seed          Randomization seed. Used to repeat a previous test run.
          * @param process_path  The path to the test process.
          */
-        context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path);
+        context(const char* category_name, const char* method_name, suite_diag<LogPtr>& diag, seed_t seed, const char* process_path);
 
         /**
          * @brief          Verifies an actual value matches the expected one.
@@ -102,12 +109,12 @@ namespace abc { namespace test {
          */
         bool are_equal(const void* actual, const void* expected, std::size_t size, diag::tag_t tag);
 
-        const char*   category_name;
-        const char*   method_name;
-        const LogPtr& log;
-        seed_t        seed;
-        const char*   process_path;
-        std::string   suborigin;
+        const char*         category_name;
+        const char*         method_name;
+        suite_diag<LogPtr>& diag;
+        seed_t              seed;
+        const char*         process_path;
+        std::string         suborigin;
     };
 
 
@@ -142,6 +149,13 @@ namespace abc { namespace test {
     template <typename LogPtr>
     using named_category = std::pair<std::string, category<LogPtr>>;
 
+    /**
+     * @brief         Bare collection of named test categories.
+     * @tparam LogPtr Pointer to a logging facility.
+     */
+    template <typename LogPtr>
+    using named_categories = std::vector<named_category<LogPtr>>;
+
 
     // --------------------------------------------------------------
 
@@ -153,10 +167,10 @@ namespace abc { namespace test {
      */
     template <typename ProcessStr, typename LogPtr>
     class suite
-        : protected diag::diag_ready<const char*, LogPtr> {
+        : protected suite_diag<LogPtr> {
 
     protected:
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = suite_diag<LogPtr>;
 
     public:
         /**
@@ -171,7 +185,7 @@ namespace abc { namespace test {
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(std::vector<named_category<LogPtr>>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
+        suite(named_categories<LogPtr>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief              Constructor. initializer list version.
@@ -188,9 +202,9 @@ namespace abc { namespace test {
          */
         bool run() noexcept;
 
-        std::vector<named_category<LogPtr>> categories;
-        seed_t                              seed;
-        ProcessStr                          process_path;
+        named_categories<LogPtr> categories;
+        seed_t                   seed;
+        ProcessStr               process_path;
 
     private:
         void srand() noexcept;

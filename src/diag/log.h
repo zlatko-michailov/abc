@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../table_stream.h"
 #include "i/log.i.h"
 
+
 namespace abc { namespace diag {
 
     template <std::size_t Size, typename Clock>
@@ -340,11 +341,11 @@ namespace abc { namespace diag {
             return false;
         }
 
-        if (origin == nullptr) {
-            return is_empty_str(_origin_prefix);
+        if (is_empty_str(_origin_prefix)) {
+            return true;
         }
 
-        if (is_empty_str(_origin_prefix)) {
+        if (origin == nullptr) {
             return false;
         }
 
