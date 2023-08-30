@@ -30,12 +30,7 @@ SOFTWARE.
 #include "test.h"
 
 
-namespace abc { namespace test { namespace ascii {
-
-    bool test_ascii_equal(test_context<abc::test::log>& context);
-    bool test_ascii_equal_n(test_context<abc::test::log>& context);
-    bool test_ascii_equal_i(test_context<abc::test::log>& context);
-    bool test_ascii_equal_i_n(test_context<abc::test::log>& context);
-
-}}}
-
+bool test_ascii_equal(test_context& context);
+bool test_ascii_equal_n(test_context& context);
+bool test_ascii_equal_i(test_context& context);
+bool test_ascii_equal_i_n(test_context& context);
