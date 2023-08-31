@@ -26,71 +26,67 @@ SOFTWARE.
 #include "inc/timestamp.h"
 
 
-namespace abc { namespace test { namespace timestamp {
+static bool test_timestamp_properties(test_context& context, const abc::timestamp<>& ts, abc::year_t year, abc::month_t month, abc::day_t day, abc::hour_t hours, abc::minute_t minutes, abc::second_t seconds, abc::millisecond_t milliseconds, abc::microsecond_t microseconds, abc::nanosecond_t nanoseconds);
 
-	static bool test_timestamp_properties(test_context<abc::test::log>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds);
-
-	static constexpr time_count_t nanoseconds_per_day = static_cast<time_count_t>(nanosecond_count) * second_count * minute_count * hour_count;
+static constexpr abc::time_count_t nanoseconds_per_day = static_cast<abc::time_count_t>(abc::nanosecond_count) * abc::second_count * abc::minute_count * abc::hour_count;
 
 
-	bool test_null_timestamp(test_context<abc::test::log>& context) {
-		abc::timestamp<> ts(nullptr);
+bool test_null_timestamp(test_context& context) {
+    abc::timestamp<> ts(nullptr);
 
-		return test_timestamp_properties(context, ts, 1970, 1, 1, 0, 0, 0, 0, 0, 0);
-	}
-
-
-	bool test_before_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context) {
-		time_count_t date_1995_1_31 = (25 * 365 + 6 + 30) * nanoseconds_per_day;
-		abc::timestamp<> ts(nullptr);
-		ts.reset(date_1995_1_31);
-
-		return test_timestamp_properties(context, ts, 1995, 1, 31, 0, 0, 0, 0, 0, 0);
-	}
+    return test_timestamp_properties(context, ts, 1970, 1, 1, 0, 0, 0, 0, 0, 0);
+}
 
 
-	bool test_before_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context) {
-		time_count_t date_1995_3_10 = (25 * 365 + 6 + 31 + 28 + 9) * nanoseconds_per_day;
-		abc::timestamp<> ts(nullptr);
-		ts.reset(date_1995_3_10);
+bool test_before_year_2000_before_mar_1_timestamp(test_context& context) {
+    abc::time_count_t date_1995_1_31 = (25 * 365 + 6 + 30) * nanoseconds_per_day;
+    abc::timestamp<> ts(nullptr);
+    ts.reset(date_1995_1_31);
 
-		return test_timestamp_properties(context, ts, 1995, 3, 10, 0, 0, 0, 0, 0, 0);
-	}
-
-
-	bool test_after_year_2000_before_mar_1_timestamp(test_context<abc::test::log>& context) {
-		time_count_t date_2010_2_16 = (40 * 365 + 10 + 31 + 15) * nanoseconds_per_day;
-		abc::timestamp<> ts(nullptr);
-		ts.reset(date_2010_2_16);
-
-		return test_timestamp_properties(context, ts, 2010, 2, 16, 0, 0, 0, 0, 0, 0);
-	}
+    return test_timestamp_properties(context, ts, 1995, 1, 31, 0, 0, 0, 0, 0, 0);
+}
 
 
-	bool test_after_year_2000_after_mar_1_timestamp(test_context<abc::test::log>& context) {
-		time_count_t date_2010_4_15 = (40 * 365 + 10 + 31 + 28 + 31 + 14) * nanoseconds_per_day;
-		abc::timestamp<> ts(nullptr);
-		ts.reset(date_2010_4_15);
+bool test_before_year_2000_after_mar_1_timestamp(test_context& context) {
+    abc::time_count_t date_1995_3_10 = (25 * 365 + 6 + 31 + 28 + 9) * nanoseconds_per_day;
+    abc::timestamp<> ts(nullptr);
+    ts.reset(date_1995_3_10);
 
-		return test_timestamp_properties(context, ts, 2010, 4, 15, 0, 0, 0, 0, 0, 0);
-	}
+    return test_timestamp_properties(context, ts, 1995, 3, 10, 0, 0, 0, 0, 0, 0);
+}
 
 
-	static bool test_timestamp_properties(test_context<abc::test::log>& context, const abc::timestamp<>& ts, year_t year, month_t month, day_t day, hour_t hours, minute_t minutes, second_t seconds, millisecond_t milliseconds, microsecond_t microseconds, nanosecond_t nanoseconds) {
-		bool passed = true;
-		passed = context.are_equal<std::int32_t>(ts.year(),			year,			0x1002e, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.month(),		month,			0x1002f, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.day(),			day,			0x10030, "%d") && passed;
+bool test_after_year_2000_before_mar_1_timestamp(test_context& context) {
+    abc::time_count_t date_2010_2_16 = (40 * 365 + 10 + 31 + 15) * nanoseconds_per_day;
+    abc::timestamp<> ts(nullptr);
+    ts.reset(date_2010_2_16);
 
-		passed = context.are_equal<std::int32_t>(ts.hours(),		hours,			0x10031, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.minutes(),		minutes,		0x10032, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.seconds(),		seconds,		0x10033, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.milliseconds(),	milliseconds,	0x10034, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.microseconds(),	microseconds,	0x10035, "%d") && passed;
-		passed = context.are_equal<std::int32_t>(ts.nanoseconds(),	nanoseconds,	0x10036, "%d") && passed;
+    return test_timestamp_properties(context, ts, 2010, 2, 16, 0, 0, 0, 0, 0, 0);
+}
 
-		return passed;
-	}
 
-}}}
+bool test_after_year_2000_after_mar_1_timestamp(test_context& context) {
+    abc::time_count_t date_2010_4_15 = (40 * 365 + 10 + 31 + 28 + 31 + 14) * nanoseconds_per_day;
+    abc::timestamp<> ts(nullptr);
+    ts.reset(date_2010_4_15);
+
+    return test_timestamp_properties(context, ts, 2010, 4, 15, 0, 0, 0, 0, 0, 0);
+}
+
+
+static bool test_timestamp_properties(test_context& context, const abc::timestamp<>& ts, abc::year_t year, abc::month_t month, abc::day_t day, abc::hour_t hours, abc::minute_t minutes, abc::second_t seconds, abc::millisecond_t milliseconds, abc::microsecond_t microseconds, abc::nanosecond_t nanoseconds) {
+    bool passed = true;
+    passed = context.are_equal<std::int32_t>(ts.year(),         year,         0x1002e, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.month(),        month,        0x1002f, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.day(),          day,          0x10030, "%d") && passed;
+
+    passed = context.are_equal<std::int32_t>(ts.hours(),        hours,        0x10031, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.minutes(),      minutes,      0x10032, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.seconds(),      seconds,      0x10033, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.milliseconds(), milliseconds, 0x10034, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.microseconds(), microseconds, 0x10035, "%d") && passed;
+    passed = context.are_equal<std::int32_t>(ts.nanoseconds(),  nanoseconds,  0x10036, "%d") && passed;
+
+    return passed;
+}
 

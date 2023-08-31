@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
+#include "../util.h"
 #include "../timestamp.h"
 #include "../buffer_streambuf.h"
 #include "../table_stream.h"
