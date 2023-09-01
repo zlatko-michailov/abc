@@ -95,9 +95,9 @@ namespace abc { namespace diag {
         base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
         base::put_thread_id(std::this_thread::get_id(), " %16s |");
         base::put_any(" %1.1x |", severity);
-        base::put_any(" %16llx | ", tag);
+        base::put_any(" %16llx |", tag);
         base::put_any(" %s |", origin);
-        base::put_any(" %s |", suborigin);
+        base::put_any(" %s | ", suborigin);
     }
 
 
