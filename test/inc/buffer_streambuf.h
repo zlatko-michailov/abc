@@ -31,11 +31,6 @@ SOFTWARE.
 #include "test.h"
 
 
-namespace abc { namespace test { namespace streambuf {
-
-    bool test_buffer_streambuf_1_char(test_context<abc::test::log>& context);
-    bool test_buffer_streambuf_N_chars(test_context<abc::test::log>& context);
-    bool test_buffer_streambuf_move(test_context<abc::test::log>& context);
-
-}}}
-
+bool test_buffer_streambuf_1_char(test_context& context);
+bool test_buffer_streambuf_N_chars(test_context& context);
+bool test_buffer_streambuf_move(test_context& context);

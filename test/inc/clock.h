@@ -33,25 +33,25 @@ SOFTWARE.
 /**
  * @brief A fake clock that returns a fixed time point.
  */
-class clock {
+class test_clock {
 public:
     using rep        = std::int64_t;
     using period     = std::nano;
     using duration   = std::chrono::duration<rep, period>;
-    using time_point = std::chrono::time_point<clock>;
+    using time_point = std::chrono::time_point<test_clock>;
 
 public:
     static time_point now() noexcept;
 };
 
 
-inline clock::time_point clock::now() noexcept {
-    constexpr clock::rep nanoseconds_per_millisecond = 1000LL * 1000LL;
-    constexpr clock::rep nanoseconds_per_second = 1000LL * nanoseconds_per_millisecond;
-    constexpr clock::rep nanoseconds_per_minute = 60LL * nanoseconds_per_second;
-    constexpr clock::rep nanoseconds_per_hour = 60LL * nanoseconds_per_minute;
-    constexpr clock::rep nanoseconds_per_day = 24LL * nanoseconds_per_hour;
-    constexpr clock::rep nanoseconds_per_year = 365LL * nanoseconds_per_day;
+inline test_clock::time_point test_clock::now() noexcept {
+    constexpr test_clock::rep nanoseconds_per_millisecond = 1000LL * 1000LL;
+    constexpr test_clock::rep nanoseconds_per_second      = 1000LL * nanoseconds_per_millisecond;
+    constexpr test_clock::rep nanoseconds_per_minute      = 60LL * nanoseconds_per_second;
+    constexpr test_clock::rep nanoseconds_per_hour        = 60LL * nanoseconds_per_minute;
+    constexpr test_clock::rep nanoseconds_per_day         = 24LL * nanoseconds_per_hour;
+    constexpr test_clock::rep nanoseconds_per_year        = 365LL * nanoseconds_per_day;
 
     // 2020-10-15 12:34:56.789
     return time_point(
