@@ -29,7 +29,7 @@ SOFTWARE.
 #include <cstdio>
 
 #include "timestamp.h"
-#include "exception.h"
+#include "diag/exception.h"
 #include "i/multifile_streambuf.i.h"
 
 

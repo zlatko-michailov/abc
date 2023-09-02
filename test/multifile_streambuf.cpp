@@ -28,52 +28,47 @@ SOFTWARE.
 #include "inc/multifile_streambuf.h"
 
 
-namespace abc { namespace test { namespace multifile {
+template <typename Streambuf>
+bool test_move(Streambuf& sb1, test_context& context) {
+    std::string path(sb1.path());
 
-    template <typename Streambuf>
-    bool test_move(Streambuf& sb1, test_context<abc::test::log>& context) {
-        std::string path(sb1.path());
+    std::ostream out1(&sb1);
+    out1.write("one ", 4);
+    out1.flush();
 
-        std::ostream out1(&sb1);
-        out1.write("one ", 4);
-        out1.flush();
-
-        Streambuf sb2(std::move(sb1));
-        std::ostream out2(&sb2);
-        out2.write("two ", 4);
-        out2.flush();
+    Streambuf sb2(std::move(sb1));
+    std::ostream out2(&sb2);
+    out2.write("two ", 4);
+    out2.flush();
 
 
-        std::filebuf sbin;
-        sbin.open(path, std::ios_base::in);
-        std::istream in(&sbin);
-        char actual[8 + 1] = { };
-        in.read(actual, 8);
+    std::filebuf sbin;
+    sbin.open(path, std::ios_base::in);
+    std::istream in(&sbin);
+    char actual[8 + 1] = { };
+    in.read(actual, 8);
 
-        bool passed = true;
+    bool passed = true;
 
-        passed = context.are_equal(actual, "one two ", 0x1072a) && passed;
+    passed = context.are_equal(actual, "one two ", 0x1072a) && passed;
 
-        return passed;
-    }
-
-
-    bool test_multifile_streambuf_move(test_context<abc::test::log>& context) {
-        abc::multifile_streambuf<std::chrono::system_clock> sb1("out/test", std::ios_base::out);
-        return test_move(sb1, context);
-    }
+    return passed;
+}
 
 
-    bool test_duration_multifile_streambuf_move(test_context<abc::test::log>& context) {
-        abc::duration_multifile_streambuf<std::chrono::system_clock> sb1(std::chrono::minutes(1), "out/test", std::ios_base::out);
-        return test_move(sb1, context);
-    }
+bool test_multifile_streambuf_move(test_context& context) {
+    abc::multifile_streambuf<std::chrono::system_clock> sb1("out/test", std::ios_base::out);
+    return test_move(sb1, context);
+}
 
 
-    bool test_size_multifile_streambuf_move(test_context<abc::test::log>& context) {
-        abc::size_multifile_streambuf<std::chrono::system_clock> sb1(abc::size::k1, "out/test", std::ios_base::out);
-        return test_move(sb1, context);
-    }
+bool test_duration_multifile_streambuf_move(test_context& context) {
+    abc::duration_multifile_streambuf<std::chrono::system_clock> sb1(std::chrono::minutes(1), "out/test", std::ios_base::out);
+    return test_move(sb1, context);
+}
 
-}}}
 
+bool test_size_multifile_streambuf_move(test_context& context) {
+    abc::size_multifile_streambuf<std::chrono::system_clock> sb1(abc::size::k1, "out/test", std::ios_base::out);
+    return test_move(sb1, context);
+}
