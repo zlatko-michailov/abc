@@ -28,73 +28,69 @@ SOFTWARE.
 #include "inc/stream.h"
 
 
-namespace abc { namespace test { namespace stream {
+template <typename Stream>
+class test_stream 
+    : public Stream {
 
-    template <typename Stream>
-    class test_stream 
-        : public Stream {
-
-    public:
-        test_stream(std::streambuf* sb)
-            : Stream(sb) {
-        }
-
-        test_stream(test_stream&& other)
-            : Stream(std::move(other)) {
-        }
-
-    public:
-        void get(char* s, std::size_t n) {
-            Stream::read(s, n);
-        }
-
-        void put(const char* s) {
-            Stream::write(s, std::strlen(s));
-        }
-    };
-
-    using test_istream = test_stream<abc::istream>;
-    using test_ostream = test_stream<abc::ostream>;
-
-
-    bool test_istream_move(test_context<abc::test::log>& context) {
-        char expected[abc::size::_256 + 1] = "first second";
-        abc::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
-
-        char actual[abc::size::_256 + 1] = { };
-
-        bool passed = true;
-
-        test_istream is1(&sb);
-        is1.get(actual, 6);
-        passed = context.are_equal(actual, "first ", 0x1072b) && passed;
-
-        test_istream is2(std::move(is1));
-        is1.get(actual, 6);
-        passed = context.are_equal(actual, "second", 0x1072c) && passed;
-
-        return passed;
+public:
+    test_stream(std::streambuf* sb)
+        : Stream(sb) {
     }
 
-
-    bool test_ostream_move(test_context<abc::test::log>& context) {
-        char actual[abc::size::_256 + 1] = { };
-        abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
-
-        bool passed = true;
-
-        test_ostream os1(&sb);
-        os1.put("first ");
-        os1.flush();
-        passed = context.are_equal(actual, "first ", 0x1072d) && passed;
-
-        test_ostream os2(std::move(os1));
-        os2.put("second");
-        os2.flush();
-        passed = context.are_equal(actual, "first second", 0x1072e) && passed;
-
-        return passed;
+    test_stream(test_stream&& other)
+        : Stream(std::move(other)) {
     }
 
-}}}
+public:
+    void get(char* s, std::size_t n) {
+        Stream::read(s, n);
+    }
+
+    void put(const char* s) {
+        Stream::write(s, std::strlen(s));
+    }
+};
+
+using test_istream = test_stream<abc::istream>;
+using test_ostream = test_stream<abc::ostream>;
+
+
+bool test_istream_move(test_context& context) {
+    char expected[abc::size::_256 + 1] = "first second";
+    abc::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
+
+    char actual[abc::size::_256 + 1] = { };
+
+    bool passed = true;
+
+    test_istream is1(&sb);
+    is1.get(actual, 6);
+    passed = context.are_equal(actual, "first ", 0x1072b) && passed;
+
+    test_istream is2(std::move(is1));
+    is1.get(actual, 6);
+    passed = context.are_equal(actual, "second", 0x1072c) && passed;
+
+    return passed;
+}
+
+
+bool test_ostream_move(test_context& context) {
+    char actual[abc::size::_256 + 1] = { };
+    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+
+    bool passed = true;
+
+    test_ostream os1(&sb);
+    os1.put("first ");
+    os1.flush();
+    passed = context.are_equal(actual, "first ", 0x1072d) && passed;
+
+    test_ostream os2(std::move(os1));
+    os2.put("second");
+    os2.flush();
+    passed = context.are_equal(actual, "first second", 0x1072e) && passed;
+
+    return passed;
+}
 
