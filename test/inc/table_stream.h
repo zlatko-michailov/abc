@@ -25,24 +25,19 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/log.h"
+#include "../../src/diag/log.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace table {
+bool test_line_debug(test_context& context);
+bool test_line_diag(test_context& context);
+bool test_line_test(test_context& context);
 
-    bool test_line_debug(test_context<abc::test::log>& context);
-    bool test_line_diag(test_context<abc::test::log>& context);
-    bool test_line_test(test_context<abc::test::log>& context);
+bool test_table_move(test_context& context);
+bool test_log_move(test_context& context);
 
-    bool test_table_move(test_context<abc::test::log>& context);
-    bool test_log_move(test_context<abc::test::log>& context);
-
-    bool test_line_move(test_context<abc::test::log>& context);
-    bool test_line_debug_move(test_context<abc::test::log>& context);
-    bool test_line_diag_move(test_context<abc::test::log>& context);
-    bool test_line_test_move(test_context<abc::test::log>& context);
-
-}}}
-
+bool test_line_move(test_context& context);
+bool test_line_debug_move(test_context& context);
+bool test_line_diag_move(test_context& context);
+bool test_line_test_move(test_context& context);
