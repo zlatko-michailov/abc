@@ -185,7 +185,7 @@ namespace abc { namespace test {
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(named_categories<LogPtr>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
+        suite(named_categories<LogPtr>&& categories, const LogPtr& log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief              Constructor. initializer list version.
@@ -194,7 +194,7 @@ namespace abc { namespace test {
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path);
+        suite(std::initializer_list<named_category<LogPtr>> init, const LogPtr& log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief  Executes all test methods of all test categories.

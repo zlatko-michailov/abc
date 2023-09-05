@@ -34,9 +34,9 @@ SOFTWARE.
 namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
-    inline diag_ready<OriginStr, LogPtr>::diag_ready(OriginStr&& origin, LogPtr&& log) noexcept
+    inline diag_ready<OriginStr, LogPtr>::diag_ready(OriginStr&& origin, const LogPtr& log) noexcept
         : _origin(std::move(origin))
-        , _log(std::move(log)) {
+        , _log(log) {
     }
 
 

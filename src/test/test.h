@@ -124,8 +124,8 @@ namespace abc { namespace test {
 
 
     template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(named_categories<LogPtr>&& categories, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
-        : diag_base("abc::test::suite", std::move(log))
+    inline suite<ProcessStr, LogPtr>::suite(named_categories<LogPtr>&& categories, const LogPtr& log, seed_t seed, ProcessStr&& process_path)
+        : diag_base("abc::test::suite", log)
         , categories(std::move(categories))
         , seed(seed)
         , process_path(std::move(process_path)) {
@@ -133,8 +133,8 @@ namespace abc { namespace test {
 
 
     template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(std::initializer_list<named_category<LogPtr>> init, LogPtr&& log, seed_t seed, ProcessStr&& process_path)
-        : diag_base("abc::test::suite", std::move(log))
+    inline suite<ProcessStr, LogPtr>::suite(std::initializer_list<named_category<LogPtr>> init, const LogPtr& log, seed_t seed, ProcessStr&& process_path)
+        : diag_base("abc::test::suite", log)
         , categories(init.begin(), init.end())
         , seed(seed)
         , process_path(std::move(process_path)) {

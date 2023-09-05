@@ -46,7 +46,7 @@ namespace abc { namespace diag {
          * @param origin  Origin string.
          * @param log     Log pointer.
          */
-        diag_ready(OriginStr&& origin, LogPtr&& log) noexcept;
+        diag_ready(OriginStr&& origin, const LogPtr& log) noexcept;
 
         /**
          * @brief Move constructor.
