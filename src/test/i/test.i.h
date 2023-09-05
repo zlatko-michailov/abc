@@ -50,33 +50,25 @@ namespace abc { namespace test {
 
 
     /**
-     * @brief  The `diag_ready` specialization that `suite` creates and passes to `context`.
-     * @tparam LogPtr Pointer to a logging facility.
-     */
-    template <typename LogPtr>
-    using suite_diag = diag::diag_ready<const char*, LogPtr>;
-
-
-    // --------------------------------------------------------------
-
-
-    /**
      * @brief         Temporary accessor passed into each test method to perform verification and logging.
      * @tparam LogPtr Pointer to a logging facility.
      */
     template <typename LogPtr>
-    class context {
+    class context 
+        : protected diag::diag_ready<const char*, LogPtr> {
+
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
          * @brief               Constructor.
          * @param category_name Test category name.
          * @param method_name   Test method name.
-         * @param diag          Reference to `diag::diag_ready`.
+         * @param log           Pointer to a `log_ostream` instance.
          * @param seed          Randomization seed. Used to repeat a previous test run.
          * @param process_path  The path to the test process.
          */
-        context(const char* category_name, const char* method_name, suite_diag<LogPtr>& diag, seed_t seed, const char* process_path);
+        context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path);
 
         /**
          * @brief          Verifies an actual value matches the expected one.
@@ -111,7 +103,6 @@ namespace abc { namespace test {
 
         const char*         category_name;
         const char*         method_name;
-        suite_diag<LogPtr>& diag;
         seed_t              seed;
         const char*         process_path;
         std::string         suborigin;
@@ -167,10 +158,9 @@ namespace abc { namespace test {
      */
     template <typename ProcessStr, typename LogPtr>
     class suite
-        : protected suite_diag<LogPtr> {
+        : protected diag::diag_ready<const char*, LogPtr> {
 
-    protected:
-        using diag_base = suite_diag<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
