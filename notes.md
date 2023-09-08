@@ -4,9 +4,7 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- socket:
-  - Move to subnamespace `net`.
-
+- Templatize `std::streambuf*`. Pass __by copy__.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.
