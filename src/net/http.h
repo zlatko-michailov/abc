@@ -36,12 +36,12 @@ SOFTWARE.
 namespace abc { namespace net {
 
     template <typename LogPtr>
-    inline http_state<LogPtr>::http_state(http::item_t next, const LogPtr& log) noexcept
-        : diag_base("abc::net::http_state", log)
+    inline http_state<LogPtr>::http_state(const char* origin, http::item_t next, const LogPtr& log) noexcept
+        : diag_base(origin, log)
         , _next(next) {
 
         constexpr const char* suborigin = "http_state()";
-        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: origin='%s' next=%u", origin, (unsigned)next);
 
         diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
@@ -79,12 +79,12 @@ namespace abc { namespace net {
 
 
     template <typename LogPtr>
-    inline http_istream<LogPtr>::http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log)
+    inline http_istream<LogPtr>::http_istream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log)
         : base(sb)
-        , state(next, log) {
+        , state(origin, next, log) {
 
         constexpr const char* suborigin = "http_istream()";
-        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
 
         diag_base::expect(suborigin, sb != nullptr, __TAG__, "sb");
 
@@ -410,112 +410,58 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_ostream<Log>::http_ostream(std::streambuf* sb, http::item_t next, Log* log)
+    template <typename LogPtr>
+    inline http_ostream<LogPtr>::http_ostream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log)
         : base(sb)
-        , state(next, log) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10047, "http_ostream::http_ostream()");
-        }
+        , state(origin, next, log) {
+
+        constexpr const char* suborigin = "http_ostream()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline http_ostream<Log>::http_ostream(http_ostream&& other)
+    template <typename LogPtr>
+    inline http_ostream<LogPtr>::http_ostream(http_ostream&& other)
         : base(std::move(other))
         , state(std::move(other)) {
     }
 
 
-    template <typename Log>
-    inline void http_ostream<Log>::set_pstate(http::item_t next) {
-        base::flush();
-        state::reset(next);
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::put_headers(const http_headers& headers) {
+        constexpr const char* suborigin = "put_headers()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        for (const http_headers::value_type& header : headers) {
+            put_header_name(header.first);
+            put_header_value(header.second);
+        }
+
+        end_headers();
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_protocol(const char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10048, "http_ostream::put_protocol() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::put_header_name(const char* header_name, std::size_t header_name_len) {
+        constexpr const char* suborigin = "put_header_name()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: header_name='%s'", header_name);
 
-        state::assert_next(http::item::protocol);
-
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
-        }
-
-        std::size_t gcount = 0;    
-
-        if (size < 5 || !ascii::are_equal_i_n(buffer, "HTTP/", 5)) {
-            base::set_bad();
-        }
-        else {
-            gcount = put_bytes("HTTP/", 5); //// put_any_chars()
-        }
-
-        if (base::is_good() && gcount < size) {
-            std::size_t gcount_local = put_digits(buffer + gcount, size - gcount);
-            if (gcount_local == 0) {
-                base::set_bad();
-            }
-            else {
-                gcount += gcount_local;
-            }
-        }
-
-        if (base::is_good() && gcount < size) {
-            if (buffer[gcount] != '.') {
-                base::set_bad();
-            }
-            else {
-                base::put('.');
-                gcount++;
-            }
-        }
-
-        if (base::is_good() && gcount < size) {
-            std::size_t gcount_local = put_digits(buffer + gcount, size - gcount);
-            if (gcount_local == 0) {
-                base::set_bad();
-            }
-            else {
-                gcount += gcount_local;
-            }
-        }
-
-        if (base::is_good() && gcount < size) {
-            base::set_bad();
-        }
-
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10049, "http_ostream::put_protocol() <<< buffer='%s', size=%zu, gcount=%zu", buffer, size, gcount);
-        }
-
-        return gcount;
-    }
-
-
-    template <typename Log>
-    inline void http_ostream<Log>::put_header_name(const char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1004a, "http_ostream::put_header_name() >>>");
-        }
+        diag_base::expect(suborigin, header_name != nullptr, __TAG__, "header_name != nullptr");
 
         state::assert_next(http::item::header_name);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
+        if (header_name_len == size::strlen) {
+            header_name_len = std::strlen(header_name);
         }
 
-        std::size_t pcount = put_token(buffer, size);
+        std::size_t pcount = put_token(header_name, header_name_len);
 
         if (base::is_good()) {
-            if (pcount < size) {
+            if (pcount < header_name_len) {
                 base::set_bad();
             }
         }
@@ -527,62 +473,56 @@ namespace abc { namespace net {
 
         set_pstate(http::item::header_value);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x1004b, "http_ostream::put_header_name() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_ostream<Log>::put_header_value(const char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1004c, "http_ostream::put_header_value() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::put_header_value(const char* header_value, std::size_t header_value_len) {
+        constexpr const char* suborigin = "put_header_value()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: header_value='%s'", header_value);
+
+        diag_base::expect(suborigin, header_value != nullptr, __TAG__, "header_value != nullptr");
 
         state::assert_next(http::item::header_value);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
+        if (header_value_len == size::strlen) {
+            header_value_len = std::strlen(header_value);
         }
 
         std::size_t pcount = 0;
         do {
-            std::size_t sp = skip_spaces_in_header_value(buffer + pcount, size - pcount);
+            std::size_t sp = count_leading_spaces_in_header_value(header_value + pcount, header_value_len - pcount);
 
-            if (pcount > 0 && sp > 0 && pcount + sp < size) {
+            if (pcount > 0 && sp > 0 && pcount + sp < header_value_len) {
                 put_space();
             }
 
             pcount += sp;
 
-            if (pcount < size) {
-                if (ascii::is_abcprint(buffer[pcount])) {
-                    pcount += put_prints(buffer + pcount, size - pcount);
+            if (pcount < header_value_len) {
+                if (ascii::is_abcprint(header_value[pcount])) {
+                    pcount += put_prints(header_value + pcount, header_value_len - pcount);
                 }
                 else {
                     base::set_bad();
                 }
             }
         }
-        while (base::is_good() && pcount < size);
+        while (base::is_good() && pcount < header_value_len);
 
         put_crlf();
 
         set_pstate(http::item::header_name);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x1004d, "http_ostream::put_header_value() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: pcount=%zu", pcount);
     }
 
 
-    template <typename Log>
-    inline void http_ostream<Log>::end_headers() {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1004e, "http_ostream::end_headers() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::end_headers() {
+        constexpr const char* suborigin = "put_header_value()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
         state::assert_next(http::item::header_name);
 
@@ -590,103 +530,161 @@ namespace abc { namespace net {
 
         set_pstate(http::item::body);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1004f, "http_ostream::end_headers() <<<");
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_ostream<Log>::put_body(const char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10050, "http_ostream::put_body() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::put_body(const char* body, std::size_t body_len) {
+        constexpr const char* suborigin = "put_body()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        diag_base::expect(suborigin, body != nullptr, __TAG__, "body != nullptr");
 
         state::assert_next(http::item::body);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
+        if (body_len == size::strlen) {
+            body_len = std::strlen(body);
         }
 
-        std::size_t pcount = put_bytes(buffer, size); //// put_any_chars()
+        std::size_t pcount = put_any_chars(body, body_len);
 
         set_pstate(http::item::body);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10051, "http_ostream::put_body() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: pcount=%zu", pcount);
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_crlf() {
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+        constexpr const char* suborigin = "put_protocol()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
+
+        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+
+        state::assert_next(http::item::protocol);
+
+        if (protocol_len == size::strlen) {
+            protocol_len = std::strlen(protocol);
+        }
+
+        std::size_t pcount = 0;    
+
+        if (protocol_len < 5 || !ascii::are_equal_i_n(protocol, "HTTP/", 5)) {
+            base::set_bad();
+        }
+        else {
+            pcount = put_any_chars("HTTP/", 5);
+        }
+
+        if (base::is_good() && pcount < protocol_len) {
+            std::size_t pcount_local = put_digits(protocol + pcount, size - pcount);
+            if (pcount_local == 0) {
+                base::set_bad();
+            }
+            else {
+                pcount += pcount_local;
+            }
+        }
+
+        if (base::is_good() && pcount < protocol_len) {
+            if (protocol[pcount] != '.') {
+                base::set_bad();
+            }
+            else {
+                base::put('.');
+                pcount++;
+            }
+        }
+
+        if (base::is_good() && pcount < protocol_len) {
+            std::size_t pcount_local = put_digits(protocol + pcount, size - pcount);
+            if (pcount_local == 0) {
+                base::set_bad();
+            }
+            else {
+                pcount += pcount_local;
+            }
+        }
+
+        if (base::is_good() && pcount < protocol_len) {
+            base::set_bad();
+        }
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+
+        return pcount;
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_token(const char* token, std::size_t token_len) {
+        return put_chars(ascii::http::is_token, token, token_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_prints(const char* prints, std::size_t prints_len) {
+        return put_chars(ascii::is_abcprint, prints, prints_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_prints_and_spaces(const char* prints_and_spaces, std::size_t prints_and_spaces_len) {
+        return put_chars(ascii::is_abcprint_or_space, prints_and_spaces, prints_and_spaces_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_alphas(const char* alphas, std::size_t alphas_len) {
+        return put_chars(ascii::is_alpha, alphas, alphas_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_digits(const char* digits, std::size_t digits_len) {
+        return put_chars(ascii::is_digit, digits, digits_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_crlf() {
         return put_char('\r') + put_char('\n');
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_space() {
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_space() {
         return put_char(' ');
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_token(const char* buffer, std::size_t size) {
-        return put_chars(ascii::http::is_token, buffer, size);
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_prints(const char* buffer, std::size_t size) {
-        return put_chars(ascii::is_abcprint, buffer, size);
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_prints_and_spaces(const char* buffer, std::size_t size) {
-        return put_chars(ascii::is_abcprint_or_space, buffer, size);
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_alphas(const char* buffer, std::size_t size) {
-        return put_chars(ascii::is_alpha, buffer, size);
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_digits(const char* buffer, std::size_t size) {
-        return put_chars(ascii::is_digit, buffer, size);
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_bytes(const char* buffer, std::size_t size) {
-        std::size_t gcount = 0;
-
-        while (base::is_good() && gcount < size) {
-            base::put(buffer[gcount++]);
-        }
-
-        return gcount;
-    }
-
-
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_chars(ascii::predicate_t&& predicate, const char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_any_chars(const char* any_chars, std::size_t any_chars_len) {
         std::size_t pcount = 0;
 
-        while (base::is_good() && pcount < size && predicate(buffer[pcount])) {
-            base::put(buffer[pcount++]);
+        while (base::is_good() && pcount < any_chars_len) {
+            base::put(any_chars[pcount++]);
         }
 
         return pcount;
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::put_char(char ch) {
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len) {
+        std::size_t pcount = 0;
+
+        while (base::is_good() && pcount < chars_len && predicate(chars[pcount])) {
+            base::put(chars[pcount++]);
+        }
+
+        return pcount;
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::put_char(char ch) {
         if (base::is_good()) {
             base::put(ch);
         }
@@ -695,15 +693,15 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::skip_spaces_in_header_value(const char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::count_leading_spaces_in_header_value(const char* header_value, std::size_t header_value_len) {
         std::size_t sp = 0;
 
-        while (sp < size) {
-            if (ascii::is_space(buffer[sp])) {
+        while (sp < header_value_len) {
+            if (ascii::is_space(header_value[sp])) {
                 sp++;
             }
-            else if (sp + 3 < size && buffer[sp] == '\r' && buffer[sp + 1] == '\n' && ascii::is_space(buffer[sp + 2])) {
+            else if (sp + 3 < size && header_value[sp] == '\r' && header_value[sp + 1] == '\n' && ascii::is_space(header_value[sp + 2])) {
                 sp += 3;
             }
             else {
@@ -715,415 +713,449 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Log>
-    inline std::size_t http_ostream<Log>::skip_spaces(const char* buffer, std::size_t size) {
+    //// TODO:
+    /*template <typename LogPtr>
+    inline std::size_t http_ostream<LogPtr>::count_leading_spaces(const char* content, std::size_t content_len) {
         std::size_t sp = 0;
 
-        while (sp < size && ascii::is_space(buffer[sp])) {
+        while (sp < content_len && ascii::is_space(content[sp])) {
             sp++;
         }
 
         return sp;
+    }*/
+
+
+    template <typename LogPtr>
+    inline void http_ostream<LogPtr>::set_pstate(http::item_t next) {
+        constexpr const char* suborigin = "set_pstate()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
+
+        base::flush();
+        state::reset(next);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    // --------------------------------------------------------------
+   // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_request_istream<Log>::http_request_istream(std::streambuf* sb, Log* log)
-        : base(sb, http::item::method, log) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10052, "http_request_istream::http_request_istream()");
-        }
+    template <typename LogPtr>
+    inline http_request_istream<LogPtr>::http_request_istream(std::streambuf* sb, const LogPtr& log)
+        : base("abc:net::http_request_istream", sb, http::item::method, log) {
+
+        constexpr const char* suborigin = "http_request_istream()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline http_request_istream<Log>::http_request_istream(http_request_istream&& other)
+    template <typename LogPtr>
+    inline http_request_istream<LogPtr>::http_request_istream(http_request_istream&& other)
         : base(std::move(other)) {
     }
 
 
-    template <typename Log>
-    inline void http_request_istream<Log>::reset() {
+    template <typename LogPtr>
+    inline void http_request_istream<LogPtr>::reset() {
+        constexpr const char* suborigin = "reset()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
         base::reset(http::item::method);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_request_istream<Log>::get_method(char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10053, "http_request_istream::get_method() >>>");
-        }
+    template <typename LogPtr>
+    inline std::string http_request_istream<LogPtr>::get_method() {
+        constexpr const char* suborigin = "get_method()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
         base::assert_next(http::item::method);
 
-        std::size_t gcount = base::get_token(buffer, size);
-
+        std::string method = base::get_token();
         base::skip_spaces();
 
-        base::set_gstate(gcount, http::item::resource);
+        base::set_gstate(method.length(), http::item::resource);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10054, "http_request_istream::get_method() <<< method='%s', gcount=%zu", buffer, gcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, method='%s'", method.length(), method.c_str());
+
+        return std::move(method);
     }
 
 
-    template <typename Log>
-    inline void http_request_istream<Log>::get_resource(char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10055, "http_request_istream::get_resource() >>>");
-        }
+    template <typename LogPtr>
+    inline http_resource http_request_istream<LogPtr>::get_resource() {
+        constexpr const char* suborigin = "get_resource()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
         base::assert_next(http::item::resource);
 
-        // The resource is terminated by an extra '\0', so it could be split.
-        std::size_t gcount = base::get_prints(buffer, size - 1);
-        buffer[gcount + 1] = '\0';
-
+        std::string raw_resource = base::get_prints();
         base::skip_spaces();
 
-        base::set_gstate(gcount, http::item::protocol);
+        base::set_gstate(raw_resource.length(), http::item::protocol);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10056, "http_request_istream::get_resource() <<< resource='%s', gcount=%zu", buffer, gcount);
-        }
+        http_resource resource = split_resource(raw_resource);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, raw_resource='%s'", raw_resource.length(), raw_resource.c_str());
+
+        return std::move(resource);
     }
 
 
-    template <typename Log>
-    inline void http_request_istream<Log>::get_protocol(char* buffer, std::size_t size) {
-        std::size_t gcount = http_istream<Log>::get_protocol(buffer, size);
+    template <typename LogPtr>
+    inline std::string http_request_istream<LogPtr>::get_protocol() {
+        constexpr const char* suborigin = "get_protocol()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
+        std::string protocol = base::get_protocol();
         base::skip_crlf();
 
-        base::set_gstate(gcount, http::item::header_name);
+        base::set_gstate(protocol.length(), http::item::header_name);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
+
+        return std::move(protocol);
     }
 
 
-    template <typename Log>
-    inline void http_request_istream<Log>::split_resource(char* buffer, std::size_t size) {
-        const char* const end = buffer + size;
- 
-        // path?param1=...&param2=...
-        char* param = std::strchr(buffer, '?');
+    template <typename LogPtr>
+    inline http_resource http_request_istream<LogPtr>::split_resource(const std::string& raw_resource) {
+        constexpr const char* suborigin = "split_resource()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: raw_resource='%s'", raw_resource.c_str());
 
-        while (param < end && param != nullptr) {
-            *param++ = '\0';
+        // Format: path?param1=...&param2=...
 
-            if (param < end && *param != '\0') {
-                param = std::strchr(param, '&');
-            }
-        }
-    }
+        http_resource resource;
 
+        // Extract the path.
+        std::string::size_type end_pos = raw_resource.find('?');
+        resource.path = raw_resource.substr(0, end_pos);
 
-    template <typename Log>
-    inline const char* http_request_istream<Log>::get_resource_parameter(const char* buffer, std::size_t size, const char* parameter_name) {
-        const char* const end = buffer + size;
-        const std::size_t parameter_name_len = std::strlen(parameter_name);
- 
-        // path\0param1=...\0param2=...\0\0
-        const char* param = buffer + std::strlen(buffer) + 1;
+        while (end_pos != std::string::npos) {
+            std::string::size_type begin_pos = ++end_pos;
+            end_pos = raw_resource.find_first_of('=&', begin_pos);
 
-        while (param < end && *param != '\0') {
-            if (std::strncmp(param, parameter_name, parameter_name_len) == 0 && param[parameter_name_len] == '=') {
-                return param + parameter_name_len + 1;
-            }
+            if (end_pos != std::string::npos) {
+                std::string param_name = raw_resource.substr(begin_pos, end_pos);
 
-            if (param < end && *param != '\0') {
-                param += std::strlen(param) + 1;
+                std::string param_value;
+                if (raw_resource[end_pos] == '=') {
+                    begin_pos = ++end_pos;
+                    end_pos = raw_resource.find('&', begin_pos);
+                    param_value = raw_resource.substr(begin_pos, end_pos);
+                }
+
+                resource.parameters[std::move(param_name)] = std::move(param_value);
             }
         }
 
-        return nullptr;
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
+
+        return std::move(resource);
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_request_ostream<Log>::http_request_ostream(std::streambuf* sb, Log* log)
-        : base(sb, http::item::method, log) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10057, "http_request_ostream::http_request_ostream()");
-        }
+    template <typename LogPtr>
+    inline http_request_ostream<LogPtr>::http_request_ostream(std::streambuf* sb, const LogPtr& log)
+        : base("abc:net::http_request_ostream", sb, http::item::method, log) {
+
+        constexpr const char* suborigin = "http_request_ostream()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline http_request_ostream<Log>::http_request_ostream(http_request_ostream&& other)
+    template <typename LogPtr>
+    inline http_request_ostream<LogPtr>::http_request_ostream(http_request_ostream&& other)
         : base(std::move(other)) {
     }
 
 
-    template <typename Log>
-    inline void http_request_ostream<Log>::reset() {
+    template <typename LogPtr>
+    inline void http_request_ostream<LogPtr>::reset() {
+        constexpr const char* suborigin = "reset()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
         base::reset(http::item::method);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_request_ostream<Log>::put_method(const char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10058, "http_ostream::put_method() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_request_ostream<LogPtr>::put_method(const char* method, std::size_t method_len) {
+        constexpr const char* suborigin = "put_method()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: method='%s'", method);
+
+        diag_base::expect(suborigin, method != nullptr, __TAG__, "method != nullptr");
 
         base::assert_next(http::item::method);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
+        if (method_len == size::strlen) {
+            method_len = std::strlen(method);
         }
 
-        std::size_t pcount = base::put_token(buffer, size);
-
+        std::size_t pcount = base::put_token(method, method_len);
         base::put_space();
 
         base::set_pstate(http::item::resource);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10059, "http_ostream::put_method() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_request_ostream<Log>::put_resource(const char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1005a, "http_ostream::put_resource() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_request_ostream<LogPtr>::put_resource(const char* resource, std::size_t resource_len) {
+        constexpr const char* suborigin = "put_method()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: resource='%s'", resource);
+
+        diag_base::expect(suborigin, resource != nullptr, __TAG__, "resource != nullptr");
 
         base::assert_next(http::item::resource);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
+        if (resource_len == size::strlen) {
+            resource_len = std::strlen(resource);
         }
 
-        std::size_t pcount = base::put_prints(buffer, size);
-
+        std::size_t pcount = base::put_prints(resource, resource_len);
         base::put_space();
 
         base::set_pstate(http::item::protocol);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x1005b, "http_ostream::put_resource() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_request_ostream<Log>::put_protocol(const char* buffer, std::size_t size) {
-        http_ostream<Log>::put_protocol(buffer, size);
+    template <typename LogPtr>
+    inline void http_request_ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+        constexpr const char* suborigin = "put_protocol()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
 
+        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+
+        http_ostream<Log>::put_protocol(protocol, protocol_len);
         base::put_crlf();
 
         base::set_pstate(http::item::header_name);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_response_istream<Log>::http_response_istream(std::streambuf* sb, Log* log)
-        : base(sb, http::item::protocol, log) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1005c, "http_response_istream::http_response_istream()");
-        }
+    template <typename LogPtr>
+    inline http_response_istream<LogPtr>::http_response_istream(std::streambuf* sb, const LogPtr& log)
+        : base("abc:net::http_response_istream", sb, http::item::protocol, log) {
+
+        constexpr const char* suborigin = "http_response_istream()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline http_response_istream<Log>::http_response_istream(http_response_istream&& other)
+    template <typename LogPtr>
+    inline http_response_istream<LogPtr>::http_response_istream(http_response_istream&& other)
         : base(std::move(other)) {
     }
 
 
-    template <typename Log>
-    inline void http_response_istream<Log>::reset() {
+    template <typename LogPtr>
+    inline void http_response_istream<LogPtr>::reset() {
+        constexpr const char* suborigin = "reset()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
         base::reset(http::item::protocol);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_response_istream<Log>::get_protocol(char* buffer, std::size_t size) {
-        std::size_t gcount = http_istream<Log>::get_protocol(buffer, size);
+    template <typename LogPtr>
+    inline std::string http_response_istream<LogPtr>::get_protocol() {
+        constexpr const char* suborigin = "get_protocol()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
-        base::set_gstate(gcount, http::item::status_code);
+        std::string protocol = base::get_protocol();
+
+        base::set_gstate(protocol.length(), http::item::status_code);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
+
+        return std::move(protocol);
     }
 
-    template <typename Log>
-    inline void http_response_istream<Log>::get_status_code(char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1005d, "http_response_istream::get_status_code() >>>");
-        }
+    template <typename LogPtr>
+    inline http_status_code http_response_istream<LogPtr>::get_status_code() {
+        constexpr const char* suborigin = "get_status_code()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
         base::assert_next(http::item::status_code);
 
-        std::size_t gcount = base::get_digits(buffer, size);
-
+        std::string digits = base::get_digits();
         base::skip_spaces();
 
-        base::set_gstate(gcount, http::item::reason_phrase);
+        http_status_code status_code = static_cast<http_status_code>(std::stoul(digits));
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x1005e, "http_response_istream::get_status_code() <<< status_code='%s', gcount=%zu", buffer, gcount);
-        }
+        base::set_gstate(digits.length, http::item::reason_phrase);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, status_code='%u'", digits.length(), status_code);
+
+        return status_code;
     }
 
 
-    template <typename Log>
-    inline void http_response_istream<Log>::get_reason_phrase(char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x1005f, "http_response_istream::get_reason_phrase() >>>");
-        }
+    template <typename LogPtr>
+    inline std::string http_response_istream<LogPtr>::get_reason_phrase() {
+        constexpr const char* suborigin = "get_reason_phrase()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
         base::assert_next(http::item::reason_phrase);
 
-        std::size_t gcount = base::get_prints_and_spaces(buffer, size);
-
+        std::string reason_phrase = base::get_prints_and_spaces(buffer, size);
         base::skip_spaces();
         base::skip_crlf();
 
-        base::set_gstate(gcount, http::item::header_name);
+        base::set_gstate(reason_phrase.length(), http::item::header_name);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10060, "http_response_istream::get_reson_phrase() <<< reason_phrase='%s', gcount=%zu", buffer, gcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: gcount=%zu, reason_phrase='%s'", reason_phrase.length(), reason_phrase.c_str());
+
+        return std::move(reason_phrase);
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_response_ostream<Log>::http_response_ostream(std::streambuf* sb, Log* log)
-        : base(sb, http::item::protocol, log) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10061, "http_response_ostream::http_response_ostream()");
-        }
+    template <typename LogPtr>
+    inline http_response_ostream<LogPtr>::http_response_ostream(std::streambuf* sb, const LogPtr& log)
+        : base("abc:net::http_response_ostream", sb, http::item::protocol, log) {
+
+        constexpr const char* suborigin = "http_response_ostream()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline http_response_ostream<Log>::http_response_ostream(http_response_ostream&& other)
+    template <typename LogPtr>
+    inline http_response_ostream<LogPtr>::http_response_ostream(http_response_ostream&& other)
         : base(std::move(other)) {
     }
 
 
-    template <typename Log>
-    inline void http_response_ostream<Log>::reset() {
+    template <typename LogPtr>
+    inline void http_response_ostream<LogPtr>::reset() {
+        constexpr const char* suborigin = "reset()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
         base::reset(http::item::protocol);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_response_ostream<Log>::put_protocol(const char* buffer, std::size_t size) {
-        http_ostream<Log>::put_protocol(buffer, size);
+    template <typename LogPtr>
+    inline void http_response_ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+        constexpr const char* suborigin = "put_protocol()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: protocol='%s'", protocol.c_str());
 
+        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+
+        base::put_protocol(protocol, protocol_len);
         base::put_space();
 
         base::set_pstate(http::item::status_code);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_response_ostream<Log>::put_status_code(const char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10062, "http_response_ostream::put_status_code() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_response_ostream<LogPtr>::put_status_code(http_status_code status_code) {
+        constexpr const char* suborigin = "put_status_code()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: status_code='%u'", (unsigned)status_code);
 
         base::assert_next(http::item::status_code);
 
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
-        }
+        char digits[12];
+        std::snprintf(digits, sizeof(digits) * sizeof(char), "%u", (unsigned)status_code);
 
-        std::size_t pcount = base::put_digits(buffer, size);
-
+        std::size_t pcount = base::put_digits(digits, std::strlen(digits));
         base::put_space();
 
         base::set_pstate(http::item::reason_phrase);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10063, "http_response_ostream::put_status_code() <<< buffer='%s', size=%zu, pcount=%zu", buffer, size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline void http_response_ostream<Log>::put_reason_phrase(const char* buffer, std::size_t size) {
-        Log* log_local = base::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::debug, 0x10064, "http_response_ostream::put_reason_phrase() >>>");
-        }
+    template <typename LogPtr>
+    inline void http_response_ostream<LogPtr>::put_reason_phrase(const char* reason_phrase, std::size_t reason_phrase_len) {
+        constexpr const char* suborigin = "put_reason_phrase()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: reason_phrase='%s'", reason_phrase.c_str());
 
         base::assert_next(http::item::reason_phrase);
 
         std::size_t pcount = 0;
-        if (buffer != nullptr) {
-            if (size == size::strlen) {
-                size = std::strlen(buffer);
+        if (reason_phrase != nullptr) {
+            if (reason_phrase_len == size::strlen) {
+                reason_phrase_len = std::strlen(reason_phrase);
             }
 
-            pcount = base::put_prints_and_spaces(buffer, size);
+            pcount = base::put_prints_and_spaces(reason_phrase, reason_phrase_len);
         }
 
         base::put_crlf();
 
         base::set_pstate(http::item::header_name);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::http, severity::abc::optional, 0x10065, "http_response_ostream::put_reason_phrase() <<< buffer='%s', size=%zu, pcount=%zu", buffer != nullptr ? buffer : "<nullptr>", size, pcount);
-        }
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_client_stream<Log>::http_client_stream(std::streambuf* sb, Log* log)
-        : http_request_ostream<Log>(sb, log)
-        , http_response_istream<Log>(sb, log) {
+    template <typename LogPtr>
+    inline http_client_stream<LogPtr>::http_client_stream(std::streambuf* sb, const LogPtr& log)
+        : http_request_ostream<LogPtr>(sb, log)
+        , http_response_istream<LogPtr>(sb, log) {
     }
 
 
-    template <typename Log>
-    inline http_client_stream<Log>::http_client_stream(http_client_stream&& other)
-        : http_request_ostream<Log>(std::move(other))
-        , http_response_istream<Log>(std::move(other)) {
+    template <typename LogPtr>
+    inline http_client_stream<LogPtr>::http_client_stream(http_client_stream&& other)
+        : http_request_ostream<LogPtr>(std::move(other))
+        , http_response_istream<LogPtr>(std::move(other)) {
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename Log>
-    inline http_server_stream<Log>::http_server_stream(std::streambuf* sb, Log* log)
-        : http_request_istream<Log>(sb, log)
-        , http_response_ostream<Log>(sb, log) {
+    template <typename LogPtr>
+    inline http_server_stream<LogPtr>::http_server_stream(std::streambuf* sb, const LogPtr& log)
+        : http_request_istream<LogPtr>(sb, log)
+        , http_response_ostream<LogPtr>(sb, log) {
     }
 
 
-    template <typename Log>
-    inline http_server_stream<Log>::http_server_stream(http_server_stream&& other)
-        : http_request_istream<Log>(std::move(other))
-        , http_response_ostream<Log>(std::move(other)) {
+    template <typename LogPtr>
+    inline http_server_stream<LogPtr>::http_server_stream(http_server_stream&& other)
+        : http_request_istream<LogPtr>(std::move(other))
+        , http_response_ostream<LogPtr>(std::move(other)) {
     }
 
 } }

@@ -106,6 +106,11 @@ namespace abc {
         }
 
 
+        inline bool is_any(char ch) noexcept {
+            return true;
+        }
+
+
         inline std::uint8_t hex(char ch) noexcept {
             if (is_digit(ch)) {
                 return ch - '0';

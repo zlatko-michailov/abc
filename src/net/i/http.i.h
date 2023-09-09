@@ -92,11 +92,12 @@ namespace abc { namespace net {
 
     protected:
         /**
-         * @brief      Constructor.
-         * @param next Next item.
-         * @param log  `LogPtr` pointer. May be `nullptr`.
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param next   Next item.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_state(http::item_t next, const LogPtr& log = nullptr) noexcept;
+        http_state(const char* origin, http::item_t next, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
@@ -153,12 +154,13 @@ namespace abc { namespace net {
 
     protected:
         /**
-         * @brief      Constructor.
-         * @param sb   `std::streambuf` to read from.
-         * @param next Next expected item.
-         * @param log  `LogPtr` pointer. May be `nullptr`.
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param next   Next expected item.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_istream(std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        http_istream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -305,12 +307,13 @@ namespace abc { namespace net {
 
     protected:
         /**
-         * @brief      Constructor.
-         * @param sb   `std::streambuf` to write to.
-         * @param next Next expected item.
-         * @param log  `LogPtr` pointer. May be `nullptr`.
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param next   Next expected item.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_ostream(std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        http_ostream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -327,7 +330,7 @@ namespace abc { namespace net {
          * @brief         Writes headers and headers end to the http stream.
          * @param headers Headers.
          */
-        void put_headers(http_headers&& headers);
+        void put_headers(const http_headers& headers);
 
         /**
          * @brief                 Writes a header name to the http stream.
@@ -356,12 +359,6 @@ namespace abc { namespace net {
         void put_body(const char* body, std::size_t body_len = size::strlen);
 
     protected:
-        /**
-         * @brief      Sets the next expected item for the stream.
-         * @param next The next expected item.
-         */
-        void set_pstate(http::item_t next);
-
         /**
          * @brief              Writes a protocol to the http stream.
          * @param protocol     Protocol.
@@ -425,10 +422,10 @@ namespace abc { namespace net {
         /**
          * @brief               Writes a sequence of any chars to the http stream.
          * @param any_chars     Sequence of chars.
-         * @param any_chars_len Sequence length. Optional.
+         * @param any_chars_len Sequence length.
          * @return              The count of chars written. 
          */
-        std::size_t put_any_chars(const char* any_chars, std::size_t any_chars_len = size::strlen);
+        std::size_t put_any_chars(const char* any_chars, std::size_t any_chars_len);
 
         /**
          * @brief           Writes a sequence of chars that match a predicate to the http stream.
@@ -452,7 +449,7 @@ namespace abc { namespace net {
          * @param header_value_len Header value length. Optional.
          * @return                 The count of chars. 
          */
-        std::size_t count_spaces_in_header_value(const char* header_value, std::size_t header_value_len = size::strlen);
+        std::size_t count_leading_spaces_in_header_value(const char* header_value, std::size_t header_value_len = size::strlen);
 
         /**
          * @brief             Counts the leading spaces in a given content. Does not write to the http stream.
@@ -460,7 +457,13 @@ namespace abc { namespace net {
          * @param content_len Content length. Optional.
          * @return            The count of chars. 
          */
-        std::size_t count_spaces(const char* content, std::size_t content_len = size::strlen);
+        //// TODO: std::size_t count_leading_spaces(const char* content, std::size_t content_len = size::strlen);
+
+        /**
+         * @brief      Sets the next expected item for the stream.
+         * @param next The next expected item.
+         */
+        void set_pstate(http::item_t next);
     };
 
 
@@ -520,15 +523,12 @@ namespace abc { namespace net {
          */
         std::string get_protocol();
 
-#if 0 //// Remove or make private/protected
-    public:
+    protected:
         /**
-         * @brief              Splits an http resource.
-         * @param resource     Resource.
-         * @param resource_len Resource length. Optional.
+         * @brief              Splits a raw http resource.
+         * @param raw_resource Resource.
          */
-        static http_resource split_resource(char* resource, std::size_t resource_len = size::strlen);
-#endif ////
+        http_resource split_resource(const std::string& raw_resource);
     };
 
 
