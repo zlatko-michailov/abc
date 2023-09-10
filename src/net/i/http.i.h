@@ -86,9 +86,9 @@ namespace abc { namespace net {
      */
     template <typename LogPtr = std::nullptr_t>
     class http_state
-        : protected diag_ready<const char*, LogPtr> {
+        : protected diag::diag_ready<const char*, LogPtr> {
 
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -150,7 +150,7 @@ namespace abc { namespace net {
 
         using base      = istream;
         using state     = http_state<LogPtr>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -172,13 +172,7 @@ namespace abc { namespace net {
          */
         http_istream(const http_istream& other) = delete;
 
-    protected:
-        /**
-         * @brief  Reads the protocol.
-         * @return The protocol.
-         */
-        std::string get_protocol();
-
+    public:
         /**
          * @brief  Reads headers from the http stream.
          * @return The headers.
@@ -203,6 +197,14 @@ namespace abc { namespace net {
          * @return        The chunk. Empty when there is no more to read.
          */
         std::string get_body(std::size_t max_len);
+
+
+    protected:
+        /**
+         * @brief  Reads the protocol.
+         * @return The protocol.
+         */
+        std::string get_protocol();
 
         /**
          * @brief  Reads an http token.
@@ -303,7 +305,7 @@ namespace abc { namespace net {
 
         using base      = ostream;
         using state     = http_state<LogPtr>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -479,7 +481,7 @@ namespace abc { namespace net {
         : public http_istream<LogPtr> {
 
         using base      = http_istream<LogPtr>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -544,7 +546,7 @@ namespace abc { namespace net {
         : public http_ostream<LogPtr> {
 
         using base      = http_ostream<LogPtr>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -604,8 +606,8 @@ namespace abc { namespace net {
     class http_response_istream
         : public http_istream<LogPtr> {
 
-        using base      = http_istream<Log>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using base      = http_istream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -660,7 +662,7 @@ namespace abc { namespace net {
         : public http_ostream<LogPtr> {
 
         using base      = http_ostream<LogPtr>;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**

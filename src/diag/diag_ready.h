@@ -87,7 +87,7 @@ namespace abc { namespace diag {
         va_list vlist;
         va_start(vlist, format);
 
-        throw_exceptionv(suborigin, tag, format, vlist);
+        throw_exceptionv<Exception>(suborigin, tag, format, vlist);
 
         va_end(vlist);
     }

@@ -25,39 +25,33 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/http.h"
+#include "../../src/net/http.h"
 
 #include "test.h"
-#include "stream.h"
 
 
-namespace abc { namespace test { namespace http {
+bool test_http_request_istream_extraspaces(test_context& context);
+bool test_http_request_istream_bodytext(test_context& context);
+bool test_http_request_istream_bodybinary(test_context& context);
+bool test_http_request_istream_realworld_01(test_context& context);
+bool test_http_request_istream_resource_01(test_context& context);
+bool test_http_request_istream_resource_02(test_context& context);
+bool test_http_request_istream_resource_03(test_context& context);
+bool test_http_request_istream_resource_04(test_context& context);
 
-	bool test_http_request_istream_extraspaces(test_context<abc::test::log>& context);
-	bool test_http_request_istream_bodytext(test_context<abc::test::log>& context);
-	bool test_http_request_istream_bodybinary(test_context<abc::test::log>& context);
-	bool test_http_request_istream_realworld_01(test_context<abc::test::log>& context);
-	bool test_http_request_istream_resource_01(test_context<abc::test::log>& context);
-	bool test_http_request_istream_resource_02(test_context<abc::test::log>& context);
-	bool test_http_request_istream_resource_03(test_context<abc::test::log>& context);
-	bool test_http_request_istream_resource_04(test_context<abc::test::log>& context);
+bool test_http_request_ostream_bodytext(test_context& context);
+bool test_http_request_ostream_bodybinary(test_context& context);
 
-	bool test_http_request_ostream_bodytext(test_context<abc::test::log>& context);
-	bool test_http_request_ostream_bodybinary(test_context<abc::test::log>& context);
+bool test_http_response_istream_extraspaces(test_context& context);
+bool test_http_response_istream_realworld_01(test_context& context);
+bool test_http_response_istream_realworld_02(test_context& context);
 
-	bool test_http_response_istream_extraspaces(test_context<abc::test::log>& context);
-	bool test_http_response_istream_realworld_01(test_context<abc::test::log>& context);
-	bool test_http_response_istream_realworld_02(test_context<abc::test::log>& context);
+bool test_http_response_ostream_bodytext(test_context& context);
+bool test_http_response_ostream_bodybinary(test_context& context);
 
-	bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context);
-	bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context);
-
-	bool test_http_request_istream_move(test_context<abc::test::log>& context);
-	bool test_http_request_ostream_move(test_context<abc::test::log>& context);
-	bool test_http_response_istream_move(test_context<abc::test::log>& context);
-	bool test_http_response_ostream_move(test_context<abc::test::log>& context);
-	bool test_http_client_stream_move(test_context<abc::test::log>& context);
-	bool test_http_server_stream_move(test_context<abc::test::log>& context);
-
-}}}
-
+bool test_http_request_istream_move(test_context& context);
+bool test_http_request_ostream_move(test_context& context);
+bool test_http_response_istream_move(test_context& context);
+bool test_http_response_ostream_move(test_context& context);
+bool test_http_client_stream_move(test_context& context);
+bool test_http_server_stream_move(test_context& context);

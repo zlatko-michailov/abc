@@ -120,6 +120,12 @@ namespace abc { namespace test {
     }
 
 
+    template <typename LogPtr>
+    inline const LogPtr& context<LogPtr>::log() const noexcept {
+        return diag_base::log();
+    }
+
+
     // --------------------------------------------------------------
 
 

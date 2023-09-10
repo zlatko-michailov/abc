@@ -106,6 +106,12 @@ namespace abc { namespace test {
         seed_t              seed;
         const char*         process_path;
         std::string         suborigin;
+
+    public:        
+        /**
+         * @brief Returns the Log pointer.
+         */
+        const LogPtr& log() const noexcept;
     };
 
 

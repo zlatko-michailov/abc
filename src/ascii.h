@@ -106,7 +106,7 @@ namespace abc {
         }
 
 
-        inline bool is_any(char ch) noexcept {
+        inline bool is_any(char /*ch*/) noexcept {
             return true;
         }
 
