@@ -172,21 +172,26 @@ namespace abc { namespace net {
 
         state::assert_next(http::item::header_name);
 
+        std::size_t gcount = 0;
         http_headers headers;
 
         while (state::next() == http::item::header_name) {
             // Read header name.
             std::string header_name = get_header_name();
+            gcount += header_name.length();
 
             if (state::next() == http::item::header_value) {
                 // Read header value.
                 std::string header_value = get_header_value();
+                gcount += 1 + header_value.length() + 2; // : <value> CR LF
 
                 // Insert the pair into the map.
                 std::pair<std::string, std::string> pair(std::move(header_name), std::move(header_value));
                 headers.insert(std::move(pair));
             }
         }
+
+        set_gstate(gcount, http::item::body);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: headers.size()=%zu", headers.size());
 
@@ -245,12 +250,22 @@ namespace abc { namespace net {
         skip_spaces();
 
         bool has_more = true;
+
+        // Multi-line
         while (has_more) {
-            header_value += get_prints();
-            skip_spaces();
+            // One line
+            while (has_more) {
+                header_value += get_prints();
+
+                has_more = base::is_good() && !header_value.empty() && skip_spaces() > 0 && ascii::is_abcprint(peek_char());
+                if (has_more) {
+                    header_value += ' ';
+                }
+            }
+
             skip_crlf();
 
-            has_more = !header_value.empty() && skip_spaces() > 0 && ascii::is_abcprint(peek_char());
+            has_more = base::is_good() && !header_value.empty() && skip_spaces() > 0 && ascii::is_abcprint(peek_char());
             if (has_more) {
                 header_value += ' ';
             }
@@ -840,13 +855,13 @@ namespace abc { namespace net {
             end_pos = raw_resource.find_first_of("=&", begin_pos);
 
             if (end_pos != std::string::npos) {
-                std::string param_name = raw_resource.substr(begin_pos, end_pos);
+                std::string param_name = raw_resource.substr(begin_pos, end_pos - begin_pos);
 
                 std::string param_value;
                 if (raw_resource[end_pos] == '=') {
                     begin_pos = ++end_pos;
                     end_pos = raw_resource.find('&', begin_pos);
-                    param_value = raw_resource.substr(begin_pos, end_pos);
+                    param_value = raw_resource.substr(begin_pos, end_pos - begin_pos);
                 }
 
                 resource.parameters[std::move(param_name)] = std::move(param_value);
