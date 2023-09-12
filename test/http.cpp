@@ -45,7 +45,8 @@ bool test_http_request_istream_extraspaces(test_context& context) {
         " Second  line  \r\n"
         "\t    \t  \t    Third  line   \r\n"
         "Trailing-Spaces  :  3 spaces   \r\n"
-        "\r\n";
+        "\r\n"
+        "  123 \t abc \r x \n";
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
@@ -72,6 +73,16 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     passed = context.are_equal(headers["Multi-Line"].c_str(), "First line Second line Third line", 0x10072) && passed;
     passed = context.are_equal(headers["Trailing-Spaces"].c_str(), "3 spaces", 0x1006e) && passed;
     passed = verify_stream(context, istream, std::strlen("Name:Value\r\nMulti_Word-Name:Value with spaces inside\r\nMulti-Line:First line Second line Third line\r\nTrailing-Spaces:3 spaces\r\n"), __TAG__) && passed;
+
+    std::string body = istream.get_body(4);
+    passed = verify_string(context, body.c_str(), "  12", istream, __TAG__) && passed;
+
+    body = istream.get_body(1000);
+    passed = context.are_equal(body.c_str(), "3 \t abc \r x \n", __TAG__) && passed;
+    passed = context.are_equal(istream.gcount(), std::strlen("3 \t abc \r x \n"), __TAG__, "%zu") && passed;
+    passed = context.are_equal(istream.good(), false, __TAG__, "%d") && passed;
+    passed = context.are_equal(istream.bad(), true, __TAG__, "%d") && passed;
+    passed = context.are_equal(istream.eof(), true, __TAG__, "%d") && passed;
 
     return passed;
 }

@@ -127,6 +127,17 @@ namespace abc {
          * @param condition Condition.
          */
         void set_fail_if(bool condition);
+
+        /**
+         * @brief Sets the eof bit on the base stream.
+         */
+        void set_eof();
+
+        /**
+         * @brief           Sets the eof bit on the base stream if the condition is `true`.
+         * @param condition Condition.
+         */
+        void set_eof_if(bool condition);
     };
 
 

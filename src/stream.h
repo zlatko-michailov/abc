@@ -126,6 +126,20 @@ namespace abc {
     }
 
 
+    template <typename Stream>
+    inline void stream<Stream>::set_eof() {
+        base::setstate(base::eofbit);
+    }
+
+
+    template <typename Stream>
+    inline void stream<Stream>::set_eof_if(bool condition) {
+        if (condition) {
+            set_eof();
+        }
+    }
+
+
     // --------------------------------------------------------------
 
 

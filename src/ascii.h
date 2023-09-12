@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <string>
+
 #include "size.h"
 
 
@@ -106,8 +108,8 @@ namespace abc {
         }
 
 
-        inline bool is_any(char /*ch*/) noexcept {
-            return true;
+        inline bool is_any(char ch) noexcept {
+            return ch != 0 && ch != std::char_traits<char>::eof();
         }
 
 

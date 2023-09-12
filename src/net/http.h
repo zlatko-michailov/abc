@@ -290,7 +290,7 @@ namespace abc { namespace net {
 
         std::string body = get_any_chars(max_len);
 
-        set_gstate(body.length(), http::item::body);
+        set_gstate(body.length(), base::eof() ? http::item::eof : http::item::body);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: body='%s'", body.c_str());
 
@@ -340,7 +340,7 @@ namespace abc { namespace net {
         std::size_t len = 0;
 
         while (base::is_good() && predicate(peek_char()) && len++ < max_len) {
-            chars += base::get();
+            chars += get_char();
         }
 
         return std::move(chars);
@@ -365,6 +365,7 @@ namespace abc { namespace net {
 
         if (!ascii::is_ascii(ch)) {
             base::set_bad();
+            base::set_eof();
             ch = '\0';
         }
 

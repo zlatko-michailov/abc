@@ -49,6 +49,7 @@ namespace abc { namespace net {
             constexpr item_t header_name   = 5;
             constexpr item_t header_value  = 6;
             constexpr item_t body          = 7;
+            constexpr item_t eof           = 8;
         }
     }
 
