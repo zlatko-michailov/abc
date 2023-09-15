@@ -71,27 +71,27 @@ bool test_line_debug(test_context& context) {
     {
         abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-        passed = verify_stream(context, line, 0x102b4) && passed;
+        passed = verify_stream_good(context, line, 0x102b4) && passed;
 
         line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-        passed = verify_stream(context, line, 0x102b5) && passed;
+        passed = verify_stream_good(context, line, 0x102b5) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102b6) && passed;
+    passed = verify_stream_good(context, table, 0x102b6) && passed;
 
     {
         abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
-        passed = verify_stream(context, line, 0x102b7) && passed;
+        passed = verify_stream_good(context, line, 0x102b7) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102b8) && passed;
+    passed = verify_stream_good(context, table, 0x102b8) && passed;
 
     std::ostream seal(&sb);
     seal.put(abc::line_ostream<>::ends);
     seal.flush();
-    passed = verify_stream(context, table, 0x102b9) && passed;
+    passed = verify_stream_good(context, table, 0x102b9) && passed;
 
     passed = context.are_equal(std::strlen(actual), std::strlen(expected), 0x102ba, "%zu");
     passed = context.are_equal(actual, expected, 0x102bb) && passed;
@@ -137,28 +137,28 @@ bool test_line_diag(test_context& context) {
     {
         abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-        passed = verify_stream(context, line, 0x102bc) && passed;
+        passed = verify_stream_good(context, line, 0x102bc) && passed;
 
         line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-        passed = verify_stream(context, line, 0x102bd) && passed;
+        passed = verify_stream_good(context, line, 0x102bd) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102be) && passed;
+    passed = verify_stream_good(context, table, 0x102be) && passed;
 
     {
         abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
-        passed = verify_stream(context, line, 0x102bf) && passed;
-        passed = verify_stream(context, table, 0x102c0) && passed;
+        passed = verify_stream_good(context, line, 0x102bf) && passed;
+        passed = verify_stream_good(context, table, 0x102c0) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102c1) && passed;
+    passed = verify_stream_good(context, table, 0x102c1) && passed;
 
     std::ostream seal(&sb);
     seal.put(abc::line_ostream<>::ends);
     seal.flush();
-    passed = verify_stream(context, table, 0x102c2) && passed;
+    passed = verify_stream_good(context, table, 0x102c2) && passed;
 
     passed = context.are_equal(std::strlen(actual), std::strlen(expected), 0x102c3, "%zu");
     passed = context.are_equal(actual, expected, 0x102c4) && passed;
@@ -201,27 +201,27 @@ bool test_line_test(test_context& context) {
     {
         abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
-        passed = verify_stream(context, line, 0x102c5) && passed;
+        passed = verify_stream_good(context, line, 0x102c5) && passed;
 
         line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
-        passed = verify_stream(context, line, 0x102c6) && passed;
+        passed = verify_stream_good(context, line, 0x102c6) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102c7) && passed;
+    passed = verify_stream_good(context, table, 0x102c7) && passed;
 
     {
         abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
-        passed = verify_stream(context, line, 0x102c8) && passed;
+        passed = verify_stream_good(context, line, 0x102c8) && passed;
     }
 
-    passed = verify_stream(context, table, 0x102c9) && passed;
+    passed = verify_stream_good(context, table, 0x102c9) && passed;
 
     std::ostream seal(&sb);
     seal.put(abc::line_ostream<>::ends);
     seal.flush();
-    passed = verify_stream(context, table, 0x102ca) && passed;
+    passed = verify_stream_good(context, table, 0x102ca) && passed;
 
     passed = context.are_equal(std::strlen(actual), std::strlen(expected), 0x102cb, "%zu");
     passed = context.are_equal(actual, expected, 0x102cc) && passed;

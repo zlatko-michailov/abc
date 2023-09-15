@@ -32,7 +32,7 @@ SOFTWARE.
 
 
 template <typename Stream>
-inline bool verify_stream(test_context& context, const Stream& stream, abc::diag::tag_t tag) {
+inline bool verify_stream_good(test_context& context, const Stream& stream, abc::diag::tag_t tag) {
     bool passed = true;
 
     passed = context.are_equal(stream.good(), true,  tag, "%u") && passed;
@@ -45,11 +45,35 @@ inline bool verify_stream(test_context& context, const Stream& stream, abc::diag
 
 
 template <typename Stream>
-inline bool verify_stream(test_context& context, const Stream& stream, std::size_t expected_gcount, abc::diag::tag_t tag) {
+inline bool verify_stream_eof(test_context& context, const Stream& stream, abc::diag::tag_t tag) {
+    bool passed = true;
+
+    passed = context.are_equal(stream.good(), false, tag, "%u") && passed;
+    passed = context.are_equal(stream.eof(),  true,  tag, "%u") && passed;
+    passed = context.are_equal(stream.fail(), false, tag, "%u") && passed;
+    passed = context.are_equal(stream.bad(),  false, tag, "%u") && passed;
+
+    return passed;
+}
+
+
+template <typename Stream>
+inline bool verify_stream_good(test_context& context, const Stream& stream, std::size_t expected_gcount, abc::diag::tag_t tag) {
     bool passed = true;
 
     passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%zu") && passed;
-    passed = verify_stream(context, stream, tag) && passed;
+    passed = verify_stream_good(context, stream, tag) && passed;
+
+    return passed;
+}
+
+
+template <typename Stream>
+inline bool verify_stream_eof(test_context& context, const Stream& stream, std::size_t expected_gcount, abc::diag::tag_t tag) {
+    bool passed = true;
+
+    passed = context.are_equal(stream.gcount(), expected_gcount, tag, "%zu") && passed;
+    passed = verify_stream_eof(context, stream, tag) && passed;
 
     return passed;
 }

@@ -61,7 +61,7 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     passed = context.are_equal(resource.path.c_str(), "http://a.com/b", 0x1006b) && passed;
     passed = context.are_equal(resource.parameters.size(), (std::size_t)1, __TAG__, "%zu") && passed;
     passed = context.are_equal(resource.parameters["c"].c_str(), "d", __TAG__) && passed;
-    passed = verify_stream(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
     passed = verify_string(context, protocol.c_str(), "HTTP/12.345", istream, 0x1006c) && passed;
@@ -72,24 +72,21 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     passed = context.are_equal(headers["Multi_Word-Name"].c_str(), "Value with spaces inside", 0x10070) && passed;
     passed = context.are_equal(headers["Multi-Line"].c_str(), "First line Second line Third line", 0x10072) && passed;
     passed = context.are_equal(headers["Trailing-Spaces"].c_str(), "3 spaces", 0x1006e) && passed;
-    passed = verify_stream(context, istream, std::strlen("Name:Value\r\nMulti_Word-Name:Value with spaces inside\r\nMulti-Line:First line Second line Third line\r\nTrailing-Spaces:3 spaces\r\n"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Name:Value\r\nMulti_Word-Name:Value with spaces inside\r\nMulti-Line:First line Second line Third line\r\nTrailing-Spaces:3 spaces\r\n"), __TAG__) && passed;
 
     std::string body = istream.get_body(4);
     passed = verify_string(context, body.c_str(), "  12", istream, __TAG__) && passed;
 
     body = istream.get_body(1000);
     passed = context.are_equal(body.c_str(), "3 \t abc \r x \n", __TAG__) && passed;
-    passed = context.are_equal(istream.gcount(), std::strlen("3 \t abc \r x \n"), __TAG__, "%zu") && passed;
-    passed = context.are_equal(istream.good(), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(istream.bad(), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(istream.eof(), true, __TAG__, "%d") && passed;
+    passed = verify_stream_eof(context, istream, std::strlen("3 \t abc \r x \n"), __TAG__) && passed;
 
     return passed;
 }
 
 
 #if 0 ////
-bool test_http_request_istream_bodytext(test_context<abc::test::log>& context) {
+bool test_http_request_istream_bodytext(test_context& context) {
     char content[] =
         "POST http://a.com/b?c=d HTTP/1.1\r\n"
         "\r\n"
@@ -100,9 +97,8 @@ bool test_http_request_istream_bodytext(test_context<abc::test::log>& context) {
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_request_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_request_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[101];
     bool passed = true;
 
     const std::size_t binary_line_size        = 10;
@@ -867,7 +863,7 @@ static bool verify_string(test_context& context, const char* actual, const char*
     bool passed = true;
 
     passed = context.are_equal(actual, expected, tag) && passed;
-    passed = verify_stream(context, stream, std::strlen(expected), tag) && passed;
+    passed = verify_stream_good(context, stream, std::strlen(expected), tag) && passed;
 
     return passed;
 }
@@ -878,7 +874,7 @@ static bool verify_binary(test_context& context, const void* actual, const void*
     bool passed = true;
 
     passed = context.are_equal(actual, expected, size, tag) && passed;
-    passed = verify_stream(context, stream, size, tag) && passed;
+    passed = verify_stream_good(context, stream, size, tag) && passed;
 
     return passed;
 }

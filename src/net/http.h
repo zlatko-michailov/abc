@@ -363,10 +363,12 @@ namespace abc { namespace net {
     inline char http_istream<LogPtr>::peek_char() {
         char ch = base::peek();
 
-        if (!ascii::is_ascii(ch)) {
-            base::set_bad();
+        if (ch == std::char_traits<char>::eof()) {
             base::set_eof();
-            ch = '\0';
+        }
+        else if (!ascii::is_ascii(ch)) {
+            base::set_bad();
+            ch = std::char_traits<char>::eof();
         }
 
         return ch;
