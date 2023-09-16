@@ -161,7 +161,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: protocol='%s'", protocol.c_str());
 
-        return std::move(protocol);
+        return protocol;
     }
 
 
@@ -195,7 +195,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: headers.size()=%zu", headers.size());
 
-        return std::move(headers);
+        return headers;
     }
 
 
@@ -217,7 +217,7 @@ namespace abc { namespace net {
             skip_crlf();
 
             set_gstate(0, http::item::body);
-            return std::move(header_name);
+            return header_name;
         }
 
         // Read ':'
@@ -233,7 +233,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: header_name='%s'", header_name.c_str());
 
-        return std::move(header_name);
+        return header_name;
     }
 
 
@@ -277,7 +277,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: header_value='%s'", header_value.c_str());
 
-        return std::move(header_value);
+        return header_value;
     }
 
 
@@ -294,7 +294,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: body='%s'", body.c_str());
 
-        return std::move(body);
+        return body;
     }
 
 
@@ -339,11 +339,11 @@ namespace abc { namespace net {
         std::string chars;
         std::size_t len = 0;
 
-        while (base::is_good() && predicate(peek_char()) && len++ < max_len) {
-            chars += get_char();
+        while (predicate(peek_char()) && base::is_good() && len++ < max_len) {
+            chars.push_back(get_char());
         }
 
-        return std::move(chars);
+        return chars;
     }
 
 
@@ -361,17 +361,17 @@ namespace abc { namespace net {
 
     template <typename LogPtr>
     inline char http_istream<LogPtr>::peek_char() {
-        char ch = base::peek();
+        if (!base::is_good()) {
+            return (char)std::char_traits<char>::eof(); 
+        }
+
+        base::int_type ch = base::peek();
 
         if (ch == std::char_traits<char>::eof()) {
             base::set_eof();
         }
-        else if (!ascii::is_ascii(ch)) {
-            base::set_bad();
-            ch = std::char_traits<char>::eof();
-        }
 
-        return ch;
+        return (char)ch;
     }
 
 
@@ -730,19 +730,6 @@ namespace abc { namespace net {
     }
 
 
-    //// TODO:
-    /*template <typename LogPtr>
-    inline std::size_t http_ostream<LogPtr>::count_leading_spaces(const char* content, std::size_t content_len) {
-        std::size_t sp = 0;
-
-        while (sp < content_len && ascii::is_space(content[sp])) {
-            sp++;
-        }
-
-        return sp;
-    }*/
-
-
     template <typename LogPtr>
     inline void http_ostream<LogPtr>::set_pstate(http::item_t next) {
         constexpr const char* suborigin = "set_pstate()";
@@ -800,7 +787,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, method='%s'", method.length(), method.c_str());
 
-        return std::move(method);
+        return method;
     }
 
 
@@ -820,7 +807,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, raw_resource='%s'", raw_resource.length(), raw_resource.c_str());
 
-        return std::move(resource);
+        return resource;
     }
 
 
@@ -836,7 +823,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
 
-        return std::move(protocol);
+        return protocol;
     }
 
 
@@ -873,7 +860,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 
-        return std::move(resource);
+        return resource;
     }
 
 
@@ -921,7 +908,7 @@ namespace abc { namespace net {
             method_len = std::strlen(method);
         }
 
-        std::size_t pcount = base::put_token(method, method_len);
+        base::put_token(method, method_len);
         base::put_space();
 
         base::set_pstate(http::item::resource);
@@ -943,7 +930,7 @@ namespace abc { namespace net {
             resource_len = std::strlen(resource);
         }
 
-        std::size_t pcount = base::put_prints(resource, resource_len);
+        base::put_prints(resource, resource_len);
         base::put_space();
 
         base::set_pstate(http::item::protocol);
@@ -1010,7 +997,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
 
-        return std::move(protocol);
+        return protocol;
     }
 
     template <typename LogPtr>
@@ -1025,7 +1012,7 @@ namespace abc { namespace net {
 
         http_status_code status_code = static_cast<http_status_code>(std::stoul(digits));
 
-        base::set_gstate(digits.length, http::item::reason_phrase);
+        base::set_gstate(digits.length(), http::item::reason_phrase);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, status_code='%u'", digits.length(), status_code);
 
@@ -1048,7 +1035,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, reason_phrase='%s'", reason_phrase.length(), reason_phrase.c_str());
 
-        return std::move(reason_phrase);
+        return reason_phrase;
     }
 
 
@@ -1109,7 +1096,7 @@ namespace abc { namespace net {
         char digits[12];
         std::snprintf(digits, sizeof(digits) * sizeof(char), "%u", (unsigned)status_code);
 
-        std::size_t pcount = base::put_digits(digits, std::strlen(digits));
+        base::put_digits(digits, std::strlen(digits));
         base::put_space();
 
         base::set_pstate(http::item::reason_phrase);
@@ -1125,13 +1112,12 @@ namespace abc { namespace net {
 
         base::assert_next(http::item::reason_phrase);
 
-        std::size_t pcount = 0;
         if (reason_phrase != nullptr) {
             if (reason_phrase_len == size::strlen) {
                 reason_phrase_len = std::strlen(reason_phrase);
             }
 
-            pcount = base::put_prints_and_spaces(reason_phrase, reason_phrase_len);
+            base::put_prints_and_spaces(reason_phrase, reason_phrase_len);
         }
 
         base::put_crlf();

@@ -29,11 +29,13 @@ SOFTWARE.
 #include "inc/http.h"
 
 
+#if 0 //// TODO: Remove
 template <typename HttpStream>
 static bool verify_string(test_context& context, const char* actual, const char* expected, const HttpStream& stream, abc::diag::tag_t tag);
 
 template <typename HttpStream>
 static bool verify_binary(test_context& context, const void* actual, const void* expected, std::size_t size, const HttpStream& stream, abc::diag::tag_t tag);
+#endif
 
 
 bool test_http_request_istream_extraspaces(test_context& context) {
@@ -55,7 +57,8 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     bool passed = true;
 
     std::string method = istream.get_method();
-    passed = verify_string(context, method.c_str(), "GET", istream, 0x1006a) && passed;
+    passed = context.are_equal(method.c_str(), "GET", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("GET"), 0x1006a) && passed;
 
     abc::net::http_resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), "http://a.com/b", 0x1006b) && passed;
@@ -64,7 +67,8 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     passed = verify_stream_good(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
-    passed = verify_string(context, protocol.c_str(), "HTTP/12.345", istream, 0x1006c) && passed;
+    passed = context.are_equal(protocol.c_str(), "HTTP/12.345", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/12.345"), __TAG__) && passed;
 
     abc::net::http_headers headers = istream.get_headers();
     passed = context.are_equal(headers.size(), (std::size_t)4, __TAG__, "%zu") && passed;
@@ -75,7 +79,8 @@ bool test_http_request_istream_extraspaces(test_context& context) {
     passed = verify_stream_good(context, istream, std::strlen("Name:Value\r\nMulti_Word-Name:Value with spaces inside\r\nMulti-Line:First line Second line Third line\r\nTrailing-Spaces:3 spaces\r\n"), __TAG__) && passed;
 
     std::string body = istream.get_body(4);
-    passed = verify_string(context, body.c_str(), "  12", istream, __TAG__) && passed;
+    passed = context.are_equal(body.c_str(), "  12", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("  12"), __TAG__) && passed;
 
     body = istream.get_body(1000);
     passed = context.are_equal(body.c_str(), "3 \t abc \r x \n", __TAG__) && passed;
@@ -85,10 +90,9 @@ bool test_http_request_istream_extraspaces(test_context& context) {
 }
 
 
-#if 0 ////
 bool test_http_request_istream_bodytext(test_context& context) {
     char content[] =
-        "POST http://a.com/b?c=d HTTP/1.1\r\n"
+        "POST http://a.com/bbb/cc/d?x=111&yy=22&zzz=3 HTTP/1.1\r\n"
         "\r\n"
         "{\r\n"
         "  \"foo\": 42,\r\n"
@@ -101,38 +105,50 @@ bool test_http_request_istream_bodytext(test_context& context) {
 
     bool passed = true;
 
-    const std::size_t binary_line_size        = 10;
-    const std::size_t binary_line_remainder    = 7;
+    const std::size_t binary_line_size      = 10;
+    const std::size_t binary_line_remainder =  7;
 
-    istream.get_method(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "POST", istream, 0x10076) && passed;
+    std::string method = istream.get_method();
+    passed = context.are_equal(method.c_str(), "POST", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("POST"), __TAG__) && passed;
 
-    istream.get_resource(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "http://a.com/b?c=d", istream, 0x10077) && passed;
+    abc::net::http_resource resource = istream.get_resource();
+    passed = context.are_equal(resource.path.c_str(), "http://a.com/bbb/cc/d", __TAG__) && passed;
+    passed = context.are_equal(resource.parameters.size(), (std::size_t)3, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.parameters["x"].c_str(), "111", __TAG__) && passed;
+    passed = context.are_equal(resource.parameters["yy"].c_str(), "22", __TAG__) && passed;
+    passed = context.are_equal(resource.parameters["zzz"].c_str(), "3", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("http://a.com/bbb/cc/d?x=111&yy=22&zzz=3"), __TAG__) && passed;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/1.1", istream, 0x10078) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x10079) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = verify_stream_good(context, istream, (std::size_t)0, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_size);
-    passed = verify_binary(context, buffer, "{\r\n  \"foo\"", binary_line_size, istream, 0x1007a) && passed;
+    std::string body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"{\r\n  \"foo\"", binary_line_size, __TAG__) && passed;
+    passed = verify_stream_good(context, istream, binary_line_size, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_size);
-    passed = verify_binary(context, buffer, ": 42,\r\n  \"", binary_line_size, istream, 0x1007b) && passed;
+    body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)": 42,\r\n  \"", binary_line_size, __TAG__) && passed;
+    passed = verify_stream_good(context, istream, binary_line_size, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_size);
-    passed = verify_binary(context, buffer, "bar\": \"qwe", binary_line_size, istream, 0x1007c) && passed;
+    body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"bar\": \"qwe", binary_line_size, __TAG__) && passed;
+    passed = verify_stream_good(context, istream, binary_line_size, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_remainder);
-    passed = verify_binary(context, buffer, "rty\"\r\n}", binary_line_remainder, istream, 0x1007d) && passed;
+    body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"rty\"\r\n}", binary_line_remainder, __TAG__) && passed;
+    passed = verify_stream_eof(context, istream, binary_line_remainder, __TAG__) && passed;
 
     return passed;
 }
 
 
-bool test_http_request_istream_bodybinary(test_context<abc::test::log>& context) {
+bool test_http_request_istream_bodybinary(test_context& context) {
     char content[] =
         "POST http://a.com/b?c=d HTTP/1.1\r\n"
         "\r\n"
@@ -140,39 +156,48 @@ bool test_http_request_istream_bodybinary(test_context<abc::test::log>& context)
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_request_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_request_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[101];
     bool passed = true;
 
-    const std::size_t binary_line_size        = 16;
-    const std::size_t binary_line_remainder    = 7;
+    const std::size_t binary_line_size      = 16;
+    const std::size_t binary_line_remainder =  7;
 
-    istream.get_method(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "POST", istream, 0x1007e) && passed;
+    std::string method = istream.get_method();
+    passed = context.are_equal(method.c_str(), "POST", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("POST"), __TAG__) && passed;
 
-    istream.get_resource(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "http://a.com/b?c=d", istream, 0x1007f) && passed;
+    abc::net::http_resource resource = istream.get_resource();
+    passed = context.are_equal(resource.path.c_str(), "http://a.com/b", __TAG__) && passed;
+    passed = context.are_equal(resource.parameters.size(), (std::size_t)1, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.parameters["c"].c_str(), "d", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/1.1", istream, 0x10080) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x10081) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = verify_stream_good(context, istream, (std::size_t)0, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_size);
-    passed = verify_binary(context, buffer, "\x01\x05\x10 text \x02\x03\x12 mix", binary_line_size, istream, 0x10082) && passed;
+    std::string body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"\x01\x05\x10 text \x02\x03\x12 mix", binary_line_size, __TAG__) && passed;
+    passed = verify_stream_good(context, istream, binary_line_size, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_size);
-    passed = verify_binary(context, buffer, "ed \x04\x18\x19 with \x7f\x80 b", binary_line_size, istream, 0x10083) && passed;
+    body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"ed \x04\x18\x19 with \x7f\x80 b", binary_line_size, __TAG__) && passed;
+    passed = verify_stream_good(context, istream, binary_line_size, __TAG__) && passed;
 
-    istream.get_body(buffer, binary_line_remainder);
-    passed = verify_binary(context, buffer, "ytes \xaa\xff", binary_line_remainder, istream, 0x10084) && passed;
+    body = istream.get_body(binary_line_size);
+    passed = context.are_equal((const void*)body.c_str(), (const void *)"ytes \xaa\xff", binary_line_remainder, __TAG__) && passed;
+    passed = verify_stream_eof(context, istream, binary_line_remainder, __TAG__) && passed;
 
     return passed;
 }
 
 
+#if 0 ////
 bool test_http_request_istream_realworld_01(test_context<abc::test::log>& context) {
     char content[] =
         "GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
@@ -858,6 +883,7 @@ bool test_http_server_stream_move(test_context<abc::test::log>& context) {
 // --------------------------------------------------------------
 
 
+#if 0 //// TODO: Remove
 template <typename HttpStream>
 static bool verify_string(test_context& context, const char* actual, const char* expected, const HttpStream& stream, abc::diag::tag_t tag) {
     bool passed = true;
@@ -878,3 +904,4 @@ static bool verify_binary(test_context& context, const void* actual, const void*
 
     return passed;
 }
+#endif

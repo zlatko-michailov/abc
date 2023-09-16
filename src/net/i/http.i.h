@@ -455,14 +455,6 @@ namespace abc { namespace net {
         std::size_t count_leading_spaces_in_header_value(const char* header_value, std::size_t header_value_len = size::strlen);
 
         /**
-         * @brief             Counts the leading spaces in a given content. Does not write to the http stream.
-         * @param content     Content.
-         * @param content_len Content length. Optional.
-         * @return            The count of chars. 
-         */
-        //// TODO: std::size_t count_leading_spaces(const char* content, std::size_t content_len = size::strlen);
-
-        /**
          * @brief      Sets the next expected item for the stream.
          * @param next The next expected item.
          */
