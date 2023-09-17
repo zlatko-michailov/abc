@@ -197,8 +197,7 @@ bool test_http_request_istream_bodybinary(test_context& context) {
 }
 
 
-#if 0 ////
-bool test_http_request_istream_realworld_01(test_context<abc::test::log>& context) {
+bool test_http_request_istream_realworld_01(test_context& context) {
     char content[] =
         "GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
         "Host: en.cppreference.com\r\n"
@@ -214,76 +213,35 @@ bool test_http_request_istream_realworld_01(test_context<abc::test::log>& contex
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_request_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_request_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[1024];
     bool passed = true;
 
-    istream.get_method(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "GET", istream, 0x10085) && passed;
+    std::string method = istream.get_method();
+    passed = context.are_equal(method.c_str(), "GET", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("GET"), __TAG__) && passed;
 
-    istream.get_resource(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "https://en.cppreference.com/w/cpp/io/basic_streambuf", istream, 0x10086) && passed;
+    abc::net::http_resource resource = istream.get_resource();
+    passed = context.are_equal(resource.path.c_str(), "https://en.cppreference.com/w/cpp/io/basic_streambuf", __TAG__) && passed;
+    passed = context.are_equal(resource.parameters.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = verify_stream_good(context, istream, std::strlen("https://en.cppreference.com/w/cpp/io/basic_streambuf"), __TAG__) && passed;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/1.1", istream, 0x10087) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Host", istream, 0x10088) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "en.cppreference.com", istream, 0x10089) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "User-Agent", istream, 0x1008a) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", istream, 0x1008b) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Accept", istream, 0x1008c) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", istream, 0x1008d) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Accept-Language", istream, 0x1008e) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "en-US,en;q=0.5", istream, 0x1008f) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Accept-Encoding", istream, 0x10090) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "gzip, deflate, br", istream, 0x10091) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Connection", istream, 0x10092) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "keep-alive", istream, 0x10093) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Cookie", istream, 0x10094) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", istream, 0x10095) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Upgrade-Insecure-Requests", istream, 0x10096) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "1", istream, 0x10097) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Cache-Control", istream, 0x10098) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "max-age=0", istream, 0x10099) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x1009a) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)9, __TAG__, "%zu") && passed;
+    passed = context.are_equal(headers["Host"].c_str(), "en.cppreference.com", __TAG__) && passed;
+    passed = context.are_equal(headers["User-Agent"].c_str(), "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", __TAG__) && passed;
+    passed = context.are_equal(headers["Accept"].c_str(), "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", __TAG__) && passed;
+    passed = context.are_equal(headers["Accept-Language"].c_str(), "en-US,en;q=0.5", __TAG__) && passed;
+    passed = context.are_equal(headers["Accept-Encoding"].c_str(), "gzip, deflate, br", __TAG__) && passed;
+    passed = context.are_equal(headers["Connection"].c_str(), "keep-alive", __TAG__) && passed;
+    passed = context.are_equal(headers["Cookie"].c_str(), "__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437", __TAG__) && passed;
+    passed = context.are_equal(headers["Upgrade-Insecure-Requests"].c_str(), "1", __TAG__) && passed;
+    passed = context.are_equal(headers["Cache-Control"].c_str(), "max-age=0", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Host:en.cppreference.com\r\nUser-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\nAccept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nAccept-Language:en-US,en;q=0.5\r\nAccept-Encoding:gzip, deflate, br\r\nConnection:keep-alive\r\nCookie:__utma=165123437.761011328.1578550293.1590821219.1590875063.126; __utmz=165123437.1581492299.50.2.utmcsr=bing|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _bsap_daycap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; _bsap_lifecap=407621%2C407621%2C408072%2C408072%2C408072%2C408072; __utmc=165123437\r\nUpgrade-Insecure-Requests:1\r\nCache-Control:max-age=0\r\n"), __TAG__) && passed;
 
     return passed;
 }
@@ -292,6 +250,7 @@ bool test_http_request_istream_realworld_01(test_context<abc::test::log>& contex
 // --------------------------------------------------------------
 
 
+#if 0 ////
 bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* parameter_name, const char* expected_parameter_value, abc::tag_t tag);
 
 
