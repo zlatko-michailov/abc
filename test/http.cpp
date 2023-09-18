@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#include <sstream>
+
 #include "../src/diag/tag.h"
 
 #include "inc/stream.h"
@@ -250,50 +252,51 @@ bool test_http_request_istream_realworld_01(test_context& context) {
 // --------------------------------------------------------------
 
 
-#if 0 ////
-bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* parameter_name, const char* expected_parameter_value, abc::tag_t tag);
+bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value);
 
 
-bool test_http_request_istream_resource_01(test_context<abc::test::log>& context) {
-    return test_http_request_istream_resource(context, "/path", "/path", "p3", nullptr, 0x103b6);
+bool test_http_request_istream_resource_01(test_context& context) {
+    return test_http_request_istream_resource(context, "/path", "/path", 0, "p3", nullptr);
 }
 
 
-bool test_http_request_istream_resource_02(test_context<abc::test::log>& context) {
-    return test_http_request_istream_resource(context, "/path?", "/path", "p3", nullptr, 0x103b7);
+bool test_http_request_istream_resource_02(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?", "/path", 0, "p3", nullptr);
 }
 
 
-bool test_http_request_istream_resource_03(test_context<abc::test::log>& context) {
-    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", "p3", "42", 0x103b8);
+bool test_http_request_istream_resource_03(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", 3, "p3", "42");
 }
 
 
-bool test_http_request_istream_resource_04(test_context<abc::test::log>& context) {
-    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", "p3", "42", 0x103b9);
+bool test_http_request_istream_resource_04(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", 4, "p3", "42");
 }
 
 
-bool test_http_request_istream_resource(test_context<abc::test::log>& context, const char* resource, const char* path, const char* /*parameter_name*/, const char* expected_parameter_value, abc::tag_t /*tag*/) {
-    constexpr std::size_t buffer_size = 200;
-    char buffer[buffer_size + 1];
-    std::memset(buffer, 'x', buffer_size);
+bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value) {
+    std::string content("GET ");
+    content.append(expected_resource);
+    content.append(" ");
 
+    std::stringbuf sb(content, std::ios_base::in);
 
-    const std::size_t resource_len = std::strlen(resource);
-    std::memcpy(buffer, resource, resource_len + 1);
-    buffer[resource_len + 1] = '\0';
+    abc::net::http_request_istream<test_log*> istream(&sb, context.log());
 
     bool passed = true;
-    abc::http_request_istream<abc::test::log>::split_resource(buffer, buffer_size);
-    passed = context.are_equal(buffer, path, 0x103ba) && passed;
 
-    const char* parameter_value = abc::http_request_istream<abc::test::log>::get_resource_parameter(buffer, buffer_size, "p3");
+    std::string method = istream.get_method();
+    passed = context.are_equal(method.c_str(), "GET", __TAG__) && passed;
+
+    abc::net::http_resource resource = istream.get_resource();
+    passed = context.are_equal(resource.path.c_str(), expected_path, __TAG__) && passed;
+    passed = context.are_equal(resource.parameters.size(), expected_parameter_count, __TAG__, "%zu") && passed;
     if (expected_parameter_value != nullptr) {
-        passed = context.are_equal(parameter_value, expected_parameter_value, 0x103bb) && passed;
+        passed = context.are_equal(resource.parameters[expected_parameter_name].c_str(), expected_parameter_value, __TAG__) && passed;
     }
     else {
-        passed = context.are_equal<void*>((void*)parameter_value, (void*)nullptr, 0x103bc, "%p") && passed;
+        passed = context.are_equal(resource.parameters.find(expected_parameter_name) == resource.parameters.end(), true, __TAG__, "%d") && passed;
     }
 
     return passed;
@@ -303,6 +306,7 @@ bool test_http_request_istream_resource(test_context<abc::test::log>& context, c
 // --------------------------------------------------------------
 
 
+#if 0 ////
 bool test_http_request_ostream_bodytext(test_context<abc::test::log>& context) {
     const char expected[] =
         "POST http://a.com/b?c=d HTTP/1.1\r\n"
