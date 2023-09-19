@@ -452,8 +452,8 @@ namespace abc { namespace net {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         for (const http_headers::value_type& header : headers) {
-            put_header_name(header.first);
-            put_header_value(header.second);
+            put_header_name(header.first.c_str());
+            put_header_value(header.second.c_str());
         }
 
         end_headers();
