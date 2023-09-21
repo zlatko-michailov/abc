@@ -413,8 +413,7 @@ bool test_http_request_ostream_bodybinary(test_context& context) {
 // --------------------------------------------------------------
 
 
-#if 0 ////
-bool test_http_response_istream_extraspaces(test_context<abc::test::log>& context) {
+bool test_http_response_istream_extraspaces(test_context& context) {
     char content[] =
         "HTTP/12.345  789  \t  Something went wrong  \r\n"
         "Header-Name:Header-Value\r\n"
@@ -422,34 +421,36 @@ bool test_http_response_istream_extraspaces(test_context<abc::test::log>& contex
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_response_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_response_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[101];
     bool passed = true;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/12.345", istream, 0x100b2) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/12.345", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/12.345"), __TAG__) && passed;
 
-    istream.get_status_code(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "789", istream, 0x100b3) && passed;
+    abc::net::http_status_code status = istream.get_status_code();
+    passed = context.are_equal(status, (abc::net::http_status_code)789, __TAG__, "%u") && passed;
+    passed = verify_stream_good(context, istream, std::strlen("789"), __TAG__) && passed;
 
-    istream.get_reason_phrase(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Something went wrong  ", istream, 0x100b4) && passed;
+    std::string phrase = istream.get_reason_phrase();
+    passed = context.are_equal(phrase.c_str(), "Something went wrong  ", 0x100b4) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Something went wrong  "), __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Header-Name", istream, 0x100b5) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)1, __TAG__, "%zu") && passed;
+    passed = context.are_equal(headers["Header-Name"].c_str(), "Header-Value", 0x1006e) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Header-Name:Header-Value\r\n"), __TAG__) && passed;
 
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Header-Value", istream, 0x100b6) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x100b7) && passed;
+    std::string body = istream.get_body(10);
+    passed = context.are_equal(body.c_str(), "", __TAG__) && passed;
+    passed = verify_stream_eof(context, istream, 0, __TAG__) && passed;
 
     return passed;
 }
 
 
-bool test_http_response_istream_realworld_01(test_context<abc::test::log>& context) {
+bool test_http_response_istream_realworld_01(test_context& context) {
     char content[] =
         "HTTP/1.1 302\r\n"
         "Set-Cookie: ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/\r\n"
@@ -461,58 +462,40 @@ bool test_http_response_istream_realworld_01(test_context<abc::test::log>& conte
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_response_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_response_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[201];
     bool passed = true;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/1.1", istream, 0x100b8) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    istream.get_status_code(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "302", istream, 0x100b9) && passed;
+    abc::net::http_status_code status = istream.get_status_code();
+    passed = context.are_equal(status, (abc::net::http_status_code)302, __TAG__, "%u") && passed;
+    passed = verify_stream_good(context, istream, std::strlen("302"), __TAG__) && passed;
 
-    istream.get_reason_phrase(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x100ba) && passed;
+    std::string phrase = istream.get_reason_phrase();
+    passed = context.are_equal(phrase.c_str(), "", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, 0, __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Set-Cookie", istream, 0x100bb) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)5, __TAG__, "%zu") && passed;
+    passed = context.are_equal(headers["Set-Cookie"].c_str(), "ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/", __TAG__) && passed;
+    passed = context.are_equal(headers["Cache-Control"].c_str(), "no-cache, no-store, max-age=0, must-revalidate", __TAG__) && passed;
+    passed = context.are_equal(headers["Location"].c_str(), "https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.", __TAG__) && passed;
+    passed = context.are_equal(headers["Content-Length"].c_str(), "0", __TAG__) && passed;
+    passed = context.are_equal(headers["Date"].c_str(), "Sun, 31 May 2020 01:26:44 GMT", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Set-Cookie:ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/\r\nCache-Control:no-cache, no-store, max-age=0, must-revalidate\r\nLocation:https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.\r\nContent-Length:0\r\nDate:Sun, 31 May 2020 01:26:44 GMT\r\n"), __TAG__) && passed;
 
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "ADRUM_BTa=R:59|g:a2345a60-c557-41f0-8cd9-0ee876b70b76; Max-Age=30; Expires=Sun, 31-May-2020 01:27:14 GMT; Path=/", istream, 0x100bc) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Cache-Control", istream, 0x100bd) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "no-cache, no-store, max-age=0, must-revalidate", istream, 0x100be) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Location", istream, 0x100bf) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "https://xerxes-sub.xerxessecure.com/xerxes-jwt/init?state=eyJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.", istream, 0x100c0) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Content-Length", istream, 0x100c1) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "0", istream, 0x100c2) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Date", istream, 0x100c3) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Sun, 31 May 2020 01:26:44 GMT", istream, 0x100c4) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x100c5) && passed;
+    std::string body = istream.get_body(10);
+    passed = context.are_equal(body.c_str(), "", __TAG__) && passed;
+    passed = verify_stream_eof(context, istream, 0, __TAG__) && passed;
 
     return passed;
 }
 
 
-bool test_http_response_istream_realworld_02(test_context<abc::test::log>& context) {
+bool test_http_response_istream_realworld_02(test_context& context) {
     char content[] =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: application/json; charset=utf-8\r\n"
@@ -524,46 +507,36 @@ bool test_http_response_istream_realworld_02(test_context<abc::test::log>& conte
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    abc::http_response_istream<abc::test::log> istream(&sb, context.log);
+    abc::net::http_response_istream<test_log*> istream(&sb, context.log());
 
-    char buffer[201];
     bool passed = true;
 
-    istream.get_protocol(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "HTTP/1.1", istream, 0x100c6) && passed;
+    std::string protocol = istream.get_protocol();
+    passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    istream.get_status_code(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "200", istream, 0x100c7) && passed;
+    abc::net::http_status_code status = istream.get_status_code();
+    passed = context.are_equal(status, (abc::net::http_status_code)200, __TAG__, "%u") && passed;
+    passed = verify_stream_good(context, istream, std::strlen("200"), __TAG__) && passed;
 
-    istream.get_reason_phrase(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "OK", istream, 0x100c8) && passed;
+    std::string phrase = istream.get_reason_phrase();
+    passed = context.are_equal(phrase.c_str(), "OK", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("OK"), __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Content-Type", istream, 0x100c9) && passed;
+    abc::net::http_headers headers = istream.get_headers();
+    passed = context.are_equal(headers.size(), (std::size_t)3, __TAG__, "%zu") && passed;
+    passed = context.are_equal(headers["Content-Type"].c_str(), "application/json; charset=utf-8", __TAG__) && passed;
+    passed = context.are_equal(headers["Access-Control-Expose-Headers"].c_str(), "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", __TAG__) && passed;
+    passed = context.are_equal(headers["Content-Length"].c_str(), "205", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, std::strlen("Content-Type:application/json; charset=utf-8\r\nAccess-Control-Expose-Headers:X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date\r\nContent-Length:205\r\n"), __TAG__) && passed;
 
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "application/json; charset=utf-8", istream, 0x100ca) && passed;
+    std::string body = istream.get_body(200);
+    passed = context.are_equal(body.c_str(), "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sc", __TAG__) && passed;
+    passed = verify_stream_good(context, istream, 200, __TAG__) && passed;
 
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Access-Control-Expose-Headers", istream, 0x100cb) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", istream, 0x100cc) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "Content-Length", istream, 0x100cd) && passed;
-
-    istream.get_header_value(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "205", istream, 0x100ce) && passed;
-
-    istream.get_header_name(buffer, sizeof(buffer));
-    passed = verify_string(context, buffer, "", istream, 0x100cf) && passed;
-
-    istream.get_body(buffer, 200);
-    passed = verify_binary(context, buffer, "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sc", 200, istream, 0x100d0) && passed;
-
-    istream.get_body(buffer, 5);
-    passed = verify_binary(context, buffer, "a=2\"}", 5, istream, 0x100d1) && passed;
+    body = istream.get_body(20);
+    passed = context.are_equal(body.c_str(), "a=2\"}\r\n\r\n", __TAG__) && passed;
+    passed = verify_stream_eof(context, istream, 9, __TAG__) && passed;
 
     return passed;
 }
@@ -572,6 +545,7 @@ bool test_http_response_istream_realworld_02(test_context<abc::test::log>& conte
 // --------------------------------------------------------------
 
 
+#if 0 ////
 bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context) {
     const char expected[] =
         "HTTP/1.1 200 OK\r\n"
