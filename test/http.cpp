@@ -545,8 +545,7 @@ bool test_http_response_istream_realworld_02(test_context& context) {
 // --------------------------------------------------------------
 
 
-#if 0 ////
-bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context) {
+bool test_http_response_ostream_bodytext(test_context& context) {
     const char expected[] =
         "HTTP/1.1 200 OK\r\n"
         "Simple: simple\r\n"
@@ -556,53 +555,45 @@ bool test_http_response_ostream_bodytext(test_context<abc::test::log>& context) 
         "  Second line\r\n"
         "\tThird line";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::http_response_ostream<abc::test::log> ostream(&sb, context.log);
+    abc::net::http_response_ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
     ostream.put_protocol("HTTP/1.1");
-    passed = verify_stream(context, ostream, 0x100d2) && passed;
+    passed = verify_stream_good(context, ostream, 0x100d2) && passed;
 
-    ostream.put_status_code("200");
-    passed = verify_stream(context, ostream, 0x100d3) && passed;
+    ostream.put_status_code(200);
+    passed = verify_stream_good(context, ostream, 0x100d3) && passed;
 
     ostream.put_reason_phrase("OK");
-    passed = verify_stream(context, ostream, 0x100d4) && passed;
+    passed = verify_stream_good(context, ostream, 0x100d4) && passed;
 
-    ostream.put_header_name("Simple");
-    passed = verify_stream(context, ostream, 0x100d5) && passed;
+    abc::net::http_headers headers = {
+        { "List", "foo bar foobar" },
+        { "Simple", "simple" },
+    };
 
-    ostream.put_header_value("simple");
-    passed = verify_stream(context, ostream, 0x100d6) && passed;
-
-    ostream.put_header_name("List");
-    passed = verify_stream(context, ostream, 0x100d7) && passed;
-
-    ostream.put_header_value("foo    bar\t\t\tfoobar   \t  \t \t ");
-    passed = verify_stream(context, ostream, 0x100d8) && passed;
-
-    ostream.end_headers();
+    ostream.put_headers(headers);
+    passed = verify_stream_good(context, ostream, 0x100d5) && passed;
 
     ostream.put_body("First line\r\n");
-    passed = verify_stream(context, ostream, 0x100d9) && passed;
+    passed = verify_stream_good(context, ostream, 0x100d9) && passed;
 
     ostream.put_body("  Second line\r\n");
-    passed = verify_stream(context, ostream, 0x100da) && passed;
+    passed = verify_stream_good(context, ostream, 0x100da) && passed;
 
     ostream.put_body("\tThird line\r\n");
-    passed = verify_stream(context, ostream, 0x100db) && passed;
+    passed = verify_stream_good(context, ostream, 0x100db) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x100dc) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x100dc) && passed;
 
     return passed;
 }
 
 
-bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context) {
+bool test_http_response_ostream_bodybinary(test_context& context) {
     const char expected[] =
         "HTTP/1.1 789 Something went wrong \r\n"
         "Multi-Line-List: aaa bbbb ccc ddd\r\n"
@@ -611,41 +602,38 @@ bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context
         "\x20\x24\x35\x46\x57\x71\x7f"
         "\x80\x89\xa5\xb6\xc7\xff";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::http_response_ostream<abc::test::log> ostream(&sb, context.log);
+    abc::net::http_response_ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
     ostream.put_protocol("HTTP/1.1");
-    passed = verify_stream(context, ostream, 0x100dd) && passed;
+    passed = verify_stream_good(context, ostream, 0x100dd) && passed;
 
-    ostream.put_status_code("789");
-    passed = verify_stream(context, ostream, 0x100de) && passed;
+    ostream.put_status_code(789);
+    passed = verify_stream_good(context, ostream, 0x100de) && passed;
 
     ostream.put_reason_phrase("Something went wrong ");
-    passed = verify_stream(context, ostream, 0x100df) && passed;
+    passed = verify_stream_good(context, ostream, 0x100df) && passed;
 
-    ostream.put_header_name("Multi-Line-List");
-    passed = verify_stream(context, ostream, 0x100e0) && passed;
+    abc::net::http_headers headers = {
+        { "Multi-Line-List", "aaa bbbb ccc ddd" },
+    };
 
-    ostream.put_header_value("\r\n  \r\n\taaa  \t bbb\r\n\t\t\tccc\tddd");
-    passed = verify_stream(context, ostream, 0x100e1) && passed;
-
-    ostream.end_headers();
+    ostream.put_headers(headers);
+    passed = verify_stream_good(context, ostream, 0x100d5) && passed;
 
     ostream.put_body("\x03\x07\x13\x16\x19");
-    passed = verify_stream(context, ostream, 0x100e2) && passed;
+    passed = verify_stream_good(context, ostream, 0x100e2) && passed;
 
     ostream.put_body("\x20\x24\x35\x46\x57\x71\x7f");
-    passed = verify_stream(context, ostream, 0x100e3) && passed;
+    passed = verify_stream_good(context, ostream, 0x100e3) && passed;
 
     ostream.put_body("\x80\x89\xa5\xb6\xc7\xff");
-    passed = verify_stream(context, ostream, 0x100e4) && passed;
+    passed = verify_stream_good(context, ostream, 0x100e4) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x100e5) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x100e5) && passed;
 
     return passed;
 }
@@ -654,6 +642,7 @@ bool test_http_response_ostream_bodybinary(test_context<abc::test::log>& context
 // --------------------------------------------------------------
 
 
+#if 0 ////
 template <typename HttpStream>
 bool http_request_istream_move(test_context<abc::test::log>& context) {
     char content[] =
