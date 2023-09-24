@@ -28,15 +28,16 @@ SOFTWARE.
 #include "../src/util.h"
 
 #include "inc/test.h"
-//// TODO: #include "inc/clock.h"
-//// TODO: #include "inc/ascii.h"
-//// TODO: #include "inc/timestamp.h"
-//// TODO: #include "inc/buffer_streambuf.h"
-//// TODO: #include "inc/multifile_streambuf.h"
-//// TODO: #include "inc/table_stream.h"
-//// TODO: #include "inc/socket.h"
-//// TODO: #include "inc/http.h"
+#include "inc/ascii.h"
+#include "inc/clock.h"
+#include "inc/timestamp.h"
+#include "inc/buffer_streambuf.h"
+#include "inc/multifile_streambuf.h"
+#include "inc/stream.h"
+#include "inc/table_stream.h"
+#include "inc/http.h"
 //// TODO: #include "inc/json.h"
+//// TODO: #include "inc/socket.h"
 //// TODO: #include "inc/vmem.h"
 
 
@@ -48,66 +49,69 @@ int main(int /*argc*/, const char* argv[]) {
         {
 #if 0 //// TODO:
             { "ascii", {
-                { "test_ascii_equal",                                abc::test::ascii::test_ascii_equal },
-                { "test_ascii_equal_n",                              abc::test::ascii::test_ascii_equal_n },
-                { "test_ascii_equal_i",                              abc::test::ascii::test_ascii_equal_i },
-                { "test_ascii_equal_i_n",                            abc::test::ascii::test_ascii_equal_i_n },
+                { "test_ascii_equal",                                test_ascii_equal },
+                { "test_ascii_equal_n",                              test_ascii_equal_n },
+                { "test_ascii_equal_i",                              test_ascii_equal_i },
+                { "test_ascii_equal_i_n",                            test_ascii_equal_i_n },
             } },
             { "timestamp", {
-                { "test_null_timestamp",                             abc::test::timestamp::test_null_timestamp },
-                { "test_before_year_2000_before_mar_1_timestamp",    abc::test::timestamp::test_before_year_2000_before_mar_1_timestamp },
-                { "test_before_year_2000_after_mar_1_timestamp",     abc::test::timestamp::test_before_year_2000_after_mar_1_timestamp },
-                { "test_after_year_2000_before_mar_1_timestamp",     abc::test::timestamp::test_after_year_2000_before_mar_1_timestamp },
-                { "test_after_year_2000_after_mar_1_timestamp",      abc::test::timestamp::test_after_year_2000_after_mar_1_timestamp },
+                { "test_null_timestamp",                             test_null_timestamp },
+                { "test_before_year_2000_before_mar_1_timestamp",    test_before_year_2000_before_mar_1_timestamp },
+                { "test_before_year_2000_after_mar_1_timestamp",     test_before_year_2000_after_mar_1_timestamp },
+                { "test_after_year_2000_before_mar_1_timestamp",     test_after_year_2000_before_mar_1_timestamp },
+                { "test_after_year_2000_after_mar_1_timestamp",      test_after_year_2000_after_mar_1_timestamp },
             } },
             { "buffer_streambuf", {
-                { "test_buffer_streambuf_1_char",                    abc::test::streambuf::test_buffer_streambuf_1_char },
-                { "test_buffer_streambuf_N_chars",                   abc::test::streambuf::test_buffer_streambuf_N_chars },
-                { "test_buffer_streambuf_move",                      abc::test::streambuf::test_buffer_streambuf_move },
+                { "test_buffer_streambuf_1_char",                    test_buffer_streambuf_1_char },
+                { "test_buffer_streambuf_N_chars",                   test_buffer_streambuf_N_chars },
+                { "test_buffer_streambuf_move",                      test_buffer_streambuf_move },
             } },
             { "multifile", {
-                { "test_multifile_streambuf_move",                   abc::test::multifile::test_multifile_streambuf_move },
-                { "test_duration_multifile_streambuf_move",          abc::test::multifile::test_duration_multifile_streambuf_move },
-                { "test_size_multifile_streambuf_move",              abc::test::multifile::test_size_multifile_streambuf_move },
+                { "test_multifile_streambuf_move",                   test_multifile_streambuf_move },
+                { "test_duration_multifile_streambuf_move",          test_duration_multifile_streambuf_move },
+                { "test_size_multifile_streambuf_move",              test_size_multifile_streambuf_move },
             } },
             { "stream", {
-                { "test_istream_move",                               abc::test::stream::test_istream_move },
-                { "test_ostream_move",                               abc::test::stream::test_ostream_move },
+                { "test_istream_move",                               test_istream_move },
+                { "test_ostream_move",                               test_ostream_move },
             } },
             { "table_stream", {
-                { "test_line_debug",                                 abc::test::table::test_line_debug },
-                { "test_line_diag",                                  abc::test::table::test_line_diag },
-                { "test_line_test",                                  abc::test::table::test_line_test },
-                { "test_table_move",                                 abc::test::table::test_table_move },
-                { "test_log_move",                                   abc::test::table::test_log_move },
-                { "test_line_move",                                  abc::test::table::test_line_move },
-                { "test_line_debug_move",                            abc::test::table::test_line_debug_move },
-                { "test_line_diag_move",                             abc::test::table::test_line_diag_move },
-                { "test_line_test_move",                             abc::test::table::test_line_test_move },
+                { "test_line_debug",                                 test_line_debug },
+                { "test_line_diag",                                  test_line_diag },
+                { "test_line_test",                                  test_line_test },
+                { "test_table_move",                                 test_table_move },
+                { "test_log_move",                                   test_log_move },
+                { "test_line_move",                                  test_line_move },
+                { "test_line_debug_move",                            test_line_debug_move },
+                { "test_line_diag_move",                             test_line_diag_move },
+                { "test_line_test_move",                             test_line_test_move },
             } },
             { "http", {
-                { "test_http_request_istream_extraspaces",           abc::test::http::test_http_request_istream_extraspaces },
-                { "test_http_request_istream_bodytext",              abc::test::http::test_http_request_istream_bodytext },
-                { "test_http_request_istream_bodybinary",            abc::test::http::test_http_request_istream_bodybinary },
-                { "test_http_request_istream_realworld_01",          abc::test::http::test_http_request_istream_realworld_01 },
-                { "test_http_request_istream_resource_01",           abc::test::http::test_http_request_istream_resource_01 },
-                { "test_http_request_istream_resource_02",           abc::test::http::test_http_request_istream_resource_02 },
-                { "test_http_request_istream_resource_03",           abc::test::http::test_http_request_istream_resource_03 },
-                { "test_http_request_istream_resource_04",           abc::test::http::test_http_request_istream_resource_04 },
-                { "test_http_request_ostream_bodytext",              abc::test::http::test_http_request_ostream_bodytext },
-                { "test_http_request_ostream_bodybinary",            abc::test::http::test_http_request_ostream_bodybinary },
-                { "test_http_response_istream_extraspaces",          abc::test::http::test_http_response_istream_extraspaces },
-                { "test_http_response_istream_realworld_01",         abc::test::http::test_http_response_istream_realworld_01 },
-                { "test_http_response_istream_realworld_02",         abc::test::http::test_http_response_istream_realworld_02 },
-                { "test_http_response_ostream_bodytext",             abc::test::http::test_http_response_ostream_bodytext },
-                { "test_http_request_istream_move",                  abc::test::http::test_http_request_istream_move },
-                { "test_http_request_ostream_move",                  abc::test::http::test_http_request_ostream_move },
-                { "test_http_response_istream_move",                 abc::test::http::test_http_response_istream_move },
-                { "test_http_response_ostream_move",                 abc::test::http::test_http_response_ostream_move },
-                { "test_http_client_stream_move",                    abc::test::http::test_http_client_stream_move },
-                { "test_http_server_stream_move",                    abc::test::http::test_http_server_stream_move },
+                { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
+                { "test_http_request_istream_bodytext",              test_http_request_istream_bodytext },
+                { "test_http_request_istream_bodybinary",            test_http_request_istream_bodybinary },
+                { "test_http_request_istream_realworld_01",          test_http_request_istream_realworld_01 },
+                { "test_http_request_istream_resource_01",           test_http_request_istream_resource_01 },
+                { "test_http_request_istream_resource_02",           test_http_request_istream_resource_02 },
+                { "test_http_request_istream_resource_03",           test_http_request_istream_resource_03 },
+                { "test_http_request_istream_resource_04",           test_http_request_istream_resource_04 },
+                { "test_http_request_ostream_bodytext",              test_http_request_ostream_bodytext },
+                { "test_http_request_ostream_bodybinary",            test_http_request_ostream_bodybinary },
+                { "test_http_response_istream_extraspaces",          test_http_response_istream_extraspaces },
+                { "test_http_response_istream_realworld_01",         test_http_response_istream_realworld_01 },
+                { "test_http_response_istream_realworld_02",         test_http_response_istream_realworld_02 },
+                { "test_http_response_ostream_bodytext",             test_http_response_ostream_bodytext },
+                { "test_http_response_ostream_bodybinary",           test_http_response_ostream_bodybinary },
+                { "test_http_request_istream_move",                  test_http_request_istream_move },
+                { "test_http_request_ostream_move",                  test_http_request_ostream_move },
+                { "test_http_response_istream_move",                 test_http_response_istream_move },
+                { "test_http_response_ostream_move",                 test_http_response_ostream_move },
+                { "test_http_client_stream_move",                    test_http_client_stream_move },
+                { "test_http_server_stream_move",                    test_http_server_stream_move },
             } },
+#endif //// TODO:
             { "json", {
+#if 0 //// TODO:
                 { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
                 { "test_json_istream_boolean_01",                    abc::test::json::test_json_istream_boolean_01 },
                 { "test_json_istream_boolean_02",                    abc::test::json::test_json_istream_boolean_02 },
@@ -147,7 +151,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_mixed_02",                      abc::test::json::test_json_ostream_mixed_02 },
                 { "test_json_istream_move",                          abc::test::json::test_json_istream_move },
                 { "test_json_ostream_move",                          abc::test::json::test_json_ostream_move },
+#endif //// TODO:
             } },
+#if 0 //// TODO:
             { "socket", {
                 { "test_udp_socket",                                 abc::test::socket::test_udp_socket },
                 { "test_tcp_socket",                                 abc::test::socket::test_tcp_socket },
