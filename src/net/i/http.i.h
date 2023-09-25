@@ -35,22 +35,21 @@ SOFTWARE.
 #include "../../diag/i/diag_ready.i.h"
 
 
-namespace abc { namespace net {
+namespace abc { namespace net { namespace http {
 
-    namespace http {
-        using item_t = std::uint8_t;
+    
+    using item_t = std::uint8_t;
 
-        namespace item {
-            constexpr item_t method        = 0;
-            constexpr item_t resource      = 1;
-            constexpr item_t protocol      = 2;
-            constexpr item_t status_code   = 3;
-            constexpr item_t reason_phrase = 4;
-            constexpr item_t header_name   = 5;
-            constexpr item_t header_value  = 6;
-            constexpr item_t body          = 7;
-            constexpr item_t eof           = 8;
-        }
+    namespace item {
+        constexpr item_t method        = 0;
+        constexpr item_t resource      = 1;
+        constexpr item_t protocol      = 2;
+        constexpr item_t status_code   = 3;
+        constexpr item_t reason_phrase = 4;
+        constexpr item_t header_name   = 5;
+        constexpr item_t header_value  = 6;
+        constexpr item_t body          = 7;
+        constexpr item_t eof           = 8;
     }
 
 
@@ -58,9 +57,9 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief http resource parsed into path and parameters. 
+     * @brief Complete http resource. 
      */
-    struct http_resource {
+    struct resource {
         std::string                                  path;
         std::unordered_map<std::string, std::string> parameters;
     };
@@ -69,13 +68,13 @@ namespace abc { namespace net {
     /**
      * @brief Collection of http headers. 
      */
-    using http_headers = std::unordered_map<std::string, std::string>;
+    using headers = std::unordered_map<std::string, std::string>;
 
 
     /**
      * @brief http status code. 
      */
-    using http_status_code = std::uint16_t;
+    using status_code_t = std::uint16_t;
 
 
     // --------------------------------------------------------------
@@ -86,7 +85,7 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_state
+    class state
         : protected diag::diag_ready<const char*, LogPtr> {
 
         using diag_base = diag::diag_ready<const char*, LogPtr>;
@@ -98,17 +97,17 @@ namespace abc { namespace net {
          * @param next   Next item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_state(const char* origin, http::item_t next, const LogPtr& log = nullptr) noexcept;
+        state(const char* origin, http::item_t next, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
          */
-        http_state(http_state&& other) = default;
+        state(state&& other) = default;
 
         /**
          * @brief Copy constructor.
          */
-        http_state(const http_state& other) = default;
+        state(const state& other) = default;
 
     public:
         /**
@@ -145,12 +144,12 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_istream
-        : public istream
-        , public http_state<LogPtr> {
+    class istream
+        : public abc::istream
+        , public state<LogPtr> {
 
-        using base      = istream;
-        using state     = http_state<LogPtr>;
+        using base      = abc::istream;
+        using state     = state<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
@@ -161,24 +160,24 @@ namespace abc { namespace net {
          * @param next   Next expected item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_istream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        istream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_istream(http_istream&& other);
+        istream(istream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_istream(const http_istream& other) = delete;
+        istream(const istream& other) = delete;
 
     public:
         /**
          * @brief  Reads headers from the http stream.
          * @return The headers.
          */
-        http_headers get_headers();
+        headers get_headers();
 
         /**
          * @brief  Reads a header name from the http stream.
@@ -300,12 +299,12 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_ostream
-        : public ostream
-        , public http_state<LogPtr> {
+    class ostream
+        : public abc::ostream
+        , public state<LogPtr> {
 
-        using base      = ostream;
-        using state     = http_state<LogPtr>;
+        using base      = abc::ostream;
+        using state     = state<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
@@ -316,24 +315,24 @@ namespace abc { namespace net {
          * @param next   Next expected item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        http_ostream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        ostream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_ostream(http_ostream&& other);
+        ostream(ostream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_ostream(const http_ostream& other) = delete;
+        ostream(const ostream& other) = delete;
 
     public:
         /**
          * @brief         Writes headers and headers end to the http stream.
          * @param headers Headers.
          */
-        void put_headers(const http_headers& headers);
+        void put_headers(const headers& headers);
 
         /**
          * @brief                 Writes a header name to the http stream.
@@ -470,10 +469,10 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_request_istream
-        : public http_istream<LogPtr> {
+    class request_istream
+        : public istream<LogPtr> {
 
-        using base      = http_istream<LogPtr>;
+        using base      = istream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
@@ -482,17 +481,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to read from.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_request_istream(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_istream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_request_istream(http_request_istream&& other);
+        request_istream(request_istream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_request_istream(const http_request_istream& other) = delete;
+        request_istream(const request_istream& other) = delete;
 
         /**
          * @brief Resets the read state.
@@ -510,7 +509,7 @@ namespace abc { namespace net {
          * @brief  Reads an http resource from the http stream.
          * @return The resource.
          */
-        http_resource get_resource();
+        resource get_resource();
 
         /**
          * @brief  Reads an http protocol from the http stream.
@@ -523,7 +522,7 @@ namespace abc { namespace net {
          * @brief              Splits a raw http resource.
          * @param raw_resource Resource.
          */
-        http_resource split_resource(const std::string& raw_resource);
+        resource split_resource(const std::string& raw_resource);
     };
 
 
@@ -535,10 +534,10 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_request_ostream
-        : public http_ostream<LogPtr> {
+    class request_ostream
+        : public ostream<LogPtr> {
 
-        using base      = http_ostream<LogPtr>;
+        using base      = ostream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
@@ -547,17 +546,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_request_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_request_ostream(http_request_ostream&& other);
+        request_ostream(request_ostream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_request_ostream(const http_request_ostream& other) = delete;
+        request_ostream(const request_ostream& other) = delete;
 
         /**
          * @brief Resets the write state.
@@ -596,10 +595,10 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_response_istream
-        : public http_istream<LogPtr> {
+    class response_istream
+        : public istream<LogPtr> {
 
-        using base      = http_istream<LogPtr>;
+        using base      = istream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
@@ -608,17 +607,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to read from.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_response_istream(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_istream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_response_istream(http_response_istream&& other);
+        response_istream(response_istream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_response_istream(const http_response_istream& other) = delete;
+        response_istream(const response_istream& other) = delete;
 
         /**
          * @brief Resets the read state.
@@ -634,7 +633,7 @@ namespace abc { namespace net {
         /**
          * @brief Reads an http status code from the http stream.
          */
-        http_status_code get_status_code();
+        status_code_t get_status_code();
 
         /**
          * @brief Reads an http reason phrase from the http stream.
@@ -651,10 +650,10 @@ namespace abc { namespace net {
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_response_ostream
-        : public http_ostream<LogPtr> {
+    class response_ostream
+        : public ostream<LogPtr> {
 
-        using base      = http_ostream<LogPtr>;
+        using base      = ostream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
@@ -663,17 +662,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_response_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_response_ostream(http_response_ostream&& other);
+        response_ostream(response_ostream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_response_ostream(const http_response_ostream& other) = delete;
+        response_ostream(const response_ostream& other) = delete;
 
         /**
          * @brief Resets the write state.
@@ -691,7 +690,7 @@ namespace abc { namespace net {
         /**
          * @brief Writes an http status code to the http stream.
          */
-        void put_status_code(http_status_code status_code);
+        void put_status_code(status_code_t status_code);
 
         /**
          * @brief                   Writes an http reason phrase to the http stream.
@@ -706,13 +705,13 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         Combination of `http_request_ostream` and `http_response_istream`. Used on the client side.
+     * @brief         Combination of `request_ostream` and `response_istream`. Used on the client side.
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_client_stream
-        : public http_request_ostream<LogPtr>
-        , public http_response_istream<LogPtr> {
+    class client_stream
+        : public request_ostream<LogPtr>
+        , public response_istream<LogPtr> {
 
     public:
         /**
@@ -720,17 +719,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to read from and to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_client_stream(std::streambuf* sb, const LogPtr& log = nullptr);
+        client_stream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_client_stream(http_client_stream&& other);
+        client_stream(client_stream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_client_stream(const http_client_stream& other) = delete;
+        client_stream(const client_stream& other) = delete;
     };
 
 
@@ -738,13 +737,13 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         Combination of `http_request_istream` and `http_response_ostream`. Used on the server side.
+     * @brief         Combination of `request_istream` and `response_ostream`. Used on the server side.
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class http_server_stream
-        : public http_request_istream<LogPtr>
-        , public http_response_ostream<LogPtr> {
+    class server_stream
+        : public request_istream<LogPtr>
+        , public response_ostream<LogPtr> {
 
     public:
         /**
@@ -752,17 +751,17 @@ namespace abc { namespace net {
          * @param sb  `std::streambuf` to read from and to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        http_server_stream(std::streambuf* sb, const LogPtr& log = nullptr);
+        server_stream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        http_server_stream(http_server_stream&& other);
+        server_stream(server_stream&& other);
 
         /**
          * @brief Deleted.
          */
-        http_server_stream(const http_server_stream& other) = delete;
+        server_stream(const server_stream& other) = delete;
     };
 
-} }
+} } }

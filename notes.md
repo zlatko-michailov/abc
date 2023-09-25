@@ -3,8 +3,17 @@
 - `diag_ready`
 
 ## To Do
+- `http`
+  - `request` and `response` structs.
+  - `get_request`, `put_request`
+  - `get_response`, `put_response`
+  - tests
+- Templatize `std::streambuf*`and pass __by copy__
+  - `table_ostream`
+  - `log`
+  - `http`
+
 - __UNTABIFY each file before making changes!__
-- Templatize `std::streambuf*`. Pass __by copy__.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.

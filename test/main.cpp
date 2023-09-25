@@ -86,6 +86,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_line_diag_move",                             test_line_diag_move },
                 { "test_line_test_move",                             test_line_test_move },
             } },
+#endif //// TODO:
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
                 { "test_http_request_istream_bodytext",              test_http_request_istream_bodytext },
@@ -109,7 +110,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_client_stream_move",                    test_http_client_stream_move },
                 { "test_http_server_stream_move",                    test_http_server_stream_move },
             } },
-#endif //// TODO:
             { "json", {
 #if 0 //// TODO:
                 { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
