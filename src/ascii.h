@@ -38,6 +38,7 @@ namespace abc {
     namespace ascii {
         using predicate_t = bool (*) (char);
 
+
         inline bool is_between(char ch, char low, char high) noexcept {
             return low <= ch && ch <= high;
         }
@@ -110,6 +111,14 @@ namespace abc {
 
         inline bool is_any(char /*ch*/) noexcept {
             return true;
+        }
+
+
+        template <typename Hex>
+        inline char to_digit16(Hex hex) noexcept {
+            constexpr char digits[] = "0123456789ABCDEF";
+
+            return digits[hex & 0xF];
         }
 
 
@@ -187,6 +196,13 @@ namespace abc {
 
             inline bool is_token(char ch) noexcept {
                 return is_abcprint(ch) && !is_separator(ch);
+            }
+
+
+            inline bool is_url_safe(char ch) noexcept {
+                // RFC 3896, Section 2.3. Unreserved Characters
+                return
+                    is_alpha(ch) || is_digit(ch) || ch == '-' || ch == '.' || ch == '_' || ch == '~';
             }
         }
 

@@ -55,8 +55,8 @@ bool test_http_request_istream_extraspaces(test_context& context) {
 
     abc::net::http::resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), "http://a.com/b", 0x1006b) && passed;
-    passed = context.are_equal(resource.parameters.size(), (std::size_t)1, __TAG__, "%zu") && passed;
-    passed = context.are_equal(resource.parameters["c"].c_str(), "d", __TAG__) && passed;
+    passed = context.are_equal(resource.query.size(), (std::size_t)1, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query["c"].c_str(), "d", __TAG__) && passed;
     passed = verify_stream_good(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
@@ -107,10 +107,10 @@ bool test_http_request_istream_bodytext(test_context& context) {
 
     abc::net::http::resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), "http://a.com/bbb/cc/d", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters.size(), (std::size_t)3, __TAG__, "%zu") && passed;
-    passed = context.are_equal(resource.parameters["x"].c_str(), "111", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters["yy"].c_str(), "22", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters["zzz"].c_str(), "3", __TAG__) && passed;
+    passed = context.are_equal(resource.query.size(), (std::size_t)3, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query["x"].c_str(), "111", __TAG__) && passed;
+    passed = context.are_equal(resource.query["yy"].c_str(), "22", __TAG__) && passed;
+    passed = context.are_equal(resource.query["zzz"].c_str(), "3", __TAG__) && passed;
     passed = verify_stream_good(context, istream, std::strlen("http://a.com/bbb/cc/d?x=111&yy=22&zzz=3"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
@@ -162,8 +162,8 @@ bool test_http_request_istream_bodybinary(test_context& context) {
 
     abc::net::http::resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), "http://a.com/b", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters.size(), (std::size_t)1, __TAG__, "%zu") && passed;
-    passed = context.are_equal(resource.parameters["c"].c_str(), "d", __TAG__) && passed;
+    passed = context.are_equal(resource.query.size(), (std::size_t)1, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query["c"].c_str(), "d", __TAG__) && passed;
     passed = verify_stream_good(context, istream, std::strlen("http://a.com/b?c=d"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
@@ -216,7 +216,7 @@ bool test_http_request_istream_realworld_01(test_context& context) {
 
     abc::net::http::resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), "https://en.cppreference.com/w/cpp/io/basic_streambuf", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query.size(), (std::size_t)0, __TAG__, "%zu") && passed;
     passed = verify_stream_good(context, istream, std::strlen("https://en.cppreference.com/w/cpp/io/basic_streambuf"), __TAG__) && passed;
 
     std::string protocol = istream.get_protocol();
@@ -282,12 +282,12 @@ bool test_http_request_istream_resource(test_context& context, const char* expec
 
     abc::net::http::resource resource = istream.get_resource();
     passed = context.are_equal(resource.path.c_str(), expected_path, __TAG__) && passed;
-    passed = context.are_equal(resource.parameters.size(), expected_parameter_count, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query.size(), expected_parameter_count, __TAG__, "%zu") && passed;
     if (expected_parameter_value != nullptr) {
-        passed = context.are_equal(resource.parameters[expected_parameter_name].c_str(), expected_parameter_value, __TAG__) && passed;
+        passed = context.are_equal(resource.query[expected_parameter_name].c_str(), expected_parameter_value, __TAG__) && passed;
     }
     else {
-        passed = context.are_equal(resource.parameters.find(expected_parameter_name) == resource.parameters.end(), true, __TAG__, "%d") && passed;
+        passed = context.are_equal(resource.query.find(expected_parameter_name) == resource.query.end(), true, __TAG__, "%d") && passed;
     }
 
     return passed;
@@ -653,7 +653,7 @@ bool http_request_istream_move(test_context& context) {
 
     abc::net::http::resource resource = istream2.get_resource();
     passed = context.are_equal(resource.path.c_str(), "https://en.cppreference.com/w/cpp/io/basic_streambuf", __TAG__) && passed;
-    passed = context.are_equal(resource.parameters.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = context.are_equal(resource.query.size(), (std::size_t)0, __TAG__, "%zu") && passed;
     passed = verify_stream_good(context, static_cast<abc::net::http::request_istream<test_log*>&>(istream2), std::strlen("https://en.cppreference.com/w/cpp/io/basic_streambuf"), __TAG__) && passed;
 
     return passed;

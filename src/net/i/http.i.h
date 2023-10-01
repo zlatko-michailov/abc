@@ -61,7 +61,8 @@ namespace abc { namespace net { namespace http {
      */
     struct resource {
         std::string                                  path;
-        std::unordered_map<std::string, std::string> parameters;
+        std::unordered_map<std::string, std::string> query;
+        std::string                                  fragment;
     };
 
 
@@ -75,6 +76,37 @@ namespace abc { namespace net { namespace http {
      * @brief http status code. 
      */
     using status_code_t = std::uint16_t;
+
+
+    /**
+     * @brief Common request/response properties. 
+     */
+    struct common {
+        std::string protocol { "HTTP/1.1" };
+        headers     headers;
+    };
+
+
+    /**
+     * @brief Request (minus the body). 
+     */
+    struct request
+        : public common {
+
+        std::string method;
+        resource    resource;
+    };
+
+
+    /**
+     * @brief Response (minus the body). 
+     */
+    struct response
+        : public common {
+
+        status_code_t status_code;
+        std::string   reason_phrase;
+    };
 
 
     // --------------------------------------------------------------
@@ -197,7 +229,6 @@ namespace abc { namespace net { namespace http {
          * @return        The chunk. Empty when there is no more to read.
          */
         std::string get_body(std::size_t max_len);
-
 
     protected:
         /**
@@ -330,6 +361,7 @@ namespace abc { namespace net { namespace http {
     public:
         /**
          * @brief         Writes headers and headers end to the http stream.
+         * @note          If this is called on `request_ostream`, the caller is responsible for providing a `Host` header.
          * @param headers Headers.
          */
         void put_headers(const headers& headers);
@@ -430,11 +462,11 @@ namespace abc { namespace net { namespace http {
         std::size_t put_any_chars(const char* any_chars, std::size_t any_chars_len);
 
         /**
-         * @brief           Writes a sequence of chars that match a predicate to the http stream.
-         * @param predicate Predicate.
-         * @param chars     Sequence of chars.
-         * @param chars_len Sequence length. Optional.
-         * @return          The count of chars written. 
+         * @brief            Writes a sequence of chars that match a predicate to the http stream.
+         * @param predicate  Predicate.
+         * @param chars      Sequence of chars.
+         * @param chars_len  Sequence length. Optional.
+         * @return           The count of chars written. 
          */
         std::size_t put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len = size::strlen);
 
@@ -499,6 +531,12 @@ namespace abc { namespace net { namespace http {
         void reset();
 
     public:
+        /**
+         * @brief  Reads an http request from the http stream.
+         * @return The request.
+         */
+        request get_request();
+
         /**
          * @brief  Reads an http method from the http stream.
          * @return The method.
@@ -565,11 +603,23 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
+         * @brief         Writes an http request to the http stream.
+         * @param request Request.
+         */
+        void put_request(const request& request);
+
+        /**
          * @brief            Writes an http method to the http stream.
          * @param method     Method.
          * @param method_len Method length. Optional.
          */
         void put_method(const char* method, std::size_t method_len = size::strlen);
+
+        /**
+         * @brief              Writes an http resource to the http stream.
+         * @param resource     Resource.
+         */
+        void put_resource(const resource& resource);
 
         /**
          * @brief              Writes an http resource to the http stream.
@@ -626,6 +676,12 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
+         * @brief  Reads an http response from the http stream.
+         * @return The request.
+         */
+        response get_response();
+
+        /**
          * @brief Reads an http protocol from the http stream.
          */
         std::string get_protocol();
@@ -680,6 +736,12 @@ namespace abc { namespace net { namespace http {
         void reset();
 
     public:
+        /**
+         * @brief          Writes an http response to the http stream.
+         * @param response Response.
+         */
+        void put_response(const response& response);
+
         /**
          * @brief              Writes an http protocol to the http stream.
          * @param protocol     Protocol.
@@ -762,6 +824,26 @@ namespace abc { namespace net { namespace http {
          * @brief Deleted.
          */
         server_stream(const server_stream& other) = delete;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief http utilities.
+     */
+    class util {
+    public:
+        /**
+         * @brief URL-encodes the given character sequence.
+         */
+        static std::string url_encode(const char* chars, std::size_t chars_len = size::strlen);
+
+        /**
+         * @brief URL-decodes the given character sequence.
+         */
+        static std::string url_decode(const char* chars, std::size_t chars_len = size::strlen);
     };
 
 } } }

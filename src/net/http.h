@@ -690,11 +690,22 @@ namespace abc { namespace net { namespace http {
 
     template <typename LogPtr>
     inline std::size_t ostream<LogPtr>::put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len) {
+        constexpr const char* suborigin = "put_chars()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
+
+        diag_base::expect(suborigin, chars != nullptr, __TAG__, "chars != nullptr");
+
         std::size_t pcount = 0;
+
+        if (chars_len == size::strlen) {
+            chars_len = std::strlen(chars);
+        }
 
         while (base::is_good() && pcount < chars_len && predicate(chars[pcount])) {
             base::put(chars[pcount++]);
         }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
 
         return pcount;
     }
@@ -774,6 +785,24 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
+    inline request request_istream<LogPtr>::get_request() {
+        constexpr const char* suborigin = "get_request()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        request request;
+
+        request.method   = get_method();
+        request.resource = get_resource();
+        request.protocol = get_protocol();
+        request.headers  = base::get_headers();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return request;
+    }
+
+
+    template <typename LogPtr>
     inline std::string request_istream<LogPtr>::get_method() {
         constexpr const char* suborigin = "get_method()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
@@ -832,30 +861,57 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "split_resource()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: raw_resource='%s'", raw_resource.c_str());
 
-        // Format: path?param1=...&param2=...
+        // Format: path?param1=...&param2=...#...
 
         resource resource;
 
         // Extract the path.
-        std::string::size_type end_pos = raw_resource.find('?');
-        resource.path = raw_resource.substr(0, end_pos);
+        std::string::size_type begin_pos = 0;
 
-        while (end_pos != std::string::npos) {
-            std::string::size_type begin_pos = ++end_pos;
-            end_pos = raw_resource.find_first_of("=&", begin_pos);
+        std::string::size_type end_pos = raw_resource.find_first_of("?#");
+        if (end_pos == std::string::npos) {
+            end_pos = raw_resource.length();
+        }
 
-            if (end_pos != std::string::npos) {
-                std::string param_name = raw_resource.substr(begin_pos, end_pos - begin_pos);
+        resource.path = util::url_decode(raw_resource.c_str() + begin_pos, end_pos - begin_pos);
 
-                std::string param_value;
-                if (raw_resource[end_pos] == '=') {
-                    begin_pos = ++end_pos;
-                    end_pos = raw_resource.find('&', begin_pos);
-                    param_value = raw_resource.substr(begin_pos, end_pos - begin_pos);
+        while (end_pos < raw_resource.length()) {
+            begin_pos = end_pos + 1;
+
+            if (begin_pos >= raw_resource.length()) {
+                break;
+            }
+
+            // Fragment
+            if (raw_resource[end_pos] == '#') {
+                end_pos = raw_resource.length();
+                resource.fragment = util::url_decode(raw_resource.c_str() + begin_pos, end_pos - begin_pos);
+                break;
+            }
+
+            // Query/parameters.
+            end_pos = raw_resource.find_first_of("=&#", begin_pos);
+            if (end_pos == std::string::npos) {
+                end_pos = raw_resource.length();
+            }
+
+            // Parameter name.
+            std::string param_name = util::url_decode(raw_resource.c_str() + begin_pos, end_pos - begin_pos);
+            std::string param_value;
+
+            // Parameter value.
+            if (end_pos < raw_resource.length() && raw_resource[end_pos] == '=') {
+                begin_pos = end_pos + 1;
+
+                end_pos = raw_resource.find_first_of("&#", begin_pos);
+                if (end_pos == std::string::npos) {
+                    end_pos = raw_resource.length();
                 }
 
-                resource.parameters[std::move(param_name)] = std::move(param_value);
+                param_value = util::url_decode(raw_resource.c_str() + begin_pos, end_pos - begin_pos);
             }
+
+            resource.query[std::move(param_name)] = std::move(param_value);
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
@@ -896,6 +952,20 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
+    inline void request_ostream<LogPtr>::put_request(const request& request) {
+        constexpr const char* suborigin = "put_request()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        put_method(request.method.c_str(), request.method.length());
+        put_resource(request.resource);
+        put_protocol(request.protocol.c_str(), request.protocol.length());
+        base::put_headers(request.headers);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
     inline void request_ostream<LogPtr>::put_method(const char* method, std::size_t method_len) {
         constexpr const char* suborigin = "put_method()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: method='%s'", method);
@@ -912,6 +982,40 @@ namespace abc { namespace net { namespace http {
         base::put_space();
 
         base::set_pstate(item::resource);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline void request_ostream<LogPtr>::put_resource(const resource& resource) {
+        constexpr const char* suborigin = "put_resource()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        std::string url_encoded_path = util::url_encode(resource.path.c_str(), resource.path.length());
+        base::put_chars(url_encoded_path.c_str(), url_encoded_path.length());
+
+        if (!resource.query.empty()) {
+            base::put_char('?');
+
+            bool is_first = true;
+            for (auto query_itr = resource.query.cbegin(); query_itr != resource.query.cend(); query_itr++ ) {
+                if (!is_first) {
+                    base::put_char('&');
+                }
+                is_first = false;
+
+                std::string url_encoded_parameter_name = util::url_encode(query_itr->first.c_str(), query_itr->first.length());
+                base::put_chars(url_encoded_parameter_name.c_str(), url_encoded_parameter_name.length());
+
+                if (!query_itr->second.empty()) {
+                    base::put_char('=');
+
+                    std::string url_encoded_parameter_value = util::url_encode(query_itr->second.c_str(), query_itr->second.length());
+                    base::put_chars(url_encoded_parameter_value.c_str(), url_encoded_parameter_value.length());
+                }
+            }
+        } 
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -983,6 +1087,24 @@ namespace abc { namespace net { namespace http {
         base::reset(item::protocol);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline response response_istream<LogPtr>::get_response() {
+        constexpr const char* suborigin = "get_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        response response;
+
+        response.protocol      = get_protocol();
+        response.status_code   = get_status_code();
+        response.reason_phrase = get_reason_phrase();
+        response.headers       = base::get_headers();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return response;
     }
 
 
@@ -1065,6 +1187,19 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         base::reset(item::protocol);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline void response_ostream<LogPtr>::put_response(const response& response) {
+        constexpr const char* suborigin = "put_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        put_protocol(response.protocol.c_str(), response.protocol.length());
+        put_status_code(response.status_code);
+        put_reason_phrase(response.reason_phrase.c_str(), response.reason_phrase.length());
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -1160,6 +1295,64 @@ namespace abc { namespace net { namespace http {
         : request_istream<LogPtr>(std::move(other))
         , response_ostream<LogPtr>(std::move(other)) {
     }
+
+
+    // --------------------------------------------------------------
+
+
+    inline std::string util::url_encode(const char* chars, std::size_t chars_len) {
+        if (chars == nullptr) {
+            return std::string();
+        }
+
+        if (chars_len == size::strlen) {
+            chars_len = std::strlen(chars);
+        }
+
+        std::string result;
+
+        for (std::size_t i = 0; i < chars_len; i++) {
+            char ch = chars[i];
+
+            if (!ascii::http::is_url_safe(ch)) {
+                result += '%';
+                result += ascii::to_digit16((ch >> 4) & 0xF);
+                result += ascii::to_digit16(ch & 0xF);
+            }
+            else {
+                result += ch;
+            }
+        }
+
+        return result;
+    }
+
+
+    inline std::string util::url_decode(const char* chars, std::size_t chars_len) {
+        if (chars == nullptr) {
+            return std::string();
+        }
+
+        if (chars_len == size::strlen) {
+            chars_len = std::strlen(chars);
+        }
+
+        std::string result;
+
+        for (std::size_t i = 0; i < chars_len; i++) {
+            char ch = chars[i];
+
+            if (ch == '%' && (i + 2 < chars_len) && ascii::is_hex(chars[i + 1]) && ascii::is_hex(chars[i + 2])) {
+                ch = static_cast<char>((ascii::hex(chars[i + 1]) << 4) | ascii::hex(chars[i + 2]));
+                i += 2;
+            }
+
+            result += ch;
+        }
+
+        return result;
+    }
+
 
 } } }
 
