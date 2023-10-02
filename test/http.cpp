@@ -243,30 +243,60 @@ bool test_http_request_istream_realworld_01(test_context& context) {
 // --------------------------------------------------------------
 
 
-bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value);
+bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value, const char* expected_fragment);
 
 
 bool test_http_request_istream_resource_01(test_context& context) {
-    return test_http_request_istream_resource(context, "/path", "/path", 0, "p3", nullptr);
+    return test_http_request_istream_resource(context, "/pa%20th", "/pa th", 0, "p3", nullptr, "");
 }
 
 
 bool test_http_request_istream_resource_02(test_context& context) {
-    return test_http_request_istream_resource(context, "/path?", "/path", 0, "p3", nullptr);
+    return test_http_request_istream_resource(context, "/path?", "/path", 0, "p3", nullptr, "");
 }
 
 
 bool test_http_request_istream_resource_03(test_context& context) {
-    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42", "/path", 3, "p3", "42");
+    return test_http_request_istream_resource(context, "/path?p1=123&p2&p%203=4%202", "/path", 3, "p 3", "4 2", "");
 }
 
 
 bool test_http_request_istream_resource_04(test_context& context) {
-    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42&p4=56", "/path", 4, "p3", "42");
+    return test_http_request_istream_resource(context, "/path?p1=123&p2&p3=42%20&p4=56", "/path", 4, "p3", "42 ", "");
 }
 
 
-bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value) {
+bool test_http_request_istream_resource_05(test_context& context) {
+    return test_http_request_istream_resource(context, "/path#fr%20ag", "/path", 0, "p3", nullptr, "fr ag");
+}
+
+
+bool test_http_request_istream_resource_06(test_context& context) {
+    return test_http_request_istream_resource(context, "/path%20?#frag%20", "/path ", 0, "p3", nullptr, "frag ");
+}
+
+
+bool test_http_request_istream_resource_07(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?p1&p2=&p3=12#frag", "/path", 3, "p3", "12", "frag");
+}
+
+
+bool test_http_request_istream_resource_08(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?#", "/path", 0, "p3", nullptr, "");
+}
+
+
+bool test_http_request_istream_resource_09(test_context& context) {
+    return test_http_request_istream_resource(context, "/path#%20", "/path", 0, "p3", nullptr, " ");
+}
+
+
+bool test_http_request_istream_resource_10(test_context& context) {
+    return test_http_request_istream_resource(context, "/path?=12&=34&p3=56", "/path", 1, "p3", "56", "");
+}
+
+
+bool test_http_request_istream_resource(test_context& context, const char* expected_resource, const char* expected_path, std::size_t expected_parameter_count, const char* expected_parameter_name, const char* expected_parameter_value, const char* expected_fragment) {
     std::string content("GET ");
     content.append(expected_resource);
     content.append(" ");
@@ -289,6 +319,7 @@ bool test_http_request_istream_resource(test_context& context, const char* expec
     else {
         passed = context.are_equal(resource.query.find(expected_parameter_name) == resource.query.end(), true, __TAG__, "%d") && passed;
     }
+    passed = context.are_equal(resource.fragment.c_str(), expected_fragment, __TAG__) && passed;
 
     return passed;
 }
@@ -396,6 +427,76 @@ bool test_http_request_ostream_bodybinary(test_context& context) {
     passed = verify_stream_good(context, ostream, 0x100b0) && passed;
 
     passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x100b1) && passed;
+
+    return passed;
+}
+
+
+// --------------------------------------------------------------
+
+
+bool test_http_request_ostream_resource(test_context& context, abc::net::http::resource&& actual_resource, const char* expected_resource);
+
+
+bool test_http_request_ostream_resource_01(test_context& context) {
+    abc::net::http::resource actual_resource;
+    actual_resource.path = "/fi rst/sec ond";
+
+    return test_http_request_ostream_resource(context, std::move(actual_resource), "/fi%20rst/sec%20ond");
+}
+
+
+bool test_http_request_ostream_resource_02(test_context& context) {
+    abc::net::http::resource actual_resource;
+    actual_resource.path = "/pa th";
+    actual_resource.query["p 1"] = "val 1";
+    actual_resource.query["p 2"] = "";
+    actual_resource.query["p 3"] = "val 3";
+
+    return test_http_request_ostream_resource(context, std::move(actual_resource), "/pa%20th?p%203=val%203&p%202&p%201=val%201");
+}
+
+
+bool test_http_request_ostream_resource_03(test_context& context) {
+    abc::net::http::resource actual_resource;
+    actual_resource.path = "/pa th";
+    actual_resource.fragment = "fr ag";
+
+    return test_http_request_ostream_resource(context, std::move(actual_resource), "/pa%20th#fr%20ag");
+}
+
+
+bool test_http_request_ostream_resource_04(test_context& context) {
+    abc::net::http::resource actual_resource;
+    actual_resource.path = "/pa th";
+    actual_resource.query["p 1"] = "val 1";
+    actual_resource.query["p 2"] = "";
+    actual_resource.query["p 3"] = "val 3";
+    actual_resource.fragment = "fr ag";
+
+    return test_http_request_ostream_resource(context, std::move(actual_resource), "/pa%20th?p%203=val%203&p%202&p%201=val%201#fr%20ag");
+}
+
+
+bool test_http_request_ostream_resource(test_context& context, abc::net::http::resource&& actual_resource, const char* expected_resource) {
+    std::string expected = "GET ";
+    expected.append(expected_resource);
+    expected.append(" HTTP/1.1\r\n\r\n");
+
+    abc::net::http::request request;
+    request.method = "GET";
+    request.resource = std::move(actual_resource);
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::request_ostream<test_log*> ostream(&sb, context.log());
+
+    bool passed = true;
+
+    ostream.put_request(request);
+    passed = verify_stream_good(context, ostream, __TAG__) && passed;
+
+    passed = context.are_equal(sb.str().c_str(), expected.c_str(), expected.length(), __TAG__) && passed;
 
     return passed;
 }

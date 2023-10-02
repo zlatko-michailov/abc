@@ -877,7 +877,6 @@ namespace abc { namespace net { namespace http {
 
         while (end_pos < raw_resource.length()) {
             begin_pos = end_pos + 1;
-
             if (begin_pos >= raw_resource.length()) {
                 break;
             }
@@ -911,7 +910,9 @@ namespace abc { namespace net { namespace http {
                 param_value = util::url_decode(raw_resource.c_str() + begin_pos, end_pos - begin_pos);
             }
 
-            resource.query[std::move(param_name)] = std::move(param_value);
+            if (!param_name.empty()) {
+                resource.query[std::move(param_name)] = std::move(param_value);
+            }
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
@@ -992,8 +993,10 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "put_resource()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
+        base::assert_next(item::resource);
+
         std::string url_encoded_path = util::url_encode(resource.path.c_str(), resource.path.length());
-        base::put_chars(url_encoded_path.c_str(), url_encoded_path.length());
+        base::put_any_chars(url_encoded_path.c_str(), url_encoded_path.length());
 
         if (!resource.query.empty()) {
             base::put_char('?');
@@ -1006,16 +1009,26 @@ namespace abc { namespace net { namespace http {
                 is_first = false;
 
                 std::string url_encoded_parameter_name = util::url_encode(query_itr->first.c_str(), query_itr->first.length());
-                base::put_chars(url_encoded_parameter_name.c_str(), url_encoded_parameter_name.length());
+                base::put_any_chars(url_encoded_parameter_name.c_str(), url_encoded_parameter_name.length());
 
                 if (!query_itr->second.empty()) {
                     base::put_char('=');
 
                     std::string url_encoded_parameter_value = util::url_encode(query_itr->second.c_str(), query_itr->second.length());
-                    base::put_chars(url_encoded_parameter_value.c_str(), url_encoded_parameter_value.length());
+                    base::put_any_chars(url_encoded_parameter_value.c_str(), url_encoded_parameter_value.length());
                 }
             }
-        } 
+        }
+
+        if (!resource.fragment.empty()) {
+            base::put_char('#');
+            std::string url_encoded_fragment = util::url_encode(resource.fragment.c_str(), resource.fragment.length());
+            base::put_any_chars(url_encoded_fragment.c_str(), url_encoded_fragment.length());
+        }
+
+        base::put_space();
+
+        base::set_pstate(item::protocol);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }

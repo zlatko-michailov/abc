@@ -38,9 +38,19 @@ bool test_http_request_istream_resource_01(test_context& context);
 bool test_http_request_istream_resource_02(test_context& context);
 bool test_http_request_istream_resource_03(test_context& context);
 bool test_http_request_istream_resource_04(test_context& context);
+bool test_http_request_istream_resource_05(test_context& context);
+bool test_http_request_istream_resource_06(test_context& context);
+bool test_http_request_istream_resource_07(test_context& context);
+bool test_http_request_istream_resource_08(test_context& context);
+bool test_http_request_istream_resource_09(test_context& context);
+bool test_http_request_istream_resource_10(test_context& context);
 
 bool test_http_request_ostream_bodytext(test_context& context);
 bool test_http_request_ostream_bodybinary(test_context& context);
+bool test_http_request_ostream_resource_01(test_context& context);
+bool test_http_request_ostream_resource_02(test_context& context);
+bool test_http_request_ostream_resource_03(test_context& context);
+bool test_http_request_ostream_resource_04(test_context& context);
 
 bool test_http_response_istream_extraspaces(test_context& context);
 bool test_http_response_istream_realworld_01(test_context& context);

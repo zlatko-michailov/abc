@@ -3,13 +3,6 @@
 - `diag_ready`
 
 ## To Do
-- `http`
-  - Done: `request` and `response` structs.
-  - Done: `get_request`, `put_request`
-  - Done: `get_response`, `put_response`
-  - To test: `util::url_encode()`, `util::url_decode()`
-  - To test: resource (through `get_request`, `put_request`)
-  - tests
 - Templatize `std::streambuf*`and pass __by copy__
   - `table_ostream`
   - `log`

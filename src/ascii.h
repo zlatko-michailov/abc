@@ -202,7 +202,7 @@ namespace abc {
             inline bool is_url_safe(char ch) noexcept {
                 // RFC 3896, Section 2.3. Unreserved Characters
                 return
-                    is_alpha(ch) || is_digit(ch) || ch == '-' || ch == '.' || ch == '_' || ch == '~';
+                    is_alpha(ch) || is_digit(ch) || ch == '/' || ch == '-' || ch == '.' || ch == '_' || ch == '~';
             }
         }
 
