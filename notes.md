@@ -3,6 +3,13 @@
 - `diag_ready`
 
 ## To Do
+- `http`
+  - Url-encode '/' when not in path.
+  - Reorder public methods - high-level at top.
+  - Record relevant RFCs:
+    - URI - https://datatracker.ietf.org/doc/html/rfc3986
+    - HTTP Semantics - https://datatracker.ietf.org/doc/html/rfc9110
+    - HTTP/1.1 - https://datatracker.ietf.org/doc/html/rfc9112
 - Templatize `std::streambuf*`and pass __by copy__
   - `table_ostream`
   - `log`

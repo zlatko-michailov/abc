@@ -1213,6 +1213,7 @@ namespace abc { namespace net { namespace http {
         put_protocol(response.protocol.c_str(), response.protocol.length());
         put_status_code(response.status_code);
         put_reason_phrase(response.reason_phrase.c_str(), response.reason_phrase.length());
+        base::put_headers(response.headers);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }

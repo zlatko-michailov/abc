@@ -113,6 +113,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_response_istream_realworld_02",         test_http_response_istream_realworld_02 },
                 { "test_http_response_ostream_bodytext",             test_http_response_ostream_bodytext },
                 { "test_http_response_ostream_bodybinary",           test_http_response_ostream_bodybinary },
+                { "test_http_response_ostream_bodynone",             test_http_response_ostream_bodynone },
                 { "test_http_request_istream_move",                  test_http_request_istream_move },
                 { "test_http_request_ostream_move",                  test_http_request_ostream_move },
                 { "test_http_response_istream_move",                 test_http_response_istream_move },

@@ -58,6 +58,7 @@ bool test_http_response_istream_realworld_02(test_context& context);
 
 bool test_http_response_ostream_bodytext(test_context& context);
 bool test_http_response_ostream_bodybinary(test_context& context);
+bool test_http_response_ostream_bodynone(test_context& context);
 
 bool test_http_request_istream_move(test_context& context);
 bool test_http_request_ostream_move(test_context& context);

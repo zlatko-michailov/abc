@@ -731,6 +731,36 @@ bool test_http_response_ostream_bodybinary(test_context& context) {
 }
 
 
+bool test_http_response_ostream_bodynone(test_context& context) {
+    const char expected[] =
+        "HTTP/1.1 200 OK\r\n"
+        "Simple: simple\r\n"
+        "List: foo bar foobar\r\n"
+        "\r\n";
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::response_ostream<test_log*> ostream(&sb, context.log());
+
+    bool passed = true;
+
+    abc::net::http::response response;
+    response.status_code = 200;
+    response.reason_phrase = "OK";
+    response.headers = {
+        { "List", "foo bar foobar" },
+        { "Simple", "simple" },
+    };
+
+    ostream.put_response(response);
+    passed = verify_stream_good(context, ostream, __TAG__) && passed;
+
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 
