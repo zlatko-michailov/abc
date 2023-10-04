@@ -200,9 +200,15 @@ namespace abc {
 
 
             inline bool is_url_safe(char ch) noexcept {
-                // RFC 3896, Section 2.3. Unreserved Characters
+                // RFC 3896:
+                //   - Section 2.3. Unreserved Characters
+                //   - Section 3.3. Path
+                //   - Section 3.4. Query
+                //   - Section 3.5. Fragment
                 return
-                    is_alpha(ch) || is_digit(ch) || ch == '/' || ch == '-' || ch == '.' || ch == '_' || ch == '~';
+                    is_alpha(ch) || is_digit(ch) ||
+                    ch == '-' || ch == '.' || ch == '_' || ch == '~' ||
+                    ch == '/' || ch == ':' || ch == '@';
             }
         }
 

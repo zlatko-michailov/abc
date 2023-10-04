@@ -4,7 +4,6 @@
 
 ## To Do
 - `http`
-  - Url-encode '/' when not in path.
   - Reorder public methods - high-level at top.
   - Record relevant RFCs:
     - URI - https://datatracker.ietf.org/doc/html/rfc3986
