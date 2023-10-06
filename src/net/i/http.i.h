@@ -206,29 +206,34 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
-         * @brief  Reads headers from the http stream.
-         * @return The headers.
+         * @brief         Reads a chunk of a body from the http stream.
+         * @details       The whole request/response must have been read before this method is called.
+         * @param max_len Maximum length of the chunk.
+         * @return        The chunk. Empty when there is no more to read.
+         */
+        std::string get_body(std::size_t max_len);
+
+    public:
+        /**
+         * @brief   Reads headers from the http stream.
+         * @details Consider using `request_istream::get_request()` / `response_istream::get_response()`.
+         * @return  The headers.
          */
         headers get_headers();
 
         /**
          * @brief  Reads a header name from the http stream.
+         * @details Consider using `request_istream::get_request()` / `response_istream::get_response()`.
          * @return The header name.
          */
         std::string get_header_name();
 
         /**
          * @brief  Reads a header value from the http stream.
+         * @details Consider using `request_istream::get_request()` / `response_istream::get_response()`.
          * @return The header value.
          */
         std::string get_header_value();
-
-        /**
-         * @brief         Reads a chunk of a body from the http stream.
-         * @param max_len Maximum length of the chunk.
-         * @return        The chunk. Empty when there is no more to read.
-         */
-        std::string get_body(std::size_t max_len);
 
     protected:
         /**
@@ -360,7 +365,17 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
+         * @brief          Writes a body to the http stream.
+         * @details        The whole request/response must have been written before this method is called.
+         * @param body     Body.
+         * @param body_len Body length. Optional.
+         */
+        void put_body(const char* body, std::size_t body_len = size::strlen);
+
+    public:
+        /**
          * @brief         Writes headers and headers end to the http stream.
+         * @details       Consider using `request_ostream::put_request()` / `response_ostream::put_response()`.
          * @note          If this is called on `request_ostream`, the caller is responsible for providing a `Host` header.
          * @param headers Headers.
          */
@@ -384,13 +399,6 @@ namespace abc { namespace net { namespace http {
          * @brief Writes the end of headers to the http stream.
          */
         void end_headers();
-
-        /**
-         * @brief          Writes a body to the http stream.
-         * @param body     Body.
-         * @param body_len Body length. Optional.
-         */
-        void put_body(const char* body, std::size_t body_len = size::strlen);
 
     protected:
         /**
@@ -525,33 +533,38 @@ namespace abc { namespace net { namespace http {
          */
         request_istream(const request_istream& other) = delete;
 
-        /**
-         * @brief Resets the read state.
-         */
-        void reset();
-
     public:
         /**
-         * @brief  Reads an http request from the http stream.
+         * @brief  Reads a whole http request from the http stream.
          * @return The request.
          */
         request get_request();
 
+    public:
         /**
-         * @brief  Reads an http method from the http stream.
-         * @return The method.
+         * @brief   Resets the read state.
+         * @details Use only if you are certain you are the beginning of the stream.
+         */
+        void reset();
+
+        /**
+         * @brief   Reads an http method from the http stream.
+         * @details Consider using `get_request()`.
+         * @return  The method.
          */
         std::string get_method();
 
         /**
-         * @brief  Reads an http resource from the http stream.
-         * @return The resource.
+         * @brief   Reads an http resource from the http stream.
+         * @details Consider using `get_request()`.
+         * @return  The resource.
          */
         resource get_resource();
 
         /**
-         * @brief  Reads an http protocol from the http stream.
-         * @return The protocol.
+         * @brief   Reads an http protocol from the http stream.
+         * @details Consider using `get_request()`.
+         * @return  The protocol.
          */
         std::string get_protocol();
 
@@ -596,33 +609,38 @@ namespace abc { namespace net { namespace http {
          */
         request_ostream(const request_ostream& other) = delete;
 
-        /**
-         * @brief Resets the write state.
-         */
-        void reset();
-
     public:
         /**
-         * @brief         Writes an http request to the http stream.
+         * @brief         Writes a whole http request to the http stream.
          * @param request Request.
          */
         void put_request(const request& request);
 
+    public:
+        /**
+         * @brief   Resets the write state.
+         * @details Use only if you are certain you are the beginning of the stream.
+         */
+        void reset();
+
         /**
          * @brief            Writes an http method to the http stream.
+         * @details          Consider using `put_request()`.
          * @param method     Method.
          * @param method_len Method length. Optional.
          */
         void put_method(const char* method, std::size_t method_len = size::strlen);
 
         /**
-         * @brief              Writes an http resource to the http stream.
-         * @param resource     Resource.
+         * @brief          Writes an http resource to the http stream.
+         * @details        Consider using `put_request()`.
+         * @param resource Resource.
          */
         void put_resource(const resource& resource);
 
         /**
          * @brief              Writes an http resource to the http stream.
+         * @details            Consider using `put_request()`.
          * @param resource     Resource.
          * @param resource_len Resource length. Optional.
          */
@@ -630,6 +648,7 @@ namespace abc { namespace net { namespace http {
 
         /**
          * @brief              Writes an http protocol to the http stream.
+         * @details            Consider using `put_request()`.
          * @param protocol     Protocol.
          * @param protocol_len Protocol length. Optional.
          */
@@ -669,30 +688,35 @@ namespace abc { namespace net { namespace http {
          */
         response_istream(const response_istream& other) = delete;
 
-        /**
-         * @brief Resets the read state.
-         */
-        void reset();
-
     public:
         /**
-         * @brief  Reads an http response from the http stream.
-         * @return The request.
+         * @brief  Reads a whole http response from the http stream.
+         * @return The response.
          */
         response get_response();
 
+    public:
         /**
-         * @brief Reads an http protocol from the http stream.
+         * @brief   Resets the read state.
+         * @details Use only if you are certain you are the beginning of the stream.
+         */
+        void reset();
+
+        /**
+         * @brief   Reads an http protocol from the http stream.
+         * @details Consider using `get_response()`.
          */
         std::string get_protocol();
 
         /**
-         * @brief Reads an http status code from the http stream.
+         * @brief   Reads an http status code from the http stream.
+         * @details Consider using `get_response()`.
          */
         status_code_t get_status_code();
 
         /**
-         * @brief Reads an http reason phrase from the http stream.
+         * @brief   Reads an http reason phrase from the http stream.
+         * @details Consider using `get_response()`.
          */
         std::string get_reason_phrase();
     };
@@ -730,20 +754,23 @@ namespace abc { namespace net { namespace http {
          */
         response_ostream(const response_ostream& other) = delete;
 
-        /**
-         * @brief Resets the write state.
-         */
-        void reset();
-
     public:
         /**
-         * @brief          Writes an http response to the http stream.
+         * @brief          Writes a whole http response to the http stream.
          * @param response Response.
          */
         void put_response(const response& response);
 
+    public:
+        /**
+         * @brief   Resets the write state.
+         * @details Use only if you are certain you are the beginning of the stream.
+         */
+        void reset();
+
         /**
          * @brief              Writes an http protocol to the http stream.
+         * @details            Consider using `put_response()`.
          * @param protocol     Protocol.
          * @param protocol_len Protocol length. Optional.
          */
@@ -751,11 +778,14 @@ namespace abc { namespace net { namespace http {
 
         /**
          * @brief Writes an http status code to the http stream.
+         * @details            Consider using `put_response()`.
+         * @param status_code  Status code.
          */
         void put_status_code(status_code_t status_code);
 
         /**
          * @brief                   Writes an http reason phrase to the http stream.
+         * @details                 Consider using `put_response()`.
          * @param reason_phrase     Reason phrase.
          * @param reason_phrase_len Reason phrase length. Optional.
          */
