@@ -50,14 +50,14 @@ Provide the title and the link to the page along with as much information as you
 
 ### Namespace `abc::diag`
 
-- [tag](ref/tag.md) __TODO:__
--
-- [log_ostream](ref/log.md) __TODO: sal__
+- [log_ostream](ref/log.md)
 - [debug_line_ostream](ref/log.md)
 - [diag_line_ostream](ref/log.md)
 - [test_line_ostream](ref/log.md)
 -
 - [exception](ref/exception.md)
+-
+- [diag_ready](ref/diag_ready.md) __TODO:__
 
 ### Namespace `abc::net`
 

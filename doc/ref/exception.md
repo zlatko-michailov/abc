@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [exception.h](../../src/exception.h)
-Interface        | [exception.h](../../src/exception.h)
+Include          | [diag/exception.h](../../src/diag/exception.h)
+Interface        | [diag/exception.h](../../src/diag/exception.h)
 Tests / Examples | n/a
 
 A wrapper around any exception type.

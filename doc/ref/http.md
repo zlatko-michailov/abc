@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [http.h](../../src/http.h)
-Interface        | [http.i.h](../../src/i/http.i.h)
+Include          | [net/http.h](../../src/net/http.h)
+Interface        | [net/i/http.i.h](../../src/net/i/http.i.h)
 Tests / Examples | [test/http.cpp](../../test/http.cpp)
 
 These classes provide a _syntactic_ check and generation of `http` request and response streams.

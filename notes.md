@@ -3,8 +3,8 @@
 - `diag_ready`
 
 ## To Do
+- Update doc/ref/*.md for all classes that have been done.
 - `http`
-  - Reorder public methods - high-level at top.
   - Record relevant RFCs:
     - URI - https://datatracker.ietf.org/doc/html/rfc3986
     - HTTP Semantics - https://datatracker.ietf.org/doc/html/rfc9110

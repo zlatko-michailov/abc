@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [log.h](../../src/log.h)
-Interface        | [log.i.h](../../src/i/log.i.h)
+Include          | [diag/log.h](../../src/diag/log.h)
+Interface        | [diag/i/log.i.h](../../src/diag/i/log.i.h)
 Tests / Examples | [test/main.cpp](../../test/main.cpp)
 
 `log_ostream` is a specialization of `table_ostream`.
