@@ -57,11 +57,35 @@ Provide the title and the link to the page along with as much information as you
 -
 - [exception](ref/exception.md)
 -
-- [diag_ready](ref/diag_ready.md) __TODO:__
+- [diag_ready](ref/diag_ready.md)
+
+### Namespace `abc::net::http`
+
+- [request_istream](ref/http.md)
+- [request_ostream](ref/http.md)
+- [response_istream](ref/http.md)
+- [response_ostream](ref/http.md)
+- [client_stream](ref/http.md)
+- [server_stream](ref/http.md)
+
+### Namespace `abc::net::json`
+
+- [istream](ref/json.md)
+- [ostream](ref/json.md)
 
 ### Namespace `abc::net`
 
+- [sockets](ref/socket.md)
+  - [socket_streambuf](ref/socket.md)
+  - [udp_socket](ref/socket.md)
+  - [tcp_server_socket](ref/socket.md)
+  - [tcp_client_socket](ref/socket.md)
+  - [openssl_tcp_server_socket](ref/openssl_socket.md)
+  - [openssl_tcp_client_socket](ref/openssl_socket.md)
 - [endpoint](ref/endpoint.md)
+
+
+
 - [gpio](ref/gpio.md)
   - [gpio_chip](ref/gpio.md)
   - [gpio_line](ref/gpio.md)
@@ -75,23 +99,6 @@ Provide the title and the link to the page along with as much information as you
   - [gpio_smbus_grayscale](ref/gpio.md)
   - [gpio_smbus_motion](ref/gpio.md)
   - [gpio_smbus_motion_tracker](ref/gpio.md)
-- [http](ref/http.md)
-  - [http_request_istream](ref/http.md)
-  - [http_request_ostream](ref/http.md)
-  - [http_response_istream](ref/http.md)
-  - [http_response_ostream](ref/http.md)
-  - [http_client_stream](ref/http.md)
-  - [http_server_stream](ref/http.md)
-- [json](ref/json.md)
-  - [json_istream](ref/json.md)
-  - [json_ostream](ref/json.md)
-- [sockets](ref/socket.md)
-  - [socket_streambuf](ref/socket.md)
-  - [udp_socket](ref/socket.md)
-  - [tcp_server_socket](ref/socket.md)
-  - [tcp_client_socket](ref/socket.md)
-  - [openssl_tcp_server_socket](ref/openssl_socket.md)
-  - [openssl_tcp_client_socket](ref/openssl_socket.md)
 - [test](ref/test.md)
 - [vmem](ref/vmem.md)
   - [vmem_pool](ref/vmem.md)
