@@ -108,7 +108,8 @@ namespace abc { namespace net { namespace http {
         // Format: HTTP/1.1
 
         // Read 'HTTP'
-        std::string protocol = get_alphas();
+        constexpr std::size_t estimated_len = size::_8;
+        std::string protocol = get_alphas(estimated_len);
         if (protocol.length() != 4 || !ascii::are_equal_i_n("HTTP", protocol.c_str(), 4)) {
             base::set_bad();
         }
@@ -126,7 +127,8 @@ namespace abc { namespace net { namespace http {
 
         // Read '1'
         if (base::is_good()) {
-            std::string digits = get_digits();
+            constexpr std::size_t estimated_len = size::_8;
+            std::string digits = get_digits(estimated_len);
             if (!digits.empty()) {
                 protocol += digits;
             }
@@ -148,7 +150,8 @@ namespace abc { namespace net { namespace http {
 
         // Read '1'
         if (base::is_good()) {
-            std::string digits = get_digits();
+            constexpr std::size_t estimated_len = size::_8;
+            std::string digits = get_digits(estimated_len);
             if (!digits.empty()) {
                 protocol += digits;
             }
@@ -209,7 +212,8 @@ namespace abc { namespace net { namespace http {
         // Format: 'Name :'
 
         // Read Name
-        std::string header_name = get_token();
+        constexpr std::size_t estimated_len = size::_256;
+        std::string header_name = get_token(estimated_len);
         skip_spaces();
 
         // Headers end when there is a blank line, i.e. the name is empty.
@@ -255,7 +259,8 @@ namespace abc { namespace net { namespace http {
         while (has_more) {
             // One line
             while (has_more) {
-                header_value += get_prints();
+                constexpr std::size_t estimated_len = size::k2;
+                header_value += get_prints(estimated_len);
 
                 has_more = base::is_good() && !header_value.empty() && skip_spaces() > 0 && ascii::is_abcprint(peek_char());
                 if (has_more) {
@@ -288,7 +293,8 @@ namespace abc { namespace net { namespace http {
 
         state::assert_next(item::body);
 
-        std::string body = get_any_chars(max_len);
+        constexpr std::size_t estimated_len = size::k4;
+        std::string body = get_any_chars(estimated_len, max_len);
 
         set_gstate(body.length(), base::eof() ? item::eof : item::body);
 
@@ -299,44 +305,46 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_token() {
-        return get_chars(ascii::http::is_token);
+    inline std::string istream<LogPtr>::get_token(std::size_t estimated_len) {
+        return get_chars(ascii::http::is_token, estimated_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_prints() {
-        return get_chars(ascii::is_abcprint);
+    inline std::string istream<LogPtr>::get_prints(std::size_t estimated_len) {
+        return get_chars(ascii::is_abcprint, estimated_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_prints_and_spaces() {
-        return get_chars(ascii::is_abcprint_or_space);
+    inline std::string istream<LogPtr>::get_prints_and_spaces(std::size_t estimated_len) {
+        return get_chars(ascii::is_abcprint_or_space, estimated_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_alphas() {
-        return get_chars(ascii::is_alpha);
+    inline std::string istream<LogPtr>::get_alphas(std::size_t estimated_len) {
+        return get_chars(ascii::is_alpha, estimated_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_digits() {
-        return get_chars(ascii::is_digit);
+    inline std::string istream<LogPtr>::get_digits(std::size_t estimated_len) {
+        return get_chars(ascii::is_digit, estimated_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_any_chars(std::size_t max_len) {
-        return get_chars(ascii::is_any, max_len);
+    inline std::string istream<LogPtr>::get_any_chars(std::size_t estimated_len, std::size_t max_len) {
+        return get_chars(ascii::is_any, estimated_len, max_len);
     }
 
 
     template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_chars(ascii::predicate_t&& predicate, std::size_t max_len) {
+    inline std::string istream<LogPtr>::get_chars(ascii::predicate_t&& predicate, std::size_t estimated_len, std::size_t max_len) {
         std::string chars;
+        chars.reserve(estimated_len);
+
         std::size_t len = 0;
 
         while (predicate(peek_char()) && base::is_good() && len++ < max_len) {
@@ -809,7 +817,8 @@ namespace abc { namespace net { namespace http {
 
         base::assert_next(item::method);
 
-        std::string method = base::get_token();
+        constexpr std::size_t estimated_len = size::_16;
+        std::string method = base::get_token(estimated_len);
         base::skip_spaces();
 
         base::set_gstate(method.length(), item::resource);
@@ -827,7 +836,8 @@ namespace abc { namespace net { namespace http {
 
         base::assert_next(item::resource);
 
-        std::string raw_resource = base::get_prints();
+        constexpr std::size_t estimated_len = size::k2;
+        std::string raw_resource = base::get_prints(estimated_len);
         base::skip_spaces();
 
         base::set_gstate(raw_resource.length(), item::protocol);
@@ -1142,7 +1152,8 @@ namespace abc { namespace net { namespace http {
 
         base::assert_next(item::status_code);
 
-        std::string digits = base::get_digits();
+        constexpr std::size_t estimated_len = size::_8;
+        std::string digits = base::get_digits(estimated_len);
         base::skip_spaces();
 
         status_code_t status_code = static_cast<status_code_t>(std::stoul(digits));
@@ -1162,7 +1173,8 @@ namespace abc { namespace net { namespace http {
 
         base::assert_next(item::reason_phrase);
 
-        std::string reason_phrase = base::get_prints_and_spaces();
+        constexpr std::size_t estimated_len = size::_256;
+        std::string reason_phrase = base::get_prints_and_spaces(estimated_len);
         base::skip_spaces();
         base::skip_crlf();
 

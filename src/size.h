@@ -38,6 +38,7 @@ namespace abc {
         constexpr std::size_t invalid = SIZE_MAX;
         constexpr std::size_t strlen  = invalid;
 
+        constexpr std::size_t _8   =   8;
         constexpr std::size_t _16  =  16;
         constexpr std::size_t _32  =  32;
         constexpr std::size_t _64  =  64;

@@ -3,13 +3,9 @@
 - `diag_ready`
 
 ## To Do
-- Update doc/ref/*.md for all classes that have been done.
-- Templatize `std::streambuf*`and pass __by copy__
-  - `table_ostream`
-  - `log`
-  - `http`
-
 - __UNTABIFY each file before making changes!__
+
+- Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.

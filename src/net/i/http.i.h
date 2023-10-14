@@ -243,49 +243,56 @@ namespace abc { namespace net { namespace http {
         std::string get_protocol();
 
         /**
-         * @brief  Reads an http token.
-         * @return The token.
+         * @brief               Reads an http token.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @return              The token.
          */
-        std::string get_token();
+        std::string get_token(std::size_t estimated_len);
 
         /**
-         * @brief  Reads a sequence of printable chars.
-         * @return The sequence.
+         * @brief               Reads a sequence of printable chars.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @return              The sequence.
          */
-        std::string get_prints();
+        std::string get_prints(std::size_t estimated_len);
 
         /**
-         * @brief  Reads a sequence of printable chars and spaces.
-         * @return The sequence.
+         * @brief               Reads a sequence of printable chars and spaces.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @return              The sequence.
          */
-        std::string get_prints_and_spaces();
+        std::string get_prints_and_spaces(std::size_t estimated_len);
 
         /**
-         * @brief  Reads a sequence of letters.
-         * @return The sequence.
+         * @brief               Reads a sequence of letters.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @return              The sequence.
          */
-        std::string get_alphas();
+        std::string get_alphas(std::size_t estimated_len);
 
         /**
-         * @brief  Reads a sequence of digits.
-         * @return The sequence.
+         * @brief               Reads a sequence of digits.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @return              The sequence.
          */
-        std::string get_digits();
+        std::string get_digits(std::size_t estimated_len);
 
         /**
-         * @brief         Reads a sequence of any chars through the end of the stream.
-         * @param max_len Maximum length of the chunk.
-         * @return        The sequence.
+         * @brief               Reads a sequence of any chars through the end of the stream.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @param max_len       Maximum length of the chunk.
+         * @return              The sequence.
          */
-        std::string get_any_chars(std::size_t max_len);
+        std::string get_any_chars(std::size_t estimated_len, std::size_t max_len);
 
         /**
-         * @brief           Reads a sequence of chars that match a predicate.
-         * @param predicate Predicate.
-         * @param max_len   Maximum length of the chunk.
-         * @return          The sequence.
+         * @brief               Reads a sequence of chars that match a predicate.
+         * @param predicate     Predicate.
+         * @param estimated_len Estimated capacity to reserve in the output string to prevent unnecessary reallocations.
+         * @param max_len       Maximum length of the chunk.
+         * @return              The sequence.
          */
-        std::string get_chars(ascii::predicate_t&& predicate, std::size_t max_len = size::strlen);
+        std::string get_chars(ascii::predicate_t&& predicate, std::size_t estimated_len, std::size_t max_len = size::strlen);
 
         /**
          * @brief  Gets the next char from the stream and moves forward.
