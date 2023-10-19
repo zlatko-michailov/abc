@@ -483,18 +483,22 @@ bool test_http_request_ostream_resource(test_context& context, abc::net::http::r
     expected.append(expected_resource);
     expected.append(" HTTP/1.1\r\n\r\n");
 
-    abc::net::http::request request;
-    request.method = "GET";
-    request.resource = std::move(actual_resource);
-
     std::stringbuf sb(std::ios_base::out);
 
     abc::net::http::request_ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    ostream.put_request(request);
+    ostream.put_method("GET");
     passed = verify_stream_good(context, ostream, __TAG__) && passed;
+
+    ostream.put_resource(actual_resource);
+    passed = verify_stream_good(context, ostream, __TAG__) && passed;
+
+    ostream.put_protocol("HTTP/1.1");
+    passed = verify_stream_good(context, ostream, __TAG__) && passed;
+
+    ostream.end_headers();
 
     passed = context.are_equal(sb.str().c_str(), expected.c_str(), expected.length(), __TAG__) && passed;
 

@@ -4,7 +4,15 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
+- `http`
+  - `xxx_reader`
+  - `xxx_writer`
 
+- `json`
+  - Rename
+    - `item_t` -> `enum class token_type`, `enum class value_type`
+    - `value_t` -> `payload`
+    - `token_t` -> `value`
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 - log:
