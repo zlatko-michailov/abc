@@ -7,6 +7,8 @@
 - `http`
   - `xxx_reader`
   - `xxx_writer`
+  - Rename `client_stream` to `client` and derive from `request_writer` and `response_reader`.
+  - Rename `server_stream` ...
 
 - `json`
   - Rename

@@ -512,7 +512,8 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         http request input stream. Used on the server side to read requests.
+     * @brief         http request input stream. Used on the server side to read request streams sequentially.
+     * @details       Using this class requires knowledge of the http protocol. Consider using `request_reader`.
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
@@ -521,6 +522,15 @@ namespace abc { namespace net { namespace http {
 
         using base      = istream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin-Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        request_istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
 
     public:
         /**
@@ -542,13 +552,6 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
-         * @brief  Reads a whole http request from the http stream.
-         * @return The request.
-         */
-        request get_request();
-
-    public:
-        /**
          * @brief   Resets the read state.
          * @details Use only if you are certain you are the beginning of the stream.
          */
@@ -556,21 +559,18 @@ namespace abc { namespace net { namespace http {
 
         /**
          * @brief   Reads an http method from the http stream.
-         * @details Consider using `get_request()`.
          * @return  The method.
          */
         std::string get_method();
 
         /**
          * @brief   Reads an http resource from the http stream.
-         * @details Consider using `get_request()`.
          * @return  The resource.
          */
         resource get_resource();
 
         /**
          * @brief   Reads an http protocol from the http stream.
-         * @details Consider using `get_request()`.
          * @return  The protocol.
          */
         std::string get_protocol();
@@ -581,6 +581,60 @@ namespace abc { namespace net { namespace http {
          * @param raw_resource Resource.
          */
         resource split_resource(const std::string& raw_resource);
+    };
+
+
+    /**
+     * @brief         http request reader. Used on the server side to read whole requests.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class request_reader
+        : protected request_istream<LogPtr> {
+
+        using base      = request_istream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin-Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        request_reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to read from.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        request_reader(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        request_reader(request_reader&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        request_reader(const request_reader& other) = delete;
+
+    public:
+        /**
+         * @brief  Reads a whole http request from the http stream.
+         * @return The request.
+         */
+        request get_request();
+
+        /**
+         * @brief         Reads a chunk of a body from the http stream.
+         * @param max_len Maximum length of the chunk.
+         * @return        The chunk. Empty when there is no more to read.
+         */
+        std::string get_body(std::size_t max_len);
     };
 
 
