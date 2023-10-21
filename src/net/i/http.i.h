@@ -60,16 +60,16 @@ namespace abc { namespace net { namespace http {
      * @brief Complete http resource. 
      */
     struct resource {
-        std::string                                  path;
-        std::unordered_map<std::string, std::string> query;
-        std::string                                  fragment;
+        std::string                        path;
+        std::map<std::string, std::string> query;
+        std::string                        fragment;
     };
 
 
     /**
      * @brief Collection of http headers. 
      */
-    using headers = std::unordered_map<std::string, std::string>;
+    using headers = std::map<std::string, std::string>;
 
 
     /**

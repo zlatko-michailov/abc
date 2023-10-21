@@ -102,7 +102,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_request_istream_resource_08",           test_http_request_istream_resource_08 },
                 { "test_http_request_istream_resource_09",           test_http_request_istream_resource_09 },
                 { "test_http_request_istream_resource_10",           test_http_request_istream_resource_10 },
-                { "test_http_request_reader",                        test_http_request_reader },
+                { "test_http_request_reader_none",                   test_http_request_reader_none },
                 { "test_http_request_reader_headers",                test_http_request_reader_headers },
                 { "test_http_request_reader_body",                   test_http_request_reader_body },
                 { "test_http_request_reader_headers_body",           test_http_request_reader_headers_body },

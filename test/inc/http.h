@@ -45,7 +45,7 @@ bool test_http_request_istream_resource_08(test_context& context);
 bool test_http_request_istream_resource_09(test_context& context);
 bool test_http_request_istream_resource_10(test_context& context);
 
-bool test_http_request_reader(test_context& context);
+bool test_http_request_reader_none(test_context& context);
 bool test_http_request_reader_headers(test_context& context);
 bool test_http_request_reader_body(test_context& context);
 bool test_http_request_reader_headers_body(test_context& context);
@@ -57,11 +57,10 @@ bool test_http_request_ostream_resource_02(test_context& context);
 bool test_http_request_ostream_resource_03(test_context& context);
 bool test_http_request_ostream_resource_04(test_context& context);
 
-//// TODO:
-bool test_http_request_writer_01(test_context& context);
-bool test_http_request_writer_02(test_context& context);
-bool test_http_request_writer_03(test_context& context);
-bool test_http_request_writer_04(test_context& context);
+bool test_http_request_writer_none(test_context& context);
+bool test_http_request_writer_headers(test_context& context);
+bool test_http_request_writer_body(test_context& context);
+bool test_http_request_writer_headers_body(test_context& context);
 
 bool test_http_response_istream_extraspaces(test_context& context);
 bool test_http_response_istream_realworld_01(test_context& context);
