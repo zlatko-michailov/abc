@@ -331,22 +331,22 @@ bool test_http_request_istream_resource(test_context& context, const char* expec
 bool test_http_request_reader(test_context& context, bool use_headers, bool use_body);
 
 
-bool test_http_request_reader_01(test_context& context) {
+bool test_http_request_reader(test_context& context) {
     return test_http_request_reader(context, false, false);
 }
 
 
-bool test_http_request_reader_02(test_context& context) {
+bool test_http_request_reader_headers(test_context& context) {
     return test_http_request_reader(context, true, false);
 }
 
 
-bool test_http_request_reader_03(test_context& context) {
+bool test_http_request_reader_body(test_context& context) {
     return test_http_request_reader(context, false, true);
 }
 
 
-bool test_http_request_reader_04(test_context& context) {
+bool test_http_request_reader_headers_body(test_context& context) {
     return test_http_request_reader(context, true, true);
 }
 
