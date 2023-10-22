@@ -622,63 +622,51 @@ bool test_http_request_writer_headers_body(test_context& context) {
 
 
 bool test_http_request_writer(test_context& context, bool use_headers, bool use_body) {
-    char content_body[] =
-        "{\r\n"
-        "  \"foo\": 42,\r\n"
-        "  \"bar\": \"qwerty\"\r\n"
-        "}";
+    abc::net::http::request request;
 
-    std::string content = "POST http://a.com/bbb/cc/d?x=111&yy=22&zzz=3 HTTP/1.1\r\n";
+    request.method = "POST";
+    request.resource.path = "http://a.com/bbb/cc/d";
+    request.resource.query["x"] = "111";
+    request.resource.query["yy"] = "22";
+    request.resource.query["zzz"] = "3";
+
+    std::string expected = "POST http://a.com/bbb/cc/d?x=111&yy=22&zzz=3 HTTP/1.1\r\n";
 
     if (use_headers) {
-        content.append(
-            "Host: en.cppreference.com\r\n"
-            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\n"
+        request.headers["Host"] = "en.cppreference.com";
+        request.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0";
+        request.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+        request.headers["Accept-Language"] = "en-US,en;q=0.5";
+
+        expected.append(
             "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n"
-            "Accept-Language: en-US,en;q=0.5\r\n");
+            "Accept-Language: en-US,en;q=0.5\r\n"
+            "Host: en.cppreference.com\r\n"
+            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\n");
     }
-    content.append("\r\n");
+    expected.append("\r\n");
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::request_writer<test_log*> writer(&sb, context.log());
+
+    writer.put_request(request);
 
     if (use_body) {
-        content.append(content_body);
+        const char expected_body[] =
+            "{\r\n"
+            "  \"foo\": 42,\r\n"
+            "  \"bar\": \"qwerty\"\r\n"
+            "}";
+
+        writer.put_body(expected_body);
+
+        expected.append(expected_body);
     }
-
-    std::stringbuf sb(content, std::ios_base::in);
-
-    abc::net::http::request_reader<test_log*> reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::http::request request = reader.get_request();
-    std::string body = reader.get_body(abc::size::k1);
-
-    passed = context.are_equal(request.method.c_str(), "POST", __TAG__) && passed;
-
-    passed = context.are_equal(request.resource.path.c_str(), "http://a.com/bbb/cc/d", __TAG__) && passed;
-    passed = context.are_equal(request.resource.query.size(), (std::size_t)3, __TAG__, "%zu") && passed;
-    passed = context.are_equal(request.resource.query["x"].c_str(), "111", __TAG__) && passed;
-    passed = context.are_equal(request.resource.query["yy"].c_str(), "22", __TAG__) && passed;
-    passed = context.are_equal(request.resource.query["zzz"].c_str(), "3", __TAG__) && passed;
-
-    passed = context.are_equal(request.protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
-
-    if (use_headers) {
-        passed = context.are_equal(request.headers.size(), (std::size_t)4, __TAG__, "%zu") && passed;
-        passed = context.are_equal(request.headers["Host"].c_str(), "en.cppreference.com", __TAG__) && passed;
-        passed = context.are_equal(request.headers["User-Agent"].c_str(), "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0", __TAG__) && passed;
-        passed = context.are_equal(request.headers["Accept"].c_str(), "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", __TAG__) && passed;
-        passed = context.are_equal(request.headers["Accept-Language"].c_str(), "en-US,en;q=0.5", __TAG__) && passed;
-    }
-    else {
-        passed = context.are_equal(request.headers.size(), (std::size_t)0, __TAG__, "%zu") && passed;
-    }
-
-    if (use_body) {
-        passed = context.are_equal(body.c_str(), content_body, __TAG__) && passed;
-    }
-    else {
-        passed = context.are_equal(body.c_str(), "", __TAG__) && passed;
-    }
+    passed = context.are_equal(sb.str().c_str(), expected.c_str(), __TAG__) && passed;
 
     return passed;
 }

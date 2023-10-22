@@ -584,6 +584,8 @@ namespace abc { namespace net { namespace http {
     };
 
 
+    // --------------------------------------------------------------
+
     /**
      * @brief         http request reader. Used on the server side to read whole requests.
      * @tparam LogPtr Pointer type to `log_ostream`.
@@ -652,6 +654,15 @@ namespace abc { namespace net { namespace http {
         using base      = ostream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        request_ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
     public:
         /**
          * @brief     Constructor.
@@ -669,13 +680,6 @@ namespace abc { namespace net { namespace http {
          * @brief Deleted.
          */
         request_ostream(const request_ostream& other) = delete;
-
-    public:
-        /**
-         * @brief         Writes a whole http request to the http stream.
-         * @param request Request.
-         */
-        void put_request(const request& request);
 
     public:
         /**
@@ -714,6 +718,62 @@ namespace abc { namespace net { namespace http {
          * @param protocol_len Protocol length. Optional.
          */
         void put_protocol(const char* protocol, std::size_t protocol_len = size::strlen);
+    };
+
+
+    // --------------------------------------------------------------
+
+    /**
+     * @brief         http request writer. Used on the client side to write whole requests.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class request_writer
+        : protected request_ostream<LogPtr> {
+
+        using base      = request_ostream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin-Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        request_writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to write to.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        request_writer(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        request_writer(request_writer&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        request_writer(const request_writer& other) = delete;
+
+    public:
+        /**
+         * @brief         Writes a whole http request to the http stream.
+         * @param request Request.
+         */
+        void put_request(const request& request);
+
+        /**
+         * @brief          Writes a body to the http stream.
+         * @param body     Body.
+         * @param body_len Body length. Optional.
+         */
+        void put_body(const char* body, std::size_t body_len = size::strlen);
     };
 
 
