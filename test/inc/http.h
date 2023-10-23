@@ -66,11 +66,10 @@ bool test_http_response_istream_extraspaces(test_context& context);
 bool test_http_response_istream_realworld_01(test_context& context);
 bool test_http_response_istream_realworld_02(test_context& context);
 
-//// TODO:
-bool test_http_response_reader_01(test_context& context);
-bool test_http_response_reader_02(test_context& context);
-bool test_http_response_reader_03(test_context& context);
-bool test_http_response_reader_04(test_context& context);
+bool test_http_response_reader_none(test_context& context);
+bool test_http_response_reader_headers(test_context& context);
+bool test_http_response_reader_body(test_context& context);
+bool test_http_response_reader_headers_body(test_context& context);
 
 bool test_http_response_ostream_bodytext(test_context& context);
 bool test_http_response_ostream_bodybinary(test_context& context);

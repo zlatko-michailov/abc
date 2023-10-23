@@ -1163,13 +1163,19 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(std::streambuf* sb, const LogPtr& log)
-        : base("abc::net::http::response_istream", sb, item::protocol, log) {
+    inline response_istream<LogPtr>::response_istream(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_istream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline response_istream<LogPtr>::response_istream(std::streambuf* sb, const LogPtr& log)
+        : response_istream("abc::net::http::response_istream", sb, log) {
     }
 
 
@@ -1187,24 +1193,6 @@ namespace abc { namespace net { namespace http {
         base::reset(item::protocol);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-    }
-
-
-    template <typename LogPtr>
-    inline response response_istream<LogPtr>::get_response() {
-        constexpr const char* suborigin = "get_response()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
-
-        response response;
-
-        response.protocol      = get_protocol();
-        response.status_code   = get_status_code();
-        response.reason_phrase = get_reason_phrase();
-        response.headers       = base::get_headers();
-
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-
-        return response;
     }
 
 
@@ -1260,6 +1248,56 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, reason_phrase='%s'", reason_phrase.length(), reason_phrase.c_str());
 
         return reason_phrase;
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    template <typename LogPtr>
+    inline response_reader<LogPtr>::response_reader(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, log) {
+
+        constexpr const char* suborigin = "response_reader()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline response_reader<LogPtr>::response_reader(std::streambuf* sb, const LogPtr& log)
+        : response_reader("abc::net::http::response_reader", sb, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline response_reader<LogPtr>::response_reader(response_reader&& other)
+        : base(std::move(other)) {
+    }
+
+
+    template <typename LogPtr>
+    inline response response_reader<LogPtr>::get_response() {
+        constexpr const char* suborigin = "get_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        response response;
+
+        response.protocol      = base::get_protocol();
+        response.status_code   = base::get_status_code();
+        response.reason_phrase = base::get_reason_phrase();
+        response.headers       = base::get_headers();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return response;
+    }
+
+
+    template <typename LogPtr>
+    inline std::string response_reader<LogPtr>::get_body(std::size_t max_len) {
+        return base::get_body(max_len);
     }
 
 

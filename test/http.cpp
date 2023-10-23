@@ -807,6 +807,87 @@ bool test_http_response_istream_realworld_02(test_context& context) {
 // --------------------------------------------------------------
 
 
+bool test_http_response_reader(test_context& context, bool use_headers, bool use_body);
+
+
+bool test_http_response_reader_none(test_context& context) {
+    return test_http_response_reader(context, false, false);
+}
+
+
+bool test_http_response_reader_headers(test_context& context) {
+    return test_http_response_reader(context, true, false);
+}
+
+
+bool test_http_response_reader_body(test_context& context) {
+    return test_http_response_reader(context, false, true);
+}
+
+
+bool test_http_response_reader_headers_body(test_context& context) {
+    return test_http_response_reader(context, true, true);
+}
+
+
+bool test_http_response_reader(test_context& context, bool use_headers, bool use_body) {
+    char content_body[] =
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    std::string content = "HTTP/1.1 200 OK\r\n";
+
+    if (use_headers) {
+        content.append(
+            "Access-Control-Expose-Headers: X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date\r\n"
+            "Content-Length: 205\r\n"
+            "Content-Type: application/json; charset=utf-8\r\n");
+    }
+    content.append("\r\n");
+
+    if (use_body) {
+        content.append(content_body);
+    }
+
+    std::stringbuf sb(content, std::ios_base::in);
+
+    abc::net::http::response_reader<test_log*> reader(&sb, context.log());
+
+    bool passed = true;
+
+    abc::net::http::response response = reader.get_response();
+    std::string body = reader.get_body(abc::size::k1);
+
+    passed = context.are_equal(response.protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
+    passed = context.are_equal((unsigned)response.status_code, 200U, __TAG__, "%u") && passed;
+    passed = context.are_equal(response.reason_phrase.c_str(), "OK", __TAG__) && passed;
+
+    if (use_headers) {
+        passed = context.are_equal(response.headers.size(), (std::size_t)3, __TAG__, "%zu") && passed;
+        passed = context.are_equal(response.headers["Access-Control-Expose-Headers"].c_str(), "X-Content-Type-Options,Cache-Control,Pragma,ContextId,Content-Length,Connection,MS-CV,Date", __TAG__) && passed;
+        passed = context.are_equal(response.headers["Content-Length"].c_str(), "205", __TAG__) && passed;
+        passed = context.are_equal(response.headers["Content-Type"].c_str(), "application/json; charset=utf-8", __TAG__) && passed;
+    }
+    else {
+        passed = context.are_equal(response.headers.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    }
+
+    if (use_body) {
+        passed = context.are_equal(body.c_str(), content_body, __TAG__) && passed;
+    }
+    else {
+        passed = context.are_equal(body.c_str(), "", __TAG__) && passed;
+    }
+
+    return passed;
+}
+
+
+// --------------------------------------------------------------
+
+
 bool test_http_response_ostream_bodytext(test_context& context) {
     const char expected[] =
         "HTTP/1.1 200 OK\r\n"

@@ -791,6 +791,15 @@ namespace abc { namespace net { namespace http {
         using base      = istream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        response_istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
     public:
         /**
          * @brief     Constructor.
@@ -808,13 +817,6 @@ namespace abc { namespace net { namespace http {
          * @brief Deleted.
          */
         response_istream(const response_istream& other) = delete;
-
-    public:
-        /**
-         * @brief  Reads a whole http response from the http stream.
-         * @return The response.
-         */
-        response get_response();
 
     public:
         /**
@@ -840,6 +842,63 @@ namespace abc { namespace net { namespace http {
          * @details Consider using `get_response()`.
          */
         std::string get_reason_phrase();
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief         http response reader. Used on the client side to read whole responses.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class response_reader
+        : protected response_istream<LogPtr> {
+
+        using base      = response_istream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin-Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        response_reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to read from.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        response_reader(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        response_reader(response_reader&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        response_reader(const response_reader& other) = delete;
+
+    public:
+        /**
+         * @brief  Reads a whole http response from the http stream.
+         * @return The response.
+         */
+        response get_response();
+
+        /**
+         * @brief         Reads a chunk of a body from the http stream.
+         * @param max_len Maximum length of the chunk.
+         * @return        The chunk. Empty when there is no more to read.
+         */
+        std::string get_body(std::size_t max_len);
     };
 
 
