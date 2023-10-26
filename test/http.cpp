@@ -995,18 +995,88 @@ bool test_http_response_ostream_bodynone(test_context& context) {
 
     bool passed = true;
 
-    abc::net::http::response response;
-    response.status_code = 200;
-    response.reason_phrase = "OK";
-    response.headers = {
+    abc::net::http::headers headers = {
         { "List", "foo bar foobar" },
         { "Simple", "simple" },
     };
 
-    ostream.put_response(response);
+    ostream.put_protocol("HTTP/1.1");
+    ostream.put_status_code(200);
+    ostream.put_reason_phrase("OK");
+    ostream.put_headers(headers);
     passed = verify_stream_good(context, ostream, __TAG__) && passed;
 
     passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+
+    return passed;
+}
+
+
+// --------------------------------------------------------------
+
+
+bool test_http_response_writer(test_context& context, bool use_headers, bool use_body);
+
+
+bool test_http_response_writer_none(test_context& context) {
+    return test_http_response_writer(context, false, false);
+}
+
+
+bool test_http_response_writer_headers(test_context& context) {
+    return test_http_response_writer(context, true, false);
+}
+
+
+bool test_http_response_writer_body(test_context& context) {
+    return test_http_response_writer(context, false, true);
+}
+
+
+bool test_http_response_writer_headers_body(test_context& context) {
+    return test_http_response_writer(context, true, true);
+}
+
+
+bool test_http_response_writer(test_context& context, bool use_headers, bool use_body) {
+    abc::net::http::response response;
+
+    response.status_code = 200;
+    response.reason_phrase = "OK";
+
+    std::string expected = "HTTP/1.1 200 OK\r\n";
+
+    if (use_headers) {
+        response.headers["List"] = "foo bar foobar";
+        response.headers["Simple"] = "simple";
+
+        expected.append(
+            "List: foo bar foobar\r\n"
+            "Simple: simple\r\n");
+    }
+    expected.append("\r\n");
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::response_writer<test_log*> writer(&sb, context.log());
+
+    writer.put_response(response);
+
+    if (use_body) {
+        const char expected_body[] =
+            "{\r\n"
+            "  \"foo\": 42,\r\n"
+            "  \"bar\": \"qwerty\"\r\n"
+            "}";
+
+        writer.put_body(expected_body);
+
+        expected.append(expected_body);
+    }
+
+    bool passed = true;
+
+    passed = context.are_equal(sb.str().c_str(), expected.c_str(), __TAG__) && passed;
 
     return passed;
 }

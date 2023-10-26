@@ -1305,13 +1305,19 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(std::streambuf* sb, const LogPtr& log)
-        : base("abc::net::http::response_ostream", sb, item::protocol, log) {
+    inline response_ostream<LogPtr>::response_ostream(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_ostream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline response_ostream<LogPtr>::response_ostream(std::streambuf* sb, const LogPtr& log)
+        : response_ostream("abc::net::http::response_ostream", sb, log) {
     }
 
 
@@ -1327,20 +1333,6 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         base::reset(item::protocol);
-
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-    }
-
-
-    template <typename LogPtr>
-    inline void response_ostream<LogPtr>::put_response(const response& response) {
-        constexpr const char* suborigin = "put_response()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
-
-        put_protocol(response.protocol.c_str(), response.protocol.length());
-        put_status_code(response.status_code);
-        put_reason_phrase(response.reason_phrase.c_str(), response.reason_phrase.length());
-        base::put_headers(response.headers);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -1401,6 +1393,52 @@ namespace abc { namespace net { namespace http {
         base::set_pstate(item::header_name);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    template <typename LogPtr>
+    inline response_writer<LogPtr>::response_writer(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, log) {
+
+        constexpr const char* suborigin = "response_writer()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline response_writer<LogPtr>::response_writer(std::streambuf* sb, const LogPtr& log)
+        : response_writer("abc::net::http::response_writer", sb, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline response_writer<LogPtr>::response_writer(response_writer&& other)
+        : base(std::move(other)) {
+    }
+
+
+    template <typename LogPtr>
+    inline void response_writer<LogPtr>::put_response(const response& response) {
+        constexpr const char* suborigin = "put_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        base::put_protocol(response.protocol.c_str(), response.protocol.length());
+        base::put_status_code(response.status_code);
+        base::put_reason_phrase(response.reason_phrase.c_str(), response.reason_phrase.length());
+        base::put_headers(response.headers);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline void response_writer<LogPtr>::put_body(const char* body, std::size_t body_len) {
+        return base::put_body(body, body_len);
     }
 
 

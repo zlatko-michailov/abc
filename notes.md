@@ -9,6 +9,8 @@
   - `xxx_writer`
   - Rename `client_stream` to `client` and derive from `request_writer` and `response_reader`.
   - Rename `server_stream` ...
+  - Update `http` docs.
+  - Test move constructors for readers and writers.
 
 - `json`
   - Rename

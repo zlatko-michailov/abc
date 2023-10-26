@@ -75,11 +75,10 @@ bool test_http_response_ostream_bodytext(test_context& context);
 bool test_http_response_ostream_bodybinary(test_context& context);
 bool test_http_response_ostream_bodynone(test_context& context);
 
-//// TODO:
-bool test_http_response_writer_01(test_context& context);
-bool test_http_response_writer_02(test_context& context);
-bool test_http_response_writer_03(test_context& context);
-bool test_http_response_writer_04(test_context& context);
+bool test_http_response_writer_none(test_context& context);
+bool test_http_response_writer_headers(test_context& context);
+bool test_http_response_writer_body(test_context& context);
+bool test_http_response_writer_headers_body(test_context& context);
 
 bool test_http_request_istream_move(test_context& context);
 bool test_http_request_reader_move(test_context& context); //// TODO:

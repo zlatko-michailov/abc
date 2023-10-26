@@ -916,6 +916,15 @@ namespace abc { namespace net { namespace http {
         using base      = ostream<LogPtr>;
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        response_ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
     public:
         /**
          * @brief     Constructor.
@@ -933,13 +942,6 @@ namespace abc { namespace net { namespace http {
          * @brief Deleted.
          */
         response_ostream(const response_ostream& other) = delete;
-
-    public:
-        /**
-         * @brief          Writes a whole http response to the http stream.
-         * @param response Response.
-         */
-        void put_response(const response& response);
 
     public:
         /**
@@ -970,6 +972,62 @@ namespace abc { namespace net { namespace http {
          * @param reason_phrase_len Reason phrase length. Optional.
          */
         void put_reason_phrase(const char* reason_phrase, std::size_t reason_phrase_len = size::strlen);
+    };
+
+
+    // --------------------------------------------------------------
+
+    /**
+     * @brief         http response writer. Used on the server side to write whole responses.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class response_writer
+        : protected response_ostream<LogPtr> {
+
+        using base      = response_ostream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin-Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        response_writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to write to.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        response_writer(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        response_writer(response_writer&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        response_writer(const response_writer& other) = delete;
+
+    public:
+        /**
+         * @brief          Writes a whole http response to the http stream.
+         * @param response Response.
+         */
+        void put_response(const response& response);
+
+        /**
+         * @brief          Writes a body to the http stream.
+         * @param body     Body.
+         * @param body_len Body length. Optional.
+         */
+        void put_body(const char* body, std::size_t body_len = size::strlen);
     };
 
 
