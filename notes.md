@@ -5,12 +5,8 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `http`
-  - `xxx_reader`
-  - `xxx_writer`
-  - Rename `client_stream` to `client` and derive from `request_writer` and `response_reader`.
-  - Rename `server_stream` ...
-  - Update `http` docs.
   - Test move constructors for readers and writers.
+  - Update `http` docs.
 
 - `json`
   - Rename

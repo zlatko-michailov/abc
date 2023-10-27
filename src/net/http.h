@@ -1446,16 +1446,16 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline client_stream<LogPtr>::client_stream(std::streambuf* sb, const LogPtr& log)
-        : request_ostream<LogPtr>(sb, log)
-        , response_istream<LogPtr>(sb, log) {
+    inline client<LogPtr>::client(std::streambuf* sb, const LogPtr& log)
+        : request_writer<LogPtr>(sb, log)
+        , response_reader<LogPtr>(sb, log) {
     }
 
 
     template <typename LogPtr>
-    inline client_stream<LogPtr>::client_stream(client_stream&& other)
-        : request_ostream<LogPtr>(std::move(other))
-        , response_istream<LogPtr>(std::move(other)) {
+    inline client<LogPtr>::client(client&& other)
+        : request_writer<LogPtr>(std::move(other))
+        , response_reader<LogPtr>(std::move(other)) {
     }
 
 
@@ -1463,16 +1463,16 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline server_stream<LogPtr>::server_stream(std::streambuf* sb, const LogPtr& log)
-        : request_istream<LogPtr>(sb, log)
-        , response_ostream<LogPtr>(sb, log) {
+    inline server<LogPtr>::server(std::streambuf* sb, const LogPtr& log)
+        : request_reader<LogPtr>(sb, log)
+        , response_writer<LogPtr>(sb, log) {
     }
 
 
     template <typename LogPtr>
-    inline server_stream<LogPtr>::server_stream(server_stream&& other)
-        : request_istream<LogPtr>(std::move(other))
-        , response_ostream<LogPtr>(std::move(other)) {
+    inline server<LogPtr>::server(server&& other)
+        : request_reader<LogPtr>(std::move(other))
+        , response_writer<LogPtr>(std::move(other)) {
     }
 
 

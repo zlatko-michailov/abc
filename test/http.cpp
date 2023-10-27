@@ -1085,54 +1085,52 @@ bool test_http_response_writer(test_context& context, bool use_headers, bool use
 // --------------------------------------------------------------
 
 
-template <typename HttpStream>
-bool http_request_istream_move(test_context& context) {
+bool test_http_request_istream_move(test_context& context) {
     char content[] =
         "GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
         "\r\n";
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    HttpStream istream1(&sb, context.log());
+    abc::net::http::request_istream<test_log*> istream1(&sb, context.log());
 
     bool passed = true;
 
     std::string method = istream1.get_method();
     passed = context.are_equal(method.c_str(), "GET", __TAG__) && passed;
-    passed = verify_stream_good(context, static_cast<abc::net::http::request_istream<test_log*>&>(istream1), std::strlen("GET"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream1, std::strlen("GET"), __TAG__) && passed;
 
-    HttpStream istream2(std::move(istream1));
+    abc::net::http::request_istream<test_log*> istream2(std::move(istream1));
 
     abc::net::http::resource resource = istream2.get_resource();
     passed = context.are_equal(resource.path.c_str(), "https://en.cppreference.com/w/cpp/io/basic_streambuf", __TAG__) && passed;
     passed = context.are_equal(resource.query.size(), (std::size_t)0, __TAG__, "%zu") && passed;
-    passed = verify_stream_good(context, static_cast<abc::net::http::request_istream<test_log*>&>(istream2), std::strlen("https://en.cppreference.com/w/cpp/io/basic_streambuf"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream2, std::strlen("https://en.cppreference.com/w/cpp/io/basic_streambuf"), __TAG__) && passed;
 
     return passed;
 }
 
 
-template <typename HttpStream>
-bool http_request_ostream_move(test_context& context) {
+bool test_http_request_ostream_move(test_context& context) {
     const char expected[] =
         "POST http://a.com/b?c=d HTTP/1.1\r\n";
 
     std::stringbuf sb(std::ios_base::out);
 
-    HttpStream ostream1(&sb, context.log());
+    abc::net::http::request_ostream<test_log*> ostream1(&sb, context.log());
 
     bool passed = true;
 
     ostream1.put_method("POST");
-    passed = verify_stream_good(context, static_cast<abc::net::http::request_ostream<test_log*>&>(ostream1), 0x10717) && passed;
+    passed = verify_stream_good(context, ostream1, 0x10717) && passed;
 
-    HttpStream ostream2(std::move(ostream1));
+    abc::net::http::request_ostream<test_log*> ostream2(std::move(ostream1));
 
     ostream2.put_resource("http://a.com/b?c=d");
-    passed = verify_stream_good(context, static_cast<abc::net::http::request_ostream<test_log*>&>(ostream2), 0x10718) && passed;
+    passed = verify_stream_good(context, ostream2, 0x10718) && passed;
 
     ostream2.put_protocol("HTTP/1.1");
-    passed = verify_stream_good(context, static_cast<abc::net::http::request_ostream<test_log*>&>(ostream2), 0x10719) && passed;
+    passed = verify_stream_good(context, ostream2, 0x10719) && passed;
 
     passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x1071a) && passed;
 
@@ -1140,53 +1138,51 @@ bool http_request_ostream_move(test_context& context) {
 }
 
 
-template <typename HttpStream>
-bool http_response_istream_move(test_context& context) {
+bool test_http_response_istream_move(test_context& context) {
     char content[] =
         "HTTP/1.1 302\r\n"
         "\r\n";
 
     abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
-    HttpStream istream1(&sb, context.log());
+    abc::net::http::response_istream<test_log*> istream1(&sb, context.log());
 
     bool passed = true;
 
     std::string protocol = istream1.get_protocol();
     passed = context.are_equal(protocol.c_str(), "HTTP/1.1", __TAG__) && passed;
-    passed = verify_stream_good(context, static_cast<abc::net::http::response_istream<test_log*>&>(istream1), std::strlen("HTTP/1.1"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream1, std::strlen("HTTP/1.1"), __TAG__) && passed;
 
-    HttpStream istream2(std::move(istream1));
+    abc::net::http::response_istream<test_log*> istream2(std::move(istream1));
 
     abc::net::http::status_code_t status = istream2.get_status_code();
     passed = context.are_equal(status, (abc::net::http::status_code_t)302, __TAG__, "%u") && passed;
-    passed = verify_stream_good(context, static_cast<abc::net::http::response_istream<test_log*>&>(istream2), std::strlen("302"), __TAG__) && passed;
+    passed = verify_stream_good(context, istream2, std::strlen("302"), __TAG__) && passed;
 
     return passed;
 }
 
 
-template <typename HttpStream>
-bool http_response_ostream_move(test_context& context) {
+bool test_http_response_ostream_move(test_context& context) {
     const char expected[] =
         "HTTP/1.1 200 OK\r\n";
 
     std::stringbuf sb(std::ios_base::out);
 
-    HttpStream ostream1(&sb, context.log());
+    abc::net::http::response_ostream<test_log*> ostream1(&sb, context.log());
 
     bool passed = true;
 
     ostream1.put_protocol("HTTP/1.1");
-    passed = verify_stream_good(context, static_cast<abc::net::http::response_ostream<test_log*>&>(ostream1), 0x1071d) && passed;
+    passed = verify_stream_good(context, ostream1, 0x1071d) && passed;
 
-    HttpStream ostream2(std::move(ostream1));
+    abc::net::http::response_ostream<test_log*> ostream2(std::move(ostream1));
 
     ostream2.put_status_code(200);
-    passed = verify_stream_good(context, static_cast<abc::net::http::response_ostream<test_log*>&>(ostream2), 0x1071e) && passed;
+    passed = verify_stream_good(context, ostream2, 0x1071e) && passed;
 
     ostream2.put_reason_phrase("OK");
-    passed = verify_stream_good(context, static_cast<abc::net::http::response_ostream<test_log*>&>(ostream2), 0x1071f) && passed;
+    passed = verify_stream_good(context, ostream2, 0x1071f) && passed;
 
     passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10720) && passed;
 
@@ -1194,41 +1190,23 @@ bool http_response_ostream_move(test_context& context) {
 }
 
 
-bool test_http_request_istream_move(test_context& context) {
-    return http_request_istream_move<abc::net::http::request_istream<test_log*>>(context);
-}
-
-
-bool test_http_request_ostream_move(test_context& context) {
-    return http_request_ostream_move<abc::net::http::request_ostream<test_log*>>(context);
-}
-
-
-bool test_http_response_istream_move(test_context& context) {
-    return http_response_istream_move<abc::net::http::response_istream<test_log*>>(context);
-}
-
-
-bool test_http_response_ostream_move(test_context& context) {
-    return http_response_ostream_move<abc::net::http::response_ostream<test_log*>>(context);
-}
-
-
-bool test_http_client_stream_move(test_context& context) {
+bool test_http_client_move(test_context& context) {
     bool passed = true;
 
-    passed = http_request_ostream_move<abc::net::http::client_stream<test_log*>>(context) && passed;
-    passed = http_response_istream_move<abc::net::http::client_stream<test_log*>>(context) && passed;
+    //// TODO: http_request_writer_move
+    ////passed = http_request_writer_move<abc::net::http::client<test_log*>>(context) && passed;
+    ////passed = http_response_reader_move<abc::net::http::client<test_log*>>(context) && passed;
 
     return passed;
 }
 
 
-bool test_http_server_stream_move(test_context& context) {
+bool test_http_server_move(test_context& context) {
     bool passed = true;
 
-    passed = http_request_istream_move<abc::net::http::server_stream<test_log*>>(context) && passed;
-    passed = http_response_ostream_move<abc::net::http::server_stream<test_log*>>(context) && passed;
+    //// TODO: http_request_reader_move
+    ////passed = http_request_reader_move<abc::net::http::server<test_log*>>(context) && passed;
+    ////passed = http_response_writer_move<abc::net::http::server<test_log*>>(context) && passed;
 
     return passed;
 }

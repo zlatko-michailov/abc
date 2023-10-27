@@ -1035,13 +1035,13 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Combination of `request_ostream` and `response_istream`. Used on the client side.
+     * @brief         Combination of `request_writer` and `response_reader`. Used on the client side.
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class client_stream
-        : public request_ostream<LogPtr>
-        , public response_istream<LogPtr> {
+    class client
+        : public request_writer<LogPtr>
+        , public response_reader<LogPtr> {
 
     public:
         /**
@@ -1049,17 +1049,17 @@ namespace abc { namespace net { namespace http {
          * @param sb  `std::streambuf` to read from and to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        client_stream(std::streambuf* sb, const LogPtr& log = nullptr);
+        client(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        client_stream(client_stream&& other);
+        client(client&& other);
 
         /**
          * @brief Deleted.
          */
-        client_stream(const client_stream& other) = delete;
+        client(const client& other) = delete;
     };
 
 
@@ -1067,13 +1067,13 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Combination of `request_istream` and `response_ostream`. Used on the server side.
+     * @brief         Combination of `request_reader` and `response_writer`. Used on the server side.
      * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
-    class server_stream
-        : public request_istream<LogPtr>
-        , public response_ostream<LogPtr> {
+    class server
+        : public request_reader<LogPtr>
+        , public response_writer<LogPtr> {
 
     public:
         /**
@@ -1081,17 +1081,17 @@ namespace abc { namespace net { namespace http {
          * @param sb  `std::streambuf` to read from and to write to.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        server_stream(std::streambuf* sb, const LogPtr& log = nullptr);
+        server(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        server_stream(server_stream&& other);
+        server(server&& other);
 
         /**
          * @brief Deleted.
          */
-        server_stream(const server_stream& other) = delete;
+        server(const server& other) = delete;
     };
 
 

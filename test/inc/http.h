@@ -88,5 +88,5 @@ bool test_http_response_istream_move(test_context& context);
 bool test_http_response_reader_move(test_context& context); //// TODO:
 bool test_http_response_ostream_move(test_context& context);
 bool test_http_response_write_move(test_context& context); //// TODO:
-bool test_http_client_stream_move(test_context& context);
-bool test_http_server_stream_move(test_context& context);
+bool test_http_client_move(test_context& context);
+bool test_http_server_move(test_context& context);
