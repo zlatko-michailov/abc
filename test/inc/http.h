@@ -81,12 +81,12 @@ bool test_http_response_writer_body(test_context& context);
 bool test_http_response_writer_headers_body(test_context& context);
 
 bool test_http_request_istream_move(test_context& context);
-bool test_http_request_reader_move(test_context& context); //// TODO:
 bool test_http_request_ostream_move(test_context& context);
-bool test_http_request_writer_move(test_context& context); //// TODO:
 bool test_http_response_istream_move(test_context& context);
-bool test_http_response_reader_move(test_context& context); //// TODO:
 bool test_http_response_ostream_move(test_context& context);
-bool test_http_response_write_move(test_context& context); //// TODO:
+bool test_http_request_reader_move(test_context& context);
+bool test_http_request_writer_move(test_context& context);
+bool test_http_response_reader_move(test_context& context);
+bool test_http_response_writer_move(test_context& context);
 bool test_http_client_move(test_context& context);
 bool test_http_server_move(test_context& context);

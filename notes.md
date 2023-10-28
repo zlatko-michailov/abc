@@ -5,7 +5,7 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `http`
-  - Test move constructors for readers and writers.
+  - Test - remove 'test' from helpers.
   - Update `http` docs.
 
 - `json`

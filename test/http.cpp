@@ -1190,12 +1190,209 @@ bool test_http_response_ostream_move(test_context& context) {
 }
 
 
+template <typename HttpRequestReader>
+bool http_request_reader_move(test_context& context) {
+    char content[] =
+        "POST https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
+        "List: foo bar foobar\r\n"
+        "Simple: simple\r\n"
+        "\r\n"
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    char content_body[] =
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+    HttpRequestReader reader1(&sb, context.log());
+
+    bool passed = true;
+
+    abc::net::http::request request = reader1.get_request();
+    passed = context.are_equal(request.method.c_str(), "POST", __TAG__) && passed;
+    passed = context.are_equal(request.resource.path.c_str(), "https://en.cppreference.com/w/cpp/io/basic_streambuf", __TAG__) && passed;
+    passed = context.are_equal(request.resource.query.size(), (std::size_t)0, __TAG__, "%zu") && passed;
+    passed = context.are_equal(request.headers.size(), (std::size_t)2, __TAG__, "%zu") && passed;
+    passed = context.are_equal(request.headers["List"].c_str(), "foo bar foobar", __TAG__) && passed;
+    passed = context.are_equal(request.headers["Simple"].c_str(), "simple", __TAG__) && passed;
+
+    HttpRequestReader reader2(std::move(reader1));
+
+    std::string body = reader2.get_body(abc::size::k1);
+    passed = context.are_equal(body.c_str(), content_body, __TAG__) && passed;
+
+    return passed;
+}
+
+
+template <typename HttpRequestWriter>
+bool http_request_writer_move(test_context& context) {
+    const char expected[] = 
+        "POST http://a.com/bbb/cc/d?x=111&yy=22&zzz=3 HTTP/1.1\r\n"
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n"
+        "Accept-Language: en-US,en;q=0.5\r\n"
+        "Host: en.cppreference.com\r\n"
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\n"
+        "\r\n"
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    const char body[] =
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    abc::net::http::request request;
+
+    request.method = "POST";
+    request.resource.path = "http://a.com/bbb/cc/d";
+    request.resource.query["x"] = "111";
+    request.resource.query["yy"] = "22";
+    request.resource.query["zzz"] = "3";
+    request.headers["Host"] = "en.cppreference.com";
+    request.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0";
+    request.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    request.headers["Accept-Language"] = "en-US,en;q=0.5";
+
+    std::stringbuf sb(std::ios_base::out);
+
+    HttpRequestWriter writer1(&sb, context.log());
+
+    writer1.put_request(request);
+
+    HttpRequestWriter writer2(std::move(writer1));
+
+    writer2.put_body(body);
+
+    bool passed = true;
+
+    passed = context.are_equal(sb.str().c_str(), expected, __TAG__) && passed;
+
+    return passed;
+}
+
+
+template <typename HttpResponseReader>
+bool http_response_reader_move(test_context& context) {
+    char content[] =
+        "HTTP/1.1 911 What's your emergency?\r\n"
+        "List: foo bar foobar\r\n"
+        "Simple: simple\r\n"
+        "\r\n"
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    char content_body[] =
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+
+    HttpResponseReader reader1(&sb, context.log());
+
+    bool passed = true;
+
+    abc::net::http::response response = reader1.get_response();
+    passed = context.are_equal(response.status_code, (abc::net::http::status_code_t)911, __TAG__, "%u") && passed;
+    passed = context.are_equal(response.reason_phrase.c_str(), "What's your emergency?", __TAG__) && passed;
+    passed = context.are_equal(response.headers.size(), (std::size_t)2, __TAG__, "%zu") && passed;
+    passed = context.are_equal(response.headers["List"].c_str(), "foo bar foobar", __TAG__) && passed;
+    passed = context.are_equal(response.headers["Simple"].c_str(), "simple", __TAG__) && passed;
+
+    HttpResponseReader reader2(std::move(reader1));
+
+    std::string body = reader2.get_body(abc::size::k1);
+    passed = context.are_equal(body.c_str(), content_body, __TAG__) && passed;
+
+    return passed;
+}
+
+
+template <typename HttpResponseWriter>
+bool http_response_writer_move(test_context& context) {
+    const char expected[] = 
+        "HTTP/1.1 911 What's your emergency?\r\n"
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n"
+        "Accept-Language: en-US,en;q=0.5\r\n"
+        "Host: en.cppreference.com\r\n"
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0\r\n"
+        "\r\n"
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    const char body[] =
+        "{\r\n"
+        "  \"foo\": 42,\r\n"
+        "  \"bar\": \"qwerty\"\r\n"
+        "}";
+
+    abc::net::http::response response;
+
+    response.status_code = 911;
+    response.reason_phrase = "What's your emergency?";
+    response.headers["Host"] = "en.cppreference.com";
+    response.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0";
+    response.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    response.headers["Accept-Language"] = "en-US,en;q=0.5";
+
+    std::stringbuf sb(std::ios_base::out);
+
+    HttpResponseWriter writer1(&sb, context.log());
+
+    writer1.put_response(response);
+
+    HttpResponseWriter writer2(std::move(writer1));
+
+    writer2.put_body(body);
+
+    bool passed = true;
+
+    passed = context.are_equal(sb.str().c_str(), expected, __TAG__) && passed;
+
+    return passed;
+}
+
+
+bool test_http_request_reader_move(test_context& context) {
+    return http_request_reader_move<abc::net::http::request_reader<test_log*>>(context);
+}
+
+
+bool test_http_request_writer_move(test_context& context) {
+    return http_request_writer_move<abc::net::http::request_writer<test_log*>>(context);
+}
+
+
+bool test_http_response_reader_move(test_context& context) {
+    return http_response_reader_move<abc::net::http::response_reader<test_log*>>(context);
+}
+
+
+bool test_http_response_writer_move(test_context& context) {
+    return http_response_writer_move<abc::net::http::response_writer<test_log*>>(context);
+}
+
+
 bool test_http_client_move(test_context& context) {
     bool passed = true;
 
-    //// TODO: http_request_writer_move
-    ////passed = http_request_writer_move<abc::net::http::client<test_log*>>(context) && passed;
-    ////passed = http_response_reader_move<abc::net::http::client<test_log*>>(context) && passed;
+    passed = http_request_writer_move<abc::net::http::client<test_log*>>(context) && passed;
+    passed = http_response_reader_move<abc::net::http::client<test_log*>>(context) && passed;
 
     return passed;
 }
@@ -1204,9 +1401,8 @@ bool test_http_client_move(test_context& context) {
 bool test_http_server_move(test_context& context) {
     bool passed = true;
 
-    //// TODO: http_request_reader_move
-    ////passed = http_request_reader_move<abc::net::http::server<test_log*>>(context) && passed;
-    ////passed = http_response_writer_move<abc::net::http::server<test_log*>>(context) && passed;
+    passed = http_request_reader_move<abc::net::http::server<test_log*>>(context) && passed;
+    passed = http_response_writer_move<abc::net::http::server<test_log*>>(context) && passed;
 
     return passed;
 }
