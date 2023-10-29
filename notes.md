@@ -4,9 +4,6 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- `http`
-  - Update `http` docs.
-
 - `json`
   - Rename
     - `item_t` -> `enum class token_type`, `enum class value_type`

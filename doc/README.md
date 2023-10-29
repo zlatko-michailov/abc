@@ -61,12 +61,18 @@ Provide the title and the link to the page along with as much information as you
 
 ### Namespace `abc::net::http`
 
+- [request_reader](ref/http.md)
+- [request_writer](ref/http.md)
+- [response_reader](ref/http.md)
+- [response_writer](ref/http.md)
+-
+- [client](ref/http.md)
+- [server](ref/http.md)
+-
 - [request_istream](ref/http.md)
 - [request_ostream](ref/http.md)
 - [response_istream](ref/http.md)
 - [response_ostream](ref/http.md)
-- [client_stream](ref/http.md)
-- [server_stream](ref/http.md)
 
 ### Namespace `abc::net::json`
 
