@@ -5,7 +5,6 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `http`
-  - Test - remove 'test' from helpers.
   - Update `http` docs.
 
 - `json`

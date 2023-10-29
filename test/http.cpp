@@ -328,30 +328,30 @@ bool test_http_request_istream_resource(test_context& context, const char* expec
 // --------------------------------------------------------------
 
 
-bool test_http_request_reader(test_context& context, bool use_headers, bool use_body);
+bool http_request_reader(test_context& context, bool use_headers, bool use_body);
 
 
 bool test_http_request_reader_none(test_context& context) {
-    return test_http_request_reader(context, false, false);
+    return http_request_reader(context, false, false);
 }
 
 
 bool test_http_request_reader_headers(test_context& context) {
-    return test_http_request_reader(context, true, false);
+    return http_request_reader(context, true, false);
 }
 
 
 bool test_http_request_reader_body(test_context& context) {
-    return test_http_request_reader(context, false, true);
+    return http_request_reader(context, false, true);
 }
 
 
 bool test_http_request_reader_headers_body(test_context& context) {
-    return test_http_request_reader(context, true, true);
+    return http_request_reader(context, true, true);
 }
 
 
-bool test_http_request_reader(test_context& context, bool use_headers, bool use_body) {
+bool http_request_reader(test_context& context, bool use_headers, bool use_body) {
     char content_body[] =
         "{\r\n"
         "  \"foo\": 42,\r\n"
@@ -598,30 +598,30 @@ bool test_http_request_ostream_resource(test_context& context, abc::net::http::r
 // --------------------------------------------------------------
 
 
-bool test_http_request_writer(test_context& context, bool use_headers, bool use_body);
+bool http_request_writer(test_context& context, bool use_headers, bool use_body);
 
 
 bool test_http_request_writer_none(test_context& context) {
-    return test_http_request_writer(context, false, false);
+    return http_request_writer(context, false, false);
 }
 
 
 bool test_http_request_writer_headers(test_context& context) {
-    return test_http_request_writer(context, true, false);
+    return http_request_writer(context, true, false);
 }
 
 
 bool test_http_request_writer_body(test_context& context) {
-    return test_http_request_writer(context, false, true);
+    return http_request_writer(context, false, true);
 }
 
 
 bool test_http_request_writer_headers_body(test_context& context) {
-    return test_http_request_writer(context, true, true);
+    return http_request_writer(context, true, true);
 }
 
 
-bool test_http_request_writer(test_context& context, bool use_headers, bool use_body) {
+bool http_request_writer(test_context& context, bool use_headers, bool use_body) {
     abc::net::http::request request;
 
     request.method = "POST";
@@ -807,30 +807,30 @@ bool test_http_response_istream_realworld_02(test_context& context) {
 // --------------------------------------------------------------
 
 
-bool test_http_response_reader(test_context& context, bool use_headers, bool use_body);
+bool http_response_reader(test_context& context, bool use_headers, bool use_body);
 
 
 bool test_http_response_reader_none(test_context& context) {
-    return test_http_response_reader(context, false, false);
+    return http_response_reader(context, false, false);
 }
 
 
 bool test_http_response_reader_headers(test_context& context) {
-    return test_http_response_reader(context, true, false);
+    return http_response_reader(context, true, false);
 }
 
 
 bool test_http_response_reader_body(test_context& context) {
-    return test_http_response_reader(context, false, true);
+    return http_response_reader(context, false, true);
 }
 
 
 bool test_http_response_reader_headers_body(test_context& context) {
-    return test_http_response_reader(context, true, true);
+    return http_response_reader(context, true, true);
 }
 
 
-bool test_http_response_reader(test_context& context, bool use_headers, bool use_body) {
+bool http_response_reader(test_context& context, bool use_headers, bool use_body) {
     char content_body[] =
         "{\r\n"
         "  \"foo\": 42,\r\n"
@@ -1015,30 +1015,30 @@ bool test_http_response_ostream_bodynone(test_context& context) {
 // --------------------------------------------------------------
 
 
-bool test_http_response_writer(test_context& context, bool use_headers, bool use_body);
+bool http_response_writer(test_context& context, bool use_headers, bool use_body);
 
 
 bool test_http_response_writer_none(test_context& context) {
-    return test_http_response_writer(context, false, false);
+    return http_response_writer(context, false, false);
 }
 
 
 bool test_http_response_writer_headers(test_context& context) {
-    return test_http_response_writer(context, true, false);
+    return http_response_writer(context, true, false);
 }
 
 
 bool test_http_response_writer_body(test_context& context) {
-    return test_http_response_writer(context, false, true);
+    return http_response_writer(context, false, true);
 }
 
 
 bool test_http_response_writer_headers_body(test_context& context) {
-    return test_http_response_writer(context, true, true);
+    return http_response_writer(context, true, true);
 }
 
 
-bool test_http_response_writer(test_context& context, bool use_headers, bool use_body) {
+bool http_response_writer(test_context& context, bool use_headers, bool use_body) {
     abc::net::http::response response;
 
     response.status_code = 200;
