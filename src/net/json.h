@@ -28,15 +28,273 @@ SOFTWARE.
 #include <cstdlib>
 #include <cstdio>
 
-#include "size.h"
-#include "ascii.h"
-#include "exception.h"
-#include "stream.h"
+#include "../size.h"
+#include "../ascii.h"
+#include "../stream.h"
 #include "i/json.i.h"
 
 
-namespace abc {
+namespace abc { namespace net { namespace json {
 
+    template <typename LogPtr>
+    inline value<LogPtr>::value(const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::empty) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::null, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::null) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::boolean b, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::boolean)
+        , _boolean(b) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::number n, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::number)
+        , _number(n) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::string&& str, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::string)
+        , _string(std::move(str)) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::array<LogPtr>&& arr, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::array)
+        , _array(std::move(arr)) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(literal::object<LogPtr>&& obj, const LogPtr& log) noexcept
+        : diag_base(_origin, log)
+        , _type(value_type::object)
+        , _object(std::move(obj)) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(const value& other)
+        : diag_base(_origin, other.log()) {
+
+        copy_from(other);
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::value(value&& other) noexcept 
+        : diag_base(_origin, other.log()) {
+
+        move_from(std::move(other));
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>::~value() noexcept {
+        clear();
+    }
+
+
+    template <typename LogPtr>
+    inline void value<LogPtr>::clear() noexcept {
+        switch (_type) {
+            case value_type::empty:
+            case value_type::null:
+            case value_type::boolean:
+            case value_type::number:
+                break;
+
+            case value_type::string:
+                _string.literal::string::~string();
+                break;
+
+            case value_type::array:
+                _array.literal::array::~array();
+                break;
+
+            case value_type::object:
+                _object.literal::object::~object();
+                break;
+        }
+
+        _type = value_type::empty;
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>& value<LogPtr>::operator = (const value& other) {
+        clear();
+        copy_from(other);
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr>& value<LogPtr>::operator = (value&& other) noexcept {
+        clear();
+        move_from(std::move(other));
+    }
+
+
+    template <typename LogPtr>
+    inline value_type value<LogPtr>::type() const noexcept {
+        return _type;
+    }
+
+
+    template <typename LogPtr>
+    inline literal::boolean value<LogPtr>::boolean() const {
+        diag_base::assert("boolean()", _type == value_type::boolean, __TAG__, "_type=%u", _type);
+
+        return _boolean;
+    }
+
+    
+    template <typename LogPtr>
+    inline literal::number value<LogPtr>::number() const {
+        diag_base::assert("number()", _type == value_type::number, __TAG__, "_type=%u", _type);
+
+        return _number;
+    }
+
+
+    template <typename LogPtr>
+    inline const literal::string& value<LogPtr>::string() const {
+        diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
+
+        return _string;
+    }
+
+
+    template <typename LogPtr>
+    inline literal::string& value<LogPtr>::string() {
+        diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
+
+        return _string;
+    }
+
+
+    template <typename LogPtr>
+    inline const literal::array<LogPtr>& value<LogPtr>::array() const {
+        diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
+
+        return _array;
+    }
+
+
+    template <typename LogPtr>
+    inline literal::array<LogPtr>& value<LogPtr>::array() {
+        diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
+
+        return _array;
+    }
+
+
+    template <typename LogPtr>
+    inline const literal::object<LogPtr>& value<LogPtr>::object() const {
+        diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
+
+        return _object;
+    }
+
+
+    template <typename LogPtr>
+    inline literal::object<LogPtr>& value<LogPtr>::object() {
+        diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
+
+        return _object;
+    }
+
+
+    template <typename LogPtr>
+    inline void value<LogPtr>::copy_from(const value& other) {
+        _type = other._type;
+
+        switch (_type) {
+            case value_type::empty:
+            case value_type::null:
+                break;
+
+            case value_type::boolean:
+                _boolean = other._boolean;
+                break;
+
+            case value_type::number:
+                _number = other._number;
+                break;
+
+            case value_type::string:
+                _string = other._string;
+                break;
+
+            case value_type::array:
+                _array = other._array;
+                break;
+
+            case value_type::object:
+                _object = other._object;
+                break;
+        }
+    }
+
+
+    template <typename LogPtr>
+    inline void value<LogPtr>::move_from(value&& other) noexcept {
+        _type = other._type;
+
+        switch (_type) {
+            case value_type::empty:
+            case value_type::null:
+                break;
+
+            case value_type::boolean:
+                _boolean = other._boolean;
+                break;
+
+            case value_type::number:
+                _number = other._number;
+                break;
+
+            case value_type::string:
+                _string = std::move(other._string);
+                other._string.clear();
+                break;
+
+            case value_type::array:
+                _array = std::move(other._array);
+                other._array.clear();
+                break;
+
+            case value_type::object:
+                _object = std::move(other._object);
+                other._object.clear();
+                break;
+        }
+
+        other.clear();
+    }
+
+
+    // --------------------------------------------------------------
+
+
+#if 0 //// TODO:
     template <std::size_t MaxLevels, typename Log>
     inline json_state<MaxLevels, Log>::json_state(Log* log)
         : _expect_property(false)
@@ -1015,6 +1273,6 @@ namespace abc {
 
 
     // --------------------------------------------------------------
+#endif
 
-}
-
+} } }

@@ -30,6 +30,7 @@ SOFTWARE.
 #include <istream>
 #include <ostream>
 #include <bitset>
+#include <string>
 #include <deque>
 #include <map>
 
@@ -52,64 +53,84 @@ namespace abc { namespace net { namespace json {
         string       =  5,
         array        =  6,
         object       =  7,
-
-        begin_array  =  8,
-        end_array    =  9,
-        begin_object = 10,
-        end_object   = 11,
-        property     = 12,
     };
 
 
-    struct value;
-    using array = std::deque<value>;
-    using object = std::map<std::string, value>;
+    /**
+     * @brief Literal/primitive value types.
+     */
+    namespace literal {
+        using null    = std::nullptr_t;
+        using boolean = bool;
+        using number  = double;
+        using string  = std::string;
+
+        template <typename Value>
+        using _array  = std::deque<Value>;
+
+        template <typename Value>
+        using _object = std::map<string, Value>;
+    }
 
 
     /**
      * @brief JSON value.
      */
-    class value {
+    template <typename LogPtr = std::nullptr_t>
+    class value
+        : diag::diag_ready<const char*, LogPtr> {
+
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+        constexpr const char* _origin = "abc::net::json::value";
+
     public:
         /**
-         * @brief Constructor - empty value.
+         * @brief     Constructor - empty value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value() noexcept;
+        value(const LogPtr& log = nullptr) noexcept;
 
         /**
-         * @brief Constructor - null value.
+         * @brief     Constructor - null value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(std::nullptr_t) noexcept;
+        value(literal::null, const LogPtr& log = nullptr) noexcept;
 
         /**
-         * @brief   Constructor - boolean value.
-         * @param b Boolean value.
+         * @brief     Constructor - boolean value.
+         * @param b   Boolean value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(bool b) noexcept;
+        value(literal::boolean b, const LogPtr& log = nullptr) noexcept;
 
         /**
-         * @brief   Constructor - number value.
-         * @param n Number value.
+         * @brief     Constructor - number value.
+         * @param n   Number value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(double n) noexcept;
+        value(literal::number n, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - string value.
          * @param str String value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(std::string&& str) noexcept;
+        value(literal::string&& str, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - array value.
          * @param arr Array value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(array&& arr) noexcept;
+        value(literal::_array<value<LogPtr>>&& arr, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - object value.
          * @param obj Object value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        value(object&& obj) noexcept;
+        value(literal::_object<value<LogPtr>>&& obj, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief Copy constructor.
@@ -121,7 +142,17 @@ namespace abc { namespace net { namespace json {
          */
         value(value&& other) noexcept;
 
+        /**
+         * @brief Destructor.
+         */
+        ~value() noexcept;
+
     public:
+        /**
+         * @brief Clears.
+         */
+        void clear() noexcept;
+
         /**
          * @brief Copy assignment.
          */
@@ -142,87 +173,142 @@ namespace abc { namespace net { namespace json {
          * @brief   Returns the boolean value.
          * @details Throws if the type is not boolean.
          */
-        bool boolean() const;
+        literal::boolean boolean() const;
 
         /**
          * @brief   Returns the number value.
          * @details Throws if the type is not number.
          */
-        double number() const;
+        literal::number number() const;
 
         /**
          * @brief   Returns the string value.
          * @details Throws if the type is not string.
          */
-        const std::string& string() const;
+        const literal::string& string() const;
 
         /**
          * @brief   Returns a mutable reference to the string value.
          * @details Throws if the type is not string.
          */
-        std::string& string();
+        literal::string& string();
 
         /**
          * @brief   Returns the array value.
          * @details Throws if the type is not array.
          */
-        const array& array() const;
+        const literal::_array<value<LogPtr>>& array() const;
 
         /**
          * @brief   Returns a mutable reference to the array value.
          * @details Throws if the type is not array.
          */
-        array& array();
+        literal::_array<value<LogPtr>>& array();
 
         /**
          * @brief   Returns the object value.
          * @details Throws if the type is not object.
          */
-        const object& object() const;
+        const literal::_object<value<LogPtr>>& object() const;
 
         /**
          * @brief   Returns a mutable reference to the object value.
          * @details Throws if the type is not object.
          */
-        object& object();
+        literal::_object<value<LogPtr>>& object();
+
+    private:
+        /**
+         * @brief Copy constructions.
+         */
+        void copy_from(const value& other);
+
+        /**
+         * @brief Move construction.
+         */
+        void move_from(value&& other) noexcept;
 
     private:
         /**
          * @brief The type of the JSON value.
          */
-        value_type _type;
+        value_type _type = value_type::empty;
 
         union {
             /**
              * @brief Potential boolean value.
              */
-            bool _boolean;
+            literal::boolean _boolean;
 
             /**
              * @brief Potential number value.
              */
-            double _number;
+            literal::number _number;
 
             /**
              * @brief Potential string value.
              */
-            std::string _string;
+            literal::string _string;
 
             /**
              * @brief Potential array value.
              */
-            array _array;
+            literal::_array<value> _array;
 
             /**
              * @brief Potential object value.
              */
-            object _object;
+            literal::_object<value> _object;
         };
     };
 
 
-    
+    namespace literal {
+        template <typename LogPtr = std::nullptr_t>
+        using array  = _array<value<LogPtr>>;
 
+        template <typename LogPtr = std::nullptr_t>
+        using object = _object<value<LogPtr>>;
+    }
+
+
+    /**
+     * @brief Enumeration of JSON stream token types.
+     */
+    enum class token_type : std::uint8_t {
+        none         =  0,
+        
+        null         =  2,
+        boolean      =  3,
+        number       =  4,
+        string       =  5,
+        begin_array  =  8,
+        end_array    =  9,
+        begin_object = 10,
+        end_object   = 11,
+        property     = 12,
+    };
+
+
+    /**
+     * @brief JSON stream token.
+     */
+    struct token {
+        token_type type = token_type::none;
+
+        ~token() noexcept;
+        
+        union {
+            literal::boolean boolean;
+            literal::number  number;
+            literal::string  string;
+            literal::string  property;
+        };
+    };
+
+
+
+#ifdef 0 //// TODO:
     using item_t = std::uint16_t;
 
     namespace item {
@@ -257,19 +343,21 @@ namespace abc { namespace net { namespace json {
         item_t    item;
         value_t    value;
     };
+#endif
 
 
     using level_t = bool;
 
     namespace level {
-        constexpr level_t    array    = false;
-        constexpr level_t    object    = true;
+        constexpr level_t array  = false;
+        constexpr level_t object = true;
     }
 
 
     // --------------------------------------------------------------
 
 
+#ifdef 0 //// TODO:
     /**
      * @brief                Internal. State keeper.
      * @tparam MaxLevels    Maximum levels of nesting. Needed to define the stack.
@@ -635,6 +723,7 @@ namespace abc { namespace net { namespace json {
          */
         bool _skip_comma;
     };
+#endif
 
 } } }
 
