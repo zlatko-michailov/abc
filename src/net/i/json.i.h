@@ -44,15 +44,13 @@ namespace abc { namespace net { namespace json {
      * @brief Enumeration of JSON value types.
      */
     enum class value_type : std::uint8_t {
-        none         =  0,
-        
-        empty        =  1,
-        null         =  2,
-        boolean      =  3,
-        number       =  4,
-        string       =  5,
-        array        =  6,
-        object       =  7,
+        empty        =  0,
+        null         =  1,
+        boolean      =  2,
+        number       =  3,
+        string       =  4,
+        array        =  5,
+        object       =  6,
     };
 
 
@@ -82,7 +80,7 @@ namespace abc { namespace net { namespace json {
 
         using diag_base = diag::diag_ready<const char*, LogPtr>;
 
-        constexpr const char* _origin = "abc::net::json::value";
+        const char* _origin = "abc::net::json::value";
 
     public:
         /**
@@ -308,7 +306,7 @@ namespace abc { namespace net { namespace json {
 
 
 
-#ifdef 0 //// TODO:
+#if 0 //// TODO:
     using item_t = std::uint16_t;
 
     namespace item {
@@ -357,7 +355,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#ifdef 0 //// TODO:
+#if 0 //// TODO:
     /**
      * @brief                Internal. State keeper.
      * @tparam MaxLevels    Maximum levels of nesting. Needed to define the stack.

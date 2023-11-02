@@ -36,7 +36,7 @@ SOFTWARE.
 #include "inc/stream.h"
 #include "inc/table_stream.h"
 #include "inc/http.h"
-//// TODO: #include "inc/json.h"
+#include "inc/json.h"
 //// TODO: #include "inc/socket.h"
 //// TODO: #include "inc/vmem.h"
 
@@ -86,7 +86,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_line_diag_move",                             test_line_diag_move },
                 { "test_line_test_move",                             test_line_test_move },
             } },
-#endif //// TODO:
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
                 { "test_http_request_istream_bodytext",              test_http_request_istream_bodytext },
@@ -141,7 +140,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_client_move",                           test_http_client_move },
                 { "test_http_server_move",                           test_http_server_move },
             } },
+#endif //// TODO:
             { "json", {
+                { "test_json_value_empty",                           test_json_value_empty },
 #if 0 //// TODO:
                 { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
                 { "test_json_istream_boolean_01",                    abc::test::json::test_json_istream_boolean_01 },

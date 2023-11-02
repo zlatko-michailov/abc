@@ -5,10 +5,11 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-  - Rename
-    - `item_t` -> `enum class token_type`, `enum class value_type`
-    - `value_t` -> `payload`
-    - `token_t` -> `value`
+  - Test `value`.
+  - Restore `istream` and `ostream`.
+  - Create `reader` and `writer`.
+  - docs
+
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 - log:

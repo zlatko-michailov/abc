@@ -31,6 +31,7 @@ SOFTWARE.
 #include "../size.h"
 #include "../ascii.h"
 #include "../stream.h"
+#include "../util.h"
 #include "i/json.i.h"
 
 
@@ -38,21 +39,21 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::empty) {
     }
 
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::null, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::null) {
     }
 
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::boolean b, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::boolean)
         , _boolean(b) {
     }
@@ -60,7 +61,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::number n, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::number)
         , _number(n) {
     }
@@ -68,7 +69,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::string&& str, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::string)
         , _string(std::move(str)) {
     }
@@ -76,7 +77,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::array<LogPtr>&& arr, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::array)
         , _array(std::move(arr)) {
     }
@@ -84,7 +85,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(literal::object<LogPtr>&& obj, const LogPtr& log) noexcept
-        : diag_base(_origin, log)
+        : diag_base(copy(_origin), log)
         , _type(value_type::object)
         , _object(std::move(obj)) {
     }
@@ -92,7 +93,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(const value& other)
-        : diag_base(_origin, other.log()) {
+        : diag_base(copy(_origin), other.log()) {
 
         copy_from(other);
     }
@@ -100,7 +101,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline value<LogPtr>::value(value&& other) noexcept 
-        : diag_base(_origin, other.log()) {
+        : diag_base(copy(_origin), other.log()) {
 
         move_from(std::move(other));
     }
@@ -122,15 +123,18 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::string:
-                _string.literal::string::~string();
+                using literal_string = literal::string;
+                _string.~literal_string();
                 break;
 
             case value_type::array:
-                _array.literal::array::~array();
+                using literal_array = literal::array<LogPtr>;
+                _array.~literal_array();
                 break;
 
             case value_type::object:
-                _object.literal::object::~object();
+                using literal_object = literal::object<LogPtr>;
+                _object.~literal_object();
                 break;
         }
 
@@ -142,6 +146,8 @@ namespace abc { namespace net { namespace json {
     inline value<LogPtr>& value<LogPtr>::operator = (const value& other) {
         clear();
         copy_from(other);
+
+        return *this;
     }
 
 
@@ -149,6 +155,8 @@ namespace abc { namespace net { namespace json {
     inline value<LogPtr>& value<LogPtr>::operator = (value&& other) noexcept {
         clear();
         move_from(std::move(other));
+
+        return *this;
     }
 
 
