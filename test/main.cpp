@@ -42,7 +42,7 @@ SOFTWARE.
 
 
 int main(int /*argc*/, const char* argv[]) {
-    test_log_filter filter("", abc::diag::severity::critical);
+    test_log_filter filter("", abc::diag::severity::optional);
     test_log log(std::cout.rdbuf(), &filter);
 
     test_suite suite(
@@ -143,6 +143,7 @@ int main(int /*argc*/, const char* argv[]) {
 #endif //// TODO:
             { "json", {
                 { "test_json_value_empty",                           test_json_value_empty },
+                { "test_json_value_null",                            test_json_value_null },
 #if 0 //// TODO:
                 { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
                 { "test_json_istream_boolean_01",                    abc::test::json::test_json_istream_boolean_01 },
