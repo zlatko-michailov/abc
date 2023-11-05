@@ -1,14 +1,35 @@
 ## Done
 - internal doc pages. UNLINKED!
 - `diag_ready`
+- `http`
+    - `request_reader`
+    - `request_writer`
+    - `response_reader`
+    - `response_writer`
 
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-  - Test `value`.
-  - Restore `istream` and `ostream`.
-  - Create `reader` and `writer`.
-  - docs
+    - Test `value`.
+    - Restore `istream` and `ostream`.
+    - Create `reader` and `writer`.
+    - docs
+
+- kvp.h
+    - `key_value_pair<Key, Value>`- derives from `std::pair<Key, Value>`
+        - key_type = Key
+        - value_type = Value
+        - `key()`
+        - `value()`
+    - `key_value_list<Key, Value>` - derives from `std::deque<key_value_pair<Key, Value>>`
+        - key_type = Key
+        - value_type = Value
+        - `find(key)`
+        - `at(key)`
+        - `operator [key]`
+    - `http::headers` to become a `key_value_list<std::string, std::string>`.
+    - `json::literal::object`to become a `key_value_list<std::string, value>`.
+    - docs
 
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.

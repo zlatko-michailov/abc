@@ -67,7 +67,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param ...       Message arguments.
          */
-        void put_any(const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        void put_any(const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) const noexcept;
 
         /**
          * @brief           Write a formatted message.
@@ -77,7 +77,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) const noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -87,13 +87,13 @@ namespace abc { namespace diag {
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        void put_binary(const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) const noexcept;
 
         /**
          * @brief          Puts a new line.
          * @param severity Entry severity.
          */
-        void put_blank_line(severity_t severity) noexcept;
+        void put_blank_line(severity_t severity) const noexcept;
 
         /**
          * @brief            Throws an exception with the given base type, message, and tag.
@@ -104,7 +104,7 @@ namespace abc { namespace diag {
          * @param ...        Message arguments.
          */
         template <typename Exception>
-        void throw_exception(const char* suborigin, tag_t tag, const char* format, ...);
+        void throw_exception(const char* suborigin, tag_t tag, const char* format, ...) const;
 
         /**
          * @brief            Throws an exception with the given base type, message, and tag.
@@ -115,7 +115,7 @@ namespace abc { namespace diag {
          * @param vlist      Message arguments.
          */
         template <typename Exception>
-        void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist);
+        void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
@@ -126,7 +126,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param ...        Message arguments.
          */
-        void assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+        void assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const;
 
         /**
          * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
@@ -137,7 +137,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
+        void assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
@@ -148,7 +148,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param ...        Message arguments.
          */
-        void expect(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+        void expect(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const;
 
         /**
          * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
@@ -159,7 +159,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
+        void expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
@@ -170,7 +170,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param ...        Message arguments.
          */
-        void ensure(const char* suborigin, bool condition, tag_t tag, const char* format, ...);
+        void ensure(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const;
 
         /**
          * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
@@ -181,7 +181,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist);
+        void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
 
     protected:
         /**
