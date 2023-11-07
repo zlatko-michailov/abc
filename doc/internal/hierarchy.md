@@ -13,8 +13,6 @@ Up to [Documentation](README.md).
     - multifile_streambuf.h
     - stream.h
     - table_stream.h
-    - __kvp ::__
-        - kvp.h __TODO:__
     - __diag ::__
         - __i__
         - tag.h

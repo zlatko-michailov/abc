@@ -10,7 +10,9 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-    - Test `value`.
+    `value`
+        - `operator ==`, `operator !=`
+        - Test.
     - Restore `istream` and `ostream`.
     - Create `reader` and `writer`.
     - docs

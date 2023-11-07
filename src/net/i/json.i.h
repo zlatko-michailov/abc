@@ -114,6 +114,13 @@ namespace abc { namespace net { namespace json {
          * @param str String value.
          * @param log `LogPtr` pointer. May be `nullptr`.
          */
+        value(const char* str, const LogPtr& log = nullptr);
+
+        /**
+         * @brief     Constructor - string value.
+         * @param str String value.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
         value(literal::string&& str, const LogPtr& log = nullptr) noexcept;
 
         /**

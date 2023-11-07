@@ -68,6 +68,12 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
+    inline value<LogPtr>::value(const char* str, const LogPtr& log)
+        : value(std::string(str), log) {
+    }
+
+
+    template <typename LogPtr>
     inline value<LogPtr>::value(literal::string&& str, const LogPtr& log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::string)
@@ -248,15 +254,15 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::string:
-                _string = other._string;
+                new (&_string) literal::string(other._string);
                 break;
 
             case value_type::array:
-                _array = other._array;
+                new (&_array) literal::array<LogPtr>(other._array);
                 break;
 
             case value_type::object:
-                _object = other._object;
+                new (&_object) literal::object<LogPtr>(other._object);
                 break;
         }
     }
@@ -280,18 +286,15 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::string:
-                _string = std::move(other._string);
-                other._string.clear();
+                new (&_string) literal::string(std::move(other._string));
                 break;
 
             case value_type::array:
-                _array = std::move(other._array);
-                other._array.clear();
+                new (&_array) literal::array<LogPtr>(std::move(other._array));
                 break;
 
             case value_type::object:
-                _object = std::move(other._object);
-                other._object.clear();
+                new (&_object) literal::object<LogPtr>(std::move(other._object));
                 break;
         }
 
