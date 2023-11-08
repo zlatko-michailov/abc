@@ -26,6 +26,9 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
+#include <utility>
+#include <deque>
+#include <map>
 
 
 namespace abc {
@@ -37,6 +40,9 @@ namespace abc {
     inline T copy(const T& source) {
         return T(source);
     }
+
+
+    // --------------------------------------------------------------
 
 
     /**
@@ -85,6 +91,95 @@ namespace abc {
      */
     inline std::size_t str_length(const std::string& str) noexcept {
         return str.length();
+    }
+
+
+    // --------------------------------------------------------------
+
+
+ // Comparison of std::pair<T1, T2> has been removed in C++ 20.
+#if __cplusplus >= 202002L
+    /**
+     * @brief Returns `true` iff both items of one pair are equal to the corresponding items of the other pair.
+     */
+    template <typename T1, typename T2>
+    bool operator == (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
+        return left.first == right.first && left.second == right.second;
+    }
+
+
+    /**
+     * @brief Returns the opposite of `operator ==`.
+     */
+    template <typename T1, typename T2>
+    bool operator != (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
+        return !(left == right);
+    }
+#endif
+
+
+    /**
+     * @brief Returns `true` iff the two containers have the same items in the same order.
+     */
+    template <typename Container>
+    bool are_equal(const Container& left, const Container& right) noexcept {
+        if (left.size() != right.size()) {
+            return false;
+        }
+
+        if (left.empty() && right.empty()) {
+            return true;
+        }
+
+        typename Container::const_iterator left_itr  = left.cbegin();
+        typename Container::const_iterator right_itr = right.cbegin();
+
+        while (left_itr != left.cend() && right_itr != right.cend()) {
+            if (*left_itr != *right_itr) {
+                return false;
+            }
+
+            left_itr++;
+            right_itr++;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * @brief Returns `true` iff the two containers have the same items in the same order.
+     */
+    template <typename T>
+    bool operator == (const std::deque<T>& left, const std::deque<T>& right) noexcept {
+        return are_equal(left, right);
+    }
+
+
+    /**
+     * @brief Returns the opposite of `operator ==`.
+     */
+    template <typename T>
+    bool operator != (const std::deque<T>& left, const std::deque<T>& right) noexcept {
+        return !are_equal(left, right);
+    }
+
+
+    /**
+     * @brief Returns `true` iff the two containers have the same items in the same order.
+     */
+    template <typename K, typename V>
+    bool operator == (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
+        return are_equal(left, right);
+    }
+
+
+    /**
+     * @brief Returns the opposite of `operator ==`.
+     */
+    template <typename K, typename V>
+    bool operator != (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
+        return !are_equal(left, right);
     }
 
 }

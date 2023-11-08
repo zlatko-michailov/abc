@@ -237,6 +237,45 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
+    inline bool value<LogPtr>::operator ==(const value& other) const noexcept {
+        if (_type != other._type) {
+            return false;
+        }
+
+        switch (_type) {
+            case value_type::empty:
+            case value_type::null:
+                return true;
+
+            case value_type::boolean:
+                return _boolean == other._boolean;
+
+            case value_type::number:
+                return _number == other._number;
+
+            case value_type::string:
+                return _string == other._string;
+
+            case value_type::array:
+                return _array == other._array;
+
+            case value_type::object:
+                return _object == other._object;
+        }
+
+        // Must remain unreached.
+        diag_base::ensure("operator ==", false, __TAG__, "_type=%u", _type);
+        return false;
+    }
+
+
+    template <typename LogPtr>
+    inline bool value<LogPtr>::operator !=(const value& other) const noexcept {
+        return !(*this == other);
+    }
+
+
+    template <typename LogPtr>
     inline void value<LogPtr>::copy_from(const value& other) {
         _type = other._type;
 

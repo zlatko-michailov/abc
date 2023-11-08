@@ -222,6 +222,17 @@ namespace abc { namespace net { namespace json {
          */
         literal::_object<value<LogPtr>>& object();
 
+    public:
+        /**
+         * @brief Returns `true` iff the two values are equal.
+         */
+        bool operator == (const value& other) const noexcept;
+
+        /**
+         * @brief Returns `true` iff the two values are not equal.
+         */
+        bool operator != (const value& other) const noexcept;
+
     private:
         /**
          * @brief Copy constructions.

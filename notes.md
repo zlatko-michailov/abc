@@ -9,10 +9,14 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
+- `http`
+    - Build with `g++` and fix errors.
+
 - `json`
     `value`
         - `operator ==`, `operator !=`
         - Test.
+        - Test - replace the verifier with a `value` comparison.
     - Restore `istream` and `ostream`.
     - Create `reader` and `writer`.
     - docs
