@@ -82,8 +82,8 @@ namespace abc { namespace net { namespace http {
      * @brief Common request/response properties. 
      */
     struct common {
-        std::string protocol { "HTTP/1.1" };
-        headers     headers;
+        std::string   protocol { "HTTP/1.1" };
+        http::headers headers;
     };
 
 
@@ -93,8 +93,8 @@ namespace abc { namespace net { namespace http {
     struct request
         : public common {
 
-        std::string method;
-        resource    resource;
+        std::string    method;
+        http::resource resource;
     };
 
 
@@ -180,9 +180,9 @@ namespace abc { namespace net { namespace http {
         : public abc::istream
         , public state<LogPtr> {
 
-        using base      = abc::istream;
-        using state     = state<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using base       = abc::istream;
+        using state_base = state<LogPtr>;
+        using diag_base  = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -346,9 +346,9 @@ namespace abc { namespace net { namespace http {
         : public abc::ostream
         , public state<LogPtr> {
 
-        using base      = abc::ostream;
-        using state     = state<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using base       = abc::ostream;
+        using state_base = state<LogPtr>;
+        using diag_base  = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**

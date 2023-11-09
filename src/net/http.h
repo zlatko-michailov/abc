@@ -80,7 +80,7 @@ namespace abc { namespace net { namespace http {
     template <typename LogPtr>
     inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item_t next, const LogPtr& log)
         : base(sb)
-        , state(origin, next, log) {
+        , state_base(origin, next, log) {
 
         constexpr const char* suborigin = "istream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
@@ -94,7 +94,7 @@ namespace abc { namespace net { namespace http {
     template <typename LogPtr>
     inline istream<LogPtr>::istream(istream&& other)
         : base(std::move(other))
-        , state(std::move(other)) {
+        , state_base(std::move(other)) {
     }
 
 
@@ -103,7 +103,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "get_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        state::assert_next(item::protocol);
+        state_base::assert_next(item::protocol);
 
         // Format: HTTP/1.1
 
@@ -173,17 +173,17 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "get_headers()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        state::assert_next(item::header_name);
+        state_base::assert_next(item::header_name);
 
         std::size_t gcount = 0;
         headers headers;
 
-        while (state::next() == item::header_name) {
+        while (state_base::next() == item::header_name) {
             // Read header name.
             std::string header_name = get_header_name();
             gcount += header_name.length();
 
-            if (state::next() == item::header_value) {
+            if (state_base::next() == item::header_value) {
                 // Read header value.
                 std::string header_value = get_header_value();
                 gcount += 1 + header_value.length() + 2; // : <value> CR LF
@@ -207,7 +207,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "get_header_name()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        state::assert_next(item::header_name);
+        state_base::assert_next(item::header_name);
 
         // Format: 'Name :'
 
@@ -246,7 +246,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "get_header_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        state::assert_next(item::header_value);
+        state_base::assert_next(item::header_value);
 
         // Format: prints CRLF[ prints CRLF[...]]
 
@@ -291,7 +291,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "get_body()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: max_len=%zu", max_len);
 
-        state::assert_next(item::body);
+        state_base::assert_next(item::body);
 
         constexpr std::size_t estimated_len = size::k4;
         std::string body = get_any_chars(estimated_len, max_len);
@@ -426,7 +426,7 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: gcount=%zu, next=%u", gcount, (unsigned)next);
 
         base::set_gcount(gcount);
-        state::reset(next);
+        state_base::reset(next);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -438,7 +438,7 @@ namespace abc { namespace net { namespace http {
     template <typename LogPtr>
     inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item_t next, const LogPtr& log)
         : base(sb)
-        , state(origin, next, log) {
+        , state_base(origin, next, log) {
 
         constexpr const char* suborigin = "ostream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
@@ -450,7 +450,7 @@ namespace abc { namespace net { namespace http {
     template <typename LogPtr>
     inline ostream<LogPtr>::ostream(ostream&& other)
         : base(std::move(other))
-        , state(std::move(other)) {
+        , state_base(std::move(other)) {
     }
 
 
@@ -477,7 +477,7 @@ namespace abc { namespace net { namespace http {
 
         diag_base::expect(suborigin, header_name != nullptr, __TAG__, "header_name != nullptr");
 
-        state::assert_next(item::header_name);
+        state_base::assert_next(item::header_name);
 
         if (header_name_len == size::strlen) {
             header_name_len = std::strlen(header_name);
@@ -509,7 +509,7 @@ namespace abc { namespace net { namespace http {
 
         diag_base::expect(suborigin, header_value != nullptr, __TAG__, "header_value != nullptr");
 
-        state::assert_next(item::header_value);
+        state_base::assert_next(item::header_value);
 
         if (header_value_len == size::strlen) {
             header_value_len = std::strlen(header_value);
@@ -549,7 +549,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "put_header_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        state::assert_next(item::header_name);
+        state_base::assert_next(item::header_name);
 
         put_crlf();
 
@@ -566,7 +566,7 @@ namespace abc { namespace net { namespace http {
 
         diag_base::expect(suborigin, body != nullptr, __TAG__, "body != nullptr");
 
-        state::assert_next(item::body);
+        state_base::assert_next(item::body);
 
         if (body_len == size::strlen) {
             body_len = std::strlen(body);
@@ -587,7 +587,7 @@ namespace abc { namespace net { namespace http {
 
         diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
 
-        state::assert_next(item::protocol);
+        state_base::assert_next(item::protocol);
 
         if (protocol_len == size::strlen) {
             protocol_len = std::strlen(protocol);
@@ -755,7 +755,7 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
 
         base::flush();
-        state::reset(next);
+        state_base::reset(next);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
