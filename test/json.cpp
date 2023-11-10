@@ -30,72 +30,184 @@ SOFTWARE.
 
 
 using json_literal_verifier = std::function<bool(test_context&, const abc::net::json::value<test_log*>&)>;
-bool json_value(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal);
+bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal);
 
 
 bool test_json_value_empty(test_context& context) {
     abc::net::json::value<test_log*> value(context.log());
 
-    bool passed = true;
-    passed = context.are_equal(value.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-    
-    abc::net::json::value<test_log*> value_copy_ctr(value);
-    passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-    passed = context.are_equal(value.type(), abc::net::json::value_type::empty, __TAG__, "%u");
+    json_literal_verifier verifier = 
+        [] (test_context& /*context*/, const abc::net::json::value<test_log*>& /*value*/) -> bool { 
+            return true;
+        };
 
-    abc::net::json::value<test_log*> value_copy_assign(context.log());
-    value_copy_assign = value;
-    passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-    passed = context.are_equal(value.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-
-    abc::net::json::value<test_log*> value_move_ctr(std::move(value_copy_ctr));
-    passed = context.are_equal(value_move_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-    passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-
-    abc::net::json::value<test_log*> value_move_assign(context.log());
-    value_move_assign = std::move(value_copy_assign);
-    passed = context.are_equal(value_move_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-    passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-
-    return passed;
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::empty, std::move(verifier));
 }
 
 
 bool test_json_value_null(test_context& context) {
     abc::net::json::value<test_log*> value(nullptr, context.log());
 
-    bool passed = true;
-    passed = context.are_equal(value.type(), abc::net::json::value_type::null, __TAG__, "%u");
-    
-    abc::net::json::value<test_log*> value_copy_ctr(value);
-    passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::null, __TAG__, "%u");
-    passed = context.are_equal(value.type(), abc::net::json::value_type::null, __TAG__, "%u");
+    json_literal_verifier verifier = 
+        [] (test_context& /*context*/, const abc::net::json::value<test_log*>& /*value*/) -> bool { 
+            return true;
+        };
 
-    abc::net::json::value<test_log*> value_copy_assign(context.log());
-    value_copy_assign = value;
-    passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::null, __TAG__, "%u");
-    passed = context.are_equal(value.type(), abc::net::json::value_type::null, __TAG__, "%u");
-
-    abc::net::json::value<test_log*> value_move_ctr(std::move(value_copy_ctr));
-    passed = context.are_equal(value_move_ctr.type(), abc::net::json::value_type::null, __TAG__, "%u");
-    passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-
-    abc::net::json::value<test_log*> value_move_assign(context.log());
-    value_move_assign = std::move(value_copy_assign);
-    passed = context.are_equal(value_move_assign.type(), abc::net::json::value_type::null, __TAG__, "%u");
-    passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u");
-
-    return passed;
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::null, std::move(verifier));
 }
 
 
-bool test_json_value_boolean(test_context& context);
-bool test_json_value_number(test_context& context);
-bool test_json_value_string(test_context& context);
-bool test_json_value_array_simple(test_context& context);
-bool test_json_value_object_simple(test_context& context);
+bool test_json_value_boolean(test_context& context) {
+    abc::net::json::value<test_log*> value(true, context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            return context.are_equal(value.boolean(), true, __TAG__, "%u");
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::boolean, std::move(verifier));
+}
+
+
+bool test_json_value_number(test_context& context) {
+    abc::net::json::value<test_log*> value(42.5, context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            return context.are_equal(value.number(), 42.5, __TAG__, "%f");
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::number, std::move(verifier));
+}
+
+
+bool test_json_value_string(test_context& context) {
+    constexpr const char* str = "jabberwocky";
+
+    abc::net::json::value<test_log*> value(str, context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            return context.are_equal(value.string().c_str(), str, __TAG__);
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::string, std::move(verifier));
+}
+
+
+bool test_json_value_array_simple(test_context& context) {
+    const abc::net::json::literal::array<test_log*> arr {
+        abc::net::json::value<test_log*>(         context.log()),
+        abc::net::json::value<test_log*>(nullptr, context.log()),
+        abc::net::json::value<test_log*>(true,    context.log()),
+        abc::net::json::value<test_log*>(99.9,    context.log()),
+        abc::net::json::value<test_log*>("xyz",   context.log()),
+    };
+
+    abc::net::json::value<test_log*> value(copy(arr), context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            bool passed = true;
+
+            passed = context.are_equal(value.array()[0].type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+            passed = context.are_equal(value.array()[1].type(),            abc::net::json::value_type::null,  __TAG__, "%u") & passed;
+            passed = context.are_equal(value.array()[2].boolean(),         true, __TAG__, "%u") & passed;
+            passed = context.are_equal(value.array()[3].number(),          99.9, __TAG__, "%4.1f") & passed;
+            passed = context.are_equal(value.array()[4].string().c_str(),  "xyz", __TAG__) & passed;
+
+            return passed;
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::array, std::move(verifier));
+}
+
+
+bool test_json_value_object_simple(test_context& context) {
+    const abc::net::json::literal::object<test_log*> obj {
+        { "empty",   abc::net::json::value<test_log*>(         context.log()) },
+        { "null",    abc::net::json::value<test_log*>(nullptr, context.log()) },
+        { "boolean", abc::net::json::value<test_log*>(true,    context.log()) },
+        { "number",  abc::net::json::value<test_log*>(99.9,    context.log()) },
+        { "string",  abc::net::json::value<test_log*>("xyz",   context.log()) },
+    };
+
+    abc::net::json::value<test_log*> value(copy(obj), context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            bool passed = true;
+
+            passed = context.are_equal(value.object().at("empty").type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+            passed = context.are_equal(value.object().at("null").type(),             abc::net::json::value_type::null,  __TAG__, "%u") & passed;
+            passed = context.are_equal(value.object().at("boolean").boolean(),       true, __TAG__, "%u") & passed;
+            passed = context.are_equal(value.object().at("number").number(),         99.9, __TAG__, "%4.1f") & passed;
+            passed = context.are_equal(value.object().at("string").string().c_str(), "xyz", __TAG__) & passed;
+
+            return passed;
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::object, std::move(verifier));
+}
+
+
 bool test_json_value_array_complex(test_context& context);
 bool test_json_value_object_complex(test_context& context);
+
+
+bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal) {
+    abc::net::json::value<test_log*> empty(context.log());
+
+    bool passed = true;
+
+    passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
+    
+    abc::net::json::value<test_log*> value_copy_ctr(value);
+    {
+        passed = context.are_equal(value_copy_ctr.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_copy_ctr == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value_copy_ctr) & passed;
+
+        passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value) & passed;
+    }
+
+    abc::net::json::value<test_log*> value_copy_assign(context.log());
+    value_copy_assign = value;
+    {
+        passed = context.are_equal(value_copy_assign.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_copy_assign == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value_copy_assign) & passed;
+        
+        passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value) & passed;
+    }
+
+    abc::net::json::value<test_log*> value_move_ctr(std::move(value_copy_ctr));
+    {
+        passed = context.are_equal(value_move_ctr.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_move_ctr == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value_move_ctr) & passed;
+
+        passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_copy_ctr == empty, true, __TAG__, "%u *") & passed;
+    }
+
+    abc::net::json::value<test_log*> value_move_assign(context.log());
+    value_move_assign = std::move(value_copy_assign);
+    {
+        passed = context.are_equal(value_move_assign.type(), type, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_move_assign == value, true, __TAG__, "%u *") & passed;
+        passed = verify_literal(context, value_move_assign) & passed;
+
+        passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+        passed = context.are_equal(value_copy_assign == empty, true, __TAG__, "%u *") & passed;
+    }
+
+    return passed;
+}
 
 
 #if 0 //// TODO:
