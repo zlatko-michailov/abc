@@ -6,15 +6,17 @@
     - `request_writer`
     - `response_reader`
     - `response_writer`
+- `json`
+    - `value`
 
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-    `value`
-        - Test.
     - Restore `istream` and `ostream`.
     - Create `reader` and `writer`.
     - docs
+        - `value`
+        - `reader`, `writer`
 
 - kvp.h
     - `key_value_pair<Key, Value>`- derives from `std::pair<Key, Value>`

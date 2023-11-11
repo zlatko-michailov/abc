@@ -149,6 +149,8 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_value_string",                          test_json_value_string },
                 { "test_json_value_array_simple",                    test_json_value_array_simple },
                 { "test_json_value_object_simple",                   test_json_value_object_simple },
+                { "test_json_value_array_complex",                   test_json_value_array_complex },
+                { "test_json_value_object_complex",                  test_json_value_object_complex },
 #if 0 //// TODO:
                 { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
                 { "test_json_istream_boolean_01",                    abc::test::json::test_json_istream_boolean_01 },

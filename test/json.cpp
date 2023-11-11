@@ -151,8 +151,78 @@ bool test_json_value_object_simple(test_context& context) {
 }
 
 
-bool test_json_value_array_complex(test_context& context);
-bool test_json_value_object_complex(test_context& context);
+bool test_json_value_array_complex(test_context& context) {
+    const abc::net::json::literal::array<test_log*> arr {
+        abc::net::json::value<test_log*>(         context.log()),
+        abc::net::json::value<test_log*>(nullptr, context.log()),
+        abc::net::json::value<test_log*>(true,    context.log()),
+        abc::net::json::value<test_log*>(99.9,    context.log()),
+        abc::net::json::value<test_log*>("xyz",   context.log()),
+    };
+
+    const abc::net::json::literal::array<test_log*> complex_arr {
+        abc::net::json::value<test_log*>(copy(arr), context.log()),
+        abc::net::json::value<test_log*>(copy(arr), context.log()),
+        abc::net::json::value<test_log*>(copy(arr), context.log()),
+    };
+
+    abc::net::json::value<test_log*> value(copy(complex_arr), context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            bool passed = true;
+
+            for (std::size_t i = 0; i < value.array().size(); i++) {
+                passed = context.are_equal(value.array()[i].array()[0].type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[1].type(),            abc::net::json::value_type::null,  __TAG__, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[2].boolean(),         true, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[3].number(),          99.9, __TAG__, "%4.1f") & passed;
+                passed = context.are_equal(value.array()[i].array()[4].string().c_str(),  "xyz", __TAG__) & passed;
+            }
+
+            return passed;
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::array, std::move(verifier));
+
+}
+
+
+bool test_json_value_object_complex(test_context& context) {
+    const abc::net::json::literal::object<test_log*> obj {
+        { "empty",   abc::net::json::value<test_log*>(         context.log()) },
+        { "null",    abc::net::json::value<test_log*>(nullptr, context.log()) },
+        { "boolean", abc::net::json::value<test_log*>(true,    context.log()) },
+        { "number",  abc::net::json::value<test_log*>(99.9,    context.log()) },
+        { "string",  abc::net::json::value<test_log*>("xyz",   context.log()) },
+    };
+
+    const abc::net::json::literal::object<test_log*> complex_obj {
+        { "one",   abc::net::json::value<test_log*>(copy(obj), context.log()) },
+        { "two",   abc::net::json::value<test_log*>(copy(obj), context.log()) },
+        { "three", abc::net::json::value<test_log*>(copy(obj), context.log()) },
+    };
+
+    abc::net::json::value<test_log*> value(copy(complex_obj), context.log());
+
+    json_literal_verifier verifier = 
+        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+            std::string keys[] = { "one", "two", "three" };
+            bool passed = true;
+
+            for (const std::string& key : keys) {
+                passed = context.are_equal(value.object().at(key).object().at("empty").type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("null").type(),             abc::net::json::value_type::null,  __TAG__, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("boolean").boolean(),       true, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("number").number(),         99.9, __TAG__, "%4.1f") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("string").string().c_str(), "xyz", __TAG__) & passed;
+            }
+
+            return passed;
+        };
+
+    return json_value_copy_move(context, std::move(value), abc::net::json::value_type::object, std::move(verifier));
+}
 
 
 bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal) {
