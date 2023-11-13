@@ -33,6 +33,7 @@ SOFTWARE.
 #include <string>
 #include <deque>
 #include <map>
+#include <stack>
 
 #include "../../i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
@@ -72,7 +73,8 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief JSON value.
+     * @brief         JSON value.
+     * @tparam LogPtr Pointer type to `log_ostream`.
      */
     template <typename LogPtr = std::nullptr_t>
     class value
@@ -292,17 +294,16 @@ namespace abc { namespace net { namespace json {
      * @brief Enumeration of JSON stream token types.
      */
     enum class token_type : std::uint8_t {
-        none         =  0,
-        
-        null         =  2,
-        boolean      =  3,
-        number       =  4,
-        string       =  5,
-        begin_array  =  8,
-        end_array    =  9,
-        begin_object = 10,
-        end_object   = 11,
-        property     = 12,
+        empty        =  0,
+        null         =  1,
+        boolean      =  2,
+        number       =  3,
+        string       =  4,
+        begin_array  = 11,
+        end_array    = 12,
+        begin_object = 13,
+        end_object   = 14,
+        property     = 15,
     };
 
 
@@ -310,21 +311,16 @@ namespace abc { namespace net { namespace json {
      * @brief JSON stream token.
      */
     struct token {
-        token_type type = token_type::none;
+        token_type type = token_type::empty;
 
-        ~token() noexcept;
-        
-        union {
-            literal::boolean boolean;
-            literal::number  number;
-            literal::string  string;
-            literal::string  property;
-        };
+        literal::boolean boolean;
+        literal::number  number;
+        literal::string  string;
     };
 
 
 
-#if 0 //// TODO:
+#if 0 //// TODO: REMOVE
     using item_t = std::uint16_t;
 
     namespace item {
@@ -362,114 +358,95 @@ namespace abc { namespace net { namespace json {
 #endif
 
 
-    using level_t = bool;
-
-    namespace level {
-        constexpr level_t array  = false;
-        constexpr level_t object = true;
-    }
-
-
-    // --------------------------------------------------------------
-
-
-#if 0 //// TODO:
-    /**
-     * @brief                Internal. State keeper.
-     * @tparam MaxLevels    Maximum levels of nesting. Needed to define the stack.
-     * @tparam Log            Logging facility.
-     */
-    template <std::size_t MaxLevels, typename Log>
-    class json_state {
-    protected:
-        /**
-         * @brief            Constructor.
-         * @param log        Pointer to a `Log` instance. May be `nullptr`.
-         */
-        json_state(Log* log);
-
-        /**
-         * @brief            Move constructor.
-         */
-        json_state(json_state&& other) = default;
-
-        /**
-         * @brief            Copy constructor.
-         */
-        json_state(const json_state& other) = default;
-
-    public:
-        /**
-         * @brief            Returns the current number of nesting levels.
-         */
-        std::size_t levels() const noexcept;
-
-        /**
-         * @brief            Returns the current nesting level - object or array.
-         */
-        json::level_t top_level() const noexcept;
-
-    protected:
-        /**
-         * @brief            Resets the state.
-         */
-        void reset() noexcept;
-
-        /**
-         * @brief            Returns whether a property name is expected.
-         */
-        bool expect_property() const noexcept;
-
-        /**
-         * @brief            Sets whether a property name is expected.
-         */
-        void set_expect_property(bool expect) noexcept;
-
-        /**
-         * @brief            Pushes a nesting level into the stack.
-         * @param level        Level - object or array.
-         * @return            true = success. false = error. 
-         */
-        bool push_level(json::level_t level) noexcept;
-
-        /**
-         * @brief            Checks whether the nesting level at the top matches the given one, and pops it from the stack.
-         * @param level        Level - object or array.
-         * @return            true = success. false = error.
-         */
-        bool pop_level(json::level_t level) noexcept;
-
-        /**
-         * @brief            Returns the Log pointer.
-         */
-        Log* log() const noexcept;
-
-    private:
-        /**
-         * @brief            Flag whether a property name is expected.
-         */
-        bool _expect_property;
-
-        /**
-         * @brief            Current top position on the stack.
-         */
-        std::size_t _level_top;
-
-        /**
-         * @brief            Nesting level stack.
-         */
-        std::bitset<MaxLevels> _level_stack;
-
-        /**
-         * @brief            The log passed in to the constructor.
-         */
-        Log* _log;
+    enum class nest_type : std::uint8_t {
+        none   = 0,
+        array  = 1,
+        object = 2,
     };
 
 
     // --------------------------------------------------------------
 
 
+    /**
+     * @brief         Internal. Keeps stream state.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class state
+        : protected diag::diag_ready<const char*, LogPtr> {
+
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        state(const char* origin, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        state(state&& other) = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        state(const state& other) = default;
+
+    protected:
+        /**
+         * @brief Returns a reference to the nest stack - arrays and objects.
+         */
+        const std::stack<nest_type>& nest_stack() const noexcept;
+
+    protected:
+        /**
+         * @brief Resets the state.
+         */
+        void reset() noexcept;
+
+        /**
+         * @brief Returns whether a property name is expected.
+         */
+        bool expect_property() const noexcept;
+
+        /**
+         * @brief Sets whether a property name is expected.
+         */
+        void set_expect_property(bool expect);
+
+        /**
+         * @brief      Pushes a nest into the stack.
+         * @param type Nest type - array or object.
+         */
+        void nest(nest_type type);
+
+        /**
+         * @brief      Checks whether the nest type at the top of the stack matches the given one, and pops it from the stack.
+         * @param type Expected nest type - array or object.
+         */
+        void unnest(nest_type type);
+
+    private:
+        /**
+         * @brief Flag whether a property name is expected.
+         */
+        bool _expect_property;
+
+        /**
+         * @brief Nest stack - arrays and objects.
+         */
+        std::stack<nest_type> _nest_stack;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+#if 0 //// TODO:
     /**
      * @brief                JSON input stream.
      * @tparam MaxLevels    Maximum nesting levels - object/array.

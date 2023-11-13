@@ -344,108 +344,87 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
-    template <std::size_t MaxLevels, typename Log>
-    inline json_state<MaxLevels, Log>::json_state(Log* log)
-        : _expect_property(false)
-        , _level_top(size::invalid)
-        , _log(log) {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::json, severity::abc::debug, 0x100f9, "json_state::json_state()");
-        }
+    template <typename LogPtr>
+    inline state<LogPtr>::state(const char* origin, const LogPtr& log)
+        : diag_base(copy(origin), log)
+        , _expect_property(false) {
+
+        constexpr const char* suborigin = "state()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s'", origin);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_state<MaxLevels, Log>::reset() noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::json, severity::abc::debug, 0x100fa, "json_state::reset()");
-        }
+    template <typename LogPtr>
+    inline void state<LogPtr>::reset() noexcept {
+        constexpr const char* suborigin = "reset()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         _expect_property = false;
-        _level_top = size::invalid;
+        _nest_stack.c.clear();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_state<MaxLevels, Log>::levels() const noexcept {
-        return _level_top + 1;
+    template <typename LogPtr>
+    inline const std::stack<nest_type>& state<LogPtr>::nest_stack() const noexcept {
+        return _nest_stack;
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json::level_t json_state<MaxLevels, Log>::top_level() const noexcept {
-        return _level_top < MaxLevels ? _level_stack[_level_top] : json::level::array;
+    template <typename LogPtr>
+    inline bool state<LogPtr>::expect_property() const noexcept {
+        return _expect_property;
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline bool json_state<MaxLevels, Log>::expect_property() const noexcept {
-        return
-            _expect_property
-            && _level_top < MaxLevels
-            && _level_stack[_level_top] == json::level::object;
+    template <typename LogPtr>
+    inline void state<LogPtr>::set_expect_property(bool expect) {
+        constexpr const char* suborigin = "set_expect_property()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: expect=%u", expect);
+
+        diag_base::expect(suborigin, !expect || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), __TAG__, "expect");
+
+        _expect_property = expect;
+
+        diag_base::ensure(suborigin, !_expect_property || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), __TAG__, "_expect_property");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_state<MaxLevels, Log>::set_expect_property(bool expect) noexcept {
-        _expect_property =
-            expect
-            && _level_top < MaxLevels
-            && _level_stack[_level_top] == json::level::object;
+    template <typename LogPtr>
+    inline void state<LogPtr>::nest(nest_type type) {
+        constexpr const char* suborigin = "nest()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
+
+        _nest_stack.push(type);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline bool json_state<MaxLevels, Log>::push_level(json::level_t level) noexcept {
-        if (_level_top + 1 >= MaxLevels) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::json, severity::important, 0x100fb, "json_state::push_level() levels='%zu', MaxLevels=%zu", _level_top + 1, MaxLevels);
-            }
+    template <typename LogPtr>
+    inline void state<LogPtr>::unnest(nest_type type) {
+        constexpr const char* suborigin = "unnest()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
 
-            return false;
-        }
+        diag_base::expect(!_nest_stack.empty() && _nest_stack.top() == type, __TAG__, "type");
 
-        _level_stack[++_level_top] = level;
-        return true;
-    }
+        _nest_stack.pop();
 
-
-    template <std::size_t MaxLevels, typename Log>
-    inline bool json_state<MaxLevels, Log>::pop_level(json::level_t level) noexcept {
-        if (_level_top >= MaxLevels) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::json, severity::important, 0x100fc, "json_state::pop_level() levels='%zu'", _level_top + 1);
-            }
-
-            return false;
-        }
-
-        if (_level_stack[_level_top] != level) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::json, severity::important, 0x100fd, "json_state::pop_level() levels='%zu', top=%u, pop=%u", _level_top + 1, (unsigned)_level_stack[_level_top], (unsigned)level);
-            }
-
-            return false;
-        }
-
-        _level_top--;
-        return true;
-    }
-
-
-    template <std::size_t MaxLevels, typename Log>
-    inline Log* json_state<MaxLevels, Log>::log() const noexcept {
-        return _log;
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json_istream<MaxLevels, Log>::json_istream(std::streambuf* sb, Log* log)
+#if 0 //// TODO:
+    template <typename LogPtr>
+    inline json_istream<LogPtr>::json_istream(std::streambuf* sb, Log* log)
         : base(sb)
         , state(log) {
         Log* log_local = state::log();
@@ -455,15 +434,15 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json_istream<MaxLevels, Log>::json_istream(json_istream&& other)
+    template <typename LogPtr>
+    inline json_istream<LogPtr>::json_istream(json_istream&& other)
         : base(std::move(other))
         , state(std::move(other)) {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_istream<MaxLevels, Log>::get_token(json::token_t* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline void json_istream<LogPtr>::get_token(json::token_t* buffer, std::size_t size) {
         Log* log_local = state::log();
 
         if (buffer == nullptr) {
@@ -481,8 +460,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json::item_t json_istream<MaxLevels, Log>::skip_value() {
+    template <typename LogPtr>
+    inline json::item_t json_istream<LogPtr>::skip_value() {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::debug, 0x10101, "json_istream::skip_value() >>>");
@@ -503,8 +482,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json::item_t json_istream<MaxLevels, Log>::get_or_skip_token(json::token_t* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline json::item_t json_istream<LogPtr>::get_or_skip_token(json::token_t* buffer, std::size_t size) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::debug, 0x10103, "json_istream::get_or_skip_token() >>>");
@@ -671,8 +650,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::get_or_skip_string(char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::get_or_skip_string(char* buffer, std::size_t size) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::debug, 0x1010a, "json_istream::get_or_skip_string() >>>");
@@ -713,8 +692,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_istream<MaxLevels, Log>::get_or_skip_number(double* buffer) {
+    template <typename LogPtr>
+    inline void json_istream<LogPtr>::get_or_skip_number(double* buffer) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::debug, 0x1010c, "json_istream::get_or_skip_number() >>>");
@@ -763,8 +742,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_istream<MaxLevels, Log>::get_literal(const char* literal) {
+    template <typename LogPtr>
+    inline void json_istream<LogPtr>::get_literal(const char* literal) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::optional, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
@@ -788,8 +767,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline char json_istream<MaxLevels, Log>::get_escaped_char() {
+    template <typename LogPtr>
+    inline char json_istream<LogPtr>::get_escaped_char() {
         Log* log_local = state::log();
 
         char ch = peek_char();
@@ -862,8 +841,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::get_or_skip_string_content(char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::get_or_skip_string_content(char* buffer, std::size_t size) {
         std::size_t gcount = 0;
 
         if (buffer != nullptr) {
@@ -877,26 +856,26 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::get_hex(char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::get_hex(char* buffer, std::size_t size) {
         return get_chars(ascii::is_hex, buffer, size);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::get_digits(char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::get_digits(char* buffer, std::size_t size) {
         return get_chars(ascii::is_digit, buffer, size);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::skip_spaces() {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::skip_spaces() {
         return skip_chars(ascii::json::is_space);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size) {
         std::size_t gcount = 0;
 
         while (base::is_good() && predicate(peek_char())) {
@@ -913,8 +892,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_istream<MaxLevels, Log>::skip_chars(ascii::predicate_t&& predicate) {
+    template <typename LogPtr>
+    inline std::size_t json_istream<LogPtr>::skip_chars(ascii::predicate_t&& predicate) {
         std::size_t gcount = 0;
         
         while (base::is_good() && predicate(peek_char())) {
@@ -926,8 +905,8 @@ namespace abc { namespace net { namespace json {
     }
     
     
-    template <std::size_t MaxLevels, typename Log>
-    inline char json_istream<MaxLevels, Log>::get_char() {
+    template <typename LogPtr>
+    inline char json_istream<LogPtr>::get_char() {
         char ch = peek_char();
 
         if (base::is_good()) {
@@ -938,8 +917,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline char json_istream<MaxLevels, Log>::peek_char() {
+    template <typename LogPtr>
+    inline char json_istream<LogPtr>::peek_char() {
         char ch = base::peek();
 
         if (!ascii::json::is_valid(ch)) {
@@ -954,8 +933,8 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json_ostream<MaxLevels, Log>::json_ostream(std::streambuf* sb, Log* log)
+    template <typename LogPtr>
+    inline json_ostream<LogPtr>::json_ostream(std::streambuf* sb, Log* log)
         : base(sb)
         , state(log)
         , _skip_comma(false) {
@@ -966,16 +945,16 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline json_ostream<MaxLevels, Log>::json_ostream(json_ostream&& other)
+    template <typename LogPtr>
+    inline json_ostream<LogPtr>::json_ostream(json_ostream&& other)
         : base(std::move(other))
         , state(std::move(other))
         , _skip_comma(other._skip_comma) {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_token(const json::token_t* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_token(const json::token_t* buffer, std::size_t size) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::optional, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
@@ -1034,32 +1013,32 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_space() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_space() {
         put_chars(" ", 1);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_tab() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_tab() {
         put_chars("\t", 1);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_cr() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_cr() {
         put_chars("\r", 1);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_lf() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_lf() {
         put_chars("\n", 1);
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_null() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_null() {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1081,8 +1060,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_boolean(bool value) {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_boolean(bool value) {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1109,8 +1088,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_number(double value) {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_number(double value) {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1135,8 +1114,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_string(const char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_string(const char* buffer, std::size_t size) {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1164,8 +1143,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_property(const char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_property(const char* buffer, std::size_t size) {
         if (!state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1193,8 +1172,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_begin_array() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_begin_array() {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1218,8 +1197,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_end_array() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_end_array() {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1239,8 +1218,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_begin_object() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_begin_object() {
         if (state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1264,8 +1243,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline void json_ostream<MaxLevels, Log>::put_end_object() {
+    template <typename LogPtr>
+    inline void json_ostream<LogPtr>::put_end_object() {
         if (!state::expect_property()) {
             Log* log_local = state::log();
             if (log_local != nullptr) {
@@ -1285,8 +1264,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_ostream<MaxLevels, Log>::put_chars(const char* buffer, std::size_t size) {
+    template <typename LogPtr>
+    inline std::size_t json_ostream<LogPtr>::put_chars(const char* buffer, std::size_t size) {
         Log* log_local = state::log();
         if (log_local != nullptr) {
             log_local->put_any(category::abc::json, severity::abc::optional, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
@@ -1312,8 +1291,8 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <std::size_t MaxLevels, typename Log>
-    inline std::size_t json_ostream<MaxLevels, Log>::put_char(char ch) {
+    template <typename LogPtr>
+    inline std::size_t json_ostream<LogPtr>::put_char(char ch) {
         if (base::is_good()) {
             base::put(ch);
         }
