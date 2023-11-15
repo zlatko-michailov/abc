@@ -446,140 +446,112 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
     /**
-     * @brief                JSON input stream.
-     * @tparam MaxLevels    Maximum nesting levels - object/array.
-     * @tparam Log            Logging facility.
+     * @brief         JSON input stream.
+     * @details       Reads a JSON payload token by token. To deserialize a `json::value`, see `json::reader`.
+     * @tparam LogPtr Pointer type to `log_ostream`.
      */
-    template <std::size_t MaxLevels = size::_64, typename Log>
-    class json_istream : public istream, public json_state<MaxLevels, Log> {
-        using base  = istream;
-        using state = json_state<MaxLevels, Log>;
+    template <typename LogPtr = std::nullptr_t>
+    class istream
+        : public abc::istream
+        , public state<LogPtr> {
+
+        using base       = abc::istream;
+        using state_base = state<LogPtr>;
+        using diag_base  = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
-         * @brief            Constructor.
-         * @param sb        `std::streambuf` to read from.
-         * @param log        Pointer to a `Log` instance. May be `nullptr`.
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to read from.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        json_istream(std::streambuf* sb, Log* log = nullptr);
+        istream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
-         * @brief            Move constructor.
+         * @brief Move constructor.
          */
-        json_istream(json_istream&& other);
+        istream(istream&& other);
 
         /**
-         * @brief            Deleted.
+         * @brief Deleted.
          */
-        json_istream(const json_istream& other) = delete;
+        istream(const istream& other) = delete;
 
     public:
         /**
-         * @brief            Reads a JSON token from the stream, and copies it into the given buffer.
-         * @param buffer    Buffer to copy to.
-         * @param size        Buffer size.
+         * @brief Reads a JSON token from the stream.
          */
-        void get_token(json::token_t* buffer, std::size_t size);
+        token get_token();
 
         /**
-         * @brief            Skips a JSON value from the stream.
-         * @return            The type of value skipped.
+         * @brief Skips a JSON value from the stream.
          */
-        json::item_t skip_value();
+        void skip_value();
 
     protected:
         /**
-         * @brief            Gets or skips a JSON token from the stream.
-         * @param buffer    If `nullptr`, the next token will be skipped. Otherwise, the next token will be copied to  the buffer.
-         * @param size        Buffer size.
-         * @return            The type of token.
+         * @brief Reads a number from the stream.
          */
-        json::item_t get_or_skip_token(json::token_t* buffer, std::size_t size);
+        literal::number get_number();
 
         /**
-         * @brief            Gets or skips a JSON number from the stream.
-         * @param buffer    If `nullptr`, the next number will be skipped. Otherwise, the next number will be copied to the buffer.
+         * @brief Reads a quoted string from the stream.
          */
-        void get_or_skip_number(double* buffer);
+        literal::string get_string();
 
         /**
-         * @brief            Gets or skips a JSON string from the stream.
-         * @param buffer    If `nullptr`, the next string will be skipped. Otherwise, the next string will be copied to the buffer.
-         * @param size        Buffer size.
-         * @return            The length of the string.
+         * @brief Reads a literal from the stream.
          */
-        std::size_t get_or_skip_string(char* buffer, std::size_t size);
-
-    protected:
-        /**
-         * @brief            Reads the specified literal (any sequence of chars) from the stream.
-         * @details            If the input does not match exactly, the "bad" flag on the stream is set.
-         * @param literal    Sequence of chars.
-         */
-        void get_literal(const char* literal);
+        literal::string get_literal();
 
         /**
-         * @brief            Reads an escape char. Note: For `\u????` escape sequences, only `\u00??` are supported.
-         * @return            The char.
+         * @brief Reads an escaped char.
+         * @note  For `\u????` escape sequences, only `\u00??` are supported.
          */
         char get_escaped_char();
 
         /**
-         * @brief            Gets or skips the inner part of a string.
-         * @param buffer    If `nullptr` the content is skipped. Otherwise, the content is copied to the buffer.
-         * @param size        Buffer size.
-         * @return            The length of the content read. 
+         * @brief Reads the inner part of a string from the stream.
          */
-        std::size_t get_or_skip_string_content(char* buffer, std::size_t size);
+        literal::string get_string_content();
 
         /**
-         * @brief            Read a hexadecimal number from the stream and copies it to the buffer.
-         * @param buffer    Buffer to copy to.
-         * @param size        Buffer size.
-         * @return            Number of chars read.
+         * @brief Read a hexadecimal number from the stream.
          */
-        std::size_t get_hex(char* buffer, std::size_t size);
+        literal::string get_hex();
 
         /**
-         * @brief            Read a decimal number from the stream and copies it to the buffer.
-         * @param buffer    Buffer to copy to.
-         * @param size        Buffer size.
-         * @return            Number of chars read.
+         * @brief Read a decimal number from the stream.
          */
-        std::size_t get_digits(char* buffer, std::size_t size);
+        literal::string get_digits();
 
         /**
-         * @brief            Skips a sequence of spaces from the stream.
-         * @return            Number of chars skipped.
+         * @brief  Skips a sequence of spaces from the stream.
+         * @return Number of chars skipped.
          */
         std::size_t skip_spaces();
 
         /**
-         * @brief            Reads a sequence of chars that match a predicate and copies it to the buffer.
-         * @param predicate    Predicate.
-         * @param buffer    Buffer
-         * @param size        Buffer size.
-         * @return            Number of chars read.
+         * @brief           Reads a sequence of chars from the stream that match a predicate.
+         * @param predicate Predicate.
          */
-        std::size_t get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size);
+        literal::string get_chars(ascii::predicate_t&& predicate);
 
         /**
-         * @brief            Skips a sequence of chars that match a predicate.
-         * @param predicate    Predicate.
-         * @return            Number of chars read.
+         * @brief           Skips a sequence of chars from the stream that match a predicate.
+         * @param predicate Predicate.
+         * @return          Number of chars skipped.
          */
         std::size_t skip_chars(ascii::predicate_t&& predicate);
 
         /**
-         * @brief            Reads a char from the stream.
-         * @return            The char read.
+         * @brief Reads a char from the stream.
          */
         char get_char();
 
         /**
-         * @brief            Returns the next char from the stream without advancing.
+         * @brief Returns the next char from the stream without advancing.
          */
         char peek_char();
     };
@@ -588,6 +560,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
+#if 0 //// TODO:
     /**
      * @brief                JSON output stream.
      * @tparam MaxLevels    Maximum nesting levels - object/array.
