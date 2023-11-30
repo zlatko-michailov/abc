@@ -29,7 +29,6 @@ SOFTWARE.
 #include <streambuf>
 #include <istream>
 #include <ostream>
-#include <bitset>
 #include <string>
 #include <deque>
 #include <map>
@@ -299,11 +298,12 @@ namespace abc { namespace net { namespace json {
         boolean      =  2,
         number       =  3,
         string       =  4,
-        begin_array  = 11,
-        end_array    = 12,
-        begin_object = 13,
-        end_object   = 14,
-        property     = 15,
+
+        property     = 11,
+        begin_array  = 12,
+        end_array    = 13,
+        begin_object = 14,
+        end_object   = 15,
     };
 
 
@@ -491,9 +491,12 @@ namespace abc { namespace net { namespace json {
 
     protected:
         /**
-         * @brief Reads a number from the stream.
+         * @brief           Throws if the next char is not the expected one.
+         * @param type      Nest type.
+         * @param suborigin Caller's suborigin.
+         * @param tag       Caller's tag.
          */
-        literal::number get_number();
+        void unnest(nest_type type, const char* suborigin, diag::tag_t tag);
 
         /**
          * @brief Reads a quoted string from the stream.
@@ -501,9 +504,16 @@ namespace abc { namespace net { namespace json {
         literal::string get_string();
 
         /**
-         * @brief Reads a literal from the stream.
+         * @brief  Reads a number from the stream.
+         * @return The sequence of chars representing the number.
          */
-        literal::string get_literal();
+        literal::string get_number();
+
+        /**
+         * @brief         Reads a literal from the stream.
+         * @param literal The expected literal.
+         */
+        literal::string get_literal(const char* literal);
 
         /**
          * @brief Reads an escaped char.
@@ -512,9 +522,14 @@ namespace abc { namespace net { namespace json {
         char get_escaped_char();
 
         /**
-         * @brief Reads the inner part of a string from the stream.
+         * @brief            Throws if the next char is not the expected one.
+         * @param actual     Actual char.
+         * @param expected   Expected char.
+         * @param should_get Should get the char from the stream.
+         * @param suborigin  Caller's suborigin.
+         * @param tag        Caller's tag.
          */
-        literal::string get_string_content();
+        void expect_char(char actual, char expected, bool should_get, const char* suborigin, diag::tag_t tag);
 
         /**
          * @brief Read a hexadecimal number from the stream.

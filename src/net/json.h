@@ -422,192 +422,127 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
     template <typename LogPtr>
-    inline json_istream<LogPtr>::json_istream(std::streambuf* sb, Log* log)
+    inline istream<LogPtr>::istream(std::streambuf* sb, const LogPtr& log)
         : base(sb)
-        , state(log) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x100fe, "json_istream::json_istream()");
-        }
+        , state_base("abc::net::json::istream", log) {
+
+        constexpr const char* suborigin = "istream()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     template <typename LogPtr>
-    inline json_istream<LogPtr>::json_istream(json_istream&& other)
+    inline istream<LogPtr>::istream(istream&& other)
         : base(std::move(other))
-        , state(std::move(other)) {
+        , state_base(std::move(other)) {
     }
 
 
     template <typename LogPtr>
-    inline void json_istream<LogPtr>::get_token(json::token_t* buffer, std::size_t size) {
-        Log* log_local = state::log();
+    inline void istream<LogPtr>::skip_value() {
+        constexpr const char* suborigin = "skip_value()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        if (buffer == nullptr) {
-            throw exception<std::logic_error, Log>("json_istream::get_token() buffer=nullptr", 0x100ff, log_local);
-        }
-
-        if (size < sizeof(json::token_t)) {
-            char buffer[100];
-            std::snprintf(buffer, sizeof(buffer), "json_istream::get_token() size=%zu (< %zu) ", size, sizeof(json::token_t));
-
-            throw exception<std::logic_error, Log>(buffer, 0x10100, log_local);
-        }
-
-        get_or_skip_token(buffer, size);
-    }
-
-
-    template <typename LogPtr>
-    inline json::item_t json_istream<LogPtr>::skip_value() {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x10101, "json_istream::skip_value() >>>");
-        }
-
-        std::size_t base_levels = state::levels();
-        json::item_t item = json::item::none;
+        std::size_t nest_stack_size = state_base::nest_stack.size();
         do {
-            item = get_or_skip_token(nullptr, 0);
+            get_token(false);
         }
-        while (state::levels() > base_levels);
+        while (state_base::nest_stack.size() > nest_stack_size);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x10102, "json_istream::skip_value() <<< item=%4.4x", item);
-        }
-
-        return item;
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     template <typename LogPtr>
-    inline json::item_t json_istream<LogPtr>::get_or_skip_token(json::token_t* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x10103, "json_istream::get_or_skip_token() >>>");
-        }
+    inline token istream<LogPtr>::get_token() {
+        constexpr const char* suborigin = "get_token()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        json::item_t item = json::item::none;
-
-        std::size_t gcount = sizeof(json::item_t);
+        token tok;
         bool trail_comma = true;
 
         skip_spaces();
-
         char ch = peek_char();
 
-        if (state::expect_property()) {
+        if (state_base::expect_property()) {
             if (ch == '"') {
-                gcount += get_or_skip_string(buffer != nullptr ? buffer->value.property : nullptr, size - gcount);
-                if (base::is_good()) {
-                    item = json::item::property;
+                tok.string = get_string();
+                tok.type = token_type::property;
 
-                    skip_spaces();
+                skip_spaces();
+                ch = peek_char();
+                expect_char(ch, ':', true, suborigin, __TAG__);
 
-                    ch = peek_char();
-                    if (ch == ':') {
-                        base::get();
-                    }
-                    else {
-                        if (log_local != nullptr) {
-                            log_local->put_any(category::abc::json, severity::important, 0x10104, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=':' ", ch, ch);
-                        }
-
-                        base::set_bad();
-                    }
-                }
-
-                state::set_expect_property(false);
+                state_base::set_expect_property(false);
                 trail_comma = false;
             }
-            else if (ch == '}') {
-                base::get();
-
-                item = json::item::end_object;
-                base::set_bad_if(!state::pop_level(json::level::object));
-
-                state::set_expect_property(true);
-            }
             else {
-                if (log_local != nullptr) {
-                    log_local->put_any(category::abc::json, severity::important, 0x10105, "json_istream::get_or_skip_token() ch='%c' (\\u%4.4x). Expected='\"' or '}'.", ch, ch);
-                }
+                expect_char(ch, '}', true, suborigin, __TAG__);
+                unnest(nest_type::object, suborigin, __TAG__);
 
-                base::set_bad();
+                tok.type = token_type::end_object;
+
+                state_base::set_expect_property(true);
             }
         }
         else {
             if (ch == 'n') {
-                get_literal("null");
-                if (base::is_good()) {
-                    item = json::item::null;
-                }
+                tok.string = get_literal("null");
+                tok.type = token_type::null;
             }
             else if (ch == 'f') {
-                get_literal("false");
-                if (base::is_good()) {
-                    item = json::item::boolean;
-                    if (buffer != nullptr) {
-                        buffer->value.boolean = false;
-                    }
-                    gcount += sizeof(bool);
-                }
+                tok.string = get_literal("false");
+                tok.boolean = false;
+                tok.type = token_type::boolean;
             }
             else if (ch == 't') {
-                get_literal("true");
-                if (base::is_good()) {
-                    item = json::item::boolean;
-                    if (buffer != nullptr) {
-                        buffer->value.boolean = true;
-                    }
-                    gcount += sizeof(bool);
-                }
+                tok.string = get_literal("true");
+                tok.boolean = true;
+                tok.type = token_type::boolean;
             }
             else if (ascii::is_digit(ch) || ch == '+' || ch == '-') {
-                item = json::item::number;
-                get_or_skip_number(buffer != nullptr ? &buffer->value.number : nullptr);
-                gcount += sizeof(double);
+                tok.string = get_number();
+                tok.number = std::atof(tok.string.c_str());
+                tok.type = token_type::number;
             }
             else if (ch == '"') {
-                gcount += get_or_skip_string(buffer != nullptr ? buffer->value.string : nullptr, size - gcount);
-                if (base::is_good()) {
-                    item = json::item::string;
-                }
+                tok.string = get_string();
+                tok.type = token_type::string;
             }
             else if (ch == '[') {
                 base::get();
+                state_base::nest(nest_type::array);
 
-                item = json::item::begin_array;
-                base::set_bad_if(!state::push_level(json::level::array));
+                tok.type = token_type::begin_array;
+
                 trail_comma = false;
             }
             else if (ch == ']') {
                 base::get();
+                unnest(nest_type::array, suborigin, __TAG__);
 
-                item = json::item::end_array;
-                base::set_bad_if(!state::pop_level(json::level::array));
+                tok.type = token_type::end_array;
             }
             else if (ch == '{') {
                 base::get();
+                state_base::nest(nest_type::object);
 
-                item = json::item::begin_object;
-                base::set_bad_if(!state::push_level(json::level::object));
+                tok.type = token_type::begin_object;
+
                 trail_comma = false;
             }
             else {
-                if (log_local != nullptr) {
-                    log_local->put_any(category::abc::json, severity::important, 0x10106, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x)", ch, ch);
-                }
+                diag_base::throw_exception(suborigin, __TAG__, "Unexpected ch=%c (\\u%4.4x)", ch, ch);
                 base::set_bad();
             }
 
-            state::set_expect_property(true);
+            state_base::set_expect_property(true);
         }
 
-
-        if (trail_comma && state::levels() > 0) {
+        if (trail_comma && state_base::nest_stack::size() > 0) {
             skip_spaces();
 
             ch = peek_char();
@@ -615,56 +550,53 @@ namespace abc { namespace net { namespace json {
                 base::get();
             }
             else {
-                if (state::expect_property()) {
-                    if (ch != '}') {
-                        if (log_local != nullptr) {
-                            log_local->put_any(category::abc::json, severity::important, 0x10107, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected='}' ", ch, ch);
-                        }
-
-                        base::set_bad();
-                    }
+                if (state_base::expect_property()) {
+                    expect_char(ch, '}', false, suborigin, __TAG__);
                 }
                 else {
-                    if (ch != ']') {
-                        if (log_local != nullptr) {
-                            log_local->put_any(category::abc::json, severity::important, 0x10108, "json_istream::get_or_skip_token() ch='%c' (\\u4.4x). Expected=']' ", ch, ch);
-                        }
-
-                        base::set_bad();
-                    }
+                    expect_char(ch, ']', false, suborigin, __TAG__);
                 }
             }
         }
 
-        base::set_gcount(gcount);
+        base::set_gcount(tok.string.length());
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x10109, "json_istream::get_or_skip_token() ch=%c (\\u%4.4x) <<<", ch, ch);
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: tok.type=%u, tok.string='%s'", tok.type, tok.string);
 
-        if (buffer != nullptr) {
-            buffer->item = item;
-        }
-
-        return item;
+        return tok;
     }
 
 
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::get_or_skip_string(char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x1010a, "json_istream::get_or_skip_string() >>>");
+    inline void istream<LogPtr>::unnest(nest_type type, const char* suborigin, diag::tag_t tag) {
+        nest_type actual = nest_type::none;
+        if (!state_base::nest_stack.empty()) {
+            actual = state_base::nest_stack.top();
         }
 
-        std::size_t gcount = 0;
+        if (actual == type) {
+            state_base::unnest(type);
+        }
+        else {
+            base::set_bad();
+            diag_base::throw_exception(suborigin, tag, "actual_nest_type=%u, expected_nest_type=%u", actual, type);
+        }
+    }
+
+
+    template <typename LogPtr>
+    inline literal::string istream<LogPtr>::get_string() {
+        constexpr const char* suborigin = "get_string()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        literal::string str;
 
         char ch = peek_char();
         if (ch == '"') {
             base::get();
 
             for (;;) {
-                gcount += get_or_skip_string_content(buffer != nullptr ? buffer + gcount : nullptr, size - gcount);
+                str += get_chars(ascii::json::is_string_content);
 
                 ch = peek_char();
                 if (ch == '"') {
@@ -672,169 +604,124 @@ namespace abc { namespace net { namespace json {
                     break;
                 }
                 else if (ch == '\\') {
-                    char ech = get_escaped_char();
-                    if (buffer != nullptr) {
-                        buffer[gcount++] = ech;
-                    }
+                    str += get_escaped_char();
                 }
             }
         }
 
-        if (buffer != nullptr) {
-            buffer[gcount] = '\0';
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x1010b, "json_istream::get_or_skip_string() string='%s' <<<", buffer);
-        }
-
-        return gcount;
+        return str;
     }
 
 
     template <typename LogPtr>
-    inline void json_istream<LogPtr>::get_or_skip_number(double* buffer) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x1010c, "json_istream::get_or_skip_number() >>>");
-        }
+    inline literal::string istream<LogPtr>::get_number() {
+        constexpr const char* suborigin = "get_number()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        std::size_t gcount = 0;
-        char digits[19 + 6 + 1];
+        literal::string str;
 
         char ch = peek_char();
         if (ch == '+' || ch == '-') {
-            digits[gcount++] = base::get();
+            str += base::get();
         }
 
-        gcount += get_digits(digits + gcount, sizeof(digits) - gcount);
+        str += get_digits();
 
         ch = peek_char();
         if (ch == '.') {
-            digits[gcount++] = base::get();
+            str += base::get();
 
-            gcount += get_digits(digits + gcount, sizeof(digits) - gcount);
+            str += get_digits();
         }
 
         ch = peek_char();
         if (ch == 'e' || ch == 'E') {
-            digits[gcount++] = base::get();
+           str += base::get();
 
             ch = peek_char();
             if (ch == '+' || ch == '-') {
-                digits[gcount++] = base::get();
+                str += base::get();
             }
 
-            gcount += get_digits(digits + gcount, sizeof(digits) - gcount);
+            str += get_digits();
         }
 
-        digits[gcount] = '\0';
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
 
-        double number = 0;
-        if (buffer != nullptr) {
-            number = std::atof(digits);
-            *buffer = number;
-        }
-
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x1010d, "json_istream::get_or_skip_number() number=%lf (%s) <<<", number, digits);
-        }
+        return str;
     }
 
 
     template <typename LogPtr>
-    inline void json_istream<LogPtr>::get_literal(const char* literal) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x1010e, "json_istream::get_literal() literal='%s' >>>", literal);
+    inline literal::string istream<LogPtr>::get_literal(const char* literal) {
+        constexpr const char* suborigin = "get_number()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: literal='%s'", literal);
+
+        literal::string str;
+
+        for (const char* itr = literal; *itr != '\0'; itr++) {
+            char ch = peek_char();
+            expect_char(ch, *itr, true, suborigin, __TAG__);
+
+            str += ch;
         }
 
-        for (const char* it = literal; *it != '\0'; it++) {
-            char ch = get_char();
-            if (ch != *it) {
-                if (log_local != nullptr) {
-                    log_local->put_any(category::abc::json, severity::important, 0x1010f, "json_istream::get_literal() ch='%c' (\\u%4.4x). Expected='%c' (\\u%4.4x)", ch, ch, *it, *it);
-                }
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
 
-                base::set_bad();
-                break;
-            }
-        }
-
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x10110, "json_istream::get_literal() <<<");
-        }
+        return str;
     }
 
 
     template <typename LogPtr>
-    inline char json_istream<LogPtr>::get_escaped_char() {
-        Log* log_local = state::log();
+    inline char istream<LogPtr>::get_escaped_char() {
+        constexpr const char* suborigin = "get_escaped_char()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         char ch = peek_char();
+        expect_char(ch, '\\', true, suborigin, __TAG__);
 
-        if (ch == '\\') {
+        ch = peek_char();
+        if (ch == '"' || ch == '\\' || ch == '/') {
+            base::get();
+        }
+        else if (ch == 'b') {
+            base::get();
+            ch = '\b';
+        }
+        else if (ch == 'f') {
+            base::get();
+            ch = '\f';
+        }
+        else if (ch == 'n') {
+            base::get();
+            ch = '\n';
+        }
+        else if (ch == 'r') {
+            base::get();
+            ch = '\r';
+        }
+        else if (ch == 't') {
+            base::get();
+            ch = '\t';
+        }
+        else if (ch == 'u') {
             base::get();
 
-            ch = peek_char();
-            if (ch == '"' || ch == '\\' || ch == '/') {
-                base::get();
-            }
-            else if (ch == 'b') {
-                base::get();
-                ch = '\b';
-            }
-            else if (ch == 'f') {
-                base::get();
-                ch = '\f';
-            }
-            else if (ch == 'n') {
-                base::get();
-                ch = '\n';
-            }
-            else if (ch == 'r') {
-                base::get();
-                ch = '\r';
-            }
-            else if (ch == 't') {
-                base::get();
-                ch = '\t';
-            }
-            else if (ch == 'u') {
-                base::get();
+            literal::string str = get_hex();
 
-                char buffer[4 + 1];
-
-                std::size_t gcount = get_hex(buffer, sizeof(buffer));
-
-                if (gcount != 4) {
-                    if (log_local != nullptr) {
-                        log_local->put_any(category::abc::json, severity::important, 0x10111, "json_istream::get_escaped_char() gcount=%zu", gcount);
-                    }
-
-                    base::set_bad();
-                    ch = '\0';
-                }
-                else if (buffer[0] == '0' && buffer[1] == '0') {
-                    ch = (ascii::hex(buffer[2]) << 4) | ascii::hex(buffer[3]);
-                }
-                else {
-                    if (log_local != nullptr) {
-                        log_local->put_any(category::abc::json, severity::important, 0x10112, "json_istream::get_escaped_char() Wide chars not supported.");
-                    }
-
-                    base::set_bad();
-                    ch = '\0';
-                }
+            if (str.length() != 4) {
+                base::set_bad();
+                diag_base::throw_exception(suborigin, __TAG__, "str='%s'", str);
             }
-        }
-        else {
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x10113, "json_istream::get_escaped_char() ch='%c' (\\u%4.4x). Unexpected.", ch, ch);
+            else if (str[0] == '0' && str[1] == '0') {
+                ch = (ascii::hex(str[2]) << 4) | ascii::hex(str[3]);
             }
-
-            base::set_bad();
-            ch = '\0';
+            else {
+                base::set_bad();
+                diag_base::throw_exception(suborigin, __TAG__, "Wide chars not supported.");
+            }
         }
 
         return ch;
@@ -842,20 +729,18 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::get_or_skip_string_content(char* buffer, std::size_t size) {
-        std::size_t gcount = 0;
-
-        if (buffer != nullptr) {
-            gcount = get_chars(ascii::json::is_string_content, buffer, size);
+    inline void istream<LogPtr>::expect_char(char actual, char expected, bool should_get, const char* suborigin, diag::tag_t tag) {
+        if (actual != expected) {
+            base::set_bad();
+            diag_base::throw_exception(suborigin, tag, "actual_char=%c (\\u%4.4x), expected_char=%c (\\u%4.4x)", actual, actual, expected, expected);
         }
-        else {
-            gcount = skip_chars(ascii::json::is_string_content);
+        else if (should_get) {
+            base::get();
         }
-
-        return gcount;
     }
 
 
+#if 0 //// TODO:
     template <typename LogPtr>
     inline std::size_t json_istream<LogPtr>::get_hex(char* buffer, std::size_t size) {
         return get_chars(ascii::is_hex, buffer, size);
