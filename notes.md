@@ -18,27 +18,14 @@
         - `value`
         - `reader`, `writer`
 
-- kvp.h
-    - `key_value_pair<Key, Value>`- derives from `std::pair<Key, Value>`
-        - key_type = Key
-        - value_type = Value
-        - `key()`
-        - `value()`
-    - `key_value_list<Key, Value>` - derives from `std::deque<key_value_pair<Key, Value>>`
-        - key_type = Key
-        - value_type = Value
-        - `find(key)`
-        - `at(key)`
-        - `operator [key]`
-    - `http::headers` to become a `key_value_list<std::string, std::string>`.
-    - `json::literal::object`to become a `key_value_list<std::string, value>`.
-    - docs
-
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 - log:
   - Rename `category` to `origin`.
   - Rename `severity` to `level`.
+
+- Namespace `ml`.
+  - `neural_net`
 
 ## To Do Refactoring
 - internal docs
@@ -60,7 +47,6 @@
 
 ## Pick List
 - drive
-- Untabify
 - vmem:
   - check
     - No data loss

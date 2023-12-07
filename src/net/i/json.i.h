@@ -542,16 +542,16 @@ namespace abc { namespace net { namespace json {
         literal::string get_digits();
 
         /**
-         * @brief  Skips a sequence of spaces from the stream.
-         * @return Number of chars skipped.
-         */
-        std::size_t skip_spaces();
-
-        /**
          * @brief           Reads a sequence of chars from the stream that match a predicate.
          * @param predicate Predicate.
          */
         literal::string get_chars(ascii::predicate_t&& predicate);
+
+        /**
+         * @brief  Skips a sequence of spaces from the stream.
+         * @return Number of chars skipped.
+         */
+        std::size_t skip_spaces();
 
         /**
          * @brief           Skips a sequence of chars from the stream that match a predicate.

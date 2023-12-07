@@ -740,45 +740,38 @@ namespace abc { namespace net { namespace json {
     }
 
 
-#if 0 //// TODO:
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::get_hex(char* buffer, std::size_t size) {
-        return get_chars(ascii::is_hex, buffer, size);
+    inline literal::string istream<LogPtr>::get_hex() {
+        return get_chars(ascii::is_hex);
     }
 
 
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::get_digits(char* buffer, std::size_t size) {
-        return get_chars(ascii::is_digit, buffer, size);
+    inline literal::string istream<LogPtr>::get_digits() {
+        return get_chars(ascii::is_digit);
     }
 
 
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::skip_spaces() {
+    inline literal::string istream<LogPtr>::get_chars(ascii::predicate_t&& predicate) {
+        literal::string str;
+
+        while (base::is_good() && predicate(peek_char())) {
+            str += base::get();
+        }
+
+        return str;
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t istream<LogPtr>::skip_spaces() {
         return skip_chars(ascii::json::is_space);
     }
 
 
     template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::get_chars(ascii::predicate_t&& predicate, char* buffer, std::size_t size) {
-        std::size_t gcount = 0;
-
-        while (base::is_good() && predicate(peek_char())) {
-            if (gcount == size - 1) {
-                base::set_fail();
-                break;
-            }
-
-            buffer[gcount++] = base::get();
-        }
-        buffer[gcount] = '\0';
-
-        return gcount;
-    }
-
-
-    template <typename LogPtr>
-    inline std::size_t json_istream<LogPtr>::skip_chars(ascii::predicate_t&& predicate) {
+    inline std::size_t istream<LogPtr>::skip_chars(ascii::predicate_t&& predicate) {
         std::size_t gcount = 0;
         
         while (base::is_good() && predicate(peek_char())) {
@@ -791,7 +784,7 @@ namespace abc { namespace net { namespace json {
     
     
     template <typename LogPtr>
-    inline char json_istream<LogPtr>::get_char() {
+    inline char istream<LogPtr>::get_char() {
         char ch = peek_char();
 
         if (base::is_good()) {
@@ -803,7 +796,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline char json_istream<LogPtr>::peek_char() {
+    inline char istream<LogPtr>::peek_char() {
         char ch = base::peek();
 
         if (!ascii::json::is_valid(ch)) {
@@ -818,6 +811,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
+#if 0 //// TODO:
     template <typename LogPtr>
     inline json_ostream<LogPtr>::json_ostream(std::streambuf* sb, Log* log)
         : base(sb)
