@@ -39,6 +39,7 @@ namespace abc { namespace diag {
     // |       |__ expect_error
     // |       |__ ensure_error
     // |__ std::runtime_error
+    //     |__ input_error
 
 
     // --------------------------------------------------------------
@@ -143,6 +144,28 @@ namespace abc { namespace diag {
          * @brief Copy constructor.
          */
         ensure_error(const ensure_error& other) noexcept = default;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    class input_error
+        : public std::runtime_error {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param message Error message.
+         */
+        input_error(const char* message)
+            : std::runtime_error(message) {
+        }
+
+        /**
+         * @brief Copy constructor.
+         */
+        input_error(const input_error& other) noexcept = default;
     };
 
 
