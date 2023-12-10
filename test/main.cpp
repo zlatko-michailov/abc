@@ -42,7 +42,7 @@ SOFTWARE.
 
 
 int main(int /*argc*/, const char* argv[]) {
-    test_log_filter filter("", abc::diag::severity::optional);
+    test_log_filter filter("", abc::diag::severity::critical);
     test_log log(std::cout.rdbuf(), &filter);
 
     test_suite suite(
@@ -151,19 +151,19 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_value_object_simple",                   test_json_value_object_simple },
                 { "test_json_value_array_complex",                   test_json_value_array_complex },
                 { "test_json_value_object_complex",                  test_json_value_object_complex },
+                { "test_json_istream_null",                          test_json_istream_null },
+                { "test_json_istream_boolean_01",                    test_json_istream_boolean_01 },
+                { "test_json_istream_boolean_02",                    test_json_istream_boolean_02 },
+                { "test_json_istream_number_01",                     test_json_istream_number_01 },
+                { "test_json_istream_number_02",                     test_json_istream_number_02 },
+                { "test_json_istream_number_03",                     test_json_istream_number_03 },
+                { "test_json_istream_number_04",                     test_json_istream_number_04 },
+                { "test_json_istream_number_05",                     test_json_istream_number_05 },
+                { "test_json_istream_string_01",                     test_json_istream_string_01 },
+                { "test_json_istream_string_02",                     test_json_istream_string_02 },
+                { "test_json_istream_string_03",                     test_json_istream_string_03 },
+                { "test_json_istream_string_04",                     test_json_istream_string_04 },
 #if 0 //// TODO:
-                { "test_json_istream_null",                          abc::test::json::test_json_istream_null },
-                { "test_json_istream_boolean_01",                    abc::test::json::test_json_istream_boolean_01 },
-                { "test_json_istream_boolean_02",                    abc::test::json::test_json_istream_boolean_02 },
-                { "test_json_istream_number_01",                     abc::test::json::test_json_istream_number_01 },
-                { "test_json_istream_number_02",                     abc::test::json::test_json_istream_number_02 },
-                { "test_json_istream_number_03",                     abc::test::json::test_json_istream_number_03 },
-                { "test_json_istream_number_04",                     abc::test::json::test_json_istream_number_04 },
-                { "test_json_istream_number_05",                     abc::test::json::test_json_istream_number_05 },
-                { "test_json_istream_string_01",                     abc::test::json::test_json_istream_string_01 },
-                { "test_json_istream_string_02",                     abc::test::json::test_json_istream_string_02 },
-                { "test_json_istream_string_03",                     abc::test::json::test_json_istream_string_03 },
-                { "test_json_istream_string_04",                     abc::test::json::test_json_istream_string_04 },
                 { "test_json_istream_array_01",                      abc::test::json::test_json_istream_array_01 },
                 { "test_json_istream_array_02",                      abc::test::json::test_json_istream_array_02 },
                 { "test_json_istream_array_03",                      abc::test::json::test_json_istream_array_03 },

@@ -28,6 +28,7 @@ SOFTWARE.
 #include "../../src/net/json.h"
 
 #include "test.h"
+#include "stream.h"
 
 
 bool test_json_value_empty(test_context& context);

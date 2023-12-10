@@ -32,6 +32,7 @@ SOFTWARE.
 #include "../ascii.h"
 #include "../stream.h"
 #include "../util.h"
+#include "../diag/diag_ready.h"
 #include "i/json.i.h"
 
 
@@ -350,7 +351,7 @@ namespace abc { namespace net { namespace json {
         , _expect_property(false) {
 
         constexpr const char* suborigin = "state()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s'", origin);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -411,7 +412,7 @@ namespace abc { namespace net { namespace json {
         constexpr const char* suborigin = "unnest()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
 
-        diag_base::expect(!_nest_stack.empty() && _nest_stack.top() == type, __TAG__, "type");
+        diag_base::expect(suborigin, !_nest_stack.empty() && _nest_stack.top() == type, __TAG__, "type");
 
         _nest_stack.pop();
 
@@ -535,14 +536,16 @@ namespace abc { namespace net { namespace json {
                 trail_comma = false;
             }
             else {
-                diag_base::throw_exception(suborigin, __TAG__, "Unexpected ch=%c (\\u%4.4x)", ch, ch);
                 base::set_bad();
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected ch=%c (\\u%4.4x)", ch, ch);
             }
 
-            state_base::set_expect_property(true);
+            if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object) {
+                state_base::set_expect_property(true);
+            }
         }
 
-        if (trail_comma && state_base::nest_stack::size() > 0) {
+        if (trail_comma && !state_base::nest_stack().empty()) {
             skip_spaces();
 
             ch = peek_char();
@@ -561,7 +564,7 @@ namespace abc { namespace net { namespace json {
 
         base::set_gcount(tok.string.length());
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: tok.type=%u, tok.string='%s'", tok.type, tok.string);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: tok.type=%u, tok.string='%s'", tok.type, tok.string.c_str());
 
         return tok;
     }
@@ -570,8 +573,8 @@ namespace abc { namespace net { namespace json {
     template <typename LogPtr>
     inline void istream<LogPtr>::unnest(nest_type type, const char* suborigin, diag::tag_t tag) {
         nest_type actual = nest_type::none;
-        if (!state_base::nest_stack.empty()) {
-            actual = state_base::nest_stack.top();
+        if (!state_base::nest_stack().empty()) {
+            actual = state_base::nest_stack().top();
         }
 
         if (actual == type) {
@@ -579,7 +582,7 @@ namespace abc { namespace net { namespace json {
         }
         else {
             base::set_bad();
-            diag_base::throw_exception(suborigin, tag, "actual_nest_type=%u, expected_nest_type=%u", actual, type);
+            diag_base::template throw_exception<diag::input_error>(suborigin, tag, "actual_nest_type=%u, expected_nest_type=%u", actual, type);
         }
     }
 
@@ -609,7 +612,7 @@ namespace abc { namespace net { namespace json {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -648,7 +651,7 @@ namespace abc { namespace net { namespace json {
             str += get_digits();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -656,7 +659,7 @@ namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
     inline literal::string istream<LogPtr>::get_literal(const char* literal) {
-        constexpr const char* suborigin = "get_number()";
+        constexpr const char* suborigin = "get_literal()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: literal='%s'", literal);
 
         literal::string str;
@@ -668,7 +671,7 @@ namespace abc { namespace net { namespace json {
             str += ch;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -713,14 +716,14 @@ namespace abc { namespace net { namespace json {
 
             if (str.length() != 4) {
                 base::set_bad();
-                diag_base::throw_exception(suborigin, __TAG__, "str='%s'", str);
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "str='%s'", str.c_str());
             }
             else if (str[0] == '0' && str[1] == '0') {
                 ch = (ascii::hex(str[2]) << 4) | ascii::hex(str[3]);
             }
             else {
                 base::set_bad();
-                diag_base::throw_exception(suborigin, __TAG__, "Wide chars not supported.");
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Wide chars not supported.");
             }
         }
 
@@ -732,7 +735,7 @@ namespace abc { namespace net { namespace json {
     inline void istream<LogPtr>::expect_char(char actual, char expected, bool should_get, const char* suborigin, diag::tag_t tag) {
         if (actual != expected) {
             base::set_bad();
-            diag_base::throw_exception(suborigin, tag, "actual_char=%c (\\u%4.4x), expected_char=%c (\\u%4.4x)", actual, actual, expected, expected);
+            diag_base::template throw_exception<diag::input_error>(suborigin, tag, "actual_char=%c (\\u%4.4x), expected_char=%c (\\u%4.4x)", actual, actual, expected, expected);
         }
         else if (should_get) {
             base::get();
