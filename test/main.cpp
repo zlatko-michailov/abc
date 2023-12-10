@@ -163,10 +163,10 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_istream_string_02",                     test_json_istream_string_02 },
                 { "test_json_istream_string_03",                     test_json_istream_string_03 },
                 { "test_json_istream_string_04",                     test_json_istream_string_04 },
+                { "test_json_istream_array_01",                      test_json_istream_array_01 },
+                { "test_json_istream_array_02",                      test_json_istream_array_02 },
+                { "test_json_istream_array_03",                      test_json_istream_array_03 },
 #if 0 //// TODO:
-                { "test_json_istream_array_01",                      abc::test::json::test_json_istream_array_01 },
-                { "test_json_istream_array_02",                      abc::test::json::test_json_istream_array_02 },
-                { "test_json_istream_array_03",                      abc::test::json::test_json_istream_array_03 },
                 { "test_json_istream_object_01",                     abc::test::json::test_json_istream_object_01 },
                 { "test_json_istream_object_02",                     abc::test::json::test_json_istream_object_02 },
                 { "test_json_istream_object_03",                     abc::test::json::test_json_istream_object_03 },
