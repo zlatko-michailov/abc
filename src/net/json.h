@@ -486,7 +486,9 @@ namespace abc { namespace net { namespace json {
 
                 tok.type = token_type::end_object;
 
-                state_base::set_expect_property(true);
+                if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object) {
+                    state_base::set_expect_property(true);
+                }
             }
         }
         else {
