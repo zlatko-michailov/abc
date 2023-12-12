@@ -858,9 +858,8 @@ bool test_json_istream_object_03(test_context& context) {
 }
 
 
-#if 0 //// TODO:
-bool test_json_istream_mixed_01(test_context<abc::test::log>& context) {
-    char content[] = R"####(
+bool test_json_istream_mixed_01(test_context& context) {
+    std::string content = R"####(
 [
 {
     "a11": [ 1, true ],
@@ -875,144 +874,113 @@ bool test_json_istream_mixed_01(test_context<abc::test::log>& context) {
 ]
 )####";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    std::stringbuf sb(content, std::ios_base::in);
 
-    abc::json_istream<abc::size::_64, abc::test::log> istream(&sb, context.log);
+    abc::net::json::istream<test_log*> istream(&sb, context.log());
 
-    char buffer[101];
-    abc::json::token_t* token = (abc::json::token_t*)buffer;
     bool passed = true;
-    std::size_t size;
 
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x1019e, "%x", size) && passed;
+    abc::net::json::token token = istream.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x1019e, "%x", token.string.length()) && passed;
+    {
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::begin_object, istream, 0x1019f, "%x", token.string.length()) && passed;
+        {
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101a0, "%x", token.string.length()) && passed;
+            passed = verify_string(context, token.string.c_str(), "a11", istream, 0x101a1) && passed;
 
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x1019f, "%x", size) && passed;
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101a2, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101a3, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.number, 1.0, istream, 0x101a4, "%f", token.string.length()) && passed;
 
-            size = sizeof(abc::json::item_t) + std::strlen("a11");
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101a0, "%x", size) && passed;
-            passed = verify_string(context, token->value.property, "a11", istream, 0x101a1) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream, 0x101a5, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.boolean, true, istream, 0x101a6, "%u", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101a7, "%x", token.string.length()) && passed;
 
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101a2, "%x", size) && passed;
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101a8, "%x", token.string.length()) && passed;
+            passed = verify_string(context, token.string.c_str(), "a12", istream, 0x101a9) && passed;
 
-                size = sizeof(abc::json::item_t) + sizeof(double);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101a3, "%x", size) && passed;
-                passed = verify_integral(context, token->value.number, 1.0, istream, 0x101a4, "%f", size) && passed;
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101aa, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::string, istream, 0x101ab, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "abc", istream, 0x101ac) && passed;
 
-                size = sizeof(abc::json::item_t) + sizeof(bool);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::boolean, istream, 0x101a5, "%x", size) && passed;
-                passed = verify_integral(context, token->value.boolean, true, istream, 0x101a6, "%d", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101ad, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.number, 2.0, istream, 0x101ae, "%u", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101af, "%x", token.string.length()) && passed;
+        }
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::end_object, istream, 0x101b0, "%x", token.string.length()) && passed;
 
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101a7, "%x", size) && passed;
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101b1, "%x", token.string.length()) && passed;
+        {
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_object, istream, 0x101b2, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101b3, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "a211", istream, 0x101b4) && passed;
 
-            size = sizeof(abc::json::item_t) + std::strlen("a12");
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101a8, "%x", size) && passed;
-            passed = verify_string(context, token->value.property, "a12", istream, 0x101a9) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101b5, "%x", token.string.length()) && passed;
+                {
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101b6, "%x", token.string.length()) && passed;
+                    passed = verify_integral(context, token.number, 4.0, istream, 0x101b7, "%f", token.string.length()) && passed;
 
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101aa, "%x", size) && passed;
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::string, istream, 0x101b8, "%x", token.string.length()) && passed;
+                    passed = verify_string(context, token.string.c_str(), "def", istream, 0x101b9) && passed;
 
-                size = sizeof(abc::json::item_t) + std::strlen("abc");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::string, istream, 0x101ab, "%x", size) && passed;
-                passed = verify_string(context, token->value.string, "abc", istream, 0x101ac) && passed;
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream, 0x101ba, "%x", token.string.length()) && passed;
+                    passed = verify_integral(context, token.boolean, false, istream, 0x101bb, "%u", token.string.length()) && passed;
+                }
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101bc, "%x", token.string.length()) && passed;
 
-                size = sizeof(abc::json::item_t) + sizeof(double);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101ad, "%x", size) && passed;
-                passed = verify_integral(context, token->value.number, 2.0, istream, 0x101ae, "%f", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101bd, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "a212", istream, 0x101be) && passed;
 
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101af, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101b0, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101b1, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x101b2, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + std::strlen("a211");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101b3, "%x", size) && passed;
-                passed = verify_string(context, token->value.property, "a211", istream, 0x101b4) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101b5, "%x", size) && passed;
-
-                    size = sizeof(abc::json::item_t) + sizeof(double);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101b6, "%x", size) && passed;
-                    passed = verify_integral(context, token->value.number, 4.0, istream, 0x101b7, "%f", size) && passed;
-
-                    size = sizeof(abc::json::item_t) + std::strlen("def");
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::string, istream, 0x101b8, "%x", size) && passed;
-                    passed = verify_string(context, token->value.string, "def", istream, 0x101b9) && passed;
-
-                    size = sizeof(abc::json::item_t) + sizeof(bool);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::boolean, istream, 0x101ba, "%x", size) && passed;
-                    passed = verify_integral(context, token->value.boolean, false, istream, 0x101bb, "%d", size) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101bc, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + std::strlen("a212");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101bd, "%x", size) && passed;
-                passed = verify_string(context, token->value.property, "a212", istream, 0x101be) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101bf, "%x", size) && passed;
-
-                    size = sizeof(abc::json::item_t);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::null, istream, 0x101c0, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101c1, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101c2, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101c3, "%x", size) && passed;
-
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101c4, "%x", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101bf, "%x", token.string.length()) && passed;
+                {
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::null, istream, 0x101c0, "%x", token.string.length()) && passed;
+                }
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101c1, "%x", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_object, istream, 0x101c2, "%x", token.string.length()) && passed;
+        }
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101c3, "%x", token.string.length()) && passed;
+    }
+    token = istream.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101c4, "%x", token.string.length()) && passed;
 
     return passed;
 }
 
 
-bool test_json_istream_mixed_02(test_context<abc::test::log>& context) {
-    char content[] = R"####(
+bool test_json_istream_mixed_02(test_context& context) {
+    std::string content = R"####(
 {
 "a1": {
     "a11": [ 1, true ],
@@ -1027,217 +995,114 @@ bool test_json_istream_mixed_02(test_context<abc::test::log>& context) {
 }
 )####";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    std::stringbuf sb(content, std::ios_base::in);
 
-    abc::json_istream<abc::size::_64, abc::test::log> istream(&sb, context.log);
+    abc::net::json::istream<test_log*> istream(&sb, context.log());
 
-    char buffer[101];
-    abc::json::token_t* token = (abc::json::token_t*)buffer;
     bool passed = true;
-    std::size_t size;
 
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x101c5, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t) + std::strlen("a1");
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101c6, "%x", size) && passed;
-        passed = verify_string(context, token->value.property, "a1", istream, 0x101c7) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x101c8, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t) + std::strlen("a11");
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101c9, "%x", size) && passed;
-            passed = verify_string(context, token->value.property, "a11", istream, 0x101ca) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101cb, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + sizeof(double);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101cc, "%x", size) && passed;
-                passed = verify_integral(context, token->value.number, 1.0, istream, 0x101cd, "%f", size) && passed;
-
-                size = sizeof(abc::json::item_t) + sizeof(bool);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::boolean, istream, 0x101ce, "%x", size) && passed;
-                passed = verify_integral(context, token->value.boolean, true, istream, 0x101cf, "%d", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101d0, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t) + std::strlen("a12");
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101d1, "%x", size) && passed;
-            passed = verify_string(context, token->value.property, "a12", istream, 0x101d2) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101d3, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + std::strlen("abc");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::string, istream, 0x101d4, "%x", size) && passed;
-                passed = verify_string(context, token->value.string, "abc", istream, 0x101d5) && passed;
-
-                size = sizeof(abc::json::item_t) + sizeof(double);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101d6, "%x", size) && passed;
-                passed = verify_integral(context, token->value.number, 2.0, istream, 0x101d7, "%f", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101d8, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101d9, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t) + std::strlen("a2");
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101da, "%x", size) && passed;
-        passed = verify_string(context, token->value.property, "a2", istream, 0x101db) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101dc, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x101dd, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + std::strlen("a211");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101de, "%x", size) && passed;
-                passed = verify_string(context, token->value.property, "a211", istream, 0x101df) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101e0, "%x", size) && passed;
-
-                    size = sizeof(abc::json::item_t) + sizeof(double);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101e1, "%x", size) && passed;
-                    passed = verify_integral(context, token->value.number, 4.0, istream, 0x101e2, "%f", size) && passed;
-
-                    size = sizeof(abc::json::item_t) + std::strlen("def");
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::string, istream, 0x101e3, "%x", size) && passed;
-                    passed = verify_string(context, token->value.string, "def", istream, 0x101e4) && passed;
-
-                    size = sizeof(abc::json::item_t) + sizeof(bool);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::boolean, istream, 0x101e5, "%x", size) && passed;
-                    passed = verify_integral(context, token->value.boolean, false, istream, 0x101e6, "%d", size) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101e7, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t) + std::strlen("a212");
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101e8, "%x", size) && passed;
-                passed = verify_string(context, token->value.property, "a212", istream, 0x101e9) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101ea, "%x", size) && passed;
-
-                    size = sizeof(abc::json::item_t);
-                    istream.get_token(token, sizeof(buffer));
-                    passed = verify_integral(context, token->item, abc::json::item::null, istream, 0x101eb, "%x", size) && passed;
-
-                size = sizeof(abc::json::item_t);
-                istream.get_token(token, sizeof(buffer));
-                passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101ec, "%x", size) && passed;
-
-            size = sizeof(abc::json::item_t);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101ed, "%x", size) && passed;
-
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101ee, "%x", size) && passed;
-
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101ef, "%x", size) && passed;
-
-    return passed;
-}
-
-
-bool test_json_istream_skip(test_context<abc::test::log>& context) {
-    char content[] = R"####(
-{
-"a1": {
-    "a11": [ 1, true ],
-    "a12": [ "abc", 2 ]
-},
-"a2": [
+    abc::net::json::token token = istream.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::begin_object, istream, 0x101c5, "%x", token.string.length()) && passed;
     {
-        "a211": [ 4, "def", false ],
-        "a212": [ null ]
-    },
-    42,
-]
-}
-)####";
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101c6, "%x", token.string.length()) && passed;
+        passed = verify_string(context, token.string.c_str(), "a1", istream, 0x101c7) && passed;
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+        abc::net::json::token token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::begin_object, istream, 0x101c8, "%x", token.string.length()) && passed;
+        {
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101c9, "%x", token.string.length()) && passed;
+            passed = verify_string(context, token.string.c_str(), "a11", istream, 0x101ca) && passed;
 
-    abc::json_istream<abc::size::_64, abc::test::log> istream(&sb, context.log);
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101cb, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101cc, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.number, 1.0, istream, 0x101cd, "%f", token.string.length()) && passed;
 
-    char buffer[101];
-    abc::json::token_t* token = (abc::json::token_t*)buffer;
-    bool passed = true;
-    std::size_t size;
-    abc::json::item_t item;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream, 0x101ce, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.boolean, true, istream, 0x101cf, "%u", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101d0, "%x", token.string.length()) && passed;
 
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::begin_object, istream, 0x101f0, "%x", size) && passed;
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101d1, "%x", token.string.length()) && passed;
+            passed = verify_string(context, token.string.c_str(), "a12", istream, 0x101d2) && passed;
 
-        size = sizeof(abc::json::item_t) + std::strlen("a1");
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101f1, "%x", size) && passed;
-        passed = verify_string(context, token->value.property, "a1", istream, 0x101f2) && passed;
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101d3, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::string, istream, 0x101d4, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "abc", istream, 0x101d5) && passed;
 
-            size = sizeof(abc::json::item_t);
-            item = istream.skip_value();
-            passed = verify_integral(context, item, abc::json::item::end_object, istream, 0x101f3, "%x", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101d6, "%x", token.string.length()) && passed;
+                passed = verify_integral(context, token.number, 2.0, istream, 0x101d7, "%u", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101d8, "%x", token.string.length()) && passed;
+        }
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::end_object, istream, 0x101d9, "%x", token.string.length()) && passed;
 
-        size = sizeof(abc::json::item_t) + std::strlen("a2");
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::property, istream, 0x101f4, "%x", size) && passed;
-        passed = verify_string(context, token->value.property, "a2", istream, 0x101f5) && passed;
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101da, "%x", token.string.length()) && passed;
+        passed = verify_string(context, token.string.c_str(), "a2", istream, 0x101db) && passed;
 
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::begin_array, istream, 0x101f6, "%x", size) && passed;
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101dc, "%x", token.string.length()) && passed;
+        {
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::begin_object, istream, 0x101dd, "%x", token.string.length()) && passed;
+            {
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101de, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "a211", istream, 0x101df) && passed;
 
-            size = sizeof(abc::json::item_t);
-            item = istream.skip_value();
-            passed = verify_integral(context, item, abc::json::item::end_object, istream, 0x101f7, "%x", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101e0, "%x", token.string.length()) && passed;
+                {
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream, 0x101e1, "%x", token.string.length()) && passed;
+                    passed = verify_integral(context, token.number, 4.0, istream, 0x101e2, "%f", token.string.length()) && passed;
 
-            size = sizeof(abc::json::item_t) + sizeof(double);
-            istream.get_token(token, sizeof(buffer));
-            passed = verify_integral(context, token->item, abc::json::item::number, istream, 0x101f8, "%x", size) && passed;
-            passed = verify_integral(context, token->value.number, 42.0, istream, 0x101f9, "%f", size) && passed;
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::string, istream, 0x101e3, "%x", token.string.length()) && passed;
+                    passed = verify_string(context, token.string.c_str(), "def", istream, 0x101e4) && passed;
 
-        size = sizeof(abc::json::item_t);
-        istream.get_token(token, sizeof(buffer));
-        passed = verify_integral(context, token->item, abc::json::item::end_array, istream, 0x101fa, "%x", size) && passed;
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream, 0x101e5, "%x", token.string.length()) && passed;
+                    passed = verify_integral(context, token.boolean, false, istream, 0x101e6, "%u", token.string.length()) && passed;
+                }
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101e7, "%x", token.string.length()) && passed;
 
-    size = sizeof(abc::json::item_t);
-    istream.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::end_object, istream, 0x101fb, "%x", size) && passed;
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::property, istream, 0x101e8, "%x", token.string.length()) && passed;
+                passed = verify_string(context, token.string.c_str(), "a212", istream, 0x101e9) && passed;
+
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::begin_array, istream, 0x101ea, "%x", token.string.length()) && passed;
+                {
+                    token = istream.get_token();
+                    passed = verify_integral(context, token.type, abc::net::json::token_type::null, istream, 0x101eb, "%x", token.string.length()) && passed;
+                }
+                token = istream.get_token();
+                passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101ec, "%x", token.string.length()) && passed;
+            }
+            token = istream.get_token();
+            passed = verify_integral(context, token.type, abc::net::json::token_type::end_object, istream, 0x101ed, "%x", token.string.length()) && passed;
+        }
+        token = istream.get_token();
+        passed = verify_integral(context, token.type, abc::net::json::token_type::end_array, istream, 0x101ee, "%x", token.string.length()) && passed;
+    }
+    token = istream.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::end_object, istream, 0x101ef, "%x", token.string.length()) && passed;
 
     return passed;
 }
@@ -1246,6 +1111,7 @@ bool test_json_istream_skip(test_context<abc::test::log>& context) {
 // --------------------------------------------------------------
 
 
+#if 0 //// TODO:
 bool test_json_ostream_null(test_context<abc::test::log>& context) {
     char expected[] =
         " \r\t\n null \t\r\n";

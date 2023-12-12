@@ -468,7 +468,7 @@ namespace abc { namespace net { namespace json {
         skip_spaces();
         char ch = peek_char();
 
-        if (state_base::expect_property()) {
+        if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
             if (ch == '"') {
                 tok.string = get_string();
                 tok.type = token_type::property;
@@ -555,7 +555,7 @@ namespace abc { namespace net { namespace json {
                 base::get();
             }
             else {
-                if (state_base::expect_property()) {
+                if (state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
                     expect_char(ch, '}', false, suborigin, __TAG__);
                 }
                 else {
