@@ -225,7 +225,7 @@ namespace abc { namespace diag {
     }
 
     template <std::size_t Size, typename Clock>
-    inline void test_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t /*tag*/) noexcept {
+    inline void test_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
         base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
         char buf_severity[2 * severity::abc::debug + 1];
@@ -235,7 +235,7 @@ namespace abc { namespace diag {
         base::put_any(buf_severity);
 
         if (severity::is_higher_or_equal(severity, severity::callstack)) {
-            base::put_any("%s::%s ", origin, suborigin);
+            base::put_any("%s::%s [0x%llx] ", origin, suborigin, (unsigned long long)tag);
         }
     }
 
