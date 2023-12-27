@@ -319,45 +319,6 @@ namespace abc { namespace net { namespace json {
     };
 
 
-
-#if 0 //// TODO: REMOVE
-    using item_t = std::uint16_t;
-
-    namespace item {
-        constexpr item_t none            = 0;
-
-        constexpr item_t null            = 0x0001;
-        constexpr item_t boolean        = 0x0002;
-        constexpr item_t number            = 0x0004;
-        constexpr item_t string            = 0x0008;
-        constexpr item_t begin_array    = 0x0010;
-        constexpr item_t end_array        = 0x0020;
-        constexpr item_t begin_object    = 0x0040;
-        constexpr item_t end_object        = 0x0080;
-        constexpr item_t property        = 0x0100;
-    }
-
-
-    /**
-     * @brief            JSON value union.
-     */
-    union value_t {
-        bool    boolean;
-        double    number;
-        char    string[1];
-        char    property[1];
-    };
-    
-    /**
-     * @brief            JSON token.
-     */
-    struct token_t {
-        item_t    item;
-        value_t    value;
-    };
-#endif
-
-
     enum class nest_type : std::uint8_t {
         none   = 0,
         array  = 1,
@@ -575,136 +536,136 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
     /**
-     * @brief                JSON output stream.
-     * @tparam MaxLevels    Maximum nesting levels - object/array.
-     * @tparam Log            Logging facility.
+     * @brief         JSON output stream.
+     * @details       Writes a JSON payload token by token. To serialize a `json::value`, see `json::writer`.
+     * @tparam LogPtr Pointer type to `log_ostream`.
      */
-    template <std::size_t MaxLevels = size::_64, typename Log>
-    class json_ostream : public ostream, public json_state<MaxLevels, Log> {
-        using base  = ostream;
-        using state = json_state<MaxLevels, Log>;
+    template <typename LogPtr = std::nullptr_t>
+    class ostream
+        : public abc::ostream
+        , public state<LogPtr> {
+
+        using base       = abc::ostream;
+        using state_base = state<LogPtr>;
+        using diag_base  = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
-         * @brief            Constructor.
-         * @param sb        `std::streambuf` to read from.
-         * @param log        Pointer to a `Log` instance. May be `nullptr`.
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to write to.
+         * @param log `LogPtr` pointer. May be `nullptr`.
          */
-        json_ostream(std::streambuf* sb, Log* log = nullptr);
+        ostream(std::streambuf* sb, const LogPtr& log = nullptr);
 
         /**
-         * @brief            Move constructor.
+         * @brief Move constructor.
          */
-        json_ostream(json_ostream&& other);
+        ostream(ostream&& other);
 
         /**
-         * @brief            Deleted.
+         * @brief Deleted.
          */
-        json_ostream(const json_ostream& other) = delete;
+        ostream(const ostream& other) = delete;
 
     public:
         /**
-         * @brief            Writes a JSON token to the stream from the buffer.
-         * @param buffer    Buffer.
-         * @param size        Content size.
+         * @brief       Writes a JSON token to the stream.
+         * @param token JSON token.
          */
-        void put_token(const json::token_t* buffer, std::size_t size = size::strlen);
+        void put_token(const token& token);
 
         /**
-         * @brief            Writes a space to the stream.
-         */
-        void put_space();
-
-        /**
-         * @brief            Writes a tab to the stream.
-         */
-        void put_tab();
-
-        /**
-         * @brief            Writes a CR to the stream.
-         */
-        void put_cr();
-
-        /**
-         * @brief            Writes a LF to the stream.
-         */
-        void put_lf();
-
-        /**
-         * @brief            Writes `null` to the stream.
+         * @brief Writes `null` to the stream.
          */
         void put_null();
 
         /**
-         * @brief            Writes a boolean value to the stream.
-         * @param value        The value to write.
+         * @brief   Writes a boolean literal to the stream.
+         * @param b The boolean to write.
          */
-        void put_boolean(bool value);
+        void put_boolean(literal::boolean b);
 
         /**
-         * @brief            Writes a number value to the stream.
-         * @param value        The value to write.
+         * @brief   Writes a number literal to the stream.
+         * @param n The number to write.
          */
-        void put_number(double value);
+        void put_number(literal::number n);
 
         /**
-         * @brief            Writes a string value to the stream.
-         * @param buffer    The string to write.
-         * @param size        String length.
+         * @brief   Writes a string literal to the stream.
+         * @param s The string to write.
          */
-        void put_string(const char* buffer, std::size_t size = size::strlen);
+        void put_string(const literal::string& s);
 
         /**
-         * @brief            Writes a property name to the stream.
-         * @param buffer    The property name to write.
-         * @param size        Property name length.
+         * @brief      Writes a property name to the stream.
+         * @param name The property name to write.
          */
-        void put_property(const char* buffer, std::size_t size = size::strlen);
+        void put_property(const literal::string& name);
 
         /**
-         * @brief            Writes `[` to the stream.
+         * @brief Writes `[` to the stream.
          */
         void put_begin_array();
 
         /**
-         * @brief            Writes `]` to the stream.
+         * @brief Writes `]` to the stream.
          */
         void put_end_array();
 
         /**
-         * @brief            Writes `{` to the stream.
+         * @brief Writes `{` to the stream.
          */
         void put_begin_object();
 
         /**
-         * @brief            Writes `}` to the stream.
+         * @brief Writes `}` to the stream.
          */
         void put_end_object();
 
-    public:
         /**
-         * @brief            Writes a sequence of chars to the stream.
-         * @param buffer    The sequence to write.
-         * @param size        Sequence length.
+         * @brief Writes a space to the stream.
          */
-        std::size_t put_chars(const char* buffer, std::size_t size);
+        void put_space();
 
         /**
-         * @brief            Writes a char to the stream.
-         * @param ch        Char to write.
-         * @return            1 = success. 0 = error.
+         * @brief Writes a tab to the stream.
+         */
+        void put_tab();
+
+        /**
+         * @brief Writes a CR to the stream.
+         */
+        void put_cr();
+
+        /**
+         * @brief Writes a LF to the stream.
+         */
+        void put_lf();
+
+    protected:
+        /**
+         * @brief           Writes a sequence of chars to the stream.
+         * @param chars     The sequence of chars to write.
+         * @param chars_len Sequence length.
+         * @return          The count of chars written. 
+         */
+        std::size_t put_chars(const char* chars, std::size_t chars_len = size::strlen);
+
+        /**
+         * @brief    Writes a char to the stream.
+         * @param ch Char to write.
+         * @return   1 = success. 0 = error.
          */
         std::size_t put_char(char ch);
 
     private:
         /**
-         * @brief            State flag whether comma `,` should be written before the next value. true = skip. false = write.
+         * @brief State flag whether comma `,` should be written before the next value. true = skip. false = write.
          */
         bool _skip_comma;
     };
-#endif
 
 } } }
 
