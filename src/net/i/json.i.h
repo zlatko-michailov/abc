@@ -646,7 +646,25 @@ namespace abc { namespace net { namespace json {
 
     protected:
         /**
-         * @brief           Writes a sequence of chars to the stream.
+         * @brief           Examines the current context, and Writes a sequence of chars to the stream.
+         * @param chars     The sequence of chars to write.
+         * @param chars_len Sequence length.
+         * @return          The count of chars written. 
+         */
+        std::size_t put_literal(const char* chars, std::size_t chars_len = size::strlen);
+
+        /**
+         * @brief Checks/sets preconditions for `put_literal()`.
+         */
+        void put_literal_precond();
+
+        /**
+         * @brief Checks/sets postconditions for `put_literal()`.
+         */
+        void put_literal_postcond();
+
+        /**
+         * @brief           Unconditionally writes a sequence of chars to the stream.
          * @param chars     The sequence of chars to write.
          * @param chars_len Sequence length.
          * @return          The count of chars written. 

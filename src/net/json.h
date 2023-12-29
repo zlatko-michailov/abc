@@ -816,376 +816,350 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
     template <typename LogPtr>
-    inline json_ostream<LogPtr>::json_ostream(std::streambuf* sb, Log* log)
+    inline ostream<LogPtr>::ostream(std::streambuf* sb, const LogPtr& log)
         : base(sb)
-        , state(log)
+        , state_base("abc::net::json::ostream", log)
         , _skip_comma(false) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x10114, "json_ostream::json_ostream()");
-        }
+
+        constexpr const char* suborigin = "ostream()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     template <typename LogPtr>
-    inline json_ostream<LogPtr>::json_ostream(json_ostream&& other)
+    inline ostream<LogPtr>::ostream(ostream&& other)
         : base(std::move(other))
-        , state(std::move(other))
+        , state_base(std::move(other))
         , _skip_comma(other._skip_comma) {
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_token(const json::token_t* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x10115, "json_ostream::put_token() item='%4.4x' >>>", buffer->item);
-        }
+    inline void ostream<LogPtr>::put_token(const token& token) {
+        constexpr const char* suborigin = "put_token()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10115, "Begin: token.type=0x%2.2x", token.type);
 
-        switch (buffer->item)
+        switch (token.type)
         {
-        case json::item::null:
+        case token_type::null:
             put_null();
             break;
 
-        case json::item::boolean:
-            put_boolean(buffer->value.boolean);
+        case token_type::boolean:
+            put_boolean(token.boolean);
             break;
 
-        case json::item::number:
-            put_number(buffer->value.number);
+        case token_type::number:
+            put_number(token.number);
             break;
 
-        case json::item::string:
-            put_string(buffer->value.string, size);
+        case token_type::string:
+            put_string(token.string);
             break;
 
-        case json::item::property:
-            put_property(buffer->value.property, size);
+        case token_type::property:
+            put_property(token.string);
             break;
 
-        case json::item::begin_array:
+        case token_type::begin_array:
             put_begin_array();
             break;
 
-        case json::item::end_array:
+        case token_type::end_array:
             put_end_array();
             break;
 
-        case json::item::begin_object:
+        case token_type::begin_object:
             put_begin_object();
             break;
 
-        case json::item::end_object:
+        case token_type::end_object:
             put_end_object();
             break;
 
         default:
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x10116, "json_ostream::put_token() Unexpected item=%4.4x <<<", buffer->item);
-            }
-
             base::set_bad();
+            diag_base::template throw_exception<std::logic_error>(suborigin, 0x10116, "token.type=0x%2.2x", token.type);
             break;
         }
 
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::debug, 0x10117, "json_ostream::put_token() <<<");
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10117, "End:");
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_space() {
+    inline void ostream<LogPtr>::put_null() {
+        constexpr const char* suborigin = "put_null()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        std::size_t pcount = put_literal("null", 4);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_boolean(literal::boolean b) {
+        constexpr const char* suborigin = "put_boolean()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: b=%d", b);
+
+        std::size_t pcount = 0;
+        if (b) {
+            pcount = put_literal("true", 4);
+        }
+        else {
+            pcount = put_literal("false", 5);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_number(literal::number n) {
+        constexpr const char* suborigin = "put_number()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: n=%.16lg", n);
+
+        char literal[19 + 6 + 1];
+        std::size_t size = std::snprintf(literal, sizeof(literal), "%.16lg", n);
+
+        std::size_t pcount = put_literal(literal, size);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_string(const literal::string& s) {
+        constexpr const char* suborigin = "put_string()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: s='%s'", s.c_str());
+
+        put_literal_precond();
+
+        std::size_t pcount = 0;
+        pcount += put_chars("\"", 1);
+        pcount += put_chars(buffer, size);
+        pcount += put_chars("\"", 1);
+
+        put_literal_postcond();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_property(const literal::string& name) {
+        constexpr const char* suborigin = "put_property()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: name='%s'", name.c_str());
+
+        if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object || !state_base::expect_property()) {
+            base::set_bad();
+            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Did not expect a property.");
+            return;
+        }
+
+        if (!_skip_comma) {
+            put_chars(",", 1);
+        }
+
+        std::size_t pcount = 0;
+        pcount += put_chars("\"", 1);
+        pcount += put_chars(buffer, size);
+        pcount += put_chars("\":", 2);
+
+        _skip_comma = true;
+        state::set_expect_property(false);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_begin_array() {
+        constexpr const char* suborigin = "put_begin_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        put_literal_precond();
+
+        std::size_t pcount = put_chars("[", 1);
+
+        state_base::nest_stack().push(nest_type::array);
+        _skip_comma = true;
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_end_array() {
+        constexpr const char* suborigin = "put_end_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::array) {
+            base::set_bad();
+            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Not in an array.");
+            return;
+        }
+
+        std::size_t pcount = put_chars("]", 1);
+
+        state_base::nest_stack().pop();
+        put_literal_postcond();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_begin_object() {
+        constexpr const char* suborigin = "put_begin_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        put_literal_precond();
+
+        std::size_t pcount = put_chars("{", 1);
+
+        state_base::nest_stack().push(nest_type::object);
+        _skip_comma = true;
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_end_object() {
+        constexpr const char* suborigin = "put_end_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object) {
+            base::set_bad();
+            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Not in an object.");
+            return;
+        }
+
+        std::size_t pcount = put_chars("}", 1);
+
+        state_base::nest_stack().pop();
+        put_literal_postcond();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_space() {
         put_chars(" ", 1);
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_tab() {
+    inline void ostream<LogPtr>::put_tab() {
         put_chars("\t", 1);
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_cr() {
+    inline void ostream<LogPtr>::put_cr() {
         put_chars("\r", 1);
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_lf() {
+    inline void ostream<LogPtr>::put_lf() {
         put_chars("\n", 1);
     }
 
 
     template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_null() {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x10118, "json_ostream::put_null() Expected a property.");
-            }
+    inline std::size_t ostream<LogPtr>::put_literal(const char* chars, std::size_t chars_len) {
+        constexpr const char* suborigin = "put_literal()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
 
-            base::set_bad();
-            return;
-        }
+        put_literal_precond();
 
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
+        std::size_t pcount = put_chars(chars, chars_len);
 
-        put_chars("null", 4);
+        put_literal_postcond();
 
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_boolean(bool value) {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x10119, "json_ostream::put_boolean() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        if (value) {
-            put_chars("true", 4);
-        }
-        else {
-            put_chars("false", 5);
-        }
-
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_number(double value) {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011a, "json_ostream::put_number() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        char literal[19 + 6 + 1];
-        std::size_t size = std::snprintf(literal, sizeof(literal), "%.16lg", value);
-
-        put_chars(literal, size);
-
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_string(const char* buffer, std::size_t size) {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011b, "json_ostream::put_string() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        put_chars("\"", 1);
-        put_chars(buffer, size);
-        put_chars("\"", 1);
-
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_property(const char* buffer, std::size_t size) {
-        if (!state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011c, "json_ostream::put_property() Expected a value.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (size == size::strlen) {
-            size = std::strlen(buffer);
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::object && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        put_chars("\"", 1);
-        put_chars(buffer, size);
-        put_chars("\":", 2);
-
-        _skip_comma = true;
-        state::set_expect_property(false);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_begin_array() {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011d, "json_ostream::put_begin_array() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        put_chars("[", 1);
-
-        base::set_bad_if(!state::push_level(json::level::array));
-
-        _skip_comma = true;
-        state::set_expect_property(false);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_end_array() {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011e, "json_ostream::put_end_array() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        put_chars("]", 1);
-
-        base::set_bad_if(!state::pop_level(json::level::array));
-
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_begin_object() {
-        if (state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x1011f, "json_ostream::put_begin_object() Expected a property.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        if (state::levels() > 0 && state::top_level() == json::level::array && !_skip_comma) {
-            put_chars(",", 1);
-        }
-
-        put_chars("{", 1);
-
-        base::set_bad_if(!state::push_level(json::level::object));
-
-        _skip_comma = true;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline void json_ostream<LogPtr>::put_end_object() {
-        if (!state::expect_property()) {
-            Log* log_local = state::log();
-            if (log_local != nullptr) {
-                log_local->put_any(category::abc::json, severity::important, 0x10120, "json_ostream::put_null() Expected a value.");
-            }
-
-            base::set_bad();
-            return;
-        }
-
-        put_chars("}", 1);
-
-        base::set_bad_if(!state::pop_level(json::level::object));
-
-        _skip_comma = false;
-        state::set_expect_property(true);
-    }
-
-
-    template <typename LogPtr>
-    inline std::size_t json_ostream<LogPtr>::put_chars(const char* buffer, std::size_t size) {
-        Log* log_local = state::log();
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x10121, "json_ostream::put_chars() buffer='%s' >>>", buffer);
-        }
-
-        std::size_t pcount = 0;
-
-        while (base::is_good() && pcount < size) {
-            base::put(buffer[pcount++]);
-        }
-
-        if (pcount < size) {
-            base::set_fail();
-        }
-
-        base::flush();
-
-        if (log_local != nullptr) {
-            log_local->put_any(category::abc::json, severity::abc::optional, 0x10122, "json_ostream::put_chars() pcount=%zu <<<", pcount);
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
 
         return pcount;
     }
 
 
     template <typename LogPtr>
-    inline std::size_t json_ostream<LogPtr>::put_char(char ch) {
-        if (base::is_good()) {
-            base::put(ch);
+    inline void ostream<LogPtr>::put_literal_precond() {
+        constexpr const char* suborigin = "put_literal_precond()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
+            base::set_bad();
+            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Expected a property.");
+            return;
         }
 
-        return base::is_good() ? 1 : 0;
+        if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::array && !_skip_comma) {
+            put_chars(",", 1);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return pcount;
+    }
+
+
+    template <typename LogPtr>
+    inline void ostream<LogPtr>::put_literal_postcond() {
+        constexpr const char* suborigin = "put_literal_postcond()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        _skip_comma = false;
+
+        if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object) {
+            state::set_expect_property(true);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return pcount;
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t ostream<LogPtr>::put_chars(const char* chars, std::size_t chars_len) {
+        constexpr const char* suborigin = "put_chars()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10121, "Begin: chars='%s'", chars);
+
+        std::size_t pcount = 0;
+
+        if (chars_len == size::strlen) {
+            chars_len = std::strlen(chars);
+        }
+
+        while (base::is_good() && pcount < chars_len) {
+            base::put(chars[pcount++]);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10122, "End: pcount=%zu", pcount);
+
+        return pcount;
+    }
+
+
+    template <typename LogPtr>
+    inline std::size_t ostream<LogPtr>::put_char(char ch) {
+        if (base::is_good()) {
+            base::put(ch);
+            return 1;
+        }
+
+        return 0;
     }
 
 
     // --------------------------------------------------------------
-#endif
 
 } } }
