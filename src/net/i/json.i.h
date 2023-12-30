@@ -363,6 +363,11 @@ namespace abc { namespace net { namespace json {
          */
         const std::stack<nest_type>& nest_stack() const noexcept;
 
+        /**
+         * @brief Returns a reference to the nest stack - arrays and objects.
+         */
+        std::stack<nest_type>& nest_stack() noexcept;
+
     protected:
         /**
          * @brief Resets the state.

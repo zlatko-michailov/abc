@@ -376,6 +376,12 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
+    inline std::stack<nest_type>& state<LogPtr>::nest_stack() noexcept {
+        return _nest_stack;
+    }
+
+
+    template <typename LogPtr>
     inline bool state<LogPtr>::expect_property() const noexcept {
         return _expect_property;
     }
@@ -941,7 +947,7 @@ namespace abc { namespace net { namespace json {
 
         std::size_t pcount = 0;
         pcount += put_chars("\"", 1);
-        pcount += put_chars(buffer, size);
+        pcount += put_chars(s.c_str(), s.length());
         pcount += put_chars("\"", 1);
 
         put_literal_postcond();
@@ -967,11 +973,11 @@ namespace abc { namespace net { namespace json {
 
         std::size_t pcount = 0;
         pcount += put_chars("\"", 1);
-        pcount += put_chars(buffer, size);
+        pcount += put_chars(name.c_str(), name.length());
         pcount += put_chars("\":", 2);
 
         _skip_comma = true;
-        state::set_expect_property(false);
+        state_base::set_expect_property(false);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
     }
@@ -1106,8 +1112,6 @@ namespace abc { namespace net { namespace json {
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-
-        return pcount;
     }
 
 
@@ -1119,12 +1123,10 @@ namespace abc { namespace net { namespace json {
         _skip_comma = false;
 
         if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object) {
-            state::set_expect_property(true);
+            state_base::set_expect_property(true);
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-
-        return pcount;
     }
 
 

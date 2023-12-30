@@ -1111,427 +1111,326 @@ bool test_json_istream_mixed_02(test_context& context) {
 // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
-bool test_json_ostream_null(test_context<abc::test::log>& context) {
+bool test_json_ostream_null(test_context& context) {
     char expected[] =
         " \r\t\n null \t\r\n";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
     ostream.put_space();
-    passed = verify_stream(context, ostream, 0x101fc) && passed;
+    passed = verify_stream_good(context, ostream, 0x101fc) && passed;
     ostream.put_cr();
-    passed = verify_stream(context, ostream, 0x101fd) && passed;
+    passed = verify_stream_good(context, ostream, 0x101fd) && passed;
     ostream.put_tab();
-    passed = verify_stream(context, ostream, 0x101fe) && passed;
+    passed = verify_stream_good(context, ostream, 0x101fe) && passed;
     ostream.put_lf();
-    passed = verify_stream(context, ostream, 0x101ff) && passed;
+    passed = verify_stream_good(context, ostream, 0x101ff) && passed;
     ostream.put_space();
-    passed = verify_stream(context, ostream, 0x10200) && passed;
+    passed = verify_stream_good(context, ostream, 0x10200) && passed;
 
-    token->item = abc::json::item::null;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10201) && passed;
+    ostream.put_null();
+    passed = verify_stream_good(context, ostream, 0x10201) && passed;
 
     ostream.put_space();
-    passed = verify_stream(context, ostream, 0x10202) && passed;
+    passed = verify_stream_good(context, ostream, 0x10202) && passed;
     ostream.put_tab();
-    passed = verify_stream(context, ostream, 0x10203) && passed;
+    passed = verify_stream_good(context, ostream, 0x10203) && passed;
     ostream.put_cr();
-    passed = verify_stream(context, ostream, 0x10204) && passed;
+    passed = verify_stream_good(context, ostream, 0x10204) && passed;
     ostream.put_lf();
-    passed = verify_stream(context, ostream, 0x10205) && passed;
+    passed = verify_stream_good(context, ostream, 0x10205) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10206) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10206) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_boolean_01(test_context<abc::test::log>& context) {
+bool test_json_ostream_boolean_01(test_context& context) {
     char expected[] =
         "\n\nfalse\r\n";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
     ostream.put_lf();
-    passed = verify_stream(context, ostream, 0x10207) && passed;
+    passed = verify_stream_good(context, ostream, 0x10207) && passed;
     ostream.put_lf();
-    passed = verify_stream(context, ostream, 0x10208) && passed;
+    passed = verify_stream_good(context, ostream, 0x10208) && passed;
 
-    token->item = abc::json::item::boolean;
-    token->value.boolean = false;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10209) && passed;
+    ostream.put_boolean(false);
+    passed = verify_stream_good(context, ostream, 0x10209) && passed;
 
     ostream.put_cr();
-    passed = verify_stream(context, ostream, 0x1020a) && passed;
+    passed = verify_stream_good(context, ostream, 0x1020a) && passed;
     ostream.put_lf();
-    passed = verify_stream(context, ostream, 0x1020b) && passed;
+    passed = verify_stream_good(context, ostream, 0x1020b) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x1020c) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x1020c) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_boolean_02(test_context<abc::test::log>& context) {
+bool test_json_ostream_boolean_02(test_context& context) {
     char expected[] =
         "true";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::boolean;
-    token->value.boolean = true;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x1020d) && passed;
+    ostream.put_boolean(true);
+    passed = verify_stream_good(context, ostream, 0x1020d) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x1020e) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x1020e) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_number_01(test_context<abc::test::log>& context) {
+bool test_json_ostream_number_01(test_context& context) {
     char expected[] =
         "42";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::number;
-    token->value.number = 42;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x1020f) && passed;
+    ostream.put_number(42);
+    passed = verify_stream_good(context, ostream, 0x1020f) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10210) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10210) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_number_02(test_context<abc::test::log>& context) {
+bool test_json_ostream_number_02(test_context& context) {
     char expected[] =
         "12345.6789012345";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::number;
-    token->value.number = 12345.6789012345;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10211) && passed;
+    ostream.put_number(12345.6789012345);
+    passed = verify_stream_good(context, ostream, 0x10211) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10212) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10212) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_number_03(test_context<abc::test::log>& context) {
+bool test_json_ostream_number_03(test_context& context) {
     char expected[] =
         "-8.87766554433221e-10";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::number;
-    token->value.number = -8.87766554433221e-10;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10213) && passed;
+    ostream.put_number(-8.87766554433221e-10);
+    passed = verify_stream_good(context, ostream, 0x10213) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10214) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10214) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_string_01(test_context<abc::test::log>& context) {
+bool test_json_ostream_string_01(test_context& context) {
     char expected[] =
         "\"\"";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::string;
-    std::strcpy(token->value.string, "");
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10215) && passed;
+    ostream.put_string("");
+    passed = verify_stream_good(context, ostream, 0x10215) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10216) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10216) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_string_02(test_context<abc::test::log>& context) {
+bool test_json_ostream_string_02(test_context& context) {
     char expected[] =
         "\"qwerty\"";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::string;
-    std::strcpy(token->value.string, "qwerty");
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10217) && passed;
+    ostream.put_string("qwerty");
+    passed = verify_stream_good(context, ostream, 0x10217) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10218) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10218) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_array_01(test_context<abc::test::log>& context) {
+bool test_json_ostream_array_01(test_context& context) {
     char expected[] =
         "[]";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::begin_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10219) && passed;
+    ostream.put_begin_array();
+    passed = verify_stream_good(context, ostream, 0x10219) && passed;
 
-    token->item = abc::json::item::end_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x1021a) && passed;
+    ostream.put_end_array();
+    passed = verify_stream_good(context, ostream, 0x1021a) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x1021b) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x1021b) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_array_02(test_context<abc::test::log>& context) {
+bool test_json_ostream_array_02(test_context& context) {
     char expected[] =
         "[ 12.34,null,true,\"abc\" ]";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::begin_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x1021c) && passed;
-    ostream.put_space();
+    ostream.put_begin_array();
+    passed = verify_stream_good(context, ostream, 0x1021c) && passed;
+    {
+        ostream.put_space();
 
-        token->item = abc::json::item::number;
-        token->value.number = 12.34;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x1021d) && passed;
+        ostream.put_number(12.34);
+        passed = verify_stream_good(context, ostream, 0x1021d) && passed;
 
-        token->item = abc::json::item::null;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x1021e) && passed;
+        ostream.put_null();
+        passed = verify_stream_good(context, ostream, 0x1021e) && passed;
 
-        token->item = abc::json::item::boolean;
-        token->value.boolean = true;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x1021f) && passed;
+        ostream.put_boolean(true);
+        passed = verify_stream_good(context, ostream, 0x1021f) && passed;
 
-        token->item = abc::json::item::string;
-        std::strcpy(token->value.string, "abc");
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x10220) && passed;
+        ostream.put_string("abc");
+        passed = verify_stream_good(context, ostream, 0x10220) && passed;
 
-    ostream.put_space();
-    token->item = abc::json::item::end_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10221) && passed;
+        ostream.put_space();
+    }
+    ostream.put_end_array();
+    passed = verify_stream_good(context, ostream, 0x10221) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10222) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10222) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_array_03(test_context<abc::test::log>& context) {
+bool test_json_ostream_array_03(test_context& context) {
     char expected[] =
         "[ 1,2,[[3],[4]],[[[5]]] ]";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream(&sb, context.log);
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
 
     bool passed = true;
 
-    token->item = abc::json::item::begin_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10223) && passed;
-    ostream.put_space();
+    ostream.put_begin_array();
+    passed = verify_stream_good(context, ostream, 0x10223) && passed;
+    {
+        ostream.put_space();
 
-        token->item = abc::json::item::number;
-        token->value.number = 1;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x10224) && passed;
+        ostream.put_number(1);
+        passed = verify_stream_good(context, ostream, 0x10224) && passed;
 
-        token->item = abc::json::item::number;
-        token->value.number = 2;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x10225) && passed;
+        ostream.put_number(2);
+        passed = verify_stream_good(context, ostream, 0x10225) && passed;
 
-        token->item = abc::json::item::begin_array;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x10226) && passed;
+        ostream.put_begin_array();
+        passed = verify_stream_good(context, ostream, 0x10226) && passed;
+        {
+            ostream.put_begin_array();
+            passed = verify_stream_good(context, ostream, 0x10227) && passed;
+            {
+                ostream.put_number(3);
+                passed = verify_stream_good(context, ostream, 0x10228) && passed;
+            }
+            ostream.put_end_array();
+            passed = verify_stream_good(context, ostream, 0x10229) && passed;
 
-            token->item = abc::json::item::begin_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x10227) && passed;
+            ostream.put_begin_array();
+            passed = verify_stream_good(context, ostream, 0x1022a) && passed;
+            {
+                ostream.put_number(4);
+                passed = verify_stream_good(context, ostream, 0x1022b) && passed;
+            }
+            ostream.put_end_array();
+            passed = verify_stream_good(context, ostream, 0x1022c) && passed;
+        }
+        ostream.put_end_array();
+        passed = verify_stream_good(context, ostream, 0x1022d) && passed;
 
-                token->item = abc::json::item::number;
-                token->value.number = 3;
-                ostream.put_token(token);
-                passed = verify_stream(context, ostream, 0x10228) && passed;
+        ostream.put_begin_array();
+        passed = verify_stream_good(context, ostream, 0x1022e) && passed;
+        {
+            ostream.put_begin_array();
+            passed = verify_stream_good(context, ostream, 0x1022f) && passed;
+            {
+                ostream.put_begin_array();
+                passed = verify_stream_good(context, ostream, 0x10230) && passed;
+                {
+                    ostream.put_number(5);
+                    passed = verify_stream_good(context, ostream, 0x10231) && passed;
+                }
+                ostream.put_end_array();
+                passed = verify_stream_good(context, ostream, 0x10232) && passed;
+            }
+            ostream.put_end_array();
+            passed = verify_stream_good(context, ostream, 0x10233) && passed;
+        }
+        ostream.put_end_array();
+        passed = verify_stream_good(context, ostream, 0x10234) && passed;
 
-            token->item = abc::json::item::end_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x10229) && passed;
+        ostream.put_space();
+    }
+    ostream.put_end_array();
+    passed = verify_stream_good(context, ostream, 0x10235) && passed;
 
-            token->item = abc::json::item::begin_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x1022a) && passed;
-
-                token->item = abc::json::item::number;
-                token->value.number = 4;
-                ostream.put_token(token);
-                passed = verify_stream(context, ostream, 0x1022b) && passed;
-
-            token->item = abc::json::item::end_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x1022c) && passed;
-
-        token->item = abc::json::item::end_array;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x1022d) && passed;
-
-        token->item = abc::json::item::begin_array;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x1022e) && passed;
-
-            token->item = abc::json::item::begin_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x1022f) && passed;
-
-                token->item = abc::json::item::begin_array;
-                ostream.put_token(token);
-                passed = verify_stream(context, ostream, 0x10230) && passed;
-
-                    token->item = abc::json::item::number;
-                    token->value.number = 5;
-                    ostream.put_token(token);
-                    passed = verify_stream(context, ostream, 0x10231) && passed;
-
-                token->item = abc::json::item::end_array;
-                ostream.put_token(token);
-                passed = verify_stream(context, ostream, 0x10232) && passed;
-
-            token->item = abc::json::item::end_array;
-            ostream.put_token(token);
-            passed = verify_stream(context, ostream, 0x10233) && passed;
-
-        token->item = abc::json::item::end_array;
-        ostream.put_token(token);
-        passed = verify_stream(context, ostream, 0x10234) && passed;
-
-    ostream.put_space();
-    token->item = abc::json::item::end_array;
-    ostream.put_token(token);
-    passed = verify_stream(context, ostream, 0x10235) && passed;
-
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10236) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10236) && passed;
 
     return passed;
 }
 
 
+#if 0 //// TODO:
 bool test_json_ostream_object_01(test_context<abc::test::log>& context) {
     char expected[] =
         "{}";
