@@ -1029,6 +1029,7 @@ namespace abc { namespace net { namespace json {
         std::size_t pcount = put_chars("{", 1);
 
         state_base::nest_stack().push(nest_type::object);
+        state_base::set_expect_property(true);
         _skip_comma = true;
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);

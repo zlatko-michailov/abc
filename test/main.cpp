@@ -182,10 +182,10 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_array_01",                      test_json_ostream_array_01 },
                 { "test_json_ostream_array_02",                      test_json_ostream_array_02 },
                 { "test_json_ostream_array_03",                      test_json_ostream_array_03 },
+                { "test_json_ostream_object_01",                     test_json_ostream_object_01 },
+                { "test_json_ostream_object_02",                     test_json_ostream_object_02 },
+                { "test_json_ostream_object_03",                     test_json_ostream_object_03 },
 #if 0 //// TODO:
-                { "test_json_ostream_object_01",                     abc::test::json::test_json_ostream_object_01 },
-                { "test_json_ostream_object_02",                     abc::test::json::test_json_ostream_object_02 },
-                { "test_json_ostream_object_03",                     abc::test::json::test_json_ostream_object_03 },
                 { "test_json_ostream_mixed_01",                      abc::test::json::test_json_ostream_mixed_01 },
                 { "test_json_ostream_mixed_02",                      abc::test::json::test_json_ostream_mixed_02 },
                 { "test_json_istream_move",                          abc::test::json::test_json_istream_move },
