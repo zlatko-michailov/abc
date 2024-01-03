@@ -1858,70 +1858,53 @@ bool test_json_ostream_mixed_02(test_context& context) {
 // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
-bool test_json_istream_move(test_context<abc::test::log>& context) {
-    char content[] =
+bool test_json_istream_move(test_context& context) {
+    std::string content =
         "false 42 ";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    std::stringbuf sb(content, std::ios_base::in);
 
-    abc::json_istream<abc::size::_64, abc::test::log> istream1(&sb, context.log);
+    abc::net::json::istream<test_log*> istream1(&sb, context.log());
 
-    char buffer[101];
-    abc::json::token_t* token = (abc::json::token_t*)buffer;
     bool passed = true;
 
-    std::size_t size = sizeof(abc::json::item_t) + sizeof(bool);
+    abc::net::json::token token = istream1.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream1, 0x10721, "%x", token.string.length()) && passed;
+    passed = verify_integral(context, token.boolean, false, istream1, 0x10722, "%u", token.string.length()) && passed;
 
-    istream1.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::boolean, istream1, 0x10721, "%x", size) && passed;
-    passed = verify_integral(context, token->value.boolean, false, istream1, 0x10722, "%u", size) && passed;
+    abc::net::json::istream<test_log*> istream2(std::move(istream1));
 
-    abc::json_istream<abc::size::_64, abc::test::log> istream2(std::move(istream1));
-
-    size = sizeof(abc::json::item_t) + sizeof(double);
-
-    istream2.get_token(token, sizeof(buffer));
-    passed = verify_integral(context, token->item, abc::json::item::number, istream2, 0x10723, "%x", size) && passed;
-    passed = verify_integral(context, token->value.number, 42.0, istream2, 0x10724, "%f", size) && passed;
+    token = istream2.get_token();
+    passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream2, 0x10723, "%x", token.string.length()) && passed;
+    passed = verify_integral(context, token.number, 42.0, istream2, 0x10724, "%f", token.string.length()) && passed;
 
     return passed;
 }
 
 
-bool test_json_ostream_move(test_context<abc::test::log>& context) {
+bool test_json_ostream_move(test_context& context) {
     char expected[] =
         "true 42";
 
-    char actual [1024 + 1];
+    std::stringbuf sb(std::ios_base::out);
 
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual));
-
-    char token_buffer [sizeof(abc::json::item_t) + 1024 + 1];
-    abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(token_buffer);
+    abc::net::json::ostream<test_log*> ostream1(&sb, context.log());
 
     bool passed = true;
 
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream1(&sb, context.log);
-
-    token->item = abc::json::item::boolean;
-    token->value.boolean = true;
-    ostream1.put_token(token);
+    ostream1.put_boolean(true);
     passed = verify_stream_good(context, ostream1, 0x10725) && passed;
 
-    abc::json_ostream<abc::size::_64, abc::test::log> ostream2(std::move(ostream1));
+    abc::net::json::ostream<test_log*> ostream2(std::move(ostream1));
     ostream2.put_space();
 
-    token->item = abc::json::item::number;
-    token->value.number = 42.0;
-    ostream2.put_token(token);
+    ostream2.put_number(42.0);
     passed = verify_stream_good(context, ostream2, 0x10726) && passed;
 
-    passed = context.are_equal(actual, expected, std::strlen(expected), 0x10727) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10727) && passed;
 
     return passed;
 }
-#endif
 
 
 // --------------------------------------------------------------
