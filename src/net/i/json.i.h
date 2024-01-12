@@ -426,6 +426,15 @@ namespace abc { namespace net { namespace json {
         using state_base = state<LogPtr>;
         using diag_base  = diag::diag_ready<const char*, LogPtr>;
 
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
     public:
         /**
          * @brief     Constructor.
@@ -542,6 +551,79 @@ namespace abc { namespace net { namespace json {
 
 
     /**
+     * @brief         JSON reader.
+     * @details       Reads a `json::value` from a JSON stream.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class reader
+        : protected istream<LogPtr> {
+
+        using base      = istream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to read from.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to read from.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        reader(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        reader(reader&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        reader(const reader& other) = delete;
+
+    public:
+        /**
+         * @brief  Reads a whole `json::value` from the JSON stream.
+         * @return The JSON value.
+         */
+        value<LogPtr> get_value();
+
+    protected:
+        /**
+         * @brief       Reads a whole `json::value` from the JSON stream.
+         * @param token The first token of the value that has already been read from the stream.
+         * @return      The JSON value.
+         */
+        value<LogPtr> get_value_from_token(token&& token);
+
+        /**
+         * @brief  Reads a JSON array from the JSON stream.
+         * @note   The `[` has already been read.
+         * @return A `literal::array`.
+         */
+        literal::array<LogPtr> get_array();
+
+        /**
+         * @brief  Reads a JSON object from the JSON stream.
+         * @note   The `{` has already been read.
+         * @return A `literal::object`.
+         */
+        literal::object<LogPtr> get_object();
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
      * @brief         JSON output stream.
      * @details       Writes a JSON payload token by token. To serialize a `json::value`, see `json::writer`.
      * @tparam LogPtr Pointer type to `log_ostream`.
@@ -554,6 +636,15 @@ namespace abc { namespace net { namespace json {
         using base       = abc::ostream;
         using state_base = state<LogPtr>;
         using diag_base  = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
 
     public:
         /**
@@ -688,6 +779,57 @@ namespace abc { namespace net { namespace json {
          * @brief State flag whether comma `,` should be written before the next value. true = skip. false = write.
          */
         bool _skip_comma;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief         JSON writer.
+     * @details       Writes a `json::value` to a JSON stream.
+     * @tparam LogPtr Pointer type to `log_ostream`.
+     */
+    template <typename LogPtr = std::nullptr_t>
+    class writer
+        : protected ostream<LogPtr> {
+
+        using base      = ostream<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     `std::streambuf` to write to.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  `std::streambuf` to read from.
+         * @param log `LogPtr` pointer. May be `nullptr`.
+         */
+        writer(std::streambuf* sb, const LogPtr& log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        writer(writer&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        writer(const writer& other) = delete;
+
+    public:
+        /**
+         * @brief       Writes a whole `json::value` to the JSON stream.
+         * @param value The `json::value`.
+         */
+        void put_value(const value<LogPtr>& value);
     };
 
 } } }

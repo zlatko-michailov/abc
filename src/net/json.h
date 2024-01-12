@@ -430,14 +430,20 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline istream<LogPtr>::istream(std::streambuf* sb, const LogPtr& log)
+    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, const LogPtr& log)
         : base(sb)
-        , state_base("abc::net::json::istream", log) {
+        , state_base(origin, log) {
 
         constexpr const char* suborigin = "istream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline istream<LogPtr>::istream(std::streambuf* sb, const LogPtr& log)
+        : istream("abc::net::json::istream", sb, log) {
     }
 
 
@@ -735,6 +741,8 @@ namespace abc { namespace net { namespace json {
             }
         }
 
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ch='%c' (0x%2.2x)", ch, ch);
+
         return ch;
     }
 
@@ -819,19 +827,158 @@ namespace abc { namespace net { namespace json {
     }
 
 
+   // --------------------------------------------------------------
+
+
+    template <typename LogPtr>
+    inline reader<LogPtr>::reader(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, log) {
+
+        constexpr const char* suborigin = "reader()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline reader<LogPtr>::reader(std::streambuf* sb, const LogPtr& log)
+        : reader("abc::net::json::reader", sb, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline reader<LogPtr>::reader(reader&& other)
+        : base(std::move(other)) {
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr> reader<LogPtr>::get_value() {
+        constexpr const char* suborigin = "get_value()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        token token = base::get_token();
+
+        value<LogPtr> value = get_value_from_token(std::move(token));
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return value;
+    }
+
+
+    template <typename LogPtr>
+    inline value<LogPtr> reader<LogPtr>::get_value_from_token(token&& token) {
+        constexpr const char* suborigin = "get_value_from_token()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        switch (token.type) {
+            case token_type::null:
+                return value<LogPtr>(nullptr, base::log());
+
+            case token_type::boolean:
+                return value<LogPtr>(token.boolean, base::log());
+
+            case token_type::number:
+                return value<LogPtr>(token.number, base::log());
+
+            case token_type::string:
+                return value<LogPtr>(std::move(token.string), base::log());
+
+            case token_type::begin_array:
+                return value<LogPtr>(get_array(), base::log());
+
+            case token_type::begin_object:
+                return value<LogPtr>(get_object(), base::log());
+
+            default:
+                base::set_bad();
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected token_type=%u", token.type);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return value<LogPtr>(base::log());
+    }
+
+
+    template <typename LogPtr>
+    inline literal::array<LogPtr> reader<LogPtr>::get_array() {
+        constexpr const char* suborigin = "get_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        literal::array<LogPtr> array;
+
+        token token = base::get_token();
+        while (token.type != token_type::end_array) {
+            value<LogPtr> value = get_value_from_token(std::move(token));
+            if (value.type() == value_type::empty) {
+                base::set_bad();
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+            }
+
+            array.push_back(std::move(value));
+
+            token = base::get_token();
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu", array.size());
+
+        return array;
+    }
+
+
+    template <typename LogPtr>
+    inline literal::object<LogPtr> reader<LogPtr>::get_object() {
+        constexpr const char* suborigin = "get_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        literal::object<LogPtr> object;
+
+        token token = base::get_token();
+        while (token.type != token_type::end_object) {
+            if (token.type != token_type::property) {
+                base::set_bad();
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected token_type=%u", token.type);
+            }
+
+            value<LogPtr> value = get_value();
+            if (value.type() == value_type::empty) {
+                base::set_bad();
+                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+            }
+
+            object[token.string] = std::move(value);
+
+            token = base::get_token();
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu", object.size());
+
+        return object;
+    }
+
+
     // --------------------------------------------------------------
 
 
     template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(std::streambuf* sb, const LogPtr& log)
+    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, const LogPtr& log)
         : base(sb)
-        , state_base("abc::net::json::ostream", log)
+        , state_base(origin, log)
         , _skip_comma(false) {
 
         constexpr const char* suborigin = "ostream()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline ostream<LogPtr>::ostream(std::streambuf* sb, const LogPtr& log)
+        : ostream("abc::net::json::ostream", sb, log) {
     }
 
 
@@ -1160,6 +1307,32 @@ namespace abc { namespace net { namespace json {
         }
 
         return 0;
+    }
+
+
+// --------------------------------------------------------------
+
+
+    template <typename LogPtr>
+    inline writer<LogPtr>::writer(const char* origin, std::streambuf* sb, const LogPtr& log)
+        : base(origin, sb, log) {
+
+        constexpr const char* suborigin = "writer()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline writer<LogPtr>::writer(std::streambuf* sb, const LogPtr& log)
+        : writer("abc::net::json::writer", sb, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline writer<LogPtr>::writer(writer&& other)
+        : base(std::move(other)) {
     }
 
 

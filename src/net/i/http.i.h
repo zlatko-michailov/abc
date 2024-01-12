@@ -526,7 +526,7 @@ namespace abc { namespace net { namespace http {
     protected:
         /**
          * @brief        Constructor.
-         * @param origin-Origin.
+         * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
@@ -600,7 +600,7 @@ namespace abc { namespace net { namespace http {
     protected:
         /**
          * @brief        Constructor.
-         * @param origin-Origin.
+         * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
@@ -737,7 +737,7 @@ namespace abc { namespace net { namespace http {
     protected:
         /**
          * @brief        Constructor.
-         * @param origin-Origin.
+         * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
@@ -862,7 +862,7 @@ namespace abc { namespace net { namespace http {
     protected:
         /**
          * @brief        Constructor.
-         * @param origin-Origin.
+         * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
@@ -991,7 +991,7 @@ namespace abc { namespace net { namespace http {
     protected:
         /**
          * @brief        Constructor.
-         * @param origin-Origin.
+         * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */

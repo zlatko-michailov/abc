@@ -12,8 +12,9 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-    - Restore `istream` and `ostream`.
     - Create `reader` and `writer`.
+        - tests
+        - move test
     - docs
         - `value`
         - `reader`, `writer`
