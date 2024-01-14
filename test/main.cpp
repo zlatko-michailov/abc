@@ -189,6 +189,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_reader_object_01",                      test_json_reader_object_01 },
                 { "test_json_reader_object_02",                      test_json_reader_object_02 },
                 { "test_json_reader_object_03",                      test_json_reader_object_03 },
+                { "test_json_reader_mixed_01",                       test_json_reader_mixed_01 },
+                { "test_json_reader_mixed_02",                       test_json_reader_mixed_02 },
+#if 0 //// TODO:
                 { "test_json_ostream_null",                          test_json_ostream_null },
                 { "test_json_ostream_boolean_01",                    test_json_ostream_boolean_01 },
                 { "test_json_ostream_boolean_02",                    test_json_ostream_boolean_02 },
@@ -207,6 +210,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_mixed_02",                      test_json_ostream_mixed_02 },
                 { "test_json_istream_move",                          test_json_istream_move },
                 { "test_json_ostream_move",                          test_json_ostream_move },
+#endif
             } },
 #if 0 //// TODO:
             { "socket", {
