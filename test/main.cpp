@@ -208,9 +208,10 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_object_03",                     test_json_ostream_object_03 },
                 { "test_json_ostream_mixed_01",                      test_json_ostream_mixed_01 },
                 { "test_json_ostream_mixed_02",                      test_json_ostream_mixed_02 },
-                { "test_json_istream_move",                          test_json_istream_move },
-                { "test_json_ostream_move",                          test_json_ostream_move },
 #endif
+                { "test_json_istream_move",                          test_json_istream_move },
+                { "test_json_reader_move",                           test_json_reader_move },
+                { "test_json_ostream_move",                          test_json_ostream_move },
             } },
 #if 0 //// TODO:
             { "socket", {

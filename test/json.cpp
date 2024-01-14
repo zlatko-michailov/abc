@@ -2508,6 +2508,30 @@ bool test_json_istream_move(test_context& context) {
 }
 
 
+bool test_json_reader_move(test_context& context) {
+    std::string content =
+        "false 42 ";
+
+    std::stringbuf sb(content, std::ios_base::in);
+
+    abc::net::json::reader<test_log*> reader1(&sb, context.log());
+
+    bool passed = true;
+
+    abc::net::json::value<test_log*> value = reader1.get_value();
+    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.boolean(), false, __TAG__, "%u") & passed;
+
+    abc::net::json::reader<test_log*> reader2(std::move(reader1));
+
+    value = reader2.get_value();
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.number(), 42.0, __TAG__, "%f") & passed;
+
+    return passed;
+}
+
+
 bool test_json_ostream_move(test_context& context) {
     char expected[] =
         "true 42";
