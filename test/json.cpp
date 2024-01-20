@@ -2484,6 +2484,235 @@ bool test_json_ostream_mixed_02(test_context& context) {
 // --------------------------------------------------------------
 
 
+bool test_json_writer(test_context& context, const abc::net::json::value<test_log*>& value, const abc::net::json::write_options& options, const char* expected);
+
+
+bool test_json_writer_null_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(nullptr);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "null";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_null_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(nullptr);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "null";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_boolean_01_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(false);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "false";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_boolean_01_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(false);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "false";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_boolean_02_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(true);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "true";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_boolean_02_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(true);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "true";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_01_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(42.0);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "42";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_01_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(42.0);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "42";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_02_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(12345.6789012345);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "12345.6789012345";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_02_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(12345.6789012345);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "12345.6789012345";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_03_compact(test_context& context) {
+    abc::net::json::value<test_log*> value(-8.87766554433221e-10);
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "-8.87766554433221e-10";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_number_03_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value(-8.87766554433221e-10);
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "-8.87766554433221e-10";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_string_01_compact(test_context& context) {
+    abc::net::json::value<test_log*> value("");
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "\"\"";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_string_01_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value("");
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "\"\"";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_string_02_compact(test_context& context) {
+    abc::net::json::value<test_log*> value("qwerty");
+
+    abc::net::json::write_options options;
+    options.pretty = false;
+
+    char expected[] =
+        "\"qwerty\"";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer_string_02_pretty(test_context& context) {
+    abc::net::json::value<test_log*> value("qwerty");
+
+    abc::net::json::write_options options;
+    options.pretty = true;
+
+    char expected[] =
+        "\"qwerty\"";
+
+    return test_json_writer(context, value, options, expected);
+}
+
+
+bool test_json_writer(test_context& context, const abc::net::json::value<test_log*>& value, const abc::net::json::write_options& options, const char* expected) {
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::json::writer<test_log*> writer(&sb, context.log());
+
+    bool passed = true;
+
+    writer.put_value(value, options);
+
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+
+    return passed;
+}
+
+
+// --------------------------------------------------------------
+
+
 bool test_json_istream_move(test_context& context) {
     std::string content =
         "false 42 ";

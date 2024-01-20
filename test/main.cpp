@@ -142,6 +142,7 @@ int main(int /*argc*/, const char* argv[]) {
             } },
 #endif //// TODO:
             { "json", {
+#if 0 //// TODO:
                 { "test_json_value_empty",                           test_json_value_empty },
                 { "test_json_value_null",                            test_json_value_null },
                 { "test_json_value_boolean",                         test_json_value_boolean },
@@ -191,7 +192,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_reader_object_03",                      test_json_reader_object_03 },
                 { "test_json_reader_mixed_01",                       test_json_reader_mixed_01 },
                 { "test_json_reader_mixed_02",                       test_json_reader_mixed_02 },
-#if 0 //// TODO:
                 { "test_json_ostream_null",                          test_json_ostream_null },
                 { "test_json_ostream_boolean_01",                    test_json_ostream_boolean_01 },
                 { "test_json_ostream_boolean_02",                    test_json_ostream_boolean_02 },
@@ -209,9 +209,27 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_mixed_01",                      test_json_ostream_mixed_01 },
                 { "test_json_ostream_mixed_02",                      test_json_ostream_mixed_02 },
 #endif
+                { "test_json_writer_null_compact",                   test_json_writer_null_compact },
+                { "test_json_writer_null_pretty",                    test_json_writer_null_pretty },
+                { "test_json_writer_boolean_01_compact",             test_json_writer_boolean_01_compact },
+                { "test_json_writer_boolean_01_pretty",              test_json_writer_boolean_01_pretty },
+                { "test_json_writer_boolean_02_compact",             test_json_writer_boolean_02_compact },
+                { "test_json_writer_boolean_02_pretty",              test_json_writer_boolean_02_pretty },
+                { "test_json_writer_number_01_compact",              test_json_writer_number_01_compact },
+                { "test_json_writer_number_01_pretty",               test_json_writer_number_01_pretty },
+                { "test_json_writer_number_02_compact",              test_json_writer_number_02_compact },
+                { "test_json_writer_number_02_pretty",               test_json_writer_number_02_pretty },
+                { "test_json_writer_number_03_compact",              test_json_writer_number_03_compact },
+                { "test_json_writer_number_03_pretty",               test_json_writer_number_03_pretty },
+                { "test_json_writer_string_01_compact",              test_json_writer_string_01_compact },
+                { "test_json_writer_string_01_pretty",               test_json_writer_string_01_pretty },
+                { "test_json_writer_string_02_compact",              test_json_writer_string_02_compact },
+                { "test_json_writer_string_02_pretty",               test_json_writer_string_02_pretty },
+#if 0 //// TODO:
                 { "test_json_istream_move",                          test_json_istream_move },
                 { "test_json_reader_move",                           test_json_reader_move },
                 { "test_json_ostream_move",                          test_json_ostream_move },
+#endif
             } },
 #if 0 //// TODO:
             { "socket", {

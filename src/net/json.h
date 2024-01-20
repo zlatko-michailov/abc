@@ -1336,6 +1336,79 @@ namespace abc { namespace net { namespace json {
     }
 
 
+    template <typename LogPtr>
+    inline void writer<LogPtr>::put_value(const value<LogPtr>& value, const write_options& options) {
+        constexpr const char* suborigin = "put_value()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", value.type());
+
+        switch (value.type()) {
+            case value_type::null:
+                base::put_null();
+                break;
+
+            case value_type::boolean:
+                base::put_boolean(value.boolean());
+                break;
+
+            case value_type::number:
+                base::put_number(value.number());
+                break;
+
+            case value_type::string:
+                base::put_string(value.string());
+                break;
+
+            case value_type::array:
+                put_array(value.array(), options);
+                break;
+
+            case value_type::object:
+                put_object(value.object(), options);
+                break;
+
+            default:
+                diag_base::template throw_exception<diag::expect_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline void writer<LogPtr>::put_array(const literal::array<LogPtr>& array, const write_options& /*options*/) {
+        constexpr const char* suborigin = "put_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", array.size());
+
+        base::put_begin_array();
+
+        for (typename literal::array<LogPtr>::const_reference item : array) {
+            put_value(item);
+        }
+
+        base::put_end_array();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename LogPtr>
+    inline void writer<LogPtr>::put_object(const literal::object<LogPtr>& object, const write_options& /*options*/) {
+        constexpr const char* suborigin = "put_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", object.size());
+
+        base::put_begin_object();
+
+        for (typename literal::object<LogPtr>::const_reference item : object) {
+            base::put_property(item.first);
+            put_value(item.second);
+        }
+
+        base::put_end_object();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
     // --------------------------------------------------------------
 
 } } }
