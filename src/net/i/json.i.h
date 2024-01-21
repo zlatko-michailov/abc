@@ -786,18 +786,6 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief Options for `writer::put_value`.
-     */
-    struct write_options {
-
-        /**
-         * @brief When `true`, each value is written on a new line with indentation. When `false` or omitted, no extra space is added.
-         */
-        bool pretty = false;
-    };
-
-
-    /**
      * @brief         JSON writer.
      * @details       Writes a `json::value` to a JSON stream.
      * @tparam LogPtr Pointer type to `log_ostream`.
@@ -838,26 +826,23 @@ namespace abc { namespace net { namespace json {
 
     public:
         /**
-         * @brief         Writes a whole `json::value` to the JSON stream.
-         * @param value   The `json::value`.
-         * @param options `write_options`.
+         * @brief       Writes a whole `json::value` to the JSON stream.
+         * @param value The `json::value`.
          */
-        void put_value(const value<LogPtr>& value, const write_options& options = write_options());
+        void put_value(const value<LogPtr>& value);
 
     protected:
         /**
-         * @brief         Writes a JSON array to the JSON stream.
-         * @param array   The `literal::array`.
-         * @param options `write_options`.
+         * @brief       Writes a JSON array to the JSON stream.
+         * @param array The `literal::array`.
          */
-        void put_array(const literal::array<LogPtr>& array, const write_options& options);
+        void put_array(const literal::array<LogPtr>& array);
 
         /**
-         * @brief         Writes a JSON object to the JSON stream.
-         * @param object  The `literal::object`.
-         * @param options `write_options`.
+         * @brief        Writes a JSON object to the JSON stream.
+         * @param object The `literal::object`.
          */
-        void put_object(const literal::object<LogPtr>& object, const write_options& options);
+        void put_object(const literal::object<LogPtr>& object);
     };
 
 } } }

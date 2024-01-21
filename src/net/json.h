@@ -1337,7 +1337,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline void writer<LogPtr>::put_value(const value<LogPtr>& value, const write_options& options) {
+    inline void writer<LogPtr>::put_value(const value<LogPtr>& value) {
         constexpr const char* suborigin = "put_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", value.type());
 
@@ -1359,11 +1359,11 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::array:
-                put_array(value.array(), options);
+                put_array(value.array());
                 break;
 
             case value_type::object:
-                put_object(value.object(), options);
+                put_object(value.object());
                 break;
 
             default:
@@ -1375,7 +1375,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline void writer<LogPtr>::put_array(const literal::array<LogPtr>& array, const write_options& /*options*/) {
+    inline void writer<LogPtr>::put_array(const literal::array<LogPtr>& array) {
         constexpr const char* suborigin = "put_array()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", array.size());
 
@@ -1392,7 +1392,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline void writer<LogPtr>::put_object(const literal::object<LogPtr>& object, const write_options& /*options*/) {
+    inline void writer<LogPtr>::put_object(const literal::object<LogPtr>& object) {
         constexpr const char* suborigin = "put_object()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", object.size());
 

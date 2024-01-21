@@ -12,8 +12,6 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `json`
-    - `write_options`
-        - `pretty`
     - Create `reader` and `writer`.
         - tests
         - move test
