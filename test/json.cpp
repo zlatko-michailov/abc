@@ -2584,12 +2584,152 @@ bool test_json_writer_array_02(test_context& context) {
         12.34,
         nullptr,
         true,
-        "abc"
+        "abc",
     };
     abc::net::json::value<test_log*> value(std::move(array));
 
     char expected[] =
-        "[12.34,null,true,\"abc\"]";
+        "["
+            "12.34,"
+            "null,"
+            "true,"
+            "\"abc\""
+        "]";
+
+    return test_json_writer(context, value, expected);
+}
+
+
+bool test_json_writer_array_03(test_context& context) {
+    abc::net::json::literal::array<test_log*> array
+    {
+        1.0,
+        2.0,
+        abc::net::json::literal::array<test_log*>
+        {
+            abc::net::json::literal::array<test_log*>
+            {
+                3.0,
+            },
+            abc::net::json::literal::array<test_log*>
+            {
+                4.0,
+            },
+        },
+        abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*> // Clang optimizes these as a single array.
+        {
+            abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*>
+            {
+                abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*>
+                {
+                    5.0,
+                }),
+            }),
+        }),
+    };
+    abc::net::json::value<test_log*> value(std::move(array));
+
+    char expected[] =
+        "["
+            "1,"
+            "2,"
+            "["
+                "["
+                    "3"
+                "],"
+                "["
+                    "4"
+                "]"
+            "],"
+            "["
+                "["
+                    "["
+                        "5"
+                    "]"
+                "]"
+            "]"
+        "]";
+
+    return test_json_writer(context, value, expected);
+}
+
+
+bool test_json_writer_object_01(test_context& context) {
+    abc::net::json::literal::object<test_log*> object;
+    abc::net::json::value<test_log*> value(std::move(object));
+
+    char expected[] =
+        "{}";
+
+    return test_json_writer(context, value, expected);
+}
+
+
+bool test_json_writer_object_02(test_context& context) {
+    abc::net::json::literal::object<test_log*> object
+    {
+        { "a", 12.34 },
+        { "bb", nullptr },
+        { "ccc", true },
+        { "dddd", "abc" },
+    };
+    abc::net::json::value<test_log*> value(std::move(object));
+
+    char expected[] =
+        "{"
+            "\"a\":12.34,"
+            "\"bb\":null,"
+            "\"ccc\":true,"
+            "\"dddd\":\"abc\""
+        "}";
+
+    return test_json_writer(context, value, expected);
+}
+
+
+bool test_json_writer_object_03(test_context& context) {
+    abc::net::json::literal::object<test_log*> object
+    {
+        { "a1", 1.0 },
+        { "a2", 2.0 },
+        { "a3", abc::net::json::literal::object<test_log*> {
+            { "a31", abc::net::json::literal::object<test_log*> {
+                { "a313", 3.0 },
+            } },
+            { "a32", abc::net::json::literal::object<test_log*> {
+                { "a324", 4.0 },
+            } },
+        } },
+        { "a5", abc::net::json::literal::object<test_log*> {
+            { "a51", abc::net::json::literal::object<test_log*> {
+                { "a512", abc::net::json::literal::object<test_log*> {
+                    { "a5123", 5.0 },
+                } },
+            } },
+        } },
+    };
+    abc::net::json::value<test_log*> value(std::move(object));
+
+    char expected[] =
+        "{"
+            "\"a1\":1,"
+            "\"a2\":2,"
+            "\"a3\":{"
+                "\"a31\":{"
+                    "\"a313\":3"
+                "},"
+                "\"a32\":{"
+                    "\"a324\":4"
+                "}"
+            "},"
+            "\"a5\":{"
+                "\"a51\":{"
+                    "\"a512\":{"
+                        "\"a5123\":5"
+                    "}"
+                "}"
+            "}"
+        "}";
 
     return test_json_writer(context, value, expected);
 }
@@ -2604,7 +2744,7 @@ bool test_json_writer(test_context& context, const abc::net::json::value<test_lo
 
     writer.put_value(value);
 
-    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, __TAG__) && passed;
 
     return passed;
 }
