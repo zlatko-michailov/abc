@@ -223,6 +223,8 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_writer_object_01",                      test_json_writer_object_01 },
                 { "test_json_writer_object_02",                      test_json_writer_object_02 },
                 { "test_json_writer_object_03",                      test_json_writer_object_03 },
+                { "test_json_writer_mixed_01",                       test_json_writer_mixed_01 },
+                { "test_json_writer_mixed_02",                       test_json_writer_mixed_02 },
 #if 0 //// TODO:
                 { "test_json_istream_move",                          test_json_istream_move },
                 { "test_json_reader_move",                           test_json_reader_move },

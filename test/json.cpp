@@ -2735,6 +2735,97 @@ bool test_json_writer_object_03(test_context& context) {
 }
 
 
+bool test_json_writer_mixed_01(test_context& context) {
+    abc::net::json::literal::array<test_log*> array
+    {
+        abc::net::json::literal::object<test_log*> {
+            { "a11", abc::net::json::literal::array<test_log*> {
+                1.0,
+                true,
+            } },
+            { "a12", abc::net::json::literal::array<test_log*> {
+                "abc",
+                2.0
+            } },
+        },
+        abc::net::json::literal::array<test_log*> {
+            abc::net::json::literal::object<test_log*> {
+                { "a211", abc::net::json::literal::array<test_log*> {
+                    4.0,
+                    "def",
+                    false,
+                } },
+                { "a212", abc::net::json::literal::array<test_log*> {
+                    nullptr,
+                } },
+            } },
+    };
+    abc::net::json::value<test_log*> value(std::move(array));
+
+    char expected[] =
+        "["
+            "{"
+                "\"a11\":[1,true],"
+                "\"a12\":[\"abc\",2]"
+            "},"
+            "["
+                "{"
+                    "\"a211\":[4,\"def\",false],"
+                    "\"a212\":[null]"
+                "}"
+            "]"
+        "]";
+
+    return test_json_writer(context, value, expected);
+}
+
+
+bool test_json_writer_mixed_02(test_context& context) {
+    abc::net::json::literal::object<test_log*> object
+    {
+        { "a1", abc::net::json::literal::object<test_log*> {
+            { "a11", abc::net::json::literal::array<test_log*> {
+                1.0,
+                true,
+            } },
+            { "a12", abc::net::json::literal::array<test_log*> {
+                "abc",
+                2.0,
+            } },
+        } },
+        { "a2", abc::net::json::literal::array<test_log*> {
+            abc::net::json::literal::object<test_log*> {
+                { "a211", abc::net::json::literal::array<test_log*> {
+                    4.0,
+                    "def",
+                    false,
+                } },
+                { "a212", abc::net::json::literal::array<test_log*> {
+                    nullptr,
+                } },
+            },
+        } },
+    };
+    abc::net::json::value<test_log*> value(std::move(object));
+
+    char expected[] =
+        "{"
+            "\"a1\":{"
+                "\"a11\":[1,true],"
+                "\"a12\":[\"abc\",2]"
+            "},"
+            "\"a2\":["
+                "{"
+                    "\"a211\":[4,\"def\",false],"
+                    "\"a212\":[null]"
+                "}"
+            "]"
+        "}";
+
+    return test_json_writer(context, value, expected);
+}
+
+
 bool test_json_writer(test_context& context, const abc::net::json::value<test_log*>& value, const char* expected) {
     std::stringbuf sb(std::ios_base::out);
 
