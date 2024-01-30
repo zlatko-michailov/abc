@@ -2917,6 +2917,31 @@ bool test_json_ostream_move(test_context& context) {
 }
 
 
+bool test_json_writer_move(test_context& context) {
+    char expected[] =
+        "true 42";
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::json::writer<test_log*> writer1(&sb, context.log());
+
+    bool passed = true;
+
+    writer1.put_value(true);
+
+    abc::net::json::writer<test_log*> writer2(std::move(writer1));
+    
+    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    ostream.put_space();
+
+    writer2.put_value(42.0);
+
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 

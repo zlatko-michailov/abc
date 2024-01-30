@@ -140,9 +140,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_client_move",                           test_http_client_move },
                 { "test_http_server_move",                           test_http_server_move },
             } },
-#endif //// TODO:
             { "json", {
-#if 0 //// TODO:
                 { "test_json_value_empty",                           test_json_value_empty },
                 { "test_json_value_null",                            test_json_value_null },
                 { "test_json_value_boolean",                         test_json_value_boolean },
@@ -208,7 +206,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_object_03",                     test_json_ostream_object_03 },
                 { "test_json_ostream_mixed_01",                      test_json_ostream_mixed_01 },
                 { "test_json_ostream_mixed_02",                      test_json_ostream_mixed_02 },
-#endif
                 { "test_json_writer_null",                           test_json_writer_null },
                 { "test_json_writer_boolean_01",                     test_json_writer_boolean_01 },
                 { "test_json_writer_boolean_02",                     test_json_writer_boolean_02 },
@@ -225,12 +222,12 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_writer_object_03",                      test_json_writer_object_03 },
                 { "test_json_writer_mixed_01",                       test_json_writer_mixed_01 },
                 { "test_json_writer_mixed_02",                       test_json_writer_mixed_02 },
-#if 0 //// TODO:
                 { "test_json_istream_move",                          test_json_istream_move },
                 { "test_json_reader_move",                           test_json_reader_move },
                 { "test_json_ostream_move",                          test_json_ostream_move },
-#endif
+                { "test_json_writer_move",                           test_json_writer_move },
             } },
+#endif //// TODO:
 #if 0 //// TODO:
             { "socket", {
                 { "test_udp_socket",                                 abc::test::socket::test_udp_socket },
