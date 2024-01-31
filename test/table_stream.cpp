@@ -175,8 +175,8 @@ bool test_line_test(test_context& context) {
 
     const char expected_format[] =
         "\n"
-        "%s 1 2 3\n"
-        "%s     5 6 7\n"
+        "%s origin_1::suborigin_2 [0x1111] 1 2 3\n"
+        "%s     origin_3::suborigin_4 [0x2222] 5 6 7\n"
         "%s         0000: 61 62 63 64 65 66 67 68  69 6a 6b 6c 6d 6e 6f 70  abcdefghijklmnop\n"
         "%s         0010: 71 72 73 74 75 76 77 78  79 7a 41 42 43 44 45 46  qrstuvwxyzABCDEF\n"
         "%s         0020: 47 48 49 4a 4b 4c 4d 4e  4f 50 51 52 53 54 55 56  GHIJKLMNOPQRSTUV\n"
@@ -356,8 +356,8 @@ bool test_line_diag_move(test_context& context) {
 bool test_line_test_move(test_context& context) {
     using Line = abc::diag::test_line_ostream<abc::size::k1, test_clock>;
 
-    const char* line1_pattern = "2020-10-15 12:34:56.789 first\n";
-    const char* line2_pattern = "2020-10-15 12:34:56.789 first\n2020-10-15 12:34:56.789     second\n";
+    const char* line1_pattern = "2020-10-15 12:34:56.789 origin_1::suborigin_2 [0x1] first\n";
+    const char* line2_pattern = "2020-10-15 12:34:56.789 origin_1::suborigin_2 [0x1] first\n2020-10-15 12:34:56.789     origin_3::suborigin_4 [0x2] second\n";
 
     return _test_line_move<Line>(context, line1_pattern, line2_pattern);
 }
