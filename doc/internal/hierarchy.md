@@ -25,8 +25,8 @@ Up to [Documentation](README.md).
     - __net ::__
         - __i__
         - http.h
-        - json.h __NEXT. TODO:__
-        - socket.h
+        - json.h
+        - socket.h __NEXT. TODO:__
         - endpoint.h
         - socket_streambuf.h
         - __openssl ::__

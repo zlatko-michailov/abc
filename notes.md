@@ -8,16 +8,12 @@
     - `response_writer`
 - `json`
     - `value`
+    - `reader`
+    - `writer`
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- `json`
-    - Create `reader` and `writer`.
-        - tests
-        - move test
-    - docs
-        - `value`
-        - `reader`, `writer`
+- `socket`
 
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
