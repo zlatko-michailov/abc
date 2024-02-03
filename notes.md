@@ -21,6 +21,12 @@
   - Rename `category` to `origin`.
   - Rename `severity` to `level`.
 
+- Namespace `vmem`
+  - `blob`
+
+- Namespace `patterns`
+  - `vmem_json_value`
+
 - Namespace `ml`.
   - `neural_net`
 

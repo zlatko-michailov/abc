@@ -38,19 +38,17 @@ SOFTWARE.
 namespace abc { namespace net { namespace http {
 
     
-    using item_t = std::uint8_t;
-
-    namespace item {
-        constexpr item_t method        = 0;
-        constexpr item_t resource      = 1;
-        constexpr item_t protocol      = 2;
-        constexpr item_t status_code   = 3;
-        constexpr item_t reason_phrase = 4;
-        constexpr item_t header_name   = 5;
-        constexpr item_t header_value  = 6;
-        constexpr item_t body          = 7;
-        constexpr item_t eof           = 8;
-    }
+    enum class item : std::uint8_t {
+        method        = 0,
+        resource      = 1,
+        protocol      = 2,
+        status_code   = 3,
+        reason_phrase = 4,
+        header_name   = 5,
+        header_value  = 6,
+        body          = 7,
+        eof           = 8,
+    };
 
 
     // --------------------------------------------------------------
@@ -129,7 +127,7 @@ namespace abc { namespace net { namespace http {
          * @param next   Next item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        state(const char* origin, http::item_t next, const LogPtr& log = nullptr) noexcept;
+        state(const char* origin, http::item next, const LogPtr& log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
@@ -145,26 +143,26 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Returns the next expected item.
          */
-        http::item_t next() const noexcept;
+        http::item next() const noexcept;
 
     protected:
         /**
          * @brief      Resets the next item.
          * @param next Next item.
          */
-        void reset(http::item_t next);
+        void reset(http::item next);
 
         /**
          * @brief      Throws if `item` doesn't match `next()`.
          * @param item Item to verify.
          */
-        void assert_next(http::item_t item);
+        void assert_next(http::item item);
 
     private:
         /**
          * @brief The next expected item.
          */
-        http::item_t _next;
+        http::item _next;
     };
 
 
@@ -192,7 +190,7 @@ namespace abc { namespace net { namespace http {
          * @param next   Next expected item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        istream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        istream(const char* origin, std::streambuf* sb, http::item next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -329,7 +327,7 @@ namespace abc { namespace net { namespace http {
          * @param gcount gcount.
          * @param next   Next expected item.
          */
-        void set_gstate(std::size_t gcount, http::item_t next);
+        void set_gstate(std::size_t gcount, http::item next);
 
     };
 
@@ -358,7 +356,7 @@ namespace abc { namespace net { namespace http {
          * @param next   Next expected item.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        ostream(const char* origin, std::streambuf* sb, http::item_t next, const LogPtr& log = nullptr);
+        ostream(const char* origin, std::streambuf* sb, http::item next, const LogPtr& log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -504,7 +502,7 @@ namespace abc { namespace net { namespace http {
          * @brief      Sets the next expected item for the stream.
          * @param next The next expected item.
          */
-        void set_pstate(http::item_t next);
+        void set_pstate(http::item next);
     };
 
 

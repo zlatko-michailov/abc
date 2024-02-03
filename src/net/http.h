@@ -35,7 +35,7 @@ SOFTWARE.
 namespace abc { namespace net { namespace http {
 
     template <typename LogPtr>
-    inline state<LogPtr>::state(const char* origin, item_t next, const LogPtr& log) noexcept
+    inline state<LogPtr>::state(const char* origin, item next, const LogPtr& log) noexcept
         : diag_base(copy(origin), log)
         , _next(next) {
 
@@ -47,7 +47,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline void state<LogPtr>::reset(item_t next) {
+    inline void state<LogPtr>::reset(item next) {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
 
@@ -58,13 +58,13 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline item_t state<LogPtr>::next() const noexcept {
+    inline item state<LogPtr>::next() const noexcept {
         return _next;
     }
 
 
     template <typename LogPtr>
-    inline void state<LogPtr>::assert_next(item_t item) {
+    inline void state<LogPtr>::assert_next(item item) {
         constexpr const char* suborigin = "assert_next()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: item=%u", (unsigned)item);
 
@@ -78,7 +78,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item_t next, const LogPtr& log)
+    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item next, const LogPtr& log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -421,7 +421,7 @@ namespace abc { namespace net { namespace http {
     
     
     template <typename LogPtr>
-    inline void istream<LogPtr>::set_gstate(std::size_t gcount, item_t next) {
+    inline void istream<LogPtr>::set_gstate(std::size_t gcount, item next) {
         constexpr const char* suborigin = "set_gstate()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: gcount=%zu, next=%u", gcount, (unsigned)next);
 
@@ -436,7 +436,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item_t next, const LogPtr& log)
+    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item next, const LogPtr& log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -750,7 +750,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline void ostream<LogPtr>::set_pstate(item_t next) {
+    inline void ostream<LogPtr>::set_pstate(item next) {
         constexpr const char* suborigin = "set_pstate()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
 
