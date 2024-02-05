@@ -27,558 +27,524 @@ SOFTWARE.
 
 #include <stdexcept>
 #include <memory>
+#include <cstdio>
 
-#include "exception.h"
 #include "i/socket.i.h"
 
 
-namespace abc {
+namespace abc { namespace net {
 
-	template <typename Log>
-	inline basic_socket<Log>::basic_socket(socket::kind_t kind, socket::family_t family, Log* log)
-		: basic_socket(socket::fd::invalid, kind, family, log) {
-	}
+    template <typename LogPtr>
+    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log)
+        : basic_socket(origin, socket::fd::invalid, kind, family, log) {
+    }
 
 
-	template <typename Log>
-	inline basic_socket<Log>::basic_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log)
-		: _kind(kind)
-		, _family(family)
-		, _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
-		, _fd(fd)
-		, _log(log) {
-		if (kind != socket::kind::stream && kind != socket::kind::dgram) {
-			throw exception<std::logic_error, Log>("basic_socket::basic_socket(kind)", 0x10004, log);
-		}
+    template <typename LogPtr>
+    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log)
+        : diag_base(copy(origin), log)
+        , _kind(kind)
+        , _family(family)
+        , _protocol(kind == socket::kind::stream ? socket::protocol::tcp : socket::protocol::udp)
+        , _fd(fd) {
 
-		if (family != socket::family::ipv4 && family != socket::family::ipv6) {
-			throw exception<std::logic_error, Log>("basic_socket::basic_socket(family)", 0x10005, log);
-		}
+        constexpr const char* suborigin = "basic_socket()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)fd, (int)kind, (int)family);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10006, "basic_socket::basic_socket() %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
-		}
-	}
+        diag_base::put_any(suborigin, severity::callstack, 0x10006, "End: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+    }
 
 
-	template <typename Log>
-	inline basic_socket<Log>::basic_socket(basic_socket&& other) noexcept {
-		_kind = other._kind;
-		_family = other._family;
-		_protocol = other._protocol;
-		_fd = other._fd;
-		_log = std::move(other._log);
+    template <typename LogPtr>
+    inline basic_socket<LogPtr>::basic_socket(basic_socket&& other) noexcept
+        : diag_base(std::move(other))
+        , _kind(other._kind)
+        , _family(other._family)
+        , _protocol(other._protocol)
+        , _fd(other._fd) {
 
-		other._fd = socket::fd::invalid;
+        constexpr const char* suborigin = "basic_socket()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)other.fd, (int)other.kind, (int)other.family);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10007, "basic_socket::basic_socket(move) %s, %s, fd=%d", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6", _fd);
-		}
-	}
+        other._fd = socket::fd::invalid;
 
+        diag_base::put_any(suborigin, severity::callstack, 0x10007, "End: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+    }
 
-	template <typename Log>
-	inline basic_socket<Log>::~basic_socket() noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x10008, "basic_socket::~basic_socket() %s, %s, is_open=%s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6", is_open() ? "true" : "false");
-		}
 
-		close();
-	}
+    template <typename LogPtr>
+    inline basic_socket<LogPtr>::~basic_socket() noexcept {
+        constexpr const char* suborigin = "~basic_socket()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 
+        close();
 
-	template <typename Log>
-	inline bool basic_socket<Log>::is_open() const noexcept {
-		return _fd != socket::fd::invalid;
-	}
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline void basic_socket<Log>::close() noexcept {
-		if (is_open()) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::debug, 0x10009, "basic_socket::close()");
-			}
+    template <typename LogPtr>
+    inline bool basic_socket<LogPtr>::is_open() const noexcept {
+        return _fd != socket::fd::invalid;
+    }
 
-			::shutdown(_fd, SHUT_RDWR);
-			::close(_fd);
 
-			_fd = socket::fd::invalid;
-		}
-	}
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::close() noexcept {
+        constexpr const char* suborigin = "close()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: fd=%d", _fd);
 
+        if (is_open()) {
+            diag_base::put_any(suborigin, severity::optional, 0x10009, "Closing");
 
-	template <typename Log>
-	inline void basic_socket<Log>::open() {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000a, "basic_socket::open() start");
-		}
+            ::shutdown(_fd, SHUT_RDWR);
+            ::close(_fd);
 
-		close();
+            _fd = socket::fd::invalid;
+        }
 
-		_fd = ::socket(_family, _kind, _protocol);
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: fd=%d", _fd);
+    }
 
-		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("basic_socket::open() ::socket()", 0x1000b, _log);
-		}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000c, "basic_socket::open() done");
-		}
-	}
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::open() {
+        constexpr const char* suborigin = "open()";
+        diag_base::put_any(suborigin, severity::callstack, 0x1000a, "Begin:");
 
+        close();
 
-	template <typename Log>
-	inline addrinfo	basic_socket<Log>::hints() const noexcept {
-		addrinfo hints{ };
+        _fd = ::socket((int)_family, (int)_kind, (int)_protocol);
 
-		hints.ai_family		= _family;
-		hints.ai_socktype	= _kind;
-		hints.ai_protocol	= _protocol;
-		hints.ai_flags		= 0;
+        diag_base::ensure(suborigin, is_open(), 0x1000b, "is_open");
 
-		return hints;
-	}
+        diag_base::put_any(suborigin, severity::callstack, 0x1000c, "End: fd=%d", _fd);
+    }
 
 
-	template <typename Log>
-	inline void basic_socket<Log>::bind(const char* port) {
-		bind(any_host(), port);
-	}
-
+    template <typename LogPtr>
+    inline addrinfo basic_socket<LogPtr>::hints() const noexcept {
+        addrinfo hints{ };
 
-	template <typename Log>
-	inline void basic_socket<Log>::bind(const char* host, const char* port) {
-		tie(host, port, socket::tie::bind);
-	}
+        hints.ai_family   = _family;
+        hints.ai_socktype = _kind;
+        hints.ai_protocol = _protocol;
+        hints.ai_flags    = 0;
 
+        return hints;
+    }
 
-	template <typename Log>
-	inline void basic_socket<Log>::tie(const char* host, const char* port, socket::tie_t tt) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::debug, 0x1000d, "basic_socket::tie(outer) >>> %s", tt == socket::tie::bind ? "bind" : "connect");
-		}
 
-		if (!is_open()) {
-			open();
-		}
-		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) is_open()", 0x1000e, _log);
-		}
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::bind(const char* port) {
+        bind(any_host(), port);
+    }
 
-		addrinfo hnt = hints();
-		addrinfo* hostList = nullptr;
 
-		socket::error_t err = ::getaddrinfo(host, port, &hnt, &hostList);
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::bind(const char* host, const char* port) {
+        tie(host, port, socket::tie::bind);
+    }
 
-		if (err != socket::error::none) {
-			if (tt == socket::tie::bind) {
-				close();
-			}
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, 0x10797, "basic_socket::tie(outer) %s(), getaddrinfo() err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
-			}
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::tie(const char* host, const char* port, socket::tie tt) {
+        constexpr const char* tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
-			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) ::getaddrinfo()", 0x1000f, _log);
-		}
+        constexpr const char* suborigin = "tie(host, port)";
+        diag_base::put_any(suborigin, severity::callstack, 0x1000d, "Begin: %s(host, port)", tt_str);
 
-		if (hostList == nullptr) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, 0x10798, "basic_socket::tie(outer) %s(), getaddrinfo() nullptr", tt == socket::tie::bind ? "bind" : "connect");
-			}
-		}
+        diag_base::expect(suborigin, !is_open() || tt == socket::tie::connect, 0x1000e, "is_open");
 
-		bool is_done = false;
-		for (addrinfo* host = hostList; host != nullptr; host = host->ai_next) {
-			err = tie(*(host->ai_addr), host->ai_addrlen, tt);
+        if (!is_open()) {
+            open();
+        }
 
-			if (err == socket::error::none) {
-				is_done = true;
-				break;
-			}
-		}
+        addrinfo hnt = hints();
+        addrinfo* hostList = nullptr;
 
-		::freeaddrinfo(hostList);
+        socket::error_t err = ::getaddrinfo(host, port, &hnt, &hostList);
 
-		if (!is_done) {
-			if (tt == socket::tie::bind) {
-				close();
-			}
+        if (err != socket::error::none) {
+            if (tt == socket::tie::bind) {
+                close();
+            }
 
-			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, 0x10799, "basic_socket::tie(outer) %s() !is_done", tt == socket::tie::bind ? "bind" : "connect");
-			}
+            diag_base::throw_exception<std::runtime_error>(suborigin, 0x1000f, "::getaddrinfo() err=%d", err);
+        }
 
-			throw exception<std::runtime_error, Log>("basic_socket::tie(outer) bind()/connect()", 0x10010, _log);
-		}
+        if (hostList == nullptr) {
+            diag_base::put_any(suborigin, severity::important, 0x10798, "%s(host, port), ::getaddrinfo() nullptr", tt_str);
+        }
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::socket, severity::abc::optional, 0x10011, "basic_socket::tie(outer) <<< %s()", tt == socket::tie::bind ? "bind" : "connect");
-		}
-	}
+        bool is_done = false;
+        for (addrinfo* host = hostList; host != nullptr; host = host->ai_next) {
+            err = try_tie(*(host->ai_addr), host->ai_addrlen, tt);
 
+            if (err == socket::error::none) {
+                is_done = true;
+                break;
+            }
+        }
 
-	template <typename Log>
-	inline void basic_socket<Log>::tie(const socket::address& address, socket::tie_t tt) {
-		if (!is_open()) {
-			open();
-		}
-		else if (tt == socket::tie::bind) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie(inner) is_open()", 0x10012, _log);
-		}
+        ::freeaddrinfo(hostList);
 
-		socket::error_t err = tie(address.value, address.size, tt);
+        if (!is_done) {
+            if (tt == socket::tie::bind) {
+                close();
+            }
 
-		if (err != socket::error::none) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::socket, severity::abc::important, 0x1079a, "basic_socket::tie(inner) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
-			}
+            diag_base::throw_exception<std::runtime_error>(suborigin, 0x1000d, "!is_done");
+        }
 
-			throw exception<std::runtime_error, Log>("basic_socket::tie(inner) bind() / connect()", 0x10013, _log);
-		}
-	}
+        diag_base::put_any(suborigin, severity::callstack, 0x1000d, "End: %s", tt_str);
+    }
 
 
-	template <typename Log>
-	inline socket::error_t basic_socket<Log>::tie(const sockaddr& addr, socklen_t addr_len, socket::tie_t tt) {
-		if (!is_open()) {
-			throw exception<std::runtime_error, Log>("basic_socket::tie(innermost) !is_open()", 0x10014, _log);
-		}
+    template <typename LogPtr>
+    inline void basic_socket<LogPtr>::tie(const socket::address& address, socket::tie tt) {
+        constexpr const char* tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
-		const int on = 1;
-		socket::error_t err = socket::error::any;
+        constexpr const char* suborigin = "tie(socket::address)";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: %s(socket::address)", tt_str);
 
-		switch(tt) {
-			case socket::tie::bind:
-				::setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        diag_base::expect(suborigin, !is_open() || tt == socket::tie::connect, 0x10012, "!is_open");
 
-				err = ::bind(fd(), &addr, addr_len);
-				break;
+        if (!is_open()) {
+            open();
+        }
 
-			case socket::tie::connect:
-				err = ::connect(fd(), &addr, addr_len);
-				break;
+        socket::error_t err = try_tie(address.value, address.size, tt);
 
-			default:
-				throw exception<std::logic_error, Log>("basic_socket::tie(tt)", 0x10015, _log);
-		}
+        if (err != socket::error::none) {
+            diag_base::throw_exception<std::runtime_error>(suborigin, 0x10013, "::getaddrinfo() err=%d", err);
+        }
 
-		if (_log != nullptr) {
-			_log->put_binary(category::abc::socket, severity::abc::optional, 0x1079b, addr.sa_data, addr_len);
-			_log->put_any(category::abc::socket, severity::abc::optional, 0x1079c, "basic_socket::tie(innermost) %s(), err=%d", tt == socket::tie::bind ? "bind" : "connect", err);
-		}
+        diag_base::ensure(suborigin, is_open(), __TAG__, "is_open");
 
-		return err;
-	}
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: %s(socket::address)", tt_str);
+    }
 
 
-	template <typename Log>
-	inline const char* basic_socket<Log>::any_host() const noexcept {
-		switch (_family) {
-			case socket::family::ipv4:
-				return "0.0.0.0";
+    template <typename LogPtr>
+    inline socket::error_t basic_socket<LogPtr>::try_tie(const sockaddr& addr, socklen_t addr_len, socket::tie tt) {
+        constexpr const char* tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
-			case socket::family::ipv6:
-				return "::";
+        constexpr const char* suborigin = "try_tie(sockaddr)";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: %s(sockaddr)", tt_str);
 
-			default:
-				return nullptr;
-		}
-	}
+        diag_base::expect(suborigin, is_open(), 0x10014, "is_open");
 
+        const int on = 1;
+        socket::error_t err = socket::error::any;
 
-	template <typename Log>
-	inline socket::kind_t basic_socket<Log>::kind() const noexcept {
-		return _kind;
-	}
+        switch(tt) {
+            case socket::tie::bind:
+                ::setsockopt(fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
+                err = ::bind(fd(), &addr, addr_len);
+                break;
 
-	template <typename Log>
-	inline socket::family_t basic_socket<Log>::family() const noexcept {
-		return _family;
-	}
+            case socket::tie::connect:
+                err = ::connect(fd(), &addr, addr_len);
+                break;
 
+            default:
+                diag_base::assert(suborigin, false, 0x10015, "tt");
+        }
 
-	template <typename Log>
-	inline socket::protocol_t basic_socket<Log>::protocol() const noexcept {
-		return _protocol;
-	}
+        diag_base::put_binary(suborigin, severity::optional, 0x1079b, , addr.sa_data, addr_len);
 
+        diag_base::put_any(suborigin, severity::callstack, 0x1079c, "End: %s(sockaddr), err=%d", tt_str, err);
 
-	template <typename Log>
-	inline socket::fd_t basic_socket<Log>::fd() const noexcept {
-		return _fd;
-	}
+        return err;
+    }
 
 
-	template <typename Log>
-	inline Log* basic_socket<Log>::log() const noexcept {
-		return _log;
-	}
+    template <typename LogPtr>
+    inline const char* basic_socket<LogPtr>::any_host() const noexcept {
+        switch (_family) {
+            case socket::family::ipv4:
+                return "0.0.0.0";
 
+            case socket::family::ipv6:
+                return "::";
 
-	// --------------------------------------------------------------
+            default:
+                return nullptr;
+        }
+    }
 
 
-	template <typename Log>
-	inline client_socket<Log>::client_socket(socket::kind_t kind, socket::family_t family, Log* log)
-		: basic_socket<Log>(kind, family, log) {
-	}
+    template <typename LogPtr>
+    inline socket::kind basic_socket<LogPtr>::kind() const noexcept {
+        return _kind;
+    }
 
 
-	template <typename Log>
-	inline client_socket<Log>::client_socket(socket::fd_t fd, socket::kind_t kind, socket::family_t family, Log* log)
-		: basic_socket<Log>(fd, kind, family, log) {
-	}
+    template <typename LogPtr>
+    inline socket::family basic_socket<LogPtr>::family() const noexcept {
+        return _family;
+    }
 
 
-	template <typename Log>
-	inline void client_socket<Log>::connect(const char* host, const char* port) {
-		base::tie(host, port, socket::tie::connect);
-	}
+    template <typename LogPtr>
+    inline socket::protocol basic_socket<LogPtr>::protocol() const noexcept {
+        return _protocol;
+    }
 
 
-	template <typename Log>
-	inline void client_socket<Log>::connect(const socket::address& address) {
-		base::tie(address, socket::tie::connect);
-	}
+    template <typename LogPtr>
+    inline socket::fd_t basic_socket<LogPtr>::fd() const noexcept {
+        return _fd;
+    }
 
 
-	template <typename Log>
-	inline std::size_t client_socket<Log>::send(const void* buffer, std::size_t size, socket::address* address) {
-		Log* log_local = base::log();
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10016, "client_socket::send() >>> size=%zu", size);
-		}
+    // --------------------------------------------------------------
 
-		if (!base::is_open()) {
-			throw exception<std::logic_error, Log>("client_socket::send() !is_open()", 0x10017, log_local);
-		}
 
-		ssize_t sent_size;
-		if (address != nullptr) {
-			if (base::kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, Log>("client_socket::send() !dgram", 0x10018, log_local);
-			}
+    template <typename LogPtr>
+    inline client_socket<LogPtr>::client_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log)
+        : basic_socket<LogPtr>(origin, kind, family, log) {
+    }
 
-			sent_size = ::sendto(base::fd(), buffer, size, 0, &address->value, address->size);
-		}
-		else {
-			sent_size = ::send(base::fd(), buffer, size, 0);
-		}
 
-		if (sent_size < 0) {
-			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x1043f, "client_socket::send() sent_size=%l", (long)sent_size);
-			}
+    template <typename LogPtr>
+    inline client_socket<LogPtr>::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log)
+        : basic_socket<LogPtr>(origin, fd, kind, family, log) {
+    }
 
-			sent_size = 0;
-		}
-		else if ((std::size_t)sent_size < size) {
-			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10440, "client_socket::send() sent_size=%l", (long)sent_size);
-			}
-		}
 
-		if (log_local != nullptr) {
-			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10066, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001b, "client_socket::send() <<< size=%zu, sent_size=%l", size, sent_size);
-		}
+    template <typename LogPtr>
+    inline void client_socket<LogPtr>::connect(const char* host, const char* port) {
+        base::tie(host, port, socket::tie::connect);
+    }
 
-		return sent_size;
-	}
 
+    template <typename LogPtr>
+    inline void client_socket<LogPtr>::connect(const socket::address& address) {
+        base::tie(address, socket::tie::connect);
+    }
 
-	template <typename Log>
-	inline std::size_t client_socket<Log>::receive(void* buffer, std::size_t size, socket::address* address) {
-		Log* log_local = base::log();
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x1001c, "client_socket::receive() >>> size=%zu", size);
-		}
 
-		if (!base::is_open()) {
-			throw exception<std::logic_error, Log>("client_socket::receive() !is_open()", 0x1001d, log_local);
-		}
+    template <typename LogPtr>
+    inline std::size_t client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
+        constexpr const char* suborigin = "send()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: size=%zu", size);
 
-		ssize_t received_size;
-		if (address != nullptr) {
-			if (base::kind() != socket::kind::dgram) {
-				throw exception<std::logic_error, Log>("client_socket::receive() !dgram", 0x1001e, log_local);
-			}
+        diag_base::expect(suborigin, base::is_open(), 0x10017, "is_open");
+        diag_base::expect(suborigin, address == nullptr || base::kind() == socket::kind::dgram, 0x10018, "!address || dgram");
 
-			 received_size = ::recvfrom(base::fd(), buffer, size, 0, &address->value, &address->size);
-		}
-		else {
-			 received_size = ::recv(base::fd(), buffer, size, 0);
-		}
+        ssize_t sent_size;
+        if (address != nullptr) {
+            // dgram
+            sent_size = ::sendto(base::fd(), buffer, size, 0, &address->value, address->size);
+        }
+        else {
+            // stream
+            sent_size = ::send(base::fd(), buffer, size, 0);
+        }
 
-		if (received_size < 0) {
-			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10441, "client_socket::receive() received_size=%l", (long)received_size);
-			}
+        if (sent_size < 0) {
+            diag_base::put_any(suborigin, severity::important, 0x1043f, "sent_size=%ld", (long)sent_size);
 
-			received_size = 0;
-		}
-		else if ((std::size_t)received_size < size) {
-			if (log_local != nullptr) {
-				log_local->put_any(category::abc::socket, severity::important, 0x10442, "client_socket::receive() received_size=%l", (long)received_size);
-			}
-		}
+            sent_size = 0;
+        }
+        else if ((std::size_t)sent_size < size) {
+            diag_base::put_any(suborigin, severity::important, 0x10440, "sent_size=%ld", (long)sent_size);
+        }
 
-		if (log_local != nullptr) {
-			log_local->put_binary(category::abc::socket, severity::abc::debug, 0x10067, buffer, size);
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10021, "client_socket::receive() <<< size=%zu, received_size=%l", size, received_size);
-		}
+        diag_base::put_binary(suborigin, severity::verbose, 0x10066, buffer, size);
 
-		return received_size;
-	}
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: size=%zu, sent_size=%ld", size, (long)sent_size);
 
+        return sent_size;
+    }
 
-	// --------------------------------------------------------------
 
+    template <typename LogPtr>
+    inline std::size_t client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
+        constexpr const char* suborigin = "receive()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin: size=%zu", size);
 
-	template <typename Log>
-	inline udp_socket<Log>::udp_socket(socket::family_t family, Log* log)
-		: client_socket<Log>(socket::kind::dgram, family, log) {
-	}
+        diag_base::expect(suborigin, base::is_open(), 0x1001d, "is_open");
+        diag_base::expect(suborigin, address == nullptr || base::kind() == socket::kind::dgram, 0x1001e, "!address || dgram");
 
+        ssize_t received_size;
+        if (address != nullptr) {
+            // dgram
+            received_size = ::recvfrom(base::fd(), buffer, size, 0, &address->value, &address->size);
+        }
+        else {
+            // stream
+            received_size = ::recv(base::fd(), buffer, size, 0);
+        }
 
-	// --------------------------------------------------------------
+        if (received_size < 0) {
+            diag_base::put_any(suborigin, severity::important, 0x10441, "received_size=%ld", (long)received_size);
 
+            received_size = 0;
+        }
+        else if ((std::size_t)received_size < size) {
+            diag_base::put_any(suborigin, severity::important, 0x10442, "size=%zu, received_size=%ld", size, (long)received_size);
+        }
 
-	template <typename Log>
-	inline tcp_client_socket<Log>::tcp_client_socket(socket::family_t family, Log* log)
-		: client_socket<Log>(socket::kind::stream, family, log) {
-	}
+        diag_base::put_binary(suborigin, severity::verbose, 0x10067, buffer, size);
 
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End: size=%zu, received_size=%ld", size, (long)received_size);
 
-	template <typename Log>
-	inline tcp_client_socket<Log>::tcp_client_socket(socket::fd_t fd, socket::family_t family, Log* log)
-		: client_socket<Log>(fd, socket::kind::stream, family, log) {
-	}
+        return received_size;
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	template <typename Log>
-	inline tcp_server_socket<Log>::tcp_server_socket(socket::family_t family, Log* log)
-		: basic_socket<Log>(socket::kind::stream, family, log) {
-	}
+    template <typename LogPtr>
+    inline udp_socket<LogPtr>::udp_socket(socket::family family, const LogPtr& log)
+        : client_socket<LogPtr>("abc::net::udp_socket", socket::kind::dgram, family, log) {
+    }
 
 
-	template <typename Log>
-	inline void tcp_server_socket<Log>::listen(socket::backlog_size_t backlog_size) {
-		Log* log_local = base::log();
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10022, "tcp_server_socket::listen() >>>");
-		}
+    // --------------------------------------------------------------
 
-		socket::error_t err = ::listen(base::fd(), backlog_size);
 
-		if (err != socket::error::none) {
-			throw exception<std::runtime_error, Log>("tcp_server_socket::listen() ::listen()", 0x10023, log_local);
-		}
+    template <typename LogPtr>
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family family, const LogPtr& log)
+        : client_socket<LogPtr>("abc::net::tcp_client_socket", socket::kind::stream, family, log) {
+    }
 
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10024, "tcp_server_socket::listen() <<<");
-		}
-	}
 
+    template <typename LogPtr>
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::fd_t fd, socket::family family, const LogPtr& log)
+        : client_socket<LogPtr>("abc::net::tcp_client_socket", fd, socket::kind::stream, family, std::move(log)) {
+    }
 
-	template <typename Log>
-	inline tcp_client_socket<Log> tcp_server_socket<Log>::accept() const {
-		socket::fd_t fd = accept_fd();
 
-		return tcp_client_socket<Log>(fd, base::family(), base::log());
-	}
+    // --------------------------------------------------------------
 
 
-	template <typename Log>
-	inline socket::fd_t tcp_server_socket<Log>::accept_fd() const {
-		Log* log_local = base::log();
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::debug, 0x10025, "tcp_server_socket::accept() >>>");
-		}
+    template <typename LogPtr>
+    inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family family, const LogPtr& log)
+        : basic_socket<LogPtr>("abc::net::tcp_server_socket", socket::kind::stream, family, log) {
+    }
 
-		socket::fd_t fd = ::accept(base::fd(), nullptr, nullptr);
 
-		if (fd == socket::fd::invalid) {
-			throw exception<std::runtime_error, Log>("tcp_server_socket::accept() ::accept()", 0x10026, log_local);
-		}
+    template <typename LogPtr>
+    inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
+        constexpr const char* suborigin = "listen()";
+        diag_base::put_any(suborigin, severity::callstack, 0x10022, "Begin:");
 
-		if (log_local != nullptr) {
-			log_local->put_any(category::abc::socket, severity::abc::optional, 0x10027, "tcp_server_socket::accept() <<<");
-		}
+        diag_base::expect(suborigin, base::is_open(), __TAG__, "is_open");
 
-		return fd;
-	}
+        socket::error_t err = ::listen(base::fd(), backlog_size);
 
+        if (err != socket::error::none) {
+            diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "::listen() err=%d", err);
+        }
 
-	// --------------------------------------------------------------
+        diag_base::put_any(suborigin, severity::callstack, 0x10024, "End:");
+    }
 
 
-	template <typename Socket, typename Log>
-	inline socket_streambuf<Socket, Log>::socket_streambuf(Socket* socket, Log* log)
-		: base()
-		, _socket(socket)
-		, _log(log) {
-		if (socket == nullptr) {
-			throw exception<std::logic_error, Log>("socket_streambuf::socket_streambuf(socket)", 0x10068, _log);
-		}
+    template <typename LogPtr>
+    inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
+        socket::fd_t fd = accept_fd();
 
-		setg(&_get_ch, &_get_ch, &_get_ch);
-		setp(&_put_ch, &_put_ch + 1);
-	}
+        return tcp_client_socket<LogPtr>(fd, base::family(), base::log());
+    }
 
 
-	template <typename Socket, typename Log>
-	inline socket_streambuf<Socket, Log>::socket_streambuf(socket_streambuf&& other) noexcept
-		: base()
-		, _socket(other._socket)
-		, _log(other._log)
-		, _get_ch(other._get_ch)
-		, _put_ch(other._put_ch) {
-		setg(&_get_ch, &_get_ch, &_get_ch);
-		setp(&_put_ch, &_put_ch + 1);
+    template <typename LogPtr>
+    inline socket::fd_t tcp_server_socket<LogPtr>::accept_fd() const {
+        constexpr const char* suborigin = "accept_fd()";
+        diag_base::put_any(suborigin, severity::callstack, 0x10025, "Begin:");
 
-		other._socket = nullptr;
-		other.setg(nullptr, nullptr, nullptr);
-		other.setp(nullptr, nullptr);
-	}
+        socket::fd_t fd = ::accept(base::fd(), nullptr, nullptr);
 
+        if (fd == socket::fd::invalid) {
+            diag_base::throw_exception<std::runtime_error>(suborigin, 0x10026, "::accept()");
+        }
 
-	template <typename Socket, typename Log>
-	inline std::streambuf::int_type socket_streambuf<Socket, Log>::underflow() {
-		_socket->receive(&_get_ch, sizeof(char));
+        diag_base::put_any(suborigin, severity::callstack, 0x10027, "End:");
 
-		setg(&_get_ch, &_get_ch, &_get_ch + 1);
+        return fd;
+    }
 
-		return _get_ch;
-	}
 
+    // --------------------------------------------------------------
 
-	template <typename Socket, typename Log>
-	inline std::streambuf::int_type socket_streambuf<Socket, Log>::overflow(std::streambuf::int_type ch) {
-		_socket->send(&_put_ch, sizeof(char));
-		_socket->send(&ch, sizeof(char));
 
-		setp(&_put_ch, &_put_ch + 1);
+    template <typename SocketPtr, typename LogPtr>
+    inline socket_streambuf<SocketPtr, LogPtr>::socket_streambuf(const SocketPtr& socket, const LogPtr& log)
+        : base()
+        : diag_base("abc::net::socket_streambuf", log)
+        , _socket(socket) {
 
-		return ch;
-	}
+        constexpr const char* suborigin = "socket_streambuf()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
 
+        diag_base::expect(suborigin, socket != nullptr, 0x10068, "socket");
 
-	template <typename Socket, typename Log>
-	inline int socket_streambuf<Socket, Log>::sync() {
-		if (pptr() != &_put_ch) {
-			_socket->send(&_put_ch, sizeof(char));
-		}
+        setg(&_get_ch, &_get_ch, &_get_ch);
+        setp(&_put_ch, &_put_ch + 1);
 
-		setp(&_put_ch, &_put_ch + 1);
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
+    }
 
-		return 0;
-	}
 
-}
+    template <typename Socket, typename Log>
+    inline socket_streambuf<Socket, Log>::socket_streambuf(socket_streambuf&& other) noexcept
+        : base()
+        , diag_base(std::move(other))
+        , _socket(std::move(other._socket))
+        , _get_ch(other._get_ch)
+        , _put_ch(other._put_ch) {
+
+        constexpr const char* suborigin = "socket_streambuf()";
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "Begin:");
+
+        setg(&_get_ch, &_get_ch, &_get_ch);
+        setp(&_put_ch, &_put_ch + 1);
+
+        other._socket = nullptr;
+        other.setg(nullptr, nullptr, nullptr);
+        other.setp(nullptr, nullptr);
+
+        diag_base::put_any(suborigin, severity::callstack, __TAG__, "End:");
+    }
+
+
+    template <typename Socket, typename Log>
+    inline std::streambuf::int_type socket_streambuf<Socket, Log>::underflow() {
+        _socket->receive(&_get_ch, sizeof(char));
+
+        setg(&_get_ch, &_get_ch, &_get_ch + 1);
+
+        return _get_ch;
+    }
+
+
+    template <typename Socket, typename Log>
+    inline std::streambuf::int_type socket_streambuf<Socket, Log>::overflow(std::streambuf::int_type ch) {
+        _socket->send(&_put_ch, sizeof(char));
+        _socket->send(&ch, sizeof(char));
+
+        setp(&_put_ch, &_put_ch + 1);
+
+        return ch;
+    }
+
+
+    template <typename Socket, typename Log>
+    inline int socket_streambuf<Socket, Log>::sync() {
+        if (pptr() != &_put_ch) {
+            _socket->send(&_put_ch, sizeof(char));
+        }
+
+        setp(&_put_ch, &_put_ch + 1);
+
+        return 0;
+    }
+
+} }
