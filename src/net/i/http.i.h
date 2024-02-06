@@ -29,7 +29,7 @@ SOFTWARE.
 #include <istream>
 #include <ostream>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include "../../i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
