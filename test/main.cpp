@@ -37,7 +37,7 @@ SOFTWARE.
 #include "inc/table_stream.h"
 #include "inc/http.h"
 #include "inc/json.h"
-//// TODO: #include "inc/socket.h"
+#include "inc/socket.h"
 //// TODO: #include "inc/vmem.h"
 
 
@@ -228,11 +228,11 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_writer_move",                           test_json_writer_move },
             } },
 #endif //// TODO:
-#if 0 //// TODO:
             { "socket", {
-                { "test_udp_socket",                                 abc::test::socket::test_udp_socket },
-                { "test_tcp_socket",                                 abc::test::socket::test_tcp_socket },
-                { "test_tcp_socket_stream_move",                     abc::test::socket::test_tcp_socket_stream_move },
+                { "test_udp_socket",                                 test_udp_socket },
+                { "test_tcp_socket",                                 test_tcp_socket },
+                { "test_tcp_socket_stream_move",                     test_tcp_socket_stream_move },
+#if 0 //// TODO:
                 { "test_tcp_socket_http_json_stream",                abc::test::socket::test_tcp_socket_http_json_stream },
                 { "test_http_endpoint_json_stream",                  abc::test::socket::test_http_endpoint_json_stream },
 #ifdef __ABC__OPENSSL
@@ -241,7 +241,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_openssl_tcp_socket_http_json_stream",        abc::test::socket::test_openssl_tcp_socket_http_json_stream },
                 { "test_https_endpoint_json_stream",                 abc::test::socket::test_https_endpoint_json_stream },
 #endif
+#endif //// TODO:
             } },
+#if 0 //// TODO:
             { "vmem", {
                 { "test_vmem_pool_fit",                              abc::test::vmem::test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           abc::test::vmem::test_vmem_pool_exceed },

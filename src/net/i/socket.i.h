@@ -99,9 +99,9 @@ namespace abc { namespace net {
      */
     template <typename LogPtr = std::nullptr_t>
     class basic_socket
-        : protected diag_ready<const char*, LogPtr>  {
+        : protected diag::diag_ready<const char*, LogPtr>  {
 
-    using diag_base = diag_ready<const char*, LogPtr>;
+    using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -260,6 +260,7 @@ namespace abc { namespace net {
         : public basic_socket<LogPtr> {
 
         using base = basic_socket<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
@@ -337,6 +338,7 @@ namespace abc { namespace net {
         : public client_socket<LogPtr> {
 
         using base = client_socket<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -374,6 +376,7 @@ namespace abc { namespace net {
         : public client_socket<LogPtr> {
 
         using base = client_socket<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -418,6 +421,7 @@ namespace abc { namespace net {
         : public basic_socket<LogPtr> {
 
         using base = basic_socket<LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     public:
         /**
@@ -470,12 +474,12 @@ namespace abc { namespace net {
     template <typename SocketPtr, typename LogPtr = std::nullptr_t>
     class socket_streambuf
         : public std::streambuf
-        , protected diag_ready<const char*, LogPtr> {
+        , protected diag::diag_ready<const char*, LogPtr> {
         
         using base = std::streambuf;
-        using diag_base = diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
-        constexpr std::size_t retry_count = 5;
+        static constexpr std::size_t retry_count = 5;
 
     public:
         /**
