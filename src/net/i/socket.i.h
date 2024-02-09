@@ -499,6 +499,12 @@ namespace abc { namespace net {
          */
         socket_streambuf(const socket_streambuf& other) = delete;
 
+    public:
+        /**
+         * @brief  Flushes.
+         */
+        void flush();
+
     protected:
         /**
          * @brief  Handler that reads a byte from the socket.

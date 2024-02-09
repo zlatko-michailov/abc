@@ -516,6 +516,12 @@ namespace abc { namespace net {
 
 
     template <typename Socket, typename Log>
+    inline void socket_streambuf<Socket, Log>::flush() {
+        (void)sync();
+    }
+
+
+    template <typename Socket, typename Log>
     inline std::streambuf::int_type socket_streambuf<Socket, Log>::underflow() {
         _socket->receive(&_get_ch, sizeof(char));
 
