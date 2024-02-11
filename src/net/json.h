@@ -1370,6 +1370,8 @@ namespace abc { namespace net { namespace json {
                 diag_base::template throw_exception<diag::expect_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
         }
 
+        base::flush();
+
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
@@ -1386,6 +1388,8 @@ namespace abc { namespace net { namespace json {
         }
 
         base::put_end_array();
+
+        base::flush();
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -1404,6 +1408,8 @@ namespace abc { namespace net { namespace json {
         }
 
         base::put_end_object();
+
+        base::flush();
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }

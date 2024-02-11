@@ -1149,14 +1149,17 @@ namespace abc { namespace net { namespace http {
         base::put_protocol(request.protocol.c_str(), request.protocol.length());
         base::put_headers(request.headers);
 
+        base::flush();
+
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-
     template <typename LogPtr>
     inline void request_writer<LogPtr>::put_body(const char* body, std::size_t body_len) {
-        return base::put_body(body, body_len);
+        base::put_body(body, body_len);
+
+        base::flush();
     }
 
 
@@ -1433,13 +1436,17 @@ namespace abc { namespace net { namespace http {
         base::put_reason_phrase(response.reason_phrase.c_str(), response.reason_phrase.length());
         base::put_headers(response.headers);
 
+        base::flush();
+
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     template <typename LogPtr>
     inline void response_writer<LogPtr>::put_body(const char* body, std::size_t body_len) {
-        return base::put_body(body, body_len);
+        base::put_body(body, body_len);
+
+        base::flush();
     }
 
 

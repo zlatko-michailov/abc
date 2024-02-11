@@ -101,7 +101,7 @@ namespace abc { namespace net {
     class basic_socket
         : protected diag::diag_ready<const char*, LogPtr>  {
 
-    using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, LogPtr>;
 
     protected:
         /**
