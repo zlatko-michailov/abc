@@ -397,15 +397,25 @@ namespace abc { namespace net {
         tcp_client_socket(const tcp_client_socket& other) = delete;
 
     protected:
+        /**
+         * @brief        Internal constructor for accepted connections.
+         * @param origin Origin.
+         * @param family IPv4 or IPv6.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        tcp_client_socket(const char* origin, socket::family family, const LogPtr& log);
+
+    protected:
         friend tcp_server_socket<LogPtr>;
 
         /**
          * @brief        Internal constructor for accepted connections.
+         * @param origin Origin.
          * @param fd     Descriptor.
          * @param family IPv4 or IPv6.
          * @param log    `LogPtr` pointer. May be `nullptr`.
          */
-        tcp_client_socket(socket::fd_t fd, socket::family family, const LogPtr& log);
+        tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, const LogPtr& log);
     };
 
 
@@ -440,6 +450,15 @@ namespace abc { namespace net {
          * @brief Deleted.
          */
         tcp_server_socket(const tcp_server_socket& other) = delete;
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param family IPv4 or IPv6.
+         * @param log    `LogPtr` pointer. May be `nullptr`.
+         */
+        tcp_server_socket(const char* origin, socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
 
     public:
         /**

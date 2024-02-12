@@ -170,7 +170,7 @@ namespace abc { namespace net {
                 close();
             }
 
-            diag_base::template throw_exception<std::runtime_error>(suborigin, 0x1000f, "::getaddrinfo() err=%d", err);
+            diag_base::require(suborigin, false, 0x1000f, "::getaddrinfo() err=%d", err);
         }
 
         if (hostList == nullptr) {
@@ -194,7 +194,7 @@ namespace abc { namespace net {
                 close();
             }
 
-            diag_base::template throw_exception<std::runtime_error>(suborigin, 0x1000d, "!is_done");
+            diag_base::require(suborigin, false, 0x1000d, "is_done");
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1000d, "End: %s", tt_str);
@@ -215,10 +215,7 @@ namespace abc { namespace net {
         }
 
         socket::error_t err = try_tie(address.value, address.size, tt);
-
-        if (err != socket::error::none) {
-            diag_base::template throw_exception<std::runtime_error>(suborigin, 0x10013, "::getaddrinfo() err=%d", err);
-        }
+        diag_base::require(suborigin, err == socket::error::none, 0x10013, "try_tie() err=%d", err);
 
         diag_base::ensure(suborigin, is_open(), __TAG__, "is_open");
 
@@ -305,13 +302,13 @@ namespace abc { namespace net {
 
     template <typename LogPtr>
     inline client_socket<LogPtr>::client_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log)
-        : basic_socket<LogPtr>(origin, kind, family, log) {
+        : base(origin, kind, family, log) {
     }
 
 
     template <typename LogPtr>
     inline client_socket<LogPtr>::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log)
-        : basic_socket<LogPtr>(origin, fd, kind, family, log) {
+        : base(origin, fd, kind, family, log) {
     }
 
 
@@ -402,7 +399,7 @@ namespace abc { namespace net {
 
     template <typename LogPtr>
     inline udp_socket<LogPtr>::udp_socket(socket::family family, const LogPtr& log)
-        : client_socket<LogPtr>("abc::net::udp_socket", socket::kind::dgram, family, log) {
+        : base("abc::net::udp_socket", socket::kind::dgram, family, log) {
     }
 
 
@@ -411,13 +408,19 @@ namespace abc { namespace net {
 
     template <typename LogPtr>
     inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family family, const LogPtr& log)
-        : client_socket<LogPtr>("abc::net::tcp_client_socket", socket::kind::stream, family, log) {
+        : base("abc::net::tcp_client_socket", socket::kind::stream, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::fd_t fd, socket::family family, const LogPtr& log)
-        : client_socket<LogPtr>("abc::net::tcp_client_socket", fd, socket::kind::stream, family, std::move(log)) {
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::family family, const LogPtr& log)
+        : base(origin, socket::kind::stream, family, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, const LogPtr& log)
+        : base(origin, fd, socket::kind::stream, family, log) {
     }
 
 
@@ -426,7 +429,13 @@ namespace abc { namespace net {
 
     template <typename LogPtr>
     inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family family, const LogPtr& log)
-        : basic_socket<LogPtr>("abc::net::tcp_server_socket", socket::kind::stream, family, log) {
+        : base("abc::net::tcp_server_socket", socket::kind::stream, family, log) {
+    }
+
+
+    template <typename LogPtr>
+    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* origin, socket::family family, const LogPtr& log)
+        : base(origin, socket::kind::stream, family, log) {
     }
 
 
@@ -438,10 +447,7 @@ namespace abc { namespace net {
         diag_base::expect(suborigin, base::is_open(), __TAG__, "is_open");
 
         socket::error_t err = ::listen(base::fd(), backlog_size);
-
-        if (err != socket::error::none) {
-            diag_base::template throw_exception<std::runtime_error>(suborigin, __TAG__, "::listen() err=%d", err);
-        }
+        diag_base::require(suborigin, err == socket::error::none, __TAG__, "::listen() err=%d", err);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10024, "End:");
     }
@@ -451,7 +457,7 @@ namespace abc { namespace net {
     inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
         socket::fd_t fd = accept_fd();
 
-        return tcp_client_socket<LogPtr>(fd, base::family(), base::log());
+        return tcp_client_socket<LogPtr>("abc::net::tcp_server_socket", fd, base::family(), base::log());
     }
 
 
@@ -461,10 +467,7 @@ namespace abc { namespace net {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10025, "Begin:");
 
         socket::fd_t fd = ::accept(base::fd(), nullptr, nullptr);
-
-        if (fd == socket::fd::invalid) {
-            diag_base::template throw_exception<std::runtime_error>(suborigin, 0x10026, "::accept()");
-        }
+        diag_base::require(suborigin, fd != socket::fd::invalid, 0x10026, "::accept() fd=%d", fd);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10027, "End:");
 

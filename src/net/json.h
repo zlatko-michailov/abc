@@ -1035,7 +1035,7 @@ namespace abc { namespace net { namespace json {
 
         default:
             base::set_bad();
-            diag_base::template throw_exception<std::logic_error>(suborigin, 0x10116, "token.type=0x%2.2x", token.type);
+            diag_base::expect(suborigin, false, 0x10116, "Invalid token.type=0x%2.2x", token.type);
             break;
         }
 
@@ -1110,7 +1110,7 @@ namespace abc { namespace net { namespace json {
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object || !state_base::expect_property()) {
             base::set_bad();
-            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Did not expect a property.");
+            diag_base::expect(suborigin, false, __TAG__, "Did not expect a property.");
             return;
         }
 
@@ -1153,7 +1153,7 @@ namespace abc { namespace net { namespace json {
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::array) {
             base::set_bad();
-            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Not in an array.");
+            diag_base::expect(suborigin, false, __TAG__, "Not in an array.");
             return;
         }
 
@@ -1190,7 +1190,7 @@ namespace abc { namespace net { namespace json {
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object) {
             base::set_bad();
-            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Not in an object.");
+            diag_base::expect(suborigin, false, __TAG__, "Not in an object.");
             return;
         }
 
@@ -1251,7 +1251,7 @@ namespace abc { namespace net { namespace json {
 
         if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
             base::set_bad();
-            diag_base::template throw_exception<std::logic_error>(suborigin, __TAG__, "Expected a property.");
+            diag_base::expect(suborigin, false, __TAG__, "Expected a property.");
             return;
         }
 
@@ -1367,7 +1367,7 @@ namespace abc { namespace net { namespace json {
                 break;
 
             default:
-                diag_base::template throw_exception<diag::expect_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+                diag_base::expect(suborigin, false, __TAG__, "Unexpected value_type=%u", value.type());
         }
 
         base::flush();

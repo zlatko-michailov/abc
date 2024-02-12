@@ -182,4 +182,19 @@ namespace abc {
         return !are_equal(left, right);
     }
 
+
+    // --------------------------------------------------------------
+
+
+    template <typename Predicate, typename ...Args>
+    bool retry(std::size_t count, Predicate&& predicate, Args&&... args) {
+        for (std::size_t c = 0; c < count; c++) {
+            if (predicate(std::forward<Args>(args)...)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

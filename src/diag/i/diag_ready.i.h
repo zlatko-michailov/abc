@@ -183,6 +183,32 @@ namespace abc { namespace diag {
          */
         void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
 
+        /**
+         * @brief            Throws an exception derived from `std::runtime_error` if `condition` is `false`.
+         * @details          Use this facility to assert runtime requirements.
+         * @tparam Exception Exception base type.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Required condition.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param ...        Message arguments.
+         */
+        template <typename Exception = std::runtime_error>
+        void require(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const;
+
+        /**
+         * @brief            Throws an exception derived from `std::runtime_error` if `condition` is `false`.
+         * @details          Use this facility to assert runtime requirements.
+         * @tparam Exception Exception base type.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Asserted condition.
+         * @param tag        Origination tag.
+         * @param format     Message format.
+         * @param vlist      Message arguments.
+         */
+        template <typename Exception = std::runtime_error>
+        void requirev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
+
     protected:
         /**
          * @brief Returns the Log pointer.

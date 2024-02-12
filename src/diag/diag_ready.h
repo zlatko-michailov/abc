@@ -151,12 +151,34 @@ namespace abc { namespace diag {
         va_end(vlist);
     }
 
+
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
         if (!condition) {
             throw_exception<ensure_error>(suborigin, tag, format, vlist);
         }
     }
+
+
+    template <typename OriginStr, typename LogPtr>
+    template <typename Exception>
+    inline void diag_ready<OriginStr, LogPtr>::require(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
+        va_list vlist;
+        va_start(vlist, format);
+
+        requirev<Exception>(suborigin, condition, tag, format, vlist);
+
+        va_end(vlist);
+    }
+
+    template <typename OriginStr, typename LogPtr>
+    template <typename Exception>
+    inline void diag_ready<OriginStr, LogPtr>::requirev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
+        if (!condition) {
+            throw_exception<Exception>(suborigin, tag, format, vlist);
+        }
+    }
+
 
     template <typename OriginStr, typename LogPtr>
     inline const LogPtr& diag_ready<OriginStr, LogPtr>::log() const noexcept {
