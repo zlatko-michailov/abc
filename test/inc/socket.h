@@ -28,7 +28,7 @@ SOFTWARE.
 #include "../../src/net/socket.h"
 //// TODO: #include "../../src/net/endpoint.h"
 #ifdef __ABC__OPENSSL
-//// TODO: #include "../../src/net/openssl_socket.h"
+#include "../../src/net/openssl/socket.h"
 #endif
 
 #include "test.h"

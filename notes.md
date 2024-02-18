@@ -14,7 +14,6 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `openssl`
-    - Can `_pkey_file_password` be `std::string`?
 - `endpoint`
 
 - Update doc/ref/*.md for all classes that have been done.

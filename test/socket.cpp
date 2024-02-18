@@ -34,8 +34,6 @@ SOFTWARE.
 
 
 static constexpr const char origin[] = "";
-#if 0 //// TODO:
-static constexpr std::size_t max_path_size = abc::size::k1;
 static constexpr const char cert_filename[] = "cert.pem";
 static constexpr const char pkey_filename[] = "pkey.pem";
 static constexpr const char pkey_password[] = "server";
@@ -43,34 +41,26 @@ static constexpr bool verify_client = false;
 static constexpr bool verify_server = false;
 
 
-bool make_filepath(test_context& context, char* filepath, std::size_t filepath_size, const char* process_path, const char* filename) {
+std::string make_filepath(test_context& context, const char* process_path, const char* filename) {
     constexpr const char* suborigin = "make_filepath";
 
     context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1079d, "process_path='%s'", process_path);
 
-    std::size_t filename_len = std::strlen(filename); 
-    const char* process_last_separator = std::strrchr(process_path, '/');
-    std::size_t process_dir_len = 0;
+    std::string filepath(process_path);
 
-    if (process_last_separator != nullptr) {
-        process_dir_len = process_last_separator - process_path;
-        std::size_t filepath_len = process_dir_len + 1 + filename_len;
-
-        if (filepath_len >= filepath_size) {
-            context.log()->put_any(origin, suborigin, abc::diag::severity::important, 0x1079e, "filepath_len=%zu >= filepath_size=%zu", filepath_len, filepath_size);
-
-            return false;
-        }
-
-        std::strncpy(filepath, process_path, process_dir_len + 1);
+    std::string::size_type process_last_separator_pos = filepath.rfind('/');
+    if (process_last_separator_pos == std::string::npos) {
+        process_last_separator_pos = 0;
     }
 
-    std::strcpy(filepath + process_dir_len + 1, filename);
-    context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1079f, "filepath='%s'", filepath);
+    filepath.erase(process_last_separator_pos);
+    filepath.append("/");
+    filepath.append(filename);
 
-    return true;
+    context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1079f, "filepath='%s'", filepath.c_str());
+
+    return filepath;
 }
-#endif //// TODO:
 
 
 bool test_udp_socket(test_context& context) {
@@ -191,29 +181,23 @@ bool test_tcp_socket(test_context& context) {
 }
 
 
-#if 0 //// TODO:
-bool test_openssl_tcp_socket(test_context<abc::test::log>& context) {
+bool test_openssl_tcp_socket(test_context& context) {
     bool passed = true;
 
 #ifdef __ABC__OPENSSL
-    char cert_path[max_path_size];
-    passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+    std::string cert_path = make_filepath(context, context.process_path, cert_filename);
+    std::string pkey_path = make_filepath(context, context.process_path, pkey_filename);
 
-    char pkey_path[max_path_size];
-    passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+    abc::net::openssl::tcp_server_socket<test_log*> server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
+    abc::net::openssl::tcp_client_socket<test_log*> client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    if (passed) {
-        abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
-        abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
-
-        passed = passed && tcp_socket(context, server, client, "31002");
-    }
+    passed = tcp_socket(context, server, client, "31002") && passed;
 #else
-    passed = context.are_equal(0, 0, 0x107a0);
+    passed = context.are_equal(0, 0, 0x107a0) && passed;
 #endif
+
     return passed;
 }
-#endif //// TODO:
 
 
 // --------------------------------------------------------------
@@ -280,35 +264,28 @@ bool test_tcp_socket_stream_move(test_context& context) {
 }
 
 
-#if 0 //// TODO:
-bool test_openssl_tcp_socket_stream_move(test_context<abc::test::log>& context) {
+bool test_openssl_tcp_socket_stream_move(test_context& context) {
     bool passed = true;
 
 #ifdef __ABC__OPENSSL
-    char cert_path[max_path_size];
-    passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+    std::string cert_path = make_filepath(context, context.process_path, cert_filename);
+    std::string pkey_path = make_filepath(context, context.process_path, pkey_filename);
 
-    char pkey_path[max_path_size];
-    passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+    abc::net::openssl::tcp_server_socket<test_log*> server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
+    abc::net::openssl::tcp_client_socket<test_log*> client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    if (passed) {
-        abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
-        abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
-
-        passed = passed && tcp_socket_stream_move(context, server, client, "31004");
-    }
+    passed = tcp_socket_stream_move(context, server, client, "31004") && passed;
 #else
-    passed = context.are_equal(0, 0, 0x107a1);
+    passed = context.are_equal(0, 0, 0x107a1) && passed;
 #endif
+
     return passed;
 }
-#endif //// TODO:
 
 
 // --------------------------------------------------------------
 
 
-#if 0 //// TODO:
 static constexpr const char protocol[] = "HTTP/1.1";
 static constexpr const char request_method[] = "POST";
 static constexpr const char request_resource[] = "/scope/v1.0/api";
@@ -333,7 +310,7 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
         {
             abc::net::http::request request;
             request.method = request_method;
-            request.resource = request_resource;
+            request.resource.path = request_resource;
             request.protocol = protocol;
             request.headers = {
                 { request_header_name, request_header_value },
@@ -342,12 +319,12 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
             http.put_request(request);
 
             abc::net::json::value<test_log*> body = 
-                abc::net::json::literal::object {
+                abc::net::json::literal::object<test_log*> {
                     { "param", "foo" },
                 };
 
             abc::net::json::writer<test_log*> json(&sb, context.log());
-            json.put_value(body)
+            json.put_value(body);
         }
 
         // Receive response
@@ -357,14 +334,14 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
             passed = context.are_equal(response.protocol.c_str(), protocol, 0x100e9) && passed;
             passed = context.are_equal(response.status_code, response_status_code, 0x100ea, "%u") && passed;
             passed = context.are_equal(response.reason_phrase.c_str(), response_reason_phrase, 0x100eb) && passed;
-            passed = context.are_equal(response.headers.size(), 1, 0x100ec, "%zu") && passed;
+            passed = context.are_equal(response.headers.size(), (std::size_t)1, 0x100ec, "%zu") && passed;
             passed = context.are_equal(response.headers[response_header_name].c_str(), response_header_value, 0x100ed) && passed;
 
             abc::net::json::reader<test_log*> json(&sb, context.log());
             abc::net::json::value<test_log*> body = json.get_value();
 
             passed = context.are_equal(body.type(), abc::net::json::value_type::object, 0x102a0, "%u") && passed;
-            passed = context.are_equal(body.object().size(), 2, 0x102a1, "%zu") && passed;
+            passed = context.are_equal(body.object().size(), (std::size_t)2, 0x102a1, "%zu") && passed;
             passed = context.are_equal(body.object()["n"].type(), abc::net::json::value_type::number, 0x102a2, "%u") && passed;
             passed = context.are_equal(body.object()["n"].number(), 42.0, 0x102a3, "%f") && passed;
             passed = context.are_equal(body.object()["s"].type(), abc::net::json::value_type::string, 0x102a4, "%u") && passed;
@@ -379,8 +356,10 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
 
 template <typename ClientSocket>
 void http_json_stream_server(bool& passed, test_context& context, ClientSocket& connection) {
+    constexpr const char* suborigin = "http_json_stream_server";
+
     try {
-        abc::net::socket_streambuf<ClientSocket, test_log*> sb(&connection, context.log());
+        abc::net::socket_streambuf<ClientSocket*, test_log*> sb(&connection, context.log());
         abc::net::http::server<test_log*> http(&sb, context.log());
 
         // Receive request
@@ -390,14 +369,14 @@ void http_json_stream_server(bool& passed, test_context& context, ClientSocket& 
             passed = context.are_equal(request.method.c_str(), request_method, 0x100f2) && passed;
             passed = context.are_equal(request.resource.path.c_str(), request_resource, 0x100f3) && passed;
             passed = context.are_equal(request.protocol.c_str(), protocol, 0x100f4) && passed;
-            passed = context.are_equal(request.headers.size(), 1, 0x100f5, "%zu") && passed;
+            passed = context.are_equal(request.headers.size(), (std::size_t)1, 0x100f5, "%zu") && passed;
             passed = context.are_equal(request.headers[request_header_name].c_str(), request_header_value, 0x100f6) && passed;
 
-            abc::net::json::reader<test_log*> json(static_cast<abc::net::http::request_reader<test_log*>&>(http).rdbuf(), context.log());
+            abc::net::json::reader<test_log*> json(&sb, context.log());
             abc::net::json::value<test_log*> body = json.get_value();
 
             passed = context.are_equal(body.type(), abc::net::json::value_type::object, 0x102aa, "%u") && passed;
-            passed = context.are_equal(body.object().size(), 1, 0x102ab, "%zu") && passed;
+            passed = context.are_equal(body.object().size(), (std::size_t)1, 0x102ab, "%zu") && passed;
             passed = context.are_equal(body.object()["param"].type(), abc::net::json::value_type::string, 0x102ac, "%u") && passed;
             passed = context.are_equal(body.object()["param"].string().c_str(), "foo", 0x102ae) && passed;
         }
@@ -414,10 +393,10 @@ void http_json_stream_server(bool& passed, test_context& context, ClientSocket& 
 
             http.put_response(response);
 
-            abc::net::json::writer<test_log*> json(static_cast<abc::net::http::response_writer<test_log*>&>(http).rdbuf(), context.log());
+            abc::net::json::writer<test_log*> json(&sb, context.log());
 
             abc::net::json::value<test_log*> body = 
-                abc::net::json::literal::object {
+                abc::net::json::literal::object<test_log*> {
                     { "n", 42.0 },
                     { "s", "bar" },
                 };
@@ -460,25 +439,21 @@ bool test_tcp_socket_http_json_stream(test_context& context) {
 }
 
 
-bool test_openssl_tcp_socket_http_json_stream(test_context<abc::test::log>& context) {
+bool test_openssl_tcp_socket_http_json_stream(test_context& context) {
     bool passed = true;
 
 #ifdef __ABC__OPENSSL
-    char cert_path[max_path_size];
-    passed = passed && make_filepath(context, cert_path, max_path_size, context.process_path, cert_filename);
+    std::string cert_path = make_filepath(context, context.process_path, cert_filename);
+    std::string pkey_path = make_filepath(context, context.process_path, pkey_filename);
 
-    char pkey_path[max_path_size];
-    passed = passed && make_filepath(context, pkey_path, max_path_size, context.process_path, pkey_filename);
+    abc::net::openssl::tcp_server_socket<test_log*> server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
+    abc::net::openssl::tcp_client_socket<test_log*> client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    if (passed) {
-        abc::openssl_tcp_server_socket<abc::test::log> server(cert_path, pkey_path, pkey_password, verify_client, abc::socket::family::ipv4, context.log);
-        abc::openssl_tcp_client_socket<abc::test::log> client(verify_server, abc::socket::family::ipv4, context.log);
-
-        passed = passed && tcp_socket_http_json_stream(context, server, client, "31006");
-    }
+    passed = tcp_socket_http_json_stream(context, server, client, "31006") && passed;
 #else
-    passed = context.are_equal(0, 0, 0x107a2);
+    passed = context.are_equal(0, 0, 0x107a2) && passed;
 #endif
+
     return passed;
 }
 
@@ -486,6 +461,7 @@ bool test_openssl_tcp_socket_http_json_stream(test_context<abc::test::log>& cont
 // --------------------------------------------------------------
 
 
+#if 0 //// TODO:
 template <typename ServerSocket, typename ClientSocket, typename Limits, typename Log>
 class test_endpoint : public abc::endpoint<ServerSocket, ClientSocket, Limits, Log> {
     using base = abc::endpoint<ServerSocket, ClientSocket, Limits, Log>;
