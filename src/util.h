@@ -186,6 +186,9 @@ namespace abc {
     // --------------------------------------------------------------
 
 
+    /**
+     * @brief Retries a given predicate until it returns `true` or a maximum count of retries is reached.
+     */
     template <typename Predicate, typename ...Args>
     bool retry(std::size_t count, Predicate&& predicate, Args&&... args) {
         for (std::size_t c = 0; c < count; c++) {

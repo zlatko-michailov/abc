@@ -26,7 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include "../../src/net/socket.h"
-//// TODO: #include "../../src/net/endpoint.h"
+#include "../../src/net/endpoint.h"
 #ifdef __ABC__OPENSSL
 #include "../../src/net/openssl/socket.h"
 #endif
