@@ -970,6 +970,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
+    template <typename LogPtr>
+    inline std::streambuf* request_reader<LogPtr>::rdbuf() const {
+        return base::rdbuf();
+    }
+
+
     // --------------------------------------------------------------
 
 
@@ -1163,6 +1169,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
+    template <typename LogPtr>
+    inline std::streambuf* request_writer<LogPtr>::rdbuf() const {
+        return base::rdbuf();
+    }
+
+
     // --------------------------------------------------------------
 
 
@@ -1302,6 +1314,12 @@ namespace abc { namespace net { namespace http {
     template <typename LogPtr>
     inline std::string response_reader<LogPtr>::get_body(std::size_t max_len) {
         return base::get_body(max_len);
+    }
+
+
+    template <typename LogPtr>
+    inline std::streambuf* response_reader<LogPtr>::rdbuf() const {
+        return base::rdbuf();
     }
 
 
@@ -1447,6 +1465,12 @@ namespace abc { namespace net { namespace http {
         base::put_body(body, body_len);
 
         base::flush();
+    }
+
+
+    template <typename LogPtr>
+    inline std::streambuf* response_writer<LogPtr>::rdbuf() const {
+        return base::rdbuf();
     }
 
 

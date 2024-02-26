@@ -635,6 +635,12 @@ namespace abc { namespace net { namespace http {
          * @return        The chunk. Empty when there is no more to read.
          */
         std::string get_body(std::size_t max_len);
+
+    public:
+        /**
+         * @brief Returns the underlying streambuf.
+         */
+        std::streambuf* rdbuf() const;
     };
 
 
@@ -772,6 +778,12 @@ namespace abc { namespace net { namespace http {
          * @param body_len Body length. Optional.
          */
         void put_body(const char* body, std::size_t body_len = size::strlen);
+
+    public:
+        /**
+         * @brief Returns the underlying streambuf.
+         */
+        std::streambuf* rdbuf() const;
     };
 
 
@@ -897,6 +909,12 @@ namespace abc { namespace net { namespace http {
          * @return        The chunk. Empty when there is no more to read.
          */
         std::string get_body(std::size_t max_len);
+
+    public:
+        /**
+         * @brief Returns the underlying streambuf.
+         */
+        std::streambuf* rdbuf() const;
     };
 
 
@@ -1026,6 +1044,12 @@ namespace abc { namespace net { namespace http {
          * @param body_len Body length. Optional.
          */
         void put_body(const char* body, std::size_t body_len = size::strlen);
+
+    public:
+        /**
+         * @brief Returns the underlying streambuf.
+         */
+        std::streambuf* rdbuf() const;
     };
 
 
