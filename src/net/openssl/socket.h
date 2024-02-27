@@ -263,9 +263,9 @@ namespace abc { namespace net { namespace openssl {
     template <typename LogPtr>
     inline tcp_server_socket<LogPtr>::tcp_server_socket(tcp_server_socket&& other) noexcept
         : base(std::move(other))
+        , _pkey_file_password(std::move(other._pkey_file_password))
         , _verify_client(other._verify_client)
-        , _ctx(other._ctx)
-        , _pkey_file_password(std::move(other._pkey_file_password)) {
+        , _ctx(other._ctx) {
 
         constexpr const char* suborigin = "tcp_server_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10792, "Begin:");

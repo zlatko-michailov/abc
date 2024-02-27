@@ -47,13 +47,13 @@ namespace abc { namespace net { namespace http {
 
     template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
     inline endpoint<ServerSocket, ClientSocket, Limits, LogPtr>::endpoint(endpoint_config&& config, const LogPtr& log)
-        : endpoint("abc::net::endpoint", std::move(config), log) {
+        : endpoint("abc::net::http::endpoint", std::move(config), log) {
     }
 
 
     template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
     inline endpoint<ServerSocket, ClientSocket, Limits, LogPtr>::endpoint(const char* origin, endpoint_config&& config, const LogPtr& log)
-        : diag_base(origin, log)
+        : diag_base(copy(origin), log)
         , _config(std::move(config))
         , _requests_in_progress(0)
         , _is_shutdown_requested(false) {
@@ -128,13 +128,13 @@ namespace abc { namespace net { namespace http {
         }
 
         // Create a socket_streambuf over the ClientSocket.
-        abc::net::socket_streambuf<ClientSocket*, LogPtr> sb(&connection, diag_base::log());
+        socket_streambuf<ClientSocket*, LogPtr> sb(&connection, diag_base::log());
 
         // Create an http::server, which combines http::request_reader and http::response_writer.
-        abc::net::http::server<LogPtr> http(&sb, diag_base::log());
+        http::server<LogPtr> http(&sb, diag_base::log());
 
         // Read the request.
-        abc::net::http::request request = http.get_request();
+        http::request request = http.get_request();
         diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Request received: protocol='%s', method='%s', path='%s'", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str());
 
         ++_requests_in_progress;
@@ -204,7 +204,7 @@ namespace abc { namespace net { namespace http {
             { header::Content_Length, std::move(content_length) },
         }; 
 
-        const char* content_type = get_content_type_from_path(filepath);
+        const char* content_type = get_content_type_from_path(filepath.c_str());
         if (content_type != nullptr) {
             response.headers[header::Content_Type] = content_type;
         }
@@ -335,6 +335,29 @@ namespace abc { namespace net { namespace http {
     template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
     inline bool endpoint<ServerSocket, ClientSocket, Limits, LogPtr>::is_shutdown_requested() const {
         return _is_shutdown_requested;
+    }
+
+
+    template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
+    inline std::string endpoint<ServerSocket, ClientSocket, Limits, LogPtr>::make_root_dir_path(const request& request) const {
+        constexpr const char* suborigin = "make_root_dir_path()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: root_dir='%s', path='%s'", _config.root_dir.c_str(), request.resource.path.c_str());
+
+        std::string filepath(_config.root_dir);
+        if (filepath.back() != '/') {
+            filepath.append("/");
+        }
+        filepath.append(request.resource.path);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: path='%s'", filepath.c_str());
+
+        return filepath;
+    }
+
+
+    template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
+    inline const endpoint_config& endpoint<ServerSocket, ClientSocket, Limits, LogPtr>::config() const {
+        return _config;
     }
 
 

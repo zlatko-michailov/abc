@@ -233,12 +233,12 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_tcp_socket",                                 test_tcp_socket },
                 { "test_tcp_socket_stream_move",                     test_tcp_socket_stream_move },
                 { "test_tcp_socket_http_json_stream",                test_tcp_socket_http_json_stream },
-                //// TODO: { "test_http_endpoint_json_stream",                  test_http_endpoint_json_stream },
+                { "test_http_endpoint_json_stream",                  test_http_endpoint_json_stream },
 #ifdef __ABC__OPENSSL
                 { "test_openssl_tcp_socket",                         test_openssl_tcp_socket },
                 { "test_openssl_tcp_socket_stream_move",             test_openssl_tcp_socket_stream_move },
                 { "test_openssl_tcp_socket_http_json_stream",        test_openssl_tcp_socket_http_json_stream },
-                //// TODO: { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
+                { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
 #if 0 //// TODO:

@@ -45,12 +45,12 @@ namespace abc { namespace net { namespace http {
          * @param listen_queue_size  Maximum number of new connections pending to be processed.
          * @param root_dir           Local directory that is the root for static files.
          * @param files_prefix       Virtual path that maps to the root directory.
-         * @param cert_file_path     Full path to the TLS certificate file. May be `nullptr`.
-         * @param pkey_file_path     Full path to the TLS private key file. May be `nullptr`.
-         * @param pkey_file_password Password for the TLS private key file. May be `nullptr`.
+         * @param cert_file_path     Full path to the TLS certificate file. May be `""`.
+         * @param pkey_file_path     Full path to the TLS private key file. May be `""`.
+         * @param pkey_file_password Password for the TLS private key file. May be `""`.
          */
         endpoint_config(const char* port, std::size_t listen_queue_size, const char* root_dir, const char* files_prefix,
-                        const char* cert_file_path = nullptr, const char* pkey_file_path = nullptr, const char* pkey_file_password = nullptr);
+                        const char* cert_file_path = "", const char* pkey_file_path = "", const char* pkey_file_password = "");
 
         /**
          * @brief Port number to listen at.
@@ -355,11 +355,16 @@ namespace abc { namespace net { namespace http {
 
     protected:
         /**
+         * @brief Returns the config settings passed in to the constructor.
+         */
+        const endpoint_config& config() const;
+
+    private:
+        /**
          * @brief The config settings passed in to the constructor.
          */
         endpoint_config _config;
 
-    private:
         /**
          * @brief The `std::promise` that is returned by `start_async()`, which gets signaled when shutdown is requested.
          */
