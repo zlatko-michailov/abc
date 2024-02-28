@@ -228,8 +228,8 @@ namespace abc { namespace diag {
     inline void test_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
         base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u ");
 
-        char buf_severity[2 * severity::abc::debug + 1];
-        severity = severity <= severity::abc::debug ? severity : severity::abc::debug;
+        char buf_severity[2 * severity::debug + 1];
+        severity = severity <= severity::debug ? severity : severity::debug;
         std::memset(buf_severity, ' ', 2 * severity);
         buf_severity[2 * (severity - 1)] = '\0';
         base::put_any(buf_severity);

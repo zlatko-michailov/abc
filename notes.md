@@ -15,6 +15,7 @@
 - __UNTABIFY each file before making changes!__
 - `endpoint`
     - Remove template parameter `Limits`.
+    - Samples.
 
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.

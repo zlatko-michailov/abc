@@ -26,15 +26,14 @@ Up to [Documentation](README.md).
         - __i__
         - http.h
         - json.h
-        - socket.h __NEXT. TODO:__
+        - socket.h
         - endpoint.h
-        - socket_streambuf.h
         - __openssl ::__
             - __i__
             - socket.h
     - __vmem ::__
         - __i__
-        - layout.h
+        - layout.h __NEXT. TODO:__
         - pool.h
         - linked.h
         - container.h

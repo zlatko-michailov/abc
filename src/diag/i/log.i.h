@@ -65,40 +65,11 @@ namespace abc { namespace diag {
         constexpr severity_t important     = 0x3;
         constexpr severity_t callstack     = 0x4;
         constexpr severity_t optional      = 0x5;
-        constexpr severity_t debug         = 0x6;
-        constexpr severity_t verbose       = 0x7;
-
-        //// TODO: Remove
-        namespace abc {
-            constexpr severity_t important = 0x6;
-            constexpr severity_t optional  = 0x7;
-            constexpr severity_t debug     = 0x8;
-        }
+        constexpr severity_t verbose       = 0x6;
+        constexpr severity_t debug         = 0x7;
 
         bool is_higher(severity_t severity, severity_t other) noexcept;
         bool is_higher_or_equal(severity_t severity, severity_t other) noexcept;
-    }
-
-
-    //// TODO: Remove
-    using category_t = std::uint16_t;
-
-    namespace category {
-        constexpr category_t any    = 0xffff;
-
-        namespace abc {
-            constexpr category_t base      = 0x8000;
-            constexpr category_t exception = base +  1;
-            constexpr category_t stream    = base +  2;
-            constexpr category_t socket    = base +  3;
-            constexpr category_t http      = base +  4;
-            constexpr category_t json      = base +  5;
-            constexpr category_t multifile = base +  6;
-            constexpr category_t endpoint  = base +  7;
-            constexpr category_t vmem      = base +  8;
-            constexpr category_t samples   = base +  9;
-            constexpr category_t gpio      = base + 10;
-        }
     }
 
 

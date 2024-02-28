@@ -161,7 +161,7 @@ namespace abc { namespace net { namespace openssl {
             diag_base::put_any(suborigin, diag::severity::important, 0x10778, "sent_size=%l", (long)sent_size);
         }
 
-        diag_base::put_binary(suborigin, diag::severity::debug, 0x10779, buffer, size);
+        diag_base::put_binary(suborigin, diag::severity::verbose, 0x10779, buffer, size);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1077a, "End: size=%zu, sent_size=%l", size, sent_size);
 
@@ -188,7 +188,7 @@ namespace abc { namespace net { namespace openssl {
             diag_base::put_any(suborigin, diag::severity::important, 0x1077f, "sent_size=%l", (long)received_size);
         }
 
-        diag_base::put_binary(suborigin, diag::severity::debug, 0x10780, buffer, size);
+        diag_base::put_binary(suborigin, diag::severity::verbose, 0x10780, buffer, size);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10781, "End: size=%zu, received_size=%l", size, received_size);
 
