@@ -19,7 +19,7 @@ That is simple - all we have to pass in is a severity level.
 We can always adjust that if we decide we need more or less log entries:
 ``` c++
 // Allow entries of severity 'important' or higher from all components.
-abc::log_filter filter(abc::severity::important);
+abc::diag::log_filter filter(abc::diag::severity::important);
 ```
 
 To construct the `log_ostream` instance, we must pick a `line_ostream` format, and we have to pass in two other instances - a `streambuf` and a `log_filter`.
@@ -27,7 +27,7 @@ To construct the `log_ostream` instance, we must pick a `line_ostream` format, a
 Let's pick `debug_line_ostream` as a line format.
 To simplify our type definitions, we can define this shortcut:
 ``` c++
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
+using log_ostream = abc::diag::log_ostream<abc::debug_line_ostream<>, abc::diag::log_filter>;
 ```
 
 We already have a `log_filter`.
@@ -63,7 +63,7 @@ The value may be priceless.
 You can always filter entries in or out, but you can get entries unless you logged them.
 
 ``` c++
-log->put_any(abc::category::my, abc::severity::optional, __TAG__, "REST: Sending status=%s", status);
+log->put_any("pkg::cls", "method()", abc::diag::severity::optional, __TAG__, "REST: Sending status=%s", status);
 ```
 
 ### Choosing a Category
