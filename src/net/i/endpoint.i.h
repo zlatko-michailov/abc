@@ -91,41 +91,6 @@ namespace abc { namespace net { namespace http {
 
     // --------------------------------------------------------------
 
-    //// TODO: REMOVE if possible.
-    /**
-     * @brief Default limits for `endpoint` parse buffers.
-     */
-    struct endpoint_limits {
-        /**
-         * @brief    Maximum http method size - for GET, POST, DELETE, ...
-         */
-        static constexpr std::size_t method_size = abc::size::_32;
-
-        /**
-         * @brief    Maximum http resource size - for URL.
-         */
-        static constexpr std::size_t resource_size = abc::size::k2;
-
-        /**
-         * @brief    Maximum http protocol size - for http, https, ...
-         */
-        static constexpr std::size_t protocol_size = abc::size::_16;
-
-        /**
-         * @brief    Maximum http resource chunk size - for sending resources.
-         */
-        static constexpr std::size_t file_chunk_size = abc::size::k1;
-
-        /**
-         * @brief    Maximum http fsize size - for 64-bit numbers.
-         */
-        static constexpr std::size_t fsize_size = abc::size::_32;
-    };
-
-
-    // --------------------------------------------------------------
-
-
     namespace protocol {
         constexpr const char* HTTP_11                 = "HTTP/1.1";
     }
@@ -223,12 +188,9 @@ namespace abc { namespace net { namespace http {
      *                      This class must be subclassed to implement the processing of requests.
      * @tparam ServerSocket Server socket.
      * @tparam ClientSocket Client/connection socket.
-     * @tparam Limits       Endpoint limits.
      * @tparam LogPtr       Pointer type to `log_ostream`.
-     * @see `endpoint_limits`
-     * @see `log_ostream`
      */
-    template <typename ServerSocket, typename ClientSocket, typename Limits, typename LogPtr>
+    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
     class endpoint
         : protected diag::diag_ready<const char*, LogPtr>  {
 
@@ -245,12 +207,12 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move Constructor.
          */
-        endpoint(endpoint<ServerSocket, ClientSocket, Limits, LogPtr>&& other) noexcept = default;
+        endpoint(endpoint<ServerSocket, ClientSocket, LogPtr>&& other) noexcept = default;
 
         /**
          * @brief Deleted.
          */
-        endpoint(const endpoint<ServerSocket, ClientSocket, Limits, LogPtr>& other) = delete;
+        endpoint(const endpoint<ServerSocket, ClientSocket, LogPtr>& other) = delete;
 
     protected:
         /**
@@ -346,12 +308,12 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Thread function for the 'start' thread.
          */
-        static void start_thread_func(endpoint<ServerSocket, ClientSocket, Limits, LogPtr>* this_ptr);
+        static void start_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr);
 
         /**
          * @brief Thread function for the 'process_request' thread.
          */
-        static void process_request_thread_func(endpoint<ServerSocket, ClientSocket, Limits, LogPtr>* this_ptr, ClientSocket&& connection);
+        static void process_request_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr, ClientSocket&& connection);
 
     protected:
         /**

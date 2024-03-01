@@ -54,10 +54,6 @@ abc::endpoint_config config(
 );
 ```
 
-## Choosing a `Limits` Template Parameter
-The `Limits` template parameter contains a set of `static constexpr` definitions.
-If the provided `endpoint_limits` doesn't work for you, feel free to define your own struct or namespace with those named constants.
-
 ## Deriving Your Own Class from `endpoint`
 `endpoint` is the only class from the `abc` library that needs to be overridden.
 It is flexible - it allows for quite a few methods to be overridden.
@@ -68,8 +64,7 @@ See [equations.h](../../samples/basic/equations.h) from Basic Sample for how to 
 ## Creating an `endpoint`
 Now that you have everything, constructing the endpoint is simple:
 ``` c++
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-using limits = abc::endpoint_limits;
+using log_ostream = abc::diag::log_ostream<abc::diag::debug_line_ostream<>, abc::diag::log_filter>;
 
-equations_endpoint<limits, log_ostream> endpoint(&config, &log);
+equations_endpoint<log_ostream> endpoint(&config, &log);
 ```
