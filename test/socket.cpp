@@ -44,14 +44,7 @@ std::string make_filepath(test_context& context, const char* process_path, const
 
     context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1079d, "process_path='%s'", process_path);
 
-    std::string filepath(process_path);
-
-    std::string::size_type process_last_separator_pos = filepath.rfind('/');
-    if (process_last_separator_pos == std::string::npos) {
-        process_last_separator_pos = 0;
-    }
-
-    filepath.erase(process_last_separator_pos);
+    std::string filepath = abc::parent_path(process_path);
     filepath.append("/");
     filepath.append(filename);
 

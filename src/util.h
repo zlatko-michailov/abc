@@ -103,7 +103,7 @@ namespace abc {
      * @brief Returns `true` iff both items of one pair are equal to the corresponding items of the other pair.
      */
     template <typename T1, typename T2>
-    bool operator == (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
+    inline bool operator == (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
         return left.first == right.first && left.second == right.second;
     }
 
@@ -112,7 +112,7 @@ namespace abc {
      * @brief Returns the opposite of `operator ==`.
      */
     template <typename T1, typename T2>
-    bool operator != (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
+    inline bool operator != (const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) noexcept {
         return !(left == right);
     }
 #endif
@@ -122,7 +122,7 @@ namespace abc {
      * @brief Returns `true` iff the two containers have the same items in the same order.
      */
     template <typename Container>
-    bool are_equal(const Container& left, const Container& right) noexcept {
+    inline bool are_equal(const Container& left, const Container& right) noexcept {
         if (left.size() != right.size()) {
             return false;
         }
@@ -151,7 +151,7 @@ namespace abc {
      * @brief Returns `true` iff the two containers have the same items in the same order.
      */
     template <typename T>
-    bool operator == (const std::deque<T>& left, const std::deque<T>& right) noexcept {
+    inline bool operator == (const std::deque<T>& left, const std::deque<T>& right) noexcept {
         return are_equal(left, right);
     }
 
@@ -160,7 +160,7 @@ namespace abc {
      * @brief Returns the opposite of `operator ==`.
      */
     template <typename T>
-    bool operator != (const std::deque<T>& left, const std::deque<T>& right) noexcept {
+    inline bool operator != (const std::deque<T>& left, const std::deque<T>& right) noexcept {
         return !are_equal(left, right);
     }
 
@@ -169,7 +169,7 @@ namespace abc {
      * @brief Returns `true` iff the two containers have the same items in the same order.
      */
     template <typename K, typename V>
-    bool operator == (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
+    inline bool operator == (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
         return are_equal(left, right);
     }
 
@@ -178,8 +178,30 @@ namespace abc {
      * @brief Returns the opposite of `operator ==`.
      */
     template <typename K, typename V>
-    bool operator != (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
+    inline bool operator != (const std::map<K, V>& left, const std::map<K, V>& right) noexcept {
         return !are_equal(left, right);
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief   Removes the last segment of the give path.
+     * @details The returned path never ends with a '/'.
+     *          If the parent is the root, an empty string is returned.
+     */
+    inline std::string parent_path(const std::string& path) {
+        std::string parent_dir(path);
+
+        std::string::size_type last_separator_pos = parent_dir.rfind('/');
+        if (last_separator_pos == std::string::npos) {
+            last_separator_pos = 0;
+        }
+
+        parent_dir.erase(last_separator_pos);
+
+        return parent_dir;
     }
 
 
@@ -190,7 +212,7 @@ namespace abc {
      * @brief Retries a given predicate until it returns `true` or a maximum count of retries is reached.
      */
     template <typename Predicate, typename ...Args>
-    bool retry(std::size_t count, Predicate&& predicate, Args&&... args) {
+    inline bool retry(std::size_t count, Predicate&& predicate, Args&&... args) {
         for (std::size_t c = 0; c < count; c++) {
             if (predicate(std::forward<Args>(args)...)) {
                 return true;
