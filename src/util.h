@@ -191,7 +191,7 @@ namespace abc {
      * @details The returned path never ends with a '/'.
      *          If the parent is the root, an empty string is returned.
      */
-    inline std::string parent_path(const std::string& path) {
+    inline std::string parent_path(const char* path) {
         std::string parent_dir(path);
 
         std::string::size_type last_separator_pos = parent_dir.rfind('/');
