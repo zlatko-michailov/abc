@@ -47,13 +47,17 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
-#if 0 //// TODO:
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
                 { "test_ascii_equal_i",                              test_ascii_equal_i },
                 { "test_ascii_equal_i_n",                            test_ascii_equal_i_n },
+                { "test_ascii_less",                                 test_ascii_less },
+                { "test_ascii_less_n",                               test_ascii_less_n },
+                { "test_ascii_less_i",                               test_ascii_less_i },
+                { "test_ascii_less_i_n",                             test_ascii_less_i_n },
             } },
+#if 0 //// TODO:
             { "timestamp", {
                 { "test_null_timestamp",                             test_null_timestamp },
                 { "test_before_year_2000_before_mar_1_timestamp",    test_before_year_2000_before_mar_1_timestamp },
@@ -227,7 +231,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_move",                          test_json_ostream_move },
                 { "test_json_writer_move",                           test_json_writer_move },
             } },
-#endif //// TODO:
             { "socket", {
                 { "test_udp_socket",                                 test_udp_socket },
                 { "test_tcp_socket",                                 test_tcp_socket },
@@ -241,6 +244,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
+#endif //// TODO:
 #if 0 //// TODO:
             { "vmem", {
                 { "test_vmem_pool_fit",                              abc::test::vmem::test_vmem_pool_fit },

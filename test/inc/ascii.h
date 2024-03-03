@@ -34,3 +34,8 @@ bool test_ascii_equal(test_context& context);
 bool test_ascii_equal_n(test_context& context);
 bool test_ascii_equal_i(test_context& context);
 bool test_ascii_equal_i_n(test_context& context);
+
+bool test_ascii_less(test_context& context);
+bool test_ascii_less_n(test_context& context);
+bool test_ascii_less_i(test_context& context);
+bool test_ascii_less_i_n(test_context& context);

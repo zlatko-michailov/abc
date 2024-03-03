@@ -137,31 +137,51 @@ namespace abc {
         }
 
 
-        inline bool are_equal(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+        inline int compare(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+            // We consider nullptr to be less than any value.
+            if (s1 == nullptr && s2 == nullptr) {
+                return 0;
+            }
+            
             if (s1 == nullptr) {
-                return s2 == nullptr;
+                return -1;
             }
             
             if (s2 == nullptr) {
-                return false;
+                return +1;
             }
 
-            for (std::size_t i = 0; i < max_chars; i++) {
-                const char& ch1 = s1[i];
-                const char& ch2 = s2[i];
+            int cmp = 0;
 
-                bool are_ch_equal = case_sensitive ? ch1 == ch2 : to_lower(ch1) == to_lower(ch2);
+            for (std::size_t i = 0; i < max_chars && cmp == 0 && (s1[i] != '\0' || s2[i] != '\0'); i++) {
+                char ch1 = s1[i];
+                char ch2 = s2[i];
 
-                if (!are_ch_equal) {
-                    return false;
+                if (!case_sensitive) {
+                    ch1 = to_lower(ch1);
+                    ch2 = to_lower(ch2);
                 }
 
-                if (ch1 == '\0' && ch2 == '\0') {
-                    return true;
-                }
+                char ch_diff = ch1 - ch2;
+                cmp = ch_diff < 0 ? -1 : (ch_diff > 0 ? +1 : 0);
             }
 
-            return true;
+            return cmp;
+        }
+
+
+        inline bool are_equal(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+            return compare(s1, s2, case_sensitive, max_chars) == 0;
+        }
+
+
+        inline bool are_equal_n(const char* s1, const char* s2, std::size_t max_chars) {
+            return are_equal(s1, s2, true, max_chars);
+        }
+
+
+        inline bool are_equal_i_n(const char* s1, const char* s2, std::size_t max_chars) {
+            return are_equal(s1, s2, false, max_chars);
         }
 
 
@@ -175,13 +195,28 @@ namespace abc {
         }
 
 
-        inline bool are_equal_n(const char* s1, const char* s2, std::size_t max_chars) {
-            return are_equal(s1, s2, true, max_chars);
+        inline bool is_less(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+            return compare(s1, s2, case_sensitive, max_chars) < 0;
         }
 
 
-        inline bool are_equal_i_n(const char* s1, const char* s2, std::size_t max_chars) {
-            return are_equal(s1, s2, false, max_chars);
+        inline bool is_less_n(const char* s1, const char* s2, std::size_t max_chars) {
+            return is_less(s1, s2, true, max_chars);
+        }
+
+
+        inline bool is_less_i_n(const char* s1, const char* s2, std::size_t max_chars) {
+            return is_less(s1, s2, false, max_chars);
+        }
+
+
+        inline bool is_less(const char* s1, const char* s2) {
+            return is_less(s1, s2, true, size::strlen);
+        }
+
+
+        inline bool is_less_i(const char* s1, const char* s2) {
+            return is_less(s1, s2, false, size::strlen);
         }
 
 
