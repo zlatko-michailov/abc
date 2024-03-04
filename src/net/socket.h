@@ -29,6 +29,7 @@ SOFTWARE.
 #include <memory>
 #include <cstdio>
 
+#include "../diag/diag_ready.h"
 #include "i/socket.i.h"
 
 

@@ -29,7 +29,7 @@ SOFTWARE.
 #include <openssl/ssl.h>
 
 #include "../../../size.h"
-#include "../../../diag/i/log.i.h"
+#include "../../../diag/i/diag_ready.i.h"
 #include "../../i/socket.i.h"
 
 

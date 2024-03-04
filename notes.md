@@ -17,6 +17,8 @@
     - Samples
         - basic
         - tls
+- `vmem`
+    - Samples
         - tictactoe
         - connect4
 
