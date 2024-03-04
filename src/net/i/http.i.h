@@ -31,6 +31,7 @@ SOFTWARE.
 #include <string>
 #include <map>
 
+#include "../../util.h"
 #include "../../i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
 
@@ -55,19 +56,25 @@ namespace abc { namespace net { namespace http {
 
 
     /**
+     * @brief Collection of http query parameters. 
+     */
+    using query = map_string_string_i;
+
+
+    /**
      * @brief Complete http resource. 
      */
     struct resource {
-        std::string                        path;
-        std::map<std::string, std::string> query;
-        std::string                        fragment;
+        std::string path;
+        http::query query;
+        std::string fragment;
     };
 
 
     /**
      * @brief Collection of http headers. 
      */
-    using headers = std::map<std::string, std::string>;
+    using headers = map_string_string_i;
 
 
     /**

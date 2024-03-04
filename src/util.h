@@ -30,6 +30,8 @@ SOFTWARE.
 #include <deque>
 #include <map>
 
+#include "ascii.h"
+
 
 namespace abc {
 
@@ -187,7 +189,7 @@ namespace abc {
 
 
     /**
-     * @brief   Removes the last segment of the give path.
+     * @brief   Removes the last segment of the given path.
      * @details The returned path never ends with a '/'.
      *          If the parent is the root, an empty string is returned.
      */
@@ -203,6 +205,21 @@ namespace abc {
 
         return parent_dir;
     }
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief `std::map<std::string, std::string>` with ignore-case key comparison. 
+     */
+    struct less_i {
+        bool operator()(const std::string& str1, const std::string& str2) const noexcept {
+            return abc::ascii::is_less_i(str1.c_str(), str2.c_str());
+        }
+    };
+
+    using map_string_string_i = std::map<std::string, std::string, less_i>;
 
 
     // --------------------------------------------------------------

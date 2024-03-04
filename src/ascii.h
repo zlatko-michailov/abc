@@ -137,7 +137,7 @@ namespace abc {
         }
 
 
-        inline int compare(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+        inline int compare(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) noexcept {
             // We consider nullptr to be less than any value.
             if (s1 == nullptr && s2 == nullptr) {
                 return 0;
@@ -170,52 +170,52 @@ namespace abc {
         }
 
 
-        inline bool are_equal(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+        inline bool are_equal(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) noexcept {
             return compare(s1, s2, case_sensitive, max_chars) == 0;
         }
 
 
-        inline bool are_equal_n(const char* s1, const char* s2, std::size_t max_chars) {
+        inline bool are_equal_n(const char* s1, const char* s2, std::size_t max_chars) noexcept {
             return are_equal(s1, s2, true, max_chars);
         }
 
 
-        inline bool are_equal_i_n(const char* s1, const char* s2, std::size_t max_chars) {
+        inline bool are_equal_i_n(const char* s1, const char* s2, std::size_t max_chars) noexcept {
             return are_equal(s1, s2, false, max_chars);
         }
 
 
-        inline bool are_equal(const char* s1, const char* s2) {
+        inline bool are_equal(const char* s1, const char* s2) noexcept {
             return are_equal(s1, s2, true, size::strlen);
         }
 
 
-        inline bool are_equal_i(const char* s1, const char* s2) {
+        inline bool are_equal_i(const char* s1, const char* s2) noexcept {
             return are_equal(s1, s2, false, size::strlen);
         }
 
 
-        inline bool is_less(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) {
+        inline bool is_less(const char* s1, const char* s2, bool case_sensitive, std::size_t max_chars) noexcept {
             return compare(s1, s2, case_sensitive, max_chars) < 0;
         }
 
 
-        inline bool is_less_n(const char* s1, const char* s2, std::size_t max_chars) {
+        inline bool is_less_n(const char* s1, const char* s2, std::size_t max_chars) noexcept {
             return is_less(s1, s2, true, max_chars);
         }
 
 
-        inline bool is_less_i_n(const char* s1, const char* s2, std::size_t max_chars) {
+        inline bool is_less_i_n(const char* s1, const char* s2, std::size_t max_chars) noexcept {
             return is_less(s1, s2, false, max_chars);
         }
 
 
-        inline bool is_less(const char* s1, const char* s2) {
+        inline bool is_less(const char* s1, const char* s2) noexcept {
             return is_less(s1, s2, true, size::strlen);
         }
 
 
-        inline bool is_less_i(const char* s1, const char* s2) {
+        inline bool is_less_i(const char* s1, const char* s2) noexcept {
             return is_less(s1, s2, false, size::strlen);
         }
 
