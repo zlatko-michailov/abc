@@ -33,8 +33,8 @@ Up to [Documentation](README.md).
             - socket.h
     - __vmem ::__
         - __i__
-        - layout.h __NEXT. TODO:__
-        - pool.h
+        - pool.h __NEXT. TODO:__
+        - layout.h
         - linked.h
         - container.h
         - iterator.h
