@@ -13,15 +13,21 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
+- `log_ostream`
+    - use virtual methods instead of template
+    - Remove `LogPtr` template parameter from all classes. Pass `log_ostream*` to all constructors. instead.
 - `endpoint`
     - Samples
-        - basic
         - tls
 - `vmem`
+    - page.h
+    - ptr.h
+    - Remove util.h or merge it with the main util.h.
     - Samples
         - tictactoe
         - connect4
 
+- Remove `virtual` from `override` definitions?
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 - log:

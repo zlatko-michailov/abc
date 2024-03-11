@@ -23,136 +23,115 @@ SOFTWARE.
 */
 
 
-#include <cstring>
-#include <memory>
+#include <iostream>
+#include <string>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
-#include "../../src/log.h"
-#include "../../src/openssl_socket.h"
+#include "../../src/diag/log.h"
+#include "../../src/net/openssl/socket.h"
 
 
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
+using log_line = abc::diag::debug_line_ostream<>;
+using log_filter = abc::diag::log_filter<const char*>;
+using log_ostream = abc::diag::log_ostream<log_line, log_filter*>;
+
+
+constexpr const char* origin = "tls_sample";
 
 
 void server(const char* cert_path, const char* pkey_path, const char* password, log_ostream* log, std::condition_variable* scenario_cond) {
-	const char* port = "31241";
-	bool verify_client = false;
-	int queue_size = 5;
+    constexpr const char* suborigin = "server()";
 
-	abc::openssl_tcp_server_socket<log_ostream> openssl_server(cert_path, pkey_path, password, verify_client, abc::socket::family::ipv4, log);
+    const char* port = "31241";
+    bool verify_client = false;
+    int queue_size = 5;
 
-	openssl_server.bind(port);
-	openssl_server.listen(queue_size);
-	
-	// accept() blocks. Unblock the client thread now.
-	scenario_cond->notify_one();
+    abc::net::openssl::tcp_server_socket<log_ostream*> openssl_server(cert_path, pkey_path, password, verify_client, abc::net::socket::family::ipv4, log);
 
-	abc::openssl_tcp_client_socket<log_ostream> openssl_connection = openssl_server.accept();
+    openssl_server.bind(port);
+    openssl_server.listen(queue_size);
+    
+    // accept() blocks. Unblock the client thread now.
+    scenario_cond->notify_one();
 
-	const char hello[] = ">>> Welcome to abc!\n";
-	uint len = sizeof(hello) - 1;
-	openssl_connection.send(&len, 2);
-	openssl_connection.send(hello, len);
+    abc::net::openssl::tcp_client_socket<log_ostream*> openssl_connection = openssl_server.accept();
 
-	char message[100 + 1];
-	std::memset(message, 0, sizeof(message));
-	len = 0;
-	openssl_connection.receive(&len, 2);
-	openssl_connection.receive(message, len);
-	log->put_any(abc::category::abc::samples, abc::severity::important, 0x1075e, "SERVER: %u:%s", len, message);
+    const char hello[] = ">>> Welcome to abc!";
+    uint len = sizeof(hello) - 1;
+    openssl_connection.send(&len, 2);
+    openssl_connection.send(hello, len);
 
-	std::cout << "Press ENTER to shut down server socket..." << std::endl;
-	std::cin.get();
+    char message[100 + 1] { };
+    len = 0;
+    openssl_connection.receive(&len, 2);
+    openssl_connection.receive(message, len);
+    log->put_any(origin, suborigin, abc::diag::severity::important, 0x1075e, "Received: (%u)'%s'", len, message);
+
+    std::cout << "Press ENTER to shut down server socket..." << std::endl;
+    std::cin.get();
 }
 
 
 void client(log_ostream* log, std::mutex* scenario_mutex, std::condition_variable* scenario_cond) {
-	const char* port = "31241";
-	bool verify_server = false;
-	const char* host = "localhost";
+    constexpr const char* suborigin = "client()";
 
-	// Block until the server starts listening.
-	std::unique_lock<std::mutex> lock(*scenario_mutex);
-	scenario_cond->wait(lock);
+    const char* port = "31241";
+    bool verify_server = false;
+    const char* host = "localhost";
 
-	abc::openssl_tcp_client_socket<log_ostream> openssl_client(verify_server, abc::socket::family::ipv4, log);
+    // Block until the server starts listening.
+    std::unique_lock<std::mutex> lock(*scenario_mutex);
+    scenario_cond->wait(lock);
 
-	openssl_client.connect(host, port);
+    abc::net::openssl::tcp_client_socket<log_ostream*> openssl_client(verify_server, abc::net::socket::family::ipv4, log);
 
-	uint len = 0;
-	openssl_client.receive(&len, 2);
+    openssl_client.connect(host, port);
 
-	char message[100 + 1];
-	std::memset(message, 0, sizeof(message));
-	openssl_client.receive(message, len);
-	log->put_any(abc::category::abc::samples, abc::severity::important, 0x1075f, "CLIENT: %u:%s", len, message);
+    uint len = 0;
+    openssl_client.receive(&len, 2);
 
-	const char hi[] = "<<< Thanks.";
-	len = sizeof(hi) - 1;
-	openssl_client.send(&len, 2);
-	openssl_client.send(hi, len);
+    char message[100 + 1] { };
+    openssl_client.receive(message, len);
+    log->put_any(origin, suborigin, abc::diag::severity::important, 0x1075f, "Received: (%u)'%s'", len, message);
 
-	std::cout << "Press ENTER to close client socket..." << std::endl;
-	std::cin.get();
+    const char hi[] = "<<< Thanks.";
+    len = sizeof(hi) - 1;
+    openssl_client.send(&len, 2);
+    openssl_client.send(hi, len);
+
+    std::cout << "Press ENTER to close client socket..." << std::endl;
+    std::cin.get();
 }
 
 
 int main(int /*argc*/, const char* argv[]) {
-	// Create a log.
-	abc::log_filter filter(abc::severity::abc::debug);
-	log_ostream log(std::cout.rdbuf(), &filter);
+    constexpr const char* suborigin = "main()";
 
-	// Use the path to this program to build the path to the pool file.
-	constexpr std::size_t max_path = abc::size::k1;
+    // Create a log.
+    log_filter filter("", abc::diag::severity::important);
+    log_ostream log(std::cout.rdbuf(), &filter);
 
-	char cert_path[max_path];
-	cert_path[0] = '\0';
+    // Create cert and pkey paths.
+    std::string process_dir = abc::parent_path(argv[0]);
 
-	char pkey_path[max_path];
-	pkey_path[0] = '\0';
+    std::string cert_path = process_dir;
+    cert_path.append("/cert.pem");
+    log.put_any(origin, suborigin, abc::diag::severity::optional, 0x10761, "cert_path='%s'", cert_path.c_str());
 
-	constexpr const char cert_file[] = "cert.pem";
-	std::size_t cert_file_len = std::strlen(cert_file); 
+    std::string pkey_path = process_dir;
+    pkey_path.append("/pkey.pem");
+    log.put_any(origin, suborigin, abc::diag::severity::optional, 0x10762, "pkey_path='%s'", pkey_path.c_str());
 
-	constexpr const char pkey_file[] = "pkey.pem";
-	std::size_t pkey_file_len = std::strlen(pkey_file); 
+    // Run the client and server simultaneously.
+    std::mutex scenario_mutex;
+    std::condition_variable scenario_cond;
+    std::thread server_thread(server, cert_path.c_str(), pkey_path.c_str(), "server", &log, &scenario_cond);
+    std::thread client_thread(client, &log, &scenario_mutex, &scenario_cond);
 
-	const char* prog_last_separator = std::strrchr(argv[0], '/');
-	std::size_t prog_path_len = 0;
-	std::size_t prog_path_len_1 = 0;
+    server_thread.join();
+    client_thread.join();
 
-	if (prog_last_separator != nullptr) {
-		prog_path_len = prog_last_separator - argv[0];
-		prog_path_len_1 = prog_path_len + 1;
-		std::size_t full_path_len = prog_path_len_1 + std::max(cert_file_len, pkey_file_len);
-
-		if (full_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x10760,
-				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
-				max_path, full_path_len);
-
-			return 1;
-		}
-
-		std::strncpy(cert_path, argv[0], prog_path_len_1);
-		std::strncpy(pkey_path, argv[0], prog_path_len_1);
-	}
-
-	std::strcpy(cert_path + prog_path_len_1, cert_file);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10761, "cert_path='%s'", cert_path);
-
-	std::strcpy(pkey_path + prog_path_len_1, pkey_file);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10762, "pkey_path='%s'", pkey_path);
-
-	std::mutex scenario_mutex;
-	std::condition_variable scenario_cond;
-	std::thread server_thread(server, cert_path, pkey_path, "server", &log, &scenario_cond);
-	std::thread client_thread(client, &log, &scenario_mutex, &scenario_cond);
-
-	server_thread.join();
-	client_thread.join();
-
-	return 0;
+    return 0;
 }

@@ -57,7 +57,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_ascii_less_i",                               test_ascii_less_i },
                 { "test_ascii_less_i_n",                             test_ascii_less_i_n },
             } },
-#if 0 //// TODO:
             { "timestamp", {
                 { "test_null_timestamp",                             test_null_timestamp },
                 { "test_before_year_2000_before_mar_1_timestamp",    test_before_year_2000_before_mar_1_timestamp },
@@ -244,6 +243,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
+#if 0 //// TODO:
 #endif //// TODO:
 #if 0 //// TODO:
             { "vmem", {
