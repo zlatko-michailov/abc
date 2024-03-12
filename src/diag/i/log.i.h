@@ -323,11 +323,106 @@ namespace abc { namespace diag {
 
 
     /**
-     * @brief            `table_ostream` specialization for logging.
-     * @tparam Line      `line_ostream` specialization.
-     * @tparam FilterPtr Pointer to line filter.
+     * @brief Log line filter interface.
      */
-    template <typename Line, typename FilterPtr>
+    struct log_filter {
+        /**
+         * @brief          Returns whether an entry with the given origin and severity passes the filter.
+         * @param origin   Origin.
+         * @param severity Severity.
+         * @return         `true` = passes. `false` = filtered out. 
+         */
+        virtual bool is_enabled(const char* origin, severity_t severity) const noexcept = 0;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief                  Log line filter implementation with a flexible string type to hold the origin prefix.
+     * @tparam OriginPrefixStr String type for origin_prefix.
+     */
+    template <typename OriginPrefixStr>
+    class str_log_filter
+        : public log_filter {
+
+    public:
+        /**
+         * @brief Default constructor.
+         */
+        str_log_filter() noexcept = default;
+
+        /**
+         * @brief Move constructor.
+         */
+        str_log_filter(str_log_filter&& other) noexcept = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        str_log_filter(const str_log_filter& other) noexcept = default;
+
+    public:
+        /**
+         * @brief               Constructor.
+         * @param origin_prefix Origin prefix for a line to be written.
+         * @param min_severity  Minimum severity for a line to be written.
+         */
+        str_log_filter(OriginPrefixStr&& origin_prefix, severity_t min_severity) noexcept;
+
+    public:
+        /**
+         * @brief Returns the origin prefix.
+         */
+        const OriginPrefixStr& origin_prefix() const noexcept;
+
+        /**
+         * @brief Returns the minimum severity.
+         */
+        severity_t min_severity() const noexcept;
+
+    public:
+        /**
+         * @brief Sets the origin prefix.
+         */
+        void origin_prefix(OriginPrefixStr&& origin_prefix) noexcept;
+
+        /**
+         * @brief Sets the minimum severity.
+         */
+        void min_severity(severity_t min_severity) noexcept;
+
+    public:
+        /**
+         * @brief          Overrides `log_filter`. Returns whether an entry with the given origin and `severity` passes the filter.
+         * @param origin   Origin.
+         * @param severity Severity.
+         * @return         `true` = passes. `false` = filtered out. 
+         */
+        virtual bool is_enabled(const char* origin, severity_t severity) const noexcept override;
+
+    private:
+        /**
+         * @brief Origin prefix for a line to be written.
+         */
+        OriginPrefixStr _origin_prefix;
+
+        /**
+         * @brief Minimum severity for a line to be written.
+         */
+        severity_t _min_severity;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief       `table_ostream` specialization for logging.
+     * @tparam Line `line_ostream` specialization.
+     */
+    template <typename Line>
     class log_ostream
         : public table_ostream {
 
@@ -340,9 +435,9 @@ namespace abc { namespace diag {
         /**
          * @brief        Constructor.
          * @param sb     Pointer to a `std::streambuf` instance to write to.
-         * @param filter Pointer to a `Filter` instance.
+         * @param filter Pointer to a `log_filter` instance.
          */
-        log_ostream(std::streambuf* sb, FilterPtr&& filter);
+        log_ostream(std::streambuf* sb, const log_filter* filter = nullptr);
 
         /**
          * @brief Move constructor.
@@ -358,7 +453,7 @@ namespace abc { namespace diag {
         /**
          * @brief Returns the pointer to the `Filter` instance.
          */
-        const FilterPtr& filter() const noexcept;
+        const log_filter* filter() const noexcept;
 
     public:
         /**
@@ -408,87 +503,10 @@ namespace abc { namespace diag {
 
     private:
         /**
-         * @brief Pointer to the `Filter` instance passed in to the constructor.
+         * @brief Pointer to the `log_filter` instance passed in to the constructor.
          */
-        FilterPtr _filter;
+        const log_filter* _filter;
     };
 
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief                  Log line filter.
-     * @tparam OriginPrefixStr String type for origin_prefix.
-     */
-    template <typename OriginPrefixStr>
-    class log_filter {
-
-    public:
-        /**
-         * @brief Default constructor.
-         */
-        log_filter() noexcept = default;
-
-        /**
-         * @brief Move constructor.
-         */
-        log_filter(log_filter&& other) noexcept = default;
-
-        /**
-         * @brief Copy constructor.
-         */
-        log_filter(const log_filter& other) noexcept = default;
-
-    public:
-        /**
-         * @brief               Constructor.
-         * @param origin_prefix Origin prefix for a line to be written.
-         * @param min_severity  Minimum severity for a line to be written.
-         */
-        log_filter(OriginPrefixStr&& origin_prefix, severity_t min_severity) noexcept;
-
-    public:
-        /**
-         * @brief Returns the origin prefix.
-         */
-        const OriginPrefixStr& origin_prefix() const noexcept;
-
-        /**
-         * @brief Returns the minimum severity.
-         */
-        severity_t min_severity() const noexcept;
-
-    public:
-        /**
-         * @brief Sets the origin prefix.
-         */
-        void origin_prefix(OriginPrefixStr&& origin_prefix) noexcept;
-
-        /**
-         * @brief Sets the minimum severity.
-         */
-        void min_severity(severity_t min_severity) noexcept;
-
-    public:
-        /**
-         * @brief          Returns whether an entry with the given origin and `severity` passes the filter.
-         * @param origin   Origin.
-         * @param severity Severity.
-         * @return         `true` = passes. `false` = filtered out. 
-         */
-        bool is_enabled(const char* origin, severity_t severity) const noexcept;
-
-    private:
-        /**
-         * @brief Origin prefix for a line to be written.
-         */
-        OriginPrefixStr _origin_prefix;
-
-        /**
-         * @brief Minimum severity for a line to be written.
-         */
-        severity_t _min_severity;
-    };
 
 } }

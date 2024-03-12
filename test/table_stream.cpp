@@ -253,7 +253,7 @@ bool test_table_move(test_context& context) {
 bool test_log_move(test_context& context) {
     using Filter = test_log_filter;
     using Line = abc::diag::debug_line_ostream<>;
-    using Log = abc::diag::log_ostream<Line, Filter*>;
+    using Log = abc::diag::log_ostream<Line>;
 
     Filter filter("", abc::diag::severity::optional);
 
@@ -300,7 +300,7 @@ bool test_line_move(test_context& context) {
 template <typename Line>
 bool _test_line_move(test_context& context, const char* line1_pattern, const char* line2_pattern) {
     using Filter = test_log_filter;
-    using Log = abc::diag::log_ostream<Line, Filter*>;
+    using Log = abc::diag::log_ostream<Line>;
 
     Filter filter("", abc::diag::severity::optional);
 
