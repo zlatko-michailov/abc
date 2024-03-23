@@ -42,8 +42,10 @@ SOFTWARE.
 
 
 int main(int /*argc*/, const char* argv[]) {
+    abc::table_ostream table(std::cout.rdbuf());
+    test_log_line line(&table);
     test_log_filter filter("", abc::diag::severity::critical);
-    test_log log(std::cout.rdbuf(), &filter);
+    test_log log(&line, &filter);
 
     test_suite suite(
         {

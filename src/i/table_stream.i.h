@@ -88,11 +88,9 @@ namespace abc {
 
 
     /**
-     * @brief       Output stream that puts chars into a line buffer.
-     * @details     The built line buffer is put through a `table_ostream` upon `flush()`.
-     * @tparam Size Size of the line buffer.
+     * @brief   Output stream that puts chars into a line buffer.
+     * @details The built line buffer is put through a `table_ostream` upon `flush()`.
      */
-    template <std::size_t Size = size::k2>
     class line_ostream
         : public ostream {
 
@@ -109,11 +107,6 @@ namespace abc {
          */
         static constexpr char ends = '\0';
 
-        /**
-         * @brief The size of the line.
-         */
-        static constexpr std::size_t size = Size;
-
     public:
         /**
          * @brief Default constructor.
@@ -129,12 +122,12 @@ namespace abc {
         /**
          * @brief Move constructor.
          */
-        line_ostream(line_ostream<Size>&& other);
+        line_ostream(line_ostream&& other);
 
         /**
          * @brief Deleted.
          */
-        line_ostream(const line_ostream<Size>& other) = delete;
+        line_ostream(const line_ostream& other) = delete;
 
         /**
          * @brief Destructor.
@@ -148,11 +141,11 @@ namespace abc {
         const char* get() noexcept;
 
         /**
-         * @brief Appends a new line char and a null char, and puts the line buffer to the `table_ostream`.
-         * 
+         * @brief Appends a new-line char and a null char, and puts the line buffer to the `table_ostream`.
          */
         void flush() noexcept;
 
+    public:
         /**
          * @brief        Puts a formatted string.
          * @param format Format.
@@ -167,6 +160,15 @@ namespace abc {
          */
         void put_anyv(const char* format, va_list vlist) noexcept;
 
+        /**
+         * @brief               Puts a binary buffer.
+         * @param buffer        Buffer.
+         * @param buffer_size   Buffer size.
+         * @param buffer_offset Start offset. Gets updated.
+         */
+        bool put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
+
+    public:
         /**
          * @brief        Puts a formatted `timestamp` value.
          * @tparam Clock Clock of the timestamp.
@@ -184,12 +186,9 @@ namespace abc {
         void put_thread_id(std::thread::id thread_id, const char* format = "%s") noexcept;
 
         /**
-         * @brief               Puts a binary buffer.
-         * @param buffer        Buffer.
-         * @param buffer_size   Buffer size.
-         * @param buffer_offset Start offset. Gets updated.
+         * @brief Puts a new line.
          */
-        bool put_binary(const void* buffer, std::size_t buffer_size, std::size_t& buffer_offset) noexcept;
+        void put_blank() noexcept; 
 
     private:
         /**
@@ -200,7 +199,7 @@ namespace abc {
         /**
          * @brief Line buffer.
          */
-        char _buffer[Size + 2];
+        char _buffer[size::k2 + 2];
 
         /**
          * @brief `buffer_streambuf` around the line buffer, which must be passed to the base constructor.

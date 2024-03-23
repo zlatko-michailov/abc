@@ -30,8 +30,8 @@ SOFTWARE.
 #include "inc/table_stream.h"
 
 
-using thread_id_line_ostream = abc::line_ostream<17>;
-using timestamp_line_ostream = abc::line_ostream<60>;
+using thread_id_line_ostream = abc::line_ostream;
+using timestamp_line_ostream = abc::line_ostream;
 
 
 bool test_line_debug(test_context& context) {
@@ -62,7 +62,7 @@ bool test_line_debug(test_context& context) {
         timestamp.get(), thread_id.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream<>::endl;
+    actual[0] = abc::line_ostream::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -89,7 +89,7 @@ bool test_line_debug(test_context& context) {
     passed = verify_stream_good(context, table, 0x102b8) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream<>::ends);
+    seal.put(abc::line_ostream::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102b9) && passed;
 
@@ -128,7 +128,7 @@ bool test_line_diag(test_context& context) {
         timestamp.get(), thread_id.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream<>::endl;
+    actual[0] = abc::line_ostream::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -156,7 +156,7 @@ bool test_line_diag(test_context& context) {
     passed = verify_stream_good(context, table, 0x102c1) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream<>::ends);
+    seal.put(abc::line_ostream::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102c2) && passed;
 
@@ -192,7 +192,7 @@ bool test_line_test(test_context& context) {
         timestamp.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream<>::endl;
+    actual[0] = abc::line_ostream::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -219,7 +219,7 @@ bool test_line_test(test_context& context) {
     passed = verify_stream_good(context, table, 0x102c9) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream<>::ends);
+    seal.put(abc::line_ostream::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102ca) && passed;
 
@@ -252,25 +252,25 @@ bool test_table_move(test_context& context) {
 
 bool test_log_move(test_context& context) {
     using Filter = test_log_filter;
-    using Line = abc::diag::debug_line_ostream<>;
+    using Line = abc::diag::test_line_ostream<abc::size::k2, test_clock>;
     using Log = abc::diag::log_ostream<Line>;
-
-    Filter filter("", abc::diag::severity::optional);
 
     char actual[abc::size::_256 + 1] = { };
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 
-    Log os1(&sb, &filter);
-    os1.put_line("third\n");
-    os1.flush();
-    passed = context.are_equal(actual, "third\n", 0x10733) && passed;
+    abc::table_ostream table(&sb);
+    Line line(&table);
+    Filter filter("", abc::diag::severity::optional);
+
+    Log os1(&line, &filter);
+    os1.put_any("origin1", "suborigin1()", abc::diag::severity::critical, 91, "format1");
+    passed = context.are_equal(actual, "2020-10-15 12:34:56.789 origin1::suborigin1() [0x5b] format1\n", 0x10733) && passed;
 
     Log os2(std::move(os1));
-    os2.put_line("fourth\n");
-    os2.flush();
-    passed = context.are_equal(actual, "third\nfourth\n", 0x10734) && passed;
+    os1.put_any("origin2", "suborigin2()", abc::diag::severity::important, 92, "format2");
+    passed = context.are_equal(actual, "2020-10-15 12:34:56.789 origin1::suborigin1() [0x5b] format1\n2020-10-15 12:34:56.789     origin2::suborigin2() [0x5c] format2\n", 0x10734) && passed;
 
     return passed;
 }
@@ -283,12 +283,12 @@ bool test_line_move(test_context& context) {
     bool passed = true;
 
     abc::table_ostream table(&sb);
-    abc::line_ostream<> os1(&table);
+    abc::line_ostream os1(&table);
     os1.put_any("first");
     os1.flush();
     passed = context.are_equal(actual, "first\n", 0x10735) && passed;
 
-    abc::line_ostream<> os2(std::move(os1));
+    abc::line_ostream os2(std::move(os1));
     os2.put_any("second");
     os2.flush();
     passed = context.are_equal(actual, "first\nsecond\n", 0x10736) && passed;
@@ -299,11 +299,6 @@ bool test_line_move(test_context& context) {
 
 template <typename Line>
 bool _test_line_move(test_context& context, const char* line1_pattern, const char* line2_pattern) {
-    using Filter = test_log_filter;
-    using Log = abc::diag::log_ostream<Line>;
-
-    Filter filter("", abc::diag::severity::optional);
-
     thread_id_line_ostream thread_id;
     thread_id.put_thread_id(std::this_thread::get_id());
 
@@ -314,7 +309,7 @@ bool _test_line_move(test_context& context, const char* line1_pattern, const cha
 
     bool passed = true;
 
-    Log table(&sb, &filter);
+    abc::table_ostream table(&sb);
     Line os1(&table);
     os1.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x01, "first");
     os1.flush();

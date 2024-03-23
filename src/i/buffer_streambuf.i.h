@@ -72,8 +72,11 @@ namespace abc {
          */
         basic_buffer_streambuf(const basic_buffer_streambuf<Char>& other) = delete;
 
-    private:
+    public:
         void reset(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+
+    private:
+        void reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
 
     private:
         Char* _get_begin_ptr;

@@ -77,15 +77,86 @@ namespace abc { namespace diag {
 
 
     /**
+     * @brief Line output stream for diagnostic purposes.
+     */
+    class log_line_ostream
+        : public line_ostream {
+
+        using base = line_ostream;
+
+    protected:
+        /**
+         * @brief Default constructor.
+         */
+        log_line_ostream();
+
+        /**
+         * @brief       Constructor.
+         * @param table Pointer to a `table_ostream` instance to write the line to.
+         */
+        log_line_ostream(table_ostream* table);
+
+        /**
+         * @brief Move constructor.
+         */
+        log_line_ostream(log_line_ostream&& other);
+
+        /**
+         * @brief Deleted.
+         */
+        log_line_ostream(const log_line_ostream& other) = delete;
+
+
+    public:
+        /**
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param ...       Message arguments.
+         */
+        virtual void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept = 0;
+
+        /**
+         * @brief           Write a formatted message.
+         * @param origin    Entry origin.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param severity  Entry severity.
+         * @param tag       Entry tag.
+         * @param format    Message format.
+         * @param vlist     Message arguments.
+         */
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept = 0;
+
+        /**
+         * @brief             Write binary buffer as a sequence of hexadecimal bytes.
+         * @param origin      Entry origin.
+         * @param suborigin   Entry suborigin, e.g. method.
+         * @param severity    Entry severity.
+         * @param tag         Entry tag.
+         * @param buffer      Data buffer.
+         * @param buffer_size Content size.
+         */
+        virtual void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept = 0;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
      * @brief        `line_ostream` specialization for debug logging.
      * @tparam Size  Maximum line size.
      * @tparam Clock Clock for obtaining a timestamp.
      */
     template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
     class debug_line_ostream
-        : public line_ostream<Size> {
+        : public log_line_ostream {
 
-        using base = line_ostream<Size>;
+        using base = line_ostream;
+        using ctor_base = log_line_ostream;
 
     public:
         /**
@@ -119,7 +190,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param ...       Message arguments.
          */
-        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        virtual void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept override;
 
         /**
          * @brief           Write a formatted message.
@@ -130,7 +201,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -141,7 +212,7 @@ namespace abc { namespace diag {
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        virtual void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept override;
 
     protected:
         /**
@@ -165,9 +236,10 @@ namespace abc { namespace diag {
      */
     template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
     class diag_line_ostream
-        : public line_ostream<Size> {
+        : public log_line_ostream {
 
-        using base = line_ostream<Size>;
+        using base = line_ostream;
+        using ctor_base = log_line_ostream;
 
     public:
         /**
@@ -201,7 +273,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param ...       Message arguments.
          */
-        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+       virtual void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept override;
 
         /**
          * @brief           Write a formatted message.
@@ -212,7 +284,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -223,7 +295,7 @@ namespace abc { namespace diag {
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        virtual void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept override;
 
     protected:
         /**
@@ -247,9 +319,10 @@ namespace abc { namespace diag {
      */
     template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
     class test_line_ostream
-        : public line_ostream<Size> {
+        : public log_line_ostream {
 
-        using base = line_ostream<Size>;
+        using base = line_ostream;
+        using ctor_base = log_line_ostream;
 
     public:
         /**
@@ -283,7 +356,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param ...       Message arguments.
          */
-        void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept;
+        virtual void put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept override;
 
         /**
          * @brief           Write a formatted message.
@@ -294,7 +367,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -305,7 +378,7 @@ namespace abc { namespace diag {
          * @param buffer      Data buffer.
          * @param buffer_size Content size.
          */
-        void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept;
+        virtual void put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept override;
 
     protected:
         /**
@@ -423,10 +496,7 @@ namespace abc { namespace diag {
      * @tparam Line `line_ostream` specialization.
      */
     template <typename Line>
-    class log_ostream
-        : public table_ostream {
-
-        using base = table_ostream;
+    class log_ostream {
 
     public:
         using line_type = Line;
@@ -434,10 +504,10 @@ namespace abc { namespace diag {
     public:
         /**
          * @brief        Constructor.
-         * @param sb     Pointer to a `std::streambuf` instance to write to.
+         * @param line   Pointer to a `log_line_ostream` instance.
          * @param filter Pointer to a `log_filter` instance.
          */
-        log_ostream(std::streambuf* sb, const log_filter* filter = nullptr);
+        log_ostream(log_line_ostream* line, const log_filter* filter = nullptr);
 
         /**
          * @brief Move constructor.
@@ -502,6 +572,11 @@ namespace abc { namespace diag {
         line_type line() const noexcept;
 
     private:
+        /**
+         * @brief Pointer to the `log_line_ostream` instance passed in to the constructor.
+         */
+        log_line_ostream* _line;
+
         /**
          * @brief Pointer to the `log_filter` instance passed in to the constructor.
          */

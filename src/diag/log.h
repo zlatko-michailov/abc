@@ -37,21 +37,39 @@ SOFTWARE.
 
 namespace abc { namespace diag {
 
+    inline log_line_ostream::log_line_ostream()
+        : base() {
+    }
+
+
+    inline log_line_ostream::log_line_ostream(table_ostream* table)
+        : base(table) {
+    }
+
+
+    inline log_line_ostream::log_line_ostream(log_line_ostream&& other)
+        : base(std::move(other)) {
+    }
+
+
+    // --------------------------------------------------------------
+
+
     template <std::size_t Size, typename Clock>
     inline debug_line_ostream<Size, Clock>::debug_line_ostream()
-        : base() {
+        : ctor_base() {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline debug_line_ostream<Size, Clock>::debug_line_ostream(table_ostream* table)
-        : base(table) {
+        : ctor_base(table) {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other)
-        : base(std::move(other)) {
+        : ctor_base(std::move(other)) {
     }
 
 
@@ -106,19 +124,19 @@ namespace abc { namespace diag {
 
     template <std::size_t Size, typename Clock>
     inline diag_line_ostream<Size, Clock>::diag_line_ostream()
-        : base() {
+        : ctor_base() {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline diag_line_ostream<Size, Clock>::diag_line_ostream(table_ostream* table)
-        : base(table) {
+        : ctor_base(table) {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other)
-        : base(std::move(other)) {
+        : ctor_base(std::move(other)) {
     }
 
 
@@ -173,19 +191,19 @@ namespace abc { namespace diag {
 
     template <std::size_t Size, typename Clock>
     inline test_line_ostream<Size, Clock>::test_line_ostream()
-        : base() {
+        : ctor_base() {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline test_line_ostream<Size, Clock>::test_line_ostream(table_ostream* table)
-        : base(table) {
+        : ctor_base(table) {
     }
 
 
     template <std::size_t Size, typename Clock>
     inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other)
-        : base(std::move(other)) {
+        : ctor_base(std::move(other)) {
     }
 
 
@@ -297,16 +315,17 @@ namespace abc { namespace diag {
 
 
     template <typename Line>
-    inline log_ostream<Line>::log_ostream(std::streambuf* sb, const log_filter* filter)
-        : base(sb)
+    inline log_ostream<Line>::log_ostream(log_line_ostream* line, const log_filter* filter)
+        : _line(line)
         , _filter(filter) {
+        //// TODO: assert(line != nullptr)
     }
 
 
     template <typename Line>
     inline log_ostream<Line>::log_ostream(log_ostream&& other)
-        : base(std::move(other))
-        , _filter(std::move(other._filter)) {
+        : _line(other._line)
+        , _filter(other._filter) {
     }
 
 
@@ -330,8 +349,8 @@ namespace abc { namespace diag {
     template <typename Line>
     inline void log_ostream<Line>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-            Line line(this);
-            line.put_anyv(origin, suborigin, severity, tag, format, vlist);
+            _line->put_anyv(origin, suborigin, severity, tag, format, vlist);
+            _line->flush();
         }
     }
 
@@ -339,8 +358,8 @@ namespace abc { namespace diag {
     template <typename Line>
     inline void log_ostream<Line>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-            Line line(this);
-            line.put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
+            _line->put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
+            _line->flush();
         }
     }
 
@@ -348,7 +367,7 @@ namespace abc { namespace diag {
     template <typename Line>
     inline void log_ostream<Line>::put_blank_line(const char* origin, severity_t severity) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
-            base::put_blank_line();
+            //// TODO: base::put_blank_line();
         }
     }
 
