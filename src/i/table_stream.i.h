@@ -28,6 +28,7 @@ SOFTWARE.
 #include <streambuf>
 #include <ostream>
 #include <thread>
+#include <vector>
 
 #include "../size.h"
 #include "../buffer_streambuf.h"
@@ -192,6 +193,13 @@ namespace abc {
 
     private:
         /**
+         * @brief  Tries to ensure `available` chars of buffer capacity.
+         * @return `true` = success, `false` = failure.
+         */
+        bool try_ensure_capacity(std::size_t available) noexcept; 
+
+    private:
+        /**
          * @brief The `table_ostream` pointer passed in to the constructor.
          */
         table_ostream* _table;
@@ -199,7 +207,7 @@ namespace abc {
         /**
          * @brief Line buffer.
          */
-        char _buffer[size::k2 + 2];
+        std::vector<char> _buffer;
 
         /**
          * @brief `buffer_streambuf` around the line buffer, which must be passed to the base constructor.

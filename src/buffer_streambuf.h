@@ -40,7 +40,7 @@ namespace abc {
     inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept
         : base() {
 
-        reset(get_begin_ptr, get_begin_ptr, get_end_ptr, put_begin_ptr, put_end_ptr);
+        reset(get_begin_ptr, get_begin_ptr, get_end_ptr, put_begin_ptr, 0, put_end_ptr);
     }
 
 
@@ -51,23 +51,21 @@ namespace abc {
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept {
-        std::size_t gcount = base::gptr() - _get_begin_ptr;
-        Char* get_current_ptr = get_begin_ptr + gcount;
-
-        reset(get_begin_ptr, get_current_ptr, get_end_ptr, put_begin_ptr, put_end_ptr);
+    inline void basic_buffer_streambuf<Char>::reset(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_current_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_current_pos, std::size_t put_end_pos) noexcept {
+        reset(get_buffer + get_begin_pos, get_buffer + get_current_pos, get_buffer + get_end_pos, put_buffer + put_begin_pos, put_current_pos, put_buffer + put_end_pos);
     }
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept {
-        _put_begin_ptr = put_begin_ptr;
-        _put_end_ptr   = put_end_ptr;
+    inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept {
         _get_begin_ptr = get_begin_ptr;
         _get_end_ptr   = get_end_ptr;
+        _put_begin_ptr = put_begin_ptr;
+        _put_end_ptr   = put_end_ptr;
 
         base::setg(get_begin_ptr, get_current_ptr, get_end_ptr);
         base::setp(put_begin_ptr, put_end_ptr);
+        base::pbump(put_current_pos);
     }
 
 }

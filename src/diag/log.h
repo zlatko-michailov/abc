@@ -112,8 +112,8 @@ namespace abc { namespace diag {
     inline void debug_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
         base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2u %2.2u:%2.2u:%2.2u.%3.3u |");
         base::put_thread_id(std::this_thread::get_id(), " %16s |");
-        base::put_any(" %1.1x |", severity);
-        base::put_any(" %16llx |", tag);
+        base::put_any(" %1.1x |", (unsigned)severity);
+        base::put_any(" %16llx |", (unsigned long long)tag);
         base::put_any(" %s |", origin);
         base::put_any(" %s | ", suborigin);
     }
@@ -179,7 +179,7 @@ namespace abc { namespace diag {
     inline void diag_line_ostream<Size, Clock>::put_props(const char* origin, const char* suborigin, severity_t severity, tag_t tag) noexcept {
         base::put_timestamp(timestamp<Clock>(), "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u.%3.3uZ,");
         base::put_thread_id(std::this_thread::get_id(), "%s,");
-        base::put_any("%.1x,", severity);
+        base::put_any("%.1x,", (unsigned)severity);
         base::put_any("%llx,", (unsigned long long)tag);
         base::put_any("%s,", origin);
         base::put_any("%s,", suborigin);

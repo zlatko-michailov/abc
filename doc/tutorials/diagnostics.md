@@ -19,7 +19,7 @@ That is simple - all we have to pass in is a severity level.
 We can always adjust that if we decide we need more or less log entries:
 ``` c++
 // Allow entries of severity 'important' or higher from all components.
-abc::diag::log_filter filter(abc::diag::severity::important);
+abc::diag::str_log_filter<const char*> filter("myns::", abc::diag::severity::important);
 ```
 
 To construct the `log_ostream` instance, we must pick a `line_ostream` format, and we have to pass in two other instances - a `streambuf` and a `log_filter`.
@@ -27,7 +27,7 @@ To construct the `log_ostream` instance, we must pick a `line_ostream` format, a
 Let's pick `debug_line_ostream` as a line format.
 To simplify our type definitions, we can define this shortcut:
 ``` c++
-using log_ostream = abc::diag::log_ostream<abc::debug_line_ostream<>, abc::diag::log_filter>;
+using log_ostream = abc::diag::log_ostream<abc::debug_line_ostream<>>;
 ```
 
 We already have a `log_filter`.

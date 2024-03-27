@@ -71,10 +71,11 @@ bool test_line_debug(test_context& context) {
     {
         abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102b4) && passed;
 
-        line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102b5) && passed;
     }
 
@@ -83,6 +84,7 @@ bool test_line_debug(test_context& context) {
     {
         abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
+        line.flush();
         passed = verify_stream_good(context, line, 0x102b7) && passed;
     }
 
@@ -137,10 +139,11 @@ bool test_line_diag(test_context& context) {
     {
         abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102bc) && passed;
 
-        line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102bd) && passed;
     }
 
@@ -149,6 +152,7 @@ bool test_line_diag(test_context& context) {
     {
         abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
+        line.flush();
         passed = verify_stream_good(context, line, 0x102bf) && passed;
         passed = verify_stream_good(context, table, 0x102c0) && passed;
     }
@@ -201,10 +205,11 @@ bool test_line_test(test_context& context) {
     {
         abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102c5) && passed;
 
-        line.flush();
         line.put_any("origin_3", "suborigin_4", abc::diag::severity::important, 0x2222, "%u %u %u", 5, 6, 7);
+        line.flush();
         passed = verify_stream_good(context, line, 0x102c6) && passed;
     }
 
@@ -213,6 +218,7 @@ bool test_line_test(test_context& context) {
     {
         abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
+        line.flush();
         passed = verify_stream_good(context, line, 0x102c8) && passed;
     }
 
@@ -284,14 +290,14 @@ bool test_line_move(test_context& context) {
 
     abc::table_ostream table(&sb);
     abc::line_ostream os1(&table);
-    os1.put_any("first");
+    os1.put_any("first first first first first ");
     os1.flush();
-    passed = context.are_equal(actual, "first\n", 0x10735) && passed;
+    passed = context.are_equal(actual, "first first first first first \n", 0x10735) && passed;
 
     abc::line_ostream os2(std::move(os1));
-    os2.put_any("second");
+    os2.put_any("second second second second second");
     os2.flush();
-    passed = context.are_equal(actual, "first\nsecond\n", 0x10736) && passed;
+    passed = context.are_equal(actual, "first first first first first \nsecond second second second second\n", 0x10736) && passed;
 
     return passed;
 }

@@ -33,7 +33,8 @@ Follow the links to read more about each class.
   - [`json_ostream`](../ref/json.md)
 - [`table_ostream`](../ref/table_stream.md) - an output stream of lines.
   - [`log_ostream`](../ref/log.md) - a specialization for logging.
-- [`line_ostream`](../ref/line.md) - an output stream of chars.
+- [`line_ostream`](../ref/table_stream.md) - an output stream of chars.
+  - [`log_line_ostream`](../ref/log.md) - a line output stream interface for diagnostic purposes.
   - [`debug_line_ostream`](../ref/log.md) - a specialization for human-readable diagnostics.
-   - [`diag_line_ostream`](../ref/log.md) - a specialization for compact diagnostics.
+  - [`diag_line_ostream`](../ref/log.md) - a specialization for compact diagnostics.
   - [`test_line_ostream`](../ref/log.md) - a specialization for unit testing.

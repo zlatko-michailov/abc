@@ -71,6 +71,7 @@ namespace abc {
     // --------------------------------------------------------------
 
 
+    //// TODO: REMOVE
     inline line_ostream::line_ostream()
         : line_ostream(nullptr) {
     }
@@ -79,7 +80,8 @@ namespace abc {
     inline line_ostream::line_ostream(table_ostream* table)
         : base(&_sb)
         , _table(table)
-        , _sb(nullptr, 0, 0, _buffer, 0, size::k2) //// TODO:
+        , _buffer(size::_8) //// TODO: TEMP size::_256
+        , _sb(nullptr, 0, 0, _buffer.data(), 0, _buffer.capacity())
         , _pcount(0) {
     }
 
@@ -87,10 +89,9 @@ namespace abc {
     inline line_ostream::line_ostream(line_ostream&& other)
         : base(std::move(other))
         , _table(other._table)
+        , _buffer(std::move(other._buffer))
         , _sb(std::move(other._sb))
         , _pcount(other._pcount) {
-
-        std::memmove(_buffer, other._buffer, sizeof(char) * (size::k2 + 2)); //// TODO:
     }
 
 
@@ -100,28 +101,31 @@ namespace abc {
 
 
     inline const char* line_ostream::get() noexcept {
-        if (_pcount <= size::k2) { //// TODO:
-            _buffer[_pcount] = ends;
+        if (!try_ensure_capacity(1)) {
+            return "";
         }
 
-        return _buffer;
+        _buffer[_pcount] = ends;
+
+        return _buffer.data();
     }
 
 
     inline void line_ostream::flush() noexcept {
         if (_pcount > 0) {
-            if (_pcount <= size::k2) { //// TODO:
-                _buffer[_pcount++] = endl;
-                _buffer[_pcount] = ends;
+            if (!try_ensure_capacity(2)) {
+                return;
             }
 
+            _buffer[_pcount++] = endl;
+            _buffer[_pcount] = ends;
+
             if (_table != nullptr) {
-                _table->put_line(_buffer, _pcount);
+                _table->put_line(_buffer.data(), _pcount);
             }
 
             _pcount = 0;
-
-            _sb.reset(nullptr, nullptr, _buffer, &_buffer[size::k2]); //// TODO:
+            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, 0, _buffer.capacity());
         }
     }
 
@@ -137,7 +141,15 @@ namespace abc {
 
 
     inline void line_ostream::put_anyv(const char* format, va_list vlist) noexcept {
-        int pc = std::vsnprintf(_buffer + _pcount, size::k2 - _pcount, format, vlist); //// TODO:
+        va_list vlist_copy;
+        va_copy(vlist_copy, vlist);
+        int pc = std::vsnprintf(nullptr, 0, format, vlist_copy);
+
+        if (!try_ensure_capacity(pc + 1)) {
+            return;
+        }
+
+        pc = std::vsnprintf(_buffer.data() + _pcount, pc + 1, format, vlist);
         _pcount += pc;
     }
 
@@ -152,10 +164,6 @@ namespace abc {
         constexpr char nonprint = '.';
         constexpr char head = ':';
 
-        if (size::k2 - _pcount <= local_size) { //// TODO:
-            return false;
-        }
-
         if (buffer_size <= buffer_offset) {
             return false;
         }
@@ -164,9 +172,13 @@ namespace abc {
             return false;
         }
 
+        if (!try_ensure_capacity(local_size + 1)) {
+            return false;
+        }
+
         const std::uint8_t* chunk = static_cast<const std::uint8_t*>(buffer) + buffer_offset;
         std::size_t local_offset = 0;
-        char* line = _buffer + _pcount;
+        char* line = &_buffer[_pcount];
         bool hasMore = true;
 
         // 0000:
@@ -230,7 +242,7 @@ namespace abc {
 
     inline void line_ostream::put_thread_id(std::thread::id thread_id, const char* format) noexcept {
         char buf[17];
-        buffer_streambuf sb(nullptr, 0, 0, buf, 0, sizeof(buf) - 1);
+        buffer_streambuf sb(nullptr, 0, 0, buf, 0, sizeof(buf));
 
         try {
             std::ostream stream(&sb);
@@ -248,6 +260,24 @@ namespace abc {
         if (_table != nullptr) {
             _table->put_blank_line();
         }
+    }
+
+
+    inline bool line_ostream::try_ensure_capacity(std::size_t available) noexcept {
+        std::size_t total = _pcount + available;
+
+        try {
+            // Optimization: Round up to 256 to reduce reallocations.
+            //// TODO: total = 256 * ((total + 255) / 256);
+
+            _buffer.resize(total);
+            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, _pcount - 1, _buffer.capacity());
+        }
+        catch (...) {
+            return false;
+        }
+
+        return true;
     }
 
 }

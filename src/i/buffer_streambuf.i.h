@@ -73,10 +73,29 @@ namespace abc {
         basic_buffer_streambuf(const basic_buffer_streambuf<Char>& other) = delete;
 
     public:
-        void reset(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+        /**
+         * @brief                 Resets using positions.
+         * @param get_buffer      "Get" buffer.
+         * @param get_begin_pos   "Begin" position on the "get" buffer.
+         * @param get_current_pos "Current" position on the "get" buffer.
+         * @param get_end_pos     "End" position on the "get" buffer.
+         * @param put_buffer      "Put" buffer.
+         * @param put_begin_pos   "Begin" position on the "put" buffer.
+         * @param put_current_pos "Current" position on the "put" buffer.
+         * @param put_end_pos     "Enc" position on the "put" buffer.
+         */
+        void reset(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_current_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_current_pos, std::size_t put_end_pos) noexcept;
 
-    private:
-        void reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+        /**
+         * @brief                 Resets using pointers.
+         * @param get_begin_ptr   Pointer to the "begin" item on the "get" buffer.
+         * @param get_current_ptr Pointer to the "begin" item on the "get" buffer.
+         * @param get_end_ptr     Pointer to the "end" item on the "get" buffer.
+         * @param put_begin_ptr   Pointer to the "begin" item on the "put" buffer.
+         * @param put_current_pos "Current" position on the "put" buffer.
+         * @param put_end_ptr     Pointer to the "end" item on the "put" buffer.
+         */
+        void reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept;
 
     private:
         Char* _get_begin_ptr;

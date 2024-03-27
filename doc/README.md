@@ -51,6 +51,7 @@ Provide the title and the link to the page along with as much information as you
 ### Namespace `abc::diag`
 
 - [log_ostream](ref/log.md)
+- [log_line_ostream](ref/log.md)
 - [debug_line_ostream](ref/log.md)
 - [diag_line_ostream](ref/log.md)
 - [test_line_ostream](ref/log.md)
