@@ -47,7 +47,7 @@ namespace abc { namespace diag {
     }
 
 
-    inline log_line_ostream::log_line_ostream(log_line_ostream&& other)
+    inline log_line_ostream::log_line_ostream(log_line_ostream&& other) noexcept
         : base(std::move(other)) {
     }
 
@@ -68,7 +68,7 @@ namespace abc { namespace diag {
 
 
     template <std::size_t Size, typename Clock>
-    inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other)
+    inline debug_line_ostream<Size, Clock>::debug_line_ostream(debug_line_ostream&& other) noexcept
         : ctor_base(std::move(other)) {
     }
 
@@ -135,7 +135,7 @@ namespace abc { namespace diag {
 
 
     template <std::size_t Size, typename Clock>
-    inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other)
+    inline diag_line_ostream<Size, Clock>::diag_line_ostream(diag_line_ostream&& other) noexcept
         : ctor_base(std::move(other)) {
     }
 
@@ -202,7 +202,7 @@ namespace abc { namespace diag {
 
 
     template <std::size_t Size, typename Clock>
-    inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other)
+    inline test_line_ostream<Size, Clock>::test_line_ostream(test_line_ostream&& other) noexcept
         : ctor_base(std::move(other)) {
     }
 

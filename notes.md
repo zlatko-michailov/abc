@@ -14,17 +14,18 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - HOLD: `queue_streambuf`
+    - Make it `vector_streambuf`
     - Code
+        - `init_size`, `grow_rel`, `grow_abs`
     - Test
     - Doc
 - `log_ostream`
     - Make all `..._line_ostream` move ctors `noexcept`.
     - Use `std::va_list` instead of the C `va_list`.
+    - Un-templatize `line_ostream`.
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`
-    - Un-templatize `line_ostream`.
     - Make the override methods of `xxx_line_ostream` flush!
-    - `log_ostream`'s constructor to take `log_line_ostream *`.
     - Remove `LogPtr` template parameter from all classes. Pass `log_ostream*` to all constructors. instead.
 - `endpoint`
     - Samples

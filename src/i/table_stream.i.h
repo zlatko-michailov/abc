@@ -123,7 +123,7 @@ namespace abc {
         /**
          * @brief Move constructor.
          */
-        line_ostream(line_ostream&& other);
+        line_ostream(line_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.

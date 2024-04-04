@@ -86,7 +86,7 @@ namespace abc {
     }
 
 
-    inline line_ostream::line_ostream(line_ostream&& other)
+    inline line_ostream::line_ostream(line_ostream&& other) noexcept
         : base(std::move(other))
         , _table(other._table)
         , _buffer(std::move(other._buffer))

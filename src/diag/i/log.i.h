@@ -99,7 +99,7 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        log_line_ostream(log_line_ostream&& other);
+        log_line_ostream(log_line_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -173,7 +173,7 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        debug_line_ostream(debug_line_ostream&& other);
+        debug_line_ostream(debug_line_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -256,7 +256,7 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        diag_line_ostream(diag_line_ostream&& other);
+        diag_line_ostream(diag_line_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -339,7 +339,7 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        test_line_ostream(test_line_ostream&& other);
+        test_line_ostream(test_line_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
