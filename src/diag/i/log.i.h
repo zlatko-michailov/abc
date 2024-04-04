@@ -128,7 +128,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept = 0;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) noexcept = 0;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -201,7 +201,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -284,7 +284,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -367,7 +367,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept override;
+        virtual void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) noexcept override;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -546,7 +546,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.

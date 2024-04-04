@@ -20,8 +20,6 @@
     - Test
     - Doc
 - `log_ostream`
-    - Make all `..._line_ostream` move ctors `noexcept`.
-    - Use `std::va_list` instead of the C `va_list`.
     - Un-templatize `line_ostream`.
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`
@@ -37,6 +35,7 @@
     - Samples
         - tictactoe
         - connect4
+- Update docs when all classes are done.
 
 - Remove `virtual` from `override` definitions?
 - Update doc/ref/*.md for all classes that have been done.

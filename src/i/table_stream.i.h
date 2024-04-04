@@ -29,6 +29,7 @@ SOFTWARE.
 #include <ostream>
 #include <thread>
 #include <vector>
+#include <cstdarg>
 
 #include "../size.h"
 #include "../buffer_streambuf.h"
@@ -159,7 +160,7 @@ namespace abc {
          * @param format Format.
          * @param vlist  Variable arguments.
          */
-        void put_anyv(const char* format, va_list vlist) noexcept;
+        void put_anyv(const char* format, std::va_list vlist) noexcept;
 
         /**
          * @brief               Puts a binary buffer.

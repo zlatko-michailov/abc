@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #include <cstddef>
+#include <cstdarg>
 
 #include "log.i.h"
 
@@ -77,7 +78,7 @@ namespace abc { namespace diag {
          * @param format    Message format.
          * @param vlist     Message arguments.
          */
-        void put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) const noexcept;
+        void put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) const noexcept;
 
         /**
          * @brief             Write binary buffer as a sequence of hexadecimal bytes.
@@ -115,7 +116,7 @@ namespace abc { namespace diag {
          * @param vlist      Message arguments.
          */
         template <typename Exception>
-        void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist) const;
+        void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, std::va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
@@ -137,7 +138,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
+        void assertv(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `expect_error` if `condition` is `false`.
@@ -159,7 +160,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
+        void expectv(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `ensure_error` if `condition` is `false`.
@@ -181,7 +182,7 @@ namespace abc { namespace diag {
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
-        void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
+        void ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
 
         /**
          * @brief            Throws an exception derived from `std::runtime_error` if `condition` is `false`.
@@ -207,7 +208,7 @@ namespace abc { namespace diag {
          * @param vlist      Message arguments.
          */
         template <typename Exception = std::runtime_error>
-        void requirev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const;
+        void requirev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
 
     protected:
         /**

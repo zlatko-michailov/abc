@@ -48,7 +48,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::put_any(const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) const noexcept {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         put_anyv(suborigin, severity, tag, format, vlist);
@@ -58,7 +58,7 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) const noexcept {
+    inline void diag_ready<OriginStr, LogPtr>::put_anyv(const char* suborigin, severity_t severity, tag_t tag, const char* format, std::va_list vlist) const noexcept {
         if (_log != nullptr) {
             _log->put_anyv(c_str(_origin), suborigin, severity, tag, format, vlist);
         }
@@ -84,7 +84,7 @@ namespace abc { namespace diag {
     template <typename OriginStr, typename LogPtr>
     template <typename Exception>
     inline void diag_ready<OriginStr, LogPtr>::throw_exception(const char* suborigin, tag_t tag, const char* format, ...) const {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         throw_exceptionv<Exception>(suborigin, tag, format, vlist);
@@ -95,7 +95,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     template <typename Exception>
-    inline void diag_ready<OriginStr, LogPtr>::throw_exceptionv(const char* suborigin, tag_t tag, const char* format, va_list vlist) const {
+    inline void diag_ready<OriginStr, LogPtr>::throw_exceptionv(const char* suborigin, tag_t tag, const char* format, std::va_list vlist) const {
         char message[size::k2];
         std::vsnprintf(message, sizeof(message) / sizeof(char), format, vlist);
 
@@ -105,7 +105,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         assertv(suborigin, condition, tag, format, vlist);
@@ -115,7 +115,7 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::assertv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
+    inline void diag_ready<OriginStr, LogPtr>::assertv(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
             throw_exceptionv<assert_error>(suborigin, tag, format, vlist);
         }
@@ -124,7 +124,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::expect(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         expectv(suborigin, condition, tag, format, vlist);
@@ -134,7 +134,7 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::expectv(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
+    inline void diag_ready<OriginStr, LogPtr>::expectv(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
             throw_exception<expect_error>(suborigin, tag, format, vlist);
         }
@@ -143,7 +143,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     inline void diag_ready<OriginStr, LogPtr>::ensure(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         ensurev(suborigin, condition, tag, format, vlist);
@@ -153,7 +153,7 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr, typename LogPtr>
-    inline void diag_ready<OriginStr, LogPtr>::ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
+    inline void diag_ready<OriginStr, LogPtr>::ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
             throw_exception<ensure_error>(suborigin, tag, format, vlist);
         }
@@ -163,7 +163,7 @@ namespace abc { namespace diag {
     template <typename OriginStr, typename LogPtr>
     template <typename Exception>
     inline void diag_ready<OriginStr, LogPtr>::require(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         requirev<Exception>(suborigin, condition, tag, format, vlist);
@@ -173,7 +173,7 @@ namespace abc { namespace diag {
 
     template <typename OriginStr, typename LogPtr>
     template <typename Exception>
-    inline void diag_ready<OriginStr, LogPtr>::requirev(const char* suborigin, bool condition, tag_t tag, const char* format, va_list vlist) const {
+    inline void diag_ready<OriginStr, LogPtr>::requirev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
             throw_exception<Exception>(suborigin, tag, format, vlist);
         }

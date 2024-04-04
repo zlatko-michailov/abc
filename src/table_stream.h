@@ -131,7 +131,7 @@ namespace abc {
 
 
     inline void line_ostream::put_any(const char* format, ...) noexcept {
-        va_list vlist;
+        std::va_list vlist;
         va_start(vlist, format);
 
         put_anyv(format, vlist);
@@ -140,8 +140,8 @@ namespace abc {
     }
 
 
-    inline void line_ostream::put_anyv(const char* format, va_list vlist) noexcept {
-        va_list vlist_copy;
+    inline void line_ostream::put_anyv(const char* format, std::va_list vlist) noexcept {
+        std::va_list vlist_copy;
         va_copy(vlist_copy, vlist);
         int pc = std::vsnprintf(nullptr, 0, format, vlist_copy);
 
