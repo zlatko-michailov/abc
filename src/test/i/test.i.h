@@ -50,25 +50,23 @@ namespace abc { namespace test {
 
 
     /**
-     * @brief         Temporary accessor passed into each test method to perform verification and logging.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Temporary accessor passed into each test method to perform verification and logging.
      */
-    template <typename LogPtr>
     class context 
-        : protected diag::diag_ready<const char*, LogPtr> {
+        : protected diag::diag_ready<const char*, diag::log_ostream*> {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, diag::log_ostream*>;
 
     public:
         /**
          * @brief               Constructor.
          * @param category_name Test category name.
          * @param method_name   Test method name.
-         * @param log           Pointer to a `log_ostream` instance.
+         * @param log           Pointer to a `diag::log_ostream` instance.
          * @param seed          Randomization seed. Used to repeat a previous test run.
          * @param process_path  The path to the test process.
          */
-        context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path);
+        context(const char* category_name, const char* method_name, diag::log_ostream* log, seed_t seed, const char* process_path);
 
         /**
          * @brief          Verifies an actual value matches the expected one.
@@ -109,9 +107,9 @@ namespace abc { namespace test {
 
     public:        
         /**
-         * @brief Returns the Log pointer.
+         * @brief Returns the `diag::log_ostream` pointer.
          */
-        const LogPtr& log() const noexcept;
+        diag::log_ostream* log() const noexcept;
     };
 
 
@@ -119,39 +117,29 @@ namespace abc { namespace test {
 
 
     /**
-     * @brief         Bare test method.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Bare test method.
      */
-    template <typename LogPtr>
-    using method = std::function<bool(context<LogPtr>&)>;
+    using method = std::function<bool(context&)>;
 
     /**
-     * @brief         Pair of a name and a test method.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Pair of a name and a test method.
      */
-    template <typename LogPtr>
-    using named_method = std::pair<std::string, method<LogPtr>>;
+    using named_method = std::pair<std::string, method>;
 
     /**
-     * @brief         Bare collection of named test methods.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Bare collection of named test methods.
      */
-    template <typename LogPtr>
-    using category = std::vector<named_method<LogPtr>>;
+    using category = std::vector<named_method>;
 
     /**
-     * @brief         Pair of a name and a collection of named test methods.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Pair of a name and a collection of named test methods.
      */
-    template <typename LogPtr>
-    using named_category = std::pair<std::string, category<LogPtr>>;
+    using named_category = std::pair<std::string, category>;
 
     /**
-     * @brief         Bare collection of named test categories.
-     * @tparam LogPtr Pointer to a logging facility.
+     * @brief Bare collection of named test categories.
      */
-    template <typename LogPtr>
-    using named_categories = std::vector<named_category<LogPtr>>;
+    using named_categories = std::vector<named_category>;
 
 
     // --------------------------------------------------------------
@@ -160,13 +148,12 @@ namespace abc { namespace test {
     /**
      * @brief              Complete test suite.
      * @tparam ProcessStr  String type for process_path.
-     * @tparam LogPtr      Pointer to a logging facility.
      */
-    template <typename ProcessStr, typename LogPtr>
+    template <typename ProcessStr>
     class suite
-        : protected diag::diag_ready<const char*, LogPtr> {
+        : protected diag::diag_ready<const char*, diag::log_ostream*> {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*, diag::log_ostream*>;
 
     public:
         /**
@@ -177,20 +164,20 @@ namespace abc { namespace test {
         /**
          * @brief              Constructor. Vector version.
          * @param categories   Collection of named categories.
-         * @param log          Pointer to a `log_ostream` instance.
+         * @param log          Pointer to a `diag::log_ostream` instance.
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(named_categories<LogPtr>&& categories, const LogPtr& log, seed_t seed, ProcessStr&& process_path);
+        suite(named_categories&& categories, diag::log_ostream* log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief              Constructor. initializer list version.
          * @param init         Initializer list of named categories.
-         * @param log          Pointer to a `log_ostream` instance.
+         * @param log          Pointer to a `diag::log_ostream` instance.
          * @param seed         Randomization seed. Used to repeat a previous test run.
          * @param process_path The path to the test process.
          */
-        suite(std::initializer_list<named_category<LogPtr>> init, const LogPtr& log, seed_t seed, ProcessStr&& process_path);
+        suite(std::initializer_list<named_category> init, diag::log_ostream* log, seed_t seed, ProcessStr&& process_path);
 
         /**
          * @brief  Executes all test methods of all test categories.
@@ -198,9 +185,9 @@ namespace abc { namespace test {
          */
         bool run() noexcept;
 
-        named_categories<LogPtr> categories;
-        seed_t                   seed;
-        ProcessStr               process_path;
+        named_categories categories;
+        seed_t           seed;
+        ProcessStr       process_path;
 
     private:
         void srand() noexcept;

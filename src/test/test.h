@@ -33,8 +33,7 @@ SOFTWARE.
 
 namespace abc { namespace test {
 
-    template <typename LogPtr>
-    context<LogPtr>::context(const char* category_name, const char* method_name, const LogPtr& log, seed_t seed, const char* process_path)
+    inline context::context(const char* category_name, const char* method_name, diag::log_ostream* log, seed_t seed, const char* process_path)
         : diag_base("abc::test::context", log)
         , category_name(category_name)
         , method_name(method_name)
@@ -46,9 +45,8 @@ namespace abc { namespace test {
     }
 
 
-    template <typename LogPtr>
     template <typename Value>
-    inline bool context<LogPtr>::are_equal(const Value& actual, const Value& expected, diag::tag_t tag, const char* format) {
+    inline bool context::are_equal(const Value& actual, const Value& expected, diag::tag_t tag, const char* format) {
         // Compare.
         bool are_equal = actual == expected;
 
@@ -67,8 +65,7 @@ namespace abc { namespace test {
     }
 
 
-    template <typename LogPtr>
-    inline bool context<LogPtr>::are_equal(const char* actual, const char* expected, diag::tag_t tag) {
+    inline bool context::are_equal(const char* actual, const char* expected, diag::tag_t tag) {
         // Compare.
         bool are_equal = std::strcmp(actual, expected) == 0;
 
@@ -87,8 +84,7 @@ namespace abc { namespace test {
     }
 
 
-    template <typename LogPtr>
-    inline bool context<LogPtr>::are_equal(const void* actual, const void* expected, std::size_t size, diag::tag_t tag) {
+    inline bool context::are_equal(const void* actual, const void* expected, std::size_t size, diag::tag_t tag) {
         // Compare.
         bool are_equal = std::memcmp(actual, expected, size) == 0;
 
@@ -120,8 +116,7 @@ namespace abc { namespace test {
     }
 
 
-    template <typename LogPtr>
-    inline const LogPtr& context<LogPtr>::log() const noexcept {
+    inline diag::log_ostream* context::log() const noexcept {
         return diag_base::log();
     }
 
@@ -129,8 +124,8 @@ namespace abc { namespace test {
     // --------------------------------------------------------------
 
 
-    template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(named_categories<LogPtr>&& categories, const LogPtr& log, seed_t seed, ProcessStr&& process_path)
+    template <typename ProcessStr>
+    inline suite<ProcessStr>::suite(named_categories&& categories, diag::log_ostream* log, seed_t seed, ProcessStr&& process_path)
         : diag_base("abc::test::suite", log)
         , categories(std::move(categories))
         , seed(seed)
@@ -138,8 +133,8 @@ namespace abc { namespace test {
     }
 
 
-    template <typename ProcessStr, typename LogPtr>
-    inline suite<ProcessStr, LogPtr>::suite(std::initializer_list<named_category<LogPtr>> init, const LogPtr& log, seed_t seed, ProcessStr&& process_path)
+    template <typename ProcessStr>
+    inline suite<ProcessStr>::suite(std::initializer_list<named_category> init, diag::log_ostream* log, seed_t seed, ProcessStr&& process_path)
         : diag_base("abc::test::suite", log)
         , categories(init.begin(), init.end())
         , seed(seed)
@@ -147,8 +142,8 @@ namespace abc { namespace test {
     }
 
 
-    template <typename ProcessStr, typename LogPtr>
-    inline bool suite<ProcessStr, LogPtr>::run() noexcept {
+    template <typename ProcessStr>
+    inline bool suite<ProcessStr>::run() noexcept {
         constexpr const char* suborigin = "run";
 
         srand();
@@ -172,7 +167,7 @@ namespace abc { namespace test {
                 diag_base::put_any(suborigin, diag::severity::warning, diag::tag::none, ">>   %s", method_itr->first.c_str());
 
                 try {
-                    context<LogPtr> context(category_itr->first.c_str(), method_itr->first.c_str(), diag_base::log(), seed, c_str(process_path));
+                    context context(category_itr->first.c_str(), method_itr->first.c_str(), diag_base::log(), seed, c_str(process_path));
 
                     // Execute
                     method_passed = method_itr->second(context);
@@ -226,8 +221,8 @@ namespace abc { namespace test {
     }
 
 
-    template <typename ProcessStr, typename LogPtr>
-    inline void suite<ProcessStr, LogPtr>::srand() noexcept {
+    template <typename ProcessStr>
+    inline void suite<ProcessStr>::srand() noexcept {
         if (seed == seed::random) {
             std::srand(static_cast<seed_t>(std::chrono::system_clock::now().time_since_epoch().count() % RAND_MAX));
             seed = std::rand();
