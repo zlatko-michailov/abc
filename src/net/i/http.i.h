@@ -123,18 +123,18 @@ namespace abc { namespace net { namespace http {
      */
     template <typename LogPtr = std::nullptr_t>
     class state
-        : protected diag::diag_ready<const char*, LogPtr> {
+        : protected diag::diag_ready<const char*> {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param next   Next item.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        state(const char* origin, http::item next, const LogPtr& log = nullptr) noexcept;
+        state(const char* origin, http::item next, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
@@ -187,7 +187,7 @@ namespace abc { namespace net { namespace http {
 
         using base       = abc::istream;
         using state_base = state<LogPtr>;
-        using diag_base  = diag::diag_ready<const char*, LogPtr>;
+        using diag_base  = diag::diag_ready<const char*>;
 
     protected:
         /**
@@ -195,9 +195,9 @@ namespace abc { namespace net { namespace http {
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
          * @param next   Next expected item.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        istream(const char* origin, std::streambuf* sb, http::item next, const LogPtr& log = nullptr);
+        istream(const char* origin, std::streambuf* sb, http::item next, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -353,7 +353,7 @@ namespace abc { namespace net { namespace http {
 
         using base       = abc::ostream;
         using state_base = state<LogPtr>;
-        using diag_base  = diag::diag_ready<const char*, LogPtr>;
+        using diag_base  = diag::diag_ready<const char*>;
 
     protected:
         /**
@@ -361,9 +361,9 @@ namespace abc { namespace net { namespace http {
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
          * @param next   Next expected item.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        ostream(const char* origin, std::streambuf* sb, http::item next, const LogPtr& log = nullptr);
+        ostream(const char* origin, std::streambuf* sb, http::item next, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -526,24 +526,24 @@ namespace abc { namespace net { namespace http {
         : public istream<LogPtr> {
 
         using base      = istream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        request_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_istream(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_istream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -600,24 +600,24 @@ namespace abc { namespace net { namespace http {
         : protected request_istream<LogPtr> {
 
         using base      = request_istream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        request_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_reader(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_reader(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -663,24 +663,24 @@ namespace abc { namespace net { namespace http {
         : public ostream<LogPtr> {
 
         using base      = ostream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        request_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_ostream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -743,24 +743,24 @@ namespace abc { namespace net { namespace http {
         : protected request_ostream<LogPtr> {
 
         using base      = request_ostream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        request_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        request_writer(std::streambuf* sb, const LogPtr& log = nullptr);
+        request_writer(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -806,24 +806,24 @@ namespace abc { namespace net { namespace http {
         : public istream<LogPtr> {
 
         using base      = istream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        response_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_istream(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_istream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -874,24 +874,24 @@ namespace abc { namespace net { namespace http {
         : protected response_istream<LogPtr> {
 
         using base      = response_istream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        response_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_reader(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_reader(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -937,24 +937,24 @@ namespace abc { namespace net { namespace http {
         : public ostream<LogPtr> {
 
         using base      = ostream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        response_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_ostream(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_ostream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -1009,24 +1009,24 @@ namespace abc { namespace net { namespace http {
         : protected response_ostream<LogPtr> {
 
         using base      = response_ostream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        response_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        response_writer(std::streambuf* sb, const LogPtr& log = nullptr);
+        response_writer(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -1076,9 +1076,9 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from and to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        client(std::streambuf* sb, const LogPtr& log = nullptr);
+        client(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -1108,9 +1108,9 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from and to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        server(std::streambuf* sb, const LogPtr& log = nullptr);
+        server(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.

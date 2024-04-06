@@ -514,7 +514,7 @@ class test_http_endpoint
     : public test_endpoint_base<abc::net::tcp_server_socket<LogPtr>, abc::net::tcp_client_socket<LogPtr>, LogPtr> {
 
     using base = test_endpoint_base<abc::net::tcp_server_socket<LogPtr>, abc::net::tcp_client_socket<LogPtr>, LogPtr>;
-    using diag_base = abc::diag::diag_ready<const char*, LogPtr>;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
     test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);
@@ -545,7 +545,7 @@ class test_https_endpoint
     : public test_endpoint_base<abc::net::openssl::tcp_server_socket<LogPtr>, abc::net::openssl::tcp_client_socket<LogPtr>, LogPtr> {
 
     using base = test_endpoint_base<abc::net::openssl::tcp_server_socket<LogPtr>, abc::net::openssl::tcp_client_socket<LogPtr>, LogPtr>;
-    using diag_base = abc::diag::diag_ready<const char*, LogPtr>;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
     test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);

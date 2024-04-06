@@ -193,17 +193,17 @@ namespace abc { namespace net { namespace http {
      */
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
     class endpoint
-        : protected diag::diag_ready<const char*, LogPtr>  {
+        : protected diag::diag_ready<const char*>  {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
          * @brief        Constructor.
          * @param config `endpoint_config` instance
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        endpoint(endpoint_config&& config, const LogPtr& log);
+        endpoint(endpoint_config&& config, diag::log_ostream* log);
 
         /**
          * @brief Move Constructor.
@@ -220,9 +220,9 @@ namespace abc { namespace net { namespace http {
          * @brief        Constructor.
          * @param origin Origin.
          * @param config `endpoint_config` instance
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        endpoint(const char* origin, endpoint_config&& config, const LogPtr& log);
+        endpoint(const char* origin, endpoint_config&& config, diag::log_ostream* log);
 
     public:
         /**

@@ -48,16 +48,16 @@ namespace abc { namespace net { namespace openssl {
         : public net::tcp_client_socket<LogPtr> {
     
         using base = net::tcp_client_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
          * @brief               Constructor.
          * @param verify_server Allows the client to accept self-signed certificates.
          * @param family        IPv4 or IPv6.
-         * @param log           `LogPtr` pointer. May be `nullptr`.
+         * @param log           `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_client_socket(bool verify_server = true, socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        tcp_client_socket(bool verify_server = true, socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -113,9 +113,9 @@ namespace abc { namespace net { namespace openssl {
          * @param ctx           OpenSSL server context.
          * @param verify_server Allows the client to accept self-signed certificates.
          * @param family        IPv4 or IPv6.
-         * @param log           `LogPtr` pointer. May be `nullptr`.
+         * @param log           `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, const LogPtr& log);
+        tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, diag::log_ostream* log);
 
         /**
          * @brief Does the TLS handshake after the base socket has been connected.
@@ -152,7 +152,7 @@ namespace abc { namespace net { namespace openssl {
         : public net::tcp_server_socket<LogPtr> {
 
         using base = net::tcp_server_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
@@ -162,9 +162,9 @@ namespace abc { namespace net { namespace openssl {
          * @param pkey_file_password Password for the private key file.
          * @param verify_client      Allows the server to require client a certificate.
          * @param family             IPv4 or IPv6.
-         * @param log                `LogPtr` pointer. May be `nullptr`.
+         * @param log                `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client = false, socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client = false, socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.

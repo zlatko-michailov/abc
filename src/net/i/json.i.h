@@ -77,66 +77,66 @@ namespace abc { namespace net { namespace json {
      */
     template <typename LogPtr = std::nullptr_t>
     class value
-        : diag::diag_ready<const char*, LogPtr> {
+        : diag::diag_ready<const char*> {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
         const char* _origin = "abc::net::json::value";
 
     public:
         /**
          * @brief     Constructor - empty value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(const LogPtr& log = nullptr) noexcept;
+        value(diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - null value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::null, const LogPtr& log = nullptr) noexcept;
+        value(literal::null, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - boolean value.
          * @param b   Boolean value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::boolean b, const LogPtr& log = nullptr) noexcept;
+        value(literal::boolean b, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - number value.
          * @param n   Number value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::number n, const LogPtr& log = nullptr) noexcept;
+        value(literal::number n, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - string value.
          * @param str String value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(const char* str, const LogPtr& log = nullptr);
+        value(const char* str, diag::log_ostream* log = nullptr);
 
         /**
          * @brief     Constructor - string value.
          * @param str String value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::string&& str, const LogPtr& log = nullptr) noexcept;
+        value(literal::string&& str, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - array value.
          * @param arr Array value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::_array<value<LogPtr>>&& arr, const LogPtr& log = nullptr) noexcept;
+        value(literal::_array<value<LogPtr>>&& arr, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - object value.
          * @param obj Object value.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::_object<value<LogPtr>>&& obj, const LogPtr& log = nullptr) noexcept;
+        value(literal::_object<value<LogPtr>>&& obj, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Copy constructor.
@@ -335,17 +335,17 @@ namespace abc { namespace net { namespace json {
      */
     template <typename LogPtr = std::nullptr_t>
     class state
-        : protected diag::diag_ready<const char*, LogPtr> {
+        : protected diag::diag_ready<const char*> {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        state(const char* origin, const LogPtr& log = nullptr);
+        state(const char* origin, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -424,24 +424,24 @@ namespace abc { namespace net { namespace json {
 
         using base       = abc::istream;
         using state_base = state<LogPtr>;
-        using diag_base  = diag::diag_ready<const char*, LogPtr>;
+        using diag_base  = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        istream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        istream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        istream(std::streambuf* sb, const LogPtr& log = nullptr);
+        istream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -560,24 +560,24 @@ namespace abc { namespace net { namespace json {
         : protected istream<LogPtr> {
 
         using base      = istream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to read from.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        reader(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        reader(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        reader(std::streambuf* sb, const LogPtr& log = nullptr);
+        reader(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -635,24 +635,24 @@ namespace abc { namespace net { namespace json {
 
         using base       = abc::ostream;
         using state_base = state<LogPtr>;
-        using diag_base  = diag::diag_ready<const char*, LogPtr>;
+        using diag_base  = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        ostream(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to write to.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        ostream(std::streambuf* sb, const LogPtr& log = nullptr);
+        ostream(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -795,24 +795,24 @@ namespace abc { namespace net { namespace json {
         : protected ostream<LogPtr> {
 
         using base      = ostream<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
          * @brief        Constructor.
          * @param origin Origin.
          * @param sb     `std::streambuf` to write to.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        writer(const char* origin, std::streambuf* sb, const LogPtr& log = nullptr);
+        writer(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
 
     public:
         /**
          * @brief     Constructor.
          * @param sb  `std::streambuf` to read from.
-         * @param log `LogPtr` pointer. May be `nullptr`.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        writer(std::streambuf* sb, const LogPtr& log = nullptr);
+        writer(std::streambuf* sb, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.

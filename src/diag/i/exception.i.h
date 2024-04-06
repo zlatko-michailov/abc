@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstddef>
 #include <stdexcept>
 
+#include "log.i.h"
 #include "../tag.h"
 
 
@@ -48,9 +49,8 @@ namespace abc { namespace diag {
     /**
      * @brief            Wrapper around `Exception` that logs upon constructions to track the origin of the exception.
      * @tparam Exception Base exception type.
-     * @tparam Log       Logging facility.
      */
-    template <typename Exception, typename LogPtr = std::nullptr_t>
+    template <typename Exception>
     class exception
         : public Exception {
 
@@ -63,7 +63,7 @@ namespace abc { namespace diag {
          * @param message   Error message.
          * @param log       Pointer to a `log_ostream` instance.
          */
-        exception(const char* origin, const char* suborigin, tag_t tag, const char* message, const LogPtr& log = nullptr);
+        exception(const char* origin, const char* suborigin, tag_t tag, const char* message, log_ostream* log = nullptr);
 
         /**
          * @brief Copy constructor.

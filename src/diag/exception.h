@@ -31,8 +31,8 @@ SOFTWARE.
 
 namespace abc { namespace diag {
 
-    template <typename Exception, typename LogPtr>
-    inline exception<Exception, LogPtr>::exception(const char* origin, const char* suborigin, tag_t tag, const char* message, const LogPtr& log)
+    template <typename Exception>
+    inline exception<Exception>::exception(const char* origin, const char* suborigin, tag_t tag, const char* message, log_ostream* log)
         : Exception(message)
         , _tag(tag) {
 
@@ -42,8 +42,8 @@ namespace abc { namespace diag {
     }
 
 
-    template <typename Exception, typename LogPtr>
-    inline tag_t exception<Exception, LogPtr>::tag() const noexcept {
+    template <typename Exception>
+    inline tag_t exception<Exception>::tag() const noexcept {
         return _tag;
     }
 

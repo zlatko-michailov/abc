@@ -30,13 +30,14 @@ SOFTWARE.
 #include "../ascii.h"
 #include "../util.h"
 #include "../stream.h"
+#include "../diag/diag_ready.h"
 #include "i/http.i.h"
 
 
 namespace abc { namespace net { namespace http {
 
     template <typename LogPtr>
-    inline state<LogPtr>::state(const char* origin, item next, const LogPtr& log) noexcept
+    inline state<LogPtr>::state(const char* origin, item next, diag::log_ostream* log) noexcept
         : diag_base(copy(origin), log)
         , _next(next) {
 
@@ -79,7 +80,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item next, const LogPtr& log)
+    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -437,7 +438,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item next, const LogPtr& log)
+    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -766,7 +767,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_istream<LogPtr>::request_istream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline request_istream<LogPtr>::request_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_istream()";
@@ -777,7 +778,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_istream<LogPtr>::request_istream(std::streambuf* sb, const LogPtr& log)
+    inline request_istream<LogPtr>::request_istream(std::streambuf* sb, diag::log_ostream* log)
         : request_istream("abc::net::http::request_istream", sb, log) {
     }
 
@@ -924,7 +925,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_reader<LogPtr>::request_reader(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline request_reader<LogPtr>::request_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_reader()";
@@ -935,7 +936,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_reader<LogPtr>::request_reader(std::streambuf* sb, const LogPtr& log)
+    inline request_reader<LogPtr>::request_reader(std::streambuf* sb, diag::log_ostream* log)
         : request_reader("abc::net::http::request_reader", sb, log) {
     }
 
@@ -980,7 +981,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_ostream<LogPtr>::request_ostream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline request_ostream<LogPtr>::request_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_ostream()";
@@ -991,7 +992,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_ostream<LogPtr>::request_ostream(std::streambuf* sb, const LogPtr& log)
+    inline request_ostream<LogPtr>::request_ostream(std::streambuf* sb, diag::log_ostream* log)
         : request_ostream("abc::net::http::request_ostream", sb, log) {
     }
 
@@ -1123,7 +1124,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_writer<LogPtr>::request_writer(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline request_writer<LogPtr>::request_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_writer()";
@@ -1134,7 +1135,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline request_writer<LogPtr>::request_writer(std::streambuf* sb, const LogPtr& log)
+    inline request_writer<LogPtr>::request_writer(std::streambuf* sb, diag::log_ostream* log)
         : request_writer("abc::net::http::request_writer", sb, log) {
     }
 
@@ -1179,7 +1180,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline response_istream<LogPtr>::response_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_istream()";
@@ -1190,7 +1191,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(std::streambuf* sb, const LogPtr& log)
+    inline response_istream<LogPtr>::response_istream(std::streambuf* sb, diag::log_ostream* log)
         : response_istream("abc::net::http::response_istream", sb, log) {
     }
 
@@ -1271,7 +1272,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_reader<LogPtr>::response_reader(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline response_reader<LogPtr>::response_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_reader()";
@@ -1282,7 +1283,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_reader<LogPtr>::response_reader(std::streambuf* sb, const LogPtr& log)
+    inline response_reader<LogPtr>::response_reader(std::streambuf* sb, diag::log_ostream* log)
         : response_reader("abc::net::http::response_reader", sb, log) {
     }
 
@@ -1327,7 +1328,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline response_ostream<LogPtr>::response_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_ostream()";
@@ -1338,7 +1339,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(std::streambuf* sb, const LogPtr& log)
+    inline response_ostream<LogPtr>::response_ostream(std::streambuf* sb, diag::log_ostream* log)
         : response_ostream("abc::net::http::response_ostream", sb, log) {
     }
 
@@ -1422,7 +1423,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_writer<LogPtr>::response_writer(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline response_writer<LogPtr>::response_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_writer()";
@@ -1433,7 +1434,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline response_writer<LogPtr>::response_writer(std::streambuf* sb, const LogPtr& log)
+    inline response_writer<LogPtr>::response_writer(std::streambuf* sb, diag::log_ostream* log)
         : response_writer("abc::net::http::response_writer", sb, log) {
     }
 
@@ -1478,7 +1479,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline client<LogPtr>::client(std::streambuf* sb, const LogPtr& log)
+    inline client<LogPtr>::client(std::streambuf* sb, diag::log_ostream* log)
         : request_writer<LogPtr>(sb, log)
         , response_reader<LogPtr>(sb, log) {
     }
@@ -1495,7 +1496,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename LogPtr>
-    inline server<LogPtr>::server(std::streambuf* sb, const LogPtr& log)
+    inline server<LogPtr>::server(std::streambuf* sb, diag::log_ostream* log)
         : request_reader<LogPtr>(sb, log)
         , response_writer<LogPtr>(sb, log) {
     }

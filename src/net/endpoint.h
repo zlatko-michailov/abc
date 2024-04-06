@@ -46,13 +46,13 @@ SOFTWARE.
 namespace abc { namespace net { namespace http {
 
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(endpoint_config&& config, const LogPtr& log)
+    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(endpoint_config&& config, diag::log_ostream* log)
         : endpoint("abc::net::http::endpoint", std::move(config), log) {
     }
 
 
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(const char* origin, endpoint_config&& config, const LogPtr& log)
+    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(const char* origin, endpoint_config&& config, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _config(std::move(config))
         , _requests_in_progress(0)

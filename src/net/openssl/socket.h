@@ -35,7 +35,7 @@ SOFTWARE.
 namespace abc { namespace net { namespace openssl {
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(bool verify_server, socket::family family, const LogPtr& log)
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(bool verify_server, socket::family family, diag::log_ostream* log)
         : base("abc::net::openssl::tcp_client_socket", family, log)
         , _verify_server(verify_server) {
 
@@ -76,7 +76,7 @@ namespace abc { namespace net { namespace openssl {
 
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, const LogPtr& log)
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, diag::log_ostream* log)
         : base("abc::net::openssl::tcp_client_socket", fd, family, log)
         , _verify_server(verify_server) {
 
@@ -226,7 +226,7 @@ namespace abc { namespace net { namespace openssl {
 
 
     template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family family, const LogPtr& log)
+    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family family, diag::log_ostream* log)
         : base(family, log)
         , _verify_client(verify_client) {
 

@@ -53,9 +53,9 @@ namespace abc { namespace test {
      * @brief Temporary accessor passed into each test method to perform verification and logging.
      */
     class context 
-        : protected diag::diag_ready<const char*, diag::log_ostream*> {
+        : protected diag::diag_ready<const char*> {
 
-        using diag_base = diag::diag_ready<const char*, diag::log_ostream*>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
@@ -151,9 +151,9 @@ namespace abc { namespace test {
      */
     template <typename ProcessStr>
     class suite
-        : protected diag::diag_ready<const char*, diag::log_ostream*> {
+        : protected diag::diag_ready<const char*> {
 
-        using diag_base = diag::diag_ready<const char*, diag::log_ostream*>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**

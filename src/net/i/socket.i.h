@@ -99,9 +99,9 @@ namespace abc { namespace net {
      */
     template <typename LogPtr = std::nullptr_t>
     class basic_socket
-        : protected diag::diag_ready<const char*, LogPtr>  {
+        : protected diag::diag_ready<const char*>  {
 
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
@@ -109,9 +109,9 @@ namespace abc { namespace net {
          * @param origin Origin.
          * @param kind   Stream or datagram.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        basic_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log = nullptr);
+        basic_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log = nullptr);
 
         /**
          * @brief        Constructor.
@@ -119,9 +119,9 @@ namespace abc { namespace net {
          * @param fd     Socket descriptor.
          * @param kind   Stream or datagram.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log = nullptr);
+        basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -260,7 +260,7 @@ namespace abc { namespace net {
         : public basic_socket<LogPtr> {
 
         using base = basic_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     protected:
         /**
@@ -268,9 +268,9 @@ namespace abc { namespace net {
          * @param origin Origin.
          * @param kind   Stream or datagram.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        client_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log = nullptr);
+        client_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log = nullptr);
 
         /**
          * @brief        Constructor.
@@ -278,9 +278,9 @@ namespace abc { namespace net {
          * @param fd     Socket descriptor.
          * @param kind   Stream or datagram.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log = nullptr);
+        client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -338,15 +338,15 @@ namespace abc { namespace net {
         : public client_socket<LogPtr> {
 
         using base = client_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
          * @brief        Constructor.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        udp_socket(socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        udp_socket(socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -376,15 +376,15 @@ namespace abc { namespace net {
         : public client_socket<LogPtr> {
 
         using base = client_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
          * @brief        Constructor.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_client_socket(socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        tcp_client_socket(socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -401,9 +401,9 @@ namespace abc { namespace net {
          * @brief        Internal constructor for accepted connections.
          * @param origin Origin.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_client_socket(const char* origin, socket::family family, const LogPtr& log);
+        tcp_client_socket(const char* origin, socket::family family, diag::log_ostream* log);
 
     protected:
         friend tcp_server_socket<LogPtr>;
@@ -413,9 +413,9 @@ namespace abc { namespace net {
          * @param origin Origin.
          * @param fd     Descriptor.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, const LogPtr& log);
+        tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log);
     };
 
 
@@ -431,15 +431,15 @@ namespace abc { namespace net {
         : public basic_socket<LogPtr> {
 
         using base = basic_socket<LogPtr>;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
          * @brief        Constructor.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_server_socket(socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        tcp_server_socket(socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -456,9 +456,9 @@ namespace abc { namespace net {
          * @brief        Constructor.
          * @param origin Origin.
          * @param family IPv4 or IPv6.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        tcp_server_socket(const char* origin, socket::family family = socket::family::ipv4, const LogPtr& log = nullptr);
+        tcp_server_socket(const char* origin, socket::family family = socket::family::ipv4, diag::log_ostream* log = nullptr);
 
     public:
         /**
@@ -493,10 +493,10 @@ namespace abc { namespace net {
     template <typename SocketPtr, typename LogPtr = std::nullptr_t>
     class socket_streambuf
         : public std::streambuf
-        , protected diag::diag_ready<const char*, LogPtr> {
+        , protected diag::diag_ready<const char*> {
         
         using base = std::streambuf;
-        using diag_base = diag::diag_ready<const char*, LogPtr>;
+        using diag_base = diag::diag_ready<const char*>;
 
         static constexpr std::size_t retry_count = 5;
 
@@ -504,9 +504,9 @@ namespace abc { namespace net {
         /**
          * @brief        Constructor.
          * @param socket `client_socket` pointer.
-         * @param log    `LogPtr` pointer. May be `nullptr`.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        socket_streambuf(const SocketPtr& socket, const LogPtr& log = nullptr);
+        socket_streambuf(const SocketPtr& socket, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.

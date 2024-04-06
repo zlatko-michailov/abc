@@ -36,9 +36,8 @@ namespace abc { namespace diag {
     /**
      * @brief            Diagnostics facility used by classes.
      * @tparam OriginStr String type for origin.
-     * @tparam LogPtr    Pointer type to `log_ostream`.
      */
-    template <typename OriginStr, typename LogPtr = std::nullptr_t>
+    template <typename OriginStr>
     class diag_ready {
 
     protected:
@@ -47,7 +46,7 @@ namespace abc { namespace diag {
          * @param origin  Origin string.
          * @param log     Log pointer.
          */
-        diag_ready(OriginStr&& origin, const LogPtr& log) noexcept;
+        diag_ready(OriginStr&& origin, log_ostream* log) noexcept;
 
         /**
          * @brief Move constructor.
@@ -214,11 +213,11 @@ namespace abc { namespace diag {
         /**
          * @brief Returns the Log pointer.
          */
-        const LogPtr& log() const noexcept;
+        log_ostream* log() const noexcept;
 
     private:
-        OriginStr _origin;
-        LogPtr _log;
+        OriginStr    _origin;
+        log_ostream* _log;
     };
 
 } }

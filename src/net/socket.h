@@ -36,13 +36,13 @@ SOFTWARE.
 namespace abc { namespace net {
 
     template <typename LogPtr>
-    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log)
+    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
         : basic_socket(origin, socket::fd::invalid, kind, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log)
+    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _kind(kind)
         , _family(family)
@@ -302,13 +302,13 @@ namespace abc { namespace net {
 
 
     template <typename LogPtr>
-    inline client_socket<LogPtr>::client_socket(const char* origin, socket::kind kind, socket::family family, const LogPtr& log)
+    inline client_socket<LogPtr>::client_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
         : base(origin, kind, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline client_socket<LogPtr>::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, const LogPtr& log)
+    inline client_socket<LogPtr>::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
         : base(origin, fd, kind, family, log) {
     }
 
@@ -399,7 +399,7 @@ namespace abc { namespace net {
 
 
     template <typename LogPtr>
-    inline udp_socket<LogPtr>::udp_socket(socket::family family, const LogPtr& log)
+    inline udp_socket<LogPtr>::udp_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::udp_socket", socket::kind::dgram, family, log) {
     }
 
@@ -408,19 +408,19 @@ namespace abc { namespace net {
 
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family family, const LogPtr& log)
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::tcp_client_socket", socket::kind::stream, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::family family, const LogPtr& log)
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::family family, diag::log_ostream* log)
         : base(origin, socket::kind::stream, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, const LogPtr& log)
+    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log)
         : base(origin, fd, socket::kind::stream, family, log) {
     }
 
@@ -429,13 +429,13 @@ namespace abc { namespace net {
 
 
     template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family family, const LogPtr& log)
+    inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::tcp_server_socket", socket::kind::stream, family, log) {
     }
 
 
     template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* origin, socket::family family, const LogPtr& log)
+    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* origin, socket::family family, diag::log_ostream* log)
         : base(origin, socket::kind::stream, family, log) {
     }
 
@@ -480,7 +480,7 @@ namespace abc { namespace net {
 
 
     template <typename SocketPtr, typename LogPtr>
-    inline socket_streambuf<SocketPtr, LogPtr>::socket_streambuf(const SocketPtr& socket, const LogPtr& log)
+    inline socket_streambuf<SocketPtr, LogPtr>::socket_streambuf(const SocketPtr& socket, diag::log_ostream* log)
         : base()
         , diag_base("abc::net::socket_streambuf", log)
         , _socket(socket) {

@@ -39,21 +39,21 @@ SOFTWARE.
 namespace abc { namespace net { namespace json {
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(const LogPtr& log) noexcept
+    inline value<LogPtr>::value(diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::empty) {
     }
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::null, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::null, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::null) {
     }
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::boolean b, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::boolean b, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::boolean)
         , _boolean(b) {
@@ -61,7 +61,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::number n, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::number n, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::number)
         , _number(n) {
@@ -69,13 +69,13 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(const char* str, const LogPtr& log)
+    inline value<LogPtr>::value(const char* str, diag::log_ostream* log)
         : value(std::string(str), log) {
     }
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::string&& str, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::string&& str, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::string)
         , _string(std::move(str)) {
@@ -83,7 +83,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::array<LogPtr>&& arr, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::array<LogPtr>&& arr, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::array)
         , _array(std::move(arr)) {
@@ -91,7 +91,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline value<LogPtr>::value(literal::object<LogPtr>&& obj, const LogPtr& log) noexcept
+    inline value<LogPtr>::value(literal::object<LogPtr>&& obj, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::object)
         , _object(std::move(obj)) {
@@ -346,7 +346,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline state<LogPtr>::state(const char* origin, const LogPtr& log)
+    inline state<LogPtr>::state(const char* origin, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _expect_property(false) {
 
@@ -363,7 +363,9 @@ namespace abc { namespace net { namespace json {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         _expect_property = false;
-        _nest_stack.c.clear();
+        while (!_nest_stack.empty()) {
+            _nest_stack.pop();
+        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -430,7 +432,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, log) {
 
@@ -442,7 +444,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline istream<LogPtr>::istream(std::streambuf* sb, const LogPtr& log)
+    inline istream<LogPtr>::istream(std::streambuf* sb, diag::log_ostream* log)
         : istream("abc::net::json::istream", sb, log) {
     }
 
@@ -831,7 +833,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline reader<LogPtr>::reader(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline reader<LogPtr>::reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "reader()";
@@ -842,7 +844,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline reader<LogPtr>::reader(std::streambuf* sb, const LogPtr& log)
+    inline reader<LogPtr>::reader(std::streambuf* sb, diag::log_ostream* log)
         : reader("abc::net::json::reader", sb, log) {
     }
 
@@ -964,7 +966,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, log)
         , _skip_comma(false) {
@@ -977,7 +979,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(std::streambuf* sb, const LogPtr& log)
+    inline ostream<LogPtr>::ostream(std::streambuf* sb, diag::log_ostream* log)
         : ostream("abc::net::json::ostream", sb, log) {
     }
 
@@ -1314,7 +1316,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline writer<LogPtr>::writer(const char* origin, std::streambuf* sb, const LogPtr& log)
+    inline writer<LogPtr>::writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "writer()";
@@ -1325,7 +1327,7 @@ namespace abc { namespace net { namespace json {
 
 
     template <typename LogPtr>
-    inline writer<LogPtr>::writer(std::streambuf* sb, const LogPtr& log)
+    inline writer<LogPtr>::writer(std::streambuf* sb, diag::log_ostream* log)
         : writer("abc::net::json::writer", sb, log) {
     }
 
