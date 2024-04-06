@@ -20,7 +20,9 @@
     - Test
     - Doc
 - `log_ostream`
-    - Un-templatize `line_ostream`.
+    - Finish untemplatizing `..._line_ostream`.
+        - Remove the `Line` template parameter from `log_ostream`.
+        - ? Remove `log_ostream::line()` if it is not used. 
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`
     - Make the override methods of `xxx_line_ostream` flush!

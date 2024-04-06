@@ -148,10 +148,9 @@ namespace abc { namespace diag {
 
     /**
      * @brief        `line_ostream` specialization for debug logging.
-     * @tparam Size  Maximum line size.
      * @tparam Clock Clock for obtaining a timestamp.
      */
-    template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
+    template <typename Clock = std::chrono::system_clock>
     class debug_line_ostream
         : public log_line_ostream {
 
@@ -231,10 +230,9 @@ namespace abc { namespace diag {
 
     /**
      * @brief        `line_ostream` specialization for diagnostic logging.
-     * @tparam Size  Maximum line size.
      * @tparam Clock Clock for obtaining a timestamp.
      */
-    template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
+    template <typename Clock = std::chrono::system_clock>
     class diag_line_ostream
         : public log_line_ostream {
 
@@ -314,10 +312,9 @@ namespace abc { namespace diag {
 
     /**
      * @brief        `line_ostream` specialization for test logging.
-     * @tparam Size  Maximum line size.
      * @tparam Clock Clock for obtaining a timestamp.
      */
-    template <std::size_t Size = size::k2, typename Clock = std::chrono::system_clock>
+    template <typename Clock = std::chrono::system_clock>
     class test_line_ostream
         : public log_line_ostream {
 
@@ -565,11 +562,6 @@ namespace abc { namespace diag {
          * @param severity Entry severity.
          */
         void put_blank_line(const char* origin, severity_t severity) noexcept;
-
-        /**
-         * @brief Returns a new line.
-         */
-        line_type line() const noexcept;
 
     private:
         /**

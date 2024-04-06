@@ -69,7 +69,7 @@ bool test_line_debug(test_context& context) {
     bool passed = true;
 
     {
-        abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::debug_line_ostream<test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
         line.flush();
         passed = verify_stream_good(context, line, 0x102b4) && passed;
@@ -82,7 +82,7 @@ bool test_line_debug(test_context& context) {
     passed = verify_stream_good(context, table, 0x102b6) && passed;
 
     {
-        abc::diag::debug_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::debug_line_ostream<test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
         line.flush();
         passed = verify_stream_good(context, line, 0x102b7) && passed;
@@ -137,7 +137,7 @@ bool test_line_diag(test_context& context) {
     bool passed = true;
 
     {
-        abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::diag_line_ostream<test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
         line.flush();
         passed = verify_stream_good(context, line, 0x102bc) && passed;
@@ -150,7 +150,7 @@ bool test_line_diag(test_context& context) {
     passed = verify_stream_good(context, table, 0x102be) && passed;
 
     {
-        abc::diag::diag_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::diag_line_ostream<test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
         line.flush();
         passed = verify_stream_good(context, line, 0x102bf) && passed;
@@ -203,7 +203,7 @@ bool test_line_test(test_context& context) {
     bool passed = true;
 
     {
-        abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::test_line_ostream<test_clock> line(&table);
         line.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x1111, "%u %u %u", 1, 2, 3);
         line.flush();
         passed = verify_stream_good(context, line, 0x102c5) && passed;
@@ -216,7 +216,7 @@ bool test_line_test(test_context& context) {
     passed = verify_stream_good(context, table, 0x102c7) && passed;
 
     {
-        abc::diag::test_line_ostream<abc::size::k2, test_clock> line(&table);
+        abc::diag::test_line_ostream<test_clock> line(&table);
         line.put_binary("origin_5", "suborigin_6", abc::diag::severity::optional, 0x3333, binary, sizeof(binary));
         line.flush();
         passed = verify_stream_good(context, line, 0x102c8) && passed;
@@ -258,7 +258,7 @@ bool test_table_move(test_context& context) {
 
 bool test_log_move(test_context& context) {
     using Filter = test_log_filter;
-    using Line = abc::diag::test_line_ostream<abc::size::k2, test_clock>;
+    using Line = abc::diag::test_line_ostream<test_clock>;
     using Log = abc::diag::log_ostream<Line>;
 
     char actual[abc::size::_256 + 1] = { };
@@ -335,7 +335,7 @@ bool _test_line_move(test_context& context, const char* line1_pattern, const cha
 
 
 bool test_line_debug_move(test_context& context) {
-    using Line = abc::diag::debug_line_ostream<abc::size::k1, test_clock>;
+    using Line = abc::diag::debug_line_ostream<test_clock>;
 
     const char* line1_pattern = "2020-10-15 12:34:56.789 | %16s | 1 |                1 | origin_1 | suborigin_2 | first\n";
     const char* line2_pattern = "2020-10-15 12:34:56.789 | %16s | 1 |                1 | origin_1 | suborigin_2 | first\n2020-10-15 12:34:56.789 | %16s | 3 |                2 | origin_3 | suborigin_4 | second\n";
@@ -345,7 +345,7 @@ bool test_line_debug_move(test_context& context) {
 
 
 bool test_line_diag_move(test_context& context) {
-    using Line = abc::diag::diag_line_ostream<abc::size::k1, test_clock>;
+    using Line = abc::diag::diag_line_ostream<test_clock>;
 
     const char* line1_pattern = "2020-10-15T12:34:56.789Z,%s,1,1,origin_1,suborigin_2,first\n";
     const char* line2_pattern = "2020-10-15T12:34:56.789Z,%s,1,1,origin_1,suborigin_2,first\n2020-10-15T12:34:56.789Z,%s,3,2,origin_3,suborigin_4,second\n";
@@ -355,7 +355,7 @@ bool test_line_diag_move(test_context& context) {
 
 
 bool test_line_test_move(test_context& context) {
-    using Line = abc::diag::test_line_ostream<abc::size::k1, test_clock>;
+    using Line = abc::diag::test_line_ostream<test_clock>;
 
     const char* line1_pattern = "2020-10-15 12:34:56.789 origin_1::suborigin_2 [0x1] first\n";
     const char* line2_pattern = "2020-10-15 12:34:56.789 origin_1::suborigin_2 [0x1] first\n2020-10-15 12:34:56.789     origin_3::suborigin_4 [0x2] second\n";
