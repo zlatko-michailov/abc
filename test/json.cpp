@@ -105,7 +105,7 @@ bool test_json_value_array_simple(test_context& context) {
         abc::net::json::value<test_log*>("xyz",   context.log()),
     };
 
-    abc::net::json::value<test_log*> value(copy(arr), context.log());
+    abc::net::json::value<test_log*> value(abc::copy(arr), context.log());
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
@@ -133,7 +133,7 @@ bool test_json_value_object_simple(test_context& context) {
         { "string",  abc::net::json::value<test_log*>("xyz",   context.log()) },
     };
 
-    abc::net::json::value<test_log*> value(copy(obj), context.log());
+    abc::net::json::value<test_log*> value(abc::copy(obj), context.log());
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
@@ -162,12 +162,12 @@ bool test_json_value_array_complex(test_context& context) {
     };
 
     const abc::net::json::literal::array<test_log*> complex_arr {
-        abc::net::json::value<test_log*>(copy(arr), context.log()),
-        abc::net::json::value<test_log*>(copy(arr), context.log()),
-        abc::net::json::value<test_log*>(copy(arr), context.log()),
+        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
+        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
+        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
     };
 
-    abc::net::json::value<test_log*> value(copy(complex_arr), context.log());
+    abc::net::json::value<test_log*> value(abc::copy(complex_arr), context.log());
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
@@ -199,12 +199,12 @@ bool test_json_value_object_complex(test_context& context) {
     };
 
     const abc::net::json::literal::object<test_log*> complex_obj {
-        { "one",   abc::net::json::value<test_log*>(copy(obj), context.log()) },
-        { "two",   abc::net::json::value<test_log*>(copy(obj), context.log()) },
-        { "three", abc::net::json::value<test_log*>(copy(obj), context.log()) },
+        { "one",   abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
+        { "two",   abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
+        { "three", abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
     };
 
-    abc::net::json::value<test_log*> value(copy(complex_obj), context.log());
+    abc::net::json::value<test_log*> value(abc::copy(complex_obj), context.log());
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 

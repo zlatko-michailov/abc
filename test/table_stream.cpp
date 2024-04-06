@@ -257,24 +257,20 @@ bool test_table_move(test_context& context) {
 
 
 bool test_log_move(test_context& context) {
-    using Filter = test_log_filter;
-    using Line = abc::diag::test_line_ostream<test_clock>;
-    using Log = abc::diag::log_ostream<Line>;
-
     char actual[abc::size::_256 + 1] = { };
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 
     abc::table_ostream table(&sb);
-    Line line(&table);
-    Filter filter("", abc::diag::severity::optional);
+    abc::diag::test_line_ostream<test_clock> line(&table);
+    test_log_filter filter("", abc::diag::severity::optional);
 
-    Log os1(&line, &filter);
+    abc::diag::log_ostream os1(&line, &filter);
     os1.put_any("origin1", "suborigin1()", abc::diag::severity::critical, 91, "format1");
     passed = context.are_equal(actual, "2020-10-15 12:34:56.789 origin1::suborigin1() [0x5b] format1\n", 0x10733) && passed;
 
-    Log os2(std::move(os1));
+    abc::diag::log_ostream os2(std::move(os1));
     os1.put_any("origin2", "suborigin2()", abc::diag::severity::important, 92, "format2");
     passed = context.are_equal(actual, "2020-10-15 12:34:56.789 origin1::suborigin1() [0x5b] format1\n2020-10-15 12:34:56.789     origin2::suborigin2() [0x5c] format2\n", 0x10734) && passed;
 

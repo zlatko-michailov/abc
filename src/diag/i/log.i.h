@@ -489,14 +489,9 @@ namespace abc { namespace diag {
 
 
     /**
-     * @brief       `table_ostream` specialization for logging.
-     * @tparam Line `line_ostream` specialization.
+     * @brief `table_ostream` specialization for logging.
      */
-    template <typename Line>
     class log_ostream {
-
-    public:
-        using line_type = Line;
 
     public:
         /**

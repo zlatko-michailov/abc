@@ -314,28 +314,24 @@ namespace abc { namespace diag {
     // --------------------------------------------------------------
 
 
-    template <typename Line>
-    inline log_ostream<Line>::log_ostream(log_line_ostream* line, const log_filter* filter)
+    inline log_ostream::log_ostream(log_line_ostream* line, const log_filter* filter)
         : _line(line)
         , _filter(filter) {
     }
 
 
-    template <typename Line>
-    inline log_ostream<Line>::log_ostream(log_ostream&& other)
+    inline log_ostream::log_ostream(log_ostream&& other)
         : _line(other._line)
         , _filter(other._filter) {
     }
 
 
-    template <typename Line>
-    inline const log_filter* log_ostream<Line>::filter() const noexcept {
+    inline const log_filter* log_ostream::filter() const noexcept {
         return _filter;
     }
 
 
-    template <typename Line>
-    inline void log_ostream<Line>::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
+    inline void log_ostream::put_any(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) noexcept {
         va_list vlist;
         va_start(vlist, format);
 
@@ -345,8 +341,7 @@ namespace abc { namespace diag {
     }
 
 
-    template <typename Line>
-    inline void log_ostream<Line>::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
+    inline void log_ostream::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
                 _line->put_anyv(origin, suborigin, severity, tag, format, vlist);
@@ -356,8 +351,7 @@ namespace abc { namespace diag {
     }
 
 
-    template <typename Line>
-    inline void log_ostream<Line>::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
+    inline void log_ostream::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
                 _line->put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
@@ -367,8 +361,7 @@ namespace abc { namespace diag {
     }
 
 
-    template <typename Line>
-    inline void log_ostream<Line>::put_blank_line(const char* origin, severity_t severity) noexcept {
+    inline void log_ostream::put_blank_line(const char* origin, severity_t severity) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
                 _line->put_blank();
