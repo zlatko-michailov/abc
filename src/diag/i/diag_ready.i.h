@@ -51,12 +51,12 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        diag_ready(diag_ready&& other) noexcept;
+        diag_ready(diag_ready&& other) noexcept = default;
 
         /**
-         * @brief Deleted.
+         * @brief Copy constructor.
          */
-        diag_ready(const diag_ready& other) = delete;
+        diag_ready(const diag_ready& other) = default;
 
     protected:
         /**

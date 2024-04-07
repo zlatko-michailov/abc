@@ -30,15 +30,15 @@ SOFTWARE.
 #include "inc/json.h"
 
 
-using json_literal_verifier = std::function<bool(test_context&, const abc::net::json::value<test_log*>&)>;
-bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal);
+using json_literal_verifier = std::function<bool(test_context&, const abc::net::json::value&)>;
+bool json_value_copy_move(test_context& context, abc::net::json::value&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal);
 
 
 bool test_json_value_empty(test_context& context) {
-    abc::net::json::value<test_log*> value(context.log());
+    abc::net::json::value value(context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& /*context*/, const abc::net::json::value<test_log*>& /*value*/) -> bool { 
+        [] (test_context& /*context*/, const abc::net::json::value& /*value*/) -> bool { 
             return true;
         };
 
@@ -47,10 +47,10 @@ bool test_json_value_empty(test_context& context) {
 
 
 bool test_json_value_null(test_context& context) {
-    abc::net::json::value<test_log*> value(nullptr, context.log());
+    abc::net::json::value value(nullptr, context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& /*context*/, const abc::net::json::value<test_log*>& /*value*/) -> bool { 
+        [] (test_context& /*context*/, const abc::net::json::value& /*value*/) -> bool { 
             return true;
         };
 
@@ -59,10 +59,10 @@ bool test_json_value_null(test_context& context) {
 
 
 bool test_json_value_boolean(test_context& context) {
-    abc::net::json::value<test_log*> value(true, context.log());
+    abc::net::json::value value(true, context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             return context.are_equal(value.boolean(), true, __TAG__, "%u");
         };
 
@@ -71,10 +71,10 @@ bool test_json_value_boolean(test_context& context) {
 
 
 bool test_json_value_number(test_context& context) {
-    abc::net::json::value<test_log*> value(42.5, context.log());
+    abc::net::json::value value(42.5, context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             return context.are_equal(value.number(), 42.5, __TAG__, "%f");
         };
 
@@ -85,10 +85,10 @@ bool test_json_value_number(test_context& context) {
 bool test_json_value_string(test_context& context) {
     constexpr const char* str = "jabberwocky";
 
-    abc::net::json::value<test_log*> value(str, context.log());
+    abc::net::json::value value(str, context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             return context.are_equal(value.string().c_str(), str, __TAG__);
         };
 
@@ -97,18 +97,18 @@ bool test_json_value_string(test_context& context) {
 
 
 bool test_json_value_array_simple(test_context& context) {
-    const abc::net::json::literal::array<test_log*> arr {
-        abc::net::json::value<test_log*>(         context.log()),
-        abc::net::json::value<test_log*>(nullptr, context.log()),
-        abc::net::json::value<test_log*>(true,    context.log()),
-        abc::net::json::value<test_log*>(99.9,    context.log()),
-        abc::net::json::value<test_log*>("xyz",   context.log()),
+    const abc::net::json::literal::array arr {
+        abc::net::json::value(         context.log()),
+        abc::net::json::value(nullptr, context.log()),
+        abc::net::json::value(true,    context.log()),
+        abc::net::json::value(99.9,    context.log()),
+        abc::net::json::value("xyz",   context.log()),
     };
 
-    abc::net::json::value<test_log*> value(abc::copy(arr), context.log());
+    abc::net::json::value value(abc::copy(arr), context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             bool passed = true;
 
             passed = context.are_equal(value.array()[0].type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
@@ -125,18 +125,18 @@ bool test_json_value_array_simple(test_context& context) {
 
 
 bool test_json_value_object_simple(test_context& context) {
-    const abc::net::json::literal::object<test_log*> obj {
-        { "empty",   abc::net::json::value<test_log*>(         context.log()) },
-        { "null",    abc::net::json::value<test_log*>(nullptr, context.log()) },
-        { "boolean", abc::net::json::value<test_log*>(true,    context.log()) },
-        { "number",  abc::net::json::value<test_log*>(99.9,    context.log()) },
-        { "string",  abc::net::json::value<test_log*>("xyz",   context.log()) },
+    const abc::net::json::literal::object obj {
+        { "empty",   abc::net::json::value(         context.log()) },
+        { "null",    abc::net::json::value(nullptr, context.log()) },
+        { "boolean", abc::net::json::value(true,    context.log()) },
+        { "number",  abc::net::json::value(99.9,    context.log()) },
+        { "string",  abc::net::json::value("xyz",   context.log()) },
     };
 
-    abc::net::json::value<test_log*> value(abc::copy(obj), context.log());
+    abc::net::json::value value(abc::copy(obj), context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             bool passed = true;
 
             passed = context.are_equal(value.object().at("empty").type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
@@ -153,24 +153,24 @@ bool test_json_value_object_simple(test_context& context) {
 
 
 bool test_json_value_array_complex(test_context& context) {
-    const abc::net::json::literal::array<test_log*> arr {
-        abc::net::json::value<test_log*>(         context.log()),
-        abc::net::json::value<test_log*>(nullptr, context.log()),
-        abc::net::json::value<test_log*>(true,    context.log()),
-        abc::net::json::value<test_log*>(99.9,    context.log()),
-        abc::net::json::value<test_log*>("xyz",   context.log()),
+    const abc::net::json::literal::array arr {
+        abc::net::json::value(         context.log()),
+        abc::net::json::value(nullptr, context.log()),
+        abc::net::json::value(true,    context.log()),
+        abc::net::json::value(99.9,    context.log()),
+        abc::net::json::value("xyz",   context.log()),
     };
 
-    const abc::net::json::literal::array<test_log*> complex_arr {
-        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
-        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
-        abc::net::json::value<test_log*>(abc::copy(arr), context.log()),
+    const abc::net::json::literal::array complex_arr {
+        abc::net::json::value(abc::copy(arr), context.log()),
+        abc::net::json::value(abc::copy(arr), context.log()),
+        abc::net::json::value(abc::copy(arr), context.log()),
     };
 
-    abc::net::json::value<test_log*> value(abc::copy(complex_arr), context.log());
+    abc::net::json::value value(abc::copy(complex_arr), context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             bool passed = true;
 
             for (std::size_t i = 0; i < value.array().size(); i++) {
@@ -190,24 +190,24 @@ bool test_json_value_array_complex(test_context& context) {
 
 
 bool test_json_value_object_complex(test_context& context) {
-    const abc::net::json::literal::object<test_log*> obj {
-        { "empty",   abc::net::json::value<test_log*>(         context.log()) },
-        { "null",    abc::net::json::value<test_log*>(nullptr, context.log()) },
-        { "boolean", abc::net::json::value<test_log*>(true,    context.log()) },
-        { "number",  abc::net::json::value<test_log*>(99.9,    context.log()) },
-        { "string",  abc::net::json::value<test_log*>("xyz",   context.log()) },
+    const abc::net::json::literal::object obj {
+        { "empty",   abc::net::json::value(         context.log()) },
+        { "null",    abc::net::json::value(nullptr, context.log()) },
+        { "boolean", abc::net::json::value(true,    context.log()) },
+        { "number",  abc::net::json::value(99.9,    context.log()) },
+        { "string",  abc::net::json::value("xyz",   context.log()) },
     };
 
-    const abc::net::json::literal::object<test_log*> complex_obj {
-        { "one",   abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
-        { "two",   abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
-        { "three", abc::net::json::value<test_log*>(abc::copy(obj), context.log()) },
+    const abc::net::json::literal::object complex_obj {
+        { "one",   abc::net::json::value(abc::copy(obj), context.log()) },
+        { "two",   abc::net::json::value(abc::copy(obj), context.log()) },
+        { "three", abc::net::json::value(abc::copy(obj), context.log()) },
     };
 
-    abc::net::json::value<test_log*> value(abc::copy(complex_obj), context.log());
+    abc::net::json::value value(abc::copy(complex_obj), context.log());
 
     json_literal_verifier verifier = 
-        [] (test_context& context, const abc::net::json::value<test_log*>& value) -> bool { 
+        [] (test_context& context, const abc::net::json::value& value) -> bool { 
             std::string keys[] = { "one", "two", "three" };
             bool passed = true;
 
@@ -226,14 +226,14 @@ bool test_json_value_object_complex(test_context& context) {
 }
 
 
-bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*>&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal) {
-    abc::net::json::value<test_log*> empty(context.log());
+bool json_value_copy_move(test_context& context, abc::net::json::value&& value, abc::net::json::value_type type, json_literal_verifier&& verify_literal) {
+    abc::net::json::value empty(context.log());
 
     bool passed = true;
 
     passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
     
-    abc::net::json::value<test_log*> value_copy_ctr(value);
+    abc::net::json::value value_copy_ctr(value);
     {
         passed = context.are_equal(value_copy_ctr.type(), type, __TAG__, "%u") & passed;
         passed = context.are_equal(value_copy_ctr == value, true, __TAG__, "%u *") & passed;
@@ -244,7 +244,7 @@ bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*
         passed = verify_literal(context, value) & passed;
     }
 
-    abc::net::json::value<test_log*> value_copy_assign(context.log());
+    abc::net::json::value value_copy_assign(context.log());
     value_copy_assign = value;
     {
         passed = context.are_equal(value_copy_assign.type(), type, __TAG__, "%u") & passed;
@@ -256,7 +256,7 @@ bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*
         passed = verify_literal(context, value) & passed;
     }
 
-    abc::net::json::value<test_log*> value_move_ctr(std::move(value_copy_ctr));
+    abc::net::json::value value_move_ctr(std::move(value_copy_ctr));
     {
         passed = context.are_equal(value_move_ctr.type(), type, __TAG__, "%u") & passed;
         passed = context.are_equal(value_move_ctr == value, true, __TAG__, "%u *") & passed;
@@ -266,7 +266,7 @@ bool json_value_copy_move(test_context& context, abc::net::json::value<test_log*
         passed = context.are_equal(value_copy_ctr == empty, true, __TAG__, "%u *") & passed;
     }
 
-    abc::net::json::value<test_log*> value_move_assign(context.log());
+    abc::net::json::value value_move_assign(context.log());
     value_move_assign = std::move(value_copy_assign);
     {
         passed = context.are_equal(value_move_assign.type(), type, __TAG__, "%u") & passed;
@@ -297,7 +297,7 @@ bool test_json_istream_null(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -314,7 +314,7 @@ bool test_json_istream_boolean_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -332,7 +332,7 @@ bool test_json_istream_boolean_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -350,7 +350,7 @@ bool test_json_istream_number_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -368,7 +368,7 @@ bool test_json_istream_number_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -386,7 +386,7 @@ bool test_json_istream_number_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -404,7 +404,7 @@ bool test_json_istream_number_04(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -422,7 +422,7 @@ bool test_json_istream_number_05(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -440,7 +440,7 @@ bool test_json_istream_string_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -458,7 +458,7 @@ bool test_json_istream_string_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -476,7 +476,7 @@ bool test_json_istream_string_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -494,7 +494,7 @@ bool test_json_istream_string_04(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -512,7 +512,7 @@ bool test_json_istream_array_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -533,7 +533,7 @@ bool test_json_istream_array_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -568,7 +568,7 @@ bool test_json_istream_array_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -644,7 +644,7 @@ bool test_json_istream_object_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -674,7 +674,7 @@ bool test_json_istream_object_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -744,7 +744,7 @@ bool test_json_istream_object_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -876,7 +876,7 @@ bool test_json_istream_mixed_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -997,7 +997,7 @@ bool test_json_istream_mixed_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream(&sb, context.log());
+    abc::net::json::istream istream(&sb, context.log());
 
     bool passed = true;
 
@@ -1117,11 +1117,11 @@ bool test_json_reader_null(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
 
     return passed;
@@ -1134,11 +1134,11 @@ bool test_json_reader_boolean_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
     passed = context.are_equal(value.boolean(), false, __TAG__, "%u") & passed;
 
@@ -1152,11 +1152,11 @@ bool test_json_reader_boolean_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
     passed = context.are_equal(value.boolean(), true, __TAG__, "%u") & passed;
 
@@ -1170,11 +1170,11 @@ bool test_json_reader_number_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
     passed = context.are_equal(value.number(), 42.0, __TAG__, "%f") & passed;
 
@@ -1188,11 +1188,11 @@ bool test_json_reader_number_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
     passed = context.are_equal(value.number(), 1234.567, __TAG__, "%f") & passed;
 
@@ -1206,11 +1206,11 @@ bool test_json_reader_number_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
     passed = context.are_equal(value.number(), -56.0, __TAG__, "%f") & passed;
 
@@ -1224,11 +1224,11 @@ bool test_json_reader_number_04(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
     passed = context.are_equal(value.number(), -67.899e23, __TAG__, "%f") & passed;
 
@@ -1242,11 +1242,11 @@ bool test_json_reader_number_05(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
     passed = context.are_equal(value.number(), -88776655443322.999E-5, __TAG__, "%f") & passed;
 
@@ -1260,11 +1260,11 @@ bool test_json_reader_string_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
     passed = context.are_equal(value.string().c_str(), "", std::strlen(""), __TAG__) & passed;
 
@@ -1278,11 +1278,11 @@ bool test_json_reader_string_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
     passed = context.are_equal(value.string().c_str(), "abc xyz", std::strlen("abc xyz"), __TAG__) & passed;
 
@@ -1296,11 +1296,11 @@ bool test_json_reader_string_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
     passed = context.are_equal(value.string().c_str(), "a\nb\rc\txyz", std::strlen("a\nb\rc\txyz"), __TAG__) & passed;
 
@@ -1314,11 +1314,11 @@ bool test_json_reader_string_04(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
     passed = context.are_equal(value.string().c_str(), "абв юя", std::strlen("абв юя"), __TAG__) & passed;
 
@@ -1332,11 +1332,11 @@ bool test_json_reader_array_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
     passed = context.are_equal(value.array().size(), (std::size_t)0, __TAG__, "%zu") & passed;
     {
@@ -1352,11 +1352,11 @@ bool test_json_reader_array_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
     passed = context.are_equal(value.array().size(), (std::size_t)4, __TAG__, "%zu") & passed;
     {
@@ -1382,11 +1382,11 @@ bool test_json_reader_array_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
     passed = context.are_equal(value.array().size(), (std::size_t)4, __TAG__, "%zu") & passed;
     {
@@ -1440,11 +1440,11 @@ bool test_json_reader_object_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
     passed = context.are_equal(value.object().size(), (std::size_t)0, __TAG__, "%zu") & passed;
     {
@@ -1469,11 +1469,11 @@ bool test_json_reader_object_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
     passed = context.are_equal(value.object().size(), (std::size_t)4, __TAG__, "%zu") & passed;
     {
@@ -1518,11 +1518,11 @@ bool test_json_reader_object_03(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
     passed = context.are_equal(value.object().size(), (std::size_t)4, __TAG__, "%zu") & passed;
     {
@@ -1588,11 +1588,11 @@ bool test_json_reader_mixed_01(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
     passed = context.are_equal(value.array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
     {
@@ -1670,11 +1670,11 @@ bool test_json_reader_mixed_02(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader(&sb, context.log());
+    abc::net::json::reader reader(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader.get_value();
+    abc::net::json::value value = reader.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
     passed = context.are_equal(value.object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
     {
@@ -1743,7 +1743,7 @@ bool test_json_ostream_null(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1782,7 +1782,7 @@ bool test_json_ostream_boolean_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1811,7 +1811,7 @@ bool test_json_ostream_boolean_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1830,7 +1830,7 @@ bool test_json_ostream_number_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1849,7 +1849,7 @@ bool test_json_ostream_number_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1868,7 +1868,7 @@ bool test_json_ostream_number_03(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1887,7 +1887,7 @@ bool test_json_ostream_string_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1906,7 +1906,7 @@ bool test_json_ostream_string_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1925,7 +1925,7 @@ bool test_json_ostream_array_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1947,7 +1947,7 @@ bool test_json_ostream_array_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -1985,7 +1985,7 @@ bool test_json_ostream_array_03(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2062,7 +2062,7 @@ bool test_json_ostream_object_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2089,7 +2089,7 @@ bool test_json_ostream_object_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2153,7 +2153,7 @@ bool test_json_ostream_object_03(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2270,7 +2270,7 @@ bool test_json_ostream_mixed_01(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2381,7 +2381,7 @@ bool test_json_ostream_mixed_02(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
 
     bool passed = true;
 
@@ -2484,11 +2484,11 @@ bool test_json_ostream_mixed_02(test_context& context) {
 // --------------------------------------------------------------
 
 
-bool test_json_writer(test_context& context, const abc::net::json::value<test_log*>& value, const char* expected);
+bool test_json_writer(test_context& context, const abc::net::json::value& value, const char* expected);
 
 
 bool test_json_writer_null(test_context& context) {
-    abc::net::json::value<test_log*> value(nullptr);
+    abc::net::json::value value(nullptr);
 
     char expected[] =
         "null";
@@ -2498,7 +2498,7 @@ bool test_json_writer_null(test_context& context) {
 
 
 bool test_json_writer_boolean_01(test_context& context) {
-    abc::net::json::value<test_log*> value(false);
+    abc::net::json::value value(false);
 
     char expected[] =
         "false";
@@ -2508,7 +2508,7 @@ bool test_json_writer_boolean_01(test_context& context) {
 
 
 bool test_json_writer_boolean_02(test_context& context) {
-    abc::net::json::value<test_log*> value(true);
+    abc::net::json::value value(true);
 
     char expected[] =
         "true";
@@ -2518,7 +2518,7 @@ bool test_json_writer_boolean_02(test_context& context) {
 
 
 bool test_json_writer_number_01(test_context& context) {
-    abc::net::json::value<test_log*> value(42.0);
+    abc::net::json::value value(42.0);
 
     char expected[] =
         "42";
@@ -2528,7 +2528,7 @@ bool test_json_writer_number_01(test_context& context) {
 
 
 bool test_json_writer_number_02(test_context& context) {
-    abc::net::json::value<test_log*> value(12345.6789012345);
+    abc::net::json::value value(12345.6789012345);
 
     char expected[] =
         "12345.6789012345";
@@ -2538,7 +2538,7 @@ bool test_json_writer_number_02(test_context& context) {
 
 
 bool test_json_writer_number_03(test_context& context) {
-    abc::net::json::value<test_log*> value(-8.87766554433221e-10);
+    abc::net::json::value value(-8.87766554433221e-10);
 
     char expected[] =
         "-8.87766554433221e-10";
@@ -2548,7 +2548,7 @@ bool test_json_writer_number_03(test_context& context) {
 
 
 bool test_json_writer_string_01(test_context& context) {
-    abc::net::json::value<test_log*> value("");
+    abc::net::json::value value("");
 
     char expected[] =
         "\"\"";
@@ -2558,7 +2558,7 @@ bool test_json_writer_string_01(test_context& context) {
 
 
 bool test_json_writer_string_02(test_context& context) {
-    abc::net::json::value<test_log*> value("qwerty");
+    abc::net::json::value value("qwerty");
 
     char expected[] =
         "\"qwerty\"";
@@ -2568,8 +2568,8 @@ bool test_json_writer_string_02(test_context& context) {
 
 
 bool test_json_writer_array_01(test_context& context) {
-    abc::net::json::literal::array<test_log*> array;
-    abc::net::json::value<test_log*> value(std::move(array));
+    abc::net::json::literal::array array;
+    abc::net::json::value value(std::move(array));
 
     char expected[] =
         "[]";
@@ -2579,14 +2579,14 @@ bool test_json_writer_array_01(test_context& context) {
 
 
 bool test_json_writer_array_02(test_context& context) {
-    abc::net::json::literal::array<test_log*> array
+    abc::net::json::literal::array array
     {
         12.34,
         nullptr,
         true,
         "abc",
     };
-    abc::net::json::value<test_log*> value(std::move(array));
+    abc::net::json::value value(std::move(array));
 
     char expected[] =
         "["
@@ -2601,33 +2601,33 @@ bool test_json_writer_array_02(test_context& context) {
 
 
 bool test_json_writer_array_03(test_context& context) {
-    abc::net::json::literal::array<test_log*> array
+    abc::net::json::literal::array array
     {
         1.0,
         2.0,
-        abc::net::json::literal::array<test_log*>
+        abc::net::json::literal::array
         {
-            abc::net::json::literal::array<test_log*>
+            abc::net::json::literal::array
             {
                 3.0,
             },
-            abc::net::json::literal::array<test_log*>
+            abc::net::json::literal::array
             {
                 4.0,
             },
         },
-        abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*> // Clang optimizes these as a single array.
+        abc::net::json::value(abc::net::json::literal::array // Clang optimizes these as a single array.
         {
-            abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*>
+            abc::net::json::value(abc::net::json::literal::array
             {
-                abc::net::json::value<test_log*>(abc::net::json::literal::array<test_log*>
+                abc::net::json::value(abc::net::json::literal::array
                 {
                     5.0,
                 }),
             }),
         }),
     };
-    abc::net::json::value<test_log*> value(std::move(array));
+    abc::net::json::value value(std::move(array));
 
     char expected[] =
         "["
@@ -2655,8 +2655,8 @@ bool test_json_writer_array_03(test_context& context) {
 
 
 bool test_json_writer_object_01(test_context& context) {
-    abc::net::json::literal::object<test_log*> object;
-    abc::net::json::value<test_log*> value(std::move(object));
+    abc::net::json::literal::object object;
+    abc::net::json::value value(std::move(object));
 
     char expected[] =
         "{}";
@@ -2666,14 +2666,14 @@ bool test_json_writer_object_01(test_context& context) {
 
 
 bool test_json_writer_object_02(test_context& context) {
-    abc::net::json::literal::object<test_log*> object
+    abc::net::json::literal::object object
     {
         { "a", 12.34 },
         { "bb", nullptr },
         { "ccc", true },
         { "dddd", "abc" },
     };
-    abc::net::json::value<test_log*> value(std::move(object));
+    abc::net::json::value value(std::move(object));
 
     char expected[] =
         "{"
@@ -2688,27 +2688,27 @@ bool test_json_writer_object_02(test_context& context) {
 
 
 bool test_json_writer_object_03(test_context& context) {
-    abc::net::json::literal::object<test_log*> object
+    abc::net::json::literal::object object
     {
         { "a1", 1.0 },
         { "a2", 2.0 },
-        { "a3", abc::net::json::literal::object<test_log*> {
-            { "a31", abc::net::json::literal::object<test_log*> {
+        { "a3", abc::net::json::literal::object {
+            { "a31", abc::net::json::literal::object {
                 { "a313", 3.0 },
             } },
-            { "a32", abc::net::json::literal::object<test_log*> {
+            { "a32", abc::net::json::literal::object {
                 { "a324", 4.0 },
             } },
         } },
-        { "a5", abc::net::json::literal::object<test_log*> {
-            { "a51", abc::net::json::literal::object<test_log*> {
-                { "a512", abc::net::json::literal::object<test_log*> {
+        { "a5", abc::net::json::literal::object {
+            { "a51", abc::net::json::literal::object {
+                { "a512", abc::net::json::literal::object {
                     { "a5123", 5.0 },
                 } },
             } },
         } },
     };
-    abc::net::json::value<test_log*> value(std::move(object));
+    abc::net::json::value value(std::move(object));
 
     char expected[] =
         "{"
@@ -2736,31 +2736,31 @@ bool test_json_writer_object_03(test_context& context) {
 
 
 bool test_json_writer_mixed_01(test_context& context) {
-    abc::net::json::literal::array<test_log*> array
+    abc::net::json::literal::array array
     {
-        abc::net::json::literal::object<test_log*> {
-            { "a11", abc::net::json::literal::array<test_log*> {
+        abc::net::json::literal::object {
+            { "a11", abc::net::json::literal::array {
                 1.0,
                 true,
             } },
-            { "a12", abc::net::json::literal::array<test_log*> {
+            { "a12", abc::net::json::literal::array {
                 "abc",
                 2.0
             } },
         },
-        abc::net::json::literal::array<test_log*> {
-            abc::net::json::literal::object<test_log*> {
-                { "a211", abc::net::json::literal::array<test_log*> {
+        abc::net::json::literal::array {
+            abc::net::json::literal::object {
+                { "a211", abc::net::json::literal::array {
                     4.0,
                     "def",
                     false,
                 } },
-                { "a212", abc::net::json::literal::array<test_log*> {
+                { "a212", abc::net::json::literal::array {
                     nullptr,
                 } },
             } },
     };
-    abc::net::json::value<test_log*> value(std::move(array));
+    abc::net::json::value value(std::move(array));
 
     char expected[] =
         "["
@@ -2781,32 +2781,32 @@ bool test_json_writer_mixed_01(test_context& context) {
 
 
 bool test_json_writer_mixed_02(test_context& context) {
-    abc::net::json::literal::object<test_log*> object
+    abc::net::json::literal::object object
     {
-        { "a1", abc::net::json::literal::object<test_log*> {
-            { "a11", abc::net::json::literal::array<test_log*> {
+        { "a1", abc::net::json::literal::object {
+            { "a11", abc::net::json::literal::array {
                 1.0,
                 true,
             } },
-            { "a12", abc::net::json::literal::array<test_log*> {
+            { "a12", abc::net::json::literal::array {
                 "abc",
                 2.0,
             } },
         } },
-        { "a2", abc::net::json::literal::array<test_log*> {
-            abc::net::json::literal::object<test_log*> {
-                { "a211", abc::net::json::literal::array<test_log*> {
+        { "a2", abc::net::json::literal::array {
+            abc::net::json::literal::object {
+                { "a211", abc::net::json::literal::array {
                     4.0,
                     "def",
                     false,
                 } },
-                { "a212", abc::net::json::literal::array<test_log*> {
+                { "a212", abc::net::json::literal::array {
                     nullptr,
                 } },
             },
         } },
     };
-    abc::net::json::value<test_log*> value(std::move(object));
+    abc::net::json::value value(std::move(object));
 
     char expected[] =
         "{"
@@ -2826,10 +2826,10 @@ bool test_json_writer_mixed_02(test_context& context) {
 }
 
 
-bool test_json_writer(test_context& context, const abc::net::json::value<test_log*>& value, const char* expected) {
+bool test_json_writer(test_context& context, const abc::net::json::value& value, const char* expected) {
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::writer<test_log*> writer(&sb, context.log());
+    abc::net::json::writer writer(&sb, context.log());
 
     bool passed = true;
 
@@ -2850,7 +2850,7 @@ bool test_json_istream_move(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::istream<test_log*> istream1(&sb, context.log());
+    abc::net::json::istream istream1(&sb, context.log());
 
     bool passed = true;
 
@@ -2858,7 +2858,7 @@ bool test_json_istream_move(test_context& context) {
     passed = verify_integral(context, token.type, abc::net::json::token_type::boolean, istream1, 0x10721, "%x", token.string.length()) && passed;
     passed = verify_integral(context, token.boolean, false, istream1, 0x10722, "%u", token.string.length()) && passed;
 
-    abc::net::json::istream<test_log*> istream2(std::move(istream1));
+    abc::net::json::istream istream2(std::move(istream1));
 
     token = istream2.get_token();
     passed = verify_integral(context, token.type, abc::net::json::token_type::number, istream2, 0x10723, "%x", token.string.length()) && passed;
@@ -2874,15 +2874,15 @@ bool test_json_reader_move(test_context& context) {
 
     std::stringbuf sb(content, std::ios_base::in);
 
-    abc::net::json::reader<test_log*> reader1(&sb, context.log());
+    abc::net::json::reader reader1(&sb, context.log());
 
     bool passed = true;
 
-    abc::net::json::value<test_log*> value = reader1.get_value();
+    abc::net::json::value value = reader1.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
     passed = context.are_equal(value.boolean(), false, __TAG__, "%u") & passed;
 
-    abc::net::json::reader<test_log*> reader2(std::move(reader1));
+    abc::net::json::reader reader2(std::move(reader1));
 
     value = reader2.get_value();
     passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
@@ -2898,14 +2898,14 @@ bool test_json_ostream_move(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::ostream<test_log*> ostream1(&sb, context.log());
+    abc::net::json::ostream ostream1(&sb, context.log());
 
     bool passed = true;
 
     ostream1.put_boolean(true);
     passed = verify_stream_good(context, ostream1, 0x10725) && passed;
 
-    abc::net::json::ostream<test_log*> ostream2(std::move(ostream1));
+    abc::net::json::ostream ostream2(std::move(ostream1));
     ostream2.put_space();
 
     ostream2.put_number(42.0);
@@ -2923,15 +2923,15 @@ bool test_json_writer_move(test_context& context) {
 
     std::stringbuf sb(std::ios_base::out);
 
-    abc::net::json::writer<test_log*> writer1(&sb, context.log());
+    abc::net::json::writer writer1(&sb, context.log());
 
     bool passed = true;
 
     writer1.put_value(true);
 
-    abc::net::json::writer<test_log*> writer2(std::move(writer1));
+    abc::net::json::writer writer2(std::move(writer1));
     
-    abc::net::json::ostream<test_log*> ostream(&sb, context.log());
+    abc::net::json::ostream ostream(&sb, context.log());
     ostream.put_space();
 
     writer2.put_value(42.0);

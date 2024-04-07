@@ -72,10 +72,8 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         JSON value.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief JSON value.
      */
-    template <typename LogPtr = std::nullptr_t>
     class value
         : diag::diag_ready<const char*> {
 
@@ -129,14 +127,14 @@ namespace abc { namespace net { namespace json {
          * @param arr Array value.
          * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::_array<value<LogPtr>>&& arr, diag::log_ostream* log = nullptr) noexcept;
+        value(literal::_array<value>&& arr, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief     Constructor - object value.
          * @param obj Object value.
          * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        value(literal::_object<value<LogPtr>>&& obj, diag::log_ostream* log = nullptr) noexcept;
+        value(literal::_object<value>&& obj, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Copy constructor.
@@ -203,25 +201,25 @@ namespace abc { namespace net { namespace json {
          * @brief   Returns the array value.
          * @details Throws if the type is not array.
          */
-        const literal::_array<value<LogPtr>>& array() const;
+        const literal::_array<value>& array() const;
 
         /**
          * @brief   Returns a mutable reference to the array value.
          * @details Throws if the type is not array.
          */
-        literal::_array<value<LogPtr>>& array();
+        literal::_array<value>& array();
 
         /**
          * @brief   Returns the object value.
          * @details Throws if the type is not object.
          */
-        const literal::_object<value<LogPtr>>& object() const;
+        const literal::_object<value>& object() const;
 
         /**
          * @brief   Returns a mutable reference to the object value.
          * @details Throws if the type is not object.
          */
-        literal::_object<value<LogPtr>>& object();
+        literal::_object<value>& object();
 
     public:
         /**
@@ -281,11 +279,9 @@ namespace abc { namespace net { namespace json {
 
 
     namespace literal {
-        template <typename LogPtr = std::nullptr_t>
-        using array  = _array<value<LogPtr>>;
+        using array  = _array<value>;
 
-        template <typename LogPtr = std::nullptr_t>
-        using object = _object<value<LogPtr>>;
+        using object = _object<value>;
     }
 
 
@@ -330,10 +326,8 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         Internal. Keeps stream state.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Internal. Keeps stream state.
      */
-    template <typename LogPtr = std::nullptr_t>
     class state
         : protected diag::diag_ready<const char*> {
 
@@ -350,7 +344,7 @@ namespace abc { namespace net { namespace json {
         /**
          * @brief Move constructor.
          */
-        state(state&& other) = default;
+        state(state&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
@@ -413,17 +407,15 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         JSON input stream.
-     * @details       Reads a JSON payload token by token. To deserialize a `json::value`, see `json::reader`.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief   JSON input stream.
+     * @details Reads a JSON payload token by token. To deserialize a `json::value`, see `json::reader`.
      */
-    template <typename LogPtr = std::nullptr_t>
     class istream
         : public abc::istream
-        , public state<LogPtr> {
+        , public state {
 
         using base       = abc::istream;
-        using state_base = state<LogPtr>;
+        using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
     protected:
@@ -446,7 +438,7 @@ namespace abc { namespace net { namespace json {
         /**
          * @brief Move constructor.
          */
-        istream(istream&& other);
+        istream(istream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -551,15 +543,13 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         JSON reader.
-     * @details       Reads a `json::value` from a JSON stream.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief   JSON reader.
+     * @details Reads a `json::value` from a JSON stream.
      */
-    template <typename LogPtr = std::nullptr_t>
     class reader
-        : protected istream<LogPtr> {
+        : protected istream {
 
-        using base      = istream<LogPtr>;
+        using base      = istream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -582,7 +572,7 @@ namespace abc { namespace net { namespace json {
         /**
          * @brief Move constructor.
          */
-        reader(reader&& other);
+        reader(reader&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -594,7 +584,7 @@ namespace abc { namespace net { namespace json {
          * @brief  Reads a whole `json::value` from the JSON stream.
          * @return The JSON value.
          */
-        value<LogPtr> get_value();
+        value get_value();
 
     protected:
         /**
@@ -602,21 +592,21 @@ namespace abc { namespace net { namespace json {
          * @param token The first token of the value that has already been read from the stream.
          * @return      The JSON value.
          */
-        value<LogPtr> get_value_from_token(token&& token);
+        value get_value_from_token(token&& token);
 
         /**
          * @brief  Reads a JSON array from the JSON stream.
          * @note   The `[` has already been read.
          * @return A `literal::array`.
          */
-        literal::array<LogPtr> get_array();
+        literal::array get_array();
 
         /**
          * @brief  Reads a JSON object from the JSON stream.
          * @note   The `{` has already been read.
          * @return A `literal::object`.
          */
-        literal::object<LogPtr> get_object();
+        literal::object get_object();
     };
 
 
@@ -624,17 +614,15 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         JSON output stream.
-     * @details       Writes a JSON payload token by token. To serialize a `json::value`, see `json::writer`.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief   JSON output stream.
+     * @details Writes a JSON payload token by token. To serialize a `json::value`, see `json::writer`.
      */
-    template <typename LogPtr = std::nullptr_t>
     class ostream
         : public abc::ostream
-        , public state<LogPtr> {
+        , public state {
 
         using base       = abc::ostream;
-        using state_base = state<LogPtr>;
+        using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
     protected:
@@ -657,7 +645,7 @@ namespace abc { namespace net { namespace json {
         /**
          * @brief Move constructor.
          */
-        ostream(ostream&& other);
+        ostream(ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -786,15 +774,13 @@ namespace abc { namespace net { namespace json {
 
 
     /**
-     * @brief         JSON writer.
-     * @details       Writes a `json::value` to a JSON stream.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief   JSON writer.
+     * @details Writes a `json::value` to a JSON stream.
      */
-    template <typename LogPtr = std::nullptr_t>
     class writer
-        : protected ostream<LogPtr> {
+        : protected ostream {
 
-        using base      = ostream<LogPtr>;
+        using base      = ostream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -817,7 +803,7 @@ namespace abc { namespace net { namespace json {
         /**
          * @brief Move constructor.
          */
-        writer(writer&& other);
+        writer(writer&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -829,20 +815,20 @@ namespace abc { namespace net { namespace json {
          * @brief       Writes a whole `json::value` to the JSON stream.
          * @param value The `json::value`.
          */
-        void put_value(const value<LogPtr>& value);
+        void put_value(const value& value);
 
     protected:
         /**
          * @brief       Writes a JSON array to the JSON stream.
          * @param array The `literal::array`.
          */
-        void put_array(const literal::array<LogPtr>& array);
+        void put_array(const literal::array& array);
 
         /**
          * @brief        Writes a JSON object to the JSON stream.
          * @param object The `literal::object`.
          */
-        void put_object(const literal::object<LogPtr>& object);
+        void put_object(const literal::object& object);
     };
 
 } } }

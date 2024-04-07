@@ -309,12 +309,12 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
 
             http.put_request(request);
 
-            abc::net::json::value<test_log*> body = 
-                abc::net::json::literal::object<test_log*> {
+            abc::net::json::value body = 
+                abc::net::json::literal::object {
                     { "param", "foo" },
                 };
 
-            abc::net::json::writer<test_log*> json(&sb, context.log());
+            abc::net::json::writer json(&sb, context.log());
             json.put_value(body);
         }
 
@@ -328,8 +328,8 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
             passed = context.are_equal(response.headers.size(), (std::size_t)1, 0x100ec, "%zu") && passed;
             passed = context.are_equal(response.headers[response_header_name].c_str(), response_header_value, 0x100ed) && passed;
 
-            abc::net::json::reader<test_log*> json(&sb, context.log());
-            abc::net::json::value<test_log*> body = json.get_value();
+            abc::net::json::reader json(&sb, context.log());
+            abc::net::json::value body = json.get_value();
 
             passed = context.are_equal(body.type(), abc::net::json::value_type::object, 0x102a0, "%u") && passed;
             passed = context.are_equal(body.object().size(), (std::size_t)2, 0x102a1, "%zu") && passed;
@@ -374,8 +374,8 @@ void http_json_stream_server_body_and_response(bool& passed, test_context& conte
 
         // Receive request
         {
-            abc::net::json::reader<test_log*> json(sb, context.log());
-            abc::net::json::value<test_log*> body = json.get_value();
+            abc::net::json::reader json(sb, context.log());
+            abc::net::json::value body = json.get_value();
 
             passed = context.are_equal(body.type(), abc::net::json::value_type::object, 0x102aa, "%u") && passed;
             passed = context.are_equal(body.object().size(), (std::size_t)1, 0x102ab, "%zu") && passed;
@@ -395,10 +395,10 @@ void http_json_stream_server_body_and_response(bool& passed, test_context& conte
 
             http.put_response(response);
 
-            abc::net::json::writer<test_log*> json(sb, context.log());
+            abc::net::json::writer json(sb, context.log());
 
-            abc::net::json::value<test_log*> body = 
-                abc::net::json::literal::object<test_log*> {
+            abc::net::json::value body = 
+                abc::net::json::literal::object {
                     { "n", 42.0 },
                     { "s", "bar" },
                 };

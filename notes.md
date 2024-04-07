@@ -21,11 +21,11 @@
     - Doc
 - `log_ostream`
     - Remove the `Log` template parameter from
-        - `json`
         - `http`
         - `socket`
         - `endpoint`
         - tests
+        - samples
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`
     - Make the override methods of `xxx_line_ostream` flush!

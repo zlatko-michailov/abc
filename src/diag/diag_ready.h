@@ -41,12 +41,6 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr>
-    inline diag_ready<OriginStr>::diag_ready(diag_ready&& other) noexcept
-        : diag_ready(std::move(other._origin), std::move(other._log)) {
-    }
-
-
-    template <typename OriginStr>
     inline void diag_ready<OriginStr>::put_any(const char* suborigin, severity_t severity, tag_t tag, const char* format, ...) const noexcept {
         std::va_list vlist;
         va_start(vlist, format);

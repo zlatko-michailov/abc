@@ -38,90 +38,78 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace json {
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(diag::log_ostream* log) noexcept
+    inline value::value(diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::empty) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::null, diag::log_ostream* log) noexcept
+    inline value::value(literal::null, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::null) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::boolean b, diag::log_ostream* log) noexcept
+    inline value::value(literal::boolean b, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::boolean)
         , _boolean(b) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::number n, diag::log_ostream* log) noexcept
+    inline value::value(literal::number n, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::number)
         , _number(n) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(const char* str, diag::log_ostream* log)
+    inline value::value(const char* str, diag::log_ostream* log)
         : value(std::string(str), log) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::string&& str, diag::log_ostream* log) noexcept
+    inline value::value(literal::string&& str, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::string)
         , _string(std::move(str)) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::array<LogPtr>&& arr, diag::log_ostream* log) noexcept
+    inline value::value(literal::array&& arr, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::array)
         , _array(std::move(arr)) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(literal::object<LogPtr>&& obj, diag::log_ostream* log) noexcept
+    inline value::value(literal::object&& obj, diag::log_ostream* log) noexcept
         : diag_base(copy(_origin), log)
         , _type(value_type::object)
         , _object(std::move(obj)) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(const value& other)
+    inline value::value(const value& other)
         : diag_base(copy(_origin), other.log()) {
 
         copy_from(other);
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::value(value&& other) noexcept 
+    inline value::value(value&& other) noexcept 
         : diag_base(copy(_origin), other.log()) {
 
         move_from(std::move(other));
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>::~value() noexcept {
+    inline value::~value() noexcept {
         clear();
     }
 
 
-    template <typename LogPtr>
-    inline void value<LogPtr>::clear() noexcept {
+    inline void value::clear() noexcept {
         switch (_type) {
             case value_type::empty:
             case value_type::null:
@@ -135,12 +123,12 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::array:
-                using literal_array = literal::array<LogPtr>;
+                using literal_array = literal::array;
                 _array.~literal_array();
                 break;
 
             case value_type::object:
-                using literal_object = literal::object<LogPtr>;
+                using literal_object = literal::object;
                 _object.~literal_object();
                 break;
         }
@@ -149,8 +137,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>& value<LogPtr>::operator = (const value& other) {
+    inline value& value::operator = (const value& other) {
         clear();
         copy_from(other);
 
@@ -158,8 +145,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr>& value<LogPtr>::operator = (value&& other) noexcept {
+    inline value& value::operator = (value&& other) noexcept {
         clear();
         move_from(std::move(other));
 
@@ -167,78 +153,68 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline value_type value<LogPtr>::type() const noexcept {
+    inline value_type value::type() const noexcept {
         return _type;
     }
 
 
-    template <typename LogPtr>
-    inline literal::boolean value<LogPtr>::boolean() const {
+    inline literal::boolean value::boolean() const {
         diag_base::assert("boolean()", _type == value_type::boolean, __TAG__, "_type=%u", _type);
 
         return _boolean;
     }
 
     
-    template <typename LogPtr>
-    inline literal::number value<LogPtr>::number() const {
+    inline literal::number value::number() const {
         diag_base::assert("number()", _type == value_type::number, __TAG__, "_type=%u", _type);
 
         return _number;
     }
 
 
-    template <typename LogPtr>
-    inline const literal::string& value<LogPtr>::string() const {
+    inline const literal::string& value::string() const {
         diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
 
         return _string;
     }
 
 
-    template <typename LogPtr>
-    inline literal::string& value<LogPtr>::string() {
+    inline literal::string& value::string() {
         diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
 
         return _string;
     }
 
 
-    template <typename LogPtr>
-    inline const literal::array<LogPtr>& value<LogPtr>::array() const {
+    inline const literal::array& value::array() const {
         diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
 
         return _array;
     }
 
 
-    template <typename LogPtr>
-    inline literal::array<LogPtr>& value<LogPtr>::array() {
+    inline literal::array& value::array() {
         diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
 
         return _array;
     }
 
 
-    template <typename LogPtr>
-    inline const literal::object<LogPtr>& value<LogPtr>::object() const {
+    inline const literal::object& value::object() const {
         diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
 
         return _object;
     }
 
 
-    template <typename LogPtr>
-    inline literal::object<LogPtr>& value<LogPtr>::object() {
+    inline literal::object& value::object() {
         diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
 
         return _object;
     }
 
 
-    template <typename LogPtr>
-    inline bool value<LogPtr>::operator ==(const value& other) const noexcept {
+    inline bool value::operator ==(const value& other) const noexcept {
         if (_type != other._type) {
             return false;
         }
@@ -270,14 +246,12 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline bool value<LogPtr>::operator !=(const value& other) const noexcept {
+    inline bool value::operator !=(const value& other) const noexcept {
         return !(*this == other);
     }
 
 
-    template <typename LogPtr>
-    inline void value<LogPtr>::copy_from(const value& other) {
+    inline void value::copy_from(const value& other) {
         _type = other._type;
 
         switch (_type) {
@@ -298,18 +272,17 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::array:
-                new (&_array) literal::array<LogPtr>(other._array);
+                new (&_array) literal::array(other._array);
                 break;
 
             case value_type::object:
-                new (&_object) literal::object<LogPtr>(other._object);
+                new (&_object) literal::object(other._object);
                 break;
         }
     }
 
 
-    template <typename LogPtr>
-    inline void value<LogPtr>::move_from(value&& other) noexcept {
+    inline void value::move_from(value&& other) noexcept {
         _type = other._type;
 
         switch (_type) {
@@ -330,11 +303,11 @@ namespace abc { namespace net { namespace json {
                 break;
 
             case value_type::array:
-                new (&_array) literal::array<LogPtr>(std::move(other._array));
+                new (&_array) literal::array(std::move(other._array));
                 break;
 
             case value_type::object:
-                new (&_object) literal::object<LogPtr>(std::move(other._object));
+                new (&_object) literal::object(std::move(other._object));
                 break;
         }
 
@@ -345,8 +318,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline state<LogPtr>::state(const char* origin, diag::log_ostream* log)
+    inline state::state(const char* origin, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _expect_property(false) {
 
@@ -357,8 +329,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::reset() noexcept {
+    inline void state::reset() noexcept {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -371,26 +342,22 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline const std::stack<nest_type>& state<LogPtr>::nest_stack() const noexcept {
+    inline const std::stack<nest_type>& state::nest_stack() const noexcept {
         return _nest_stack;
     }
 
 
-    template <typename LogPtr>
-    inline std::stack<nest_type>& state<LogPtr>::nest_stack() noexcept {
+    inline std::stack<nest_type>& state::nest_stack() noexcept {
         return _nest_stack;
     }
 
 
-    template <typename LogPtr>
-    inline bool state<LogPtr>::expect_property() const noexcept {
+    inline bool state::expect_property() const noexcept {
         return _expect_property;
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::set_expect_property(bool expect) {
+    inline void state::set_expect_property(bool expect) {
         constexpr const char* suborigin = "set_expect_property()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: expect=%u", expect);
 
@@ -404,8 +371,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::nest(nest_type type) {
+    inline void state::nest(nest_type type) {
         constexpr const char* suborigin = "nest()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
 
@@ -415,8 +381,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::unnest(nest_type type) {
+    inline void state::unnest(nest_type type) {
         constexpr const char* suborigin = "unnest()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
 
@@ -431,8 +396,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline istream::istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, log) {
 
@@ -443,36 +407,32 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline istream<LogPtr>::istream(std::streambuf* sb, diag::log_ostream* log)
+    inline istream::istream(std::streambuf* sb, diag::log_ostream* log)
         : istream("abc::net::json::istream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline istream<LogPtr>::istream(istream&& other)
+    inline istream::istream(istream&& other) noexcept
         : base(std::move(other))
         , state_base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void istream<LogPtr>::skip_value() {
+    inline void istream::skip_value() {
         constexpr const char* suborigin = "skip_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        std::size_t nest_stack_size = state_base::nest_stack.size();
+        std::size_t nest_stack_size = state_base::nest_stack().size();
         do {
-            get_token(false);
+            get_token();
         }
-        while (state_base::nest_stack.size() > nest_stack_size);
+        while (state_base::nest_stack().size() > nest_stack_size);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename LogPtr>
-    inline token istream<LogPtr>::get_token() {
+    inline token istream::get_token() {
         constexpr const char* suborigin = "get_token()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -586,8 +546,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void istream<LogPtr>::unnest(nest_type type, const char* suborigin, diag::tag_t tag) {
+    inline void istream::unnest(nest_type type, const char* suborigin, diag::tag_t tag) {
         nest_type actual = nest_type::none;
         if (!state_base::nest_stack().empty()) {
             actual = state_base::nest_stack().top();
@@ -603,8 +562,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_string() {
+    inline literal::string istream::get_string() {
         constexpr const char* suborigin = "get_string()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -634,8 +592,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_number() {
+    inline literal::string istream::get_number() {
         constexpr const char* suborigin = "get_number()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -673,8 +630,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_literal(const char* literal) {
+    inline literal::string istream::get_literal(const char* literal) {
         constexpr const char* suborigin = "get_literal()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: literal='%s'", literal);
 
@@ -693,8 +649,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline char istream<LogPtr>::get_escaped_char() {
+    inline char istream::get_escaped_char() {
         constexpr const char* suborigin = "get_escaped_char()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -749,8 +704,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void istream<LogPtr>::expect_char(char actual, char expected, bool should_get, const char* suborigin, diag::tag_t tag) {
+    inline void istream::expect_char(char actual, char expected, bool should_get, const char* suborigin, diag::tag_t tag) {
         if (actual != expected) {
             base::set_bad();
             diag_base::template throw_exception<diag::input_error>(suborigin, tag, "actual_char=%c (\\u%4.4x), expected_char=%c (\\u%4.4x)", actual, actual, expected, expected);
@@ -761,20 +715,17 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_hex() {
+    inline literal::string istream::get_hex() {
         return get_chars(ascii::is_hex);
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_digits() {
+    inline literal::string istream::get_digits() {
         return get_chars(ascii::is_digit);
     }
 
 
-    template <typename LogPtr>
-    inline literal::string istream<LogPtr>::get_chars(ascii::predicate_t&& predicate) {
+    inline literal::string istream::get_chars(ascii::predicate_t&& predicate) {
         literal::string str;
 
         while (base::is_good() && predicate(peek_char())) {
@@ -785,14 +736,12 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t istream<LogPtr>::skip_spaces() {
+    inline std::size_t istream::skip_spaces() {
         return skip_chars(ascii::json::is_space);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t istream<LogPtr>::skip_chars(ascii::predicate_t&& predicate) {
+    inline std::size_t istream::skip_chars(ascii::predicate_t&& predicate) {
         std::size_t gcount = 0;
         
         while (base::is_good() && predicate(peek_char())) {
@@ -804,8 +753,7 @@ namespace abc { namespace net { namespace json {
     }
     
     
-    template <typename LogPtr>
-    inline char istream<LogPtr>::get_char() {
+    inline char istream::get_char() {
         char ch = peek_char();
 
         if (base::is_good()) {
@@ -816,8 +764,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline char istream<LogPtr>::peek_char() {
+    inline char istream::peek_char() {
         char ch = base::peek();
 
         if (!ascii::json::is_valid(ch)) {
@@ -832,8 +779,7 @@ namespace abc { namespace net { namespace json {
    // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline reader<LogPtr>::reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline reader::reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "reader()";
@@ -843,26 +789,23 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline reader<LogPtr>::reader(std::streambuf* sb, diag::log_ostream* log)
+    inline reader::reader(std::streambuf* sb, diag::log_ostream* log)
         : reader("abc::net::json::reader", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline reader<LogPtr>::reader(reader&& other)
+    inline reader::reader(reader&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr> reader<LogPtr>::get_value() {
+    inline value reader::get_value() {
         constexpr const char* suborigin = "get_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         token token = base::get_token();
 
-        value<LogPtr> value = get_value_from_token(std::move(token));
+        value value = get_value_from_token(std::move(token));
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 
@@ -870,29 +813,28 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline value<LogPtr> reader<LogPtr>::get_value_from_token(token&& token) {
+    inline value reader::get_value_from_token(token&& token) {
         constexpr const char* suborigin = "get_value_from_token()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         switch (token.type) {
             case token_type::null:
-                return value<LogPtr>(nullptr, base::log());
+                return value(nullptr, base::log());
 
             case token_type::boolean:
-                return value<LogPtr>(token.boolean, base::log());
+                return value(token.boolean, base::log());
 
             case token_type::number:
-                return value<LogPtr>(token.number, base::log());
+                return value(token.number, base::log());
 
             case token_type::string:
-                return value<LogPtr>(std::move(token.string), base::log());
+                return value(std::move(token.string), base::log());
 
             case token_type::begin_array:
-                return value<LogPtr>(get_array(), base::log());
+                return value(get_array(), base::log());
 
             case token_type::begin_object:
-                return value<LogPtr>(get_object(), base::log());
+                return value(get_object(), base::log());
 
             default:
                 base::set_bad();
@@ -901,20 +843,19 @@ namespace abc { namespace net { namespace json {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 
-        return value<LogPtr>(base::log());
+        return value(base::log());
     }
 
 
-    template <typename LogPtr>
-    inline literal::array<LogPtr> reader<LogPtr>::get_array() {
+    inline literal::array reader::get_array() {
         constexpr const char* suborigin = "get_array()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        literal::array<LogPtr> array;
+        literal::array array;
 
         token token = base::get_token();
         while (token.type != token_type::end_array) {
-            value<LogPtr> value = get_value_from_token(std::move(token));
+            value value = get_value_from_token(std::move(token));
             if (value.type() == value_type::empty) {
                 base::set_bad();
                 diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
@@ -931,12 +872,11 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline literal::object<LogPtr> reader<LogPtr>::get_object() {
+    inline literal::object reader::get_object() {
         constexpr const char* suborigin = "get_object()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        literal::object<LogPtr> object;
+        literal::object object;
 
         token token = base::get_token();
         while (token.type != token_type::end_object) {
@@ -945,7 +885,7 @@ namespace abc { namespace net { namespace json {
                 diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected token_type=%u", token.type);
             }
 
-            value<LogPtr> value = get_value();
+            value value = get_value();
             if (value.type() == value_type::empty) {
                 base::set_bad();
                 diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
@@ -965,8 +905,7 @@ namespace abc { namespace net { namespace json {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline ostream::ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, log)
         , _skip_comma(false) {
@@ -978,22 +917,19 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(std::streambuf* sb, diag::log_ostream* log)
+    inline ostream::ostream(std::streambuf* sb, diag::log_ostream* log)
         : ostream("abc::net::json::ostream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(ostream&& other)
+    inline ostream::ostream(ostream&& other) noexcept
         : base(std::move(other))
         , state_base(std::move(other))
         , _skip_comma(other._skip_comma) {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_token(const token& token) {
+    inline void ostream::put_token(const token& token) {
         constexpr const char* suborigin = "put_token()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10115, "Begin: token.type=0x%2.2x", token.type);
 
@@ -1045,8 +981,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_null() {
+    inline void ostream::put_null() {
         constexpr const char* suborigin = "put_null()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1056,8 +991,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_boolean(literal::boolean b) {
+    inline void ostream::put_boolean(literal::boolean b) {
         constexpr const char* suborigin = "put_boolean()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: b=%d", b);
 
@@ -1073,8 +1007,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_number(literal::number n) {
+    inline void ostream::put_number(literal::number n) {
         constexpr const char* suborigin = "put_number()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: n=%.16lg", n);
 
@@ -1087,8 +1020,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_string(const literal::string& s) {
+    inline void ostream::put_string(const literal::string& s) {
         constexpr const char* suborigin = "put_string()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: s='%s'", s.c_str());
 
@@ -1105,8 +1037,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_property(const literal::string& name) {
+    inline void ostream::put_property(const literal::string& name) {
         constexpr const char* suborigin = "put_property()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: name='%s'", name.c_str());
 
@@ -1132,8 +1063,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_begin_array() {
+    inline void ostream::put_begin_array() {
         constexpr const char* suborigin = "put_begin_array()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1148,8 +1078,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_end_array() {
+    inline void ostream::put_end_array() {
         constexpr const char* suborigin = "put_end_array()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1168,8 +1097,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_begin_object() {
+    inline void ostream::put_begin_object() {
         constexpr const char* suborigin = "put_begin_object()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1185,8 +1113,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_end_object() {
+    inline void ostream::put_end_object() {
         constexpr const char* suborigin = "put_end_object()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1205,32 +1132,27 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_space() {
+    inline void ostream::put_space() {
         put_chars(" ", 1);
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_tab() {
+    inline void ostream::put_tab() {
         put_chars("\t", 1);
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_cr() {
+    inline void ostream::put_cr() {
         put_chars("\r", 1);
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_lf() {
+    inline void ostream::put_lf() {
         put_chars("\n", 1);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_literal(const char* chars, std::size_t chars_len) {
+    inline std::size_t ostream::put_literal(const char* chars, std::size_t chars_len) {
         constexpr const char* suborigin = "put_literal()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
 
@@ -1246,8 +1168,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_literal_precond() {
+    inline void ostream::put_literal_precond() {
         constexpr const char* suborigin = "put_literal_precond()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1265,8 +1186,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_literal_postcond() {
+    inline void ostream::put_literal_postcond() {
         constexpr const char* suborigin = "put_literal_postcond()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1280,8 +1200,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_chars(const char* chars, std::size_t chars_len) {
+    inline std::size_t ostream::put_chars(const char* chars, std::size_t chars_len) {
         constexpr const char* suborigin = "put_chars()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10121, "Begin: chars='%s'", chars);
 
@@ -1301,8 +1220,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_char(char ch) {
+    inline std::size_t ostream::put_char(char ch) {
         if (base::is_good()) {
             base::put(ch);
             return 1;
@@ -1315,8 +1233,7 @@ namespace abc { namespace net { namespace json {
 // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline writer<LogPtr>::writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline writer::writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "writer()";
@@ -1326,20 +1243,17 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline writer<LogPtr>::writer(std::streambuf* sb, diag::log_ostream* log)
+    inline writer::writer(std::streambuf* sb, diag::log_ostream* log)
         : writer("abc::net::json::writer", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline writer<LogPtr>::writer(writer&& other)
+    inline writer::writer(writer&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void writer<LogPtr>::put_value(const value<LogPtr>& value) {
+    inline void writer::put_value(const value& value) {
         constexpr const char* suborigin = "put_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", value.type());
 
@@ -1378,14 +1292,13 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void writer<LogPtr>::put_array(const literal::array<LogPtr>& array) {
+    inline void writer::put_array(const literal::array& array) {
         constexpr const char* suborigin = "put_array()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", array.size());
 
         base::put_begin_array();
 
-        for (typename literal::array<LogPtr>::const_reference item : array) {
+        for (typename literal::array::const_reference item : array) {
             put_value(item);
         }
 
@@ -1397,14 +1310,13 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    template <typename LogPtr>
-    inline void writer<LogPtr>::put_object(const literal::object<LogPtr>& object) {
+    inline void writer::put_object(const literal::object& object) {
         constexpr const char* suborigin = "put_object()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", object.size());
 
         base::put_begin_object();
 
-        for (typename literal::object<LogPtr>::const_reference item : object) {
+        for (typename literal::object::const_reference item : object) {
             base::put_property(item.first);
             put_value(item.second);
         }
