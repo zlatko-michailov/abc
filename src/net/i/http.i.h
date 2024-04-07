@@ -118,10 +118,8 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Internal. http semantic state. 
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Internal. http semantic state. 
      */
-    template <typename LogPtr = std::nullptr_t>
     class state
         : protected diag::diag_ready<const char*> {
 
@@ -139,7 +137,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        state(state&& other) = default;
+        state(state&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
@@ -177,16 +175,14 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Internal. Common http input stream. Used to read a request on the server or to read a response on the client.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Internal. Common http input stream. Used to read a request on the server or to read a response on the client.
      */
-    template <typename LogPtr = std::nullptr_t>
     class istream
         : public abc::istream
-        , public state<LogPtr> {
+        , public state {
 
         using base       = abc::istream;
-        using state_base = state<LogPtr>;
+        using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
     protected:
@@ -202,7 +198,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        istream(istream&& other);
+        istream(istream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -343,16 +339,14 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Internal. Common http output stream. Used to write a request on the client or to write a response on the server.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Internal. Common http output stream. Used to write a request on the client or to write a response on the server.
      */
-    template <typename LogPtr = std::nullptr_t>
     class ostream
         : public abc::ostream
-        , public state<LogPtr> {
+        , public state {
 
         using base       = abc::ostream;
-        using state_base = state<LogPtr>;
+        using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
     protected:
@@ -368,7 +362,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        ostream(ostream&& other);
+        ostream(ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -517,15 +511,13 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         http request input stream. Used on the server side to read request streams sequentially.
-     * @details       Using this class requires knowledge of the http protocol. Consider using `request_reader`.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief   http request input stream. Used on the server side to read request streams sequentially.
+     * @details Using this class requires knowledge of the http protocol. Consider using `request_reader`.
      */
-    template <typename LogPtr = std::nullptr_t>
     class request_istream
-        : public istream<LogPtr> {
+        : public istream {
 
-        using base      = istream<LogPtr>;
+        using base      = istream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -548,7 +540,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        request_istream(request_istream&& other);
+        request_istream(request_istream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -592,14 +584,12 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
     /**
-     * @brief         http request reader. Used on the server side to read whole requests.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http request reader. Used on the server side to read whole requests.
      */
-    template <typename LogPtr = std::nullptr_t>
     class request_reader
-        : protected request_istream<LogPtr> {
+        : protected request_istream {
 
-        using base      = request_istream<LogPtr>;
+        using base      = request_istream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -622,7 +612,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        request_reader(request_reader&& other);
+        request_reader(request_reader&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -656,13 +646,11 @@ namespace abc { namespace net { namespace http {
 
     /**
      * @brief  http request output stream. Used on the client side to write requests.
-     * @tparam LogPtr Pointer type to `log_ostream`.
      */
-    template <typename LogPtr = std::nullptr_t>
     class request_ostream
-        : public ostream<LogPtr> {
+        : public ostream {
 
-        using base      = ostream<LogPtr>;
+        using base      = ostream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -685,7 +673,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        request_ostream(request_ostream&& other);
+        request_ostream(request_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -735,14 +723,12 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
     /**
-     * @brief         http request writer. Used on the client side to write whole requests.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http request writer. Used on the client side to write whole requests.
      */
-    template <typename LogPtr = std::nullptr_t>
     class request_writer
-        : protected request_ostream<LogPtr> {
+        : protected request_ostream {
 
-        using base      = request_ostream<LogPtr>;
+        using base      = request_ostream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -765,7 +751,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        request_writer(request_writer&& other);
+        request_writer(request_writer&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -798,14 +784,12 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         http response input stream. Used on the client side to read responses.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http response input stream. Used on the client side to read responses.
      */
-    template <typename LogPtr = std::nullptr_t>
     class response_istream
-        : public istream<LogPtr> {
+        : public istream {
 
-        using base      = istream<LogPtr>;
+        using base      = istream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -828,7 +812,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        response_istream(response_istream&& other);
+        response_istream(response_istream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -866,14 +850,12 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         http response reader. Used on the client side to read whole responses.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http response reader. Used on the client side to read whole responses.
      */
-    template <typename LogPtr = std::nullptr_t>
     class response_reader
-        : protected response_istream<LogPtr> {
+        : protected response_istream {
 
-        using base      = response_istream<LogPtr>;
+        using base      = response_istream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -896,7 +878,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        response_reader(response_reader&& other);
+        response_reader(response_reader&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -929,14 +911,12 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         http response output stream. Used on the server side to write responses.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http response output stream. Used on the server side to write responses.
      */
-    template <typename LogPtr = std::nullptr_t>
     class response_ostream
-        : public ostream<LogPtr> {
+        : public ostream {
 
-        using base      = ostream<LogPtr>;
+        using base      = ostream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -959,7 +939,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        response_ostream(response_ostream&& other);
+        response_ostream(response_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -1001,14 +981,12 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
     /**
-     * @brief         http response writer. Used on the server side to write whole responses.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief http response writer. Used on the server side to write whole responses.
      */
-    template <typename LogPtr = std::nullptr_t>
     class response_writer
-        : protected response_ostream<LogPtr> {
+        : protected response_ostream {
 
-        using base      = response_ostream<LogPtr>;
+        using base      = response_ostream;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -1031,7 +1009,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        response_writer(response_writer&& other);
+        response_writer(response_writer&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -1064,13 +1042,11 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Combination of `request_writer` and `response_reader`. Used on the client side.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Combination of `request_writer` and `response_reader`. Used on the client side.
      */
-    template <typename LogPtr = std::nullptr_t>
     class client
-        : public request_writer<LogPtr>
-        , public response_reader<LogPtr> {
+        : public request_writer
+        , public response_reader {
 
     public:
         /**
@@ -1083,7 +1059,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        client(client&& other);
+        client(client&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -1096,13 +1072,11 @@ namespace abc { namespace net { namespace http {
 
 
     /**
-     * @brief         Combination of `request_reader` and `response_writer`. Used on the server side.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Combination of `request_reader` and `response_writer`. Used on the server side.
      */
-    template <typename LogPtr = std::nullptr_t>
     class server
-        : public request_reader<LogPtr>
-        , public response_writer<LogPtr> {
+        : public request_reader
+        , public response_writer {
 
     public:
         /**
@@ -1115,7 +1089,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move constructor.
          */
-        server(server&& other);
+        server(server&& other) noexcept;
 
         /**
          * @brief Deleted.

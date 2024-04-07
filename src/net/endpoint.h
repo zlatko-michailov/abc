@@ -131,7 +131,7 @@ namespace abc { namespace net { namespace http {
         socket_streambuf<ClientSocket*, LogPtr> sb(&connection, diag_base::log());
 
         // Create an http::server, which combines http::request_reader and http::response_writer.
-        http::server<LogPtr> http(&sb, diag_base::log());
+        http::server http(&sb, diag_base::log());
 
         // Read the request.
         http::request request = http.get_request();
@@ -164,7 +164,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_file_request(server<LogPtr>& http, const request& request) {
+    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_file_request(server& http, const request& request) {
         constexpr const char* suborigin = "process_file_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102e4, "Begin: method='%s', path='%s'", request.method.c_str(), request.resource.path.c_str());
 
@@ -223,7 +223,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_rest_request(server<LogPtr>& http, const request& request) {
+    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_rest_request(server& http, const request& request) {
         constexpr const char* suborigin = "process_rest_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102ea, "Begin: method='%s', path='%s'", request.method.c_str(), request.resource.path.c_str());
 
@@ -238,7 +238,7 @@ namespace abc { namespace net { namespace http {
 
 
     template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::send_simple_response(server<LogPtr>& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag) {
+    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::send_simple_response(server& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag) {
         constexpr const char* suborigin = "send_simple_response()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102ec, "Begin:");
 

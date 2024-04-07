@@ -21,11 +21,11 @@
     - Doc
 - `log_ostream`
     - Remove the `Log` template parameter from
-        - `http`
         - `socket`
         - `endpoint`
         - tests
         - samples
+    - Make all move ctors "&& other);" `noexcept`.
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`
     - Make the override methods of `xxx_line_ostream` flush!

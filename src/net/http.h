@@ -36,8 +36,7 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace http {
 
-    template <typename LogPtr>
-    inline state<LogPtr>::state(const char* origin, item next, diag::log_ostream* log) noexcept
+    inline state::state(const char* origin, item next, diag::log_ostream* log) noexcept
         : diag_base(copy(origin), log)
         , _next(next) {
 
@@ -48,8 +47,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::reset(item next) {
+    inline void state::reset(item next) {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
 
@@ -59,14 +57,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline item state<LogPtr>::next() const noexcept {
+    inline item state::next() const noexcept {
         return _next;
     }
 
 
-    template <typename LogPtr>
-    inline void state<LogPtr>::assert_next(item item) {
+    inline void state::assert_next(item item) {
         constexpr const char* suborigin = "assert_next()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: item=%u", (unsigned)item);
 
@@ -79,8 +75,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline istream<LogPtr>::istream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
+    inline istream::istream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -93,15 +88,13 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline istream<LogPtr>::istream(istream&& other)
+    inline istream::istream(istream&& other) noexcept
         : base(std::move(other))
         , state_base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_protocol() {
+    inline std::string istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -170,8 +163,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline headers istream<LogPtr>::get_headers() {
+    inline headers istream::get_headers() {
         constexpr const char* suborigin = "get_headers()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -204,8 +196,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_header_name() {
+    inline std::string istream::get_header_name() {
         constexpr const char* suborigin = "get_header_name()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -243,8 +234,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_header_value() {
+    inline std::string istream::get_header_value() {
         constexpr const char* suborigin = "get_header_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -288,8 +278,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_body(std::size_t max_len) {
+    inline std::string istream::get_body(std::size_t max_len) {
         constexpr const char* suborigin = "get_body()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: max_len=%zu", max_len);
 
@@ -306,44 +295,37 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_token(std::size_t estimated_len) {
+    inline std::string istream::get_token(std::size_t estimated_len) {
         return get_chars(ascii::http::is_token, estimated_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_prints(std::size_t estimated_len) {
+    inline std::string istream::get_prints(std::size_t estimated_len) {
         return get_chars(ascii::is_abcprint, estimated_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_prints_and_spaces(std::size_t estimated_len) {
+    inline std::string istream::get_prints_and_spaces(std::size_t estimated_len) {
         return get_chars(ascii::is_abcprint_or_space, estimated_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_alphas(std::size_t estimated_len) {
+    inline std::string istream::get_alphas(std::size_t estimated_len) {
         return get_chars(ascii::is_alpha, estimated_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_digits(std::size_t estimated_len) {
+    inline std::string istream::get_digits(std::size_t estimated_len) {
         return get_chars(ascii::is_digit, estimated_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_any_chars(std::size_t estimated_len, std::size_t max_len) {
+    inline std::string istream::get_any_chars(std::size_t estimated_len, std::size_t max_len) {
         return get_chars(ascii::is_any, estimated_len, max_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::string istream<LogPtr>::get_chars(ascii::predicate_t&& predicate, std::size_t estimated_len, std::size_t max_len) {
+    inline std::string istream::get_chars(ascii::predicate_t&& predicate, std::size_t estimated_len, std::size_t max_len) {
         std::string chars;
         chars.reserve(estimated_len);
 
@@ -357,8 +339,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline char istream<LogPtr>::get_char() {
+    inline char istream::get_char() {
         char ch = peek_char();
 
         if (base::is_good()) {
@@ -369,8 +350,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline char istream<LogPtr>::peek_char() {
+    inline char istream::peek_char() {
         if (!base::is_good()) {
             return (char)std::char_traits<char>::eof(); 
         }
@@ -385,14 +365,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t istream<LogPtr>::skip_spaces() {
+    inline std::size_t istream::skip_spaces() {
         return skip_chars(ascii::is_space);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t istream<LogPtr>::skip_crlf() {
+    inline std::size_t istream::skip_crlf() {
         char ch = get_char();
         if (ch != '\r') {
             base::set_fail();
@@ -409,8 +387,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t istream<LogPtr>::skip_chars(ascii::predicate_t&& predicate) {
+    inline std::size_t istream::skip_chars(ascii::predicate_t&& predicate) {
         std::size_t gcount = 0;
         
         while (base::is_good() && predicate(peek_char())) {
@@ -422,8 +399,7 @@ namespace abc { namespace net { namespace http {
     }
     
     
-    template <typename LogPtr>
-    inline void istream<LogPtr>::set_gstate(std::size_t gcount, item next) {
+    inline void istream::set_gstate(std::size_t gcount, item next) {
         constexpr const char* suborigin = "set_gstate()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: gcount=%zu, next=%u", gcount, (unsigned)next);
 
@@ -437,8 +413,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
+    inline ostream::ostream(const char* origin, std::streambuf* sb, item next, diag::log_ostream* log)
         : base(sb)
         , state_base(origin, next, log) {
 
@@ -449,15 +424,13 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline ostream<LogPtr>::ostream(ostream&& other)
+    inline ostream::ostream(ostream&& other) noexcept
         : base(std::move(other))
         , state_base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_headers(const headers& headers) {
+    inline void ostream::put_headers(const headers& headers) {
         constexpr const char* suborigin = "put_headers()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -472,8 +445,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_header_name(const char* header_name, std::size_t header_name_len) {
+    inline void ostream::put_header_name(const char* header_name, std::size_t header_name_len) {
         constexpr const char* suborigin = "put_header_name()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: header_name='%s'", header_name);
 
@@ -504,8 +476,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_header_value(const char* header_value, std::size_t header_value_len) {
+    inline void ostream::put_header_value(const char* header_value, std::size_t header_value_len) {
         constexpr const char* suborigin = "put_header_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: header_value='%s'", header_value);
 
@@ -546,8 +517,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::end_headers() {
+    inline void ostream::end_headers() {
         constexpr const char* suborigin = "put_header_value()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -561,8 +531,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::put_body(const char* body, std::size_t body_len) {
+    inline void ostream::put_body(const char* body, std::size_t body_len) {
         constexpr const char* suborigin = "put_body()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -582,8 +551,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+    inline std::size_t ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
 
@@ -644,50 +612,42 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_token(const char* token, std::size_t token_len) {
+    inline std::size_t ostream::put_token(const char* token, std::size_t token_len) {
         return put_chars(ascii::http::is_token, token, token_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_prints(const char* prints, std::size_t prints_len) {
+    inline std::size_t ostream::put_prints(const char* prints, std::size_t prints_len) {
         return put_chars(ascii::is_abcprint, prints, prints_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_prints_and_spaces(const char* prints_and_spaces, std::size_t prints_and_spaces_len) {
+    inline std::size_t ostream::put_prints_and_spaces(const char* prints_and_spaces, std::size_t prints_and_spaces_len) {
         return put_chars(ascii::is_abcprint_or_space, prints_and_spaces, prints_and_spaces_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_alphas(const char* alphas, std::size_t alphas_len) {
+    inline std::size_t ostream::put_alphas(const char* alphas, std::size_t alphas_len) {
         return put_chars(ascii::is_alpha, alphas, alphas_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_digits(const char* digits, std::size_t digits_len) {
+    inline std::size_t ostream::put_digits(const char* digits, std::size_t digits_len) {
         return put_chars(ascii::is_digit, digits, digits_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_crlf() {
+    inline std::size_t ostream::put_crlf() {
         return put_char('\r') + put_char('\n');
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_space() {
+    inline std::size_t ostream::put_space() {
         return put_char(' ');
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_any_chars(const char* any_chars, std::size_t any_chars_len) {
+    inline std::size_t ostream::put_any_chars(const char* any_chars, std::size_t any_chars_len) {
         std::size_t pcount = 0;
 
         while (base::is_good() && pcount < any_chars_len) {
@@ -698,8 +658,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len) {
+    inline std::size_t ostream::put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len) {
         constexpr const char* suborigin = "put_chars()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
 
@@ -721,8 +680,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::put_char(char ch) {
+    inline std::size_t ostream::put_char(char ch) {
         if (base::is_good()) {
             base::put(ch);
         }
@@ -731,8 +689,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t ostream<LogPtr>::count_leading_spaces_in_header_value(const char* header_value, std::size_t header_value_len) {
+    inline std::size_t ostream::count_leading_spaces_in_header_value(const char* header_value, std::size_t header_value_len) {
         std::size_t sp = 0;
 
         while (sp < header_value_len) {
@@ -751,8 +708,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void ostream<LogPtr>::set_pstate(item next) {
+    inline void ostream::set_pstate(item next) {
         constexpr const char* suborigin = "set_pstate()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
 
@@ -766,8 +722,7 @@ namespace abc { namespace net { namespace http {
    // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline request_istream<LogPtr>::request_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline request_istream::request_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_istream()";
@@ -777,31 +732,27 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline request_istream<LogPtr>::request_istream(std::streambuf* sb, diag::log_ostream* log)
+    inline request_istream::request_istream(std::streambuf* sb, diag::log_ostream* log)
         : request_istream("abc::net::http::request_istream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline request_istream<LogPtr>::request_istream(request_istream&& other)
+    inline request_istream::request_istream(request_istream&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void request_istream<LogPtr>::reset() {
+    inline void request_istream::reset() {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        base::reset(item::method);
+        base::set_gstate(0, item::method);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename LogPtr>
-    inline std::string request_istream<LogPtr>::get_method() {
+    inline std::string request_istream::get_method() {
         constexpr const char* suborigin = "get_method()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -819,8 +770,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline resource request_istream<LogPtr>::get_resource() {
+    inline resource request_istream::get_resource() {
         constexpr const char* suborigin = "get_resource()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -840,8 +790,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string request_istream<LogPtr>::get_protocol() {
+    inline std::string request_istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -856,8 +805,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline resource request_istream<LogPtr>::split_resource(const std::string& raw_resource) {
+    inline resource request_istream::split_resource(const std::string& raw_resource) {
         constexpr const char* suborigin = "split_resource()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: raw_resource='%s'", raw_resource.c_str());
 
@@ -924,8 +872,7 @@ namespace abc { namespace net { namespace http {
    // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline request_reader<LogPtr>::request_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline request_reader::request_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_reader()";
@@ -935,20 +882,17 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline request_reader<LogPtr>::request_reader(std::streambuf* sb, diag::log_ostream* log)
+    inline request_reader::request_reader(std::streambuf* sb, diag::log_ostream* log)
         : request_reader("abc::net::http::request_reader", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline request_reader<LogPtr>::request_reader(request_reader&& other)
+    inline request_reader::request_reader(request_reader&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline request request_reader<LogPtr>::get_request() {
+    inline request request_reader::get_request() {
         constexpr const char* suborigin = "get_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -965,14 +909,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string request_reader<LogPtr>::get_body(std::size_t max_len) {
+    inline std::string request_reader::get_body(std::size_t max_len) {
         return base::get_body(max_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::streambuf* request_reader<LogPtr>::rdbuf() const {
+    inline std::streambuf* request_reader::rdbuf() const {
         return base::rdbuf();
     }
 
@@ -980,8 +922,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline request_ostream<LogPtr>::request_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline request_ostream::request_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_ostream()";
@@ -991,31 +932,27 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline request_ostream<LogPtr>::request_ostream(std::streambuf* sb, diag::log_ostream* log)
+    inline request_ostream::request_ostream(std::streambuf* sb, diag::log_ostream* log)
         : request_ostream("abc::net::http::request_ostream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline request_ostream<LogPtr>::request_ostream(request_ostream&& other)
+    inline request_ostream::request_ostream(request_ostream&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void request_ostream<LogPtr>::reset() {
+    inline void request_ostream::reset() {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        base::reset(item::method);
+        base::set_pstate(item::method);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename LogPtr>
-    inline void request_ostream<LogPtr>::put_method(const char* method, std::size_t method_len) {
+    inline void request_ostream::put_method(const char* method, std::size_t method_len) {
         constexpr const char* suborigin = "put_method()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: method='%s'", method);
 
@@ -1036,8 +973,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void request_ostream<LogPtr>::put_resource(const resource& resource) {
+    inline void request_ostream::put_resource(const resource& resource) {
         constexpr const char* suborigin = "put_resource()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1082,8 +1018,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void request_ostream<LogPtr>::put_resource(const char* resource, std::size_t resource_len) {
+    inline void request_ostream::put_resource(const char* resource, std::size_t resource_len) {
         constexpr const char* suborigin = "put_method()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: resource='%s'", resource);
 
@@ -1104,8 +1039,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void request_ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+    inline void request_ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
 
@@ -1123,8 +1057,7 @@ namespace abc { namespace net { namespace http {
    // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline request_writer<LogPtr>::request_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline request_writer::request_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_writer()";
@@ -1134,20 +1067,17 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline request_writer<LogPtr>::request_writer(std::streambuf* sb, diag::log_ostream* log)
+    inline request_writer::request_writer(std::streambuf* sb, diag::log_ostream* log)
         : request_writer("abc::net::http::request_writer", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline request_writer<LogPtr>::request_writer(request_writer&& other)
+    inline request_writer::request_writer(request_writer&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void request_writer<LogPtr>::put_request(const request& request) {
+    inline void request_writer::put_request(const request& request) {
         constexpr const char* suborigin = "put_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1162,16 +1092,14 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void request_writer<LogPtr>::put_body(const char* body, std::size_t body_len) {
+    inline void request_writer::put_body(const char* body, std::size_t body_len) {
         base::put_body(body, body_len);
 
         base::flush();
     }
 
 
-    template <typename LogPtr>
-    inline std::streambuf* request_writer<LogPtr>::rdbuf() const {
+    inline std::streambuf* request_writer::rdbuf() const {
         return base::rdbuf();
     }
 
@@ -1179,8 +1107,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline response_istream::response_istream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_istream()";
@@ -1190,31 +1117,27 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(std::streambuf* sb, diag::log_ostream* log)
+    inline response_istream::response_istream(std::streambuf* sb, diag::log_ostream* log)
         : response_istream("abc::net::http::response_istream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline response_istream<LogPtr>::response_istream(response_istream&& other)
+    inline response_istream::response_istream(response_istream&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void response_istream<LogPtr>::reset() {
+    inline void response_istream::reset() {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        base::reset(item::protocol);
+        base::set_gstate(0, item::protocol);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename LogPtr>
-    inline std::string response_istream<LogPtr>::get_protocol() {
+    inline std::string response_istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1227,8 +1150,8 @@ namespace abc { namespace net { namespace http {
         return protocol;
     }
 
-    template <typename LogPtr>
-    inline status_code_t response_istream<LogPtr>::get_status_code() {
+
+    inline status_code_t response_istream::get_status_code() {
         constexpr const char* suborigin = "get_status_code()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1248,8 +1171,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string response_istream<LogPtr>::get_reason_phrase() {
+    inline std::string response_istream::get_reason_phrase() {
         constexpr const char* suborigin = "get_reason_phrase()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1271,8 +1193,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline response_reader<LogPtr>::response_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline response_reader::response_reader(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_reader()";
@@ -1282,20 +1203,17 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline response_reader<LogPtr>::response_reader(std::streambuf* sb, diag::log_ostream* log)
+    inline response_reader::response_reader(std::streambuf* sb, diag::log_ostream* log)
         : response_reader("abc::net::http::response_reader", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline response_reader<LogPtr>::response_reader(response_reader&& other)
+    inline response_reader::response_reader(response_reader&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline response response_reader<LogPtr>::get_response() {
+    inline response response_reader::get_response() {
         constexpr const char* suborigin = "get_response()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1312,14 +1230,12 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline std::string response_reader<LogPtr>::get_body(std::size_t max_len) {
+    inline std::string response_reader::get_body(std::size_t max_len) {
         return base::get_body(max_len);
     }
 
 
-    template <typename LogPtr>
-    inline std::streambuf* response_reader<LogPtr>::rdbuf() const {
+    inline std::streambuf* response_reader::rdbuf() const {
         return base::rdbuf();
     }
 
@@ -1327,8 +1243,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline response_ostream::response_ostream(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_ostream()";
@@ -1338,31 +1253,27 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(std::streambuf* sb, diag::log_ostream* log)
+    inline response_ostream::response_ostream(std::streambuf* sb, diag::log_ostream* log)
         : response_ostream("abc::net::http::response_ostream", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline response_ostream<LogPtr>::response_ostream(response_ostream&& other)
+    inline response_ostream::response_ostream(response_ostream&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void response_ostream<LogPtr>::reset() {
+    inline void response_ostream::reset() {
         constexpr const char* suborigin = "reset()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        base::reset(item::protocol);
+        base::set_pstate(item::protocol);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename LogPtr>
-    inline void response_ostream<LogPtr>::put_protocol(const char* protocol, std::size_t protocol_len) {
+    inline void response_ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
 
@@ -1377,8 +1288,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void response_ostream<LogPtr>::put_status_code(status_code_t status_code) {
+    inline void response_ostream::put_status_code(status_code_t status_code) {
         constexpr const char* suborigin = "put_status_code()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: status_code='%u'", (unsigned)status_code);
 
@@ -1396,8 +1306,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void response_ostream<LogPtr>::put_reason_phrase(const char* reason_phrase, std::size_t reason_phrase_len) {
+    inline void response_ostream::put_reason_phrase(const char* reason_phrase, std::size_t reason_phrase_len) {
         constexpr const char* suborigin = "put_reason_phrase()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: reason_phrase='%s'", reason_phrase);
 
@@ -1422,8 +1331,7 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline response_writer<LogPtr>::response_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+    inline response_writer::response_writer(const char* origin, std::streambuf* sb, diag::log_ostream* log)
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_writer()";
@@ -1433,20 +1341,17 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline response_writer<LogPtr>::response_writer(std::streambuf* sb, diag::log_ostream* log)
+    inline response_writer::response_writer(std::streambuf* sb, diag::log_ostream* log)
         : response_writer("abc::net::http::response_writer", sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline response_writer<LogPtr>::response_writer(response_writer&& other)
+    inline response_writer::response_writer(response_writer&& other) noexcept
         : base(std::move(other)) {
     }
 
 
-    template <typename LogPtr>
-    inline void response_writer<LogPtr>::put_response(const response& response) {
+    inline void response_writer::put_response(const response& response) {
         constexpr const char* suborigin = "put_response()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1461,16 +1366,14 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename LogPtr>
-    inline void response_writer<LogPtr>::put_body(const char* body, std::size_t body_len) {
+    inline void response_writer::put_body(const char* body, std::size_t body_len) {
         base::put_body(body, body_len);
 
         base::flush();
     }
 
 
-    template <typename LogPtr>
-    inline std::streambuf* response_writer<LogPtr>::rdbuf() const {
+    inline std::streambuf* response_writer::rdbuf() const {
         return base::rdbuf();
     }
 
@@ -1478,34 +1381,30 @@ namespace abc { namespace net { namespace http {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline client<LogPtr>::client(std::streambuf* sb, diag::log_ostream* log)
-        : request_writer<LogPtr>(sb, log)
-        , response_reader<LogPtr>(sb, log) {
+    inline client::client(std::streambuf* sb, diag::log_ostream* log)
+        : request_writer(sb, log)
+        , response_reader(sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline client<LogPtr>::client(client&& other)
-        : request_writer<LogPtr>(std::move(other))
-        , response_reader<LogPtr>(std::move(other)) {
+    inline client::client(client&& other) noexcept
+        : request_writer(std::move(other))
+        , response_reader(std::move(other)) {
     }
 
 
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline server<LogPtr>::server(std::streambuf* sb, diag::log_ostream* log)
-        : request_reader<LogPtr>(sb, log)
-        , response_writer<LogPtr>(sb, log) {
+    inline server::server(std::streambuf* sb, diag::log_ostream* log)
+        : request_reader(sb, log)
+        , response_writer(sb, log) {
     }
 
 
-    template <typename LogPtr>
-    inline server<LogPtr>::server(server&& other)
-        : request_reader<LogPtr>(std::move(other))
-        , response_writer<LogPtr>(std::move(other)) {
+    inline server::server(server&& other) noexcept
+        : request_reader(std::move(other))
+        , response_writer(std::move(other)) {
     }
 
 

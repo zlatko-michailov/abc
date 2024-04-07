@@ -248,14 +248,14 @@ namespace abc { namespace net { namespace http {
          * @param http    A reference to `http::server`.
          * @param request A reference to `http::request`.
          */
-        virtual void process_file_request(server<LogPtr>& http, const request& request);
+        virtual void process_file_request(server& http, const request& request);
 
         /**
          * @brief         Processes a REST request.
          * @param http    A reference to `http::server`.
          * @param request A reference to `http::request`.
          */
-        virtual void process_rest_request(server<LogPtr>& http, const request& request);
+        virtual void process_rest_request(server& http, const request& request);
 
         /**
          * @brief         Checks if the resource is a static file.
@@ -273,7 +273,7 @@ namespace abc { namespace net { namespace http {
          * @param body          Http response body.
          * @param tag           Logging tag provided by the caller, so that this response could be tracked as part of the call flow.
          */
-        virtual void send_simple_response(server<LogPtr>& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag);
+        virtual void send_simple_response(server& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag);
 
         /**
          * @brief      Determines the http response Content-Type based on the file extension.

@@ -295,7 +295,7 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
         client.connect("localhost", server_port);
 
         abc::net::socket_streambuf<ClientSocket*, test_log*> sb(&client, context.log());
-        abc::net::http::client<test_log*> http(&sb, context.log());
+        abc::net::http::client http(&sb, context.log());
 
         // Send request
         {
@@ -346,7 +346,7 @@ void http_json_stream_client(bool& passed, test_context& context, ClientSocket& 
 }
 
 
-void http_json_stream_server_request(bool& passed, test_context& context, abc::net::http::server<test_log*>& http) {
+void http_json_stream_server_request(bool& passed, test_context& context, abc::net::http::server& http) {
     constexpr const char* suborigin = "http_json_stream_server_request";
 
     try {
@@ -366,11 +366,11 @@ void http_json_stream_server_request(bool& passed, test_context& context, abc::n
 }
 
 
-void http_json_stream_server_body_and_response(bool& passed, test_context& context, abc::net::http::server<test_log*>& http) {
+void http_json_stream_server_body_and_response(bool& passed, test_context& context, abc::net::http::server& http) {
     constexpr const char* suborigin = "http_json_stream_server_body_and_response";
 
     try {
-        std::streambuf* sb = static_cast<const abc::net::http::request_reader<test_log*>&>(http).rdbuf();
+        std::streambuf* sb = static_cast<const abc::net::http::request_reader&>(http).rdbuf();
 
         // Receive request
         {
@@ -428,7 +428,7 @@ bool tcp_socket_http_json_stream(test_context& context, ServerSocket& server, Cl
     ClientSocket connection = server.accept();
 
     abc::net::socket_streambuf<ClientSocket*, test_log*> sb(&connection, context.log());
-    abc::net::http::server<test_log*> http(&sb, context.log());
+    abc::net::http::server http(&sb, context.log());
 
     http_json_stream_server_request(passed, context, http);
     http_json_stream_server_body_and_response(passed, context, http);
@@ -478,7 +478,7 @@ protected:
     test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);
 
 protected:
-    virtual void process_rest_request(abc::net::http::server<LogPtr>& http, const abc::net::http::request& request) override;
+    virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
 
 protected:
     bool& _passed;
@@ -496,7 +496,7 @@ inline test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::test_endpoint_bas
 
 
 template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-inline void test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::process_rest_request(abc::net::http::server<LogPtr>& http, const abc::net::http::request& request) {
+inline void test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     _passed = _context.are_equal(request.method.c_str(), abc::net::http::method::POST, 0x107a3) && _passed;
     _passed = _context.are_equal(request.resource.path.c_str(), request_path, 0x107a4) && _passed;
 
