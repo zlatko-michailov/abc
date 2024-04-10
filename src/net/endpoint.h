@@ -128,7 +128,7 @@ namespace abc { namespace net { namespace http {
         }
 
         // Create a socket_streambuf over the ClientSocket.
-        socket_streambuf<ClientSocket*, LogPtr> sb(&connection, diag_base::log());
+        socket_streambuf<ClientSocket*> sb(&connection, diag_base::log());
 
         // Create an http::server, which combines http::request_reader and http::response_writer.
         http::server http(&sb, diag_base::log());

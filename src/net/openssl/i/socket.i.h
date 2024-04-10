@@ -35,19 +35,16 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace openssl {
 
-    template <typename LogPtr>
     class tcp_server_socket;
 
 
     /**
-     * @brief         TCP client socket functionality with OpenSSL encryption.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief TCP client socket functionality with OpenSSL encryption.
      */
-    template <typename LogPtr = std::nullptr_t>
     class tcp_client_socket
-        : public net::tcp_client_socket<LogPtr> {
+        : public net::tcp_client_socket {
     
-        using base = net::tcp_client_socket<LogPtr>;
+        using base = net::tcp_client_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -105,7 +102,7 @@ namespace abc { namespace net { namespace openssl {
         std::size_t receive(void* buffer, std::size_t size);
 
     protected:
-        friend tcp_server_socket<LogPtr>;
+        friend tcp_server_socket;
 
         /**
          * @brief               Internal constructor for accepted connections.
@@ -144,14 +141,12 @@ namespace abc { namespace net { namespace openssl {
 
 
     /**
-     * @brief         TCP server socket functionality with OpenSSL encryption.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief TCP server socket functionality with OpenSSL encryption.
      */
-    template <typename LogPtr = std::nullptr_t>
     class tcp_server_socket
-        : public net::tcp_server_socket<LogPtr> {
+        : public net::tcp_server_socket {
 
-        using base = net::tcp_server_socket<LogPtr>;
+        using base = net::tcp_server_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -186,7 +181,7 @@ namespace abc { namespace net { namespace openssl {
          * @brief  Blocks until a client tries to connect.
          * @return New `openssl::tcp_client_socket` instance for the new connection.
          */
-        tcp_client_socket<LogPtr> accept() const;
+        tcp_client_socket accept() const;
 
     private:
         /**

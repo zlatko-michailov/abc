@@ -35,14 +35,12 @@ SOFTWARE.
 
 namespace abc { namespace net {
 
-    template <typename LogPtr>
-    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
+    inline basic_socket::basic_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
         : basic_socket(origin, socket::fd::invalid, kind, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline basic_socket<LogPtr>::basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
+    inline basic_socket::basic_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _kind(kind)
         , _family(family)
@@ -56,8 +54,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline basic_socket<LogPtr>::basic_socket(basic_socket&& other) noexcept
+    inline basic_socket::basic_socket(basic_socket&& other) noexcept
         : diag_base(std::move(other))
         , _kind(other._kind)
         , _family(other._family)
@@ -73,8 +70,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline basic_socket<LogPtr>::~basic_socket() noexcept {
+    inline basic_socket::~basic_socket() noexcept {
         constexpr const char* suborigin = "~basic_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 
@@ -84,14 +80,12 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline bool basic_socket<LogPtr>::is_open() const noexcept {
+    inline bool basic_socket::is_open() const noexcept {
         return _fd != socket::fd::invalid;
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::close() noexcept {
+    inline void basic_socket::close() noexcept {
         constexpr const char* suborigin = "close()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d", _fd);
 
@@ -108,8 +102,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::open() {
+    inline void basic_socket::open() {
         constexpr const char* suborigin = "open()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1000a, "Begin:");
 
@@ -123,8 +116,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline addrinfo basic_socket<LogPtr>::hints() const noexcept {
+    inline addrinfo basic_socket::hints() const noexcept {
         addrinfo hints{ };
 
         hints.ai_family   = (int)_family;
@@ -136,20 +128,17 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::bind(const char* port) {
+    inline void basic_socket::bind(const char* port) {
         bind(any_host(), port);
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::bind(const char* host, const char* port) {
+    inline void basic_socket::bind(const char* host, const char* port) {
         tie(host, port, socket::tie::bind);
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::tie(const char* host, const char* port, socket::tie tt) {
+    inline void basic_socket::tie(const char* host, const char* port, socket::tie tt) {
         const char* const tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
         constexpr const char* suborigin = "tie(host, port)";
@@ -202,8 +191,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline void basic_socket<LogPtr>::tie(const socket::address& address, socket::tie tt) {
+    inline void basic_socket::tie(const socket::address& address, socket::tie tt) {
         const char* const tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
         constexpr const char* suborigin = "tie(socket::address)";
@@ -224,8 +212,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline socket::error_t basic_socket<LogPtr>::try_tie(const sockaddr& addr, socklen_t addr_len, socket::tie tt) {
+    inline socket::error_t basic_socket::try_tie(const sockaddr& addr, socklen_t addr_len, socket::tie tt) {
         const char* const tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
         constexpr const char* suborigin = "try_tie(sockaddr)";
@@ -259,8 +246,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline const char* basic_socket<LogPtr>::any_host() const noexcept {
+    inline const char* basic_socket::any_host() const noexcept {
         switch (_family) {
             case socket::family::ipv4:
                 return "0.0.0.0";
@@ -274,26 +260,22 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline socket::kind basic_socket<LogPtr>::kind() const noexcept {
+    inline socket::kind basic_socket::kind() const noexcept {
         return _kind;
     }
 
 
-    template <typename LogPtr>
-    inline socket::family basic_socket<LogPtr>::family() const noexcept {
+    inline socket::family basic_socket::family() const noexcept {
         return _family;
     }
 
 
-    template <typename LogPtr>
-    inline socket::protocol basic_socket<LogPtr>::protocol() const noexcept {
+    inline socket::protocol basic_socket::protocol() const noexcept {
         return _protocol;
     }
 
 
-    template <typename LogPtr>
-    inline socket::fd_t basic_socket<LogPtr>::fd() const noexcept {
+    inline socket::fd_t basic_socket::fd() const noexcept {
         return _fd;
     }
 
@@ -301,32 +283,27 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline client_socket<LogPtr>::client_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
+    inline client_socket::client_socket(const char* origin, socket::kind kind, socket::family family, diag::log_ostream* log)
         : base(origin, kind, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline client_socket<LogPtr>::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
+    inline client_socket::client_socket(const char* origin, socket::fd_t fd, socket::kind kind, socket::family family, diag::log_ostream* log)
         : base(origin, fd, kind, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline void client_socket<LogPtr>::connect(const char* host, const char* port) {
+    inline void client_socket::connect(const char* host, const char* port) {
         base::tie(host, port, socket::tie::connect);
     }
 
 
-    template <typename LogPtr>
-    inline void client_socket<LogPtr>::connect(const socket::address& address) {
+    inline void client_socket::connect(const socket::address& address) {
         base::tie(address, socket::tie::connect);
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t client_socket<LogPtr>::send(const void* buffer, std::size_t size, socket::address* address) {
+    inline std::size_t client_socket::send(const void* buffer, std::size_t size, socket::address* address) {
         constexpr const char* suborigin = "send()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", size);
 
@@ -360,8 +337,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t client_socket<LogPtr>::receive(void* buffer, std::size_t size, socket::address* address) {
+    inline std::size_t client_socket::receive(void* buffer, std::size_t size, socket::address* address) {
         constexpr const char* suborigin = "receive()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", size);
 
@@ -398,8 +374,7 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline udp_socket<LogPtr>::udp_socket(socket::family family, diag::log_ostream* log)
+    inline udp_socket::udp_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::udp_socket", socket::kind::dgram, family, log) {
     }
 
@@ -407,20 +382,17 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::family family, diag::log_ostream* log)
+    inline tcp_client_socket::tcp_client_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::tcp_client_socket", socket::kind::stream, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::family family, diag::log_ostream* log)
+    inline tcp_client_socket::tcp_client_socket(const char* origin, socket::family family, diag::log_ostream* log)
         : base(origin, socket::kind::stream, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log)
+    inline tcp_client_socket::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log)
         : base(origin, fd, socket::kind::stream, family, log) {
     }
 
@@ -428,20 +400,17 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(socket::family family, diag::log_ostream* log)
+    inline tcp_server_socket::tcp_server_socket(socket::family family, diag::log_ostream* log)
         : base("abc::net::tcp_server_socket", socket::kind::stream, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* origin, socket::family family, diag::log_ostream* log)
+    inline tcp_server_socket::tcp_server_socket(const char* origin, socket::family family, diag::log_ostream* log)
         : base(origin, socket::kind::stream, family, log) {
     }
 
 
-    template <typename LogPtr>
-    inline void tcp_server_socket<LogPtr>::listen(socket::backlog_size_t backlog_size) {
+    inline void tcp_server_socket::listen(socket::backlog_size_t backlog_size) {
         constexpr const char* suborigin = "listen()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10022, "Begin:");
 
@@ -454,16 +423,14 @@ namespace abc { namespace net {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
+    inline tcp_client_socket tcp_server_socket::accept() const {
         socket::fd_t fd = accept_fd();
 
-        return tcp_client_socket<LogPtr>("abc::net::tcp_server_socket", fd, base::family(), base::log());
+        return tcp_client_socket("abc::net::tcp_server_socket", fd, base::family(), base::log());
     }
 
 
-    template <typename LogPtr>
-    inline socket::fd_t tcp_server_socket<LogPtr>::accept_fd() const {
+    inline socket::fd_t tcp_server_socket::accept_fd() const {
         constexpr const char* suborigin = "accept_fd()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10025, "Begin:");
 
@@ -479,8 +446,8 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename SocketPtr, typename LogPtr>
-    inline socket_streambuf<SocketPtr, LogPtr>::socket_streambuf(const SocketPtr& socket, diag::log_ostream* log)
+    template <typename SocketPtr>
+    inline socket_streambuf<SocketPtr>::socket_streambuf(const SocketPtr& socket, diag::log_ostream* log)
         : base()
         , diag_base("abc::net::socket_streambuf", log)
         , _socket(socket) {
@@ -497,8 +464,8 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket, typename Log>
-    inline socket_streambuf<Socket, Log>::socket_streambuf(socket_streambuf&& other) noexcept
+    template <typename Socket>
+    inline socket_streambuf<Socket>::socket_streambuf(socket_streambuf&& other) noexcept
         : base()
         , diag_base(std::move(other))
         , _socket(std::move(other._socket))
@@ -519,14 +486,14 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket, typename Log>
-    inline void socket_streambuf<Socket, Log>::flush() {
+    template <typename Socket>
+    inline void socket_streambuf<Socket>::flush() {
         (void)sync();
     }
 
 
-    template <typename Socket, typename Log>
-    inline std::streambuf::int_type socket_streambuf<Socket, Log>::underflow() {
+    template <typename Socket>
+    inline std::streambuf::int_type socket_streambuf<Socket>::underflow() {
         _socket->receive(&_get_ch, sizeof(char));
 
         setg(&_get_ch, &_get_ch, &_get_ch + 1);
@@ -535,8 +502,8 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket, typename Log>
-    inline std::streambuf::int_type socket_streambuf<Socket, Log>::overflow(std::streambuf::int_type ch) {
+    template <typename Socket>
+    inline std::streambuf::int_type socket_streambuf<Socket>::overflow(std::streambuf::int_type ch) {
         _socket->send(&_put_ch, sizeof(char));
         _socket->send(&ch, sizeof(char));
 
@@ -546,8 +513,8 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket, typename Log>
-    inline int socket_streambuf<Socket, Log>::sync() {
+    template <typename Socket>
+    inline int socket_streambuf<Socket>::sync() {
         if (pptr() != &_put_ch) {
             _socket->send(&_put_ch, sizeof(char));
         }

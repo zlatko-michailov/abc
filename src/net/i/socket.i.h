@@ -94,10 +94,8 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         Common socket functionality. Not directly constructable.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Common socket functionality. Not directly constructable.
      */
-    template <typename LogPtr = std::nullptr_t>
     class basic_socket
         : protected diag::diag_ready<const char*>  {
 
@@ -252,14 +250,12 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         Client (data transfer) socket functionality. Not directly constructable.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief Client (data transfer) socket functionality. Not directly constructable.
      */
-    template <typename LogPtr = std::nullptr_t>
     class client_socket
-        : public basic_socket<LogPtr> {
+        : public basic_socket {
 
-        using base = basic_socket<LogPtr>;
+        using base = basic_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     protected:
@@ -330,14 +326,12 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         UDP socket functionality.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief UDP socket functionality.
      */
-    template <typename LogPtr = std::nullptr_t>
     class udp_socket
-        : public client_socket<LogPtr> {
+        : public client_socket {
 
-        using base = client_socket<LogPtr>;
+        using base = client_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -363,19 +357,16 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
     class tcp_server_socket;
 
 
     /**
-     * @brief         TCP client socket functionality.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief TCP client socket functionality.
      */
-    template <typename LogPtr = std::nullptr_t>
     class tcp_client_socket
-        : public client_socket<LogPtr> {
+        : public client_socket {
 
-        using base = client_socket<LogPtr>;
+        using base = client_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -406,7 +397,7 @@ namespace abc { namespace net {
         tcp_client_socket(const char* origin, socket::family family, diag::log_ostream* log);
 
     protected:
-        friend tcp_server_socket<LogPtr>;
+        friend tcp_server_socket;
 
         /**
          * @brief        Internal constructor for accepted connections.
@@ -423,14 +414,12 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief         TCP server socket functionality.
-     * @tparam LogPtr Pointer type to `log_ostream`.
+     * @brief TCP server socket functionality.
      */
-    template <typename LogPtr = std::nullptr_t>
     class tcp_server_socket
-        : public basic_socket<LogPtr> {
+        : public basic_socket {
 
-        using base = basic_socket<LogPtr>;
+        using base = basic_socket;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -471,7 +460,7 @@ namespace abc { namespace net {
          * @brief  Blocks until a client tries to connect.
          * @return New `tcp_client_socket` instance for the new connection.
          */
-        tcp_client_socket<LogPtr> accept() const;
+        tcp_client_socket accept() const;
 
     protected:
         /**
@@ -488,17 +477,14 @@ namespace abc { namespace net {
     /**
      * @brief            `std::streambuf` specialization that is backed by a socket.
      * @tparam SocketPtr Pointer type to `client_socket`.
-     * @tparam LogPtr    Pointer type to `log_ostream`.
      */
-    template <typename SocketPtr, typename LogPtr = std::nullptr_t>
+    template <typename SocketPtr>
     class socket_streambuf
         : public std::streambuf
         , protected diag::diag_ready<const char*> {
         
         using base = std::streambuf;
         using diag_base = diag::diag_ready<const char*>;
-
-        static constexpr std::size_t retry_count = 5;
 
     public:
         /**

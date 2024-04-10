@@ -34,8 +34,7 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace openssl {
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(bool verify_server, socket::family family, diag::log_ostream* log)
+    inline tcp_client_socket::tcp_client_socket(bool verify_server, socket::family family, diag::log_ostream* log)
         : base("abc::net::openssl::tcp_client_socket", family, log)
         , _verify_server(verify_server) {
 
@@ -57,8 +56,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(tcp_client_socket&& other) noexcept
+    inline tcp_client_socket::tcp_client_socket(tcp_client_socket&& other) noexcept
         : base(std::move(other))
         , _verify_server(other._verify_server)
         , _ctx(other._ctx)
@@ -75,8 +73,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, diag::log_ostream* log)
+    inline tcp_client_socket::tcp_client_socket(socket::fd_t fd, SSL_CTX* ctx, bool verify_server, socket::family family, diag::log_ostream* log)
         : base("abc::net::openssl::tcp_client_socket", fd, family, log)
         , _verify_server(verify_server) {
 
@@ -95,8 +92,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr>::~tcp_client_socket() noexcept {
+    inline tcp_client_socket::~tcp_client_socket() noexcept {
         constexpr const char* suborigin = "~tcp_client_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1076e, "Begin: _ssl=%p, _ctx=%p", _ssl, _ctx);
 
@@ -115,8 +111,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline void tcp_client_socket<LogPtr>::connect(const char* host, const char* port) {
+    inline void tcp_client_socket::connect(const char* host, const char* port) {
         constexpr const char* suborigin = "connect()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10770, "Begin: host='%s', port='%s'", host, port);
 
@@ -130,8 +125,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline void tcp_client_socket<LogPtr>::connect(const socket::address& address) {
+    inline void tcp_client_socket::connect(const socket::address& address) {
         constexpr const char* suborigin = "connect()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10772, "Begin:");
 
@@ -142,8 +136,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t tcp_client_socket<LogPtr>::send(const void* buffer, std::size_t size) {
+    inline std::size_t tcp_client_socket::send(const void* buffer, std::size_t size) {
         constexpr const char* suborigin = "send()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10774, "Begin: size=%zu", size);
 
@@ -169,8 +162,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline std::size_t tcp_client_socket<LogPtr>::receive(void* buffer, std::size_t size) {
+    inline std::size_t tcp_client_socket::receive(void* buffer, std::size_t size) {
         constexpr const char* suborigin = "send()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1077b, "Begin: size=%zu", size);
 
@@ -196,8 +188,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline void tcp_client_socket<LogPtr>::connect_handshake() {
+    inline void tcp_client_socket::connect_handshake() {
         constexpr const char* suborigin = "connect_handshake()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10782, "Begin:");
 
@@ -225,8 +216,7 @@ namespace abc { namespace net { namespace openssl {
     // --------------------------------------------------------------
 
 
-    template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family family, diag::log_ostream* log)
+    inline tcp_server_socket::tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family family, diag::log_ostream* log)
         : base(family, log)
         , _verify_client(verify_client) {
 
@@ -260,8 +250,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::tcp_server_socket(tcp_server_socket&& other) noexcept
+    inline tcp_server_socket::tcp_server_socket(tcp_server_socket&& other) noexcept
         : base(std::move(other))
         , _pkey_file_password(std::move(other._pkey_file_password))
         , _verify_client(other._verify_client)
@@ -277,8 +266,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_server_socket<LogPtr>::~tcp_server_socket() noexcept {
+    inline tcp_server_socket::~tcp_server_socket() noexcept {
         constexpr const char* suborigin = "~tcp_server_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10794, "Begin:");
 
@@ -291,8 +279,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline tcp_client_socket<LogPtr> tcp_server_socket<LogPtr>::accept() const {
+    inline tcp_client_socket tcp_server_socket::accept() const {
         constexpr const char* suborigin = "accept()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -300,7 +287,7 @@ namespace abc { namespace net { namespace openssl {
         diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "fd=%d", (int)fd);
 
         const bool verify_server = false; // This value doesn't matter.
-        tcp_client_socket<LogPtr> openssl_client(fd, _ctx, verify_server, base::family(), diag_base::log());
+        tcp_client_socket openssl_client(fd, _ctx, verify_server, base::family(), diag_base::log());
 
         int stat = SSL_accept(openssl_client._ssl);
         diag_base::require(suborigin, stat > 0, 0x10796, "::SSL_accept()");
@@ -311,8 +298,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    template <typename LogPtr>
-    inline int tcp_server_socket<LogPtr>::pem_passwd_cb(char* buf, int size, int /*rwflag*/, void* password) noexcept {
+    inline int tcp_server_socket::pem_passwd_cb(char* buf, int size, int /*rwflag*/, void* password) noexcept {
         std::strncpy(buf, (const char*)password, size);
         buf[size - 1] = '\0';
 

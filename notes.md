@@ -19,9 +19,10 @@
         - `init_size`, `grow_rel`, `grow_abs`
     - Test
     - Doc
+- Remove template parameter `SocketPtr` from class `socket_streambuf`.
+- In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
 - `log_ostream`
     - Remove the `Log` template parameter from
-        - `socket`
         - `endpoint`
         - tests
         - samples
