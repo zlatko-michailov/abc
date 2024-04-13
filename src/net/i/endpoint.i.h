@@ -189,9 +189,8 @@ namespace abc { namespace net { namespace http {
      *                      This class must be subclassed to implement the processing of requests.
      * @tparam ServerSocket Server socket.
      * @tparam ClientSocket Client/connection socket.
-     * @tparam LogPtr       Pointer type to `log_ostream`.
      */
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
+    template <typename ServerSocket, typename ClientSocket>
     class endpoint
         : protected diag::diag_ready<const char*>  {
 
@@ -208,12 +207,12 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Move Constructor.
          */
-        endpoint(endpoint<ServerSocket, ClientSocket, LogPtr>&& other) noexcept = default;
+        endpoint(endpoint<ServerSocket, ClientSocket>&& other) noexcept = default;
 
         /**
          * @brief Deleted.
          */
-        endpoint(const endpoint<ServerSocket, ClientSocket, LogPtr>& other) = delete;
+        endpoint(const endpoint<ServerSocket, ClientSocket>& other) = delete;
 
     protected:
         /**
@@ -309,12 +308,12 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Thread function for the 'start' thread.
          */
-        static void start_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr);
+        static void start_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr);
 
         /**
          * @brief Thread function for the 'process_request' thread.
          */
-        static void process_request_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr, ClientSocket&& connection);
+        static void process_request_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr, ClientSocket&& connection);
 
     protected:
         /**

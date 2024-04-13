@@ -45,14 +45,14 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace http {
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(endpoint_config&& config, diag::log_ostream* log)
+    template <typename ServerSocket, typename ClientSocket>
+    inline endpoint<ServerSocket, ClientSocket>::endpoint(endpoint_config&& config, diag::log_ostream* log)
         : endpoint("abc::net::http::endpoint", std::move(config), log) {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline endpoint<ServerSocket, ClientSocket, LogPtr>::endpoint(const char* origin, endpoint_config&& config, diag::log_ostream* log)
+    template <typename ServerSocket, typename ClientSocket>
+    inline endpoint<ServerSocket, ClientSocket>::endpoint(const char* origin, endpoint_config&& config, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _config(std::move(config))
         , _requests_in_progress(0)
@@ -66,8 +66,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline std::future<void> endpoint<ServerSocket, ClientSocket, LogPtr>::start_async() {
+    template <typename ServerSocket, typename ClientSocket>
+    inline std::future<void> endpoint<ServerSocket, ClientSocket>::start_async() {
         constexpr const char* suborigin = "start_async()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -81,14 +81,14 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::start_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::start_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr) {
         this_ptr->start();
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::start() {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::start() {
         constexpr const char* suborigin = "start_async()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102f1, "Begin:");
 
@@ -110,14 +110,14 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_request_thread_func(endpoint<ServerSocket, ClientSocket, LogPtr>* this_ptr, ClientSocket&& connection) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::process_request_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr, ClientSocket&& connection) {
         this_ptr->process_request(std::move(connection));
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_request(ClientSocket&& connection) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::process_request(ClientSocket&& connection) {
         constexpr const char* suborigin = "process_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102de, "Begin:");
 
@@ -163,8 +163,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_file_request(server& http, const request& request) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::process_file_request(server& http, const request& request) {
         constexpr const char* suborigin = "process_file_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102e4, "Begin: method='%s', path='%s'", request.method.c_str(), request.resource.path.c_str());
 
@@ -222,8 +222,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::process_rest_request(server& http, const request& request) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::process_rest_request(server& http, const request& request) {
         constexpr const char* suborigin = "process_rest_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102ea, "Begin: method='%s', path='%s'", request.method.c_str(), request.resource.path.c_str());
 
@@ -237,8 +237,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::send_simple_response(server& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::send_simple_response(server& http, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body, diag::tag_t tag) {
         constexpr const char* suborigin = "send_simple_response()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102ec, "Begin:");
 
@@ -267,8 +267,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline const char* endpoint<ServerSocket, ClientSocket, LogPtr>::get_content_type_from_path(const char* path) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline const char* endpoint<ServerSocket, ClientSocket>::get_content_type_from_path(const char* path) {
         const char* ext = std::strrchr(path, '.');
         if (ext == nullptr) {
             return nullptr;
@@ -312,15 +312,15 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline bool endpoint<ServerSocket, ClientSocket, LogPtr>::is_file_request(const request& request) {
+    template <typename ServerSocket, typename ClientSocket>
+    inline bool endpoint<ServerSocket, ClientSocket>::is_file_request(const request& request) {
         return ascii::are_equal_i_n(request.resource.path.c_str(), _config.files_prefix.c_str(), _config.files_prefix.size())
             || (ascii::are_equal_i(request.method.c_str(), method::GET) && ascii::are_equal_i(request.resource.path.c_str(), "/favicon.ico"));
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline void endpoint<ServerSocket, ClientSocket, LogPtr>::set_shutdown_requested() {
+    template <typename ServerSocket, typename ClientSocket>
+    inline void endpoint<ServerSocket, ClientSocket>::set_shutdown_requested() {
         constexpr const char* suborigin = "send_simple_response()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -332,14 +332,14 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline bool endpoint<ServerSocket, ClientSocket, LogPtr>::is_shutdown_requested() const {
+    template <typename ServerSocket, typename ClientSocket>
+    inline bool endpoint<ServerSocket, ClientSocket>::is_shutdown_requested() const {
         return _is_shutdown_requested;
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline std::string endpoint<ServerSocket, ClientSocket, LogPtr>::make_root_dir_path(const request& request) const {
+    template <typename ServerSocket, typename ClientSocket>
+    inline std::string endpoint<ServerSocket, ClientSocket>::make_root_dir_path(const request& request) const {
         constexpr const char* suborigin = "make_root_dir_path()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: root_dir='%s', path='%s'", _config.root_dir.c_str(), request.resource.path.c_str());
 
@@ -355,8 +355,8 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-    inline const endpoint_config& endpoint<ServerSocket, ClientSocket, LogPtr>::config() const {
+    template <typename ServerSocket, typename ClientSocket>
+    inline const endpoint_config& endpoint<ServerSocket, ClientSocket>::config() const {
         return _config;
     }
 

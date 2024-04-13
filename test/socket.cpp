@@ -468,14 +468,14 @@ bool test_openssl_tcp_socket_http_json_stream(test_context& context) {
 // --------------------------------------------------------------
 
 
-template <typename ServerSocket, typename ClientSocket, typename LogPtr>
+template <typename ServerSocket, typename ClientSocket>
 class test_endpoint_base
-    : public abc::net::http::endpoint<ServerSocket, ClientSocket, LogPtr> {
+    : public abc::net::http::endpoint<ServerSocket, ClientSocket> {
 
-    using base = abc::net::http::endpoint<ServerSocket, ClientSocket, LogPtr>;
+    using base = abc::net::http::endpoint<ServerSocket, ClientSocket>;
 
 protected:
-    test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);
+    test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
     virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
@@ -486,8 +486,8 @@ protected:
 };
 
 
-template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-inline test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log)
+template <typename ServerSocket, typename ClientSocket>
+inline test_endpoint_base<ServerSocket, ClientSocket>::test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
     : base(origin, std::move(config), log)
 
     , _passed(passed)
@@ -495,8 +495,8 @@ inline test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::test_endpoint_bas
 }
 
 
-template <typename ServerSocket, typename ClientSocket, typename LogPtr>
-inline void test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
+template <typename ServerSocket, typename ClientSocket>
+inline void test_endpoint_base<ServerSocket, ClientSocket>::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     _passed = _context.are_equal(request.method.c_str(), abc::net::http::method::POST, 0x107a3) && _passed;
     _passed = _context.are_equal(request.resource.path.c_str(), request_path, 0x107a4) && _passed;
 
@@ -509,29 +509,26 @@ inline void test_endpoint_base<ServerSocket, ClientSocket, LogPtr>::process_rest
 // --------------------------------------------------------------
 
 
-template <typename LogPtr>
 class test_http_endpoint
-    : public test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket, LogPtr> {
+    : public test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket> {
 
-    using base = test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket, LogPtr>;
+    using base = test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket>;
     using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
-    test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);
+    test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
     virtual abc::net::tcp_server_socket create_server_socket() override;
 };
 
 
-template <typename LogPtr>
-inline test_http_endpoint<LogPtr>::test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log)
+inline test_http_endpoint::test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
     : base("test_http_endpoint", passed, context, std::move(config), log) {
 }
 
 
-template <typename LogPtr>
-inline abc::net::tcp_server_socket test_http_endpoint<LogPtr>::create_server_socket() {
+inline abc::net::tcp_server_socket test_http_endpoint::create_server_socket() {
     return abc::net::tcp_server_socket(abc::net::socket::family::ipv4, diag_base::log());
 }
 
@@ -540,15 +537,14 @@ inline abc::net::tcp_server_socket test_http_endpoint<LogPtr>::create_server_soc
 
 
 #ifdef __ABC__OPENSSL
-template <typename LogPtr>
 class test_https_endpoint
-    : public test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket, LogPtr> {
+    : public test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket> {
 
-    using base = test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket, LogPtr>;
+    using base = test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket>;
     using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
-    test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log);
+    test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
     virtual abc::net::openssl::tcp_server_socket create_server_socket() override;
@@ -558,15 +554,13 @@ protected:
 };
 
 
-template <typename LogPtr>
-inline test_https_endpoint<LogPtr>::test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, const LogPtr& log)
+inline test_https_endpoint::test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
     : base("test_https_endpoint", passed, context, std::move(config), log)
     , _verify_client(verify_client) {
 }
 
 
-template <typename LogPtr>
-inline abc::net::openssl::tcp_server_socket test_https_endpoint<LogPtr>::create_server_socket() {
+inline abc::net::openssl::tcp_server_socket test_https_endpoint::create_server_socket() {
     return abc::net::openssl::tcp_server_socket(base::config().cert_file_path.c_str(), base::config().pkey_file_path.c_str(), base::config().pkey_file_password.c_str(), _verify_client, abc::net::socket::family::ipv4, diag_base::log());
 }
 #endif
@@ -603,7 +597,7 @@ bool test_http_endpoint_json_stream(test_context& context) {
         "/resources/"           // files_prefix
     );
 
-    test_http_endpoint<test_log*> endpoint(passed, context, std::move(config), context.log());
+    test_http_endpoint endpoint(passed, context, std::move(config), context.log());
 
     abc::net::tcp_client_socket client(abc::net::socket::family::ipv4, context.log());
 
@@ -630,7 +624,7 @@ bool test_https_endpoint_json_stream(test_context& context) {
         pkey_password
     );
 
-    test_https_endpoint<test_log*> endpoint(verify_client, passed, context, std::move(config), context.log());
+    test_https_endpoint endpoint(verify_client, passed, context, std::move(config), context.log());
 
     abc::net::openssl::tcp_client_socket client(verify_server, abc::net::socket::family::ipv4, context.log());
 

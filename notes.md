@@ -21,9 +21,9 @@
     - Doc
 - Remove template parameter `SocketPtr` from class `socket_streambuf`.
 - In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
+- ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
 - `log_ostream`
     - Remove the `Log` template parameter from
-        - `endpoint`
         - tests
         - samples
     - Make all move ctors "&& other);" `noexcept`.
