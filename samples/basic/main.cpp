@@ -30,11 +30,6 @@ SOFTWARE.
 #include "equations.h"
 
 
-using log_line = abc::diag::debug_line_ostream<>;
-using log_filter = abc::diag::log_filter<const char*>;
-using log_ostream = abc::diag::log_ostream<log_line, log_filter*>;
-
-
 constexpr const char* origin = "basic_sample";
 
 
@@ -42,8 +37,10 @@ int main(int /*argc*/, const char* argv[]) {
     constexpr const char* suborigin = "main()";
 
     // Create a log.
-    log_filter filter("", abc::diag::severity::important);
-    log_ostream log(std::cout.rdbuf(), &filter);
+    abc::table_ostream table(std::cout.rdbuf());
+    abc::diag::debug_line_ostream<> line(&table);
+    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
+    abc::diag::log_ostream log(&line, &filter);
 
     // Create an endpoint configuration.
     std::string process_dir = abc::parent_path(argv[0]);
@@ -55,7 +52,7 @@ int main(int /*argc*/, const char* argv[]) {
     );
 
     // Create an endpoint.
-    equations_endpoint<log_ostream*> endpoint(std::move(config), &log);
+    equations_endpoint endpoint(std::move(config), &log);
 
     log.put_any(origin, suborigin, abc::diag::severity::warning, 0x102f5, "Open a browser and navigate to http://<host>:30301/resources/index.html.");
     log.put_blank_line(origin, abc::diag::severity::warning);

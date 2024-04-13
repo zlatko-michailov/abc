@@ -19,13 +19,11 @@
         - `init_size`, `grow_rel`, `grow_abs`
     - Test
     - Doc
+- All copyrights - 2024
 - Remove template parameter `SocketPtr` from class `socket_streambuf`.
 - In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
 - ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
 - `log_ostream`
-    - Remove the `Log` template parameter from
-        - tests
-        - samples
     - Make all move ctors "&& other);" `noexcept`.
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
     - Remove the default ctor from `..._line_ostream`

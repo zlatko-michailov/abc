@@ -24,44 +24,41 @@ SOFTWARE.
 
 
 #include "../../src/ascii.h"
+#include "../../src/diag/log.h"
 #include "../../src/net/json.h"
 #include "../../src/net/http.h"
 #include "../../src/net/endpoint.h"
 
 
 
-template <typename LogPtr>
 class equations_endpoint
-    : public abc::net::http::endpoint<abc::net::tcp_server_socket<LogPtr>, abc::net::tcp_client_socket<LogPtr>, LogPtr> {
+    : public abc::net::http::endpoint<abc::net::tcp_server_socket, abc::net::tcp_client_socket> {
 
-    using base = abc::net::http::endpoint<abc::net::tcp_server_socket<LogPtr>, abc::net::tcp_client_socket<LogPtr>, LogPtr>;
+    using base = abc::net::http::endpoint<abc::net::tcp_server_socket, abc::net::tcp_client_socket>;
 
 public:
-    equations_endpoint(abc::net::http::endpoint_config&& config, const LogPtr& log);
+    equations_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
-    virtual abc::net::tcp_server_socket<LogPtr> create_server_socket() override;
-    virtual void process_rest_request(abc::net::http::server<LogPtr>& http, const abc::net::http::request& request) override;
+    virtual abc::net::tcp_server_socket create_server_socket() override;
+    virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
 };
 
 
 // --------------------------------------------------------------
 
 
-template <typename LogPtr>
-inline equations_endpoint<LogPtr>::equations_endpoint(abc::net::http::endpoint_config&& config, const LogPtr& log)
+inline equations_endpoint::equations_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
     : base("equations_endpoint", std::move(config), log) {
 }
 
 
-template <typename LogPtr>
-inline abc::net::tcp_server_socket<LogPtr> equations_endpoint<LogPtr>::create_server_socket() {
-    return abc::net::tcp_server_socket<LogPtr>(abc::net::socket::family::ipv4, base::log());
+inline abc::net::tcp_server_socket equations_endpoint::create_server_socket() {
+    return abc::net::tcp_server_socket(abc::net::socket::family::ipv4, base::log());
 }
 
 
-template <typename LogPtr>
-inline void equations_endpoint<LogPtr>::process_rest_request(abc::net::http::server<LogPtr>& http, const abc::net::http::request& request) {
+inline void equations_endpoint::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_rest_request()";
     base::put_any(suborigin, abc::diag::severity::callstack, 0x102f1, "Begin:");
 
@@ -106,9 +103,9 @@ inline void equations_endpoint<LogPtr>::process_rest_request(abc::net::http::ser
         return;
     }
 
-    std::streambuf* request_body_sb = static_cast<const abc::net::http::request_reader<LogPtr>&>(http).rdbuf();
-    abc::net::json::reader<LogPtr> json_reader(request_body_sb, base::log());
-    abc::net::json::value<LogPtr> input_value = json_reader.get_value();
+    std::streambuf* request_body_sb = static_cast<const abc::net::http::request_reader&>(http).rdbuf();
+    abc::net::json::reader json_reader(request_body_sb, base::log());
+    abc::net::json::value input_value = json_reader.get_value();
 
     if (input_value.type() != abc::net::json::value_type::object
         || input_value.object().size() != 2
@@ -176,8 +173,8 @@ inline void equations_endpoint<LogPtr>::process_rest_request(abc::net::http::ser
         status = 2;
     }
 
-    abc::net::json::value<LogPtr> output_value = 
-        abc::net::json::literal::object<LogPtr> {
+    abc::net::json::value output_value = 
+        abc::net::json::literal::object {
             { "status", status },
             { "x", x },
             { "y", y },
@@ -186,7 +183,7 @@ inline void equations_endpoint<LogPtr>::process_rest_request(abc::net::http::ser
     // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
     char body[abc::size::k1 + 1] { };
     abc::buffer_streambuf response_body_sb(nullptr, 0, 0, body, 0, sizeof(body));
-    abc::net::json::writer<LogPtr> json_writer(&response_body_sb, base::log());
+    abc::net::json::writer json_writer(&response_body_sb, base::log());
     json_writer.put_value(output_value);
 
     char content_length[abc::size::_32 + 1];
