@@ -37,7 +37,7 @@ namespace abc {
 
 
     template <typename Stream>
-    inline stream<Stream>::stream(stream&& other)
+    inline stream<Stream>::stream(stream&& other) noexcept
         : base(std::move(other)) {
 
         base::rdbuf(other.rdbuf());
@@ -149,7 +149,7 @@ namespace abc {
     }
 
 
-    inline istream::istream(istream&& other)
+    inline istream::istream(istream&& other) noexcept
         : base(std::move(other)) {
     }
 
@@ -178,7 +178,7 @@ namespace abc {
     }
 
 
-    inline ostream::ostream(ostream&& other)
+    inline ostream::ostream(ostream&& other) noexcept
         : base(std::move(other)) {
     }
 

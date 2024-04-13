@@ -52,7 +52,7 @@ namespace abc {
         /**
          * @brief Move constructor.
          */
-        stream(stream&& other);
+        stream(stream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -162,7 +162,7 @@ namespace abc {
         /**
          * @brief Move constructor.
          */
-        istream(istream&& other);
+        istream(istream&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -216,7 +216,7 @@ namespace abc {
         /**
          * @brief Move constructor.
          */
-        ostream(ostream&& other);
+        ostream(ostream&& other) noexcept;
 
         /**
          * @brief Deleted.

@@ -320,7 +320,7 @@ namespace abc { namespace diag {
     }
 
 
-    inline log_ostream::log_ostream(log_ostream&& other)
+    inline log_ostream::log_ostream(log_ostream&& other) noexcept
         : _line(other._line)
         , _filter(other._filter) {
     }

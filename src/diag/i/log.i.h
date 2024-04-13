@@ -504,7 +504,7 @@ namespace abc { namespace diag {
         /**
          * @brief Move constructor.
          */
-        log_ostream(log_ostream&& other);
+        log_ostream(log_ostream&& other) noexcept;
 
         /**
          * @brief Deleted.

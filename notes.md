@@ -13,22 +13,18 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- HOLD: `queue_streambuf`
-    - Make it `vector_streambuf`
-    - Code
-        - `init_size`, `grow_rel`, `grow_abs`
-    - Test
-    - Doc
 - All copyrights - 2024
 - Remove template parameter `SocketPtr` from class `socket_streambuf`.
 - In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
 - ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
 - `log_ostream`
-    - Make all move ctors "&& other);" `noexcept`.
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
+        - Rewrite: `queue_streambuf`
+            - Code
+                - `init_size`, `grow_rel`, `grow_abs`
+            - Test
     - Remove the default ctor from `..._line_ostream`
     - Make the override methods of `xxx_line_ostream` flush!
-    - Remove `LogPtr` template parameter from all classes. Pass `log_ostream*` to all constructors. instead.
 - `endpoint`
     - Samples
         - tls
