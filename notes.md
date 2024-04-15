@@ -14,9 +14,9 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - All copyrights - 2024
-- Remove template parameter `SocketPtr` from class `socket_streambuf`.
-- In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
-- ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
+- `util`
+    - `strprintf()`
+    - test
 - `log_ostream`
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
         - Rewrite: `queue_streambuf`
@@ -25,9 +25,9 @@
             - Test
     - Remove the default ctor from `..._line_ostream`
     - Make the override methods of `xxx_line_ostream` flush!
-- `endpoint`
-    - Samples
-        - tls
+- Remove template parameter `SocketPtr` from class `socket_streambuf`.
+- In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
+- ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
 - `vmem`
     - page.h
     - ptr.h
@@ -95,7 +95,7 @@
 - `socket_streambuf` and `multifile_streambuf` should take a <Size> template parameter to buffer I/O.
 
 ---
-		context.log->filter()->min_severity(abc::severity::critical); ////
+        context.log->filter()->min_severity(abc::severity::critical); ////
 ---
 
   export LDFLAGS="-L/usr/local/opt/openssl/lib"
