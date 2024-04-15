@@ -31,6 +31,7 @@ SOFTWARE.
 #include "inc/ascii.h"
 #include "inc/clock.h"
 #include "inc/timestamp.h"
+#include "inc/util.h"
 #include "inc/buffer_streambuf.h"
 #include "inc/multifile_streambuf.h"
 #include "inc/stream.h"
@@ -65,6 +66,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_before_year_2000_after_mar_1_timestamp",     test_before_year_2000_after_mar_1_timestamp },
                 { "test_after_year_2000_before_mar_1_timestamp",     test_after_year_2000_before_mar_1_timestamp },
                 { "test_after_year_2000_after_mar_1_timestamp",      test_after_year_2000_after_mar_1_timestamp },
+            } },
+            { "util", {
+                { "test_util_strprintf",                             test_util_strprintf },
             } },
             { "buffer_streambuf", {
                 { "test_buffer_streambuf_1_char",                    test_buffer_streambuf_1_char },

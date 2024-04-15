@@ -14,9 +14,6 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - All copyrights - 2024
-- `util`
-    - `strprintf()`
-    - test
 - `log_ostream`
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
         - Rewrite: `queue_streambuf`

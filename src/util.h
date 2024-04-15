@@ -26,9 +26,12 @@ SOFTWARE.
 #pragma once
 
 #include <cstring>
+#include <cstdio>
+#include <cstdarg>
 #include <utility>
 #include <deque>
 #include <map>
+#include <string>
 
 #include "ascii.h"
 
@@ -93,6 +96,35 @@ namespace abc {
      */
     inline std::size_t str_length(const std::string& str) noexcept {
         return str.length();
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    inline std::string vstrprintf(const char* format, std::va_list vlist) {
+        std::string str;
+
+        std::va_list vlist_copy;
+        va_copy(vlist_copy, vlist);
+        int cap = std::vsnprintf(nullptr, 0, format, vlist_copy);
+        str.reserve(cap + 1);
+
+        std::vsnprintf(const_cast<char*>(str.data()), str.capacity(), format, vlist);
+
+        return str;
+    }
+
+
+    inline std::string strprintf(const char* format, ...) {
+        std::va_list vlist;
+        va_start(vlist, format);
+
+        std::string str = vstrprintf(format, vlist);
+
+        va_end(vlist);
+
+        return str;
     }
 
 
