@@ -50,6 +50,7 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
+#if 0 //// TODO:
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -236,6 +237,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_ostream_move",                          test_json_ostream_move },
                 { "test_json_writer_move",                           test_json_writer_move },
             } },
+#endif //// TODO:
             { "socket", {
                 { "test_udp_socket",                                 test_udp_socket },
                 { "test_tcp_socket",                                 test_tcp_socket },

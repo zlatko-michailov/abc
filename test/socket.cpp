@@ -113,29 +113,28 @@ bool test_udp_socket(test_context& context) {
 // --------------------------------------------------------------
 
 
-template <typename ServerSocket, typename ClientSocket>
-bool tcp_socket(test_context& context, ServerSocket& server, ClientSocket& client, const char* server_port) {
+bool tcp_socket(test_context& context, abc::net::tcp_server_socket* server, abc::net::tcp_client_socket* client, const char* server_port) {
     constexpr const char* suborigin = "tcp_socket";
     constexpr const char* request_content = "Some request content.";
     constexpr const char* response_content = "The corresponding response content.";
     bool passed = true;
 
-    server.bind(server_port);
-    server.listen(5);
+    server->bind(server_port);
+    server->listen(5);
 
     std::thread client_thread(
         [&client, &passed, &context, server_port] () {
         try {
-            client.connect("localhost", server_port);
+            client->connect("localhost", server_port);
 
             std::uint16_t content_length = std::strlen(request_content);
-            client.send(&content_length, sizeof(std::uint16_t));
-            client.send(request_content, content_length);
+            client->send(&content_length, sizeof(std::uint16_t));
+            client->send(request_content, content_length);
 
-            client.receive(&content_length, sizeof(std::uint16_t));
+            client->receive(&content_length, sizeof(std::uint16_t));
 
             char content[abc::size::k1];
-            client.receive(content, content_length);
+            client->receive(content, content_length);
             content[content_length] = '\0';
 
             passed = context.are_equal(content, response_content, 0x1002b) && passed;
@@ -146,21 +145,21 @@ bool tcp_socket(test_context& context, ServerSocket& server, ClientSocket& clien
         }
     });
 
-    ClientSocket connection = server.accept();
+    std::unique_ptr<abc::net::tcp_client_socket> connection = server->accept();
 
     std::uint16_t content_length;
-    connection.receive(&content_length, sizeof(std::uint16_t));
+    connection->receive(&content_length, sizeof(std::uint16_t));
 
     char content[abc::size::k1];
-    connection.receive(content, content_length);
+    connection->receive(content, content_length);
     content[content_length] = '\0';
 
     passed = context.are_equal(content, request_content, 0x1002d) && passed;
 
     content_length = std::strlen(response_content);
-    connection.send(&content_length, sizeof(std::uint16_t));
+    connection->send(&content_length, sizeof(std::uint16_t));
 
-    connection.send(response_content, content_length);
+    connection->send(response_content, content_length);
 
     client_thread.join();
     return passed;
@@ -171,7 +170,7 @@ bool test_tcp_socket(test_context& context) {
     abc::net::tcp_server_socket server(abc::net::socket::family::ipv4, context.log());
     abc::net::tcp_client_socket client(abc::net::socket::family::ipv4, context.log());
 
-    return tcp_socket(context, server, client, "31001");
+    return tcp_socket(context, &server, &client, "31001");
 }
 
 
@@ -185,7 +184,7 @@ bool test_openssl_tcp_socket(test_context& context) {
     abc::net::openssl::tcp_server_socket server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
     abc::net::openssl::tcp_client_socket client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    passed = tcp_socket(context, server, client, "31002") && passed;
+    passed = tcp_socket(context, &server, &client, "31002") && passed;
 #else
     passed = context.are_equal(0, 0, 0x107a0) && passed;
 #endif
@@ -197,30 +196,30 @@ bool test_openssl_tcp_socket(test_context& context) {
 // --------------------------------------------------------------
 
 
-template <typename ServerSocket, typename ClientSocket>
-bool tcp_socket_stream_move(test_context& context, ServerSocket& server, ClientSocket& client1, const char* server_port) {
+template <typename ClientSocket>
+bool tcp_socket_stream_move(test_context& context, abc::net::tcp_server_socket* server, ClientSocket* client1, const char* server_port) {
     constexpr const char* suborigin = "tcp_socket_stream_move";
     constexpr const char* request_content = "Some request line.";
     constexpr const char* response_content = "The corresponding response line.";
     bool passed = true;
 
-    server.bind(server_port);
-    server.listen(5);
+    server->bind(server_port);
+    server->listen(5);
 
     std::thread client_thread(
         [&passed, &context, &client1, server_port] () {
         try {
-            client1.connect("localhost", server_port);
+            client1->connect("localhost", server_port);
 
-            ClientSocket client2(std::move(client1));
+            ClientSocket client2(std::move(*client1));
 
-            abc::net::socket_streambuf<ClientSocket*> sb1(&client2, context.log());
+            abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb1(&client2, context.log());
             std::ostream client_out(&sb1);
 
             client_out << request_content << "\n";
             client_out.flush();
 
-            abc::net::socket_streambuf<ClientSocket*> sb2(std::move(sb1));
+            abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb2(std::move(sb1));
             std::istream client_in(&sb2);
 
             char content[abc::size::k1];
@@ -233,9 +232,9 @@ bool tcp_socket_stream_move(test_context& context, ServerSocket& server, ClientS
         }
     });
 
-    ClientSocket connection = server.accept();
+    std::unique_ptr<abc::net::tcp_client_socket> connection = server->accept();
 
-    abc::net::socket_streambuf<ClientSocket*> sb(&connection, context.log());
+    abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(connection.get(), context.log());
     std::istream connection_in(&sb);
     std::ostream connection_out(&sb);
 
@@ -255,7 +254,7 @@ bool test_tcp_socket_stream_move(test_context& context) {
     abc::net::tcp_server_socket server(abc::net::socket::family::ipv4, context.log());
     abc::net::tcp_client_socket client(abc::net::socket::family::ipv4, context.log());
 
-    return tcp_socket_stream_move(context, server, client, "31003");
+    return tcp_socket_stream_move(context, &server, &client, "31003");
 }
 
 
@@ -269,7 +268,7 @@ bool test_openssl_tcp_socket_stream_move(test_context& context) {
     abc::net::openssl::tcp_server_socket server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
     abc::net::openssl::tcp_client_socket client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    passed = tcp_socket_stream_move(context, server, client, "31004") && passed;
+    passed = tcp_socket_stream_move(context, &server, &client, "31004") && passed;
 #else
     passed = context.are_equal(0, 0, 0x107a1) && passed;
 #endif
@@ -287,14 +286,13 @@ static constexpr const char request_header_value[] = "Request-Header-Value";
 static constexpr const char response_header_name[] = "Response-Header-Name";
 static constexpr const char response_header_value[] = "Response-Header-Value";
 
-template <typename ClientSocket>
-void http_json_stream_client(bool& passed, test_context& context, ClientSocket& client, const char* server_port) {
+void http_json_stream_client(bool& passed, test_context& context, abc::net::tcp_client_socket* client, const char* server_port) {
     constexpr const char* suborigin = "http_json_stream_client";
 
     try {
-        client.connect("localhost", server_port);
+        client->connect("localhost", server_port);
 
-        abc::net::socket_streambuf<ClientSocket*> sb(&client, context.log());
+        abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(client, context.log());
         abc::net::http::client http(&sb, context.log());
 
         // Send request
@@ -413,21 +411,20 @@ void http_json_stream_server_body_and_response(bool& passed, test_context& conte
 }
 
 
-template <typename ServerSocket, typename ClientSocket>
-bool tcp_socket_http_json_stream(test_context& context, ServerSocket& server, ClientSocket& client, const char* server_port) {
+bool tcp_socket_http_json_stream(test_context& context, abc::net::tcp_server_socket* server, abc::net::tcp_client_socket* client, const char* server_port) {
     bool passed = true;
 
-    server.bind(server_port);
-    server.listen(5);
+    server->bind(server_port);
+    server->listen(5);
 
     std::thread client_thread(
         [&passed, &context, &client, server_port] () {
         http_json_stream_client(passed, context, client, server_port);
     });
 
-    ClientSocket connection = server.accept();
+    std::unique_ptr<abc::net::tcp_client_socket> connection = server->accept();
 
-    abc::net::socket_streambuf<ClientSocket*> sb(&connection, context.log());
+    abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(connection.get(), context.log());
     abc::net::http::server http(&sb, context.log());
 
     http_json_stream_server_request(passed, context, http);
@@ -442,7 +439,7 @@ bool test_tcp_socket_http_json_stream(test_context& context) {
     abc::net::tcp_server_socket server(abc::net::socket::family::ipv4, context.log());
     abc::net::tcp_client_socket client(abc::net::socket::family::ipv4, context.log());
 
-    return tcp_socket_http_json_stream(context, server, client, "31005");
+    return tcp_socket_http_json_stream(context, &server, &client, "31005");
 }
 
 
@@ -456,7 +453,7 @@ bool test_openssl_tcp_socket_http_json_stream(test_context& context) {
     abc::net::openssl::tcp_server_socket server(cert_path.c_str(), pkey_path.c_str(), pkey_password, verify_client, abc::net::socket::family::ipv4, context.log());
     abc::net::openssl::tcp_client_socket client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    passed = tcp_socket_http_json_stream(context, server, client, "31006") && passed;
+    passed = tcp_socket_http_json_stream(context, &server, &client, "31006") && passed;
 #else
     passed = context.are_equal(0, 0, 0x107a2) && passed;
 #endif
@@ -468,11 +465,10 @@ bool test_openssl_tcp_socket_http_json_stream(test_context& context) {
 // --------------------------------------------------------------
 
 
-template <typename ServerSocket, typename ClientSocket>
 class test_endpoint_base
-    : public abc::net::http::endpoint<ServerSocket, ClientSocket> {
+    : public abc::net::http::endpoint {
 
-    using base = abc::net::http::endpoint<ServerSocket, ClientSocket>;
+    using base = abc::net::http::endpoint;
 
 protected:
     test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
@@ -486,8 +482,7 @@ protected:
 };
 
 
-template <typename ServerSocket, typename ClientSocket>
-inline test_endpoint_base<ServerSocket, ClientSocket>::test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
+inline test_endpoint_base::test_endpoint_base(const char* origin, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
     : base(origin, std::move(config), log)
 
     , _passed(passed)
@@ -495,8 +490,7 @@ inline test_endpoint_base<ServerSocket, ClientSocket>::test_endpoint_base(const 
 }
 
 
-template <typename ServerSocket, typename ClientSocket>
-inline void test_endpoint_base<ServerSocket, ClientSocket>::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
+inline void test_endpoint_base::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     _passed = _context.are_equal(request.method.c_str(), abc::net::http::method::POST, 0x107a3) && _passed;
     _passed = _context.are_equal(request.resource.path.c_str(), request_path, 0x107a4) && _passed;
 
@@ -510,16 +504,16 @@ inline void test_endpoint_base<ServerSocket, ClientSocket>::process_rest_request
 
 
 class test_http_endpoint
-    : public test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket> {
+    : public test_endpoint_base {
 
-    using base = test_endpoint_base<abc::net::tcp_server_socket, abc::net::tcp_client_socket>;
+    using base = test_endpoint_base;
     using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
     test_http_endpoint(bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
-    virtual abc::net::tcp_server_socket create_server_socket() override;
+    virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
 };
 
 
@@ -528,8 +522,8 @@ inline test_http_endpoint::test_http_endpoint(bool& passed, test_context& contex
 }
 
 
-inline abc::net::tcp_server_socket test_http_endpoint::create_server_socket() {
-    return abc::net::tcp_server_socket(abc::net::socket::family::ipv4, diag_base::log());
+inline std::unique_ptr<abc::net::tcp_server_socket> test_http_endpoint::create_server_socket() {
+    return std::unique_ptr<abc::net::tcp_server_socket>(new abc::net::tcp_server_socket(abc::net::socket::family::ipv4, diag_base::log()));
 }
 
 
@@ -538,16 +532,16 @@ inline abc::net::tcp_server_socket test_http_endpoint::create_server_socket() {
 
 #ifdef __ABC__OPENSSL
 class test_https_endpoint
-    : public test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket> {
+    : public test_endpoint_base {
 
-    using base = test_endpoint_base<abc::net::openssl::tcp_server_socket, abc::net::openssl::tcp_client_socket>;
+    using base = test_endpoint_base;
     using diag_base = abc::diag::diag_ready<const char*>;
 
 public:
     test_https_endpoint(bool verify_client, bool& passed, test_context& context, abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
-    virtual abc::net::openssl::tcp_server_socket create_server_socket() override;
+    virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
 
 protected:
     bool _verify_client;
@@ -560,8 +554,8 @@ inline test_https_endpoint::test_https_endpoint(bool verify_client, bool& passed
 }
 
 
-inline abc::net::openssl::tcp_server_socket test_https_endpoint::create_server_socket() {
-    return abc::net::openssl::tcp_server_socket(base::config().cert_file_path.c_str(), base::config().pkey_file_path.c_str(), base::config().pkey_file_password.c_str(), _verify_client, abc::net::socket::family::ipv4, diag_base::log());
+inline std::unique_ptr<abc::net::tcp_server_socket> test_https_endpoint::create_server_socket() {
+    return std::unique_ptr<abc::net::tcp_server_socket>(new abc::net::openssl::tcp_server_socket(base::config().cert_file_path.c_str(), base::config().pkey_file_path.c_str(), base::config().pkey_file_password.c_str(), _verify_client, abc::net::socket::family::ipv4, diag_base::log()));
 }
 #endif
 
@@ -569,9 +563,8 @@ inline abc::net::openssl::tcp_server_socket test_https_endpoint::create_server_s
 // --------------------------------------------------------------
 
 
-template <typename Endpoint, typename ClientSocket>
-bool endpoint_json_stream(bool& passed, test_context& context, Endpoint& endpoint, ClientSocket& client, const char* server_port) {
-    std::future<void> done = endpoint.start_async();
+bool endpoint_json_stream(bool& passed, test_context& context, abc::net::http::endpoint* endpoint, abc::net::tcp_client_socket* client, const char* server_port) {
+    std::future<void> done = endpoint->start_async();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -601,7 +594,7 @@ bool test_http_endpoint_json_stream(test_context& context) {
 
     abc::net::tcp_client_socket client(abc::net::socket::family::ipv4, context.log());
 
-    passed = endpoint_json_stream(passed, context, endpoint, client, config.port.c_str()) && passed;
+    passed = endpoint_json_stream(passed, context, &endpoint, &client, config.port.c_str()) && passed;
 
     return passed;
 }
@@ -628,7 +621,7 @@ bool test_https_endpoint_json_stream(test_context& context) {
 
     abc::net::openssl::tcp_client_socket client(verify_server, abc::net::socket::family::ipv4, context.log());
 
-    passed = endpoint_json_stream(passed, context, endpoint, client, config.port.c_str()) && passed;
+    passed = endpoint_json_stream(passed, context, &endpoint, &client, config.port.c_str()) && passed;
 #else
     passed = context.are_equal(0, 0, 0x107a5) && passed;
 #endif

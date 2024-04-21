@@ -77,13 +77,13 @@ namespace abc { namespace net { namespace openssl {
          * @param host Host name.
          * @param port Port number (as a string).
          */
-        void connect(const char* host, const char* port);
+        virtual void connect(const char* host, const char* port) override;
 
         /**
          * @brief         Connects the socket to the given address.
          * @param address Address.
          */
-        void connect(const socket::address& address);
+        virtual void connect(const socket::address& address) override;
 
         /**
          * @brief        Sends the bytes from the buffer into the socket.
@@ -91,7 +91,7 @@ namespace abc { namespace net { namespace openssl {
          * @param size   Buffer size.
          * @return       The number of bytes sent. `0` = error.
          */
-        std::size_t send(const void* buffer, std::size_t size);
+        virtual std::size_t send(const void* buffer, std::size_t size) override;
 
         /**
          * @brief        Receives the given number of bytes from the socket, and stores them into the buffer.
@@ -99,7 +99,7 @@ namespace abc { namespace net { namespace openssl {
          * @param size   Buffer size.
          * @return       The number of bytes received. `0` = error.
          */
-        std::size_t receive(void* buffer, std::size_t size);
+        virtual std::size_t receive(void* buffer, std::size_t size) override;
 
     protected:
         friend tcp_server_socket;
@@ -181,7 +181,7 @@ namespace abc { namespace net { namespace openssl {
          * @brief  Blocks until a client tries to connect.
          * @return New `openssl::tcp_client_socket` instance for the new connection.
          */
-        tcp_client_socket accept() const;
+        virtual std::unique_ptr<net::tcp_client_socket> accept() const override;
 
     private:
         /**

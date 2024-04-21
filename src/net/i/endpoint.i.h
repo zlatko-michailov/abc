@@ -187,10 +187,7 @@ namespace abc { namespace net { namespace http {
      * @brief               Base http endpoint.
      * @details             This class supports the most common functionality - reads requests and dispatches them for REST- or file-processing.
      *                      This class must be subclassed to implement the processing of requests.
-     * @tparam ServerSocket Server socket.
-     * @tparam ClientSocket Client/connection socket.
      */
-    template <typename ServerSocket, typename ClientSocket>
     class endpoint
         : protected diag::diag_ready<const char*>  {
 
@@ -205,14 +202,14 @@ namespace abc { namespace net { namespace http {
         endpoint(endpoint_config&& config, diag::log_ostream* log);
 
         /**
-         * @brief Move Constructor.
-         */
-        endpoint(endpoint<ServerSocket, ClientSocket>&& other) noexcept = default;
-
-        /**
          * @brief Deleted.
          */
-        endpoint(const endpoint<ServerSocket, ClientSocket>& other) = delete;
+        endpoint(const endpoint& other) = delete;
+
+        /**
+         * @brief Destructor.
+         */
+        virtual ~endpoint() noexcept = default;
 
     protected:
         /**
@@ -240,7 +237,7 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Creates and returns an instance of ServerSocket.
          */
-        virtual ServerSocket create_server_socket() = 0;
+        virtual std::unique_ptr<net::tcp_server_socket> create_server_socket() = 0;
 
         /**
          * @brief         Processes a GET request for a static file.
@@ -287,7 +284,7 @@ namespace abc { namespace net { namespace http {
          * @details          This is the top-level method that reads the http request line, and calls either `process_file_request()` or `process_rest_request()`.
          * @param connection Connection/client socket to read the request from and to send the response to.
          */
-        void process_request(ClientSocket&& connection);
+        void process_request(std::unique_ptr<net::tcp_client_socket>&& connection);
 
         /**
          * @brief Sets the "shutdown requested" flag.
@@ -308,12 +305,12 @@ namespace abc { namespace net { namespace http {
         /**
          * @brief Thread function for the 'start' thread.
          */
-        static void start_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr);
+        static void start_thread_func(endpoint* this_ptr);
 
         /**
          * @brief Thread function for the 'process_request' thread.
          */
-        static void process_request_thread_func(endpoint<ServerSocket, ClientSocket>* this_ptr, ClientSocket&& connection);
+        static void process_request_thread_func(endpoint* this_ptr, std::unique_ptr<net::tcp_client_socket>&& connection);
 
     protected:
         /**

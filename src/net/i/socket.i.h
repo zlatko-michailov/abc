@@ -25,6 +25,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <memory>
 #include <cstdint>
 #include <streambuf>
 #include <sys/types.h>
@@ -290,18 +291,25 @@ namespace abc { namespace net {
 
     public:
         /**
+         * @brief Destructor.
+         */
+        virtual ~client_socket() noexcept = default;
+
+    public:
+        /**
          * @brief      Connects the socket to the given port on the given host name. Optional for UDP sockets.
          * @param host Host name.
          * @param port Port number (as a string).
          */
-        void connect(const char* host, const char* port);
+        virtual void connect(const char* host, const char* port);
 
         /**
          * @brief         Connects the socket to the given address. Optional for UDP sockets.
          * @param address Address.
          */
-        void connect(const socket::address& address);
+        virtual void connect(const socket::address& address);
 
+    protected:
         /**
          * @brief         Sends the bytes from the buffer into the socket.
          * @param buffer  Data buffer. 
@@ -309,7 +317,7 @@ namespace abc { namespace net {
          * @param address Remote address. Only needed for UDP sockets if `connect()` wasn't called.
          * @return        The number of bytes sent. `0` = error.
          */
-        std::size_t send(const void* buffer, std::size_t size, socket::address* address = nullptr);
+        std::size_t send(const void* buffer, std::size_t size, const socket::address* address = nullptr);
 
         /**
          * @brief         Receives the given number of bytes from the socket, and stores them into the buffer.
@@ -351,6 +359,25 @@ namespace abc { namespace net {
          * @brief Deleted.
          */
         udp_socket(const udp_socket& other) = delete;
+
+    public:
+        /**
+         * @brief         Sends the bytes from the buffer into the socket.
+         * @param buffer  Data buffer. 
+         * @param size    Buffer size.
+         * @param address Remote address. May be `nullptr`.
+         * @return        The number of bytes sent. `0` = error.
+         */
+        std::size_t send(const void* buffer, std::size_t size, const socket::address* address = nullptr);
+
+        /**
+         * @brief         Receives the given number of bytes from the socket, and stores them into the buffer.
+         * @param buffer  Data buffer. 
+         * @param size    Buffer size.
+         * @param address Remote address. May be `nullptr`.
+         * @return        The number of bytes received. `0` = error.
+         */
+        std::size_t receive(void* buffer, std::size_t size, socket::address* address = nullptr);
     };
 
 
@@ -387,6 +414,11 @@ namespace abc { namespace net {
          */
         tcp_client_socket(const tcp_client_socket& other) = delete;
 
+        /**
+         * @brief Destructor.
+         */
+        virtual ~tcp_client_socket() noexcept = default;
+
     protected:
         /**
          * @brief        Internal constructor for accepted connections.
@@ -407,6 +439,23 @@ namespace abc { namespace net {
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
         tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log);
+
+    public:
+        /**
+         * @brief         Sends the bytes from the buffer into the socket.
+         * @param buffer  Data buffer. 
+         * @param size    Buffer size.
+         * @return        The number of bytes sent. `0` = error.
+         */
+        virtual std::size_t send(const void* buffer, std::size_t size);
+
+        /**
+         * @brief         Receives the given number of bytes from the socket, and stores them into the buffer.
+         * @param buffer  Data buffer. 
+         * @param size    Buffer size.
+         * @return        The number of bytes received. `0` = error.
+         */
+        virtual std::size_t receive(void* buffer, std::size_t size);
     };
 
 
@@ -440,6 +489,11 @@ namespace abc { namespace net {
          */
         tcp_server_socket(const tcp_server_socket& other) = delete;
 
+        /**
+         * @brief Destructor.
+         */
+        virtual ~tcp_server_socket() noexcept = default;
+
     protected:
         /**
          * @brief        Constructor.
@@ -454,13 +508,13 @@ namespace abc { namespace net {
          * @brief              Starts listening.
          * @param backlog_size Queue size.
          */
-        void listen(socket::backlog_size_t backlog_size);
+        virtual void listen(socket::backlog_size_t backlog_size);
 
         /**
          * @brief  Blocks until a client tries to connect.
          * @return New `tcp_client_socket` instance for the new connection.
          */
-        tcp_client_socket accept() const;
+        virtual std::unique_ptr<tcp_client_socket> accept() const;
 
     protected:
         /**

@@ -217,7 +217,7 @@ namespace abc { namespace net { namespace openssl {
 
 
     inline tcp_server_socket::tcp_server_socket(const char* cert_file_path, const char* pkey_file_path, const char* pkey_file_password, bool verify_client, socket::family family, diag::log_ostream* log)
-        : base(family, log)
+        : base("abc::net::openssl::tcp_server_socket", family, log)
         , _verify_client(verify_client) {
 
         constexpr const char* suborigin = "tcp_server_socket()";
@@ -279,7 +279,7 @@ namespace abc { namespace net { namespace openssl {
     }
 
 
-    inline tcp_client_socket tcp_server_socket::accept() const {
+    inline std::unique_ptr<net::tcp_client_socket> tcp_server_socket::accept() const {
         constexpr const char* suborigin = "accept()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -287,9 +287,9 @@ namespace abc { namespace net { namespace openssl {
         diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "fd=%d", (int)fd);
 
         const bool verify_server = false; // This value doesn't matter.
-        tcp_client_socket openssl_client(fd, _ctx, verify_server, base::family(), diag_base::log());
+        std::unique_ptr<tcp_client_socket> openssl_client(new tcp_client_socket(fd, _ctx, verify_server, base::family(), diag_base::log()));
 
-        int stat = SSL_accept(openssl_client._ssl);
+        int stat = SSL_accept(openssl_client->_ssl);
         diag_base::require(suborigin, stat > 0, 0x10796, "::SSL_accept()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");

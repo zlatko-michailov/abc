@@ -238,7 +238,7 @@ namespace abc { namespace net {
                 diag_base::assert(suborigin, false, 0x10015, "tt");
         }
 
-        diag_base::put_binary(suborigin, diag::severity::optional, 0x1079b, addr.sa_data, addr_len);
+        diag_base::put_binary(suborigin, diag::severity::verbose, 0x1079b, addr.sa_data, addr_len);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1079c, "End: %s(sockaddr), err=%d", tt_str, err);
 
@@ -303,7 +303,7 @@ namespace abc { namespace net {
     }
 
 
-    inline std::size_t client_socket::send(const void* buffer, std::size_t size, socket::address* address) {
+    inline std::size_t client_socket::send(const void* buffer, std::size_t size, const socket::address* address) {
         constexpr const char* suborigin = "send()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", size);
 
@@ -379,6 +379,16 @@ namespace abc { namespace net {
     }
 
 
+    inline std::size_t udp_socket::send(const void* buffer, std::size_t size, const socket::address* address) {
+        return base::send(buffer, size, address);
+    }
+
+
+    inline std::size_t udp_socket::receive(void* buffer, std::size_t size, socket::address* address) {
+        return base::receive(buffer, size, address);
+    }
+
+
     // --------------------------------------------------------------
 
 
@@ -394,6 +404,16 @@ namespace abc { namespace net {
 
     inline tcp_client_socket::tcp_client_socket(const char* origin, socket::fd_t fd, socket::family family, diag::log_ostream* log)
         : base(origin, fd, socket::kind::stream, family, log) {
+    }
+
+
+    inline std::size_t tcp_client_socket::send(const void* buffer, std::size_t size) {
+        return base::send(buffer, size);
+    }
+
+
+    inline std::size_t tcp_client_socket::receive(void* buffer, std::size_t size) {
+        return base::receive(buffer, size);
     }
 
 
@@ -423,10 +443,10 @@ namespace abc { namespace net {
     }
 
 
-    inline tcp_client_socket tcp_server_socket::accept() const {
+    inline std::unique_ptr<tcp_client_socket> tcp_server_socket::accept() const {
         socket::fd_t fd = accept_fd();
 
-        return tcp_client_socket("abc::net::tcp_server_socket", fd, base::family(), base::log());
+        return std::unique_ptr<tcp_client_socket>(new tcp_client_socket("abc::net::tcp_server_socket", fd, base::family(), base::log()));
     }
 
 

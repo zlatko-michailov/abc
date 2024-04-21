@@ -71,7 +71,6 @@ namespace abc {
     // --------------------------------------------------------------
 
 
-    //// TODO: REMOVE
     inline line_ostream::line_ostream()
         : line_ostream(nullptr) {
     }

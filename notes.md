@@ -20,11 +20,8 @@
             - Code
                 - `init_size`, `grow_rel`, `grow_abs`
             - Test
-    - Remove the default ctor from `..._line_ostream`
-    - Make the override methods of `xxx_line_ostream` flush!
 - Remove template parameter `SocketPtr` from class `socket_streambuf`.
-- In socket.cpp, remove the `ServerSocket` and `ClientSocket` template parameters from helper methods.
-- ? `endpoint` - remove the `ServerSocket` and `ClientSocket` template parameters.
+- Make samples basic and tls work.
 - `vmem`
     - page.h
     - ptr.h
