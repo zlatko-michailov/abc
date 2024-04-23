@@ -213,13 +213,13 @@ bool tcp_socket_stream_move(test_context& context, abc::net::tcp_server_socket* 
 
             ClientSocket client2(std::move(*client1));
 
-            abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb1(&client2, context.log());
+            abc::net::tcp_client_socket_streambuf sb1(&client2, context.log());
             std::ostream client_out(&sb1);
 
             client_out << request_content << "\n";
             client_out.flush();
 
-            abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb2(std::move(sb1));
+            abc::net::tcp_client_socket_streambuf sb2(std::move(sb1));
             std::istream client_in(&sb2);
 
             char content[abc::size::k1];
@@ -234,7 +234,7 @@ bool tcp_socket_stream_move(test_context& context, abc::net::tcp_server_socket* 
 
     std::unique_ptr<abc::net::tcp_client_socket> connection = server->accept();
 
-    abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(connection.get(), context.log());
+    abc::net::tcp_client_socket_streambuf sb(connection.get(), context.log());
     std::istream connection_in(&sb);
     std::ostream connection_out(&sb);
 
@@ -292,7 +292,7 @@ void http_json_stream_client(bool& passed, test_context& context, abc::net::tcp_
     try {
         client->connect("localhost", server_port);
 
-        abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(client, context.log());
+        abc::net::tcp_client_socket_streambuf sb(client, context.log());
         abc::net::http::client http(&sb, context.log());
 
         // Send request
@@ -424,7 +424,7 @@ bool tcp_socket_http_json_stream(test_context& context, abc::net::tcp_server_soc
 
     std::unique_ptr<abc::net::tcp_client_socket> connection = server->accept();
 
-    abc::net::socket_streambuf<abc::net::tcp_client_socket*> sb(connection.get(), context.log());
+    abc::net::tcp_client_socket_streambuf sb(connection.get(), context.log());
     abc::net::http::server http(&sb, context.log());
 
     http_json_stream_server_request(passed, context, http);

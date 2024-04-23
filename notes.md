@@ -20,7 +20,6 @@
             - Code
                 - `init_size`, `grow_rel`, `grow_abs`
             - Test
-- Remove template parameter `SocketPtr` from class `socket_streambuf`.
 - Make samples basic and tls work.
 - `vmem`
     - page.h

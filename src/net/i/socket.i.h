@@ -529,11 +529,9 @@ namespace abc { namespace net {
 
 
     /**
-     * @brief            `std::streambuf` specialization that is backed by a socket.
-     * @tparam SocketPtr Pointer type to `client_socket`.
+     * @brief `std::streambuf` specialization that is backed by a socket.
      */
-    template <typename SocketPtr>
-    class socket_streambuf
+    class tcp_client_socket_streambuf
         : public std::streambuf
         , protected diag::diag_ready<const char*> {
         
@@ -543,20 +541,20 @@ namespace abc { namespace net {
     public:
         /**
          * @brief        Constructor.
-         * @param socket `client_socket` pointer.
+         * @param socket `tcp_client_socket` pointer.
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        socket_streambuf(const SocketPtr& socket, diag::log_ostream* log = nullptr);
+        tcp_client_socket_streambuf(tcp_client_socket* socket, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        socket_streambuf(socket_streambuf&& other) noexcept;
+        tcp_client_socket_streambuf(tcp_client_socket_streambuf&& other) noexcept;
 
         /**
          * @brief Deleted.
          */
-        socket_streambuf(const socket_streambuf& other) = delete;
+        tcp_client_socket_streambuf(const tcp_client_socket_streambuf& other) = delete;
 
     public:
         /**
@@ -586,9 +584,9 @@ namespace abc { namespace net {
 
     private:
         /**
-         * @brief The `client_socket` pointer passed in to the constructor.
+         * @brief The `tcp_client_socket` pointer passed in to the constructor.
          */
-        SocketPtr _socket;
+        tcp_client_socket* _socket;
 
         /**
          * @brief Cached char received.

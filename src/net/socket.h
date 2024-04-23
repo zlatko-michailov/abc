@@ -466,13 +466,12 @@ namespace abc { namespace net {
     // --------------------------------------------------------------
 
 
-    template <typename SocketPtr>
-    inline socket_streambuf<SocketPtr>::socket_streambuf(const SocketPtr& socket, diag::log_ostream* log)
+    inline tcp_client_socket_streambuf::tcp_client_socket_streambuf(tcp_client_socket* socket, diag::log_ostream* log)
         : base()
-        , diag_base("abc::net::socket_streambuf", log)
+        , diag_base("abc::net::tcp_client_socket_streambuf", log)
         , _socket(socket) {
 
-        constexpr const char* suborigin = "socket_streambuf()";
+        constexpr const char* suborigin = "tcp_client_socket_streambuf()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         diag_base::expect(suborigin, socket != nullptr, 0x10068, "socket");
@@ -484,15 +483,14 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket>
-    inline socket_streambuf<Socket>::socket_streambuf(socket_streambuf&& other) noexcept
+    inline tcp_client_socket_streambuf::tcp_client_socket_streambuf(tcp_client_socket_streambuf&& other) noexcept
         : base()
         , diag_base(std::move(other))
         , _socket(std::move(other._socket))
         , _get_ch(other._get_ch)
         , _put_ch(other._put_ch) {
 
-        constexpr const char* suborigin = "socket_streambuf()";
+        constexpr const char* suborigin = "tcp_client_socket_streambuf()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         setg(&_get_ch, &_get_ch, &_get_ch);
@@ -506,14 +504,12 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket>
-    inline void socket_streambuf<Socket>::flush() {
+    inline void tcp_client_socket_streambuf::flush() {
         (void)sync();
     }
 
 
-    template <typename Socket>
-    inline std::streambuf::int_type socket_streambuf<Socket>::underflow() {
+    inline std::streambuf::int_type tcp_client_socket_streambuf::underflow() {
         _socket->receive(&_get_ch, sizeof(char));
 
         setg(&_get_ch, &_get_ch, &_get_ch + 1);
@@ -522,8 +518,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket>
-    inline std::streambuf::int_type socket_streambuf<Socket>::overflow(std::streambuf::int_type ch) {
+    inline std::streambuf::int_type tcp_client_socket_streambuf::overflow(std::streambuf::int_type ch) {
         _socket->send(&_put_ch, sizeof(char));
         _socket->send(&ch, sizeof(char));
 
@@ -533,8 +528,7 @@ namespace abc { namespace net {
     }
 
 
-    template <typename Socket>
-    inline int socket_streambuf<Socket>::sync() {
+    inline int tcp_client_socket_streambuf::sync() {
         if (pptr() != &_put_ch) {
             _socket->send(&_put_ch, sizeof(char));
         }
