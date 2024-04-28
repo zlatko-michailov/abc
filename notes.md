@@ -16,7 +16,6 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- Make sample tls work.
 - `log_ostream`
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
         - Rewrite: `queue_streambuf`

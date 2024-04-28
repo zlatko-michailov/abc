@@ -33,9 +33,10 @@ SOFTWARE.
 #include "../../src/net/openssl/socket.h"
 
 
+using log_table = abc::table_ostream;
 using log_line = abc::diag::debug_line_ostream<>;
-using log_filter = abc::diag::log_filter<const char*>;
-using log_ostream = abc::diag::log_ostream<log_line, log_filter*>;
+using log_filter = abc::diag::str_log_filter<const char*>;
+using log_ostream = abc::diag::log_ostream;
 
 
 constexpr const char* origin = "tls_sample";
@@ -48,7 +49,7 @@ void server(const char* cert_path, const char* pkey_path, const char* password, 
     bool verify_client = false;
     int queue_size = 5;
 
-    abc::net::openssl::tcp_server_socket<log_ostream*> openssl_server(cert_path, pkey_path, password, verify_client, abc::net::socket::family::ipv4, log);
+    abc::net::openssl::tcp_server_socket openssl_server(cert_path, pkey_path, password, verify_client, abc::net::socket::family::ipv4, log);
 
     openssl_server.bind(port);
     openssl_server.listen(queue_size);
@@ -56,17 +57,17 @@ void server(const char* cert_path, const char* pkey_path, const char* password, 
     // accept() blocks. Unblock the client thread now.
     scenario_cond->notify_one();
 
-    abc::net::openssl::tcp_client_socket<log_ostream*> openssl_connection = openssl_server.accept();
+    std::unique_ptr<abc::net::tcp_client_socket> openssl_connection = openssl_server.accept();
 
     const char hello[] = ">>> Welcome to abc!";
     uint len = sizeof(hello) - 1;
-    openssl_connection.send(&len, 2);
-    openssl_connection.send(hello, len);
+    openssl_connection->send(&len, 2);
+    openssl_connection->send(hello, len);
 
     char message[100 + 1] { };
     len = 0;
-    openssl_connection.receive(&len, 2);
-    openssl_connection.receive(message, len);
+    openssl_connection->receive(&len, 2);
+    openssl_connection->receive(message, len);
     log->put_any(origin, suborigin, abc::diag::severity::important, 0x1075e, "Received: (%u)'%s'", len, message);
 
     std::cout << "Press ENTER to shut down server socket..." << std::endl;
@@ -85,7 +86,7 @@ void client(log_ostream* log, std::mutex* scenario_mutex, std::condition_variabl
     std::unique_lock<std::mutex> lock(*scenario_mutex);
     scenario_cond->wait(lock);
 
-    abc::net::openssl::tcp_client_socket<log_ostream*> openssl_client(verify_server, abc::net::socket::family::ipv4, log);
+    abc::net::openssl::tcp_client_socket openssl_client(verify_server, abc::net::socket::family::ipv4, log);
 
     openssl_client.connect(host, port);
 
@@ -110,8 +111,10 @@ int main(int /*argc*/, const char* argv[]) {
     constexpr const char* suborigin = "main()";
 
     // Create a log.
+    log_table table(std::cout.rdbuf());
+    log_line line(&table);
     log_filter filter("", abc::diag::severity::important);
-    log_ostream log(std::cout.rdbuf(), &filter);
+    log_ostream log(&line, &filter);
 
     // Create cert and pkey paths.
     std::string process_dir = abc::parent_path(argv[0]);
