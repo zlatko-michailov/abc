@@ -1,6 +1,7 @@
 ## Done
 - internal doc pages. UNLINKED!
 - `diag_ready`
+- Remove the `Log` template parameter from all classes.
 - `http`
     - `request_reader`
     - `request_writer`
@@ -10,17 +11,18 @@
     - `value`
     - `reader`
     - `writer`
+- `util`
+    - `strprintf()`
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- All copyrights - 2024
+- Make sample tls work.
 - `log_ostream`
     - Introduce `vector_streambuf`, and use it in `line_ostream`.
         - Rewrite: `queue_streambuf`
             - Code
                 - `init_size`, `grow_rel`, `grow_abs`
             - Test
-- Make samples basic and tls work.
 - `vmem`
     - page.h
     - ptr.h
@@ -28,6 +30,7 @@
     - Samples
         - tictactoe
         - connect4
+- All copyrights - 2024
 - Update docs when all classes are done.
 
 - Remove `virtual` from `override` definitions?

@@ -32,15 +32,15 @@ SOFTWARE.
 
 
 class equations_endpoint
-    : public abc::net::http::endpoint<abc::net::tcp_server_socket, abc::net::tcp_client_socket> {
+    : public abc::net::http::endpoint {
 
-    using base = abc::net::http::endpoint<abc::net::tcp_server_socket, abc::net::tcp_client_socket>;
+    using base = abc::net::http::endpoint;
 
 public:
     equations_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
 protected:
-    virtual abc::net::tcp_server_socket create_server_socket() override;
+    virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
     virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
 };
 
@@ -53,8 +53,8 @@ inline equations_endpoint::equations_endpoint(abc::net::http::endpoint_config&& 
 }
 
 
-inline abc::net::tcp_server_socket equations_endpoint::create_server_socket() {
-    return abc::net::tcp_server_socket(abc::net::socket::family::ipv4, base::log());
+inline std::unique_ptr<abc::net::tcp_server_socket> equations_endpoint::create_server_socket() {
+    return std::unique_ptr<abc::net::tcp_server_socket>(new abc::net::tcp_server_socket(abc::net::socket::family::ipv4, base::log()));
 }
 
 
