@@ -194,10 +194,16 @@ namespace abc {
 
     private:
         /**
-         * @brief  Tries to ensure `available` chars of buffer capacity.
-         * @return `true` = success, `false` = failure.
+         * @brief           Tries to ensure `available` chars of buffer capacity.
+         * @param available Desired available capacity.
+         * @return          `true` = success, `false` = failure.
          */
         bool try_ensure_capacity(std::size_t available) noexcept; 
+
+        /**
+         * @brief Puts an `ends` without bumping the `pptr`, so the content can be a valid C string.
+         */
+        void put_ends() noexcept;
 
     private:
         /**
@@ -214,11 +220,6 @@ namespace abc {
          * @brief `buffer_streambuf` around the line buffer, which must be passed to the base constructor.
          */
         buffer_streambuf _sb;
-
-        /**
-         * @brief Count of chars written to the buffer.
-         */
-        std::size_t _pcount;
     };
 
 }

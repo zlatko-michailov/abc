@@ -80,8 +80,7 @@ namespace abc {
         : base(&_sb)
         , _table(table)
         , _buffer(size::_8) //// TODO: TEMP size::_256
-        , _sb(nullptr, 0, 0, _buffer.data(), 0, _buffer.capacity())
-        , _pcount(0) {
+        , _sb(nullptr, 0, 0, _buffer.data(), 0, _buffer.capacity()) {
     }
 
 
@@ -89,8 +88,7 @@ namespace abc {
         : base(std::move(other))
         , _table(other._table)
         , _buffer(std::move(other._buffer))
-        , _sb(std::move(other._sb))
-        , _pcount(other._pcount) {
+        , _sb(std::move(other._sb)) {
     }
 
 
@@ -104,26 +102,25 @@ namespace abc {
             return "";
         }
 
-        _buffer[_pcount] = ends;
+        put_ends();
 
         return _buffer.data();
     }
 
 
     inline void line_ostream::flush() noexcept {
-        if (_pcount > 0) {
+        if (_sb.put_current_pos() > 0) {
             if (!try_ensure_capacity(2)) {
                 return;
             }
 
-            _buffer[_pcount++] = endl;
-            _buffer[_pcount] = ends;
+            _sb.sputc(endl);
+            put_ends();
 
             if (_table != nullptr) {
-                _table->put_line(_buffer.data(), _pcount);
+                _table->put_line(_sb.put_begin_ptr(), _sb.put_current_pos());
             }
 
-            _pcount = 0;
             _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, 0, _buffer.capacity());
         }
     }
@@ -148,8 +145,8 @@ namespace abc {
             return;
         }
 
-        pc = std::vsnprintf(_buffer.data() + _pcount, pc + 1, format, vlist);
-        _pcount += pc;
+        pc = std::vsnprintf(_sb.put_begin_ptr() + _sb.put_current_pos(), pc + 1, format, vlist);
+        _sb.move_put_current_pos(pc);
     }
 
 
@@ -177,7 +174,7 @@ namespace abc {
 
         const std::uint8_t* chunk = static_cast<const std::uint8_t*>(buffer) + buffer_offset;
         std::size_t local_offset = 0;
-        char* line = &_buffer[_pcount];
+        char* line = _sb.put_begin_ptr() + _sb.put_current_pos();
         bool hasMore = true;
 
         // 0000:
@@ -227,7 +224,7 @@ namespace abc {
 
         line[local_offset++] = ends;
 
-        _pcount += local_size;
+        _sb.move_put_current_pos(local_size);
         buffer_offset += chunk_size;
         return hasMore;
     }
@@ -263,14 +260,15 @@ namespace abc {
 
 
     inline bool line_ostream::try_ensure_capacity(std::size_t available) noexcept {
-        std::size_t total = _pcount + available;
+        std::size_t put_pos = _sb.put_current_pos(); 
+        std::size_t total = put_pos + available;
 
         try {
             // Optimization: Round up to 256 to reduce reallocations.
             //// TODO: total = 256 * ((total + 255) / 256);
 
             _buffer.resize(total);
-            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, _pcount - 1, _buffer.capacity());
+            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, put_pos, _buffer.capacity());
         }
         catch (...) {
             return false;
@@ -279,4 +277,10 @@ namespace abc {
         return true;
     }
 
+
+    inline void line_ostream::put_ends() noexcept {
+        if (try_ensure_capacity(1)) {
+            _buffer[_sb.put_current_pos()] = ends;
+        }
+    }
 }

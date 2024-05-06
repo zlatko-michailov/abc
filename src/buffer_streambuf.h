@@ -46,7 +46,9 @@ namespace abc {
 
     template <typename Char>
     inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(basic_buffer_streambuf<Char>&& other) noexcept
-        : basic_buffer_streambuf<Char>(other._get_begin_ptr, other._get_end_ptr, other._put_begin_ptr, other._put_end_ptr) {
+        : base() {
+
+        reset(other.eback(), other.gptr(), other.egptr(), other.pbase(), other.pptr() - other.pbase(), other.epptr());
     }
 
 
@@ -58,14 +60,57 @@ namespace abc {
 
     template <typename Char>
     inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept {
-        _get_begin_ptr = get_begin_ptr;
-        _get_end_ptr   = get_end_ptr;
-        _put_begin_ptr = put_begin_ptr;
-        _put_end_ptr   = put_end_ptr;
-
         base::setg(get_begin_ptr, get_current_ptr, get_end_ptr);
         base::setp(put_begin_ptr, put_end_ptr);
         base::pbump(put_current_pos);
+    }
+
+
+    template <typename Char>
+    inline Char* basic_buffer_streambuf<Char>::get_begin_ptr() const {
+        return base::eback();
+    }
+
+
+    template <typename Char>
+    inline std::size_t basic_buffer_streambuf<Char>::get_current_pos() const {
+        return base::gptr() - base::eback();
+    }
+
+
+    template <typename Char>
+    inline std::size_t basic_buffer_streambuf<Char>::get_end_pos() const {
+        return base::egptr() - base::eback();
+    }
+
+
+    template <typename Char>
+    inline void basic_buffer_streambuf<Char>::move_get_current_pos(int count) {
+        base::gbump(count);
+    }
+
+
+    template <typename Char>
+    inline Char* basic_buffer_streambuf<Char>::put_begin_ptr() const {
+        return base::pbase();
+    }
+
+
+    template <typename Char>
+    inline std::size_t basic_buffer_streambuf<Char>::put_current_pos() const {
+        return base::pptr() - base::pbase();
+    }
+
+
+    template <typename Char>
+    inline std::size_t basic_buffer_streambuf<Char>::put_end_pos() const {
+        return base::epptr() - base::pbase();
+    }
+
+
+    template <typename Char>
+    inline void basic_buffer_streambuf<Char>::move_put_current_pos(int count) {
+        base::pbump(count);
     }
 
 }

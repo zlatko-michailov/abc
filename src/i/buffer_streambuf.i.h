@@ -97,11 +97,48 @@ namespace abc {
          */
         void reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept;
 
-    private:
-        Char* _get_begin_ptr;
-        Char* _get_end_ptr;
-        Char* _put_begin_ptr;
-        Char* _put_end_ptr;
+    public:
+        /**
+         * @brief Returns the begin 'get' pointer.
+         */
+        Char* get_begin_ptr() const;
+
+        /**
+         * @brief Returns the current 'get' position.
+         */
+        std::size_t get_current_pos() const;
+
+        /**
+         * @brief Returns the end 'get' position.
+         */
+        std::size_t get_end_pos() const;
+
+        /**
+         * @brief       Moves the current 'put' position.
+         * @param count Delta. Could be either positive or negative.
+         */
+        void move_get_current_pos(int count);
+
+        /**
+         * @brief Returns the begin 'put' pointer.
+         */
+        Char* put_begin_ptr() const;
+
+        /**
+         * @brief Returns the current 'put' position.
+         */
+        std::size_t put_current_pos() const;
+
+        /**
+         * @brief Returns the end 'put' position.
+         */
+        std::size_t put_end_pos() const;
+
+        /**
+         * @brief       Moves the current 'put' position.
+         * @param delta Delta. Could be either positive or negative.
+         */
+        void move_put_current_pos(int delta);
     };
 
 

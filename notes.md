@@ -17,11 +17,12 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `log_ostream`
-    - Introduce `vector_streambuf`, and use it in `line_ostream`.
-        - Rewrite: `queue_streambuf`
-            - Code
-                - `init_size`, `grow_rel`, `grow_abs`
-            - Test
+    - `container_streambuf<Container>`
+    - `using vector_streambuf = container_streambuf<std::vector<char>>`
+    - Use `vector_streambuf` in `line_ostream`.
+        - Code
+            - `init_size`, `grow_rel`, `grow_abs`
+        - Test
 - `vmem`
     - page.h
     - ptr.h
