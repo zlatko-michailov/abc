@@ -36,6 +36,9 @@ namespace abc {
      * @brief Character utilities.
      */
     namespace ascii {
+        constexpr char endl = '\n';
+        constexpr char ends = '\0';
+
         using predicate_t = bool (*) (char);
 
 

@@ -16,13 +16,12 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
+- `buffer_streambuf`
+    - Rename `get_xxx_pos()` to `xxx_get_pos()` and `put_xxx_pos()` to `xxx_put_pos()`
+- `table_stream`
+    - Remove `endl` and `ends`, and use `ascii`.
 - `log_ostream`
-    - `container_streambuf<Container>`
-    - `using vector_streambuf = container_streambuf<std::vector<char>>`
     - Use `vector_streambuf` in `line_ostream`.
-        - Code
-            - `init_size`, `grow_rel`, `grow_abs`
-        - Test
 - `vmem`
     - page.h
     - ptr.h

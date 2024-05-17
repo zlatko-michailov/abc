@@ -34,6 +34,7 @@ SOFTWARE.
 #include "inc/util.h"
 #include "inc/buffer_streambuf.h"
 #include "inc/multifile_streambuf.h"
+#include "inc/vector_streambuf.h"
 #include "inc/stream.h"
 #include "inc/table_stream.h"
 #include "inc/http.h"
@@ -79,6 +80,12 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_multifile_streambuf_move",                   test_multifile_streambuf_move },
                 { "test_duration_multifile_streambuf_move",          test_duration_multifile_streambuf_move },
                 { "test_size_multifile_streambuf_move",              test_size_multifile_streambuf_move },
+            } },
+            { "vector_streambuf", {
+                { "test_vector_streambuf_1_char",                    test_vector_streambuf_1_char },
+                { "test_vector_streambuf_N_chars",                   test_vector_streambuf_N_chars },
+                { "test_vector_streambuf_N_chars_grow",              test_vector_streambuf_N_chars_grow },
+                { "test_vector_streambuf_move",                      test_vector_streambuf_move },
             } },
             { "stream", {
                 { "test_istream_move",                               test_istream_move },
