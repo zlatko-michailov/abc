@@ -62,7 +62,7 @@ bool test_line_debug(test_context& context) {
         timestamp.get(), thread_id.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream::endl;
+    actual[0] = abc::ascii::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -91,7 +91,7 @@ bool test_line_debug(test_context& context) {
     passed = verify_stream_good(context, table, 0x102b8) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream::ends);
+    seal.put(abc::ascii::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102b9) && passed;
 
@@ -130,7 +130,7 @@ bool test_line_diag(test_context& context) {
         timestamp.get(), thread_id.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream::endl;
+    actual[0] = abc::ascii::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -160,7 +160,7 @@ bool test_line_diag(test_context& context) {
     passed = verify_stream_good(context, table, 0x102c1) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream::ends);
+    seal.put(abc::ascii::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102c2) && passed;
 
@@ -196,7 +196,7 @@ bool test_line_test(test_context& context) {
         timestamp.get());
 
     char actual[abc::size::k2 + 1];
-    actual[0] = abc::line_ostream::endl;
+    actual[0] = abc::ascii::endl;
     abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
     abc::table_ostream table(&sb);
 
@@ -225,7 +225,7 @@ bool test_line_test(test_context& context) {
     passed = verify_stream_good(context, table, 0x102c9) && passed;
 
     std::ostream seal(&sb);
-    seal.put(abc::line_ostream::ends);
+    seal.put(abc::ascii::ends);
     seal.flush();
     passed = verify_stream_good(context, table, 0x102ca) && passed;
 

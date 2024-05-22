@@ -100,17 +100,6 @@ namespace abc {
 
     public:
         /**
-         * @brief New line literal.
-         */
-        static constexpr char endl = '\n';
-
-        /**
-         * @brief End of stream/string literal.
-         */
-        static constexpr char ends = '\0';
-
-    public:
-        /**
          * @brief Default constructor.
          */
         line_ostream();

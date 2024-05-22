@@ -60,7 +60,7 @@ namespace abc {
 
     inline void table_ostream::put_blank_line() noexcept {
         try {
-            *this << endl;
+            *this << ascii::endl;
             base::flush();
         }
         catch (...) {
@@ -114,7 +114,7 @@ namespace abc {
                 return;
             }
 
-            _sb.sputc(endl);
+            _sb.sputc(ascii::endl);
             put_ends();
 
             if (_table != nullptr) {
@@ -222,7 +222,7 @@ namespace abc {
             }
         }
 
-        line[local_offset++] = ends;
+        line[local_offset++] = ascii::ends;
 
         _sb.move_put_current_pos(local_size);
         buffer_offset += chunk_size;
@@ -242,10 +242,10 @@ namespace abc {
 
         try {
             std::ostream stream(&sb);
-            stream << std::hex << thread_id << ends;
+            stream << std::hex << thread_id << ascii::ends;
         }
         catch (...) {
-            buf[0] = ends;
+            buf[0] = ascii::ends;
         }
 
         put_any(format, buf);
@@ -280,7 +280,7 @@ namespace abc {
 
     inline void line_ostream::put_ends() noexcept {
         if (try_ensure_capacity(1)) {
-            _buffer[_sb.put_current_pos()] = ends;
+            _buffer[_sb.put_current_pos()] = ascii::ends;
         }
     }
 }
