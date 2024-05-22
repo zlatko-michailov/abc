@@ -29,7 +29,6 @@
     - Samples
         - tictactoe
         - connect4
-- All copyrights - 2024
 - Update docs when all classes are done.
 
 - Remove `virtual` from `override` definitions?
