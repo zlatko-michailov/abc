@@ -16,10 +16,6 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- `buffer_streambuf`
-    - Rename `get_xxx_pos()` to `xxx_get_pos()` and `put_xxx_pos()` to `xxx_put_pos()`
-- `table_stream`
-    - Remove `endl` and `ends`, and use `ascii`.
 - `log_ostream`
     - Use `vector_streambuf` in `line_ostream`.
 - `vmem`

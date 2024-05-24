@@ -109,7 +109,7 @@ namespace abc {
 
 
     inline void line_ostream::flush() noexcept {
-        if (_sb.put_current_pos() > 0) {
+        if (_sb.current_put_pos() > 0) {
             if (!try_ensure_capacity(2)) {
                 return;
             }
@@ -118,7 +118,7 @@ namespace abc {
             put_ends();
 
             if (_table != nullptr) {
-                _table->put_line(_sb.put_begin_ptr(), _sb.put_current_pos());
+                _table->put_line(_sb.begin_put_ptr(), _sb.current_put_pos());
             }
 
             _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, 0, _buffer.capacity());
@@ -145,8 +145,8 @@ namespace abc {
             return;
         }
 
-        pc = std::vsnprintf(_sb.put_begin_ptr() + _sb.put_current_pos(), pc + 1, format, vlist);
-        _sb.move_put_current_pos(pc);
+        pc = std::vsnprintf(_sb.begin_put_ptr() + _sb.current_put_pos(), pc + 1, format, vlist);
+        _sb.move_current_put_pos(pc);
     }
 
 
@@ -174,7 +174,7 @@ namespace abc {
 
         const std::uint8_t* chunk = static_cast<const std::uint8_t*>(buffer) + buffer_offset;
         std::size_t local_offset = 0;
-        char* line = _sb.put_begin_ptr() + _sb.put_current_pos();
+        char* line = _sb.begin_put_ptr() + _sb.current_put_pos();
         bool hasMore = true;
 
         // 0000:
@@ -224,7 +224,7 @@ namespace abc {
 
         line[local_offset++] = ascii::ends;
 
-        _sb.move_put_current_pos(local_size);
+        _sb.move_current_put_pos(local_size);
         buffer_offset += chunk_size;
         return hasMore;
     }
@@ -260,7 +260,7 @@ namespace abc {
 
 
     inline bool line_ostream::try_ensure_capacity(std::size_t available) noexcept {
-        std::size_t put_pos = _sb.put_current_pos(); 
+        std::size_t put_pos = _sb.current_put_pos(); 
         std::size_t total = put_pos + available;
 
         try {
@@ -280,7 +280,7 @@ namespace abc {
 
     inline void line_ostream::put_ends() noexcept {
         if (try_ensure_capacity(1)) {
-            _buffer[_sb.put_current_pos()] = ascii::ends;
+            _buffer[_sb.current_put_pos()] = ascii::ends;
         }
     }
 }

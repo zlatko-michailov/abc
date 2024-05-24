@@ -31,16 +31,16 @@ SOFTWARE.
 namespace abc {
 
     template <typename Char>
-    inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept
-        : basic_buffer_streambuf<Char>(&get_buffer[get_begin_pos], &get_buffer[get_end_pos], &put_buffer[put_begin_pos], &put_buffer[put_end_pos]) {
+    inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_buffer, std::size_t begin_get_pos, std::size_t end_get_pos, Char* put_buffer, std::size_t begin_put_pos, std::size_t end_put_pos) noexcept
+        : basic_buffer_streambuf<Char>(&get_buffer[begin_get_pos], &get_buffer[end_get_pos], &put_buffer[begin_put_pos], &put_buffer[end_put_pos]) {
     }
 
 
     template <typename Char>
-    inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept
+    inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* begin_get_ptr, Char* end_get_ptr, Char* begin_put_ptr, Char* end_put_ptr) noexcept
         : base() {
 
-        reset(get_begin_ptr, get_begin_ptr, get_end_ptr, put_begin_ptr, 0, put_end_ptr);
+        reset(begin_get_ptr, begin_get_ptr, end_get_ptr, begin_put_ptr, 0, end_put_ptr);
     }
 
 
@@ -53,63 +53,63 @@ namespace abc {
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::reset(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_current_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_current_pos, std::size_t put_end_pos) noexcept {
-        reset(get_buffer + get_begin_pos, get_buffer + get_current_pos, get_buffer + get_end_pos, put_buffer + put_begin_pos, put_current_pos, put_buffer + put_end_pos);
+    inline void basic_buffer_streambuf<Char>::reset(Char* get_buffer, std::size_t begin_get_pos, std::size_t current_get_pos, std::size_t end_get_pos, Char* put_buffer, std::size_t begin_put_pos, std::size_t current_put_pos, std::size_t end_put_pos) noexcept {
+        reset(get_buffer + begin_get_pos, get_buffer + current_get_pos, get_buffer + end_get_pos, put_buffer + begin_put_pos, current_put_pos, put_buffer + end_put_pos);
     }
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept {
-        base::setg(get_begin_ptr, get_current_ptr, get_end_ptr);
-        base::setp(put_begin_ptr, put_end_ptr);
-        base::pbump(put_current_pos);
+    inline void basic_buffer_streambuf<Char>::reset(Char* begin_get_ptr, Char* current_get_ptr, Char* end_get_ptr, Char* begin_put_ptr, std::size_t current_put_pos, Char* end_put_ptr) noexcept {
+        base::setg(begin_get_ptr, current_get_ptr, end_get_ptr);
+        base::setp(begin_put_ptr, end_put_ptr);
+        base::pbump(current_put_pos);
     }
 
 
     template <typename Char>
-    inline Char* basic_buffer_streambuf<Char>::get_begin_ptr() const {
+    inline Char* basic_buffer_streambuf<Char>::begin_get_ptr() const {
         return base::eback();
     }
 
 
     template <typename Char>
-    inline std::size_t basic_buffer_streambuf<Char>::get_current_pos() const {
+    inline std::size_t basic_buffer_streambuf<Char>::current_get_pos() const {
         return base::gptr() - base::eback();
     }
 
 
     template <typename Char>
-    inline std::size_t basic_buffer_streambuf<Char>::get_end_pos() const {
+    inline std::size_t basic_buffer_streambuf<Char>::end_get_pos() const {
         return base::egptr() - base::eback();
     }
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::move_get_current_pos(int count) {
+    inline void basic_buffer_streambuf<Char>::move_current_get_pos(int count) {
         base::gbump(count);
     }
 
 
     template <typename Char>
-    inline Char* basic_buffer_streambuf<Char>::put_begin_ptr() const {
+    inline Char* basic_buffer_streambuf<Char>::begin_put_ptr() const {
         return base::pbase();
     }
 
 
     template <typename Char>
-    inline std::size_t basic_buffer_streambuf<Char>::put_current_pos() const {
+    inline std::size_t basic_buffer_streambuf<Char>::current_put_pos() const {
         return base::pptr() - base::pbase();
     }
 
 
     template <typename Char>
-    inline std::size_t basic_buffer_streambuf<Char>::put_end_pos() const {
+    inline std::size_t basic_buffer_streambuf<Char>::end_put_pos() const {
         return base::epptr() - base::pbase();
     }
 
 
     template <typename Char>
-    inline void basic_buffer_streambuf<Char>::move_put_current_pos(int count) {
+    inline void basic_buffer_streambuf<Char>::move_current_put_pos(int count) {
         base::pbump(count);
     }
 

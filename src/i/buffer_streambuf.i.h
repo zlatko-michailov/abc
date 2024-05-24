@@ -45,22 +45,22 @@ namespace abc {
         /**
          * @brief               Constructor, using positions.
          * @param get_buffer    "Get" buffer.
-         * @param get_begin_pos "Begin" position on the "get" buffer.
-         * @param get_end_pos   "End" position on the "get" buffer.
+         * @param begin_get_pos "Begin" position on the "get" buffer.
+         * @param end_get_pos   "End" position on the "get" buffer.
          * @param put_buffer    "Put" buffer.
-         * @param put_begin_pos "Begin" position on the "put" buffer.
-         * @param put_end_pos   "Enc" position on the "put" buffer.
+         * @param begin_put_pos "Begin" position on the "put" buffer.
+         * @param end_put_pos   "Enc" position on the "put" buffer.
          */
-        basic_buffer_streambuf(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_end_pos) noexcept;
+        basic_buffer_streambuf(Char* get_buffer, std::size_t begin_get_pos, std::size_t end_get_pos, Char* put_buffer, std::size_t begin_put_pos, std::size_t end_put_pos) noexcept;
 
         /**
          * @brief               Constructor, using pointers.
-         * @param get_begin_ptr Pointer to the "begin" item on the "get" buffer.
-         * @param get_end_ptr   Pointer to the "end" item on the "get" buffer.
-         * @param put_begin_ptr Pointer to the "begin" item on the "put" buffer.
-         * @param put_end_ptr   Pointer to the "end" item on the "put" buffer.
+         * @param begin_get_ptr Pointer to the "begin" item on the "get" buffer.
+         * @param end_get_ptr   Pointer to the "end" item on the "get" buffer.
+         * @param begin_put_ptr Pointer to the "begin" item on the "put" buffer.
+         * @param end_put_ptr   Pointer to the "end" item on the "put" buffer.
          */
-        basic_buffer_streambuf(Char* get_begin_ptr, Char* get_end_ptr, Char* put_begin_ptr, Char* put_end_ptr) noexcept;
+        basic_buffer_streambuf(Char* begin_get_ptr, Char* end_get_ptr, Char* begin_put_ptr, Char* end_put_ptr) noexcept;
 
         /**
          * @brief Move constructor.
@@ -76,69 +76,69 @@ namespace abc {
         /**
          * @brief                 Resets using positions.
          * @param get_buffer      "Get" buffer.
-         * @param get_begin_pos   "Begin" position on the "get" buffer.
-         * @param get_current_pos "Current" position on the "get" buffer.
-         * @param get_end_pos     "End" position on the "get" buffer.
+         * @param begin_get_pos   "Begin" position on the "get" buffer.
+         * @param current_get_pos "Current" position on the "get" buffer.
+         * @param end_get_pos     "End" position on the "get" buffer.
          * @param put_buffer      "Put" buffer.
-         * @param put_begin_pos   "Begin" position on the "put" buffer.
-         * @param put_current_pos "Current" position on the "put" buffer.
-         * @param put_end_pos     "Enc" position on the "put" buffer.
+         * @param begin_put_pos   "Begin" position on the "put" buffer.
+         * @param current_put_pos "Current" position on the "put" buffer.
+         * @param end_put_pos     "Enc" position on the "put" buffer.
          */
-        void reset(Char* get_buffer, std::size_t get_begin_pos, std::size_t get_current_pos, std::size_t get_end_pos, Char* put_buffer, std::size_t put_begin_pos, std::size_t put_current_pos, std::size_t put_end_pos) noexcept;
+        void reset(Char* get_buffer, std::size_t begin_get_pos, std::size_t current_get_pos, std::size_t end_get_pos, Char* put_buffer, std::size_t begin_put_pos, std::size_t current_put_pos, std::size_t end_put_pos) noexcept;
 
         /**
          * @brief                 Resets using pointers.
-         * @param get_begin_ptr   Pointer to the "begin" item on the "get" buffer.
-         * @param get_current_ptr Pointer to the "begin" item on the "get" buffer.
-         * @param get_end_ptr     Pointer to the "end" item on the "get" buffer.
-         * @param put_begin_ptr   Pointer to the "begin" item on the "put" buffer.
-         * @param put_current_pos "Current" position on the "put" buffer.
-         * @param put_end_ptr     Pointer to the "end" item on the "put" buffer.
+         * @param begin_get_ptr   Pointer to the "begin" item on the "get" buffer.
+         * @param current_get_ptr Pointer to the "current" item on the "get" buffer.
+         * @param end_get_ptr     Pointer to the "end" item on the "get" buffer.
+         * @param begin_put_ptr   Pointer to the "begin" item on the "put" buffer.
+         * @param current_put_pos "Current" position on the "put" buffer.
+         * @param end_put_ptr     Pointer to the "end" item on the "put" buffer.
          */
-        void reset(Char* get_begin_ptr, Char* get_current_ptr, Char* get_end_ptr, Char* put_begin_ptr, std::size_t put_current_pos, Char* put_end_ptr) noexcept;
+        void reset(Char* begin_get_ptr, Char* current_get_ptr, Char* end_get_ptr, Char* begin_put_ptr, std::size_t current_put_pos, Char* end_put_ptr) noexcept;
 
     public:
         /**
          * @brief Returns the begin 'get' pointer.
          */
-        Char* get_begin_ptr() const;
+        Char* begin_get_ptr() const;
 
         /**
          * @brief Returns the current 'get' position.
          */
-        std::size_t get_current_pos() const;
+        std::size_t current_get_pos() const;
 
         /**
          * @brief Returns the end 'get' position.
          */
-        std::size_t get_end_pos() const;
+        std::size_t end_get_pos() const;
 
         /**
          * @brief       Moves the current 'put' position.
          * @param count Delta. Could be either positive or negative.
          */
-        void move_get_current_pos(int count);
+        void move_current_get_pos(int count);
 
         /**
          * @brief Returns the begin 'put' pointer.
          */
-        Char* put_begin_ptr() const;
+        Char* begin_put_ptr() const;
 
         /**
          * @brief Returns the current 'put' position.
          */
-        std::size_t put_current_pos() const;
+        std::size_t current_put_pos() const;
 
         /**
          * @brief Returns the end 'put' position.
          */
-        std::size_t put_end_pos() const;
+        std::size_t end_put_pos() const;
 
         /**
          * @brief       Moves the current 'put' position.
          * @param delta Delta. Could be either positive or negative.
          */
-        void move_put_current_pos(int delta);
+        void move_current_put_pos(int delta);
     };
 
 

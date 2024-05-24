@@ -46,7 +46,7 @@ namespace abc {
         : base(nullptr, 0, 0, nullptr, 0, 0)
         , _vector(std::move(other._vector)) {
 
-        base::reset(_vector.data(), 0, other.get_current_pos(), other.get_end_pos(), _vector.data(), 0, other.put_current_pos(), _vector.size());
+        base::reset(_vector.data(), 0, other.current_get_pos(), other.end_get_pos(), _vector.data(), 0, other.current_put_pos(), _vector.size());
         other.reset(nullptr, 0, 0, 0, nullptr, 0, 0, 0);
     }
 
@@ -66,11 +66,11 @@ namespace abc {
 
     template <typename Char>
     inline void basic_vector_streambuf<Char>::ensure_capacity(std::size_t available) {
-        std::size_t total = base::put_current_pos() + available;
+        std::size_t total = base::current_put_pos() + available;
 
         if (_vector.size() < total) {
             _vector.resize(total);
-            base::reset(_vector.data(), 0, base::get_current_pos(), _vector.size(), _vector.data(), 0, base::put_current_pos(), _vector.size());
+            base::reset(_vector.data(), 0, base::current_get_pos(), _vector.size(), _vector.data(), 0, base::current_put_pos(), _vector.size());
         }
     }
 
