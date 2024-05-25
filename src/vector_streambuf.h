@@ -47,7 +47,13 @@ namespace abc {
         , _vector(std::move(other._vector)) {
 
         base::reset(_vector.data(), 0, other.current_get_pos(), other.end_get_pos(), _vector.data(), 0, other.current_put_pos(), _vector.size());
-        other.reset(nullptr, 0, 0, 0, nullptr, 0, 0, 0);
+        static_cast<base&>(other).reset(nullptr, 0, 0, 0, nullptr, 0, 0, 0);
+    }
+
+
+    template <typename Char>
+    inline void basic_vector_streambuf<Char>::reset() noexcept {
+        base::reset(_vector.data(), 0, 0, _vector.size(), _vector.data(), 0, 0, _vector.size());
     }
 
 

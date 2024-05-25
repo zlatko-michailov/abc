@@ -63,6 +63,12 @@ namespace abc {
 
     public:
         /**
+         * @brief Resets the `std::streambuf` pointers without resizing the underlying `std::vector`.
+         */
+        void reset() noexcept;
+
+    public:
+        /**
          * @brief           Tries to ensure `available` chars of buffer capacity.
          * @param available Desired available capacity.
          * @return          `true` = success, `false` = failure.

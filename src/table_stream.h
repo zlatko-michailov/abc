@@ -29,6 +29,7 @@ SOFTWARE.
 #include <cstring>
 
 #include "stream.h"
+#include "vector_streambuf.h"
 #include "i/table_stream.i.h"
 
 
@@ -79,15 +80,13 @@ namespace abc {
     inline line_ostream::line_ostream(table_ostream* table)
         : base(&_sb)
         , _table(table)
-        , _buffer(size::_8) //// TODO: TEMP size::_256
-        , _sb(nullptr, 0, 0, _buffer.data(), 0, _buffer.capacity()) {
+        , _sb(size::_256) {
     }
 
 
     inline line_ostream::line_ostream(line_ostream&& other) noexcept
         : base(std::move(other))
         , _table(other._table)
-        , _buffer(std::move(other._buffer))
         , _sb(std::move(other._sb)) {
     }
 
@@ -98,19 +97,19 @@ namespace abc {
 
 
     inline const char* line_ostream::get() noexcept {
-        if (!try_ensure_capacity(1)) {
+        if (!_sb.try_ensure_capacity(1)) {
             return "";
         }
 
         put_ends();
 
-        return _buffer.data();
+        return _sb.vector().data();
     }
 
 
     inline void line_ostream::flush() noexcept {
         if (_sb.current_put_pos() > 0) {
-            if (!try_ensure_capacity(2)) {
+            if (!_sb.try_ensure_capacity(2)) {
                 return;
             }
 
@@ -121,7 +120,7 @@ namespace abc {
                 _table->put_line(_sb.begin_put_ptr(), _sb.current_put_pos());
             }
 
-            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, 0, _buffer.capacity());
+            _sb.reset();
         }
     }
 
@@ -141,7 +140,7 @@ namespace abc {
         va_copy(vlist_copy, vlist);
         int pc = std::vsnprintf(nullptr, 0, format, vlist_copy);
 
-        if (!try_ensure_capacity(pc + 1)) {
+        if (!_sb.try_ensure_capacity(pc + 1)) {
             return;
         }
 
@@ -168,7 +167,7 @@ namespace abc {
             return false;
         }
 
-        if (!try_ensure_capacity(local_size + 1)) {
+        if (!_sb.try_ensure_capacity(local_size + 1)) {
             return false;
         }
 
@@ -259,28 +258,10 @@ namespace abc {
     }
 
 
-    inline bool line_ostream::try_ensure_capacity(std::size_t available) noexcept {
-        std::size_t put_pos = _sb.current_put_pos(); 
-        std::size_t total = put_pos + available;
-
-        try {
-            // Optimization: Round up to 256 to reduce reallocations.
-            //// TODO: total = 256 * ((total + 255) / 256);
-
-            _buffer.resize(total);
-            _sb.reset(nullptr, 0, 0, 0, _buffer.data(), 0, put_pos, _buffer.capacity());
-        }
-        catch (...) {
-            return false;
-        }
-
-        return true;
-    }
-
-
     inline void line_ostream::put_ends() noexcept {
-        if (try_ensure_capacity(1)) {
-            _buffer[_sb.current_put_pos()] = ascii::ends;
+        if (_sb.try_ensure_capacity(1)) {
+            _sb.sputc(ascii::ends);
+            _sb.move_current_put_pos(-1);
         }
     }
 }

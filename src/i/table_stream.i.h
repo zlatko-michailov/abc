@@ -32,7 +32,7 @@ SOFTWARE.
 #include <cstdarg>
 
 #include "../size.h"
-#include "../buffer_streambuf.h"
+#include "../i/vector_streambuf.i.h"
 #include "timestamp.i.h"
 #include "stream.i.h"
 
@@ -46,12 +46,6 @@ namespace abc {
         : public ostream {
 
         using base = ostream;
-
-    public:
-        /**
-         * @brief New line literal.
-         */
-        static constexpr char endl = '\n';
 
     public:
         /**
@@ -183,13 +177,6 @@ namespace abc {
 
     private:
         /**
-         * @brief           Tries to ensure `available` chars of buffer capacity.
-         * @param available Desired available capacity.
-         * @return          `true` = success, `false` = failure.
-         */
-        bool try_ensure_capacity(std::size_t available) noexcept; 
-
-        /**
          * @brief Puts an `ends` without bumping the `pptr`, so the content can be a valid C string.
          */
         void put_ends() noexcept;
@@ -201,14 +188,9 @@ namespace abc {
         table_ostream* _table;
 
         /**
-         * @brief Line buffer.
+         * @brief `std::streambuf` implementation over its own container, which must be passed to the base constructor.
          */
-        std::vector<char> _buffer;
-
-        /**
-         * @brief `buffer_streambuf` around the line buffer, which must be passed to the base constructor.
-         */
-        buffer_streambuf _sb;
+        vector_streambuf _sb;
     };
 
 }

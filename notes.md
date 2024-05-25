@@ -16,8 +16,6 @@
 
 ## To Do
 - __UNTABIFY each file before making changes!__
-- `log_ostream`
-    - Use `vector_streambuf` in `line_ostream`.
 - `vmem`
     - page.h
     - ptr.h
