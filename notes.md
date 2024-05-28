@@ -1,6 +1,7 @@
 ## Done
 - internal doc pages. UNLINKED!
 - `diag_ready`
+- `vector_streambuf`
 - Remove the `Log` template parameter from all classes.
 - `http`
     - `request_reader`
@@ -19,6 +20,7 @@
 - `vmem`
     - page.h
     - ptr.h
+    - pool/h
     - Remove util.h or merge it with the main util.h.
     - Samples
         - tictactoe
