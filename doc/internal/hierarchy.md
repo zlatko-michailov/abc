@@ -34,8 +34,8 @@ Up to [Documentation](README.md).
     - __vmem ::__
         - __i__
         - page.h
-        - ptr.h __NEXT. TODO:__
-        - pool.h
+        - ptr.h
+        - pool.h __NEXT. TODO:__
         - layout.h
         - linked.h
         - container.h

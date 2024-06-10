@@ -33,7 +33,7 @@ SOFTWARE.
 #include <cstring>
 
 #include "../exception.h"
-#include "../i/vmem.i.h"
+#include "i/all.i.h"
 
 
 namespace abc {

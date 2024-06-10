@@ -50,6 +50,8 @@ namespace abc { namespace vmem {
 
         using diag_base = diag::diag_ready<const char*>;
 
+        static constexpr const char* _origin = "abc::vmem::ptr";
+
     public:
         /**
          * @brief          Constructor.
@@ -137,7 +139,7 @@ namespace abc { namespace vmem {
         /**
          * @brief Returns a typed pointer.
          */
-        T* ptr() const noexcept;
+        T* p() const noexcept;
 
         /**
          * @brief Returns a typed reference.

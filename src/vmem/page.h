@@ -27,8 +27,8 @@ SOFTWARE.
 
 
 #include "../diag/diag_ready.h"
-#include "i/page.i.h"
 #include "pool.h"
+#include "i/page.i.h"
 
 
 namespace abc { namespace vmem {
