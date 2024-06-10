@@ -23,11 +23,16 @@ SOFTWARE.
 */
 
 
-#include "vmem_util.h"
-#include "x/vmem_pool.x.h"
-#include "x/vmem_iterator.x.h"
-#include "x/vmem_linked.x.h"
-#include "x/vmem_container.x.h"
-#include "x/vmem_list.x.h"
-#include "x/vmem_map.x.h"
-#include "x/vmem_string.x.h"
+#include "page.i.h"
+#include "ptr.i.h"
+#include "layout.i.h"
+#include "pool.i.h"
+
+#if 0 //// TODO:
+#include "iterator.i.h"
+#include "linked.i.h"
+#include "container.i.h"
+#include "list.i.h"
+#include "map.i.h"
+#include "string.i.h"
+#endif //// TODO:

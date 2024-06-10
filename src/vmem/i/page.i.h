@@ -48,6 +48,8 @@ namespace abc { namespace vmem {
 
         using diag_base = diag::diag_ready<const char*>;
 
+        static constexpr const char* _origin = "abc::vmem::page";
+
     public:
         /**
          * @brief      Constructor.
@@ -58,13 +60,13 @@ namespace abc { namespace vmem {
         page(vmem::pool* pool, diag::log_ostream* log = nullptr);
 
         /**
-         * @brief          Constructor.
-         * @details        Maps and locks a specific page.
-         * @param pool     Pointer to a pool instance.
-         * @param page_pos Page position. If `page_pos_nil`, a free/new page is mapped.
-         * @param log      Pointer to a `log_ostream` instance.
+         * @brief      Constructor.
+         * @details    Maps and locks a specific page.
+         * @param pool Pointer to a pool instance.
+         * @param pos  Page position. If `page_pos_nil`, a free/new page is mapped.
+         * @param log  Pointer to a `log_ostream` instance.
          */
-        page(vmem::pool* pool, page_pos_t page_pos, diag::log_ostream* log = nullptr);
+        page(vmem::pool* pool, page_pos_t pos, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -90,8 +92,8 @@ namespace abc { namespace vmem {
         ~page() noexcept;
 
     public:
-        page& operator =(const page& other) noexcept;
         page& operator =(page&& other) noexcept;
+        page& operator =(const page& other) noexcept;
 
     public:
         /**
@@ -131,7 +133,7 @@ namespace abc { namespace vmem {
          * @brief  Tries to allocate a pool page for this instance.
          * @return `true` = success; `false` = error.
          */
-        bool try_alloc() noexcept;
+        bool try_alloc() noexcept; //// TODO: Is this needed?
 
         /**
          * @brief   Locks this page in memory.
@@ -146,7 +148,7 @@ namespace abc { namespace vmem {
          *          A page may be called multiple times. It gets unlocked after the lock count goes down to `0`.
          * @return  `true` = success; `false` = error.
          */
-        bool try_lock() noexcept;
+        bool try_lock() noexcept; //// TODO: Is this needed?
 
         /**
          * @brief   Unlocks this page.
