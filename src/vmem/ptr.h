@@ -33,98 +33,98 @@ SOFTWARE.
 
 namespace abc { namespace vmem {
 
-	template <typename T>
-	inline ptr<T>::ptr(vmem::pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log)
-		: diag_base(abc::copy(_origin), log)
+    template <typename T>
+    inline ptr<T>::ptr(vmem::pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log)
+        : diag_base(abc::copy(_origin), log)
         , _page(page_pos != page_pos_nil ? page(pool, page_pos, log) : page(nullptr))
-		, _byte_pos(byte_pos) {
+        , _byte_pos(byte_pos) {
 
         constexpr const char* suborigin = "ptr()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=%lu, byte_pos=%u, page_ptr=%p", _page.pool(), (unsigned long)_page.pos(), _byte_pos, page.ptr());
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-	}
+    }
 
 
-	template <typename T>
-	inline ptr<T>::ptr(std::nullptr_t, diag::log_ostream* log) noexcept
-		: ptr<T>(nullptr, page_pos_nil, item_pos_nil, log) {
-	}
+    template <typename T>
+    inline ptr<T>::ptr(std::nullptr_t, diag::log_ostream* log) noexcept
+        : ptr<T>(nullptr, page_pos_nil, item_pos_nil, log) {
+    }
 
 
-	template <typename T>
-	inline vmem::pool* ptr<T>::pool() const noexcept {
-		return _page.pool();
-	}
+    template <typename T>
+    inline vmem::pool* ptr<T>::pool() const noexcept {
+        return _page.pool();
+    }
 
 
-	template <typename T>
-	inline page_pos_t ptr<T>::page_pos() const noexcept {
-		return _page.pos();
-	}
+    template <typename T>
+    inline page_pos_t ptr<T>::page_pos() const noexcept {
+        return _page.pos();
+    }
 
 
-	template <typename T>
-	inline item_pos_t ptr<T>::byte_pos() const noexcept {
-		return _byte_pos;
-	}
+    template <typename T>
+    inline item_pos_t ptr<T>::byte_pos() const noexcept {
+        return _byte_pos;
+    }
 
 
-	template <typename T>
-	inline ptr<T>::operator T*() noexcept {
-		return p();
-	}
+    template <typename T>
+    inline ptr<T>::operator T*() noexcept {
+        return p();
+    }
 
 
-	template <typename T>
-	inline ptr<T>::operator const T*() const noexcept {
-		return p();
-	}
+    template <typename T>
+    inline ptr<T>::operator const T*() const noexcept {
+        return p();
+    }
 
 
-	template <typename T>
-	inline T* ptr<T>::operator ->() noexcept {
-		return p();
-	}
+    template <typename T>
+    inline T* ptr<T>::operator ->() noexcept {
+        return p();
+    }
 
 
-	template <typename T>
-	inline const T* ptr<T>::operator ->() const noexcept {
-		return p();
-	}
+    template <typename T>
+    inline const T* ptr<T>::operator ->() const noexcept {
+        return p();
+    }
 
 
-	template <typename T>
-	inline T& ptr<T>::operator *() {
-		return deref();
-	}
+    template <typename T>
+    inline T& ptr<T>::operator *() {
+        return deref();
+    }
 
 
-	template <typename T>
-	inline const T& ptr<T>::operator *() const {
-		return deref();
-	}
+    template <typename T>
+    inline const T& ptr<T>::operator *() const {
+        return deref();
+    }
 
 
-	template <typename T>
-	inline T* ptr<T>::p() const noexcept {
-		const char* page_ptr = reinterpret_cast<const char*>(_page.ptr());
+    template <typename T>
+    inline T* ptr<T>::p() const noexcept {
+        const char* page_ptr = reinterpret_cast<const char*>(_page.ptr());
 
-		if (page_ptr == nullptr || _byte_pos == item_pos_nil) {
-			return nullptr;
-		}
+        if (page_ptr == nullptr || _byte_pos == item_pos_nil) {
+            return nullptr;
+        }
 
-		return const_cast<T*>(reinterpret_cast<const T*>(page_ptr + _byte_pos));
-	}
+        return const_cast<T*>(reinterpret_cast<const T*>(page_ptr + _byte_pos));
+    }
 
 
-	template <typename T>
-	inline T& ptr<T>::deref() const {
-		T* p = p();
+    template <typename T>
+    inline T& ptr<T>::deref() const {
+        T* p = p();
 
         diag_base::expect(suborigin, p != nullptr, 0x103b5, "p != nullptr");
 
-		return *p;
-	}
+        return *p;
+    }
 
 } }

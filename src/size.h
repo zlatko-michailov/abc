@@ -35,8 +35,9 @@ namespace abc {
      * @brief Named constants that can be used anywhere `std::size_t` is expected.
      */
     namespace size {
-        constexpr std::size_t invalid = SIZE_MAX;
-        constexpr std::size_t strlen  = invalid;
+        constexpr std::size_t max     = SIZE_MAX;
+        constexpr std::size_t invalid = max;
+        constexpr std::size_t strlen  = max;
 
         constexpr std::size_t _8   =   8;
         constexpr std::size_t _16  =  16;

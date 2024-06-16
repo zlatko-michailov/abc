@@ -39,12 +39,12 @@ namespace abc { namespace vmem {
     using count_t    = std::uint32_t;
 
 
-    constexpr std::size_t page_size        = size::k4;
-    constexpr page_pos_t  page_pos_root    = 0;
-    constexpr page_pos_t  page_pos_start   = 1;
-    constexpr page_pos_t  page_pos_nil     = static_cast<page_pos_t>(ULLONG_MAX);
-    constexpr item_pos_t  item_pos_nil     = static_cast<item_pos_t>(USHRT_MAX);
-    constexpr std::size_t min_mapped_pages = 3;
+    constexpr std::size_t page_size             = size::k4;
+    constexpr page_pos_t  page_pos_root         = 0;
+    constexpr page_pos_t  page_pos_start        = 1;
+    constexpr page_pos_t  page_pos_nil          = static_cast<page_pos_t>(ULLONG_MAX);
+    constexpr item_pos_t  item_pos_nil          = static_cast<item_pos_t>(USHRT_MAX);
+    constexpr std::size_t min_mapped_page_count = 3;
 
 
     // --------------------------------------------------------------
