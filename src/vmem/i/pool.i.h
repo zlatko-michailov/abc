@@ -25,8 +25,9 @@ SOFTWARE.
 
 #pragma once
 
-#include <deque>
+#include <unordered_map>
 
+#include "../../size.h"
 #include "../../diag/i/diag_ready.i.h"
 #include "page.i.h"
 
@@ -50,14 +51,18 @@ namespace abc { namespace vmem {
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
+        using mapped_pages_container = std::unordered_map<page_pos_t, mapped_page>;
+
+        static constexpr const char* _origin = "abc::vmem::pool";
 
     public:
         /**
-         * @brief           Constructor.
-         * @param file_path Path to the pool file.
-         * @param log       Pointer to a `log_ostream` instance.
+         * @brief                       Constructor.
+         * @param file_path             Path to the pool file.
+         * @param max_mapped_page_count Maximum number of mapped pages at the same time.
+         * @param log                   Pointer to a `log_ostream` instance.
          */
-        pool(const char* file_path, diag::log_ostream* log = nullptr);
+        pool(const char* file_path, std::size_t max_mapped_page_count = size::max, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -121,12 +126,6 @@ namespace abc { namespace vmem {
     // Constructor helpers
     private:
         /**
-         * @brief           Verifies arguments before opening the pool file. Throws on error.
-         * @param file_path Pool file path.
-         */
-        void verify_args(const char* file_path); //// TODo: REMOVE
-
-        /**
          * @brief           Opens the pool file, and verifies its essential pages. An empty file is acceptable.
          * @param file_path Pool file path.
          * @return          `true` = the pool file is already initialized; `false` = the pool file needs initialization.
@@ -170,13 +169,13 @@ namespace abc { namespace vmem {
          * @brief  Pops a free page from the pool's list of free pages, and returns its position.
          * @return The position of the popped page.
          */
-        page_pos_t pop_free_page();
+        page_pos_t pop_free_page_pos();
 
         /**
          * @brief          Pushes a page to the pool's list of free pages.
          * @param page_pos Page position.
          */
-        void push_free_page(page_pos_t page_pos);
+        void push_free_page_pos(page_pos_t page_pos);
 
         /**
          * @brief  Unconditionally creates a new page on the pool file, and returns its position.
@@ -287,11 +286,12 @@ namespace abc { namespace vmem {
         void log_stats() noexcept;
 
     private:
-        bool                    _ready;
-        int                     _fd;
-        std::size_t             _mapped_page_count;
-        std::deque<mapped_page> _mapped_pages;
-        pool_stats              _pool_stats;
+        bool                   _ready;
+        int                    _fd;
+        const std::size_t      _max_mapped_page_count;
+        std::size_t            _mapped_page_count;
+        mapped_pages_container _mapped_pages;
+        pool_stats             _stats;
     };
 
 
