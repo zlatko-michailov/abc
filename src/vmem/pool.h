@@ -266,8 +266,8 @@ namespace abc { namespace vmem {
         vmem::page page(this, page_pos_root, diag_base::log());
         diag_base::ensure(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
 
-        root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
-        linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
+        vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
+        vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
 
         if (!free_pages_linked.empty()) {
             diag_base::put_any(suborigin, diag::severity::optional, 0x10393, "!empty");
@@ -284,61 +284,35 @@ namespace abc { namespace vmem {
     }
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline void pool<MaxMappedPages, Log>::push_free_page_pos(page_pos_t page_pos) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104b5, "pool::push_free_page_pos() Start. page_pos=0x%llx", (long long)page_pos);
-        }
+    inline void pool::push_free_page_pos(page_pos_t page_pos) {
+        constexpr const char* suborigin = "push_free_page_pos()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104b5, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
-        page<Pool, Log> page(this, page_pos_root, _log);
+        vmem:page page(this, page_pos_root, _log);
+        diag_base::ensure(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
 
-        if (page.ptr() == nullptr) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::warning, 0x1039a, "pool::push_free_page_pos() Could not add to free_pages");
-            }
-        }
-        else {
-            root_page* root_page = reinterpret_cast<root_page*>(page.ptr());
+        vmem::root_page* root_page = reinterpret_cast<root_page*>(page.ptr());
+        vmem::linked free_pages_linked(&root_page->free_pages, this, _log);
 
-            linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
+        free_pages_linked.push_back(page_pos);
 
-            free_pages_linked.push_back(page_pos);
-        }
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104b6, "pool::push_free_page_pos() Done. page_pos=0x%llx", (long long)page_pos);
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104b6, "End:");
     }
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline page_pos_t pool<MaxMappedPages, Log>::create_page() noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104b7, "pool::create_page() Start");
-        }
+    inline page_pos_t pool::create_page() {
+        constexpr const char* suborigin = "create_page()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104b7, "Begin:");
 
         page_pos_t page_off = lseek(_fd, 0, SEEK_END);
         page_pos_t page_pos = page_off / page_size;
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10397, "pool::create_page() pos=0x%llx off=0x%llx",
-                (long long)page_pos, (long long)page_off);
-        }
+        diag_base::put_any(suborigin, diag::severity::optional,  0x10397, "pos=0x%llx off=0x%llx", (unsigned long long)page_pos, (unsigned long long)page_off);
 
         std::uint8_t blank_page[page_size] = { };
         ssize_t wb = write(_fd, blank_page, page_size);
+        diag_base::ensure(suborigin, wb == page_size, 0x10398, "wb == page_size, wb=%l, errno=%d", (long)wb, errno);
 
-        if (wb != page_size) {
-            page_pos = page_pos_nil;
-
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x10398, "pool::create_page() wb=%l, errno=%d", (long)wb, errno);
-            }
-        }
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104b8, "pool::create_page() Done. page_pos=0x%llx", (long long)page_pos);
-        }
+        diag_base::put_any(suborigin, diag::severity::callback, 0x104b8, "End: page_pos=0x%llx", (unsigned long long)page_pos);
 
         return page_pos;
     }
