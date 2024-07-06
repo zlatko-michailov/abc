@@ -34,6 +34,65 @@ SOFTWARE.
 
 namespace abc { namespace vmem {
 
+    /**
+     * @brief `pool` settings.
+     */
+    struct pool_config {
+
+        /**
+         * @brief                              Constructor. Properties can only be set at construction.
+         * @param file_path                    Path to the pool file.
+         * @param max_mapped_page_count        Maximum number of mapped pages at the same time. Default: `abc::size::max`, i.e. no limit.
+         * @param sync_pages_on_unlock         When `true`, pages get synced to disk when their lock count drops to `0`. Default: `false`.
+         * @param sync_locked_pages_on_destroy When `true`, locked pages get synced to disk when the pool is destroyed. Default: `false`.
+         */
+        pool_config(const char* file_path, int max_mapped_page_count = size::max, bool sync_pages_on_unlock = false, bool sync_locked_pages_on_destroy = false);
+
+        /**
+         * @brief Path to the pool file.
+         */
+        const std::string file_path;
+
+        /**
+         * @brief   Maximum number of mapped pages at the same time.
+         * @details Limits the maximum physical memory the pool can use.
+         */
+        const int max_mapped_page_count;
+
+        /**
+         * @brief   When `true`, pages get synced to disk when their lock count drops to `0`. Otherwise, pages get synced to disk only when unmapped.
+         * @details `true` improves performance at the risk of losing data in case of a process crash.
+         */
+        const bool sync_pages_on_unlock;
+
+        /**
+         * @brief   When `true`, locked pages get synced to disk when the pool is destroyed.
+         * @details Having locked pages when the pool is destroyed is a program error. Either way could lead to a loss of data integrity.
+         */
+        const bool sync_locked_pages_on_destroy;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Pool performance stats.
+     */
+    struct pool_stats {
+        count_t map_hit_count;
+        count_t map_miss_count;
+
+        count_t locked_page_count;
+        count_t locked_page_keep_count;
+
+        count_t unlocked_page_count;
+        count_t unlocked_page_keep_count;
+
+        count_t make_capacity_count;
+    };
+
+
     // --------------------------------------------------------------
 
 
@@ -51,18 +110,17 @@ namespace abc { namespace vmem {
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
-        using mapped_pages_container = std::unordered_map<page_pos_t, mapped_page>;
+        using mapped_page_container = std::unordered_map<page_pos_t, mapped_page>;
 
         static constexpr const char* _origin = "abc::vmem::pool";
 
     public:
         /**
-         * @brief                       Constructor.
-         * @param file_path             Path to the pool file.
-         * @param max_mapped_page_count Maximum number of mapped pages at the same time.
-         * @param log                   Pointer to a `log_ostream` instance.
+         * @brief        Constructor.
+         * @param config `pool_config` instance
+         * @param log    Pointer to a `log_ostream` instance.
          */
-        pool(const char* file_path, std::size_t max_mapped_page_count = size::max, diag::log_ostream* log = nullptr);
+        pool(pool_config&& config, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -126,11 +184,10 @@ namespace abc { namespace vmem {
     // Constructor helpers
     private:
         /**
-         * @brief           Opens the pool file, and verifies its essential pages. An empty file is acceptable.
-         * @param file_path Pool file path.
-         * @return          `true` = the pool file is already initialized; `false` = the pool file needs initialization.
+         * @brief  Opens the pool file, and verifies its essential pages. An empty file is acceptable.
+         * @return `true` = the pool file is already initialized; `false` = the pool file needs initialization.
          */
-        bool open(const char* file_path);
+        bool open();
 
         /**
          * @brief Initializes an empty pool file.
@@ -187,38 +244,31 @@ namespace abc { namespace vmem {
     // lock_page() / unlock_page() helpers
     private:
         /**
-         * @brief          Tries to find a mapped page.
+         * @brief          Ensures a page is mapped in memory
+         * @details        If the page is already mapped, it simply returns a pointer to the entry.
+         *                 Does not modify the lock count of the page.
          * @param page_pos Page position.
-         * @return         The position of the page on the array of mapped pages if found; `size::invalid` if not found. 
+         * @return         Pointer to the `mapped_page` entry.
          */
-        std::size_t find_mapped_page(page_pos_t page_pos) noexcept;
+        vmem::mapped_page* map_page(page_pos_t page_pos);
 
         /**
-         * @brief Checks whether there is capacity for at least one more page on the array of mapped pages.
+         * @brief                 Unconditionally unmaps a mapped page.
+         * @param mapped_page_itr Iterator on the mapped pages container.
          */
-        bool has_mapping_capacity() noexcept;
+        void unmap_page(const mapped_page_container::iterator& mapped_page_itr);
 
         /**
-         * @brief   Unmaps unlocked mapped pages.
-         * @details First tries to unmap unlocked mapped pages with a keep count below the current average.
-         *          If no page gets unmapped, tries to unmap all unlocked mapped pages.
-         * @return  The count pages that have been unmapped.
+         * @brief Ensures that `_mapped_page_count` is less than `_max_mapped_page_count`, so that a new page can be mapped.
          */
-        std::size_t make_mapping_capacity();
-
-        /**
-         * @brief                Unmaps unlocked mapped pages with a keep count below the given minimum.
-         * @param min_keep_count Minimum keep count for an unlocked mapped page to be kept.
-         * @return               The count of pages that have been unmapped.
-         */
-        std::size_t make_mapping_capacity(count_t min_keep_count);
+        void ensure_mapping_capacity();
 
         /**
          * @brief                Checks weather an unlocked mapped page meets the required minimum keep count.
          * @param i              Position on the array of mapped pages.
          * @param min_keep_count Minimum keep count.
          */
-        bool should_keep_mapped_page(std::size_t i, count_t min_keep_count) noexcept;
+        bool should_keep_mapped_page(std::size_t i, count_t min_keep_count) noexcept; //// TODO: Remove
 
         /**
          * @brief                Keeps an unlocked mapped page.
@@ -229,7 +279,7 @@ namespace abc { namespace vmem {
          * @param min_keep_count Minimum keep count.
          * @param empty_i        Input/output. The lowest position of an empty item on the array of mapped pages.
          */
-        void keep_mapped_page(std::size_t i, count_t min_keep_count, std::size_t& empty_i);
+        void keep_mapped_page(std::size_t i, count_t min_keep_count, std::size_t& empty_i); //// TODO: Remove
 
         /**
          * @brief                Unconditionally unmaps a mapped page.
@@ -238,7 +288,7 @@ namespace abc { namespace vmem {
          * @param empty_i        Output. If this is the first unmapped page, this argument is set to `i`.
          * @param unmapped_count Input/output. Current count of unmapped pages. This counter gets incremented once.
          */
-        void unmap_mapped_page(std::size_t i, count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count);
+        void unmap_mapped_page(std::size_t i, count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count); //// TODO: Remove
 
         /**
          * @brief   Locks a mapped page, and returns a pointer to the page's content.
@@ -246,7 +296,7 @@ namespace abc { namespace vmem {
          * @param i Position on the array of mapped pages.
          * @return  Pointer to the beginning of the page.
          */
-        void* lock_mapped_page(std::size_t i) noexcept;
+        void* lock_mapped_page(std::size_t i) noexcept; //// TODO: Remove
 
         /**
          * @brief   Unlocks a mapped page.
@@ -254,7 +304,7 @@ namespace abc { namespace vmem {
          *          If the lock count becomes zero, i.e. if all locks have been released, the page is synced to the file.
          * @param i Position on the array of mapped pages.
          */
-        void unlock_mapped_page(std::size_t i);
+        void unlock_mapped_page(std::size_t i); //// TODO: Remove
 
         /**
          * @brief          Maps and locks a page in memory.
@@ -262,7 +312,7 @@ namespace abc { namespace vmem {
          * @param page_pos Page position.
          * @return         Pointer to the beginning of the page.
          */
-        void* map_new_page(std::size_t i, page_pos_t page_pos);
+        void* map_new_page(std::size_t i, page_pos_t page_pos); //// TODO: Remove
 
         /**
          * @brief   Swaps a mapped page with another one that has a lower position on the array of mapped pages and a lower keep count.
@@ -286,12 +336,30 @@ namespace abc { namespace vmem {
         void log_stats() noexcept;
 
     private:
-        bool                   _ready;
-        int                    _fd;
-        const std::size_t      _max_mapped_page_count;
-        std::size_t            _mapped_page_count;
-        mapped_pages_container _mapped_pages;
-        pool_stats             _stats;
+        /**
+         * @brief The config settings passed in to the constructor.
+         */
+        pool_config _config;
+
+        /**
+         * @brief Whether this instance is properly initialized.
+         */
+        bool _ready;
+
+        /**
+         * @brief Descriptor of the pool file.
+         */
+        int _fd;
+
+        /**
+         * @brief Mapped page container.
+         */
+        mapped_page_container _mapped_pages;
+
+        /**
+         * @brief Perf stats.
+         */
+        pool_stats _stats;
     };
 
 

@@ -34,28 +34,27 @@ SOFTWARE.
 
 #include "../diag/diag_ready.h"
 #include "page.h"
-#include "linked.h"
+//// TODO: #include "linked.h"
 #include "i/layout.i.h"
 #include "i/pool.i.h"
 
 
 namespace abc { namespace vmem {
 
-    inline pool::pool(const char* file_path, std::size_t max_mapped_page_count = size::max, diag::log_ostream* log)
+    inline pool::pool(pool_config&& config, diag::log_ostream* log)
         : diag_base(abc::copy(_origin), log)
+        , _config(std::move(config))
         , _ready(false)
-        , _max_mapped_page_count(max_mapped_page_count)
-        , _mapped_page_count(0)
+        , _fd(-1)
         , _mapped_pages{ }
         , _stats{ } {
 
         constexpr const char* suborigin = "pool()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: file_path='%s', max_mapped_page_count=%zu", file_path, max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: file_path='%s', max_mapped_page_count=%zu", _config.file_path.c_str(), _config.max_mapped_page_count);
 
-        diag_base::expect(suborigin, file_path != nullptr, __TAG__, "file_path != nullptr");
-        diag_base::expect(suborigin, min_mapped_page_count < max_mapped_page_count, __TAG__, "min_mapped_page_count < max_mapped_page_count");
+        diag_base::expect(suborigin, !_config.file_path.empty(), __TAG__, "!_config.file_path.empty()");
 
-        bool is_init = open(file_path);
+        bool is_init = open();
 
         if (!is_init) {
             init();
@@ -70,19 +69,17 @@ namespace abc { namespace vmem {
 
     inline pool::pool(pool&& other) noexcept 
         : diag_base(other)
+        , _config(std::move(other._config))
         , _ready(other._ready)
         , _fd(other._fd)
-        , _max_mapped_page_count(other._max_mapped_page_count)
-        , _mapped_page_count(other._mapped_page_count)
         , _mapped_pages(std::move(other._mapped_pages))
         , _stats(std::move(other._stats)) {
 
         constexpr const char* suborigin = "pool(move)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
 
         other._ready = false;
         other._fd = -1;
-        other._mapped_page_count = 0;
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -90,16 +87,13 @@ namespace abc { namespace vmem {
 
     inline pool::~pool() noexcept {
         constexpr const char* suborigin = "~pool()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
 
         if (_ready) {
             if (_fd >= 0) {
-                for (std::size_t i = 0; i < _mapped_page_count; i++) {
-                    std::size_t dummy_unmapped_count = 0;
-                    std::size_t dummy_empty_i = _mapped_page_count;
-
-                    diag_base::put_any(suborigin, diag::severity::optional, 0x10712, "Unmapping page i=%zu", i);
-                    unmap_mapped_page(i, _mapped_pages[i].keep_count + 1, dummy_empty_i, dummy_unmapped_count); //// TODO: Unmap all pages?
+                // Unmap all mapped pages.
+                while (!_mapped_pages.empty()) {
+                    unmap_page(_mapped_pages.begin());
                 }
 
                 diag_base::put_any(suborigin, diag::severity::optional, 0x10713, "Close file fd=%d", _fd);
@@ -112,17 +106,16 @@ namespace abc { namespace vmem {
 
         _ready = false;
         _fd = -1;
-        _mapped_page_count = 0;
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    inline bool pool::open(const char* file_path) {
+    inline bool pool::open() {
         constexpr const char* suborigin = "open()";
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x1037c, "Begin: file_path='%s'", file_path);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1037c, "Begin: file_path='%s'", _config.file_path.c_str());
 
-        _fd = ::open(file_path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+        _fd = ::open(_config.file_path.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         diag_base::ensure(suborigin, _fd >= 0, 0x1037e, "_fd >= 0, errno=%d", errno);
 
         page_pos_t file_size = ::lseek(_fd, 0, SEEK_END);
@@ -197,16 +190,16 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10387, "Begin:");
 
         vmem::page page(this, page_pos_root, diag_base::log());
-        diag_base::ensure(suborigin, page.ptr() != nullptr, 0x10388, "page.ptr() != nullptr");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10388, "page.ptr() != nullptr");
 
         vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
         diag_base::put_any(suborigin, diag::severity::debug, 0x10389, "Root page: pos=0x%llx, ptr=%p, version=%u, signature='%s', page_size=%u",
                 (unsigned long long)page.pos(), page.ptr(), root_page->version, root_page->signature, (unsigned)root_page->page_size);
 
         vmem::root_page root_page_layout;
-        diag_base::ensure(suborigin, root_page->version == root_page_layout.version, 0x1038a, "root_page->version == root_page_layout.version");
-        diag_base::ensure(suborigin, std::strcmp(root_page->signature, root_page_layout.signature) == 0, 0x1038b, "std::strcmp(root_page->signature, root_page_layout.signature) == 0");
-        diag_base::ensure(suborigin, root_page->page_size == page_size, 0x1038c, "root_page->page_size == page_size");
+        diag_base::expect(suborigin, root_page->version == root_page_layout.version, 0x1038a, "root_page->version == root_page_layout.version");
+        diag_base::expect(suborigin, std::strcmp(root_page->signature, root_page_layout.signature) == 0, 0x1038b, "std::strcmp(root_page->signature, root_page_layout.signature) == 0");
+        diag_base::expect(suborigin, root_page->page_size == page_size, 0x1038c, "root_page->page_size == page_size");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104af, "End:");
     }
@@ -217,7 +210,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1038d, "Begin:");
 
         vmem::page page(this, page_pos_start, diag_base::log());
-        diag_base::ensure(suborigin, page.ptr() != nullptr, 0x1038e, "page.ptr() != nullptr");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x1038e, "page.ptr() != nullptr");
 
         diag_base::put_any(suborigin, diag::severity::debug, 0x1038f, "Start page: pos=0x%llx, ptr=%p", (unsigned long long)page.pos(), page.ptr());
 
@@ -263,8 +256,11 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b3, "Begin:");
 
         page_pos_t page_pos = page_pos_nil;
+
+#if 0 //// TODO: Linked
+        // Get the root page to get the free pages linked state.
         vmem::page page(this, page_pos_root, diag_base::log());
-        diag_base::ensure(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
 
         vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
         vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
@@ -277,8 +273,9 @@ namespace abc { namespace vmem {
 
             diag_base::put_any(suborigin, diag::severity::optional, 0x10394, "page_pos=0x%llx", (unsigned long long)page_pos);
         }
+#endif
 
-        diag_base::put_any(suborigin, diag::severity::callback, 0x104b4, "End: page_pos=0x%llx", (unsigned long long)page_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104b4, "End: page_pos=0x%llx", (unsigned long long)page_pos);
 
         return page_pos;
     }
@@ -288,13 +285,16 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "push_free_page_pos()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b5, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
+#if 0 //// TODO: Linked
+        // Get the root page to get the free pages linked state.
         vmem:page page(this, page_pos_root, _log);
-        diag_base::ensure(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
 
         vmem::root_page* root_page = reinterpret_cast<root_page*>(page.ptr());
         vmem::linked free_pages_linked(&root_page->free_pages, this, _log);
 
         free_pages_linked.push_back(page_pos);
+#endif
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b6, "End:");
     }
@@ -312,7 +312,7 @@ namespace abc { namespace vmem {
         ssize_t wb = write(_fd, blank_page, page_size);
         diag_base::ensure(suborigin, wb == page_size, 0x10398, "wb == page_size, wb=%l, errno=%d", (long)wb, errno);
 
-        diag_base::put_any(suborigin, diag::severity::callback, 0x104b8, "End: page_pos=0x%llx", (unsigned long long)page_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104b8, "End: page_pos=0x%llx", (unsigned long long)page_pos);
 
         return page_pos;
     }
@@ -321,199 +321,135 @@ namespace abc { namespace vmem {
     // ..............................................................
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline void* pool<MaxMappedPages, Log>::lock_page(page_pos_t page_pos) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1039b, "pool::lock_page() Start. page_pos=0x%llx", (long long)page_pos);
+    inline void* pool::lock_page(page_pos_t page_pos) {
+        constexpr const char* suborigin = "lock_page()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1039b, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
+
+        vmem::mapped_page* mapped_page = map_page(page_pos);
+        diag_base::ensure(suborigin, mapped_page != nullptr, __TAG__, "mapped_page != nullptr");
+
+        if (mapped_page->lock_count == 0) {
+            //// TODO: Move lock_count and keep_count from unlocked to locked.
         }
 
-        std::size_t i;
-        bool is_found = find_mapped_page(page_pos, i);
+        mapped_page->lock_count++;
+        mapped_page->keep_count++;
 
-        if (!is_found) {
-            // The page is not mapped. We'll have to map it. We need capacity for that.
-            if (!has_mapping_capacity()) {
-                make_mapping_capacity();
-            }
+        log_stats();
 
-            if (has_mapping_capacity()) {
-                // There is capacity to map one more page.
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::abc::debug, 0x103a4, "pool::lock_page() Capacity _mapped_page_count=%zu", _mapped_page_count);
-                }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1039b, "Begin: lock_count=%u", (unsigned)mapped_page->lock_count);
 
-                i = _mapped_page_count;
-            }
-            else {
-                // All the maped pages are locked. We cannot find a slot for the new page.
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::warning, 0x103a5, "pool::lock_page() Insufficient capacity. MaxedMappedPages=%zu", MaxMappedPages);
-                }
+        return mapped_page->ptr;
+    }
 
-                return nullptr;
-            }
-        } // Not found
 
-        void* page_ptr = nullptr; 
+    inline void pool::unlock_page(page_pos_t page_pos) {
+        constexpr const char* suborigin = "unlock_page()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x103aa, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
-        if (i < _mapped_page_count) {
-            // The page is already mapped. Only re-lock it.
-            page_ptr = lock_mapped_page(i);
+        // The page must be mapped.
+        mapped_page_container::iterator mapped_page_itr = _mapped_pages.find(page_pos);
+        diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), 0x103ad, "mapped_page_itr != _mapped_pages.end()");
+
+        // The page's lock count must be strictly bigger than 0.
+        diag_base::expect(suborigin, mapped_page_itr->second.lock_count > 0, __TAG__, "mapped_page_itr->second.lock_count > 0");
+        mapped_page_itr->second.lock_count--;
+
+        if (mapped_page_itr->second.lock_count == 0) {
+            //// TODO: Move lock_count and keep_count from locked to unlocked.
+
+            // When all locks on a page are released, we sync the OS page.
+            int sn = msync(_mapped_pages[i].ptr, page_size, MS_ASYNC);
+            diag_base::ensure(suborigin, sn == 0, 0x103ab, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)page_pos, mapped_page_itr->second.ptr, sn, errno);
+        }
+
+        log_stats();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: lock_count=%u", (unsigned)mapped_page_itr->second.lock_count);
+    }
+
+
+    inline vmem::mapped_page* pool::map_page(page_pos_t page_pos) {
+        constexpr const char* suborigin = "map_page()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
+
+        mapped_page_container::iterator mapped_page_itr = _mapped_pages.find(page_pos);
+        if (mapped_page_itr != _mapped_pages.end()) {
+            // The page is already mapped.
+            _stats.map_hit_count++;
         }
         else {
-            // The page is not mapped. Map it. Then lock it.
-            page_ptr = map_new_page(i, page_pos);
+            // The page has to be mapped.
+            _stats.map_miss_count++;
+
+            // Make sure there is capacity.
+            ensure_mapping_capacity();
+            diag_base::expect(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, _mapped_page_count=%zu, _max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+
+            // Map the OS page.
+            off_t page_off = static_cast<off_t>(page_pos * vmem::page_size);
+            void* ptr = mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
+            diag_base::ensure(suborigin, ptr != MAP_FAILED, __TAG__, "ptr != MAP_FAILED, ptr=%p, errno=%d", ptr, errno);
+
+            // Init a mapped_page entry.
+            std::pair<page_pos_t, mapped_page> mapped_page_kvp;
+            mapped_page_kvp.first = page_pos;
+            mapped_page_kvp.second.pos = page_pos;
+            mapped_page_kvp.second.ptr = ptr;
+
+            std::pair<mapped_page_container::iterator, bool> inserted_mapped_page = _mapped_pages.insert(std::move(mapped_page_kvp));
+            diag_base::ensure(suborigin, inserted_mapped_page.second, __TAG__, "inserted_mapped_page.second");
+            mapped_page_itr = std::move(inserted_mapped_page.first);            
         }
 
-        // Optimization: Swap this page forward (once) to keep pages sorted by keep_count.
-        optimize_mapped_page(i);
+        diag_base::ensure(suborigin, &*mapped_page_itr != nullptr, __TAG__, "&*mapped_page_itr != nullptr");
 
-        log_totals();
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: mapped_page=%p", &*mapped_page_itr);
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x104b9, "pool::lock_page() Done. page_pos=0x%llx, ptr=%p", (long long)page_pos, page_ptr);
-        }
-
-        return page_ptr;
+        return &mapped_page_itr->second;
     }
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline bool pool<MaxMappedPages, Log>::unlock_page(page_pos_t page_pos) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x103aa, "pool::unlock_page() pos=0x%llx", (long long)page_pos);
-        }
+    inline void pool::unmap_page(const mapped_page_container::iterator& mapped_page_itr) {
+        constexpr const char* suborigin = "unmap_page()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x103a0, "Begin:");
 
-        _mapped_page_totals.unlock_count++;
+        diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
+        diag_base::expect(suborigin, mapped_page_itr->ptr != nullptr, __TAG__, "mapped_page_itr->ptr != nullptr");
 
-        std::size_t i;
-        bool is_found = find_mapped_page(page_pos, i);
+        //// TODO: sync the page according to config. 
 
-        if (is_found) {
-            unlock_mapped_page(i);
-        }
-        else {
-            // The page was not found. This is a logic error.
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::warning, 0x103ad, "pool::unlock_page() Trying to unlock a page that is not locked. page_pos=0x%llx",
-                    (long long)page_pos);
-            }
+        // Unmap the OS page.
+        int um = munmap(mapped_page_itr->ptr, page_size);
+        diag_base::ensure(suborigin, um == 0, __TAG__, "um == 0");
 
-            return false;
-        }
+        diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "pos=0x%llx, ptr=%p", (unsigned long long)mapped_page_itr->pos, mapped_page_itr->ptr);
 
-        log_totals();
+        // Remove the mapped page entry from the container.
+        _mapped_pages.erase(mapped_page_itr);
 
-        return true;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104c2, "End:");
     }
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline bool pool<MaxMappedPages, Log>::find_mapped_page(page_pos_t page_pos, std::size_t& i) noexcept {
-        bool is_found = false;
+    inline void pool::ensure_mapping_capacity() {
+        constexpr const char* suborigin = "ensure_mapping_capacity()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: count=%zu, max_count=%zu", _mapped_page_count, _max_mapped_page_count);
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104ba, "pool::find_mapped_page() Start. page_pos=0x%llx", (long long)page_pos);
+        diag_base::expect(_mapped_page_count <= _max_mapped_page_count, __TAG__, "_mapped_page_count < _max_mapped_page_count, _mapped_page_count=%zu, _max_mapped_page_count=%zu", _mapped_page_count, _max_mapped_page_count);
+
+        if (_mapped_page_count == _max_mapped_page_count) {
+            //// TODO: Free capacity
+            //// a) If the average keep count of unlocked pages is lower than the average keep count of locked pages => unmap such unlocked pages.
+            //// b) Unmap all unlocked pages.
         }
 
-        for (i = 0; i < _mapped_page_count; i++) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x104bb, "pool::find_mapped_page() Examine i=%zu pos=0x%llx, lock_count=%d, keep_count=%d, ptr=%p",
-                    i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].lock_count, (unsigned)_mapped_pages[i].keep_count, _mapped_pages[i].ptr);
-            }
+        diag_base::ensure(_mapped_page_count < _max_mapped_page_count, __TAG__, "_mapped_page_count < _max_mapped_page_count, _mapped_page_count=%zu, _max_mapped_page_count=%zu", _mapped_page_count, _max_mapped_page_count);
 
-            if (_mapped_pages[i].pos == page_pos) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::abc::debug, 0x104bc, "pool::find_mapped_page() Found i=%zu pos=0x%llx, lock_count=%d, keep_count=%d, ptr=%p",
-                        i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].lock_count, (unsigned)_mapped_pages[i].keep_count, _mapped_pages[i].ptr);
-                }
-
-                is_found = true;
-                break;
-            }
-        }
-
-        // Update the totals with the cost of this attempt.
-        _mapped_page_totals.check_count += i + 1;
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104bd, "pool::find_mapped_page() Done. page_pos=0x%llx, i=%zu", (long long)page_pos, i);
-        }
-
-        return is_found;
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: count=%zu, max_count=%zu", _mapped_page_count, _max_mapped_page_count);
     }
 
 
-    template <std::size_t MaxMappedPages, typename Log>
-    inline bool pool<MaxMappedPages, Log>::has_mapping_capacity() noexcept {
-        return _mapped_page_count < MaxMappedPages;
-    }
-
-
-    template <std::size_t MaxMappedPages, typename Log>
-    inline std::size_t pool<MaxMappedPages, Log>::make_mapping_capacity() noexcept {
-        // Record this run in the totals.
-        _mapped_page_totals.unmap_count++;
-
-        // Since this process is not cheap - it requires a scan of all the pages - we don't unmap a single page per run.
-        // Instead, we unmap as many pages that match a certain condition.  
-        // This is to avoid doing this process too frequently while still keeping frequently used pages mapped.
-        // To enforce some fairness, we subtract the min_keep_count from the keep_count of each page that will be kept.
-
-        // First try to unmap the pages with a keep_count below the average.
-        page_hit_count_t avg_keep_count = _mapped_page_totals.keep_count / _mapped_page_count;
-        std::size_t unmapped_count = make_mapping_capacity(avg_keep_count);
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104be, "pool::make_mapping_capacity() First attempt. unmapped_count=%zu", unmapped_count);
-        }
-
-        // If the attempt makes some capacity, we are done.
-        if (unmapped_count > 0) {
-            return unmapped_count;
-        }
-
-        // If the first attempt, doesn't make any capacity, we try to unmap all pages that are not locked.
-        avg_keep_count = _mapped_page_totals.keep_count  + 1;
-        unmapped_count = make_mapping_capacity(avg_keep_count);
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104bf, "pool::make_mapping_capacity() Second attempt. unmapped_count=%zu", unmapped_count);
-        }
-
-        return unmapped_count;
-    }
-
-
-    template <std::size_t MaxMappedPages, typename Log>
-    inline std::size_t pool<MaxMappedPages, Log>::make_mapping_capacity(page_hit_count_t min_keep_count) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x1039d, "pool::make_mapping_capacity() Start. min_keep_count=%u, mapped_page_count=%zu",
-                (unsigned)min_keep_count, _mapped_page_count);
-        }
-
-        std::size_t unmapped_count = 0;
-        std::size_t empty_i = MaxMappedPages;
-
-        for (std::size_t i = 0; i < _mapped_page_count; i++) {
-            if (should_keep_mapped_page(i, min_keep_count)) {
-                keep_mapped_page(i, min_keep_count, empty_i);
-            }
-            else {
-                unmap_mapped_page(i, min_keep_count, empty_i, unmapped_count);
-            }
-        }
-
-        // Update the mapped page count.
-        _mapped_page_count -= unmapped_count;
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104c0, "pool::make_mapping_capacity() Done. min_keep_count=%u, mapped_page_count=%zu, unmapped_count=%zu",
-                (unsigned)min_keep_count, _mapped_page_count, unmapped_count);
-        }
-
-        return unmapped_count;
-    }
 
 
     template <std::size_t MaxMappedPages, typename Log>
@@ -560,40 +496,6 @@ namespace abc { namespace vmem {
         if (_log != nullptr) {
             _log->put_any(category::abc::vmem, severity::abc::debug, 0x104c1, "pool::keep_mapped_page() Done. i=%zu, pos=0x%llx, keep_count=%u, min_keep_count=%u",
                 i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)min_keep_count);
-        }
-    }
-
-
-    template <std::size_t MaxMappedPages, typename Log>
-    inline void pool<MaxMappedPages, Log>::unmap_mapped_page(std::size_t i, page_hit_count_t min_keep_count, std::size_t& empty_i, std::size_t& unmapped_count) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x103a0, "pool::unmap_mapped_page() Start. i=%zu, pos=0x%llx, keep_count=%u, min_keep_count=%u",
-                i, (long long)_mapped_pages[i].pos, (unsigned)_mapped_pages[i].keep_count, (unsigned)min_keep_count);
-        }
-
-        // Unmap the OS page.
-        int um = munmap(_mapped_pages[i].ptr, page_size);
-        void* ptr = _mapped_pages[i].ptr;
-
-        // Zero out the slot.
-        _mapped_pages[i] = { };
-        _mapped_pages[i].ptr = nullptr;
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x103a1, "pool::unmap_mapped_page() Unmap. i=%zu, ptr=%p, um=%d, errno=%d", i, ptr, um, errno);
-        }
-
-        // If this is the first unmapped page, set empty_i.
-        if (unmapped_count++ == 0) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x103a2, "pool::unmap_mapped_page() First empty slot i=%zu", i);
-            }
-
-            empty_i = i;
-        }
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x104c2, "pool::unmap_mapped_page() Done. i=%zu", i);
         }
     }
 
@@ -748,6 +650,17 @@ namespace abc { namespace vmem {
         if (_log != nullptr) {
             _log->put_any(category::abc::vmem, severity::abc::optional, 0x104c5, "pool::clear_linked() Done.");
         }
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    pool_config::pool_config(const char* file_path, int max_mapped_page_count, bool sync_pages_on_unlock, bool sync_locked_pages_on_destroy)
+        : file_path(file_path)
+        , max_mapped_page_count(max_mapped_page_count)
+        , sync_pages_on_unlock(sync_pages_on_unlock)
+        , sync_locked_pages_on_destroy(sync_locked_pages_on_destroy) {
     }
 
 

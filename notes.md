@@ -18,10 +18,14 @@
 ## To Do
 - __UNTABIFY each file before making changes!__
 - `vmem`
-    - page.h
-    - ptr.h
-    - pool/h
-    - Remove util.h or merge it with the main util.h.
+    - pool
+        - To free capacity, unmap unlocked pages with a keep_count below the average keep_count of locked pages.
+        - Use a lock! (Minimize public surface.)
+    - Entities
+        - page.h
+        - ptr.h
+        - pool/h
+        - Remove util.h or merge it with the main util.h.
     - Samples
         - tictactoe
         - connect4

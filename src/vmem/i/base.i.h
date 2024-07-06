@@ -61,19 +61,6 @@ namespace abc { namespace vmem {
     };
 
 
-    /**
-     * @brief Performance counters of a vmem pool.
-     */
-    struct pool_stats {
-        count_t keep_count;
-        count_t hit_count;
-        count_t miss_count;
-        count_t unlock_count;
-        count_t check_count;
-        count_t unmap_count;
-    };
-
-
     // --------------------------------------------------------------
 
 } }
