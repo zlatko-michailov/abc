@@ -130,7 +130,7 @@ namespace abc { namespace diag {
     template <typename OriginStr>
     inline void diag_ready<OriginStr>::expectv(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
-            throw_exception<expect_error>(suborigin, tag, format, vlist);
+            throw_exceptionv<expect_error>(suborigin, tag, format, vlist);
         }
     }
 
@@ -149,7 +149,7 @@ namespace abc { namespace diag {
     template <typename OriginStr>
     inline void diag_ready<OriginStr>::ensurev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
-            throw_exception<ensure_error>(suborigin, tag, format, vlist);
+            throw_exceptionv<ensure_error>(suborigin, tag, format, vlist);
         }
     }
 
@@ -169,7 +169,7 @@ namespace abc { namespace diag {
     template <typename Exception>
     inline void diag_ready<OriginStr>::requirev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const {
         if (!condition) {
-            throw_exception<Exception>(suborigin, tag, format, vlist);
+            throw_exceptionv<Exception>(suborigin, tag, format, vlist);
         }
     }
 
