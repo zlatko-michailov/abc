@@ -197,7 +197,7 @@ namespace abc { namespace vmem {
     struct root_page {
         const version_t     version       = 3;
         const char          signature[10] = "abc::vmem";
-        const item_pos_t    page_size     = page_size;
+        const item_pos_t    page_size     = vmem::page_size;
         const std::uint16_t unused1       = 0xcccc;
         linked_state        free_pages;
         const std::uint8_t  unused2       = 0xcc;

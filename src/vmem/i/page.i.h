@@ -48,7 +48,8 @@ namespace abc { namespace vmem {
 
         using diag_base = diag::diag_ready<const char*>;
 
-        static constexpr const char* _origin = "abc::vmem::page";
+    private:
+        static constexpr const char* origin() noexcept;
 
     public:
         /**

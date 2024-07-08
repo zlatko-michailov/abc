@@ -32,6 +32,7 @@ SOFTWARE.
 #include <unistd.h>
 #include <cstring>
 
+#include "../util.h"
 #include "../diag/diag_ready.h"
 #include "page.h"
 //// TODO: #include "linked.h"
@@ -41,8 +42,13 @@ SOFTWARE.
 
 namespace abc { namespace vmem {
 
+    inline constexpr const char* pool::origin() noexcept {
+        return "abc::vmem::pool";
+    }
+
+
     inline pool::pool(pool_config&& config, diag::log_ostream* log)
-        : diag_base(abc::copy(_origin), log)
+        : diag_base(abc::copy(origin()), log)
         , _config(std::move(config))
         , _ready(false)
         , _fd(-1)
@@ -111,6 +117,11 @@ namespace abc { namespace vmem {
     }
 
 
+    inline const pool_config& pool::config() const noexcept {
+        return _config;
+    }
+
+
     inline bool pool::open() {
         constexpr const char* suborigin = "open()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1037c, "Begin: file_path='%s'", _config.file_path.c_str());
@@ -121,7 +132,7 @@ namespace abc { namespace vmem {
         page_pos_t file_size = ::lseek(_fd, 0, SEEK_END);
         diag_base::ensure(suborigin, (file_size & (page_size - 1)) == 0, 0x10380, "(file_size & (page_size - 1)) == 0");
 
-        bool is_init = (file_size > 0);
+        bool is_init = (file_size / page_size >= 2);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104ae, "End: is_init=%d, file_size=%llu", is_init, (unsigned long long)file_size);
 
@@ -402,7 +413,7 @@ namespace abc { namespace vmem {
             mapped_page_itr = std::move(inserted_mapped_page.first);            
         }
 
-        diag_base::ensure(suborigin, &*mapped_page_itr != nullptr, __TAG__, "&*mapped_page_itr != nullptr");
+        diag_base::ensure(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: mapped_page=%p", &*mapped_page_itr);
 
@@ -653,10 +664,15 @@ namespace abc { namespace vmem {
     }
 #endif
 
+
+    inline void pool::log_stats() noexcept {
+    }
+
+
     // --------------------------------------------------------------
 
 
-    pool_config::pool_config(const char* file_path, int max_mapped_page_count, bool sync_pages_on_unlock, bool sync_locked_pages_on_destroy)
+    inline pool_config::pool_config(const char* file_path, std::size_t max_mapped_page_count, bool sync_pages_on_unlock, bool sync_locked_pages_on_destroy)
         : file_path(file_path)
         , max_mapped_page_count(max_mapped_page_count)
         , sync_pages_on_unlock(sync_pages_on_unlock)

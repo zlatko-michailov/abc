@@ -175,7 +175,7 @@ build_test: build_product
 	$(CPP) $(CPP_OPTIONS) -o $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)/$(PROG_TEST) \
 		$(CURDIR)/$(SUBDIR_TEST)/main.cpp $(CURDIR)/$(SUBDIR_TEST)/ascii.cpp $(CURDIR)/$(SUBDIR_TEST)/timestamp.cpp $(CURDIR)/$(SUBDIR_TEST)/util.cpp $(CURDIR)/$(SUBDIR_TEST)/buffer_streambuf.cpp \
 		$(CURDIR)/$(SUBDIR_TEST)/multifile_streambuf.cpp $(CURDIR)/$(SUBDIR_TEST)/vector_streambuf.cpp $(CURDIR)/$(SUBDIR_TEST)/stream.cpp $(CURDIR)/$(SUBDIR_TEST)/table_stream.cpp \
-		$(CURDIR)/$(SUBDIR_TEST)/http.cpp $(CURDIR)/$(SUBDIR_TEST)/json.cpp $(CURDIR)/$(SUBDIR_TEST)/socket.cpp \
+		$(CURDIR)/$(SUBDIR_TEST)/http.cpp $(CURDIR)/$(SUBDIR_TEST)/json.cpp $(CURDIR)/$(SUBDIR_TEST)/socket.cpp $(CURDIR)/$(SUBDIR_TEST)/vmem.cpp \
 		$(CPP_LINK_OPTIONS)
 	cp $(CURDIR)/$(SUBDIR_TEST)/$(SUBDIR_RESOURCES)/*.pem $(CURDIR)/$(SUBDIR_OUT)/$(SUBDIR_TEST)
 	# ---------- Done building tests ----------

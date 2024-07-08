@@ -46,7 +46,7 @@ namespace abc { namespace vmem {
          * @param sync_pages_on_unlock         When `true`, pages get synced to disk when their lock count drops to `0`. Default: `false`.
          * @param sync_locked_pages_on_destroy When `true`, locked pages get synced to disk when the pool is destroyed. Default: `false`.
          */
-        pool_config(const char* file_path, int max_mapped_page_count = size::max, bool sync_pages_on_unlock = false, bool sync_locked_pages_on_destroy = false);
+        pool_config(const char* file_path, std::size_t max_mapped_page_count = size::max, bool sync_pages_on_unlock = false, bool sync_locked_pages_on_destroy = false);
 
         /**
          * @brief Path to the pool file.
@@ -57,7 +57,7 @@ namespace abc { namespace vmem {
          * @brief   Maximum number of mapped pages at the same time.
          * @details Limits the maximum physical memory the pool can use.
          */
-        const int max_mapped_page_count;
+        const std::size_t max_mapped_page_count;
 
         /**
          * @brief   When `true`, pages get synced to disk when their lock count drops to `0`. Otherwise, pages get synced to disk only when unmapped.
@@ -112,7 +112,8 @@ namespace abc { namespace vmem {
         using diag_base = diag::diag_ready<const char*>;
         using mapped_page_container = std::unordered_map<page_pos_t, mapped_page>;
 
-        static constexpr const char* _origin = "abc::vmem::pool";
+    private:
+        static constexpr const char* origin() noexcept;
 
     public:
         /**
@@ -136,6 +137,9 @@ namespace abc { namespace vmem {
          * @brief Destructor.
          */
         ~pool() noexcept;
+
+    public:
+        const pool_config& config() const noexcept;
 
     private:
         friend page;

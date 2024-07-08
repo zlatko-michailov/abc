@@ -25,39 +25,35 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/log.h"
-#include "../../src/vmem.h"
+#include "../../src/vmem/all.h"
 
 #include "test.h"
 
 
-namespace abc { namespace test { namespace vmem {
+bool test_vmem_pool_fit(test_context& context);
+bool test_vmem_pool_exceed(test_context& context);
+bool test_vmem_pool_reopen(test_context& context);
+bool test_vmem_pool_freepages(test_context& context);
 
-	bool test_vmem_pool_fit(test_context<abc::test::log>& context);
-	bool test_vmem_pool_exceed(test_context<abc::test::log>& context);
-	bool test_vmem_pool_reopen(test_context<abc::test::log>& context);
-	bool test_vmem_pool_freepages(test_context<abc::test::log>& context);
+bool test_vmem_linked_mixedone(test_context& context);
+bool test_vmem_linked_mixedmany(test_context& context);
+bool test_vmem_linked_splice(test_context& context);
+bool test_vmem_linked_clear(test_context& context);
 
-	bool test_vmem_linked_mixedone(test_context<abc::test::log>& context);
-	bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context);
-	bool test_vmem_linked_splice(test_context<abc::test::log>& context);
-	bool test_vmem_linked_clear(test_context<abc::test::log>& context);
+bool test_vmem_list_insert(test_context& context);
+bool test_vmem_list_insertmany(test_context& context);
+bool test_vmem_list_erase(test_context& context);
 
-	bool test_vmem_list_insert(test_context<abc::test::log>& context);
-	bool test_vmem_list_insertmany(test_context<abc::test::log>& context);
-	bool test_vmem_list_erase(test_context<abc::test::log>& context);
+bool test_vmem_temp_destructor(test_context& context);
 
-	bool test_vmem_temp_destructor(test_context<abc::test::log>& context);
+bool test_vmem_map_insert(test_context& context);
+bool test_vmem_map_insertmany(test_context& context);
+bool test_vmem_map_erase(test_context& context);
+bool test_vmem_map_clear(test_context& context);
 
-	bool test_vmem_map_insert(test_context<abc::test::log>& context);
-	bool test_vmem_map_insertmany(test_context<abc::test::log>& context);
-	bool test_vmem_map_erase(test_context<abc::test::log>& context);
-	bool test_vmem_map_clear(test_context<abc::test::log>& context);
+bool test_vmem_string_iterator(test_context& context);
+bool test_vmem_string_stream(test_context& context);
 
-	bool test_vmem_string_iterator(test_context<abc::test::log>& context);
-	bool test_vmem_string_stream(test_context<abc::test::log>& context);
-
-	bool test_vmem_pool_move(test_context<abc::test::log>& context);
-	bool test_vmem_page_move(test_context<abc::test::log>& context);
-}}}
+bool test_vmem_pool_move(test_context& context);
+bool test_vmem_page_move(test_context& context);
 

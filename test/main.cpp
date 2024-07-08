@@ -40,7 +40,7 @@ SOFTWARE.
 #include "inc/http.h"
 #include "inc/json.h"
 #include "inc/socket.h"
-//// TODO: #include "inc/vmem.h"
+#include "inc/vmem.h"
 
 
 int main(int /*argc*/, const char* argv[]) {
@@ -51,6 +51,7 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
+#if 0 //// TODO:
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -256,32 +257,31 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
-#if 0 //// TODO:
 #endif //// TODO:
-#if 0 //// TODO:
             { "vmem", {
-                { "test_vmem_pool_fit",                              abc::test::vmem::test_vmem_pool_fit },
-                { "test_vmem_pool_exceed",                           abc::test::vmem::test_vmem_pool_exceed },
-                { "test_vmem_pool_reopen",                           abc::test::vmem::test_vmem_pool_reopen },
-                { "test_vmem_pool_freepages",                        abc::test::vmem::test_vmem_pool_freepages },
-                { "test_vmem_linked_mixedone",                       abc::test::vmem::test_vmem_linked_mixedone },
-                { "test_vmem_linked_mixedmany",                      abc::test::vmem::test_vmem_linked_mixedmany },
-                { "test_vmem_linked_splice",                         abc::test::vmem::test_vmem_linked_splice },
-                { "test_vmem_linked_clear",                          abc::test::vmem::test_vmem_linked_clear },
-                { "test_vmem_list_insert",                           abc::test::vmem::test_vmem_list_insert },
-                { "test_vmem_list_insertmany",                       abc::test::vmem::test_vmem_list_insertmany },
-                { "test_vmem_list_erase",                            abc::test::vmem::test_vmem_list_erase },
-                { "test_vmem_temp_destructor",                       abc::test::vmem::test_vmem_temp_destructor },
-                { "test_vmem_map_insert",                            abc::test::vmem::test_vmem_map_insert },
-                { "test_vmem_map_insertmany",                        abc::test::vmem::test_vmem_map_insertmany },
-                { "test_vmem_map_erase",                             abc::test::vmem::test_vmem_map_erase },
-                { "test_vmem_map_clear",                             abc::test::vmem::test_vmem_map_clear },
-                { "test_vmem_string_iterator",                       abc::test::vmem::test_vmem_string_iterator },
-                { "test_vmem_string_stream",                         abc::test::vmem::test_vmem_string_stream },
-                { "test_vmem_pool_move",                             abc::test::vmem::test_vmem_pool_move },
-                { "test_vmem_page_move",                             abc::test::vmem::test_vmem_page_move },
-            } },
+                { "test_vmem_pool_fit",                              test_vmem_pool_fit },
+                { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
+#if 0 //// TODO:
+                { "test_vmem_pool_reopen",                           test_vmem_pool_reopen },
+                { "test_vmem_pool_freepages",                        test_vmem_pool_freepages },
+                { "test_vmem_linked_mixedone",                       test_vmem_linked_mixedone },
+                { "test_vmem_linked_mixedmany",                      test_vmem_linked_mixedmany },
+                { "test_vmem_linked_splice",                         test_vmem_linked_splice },
+                { "test_vmem_linked_clear",                          test_vmem_linked_clear },
+                { "test_vmem_list_insert",                           test_vmem_list_insert },
+                { "test_vmem_list_insertmany",                       test_vmem_list_insertmany },
+                { "test_vmem_list_erase",                            test_vmem_list_erase },
+                { "test_vmem_temp_destructor",                       test_vmem_temp_destructor },
+                { "test_vmem_map_insert",                            test_vmem_map_insert },
+                { "test_vmem_map_insertmany",                        test_vmem_map_insertmany },
+                { "test_vmem_map_erase",                             test_vmem_map_erase },
+                { "test_vmem_map_clear",                             test_vmem_map_clear },
+                { "test_vmem_string_iterator",                       test_vmem_string_iterator },
+                { "test_vmem_string_stream",                         test_vmem_string_stream },
+                { "test_vmem_pool_move",                             test_vmem_pool_move },
+                { "test_vmem_page_move",                             test_vmem_page_move },
 #endif
+            } },
         },
         &log,
         abc::test::seed::random,

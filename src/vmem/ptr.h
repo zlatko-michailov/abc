@@ -40,7 +40,7 @@ namespace abc { namespace vmem {
         , _byte_pos(byte_pos) {
 
         constexpr const char* suborigin = "ptr()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=%lu, byte_pos=%u, page_ptr=%p", _page.pool(), (unsigned long)_page.pos(), _byte_pos, page.ptr());
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=%llu, byte_pos=%u, page_ptr=%p", _page.pool(), (unsigned long long)_page.pos(), _byte_pos, _page.ptr());
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -120,6 +120,8 @@ namespace abc { namespace vmem {
 
     template <typename T>
     inline T& ptr<T>::deref() const {
+        constexpr const char* suborigin = "deref()";
+
         T* p = p();
 
         diag_base::expect(suborigin, p != nullptr, 0x103b5, "p != nullptr");
