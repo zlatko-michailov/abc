@@ -89,9 +89,9 @@ bool insert_linked_page(test_context<abc::test::log>& context, Pool* pool, abc::
 template <typename Pool>
 bool verify_linked_pages(test_context<abc::test::log>& context, Pool* pool, abc::vmem_linked<Pool, abc::test::log>& linked,
                         const std::pair<LinkedPageData, abc::vmem_linked_const_iterator<Pool, abc::test::log>> expected[], std::size_t expected_len);
-
-bool verify_bytes(test_context<abc::test::log>& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b, abc::tag_t tag);
 #endif
+
+bool verify_bytes(test_context& context, const void* buffer, std::size_t begin_pos, std::size_t end_pos, std::uint8_t b, abc::diag::tag_t tag);
 
 bool create_vmem_pool(test_context& context, abc::vmem::pool* pool, bool fit);
 
@@ -120,64 +120,65 @@ bool test_vmem_pool_exceed(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_pool_reopen(test_context<abc::test::log>& context) {
-    using Pool = PoolFit;
-
+bool test_vmem_pool_reopen(test_context& context) {
     bool passed = true;
 
     {
-        Pool pool("out/test/pool_reopen.vmem", context.log);
+        abc::vmem::pool_config config("out/test/pool_reopen.vmem", max_mapped_page_count_fit);
+        abc::vmem::pool pool(std::move(config), context.log());
+
         passed = create_vmem_pool(context, &pool, true) && passed;
     }
 
-    Pool pool("out/test/pool_reopen.vmem", context.log);
+    abc::vmem::pool_config config("out/test/pool_reopen.vmem", max_mapped_page_count_fit);
+    abc::vmem::pool pool(std::move(config), context.log());
 
     // Page 0 (root page)
     {
-        abc::vmem::page page(&pool, 0, context.log);
+        abc::vmem::page page(&pool, 0UL, context.log());
 
-        vmem_root_page expected;
-        int cmp = std::memcmp(&expected, page.ptr(), sizeof(vmem_root_page));
+        abc::vmem::root_page expected;
+        int cmp = std::memcmp(&expected, page.ptr(), sizeof(abc::vmem::root_page));
         passed = context.are_equal<int>(cmp, 0, 0x103bd, "%d") && passed;
 
-        passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00, 0x104c6) && passed;
+        passed = verify_bytes(context, page.ptr(), sizeof(abc::vmem::root_page), abc::vmem::page_size, 0x00, 0x104c6) && passed;
     }
 
     // Page 1 (start page)
     {
-        abc::vmem::page page(&pool, 1, context.log);
-        passed = verify_bytes(context, page.ptr(), sizeof(vmem_root_page), abc::vmem_page_size, 0x00, 0x104c7) && passed;
+        abc::vmem::page page(&pool, 1UL, context.log());
+        passed = verify_bytes(context, page.ptr(), sizeof(abc::vmem::root_page), abc::vmem::page_size, 0x00, 0x104c7) && passed;
     }
 
     // Page 2
     {
-        abc::vmem::page page(&pool, 2, context.log);
-        passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x22, 0x104c8) && passed;
+        abc::vmem::page page(&pool, 2UL, context.log());
+        passed = verify_bytes(context, page.ptr(), 0, abc::vmem::page_size, 0x22, 0x104c8) && passed;
     }
 
     // Page 3
     {
-        abc::vmem::page page(&pool, 3, context.log);
-        passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x33, 0x104c9) && passed;
+        abc::vmem::page page(&pool, 3UL, context.log());
+        passed = verify_bytes(context, page.ptr(), 0, abc::vmem::page_size, 0x33, 0x104c9) && passed;
     }
 
     // Page 4
     {
-        abc::vmem::page page(&pool, 4, context.log);
-        passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x44, 0x104ca) && passed;
+        abc::vmem::page page(&pool, 4UL, context.log());
+        passed = verify_bytes(context, page.ptr(), 0, abc::vmem::page_size, 0x44, 0x104ca) && passed;
     }
 
     // Page 5
     {
-        abc::vmem::page page(&pool, 5, context.log);
-        passed = verify_bytes(context, page.ptr(), 0, abc::vmem_page_size, 0x55, 0x104cb) && passed;
+        abc::vmem::page page(&pool, 5UL, context.log());
+        passed = verify_bytes(context, page.ptr(), 0, abc::vmem::page_size, 0x55, 0x104cb) && passed;
     }
 
     return passed;
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_pool_freepages(test_context<abc::test::log>& context) {
     using Pool = PoolFree;
 
