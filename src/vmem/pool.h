@@ -340,7 +340,12 @@ namespace abc { namespace vmem {
         diag_base::ensure(suborigin, mapped_page != nullptr, __TAG__, "mapped_page != nullptr");
 
         if (mapped_page->lock_count == 0) {
-            //// TODO: Move lock_count and keep_count from unlocked to locked.
+            // Move lock_count and keep_count from unlocked to locked.
+            _stats.unlocked_page_count--;
+            _stats.unlocked_page_keep_count -= mapped_page->keep_count;
+
+            _stats.locked_page_count++;
+            _stats.locked_page_keep_count += mapped_page->keep_count;
         }
 
         mapped_page->lock_count++;
@@ -367,11 +372,18 @@ namespace abc { namespace vmem {
         mapped_page_itr->second.lock_count--;
 
         if (mapped_page_itr->second.lock_count == 0) {
-            //// TODO: Move lock_count and keep_count from locked to unlocked.
+            // Move lock_count and keep_count from locked to unlocked.
+            _stats.locked_page_count--;
+            _stats.locked_page_keep_count -= mapped_page_itr->second.keep_count;
 
-            // When all locks on a page are released, we sync the OS page.
-            int sn = msync(mapped_page_itr->second.ptr, page_size, MS_ASYNC);
-            diag_base::ensure(suborigin, sn == 0, 0x103ab, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)page_pos, mapped_page_itr->second.ptr, sn, errno);
+            _stats.unlocked_page_count++;
+            _stats.unlocked_page_keep_count += mapped_page_itr->second.keep_count;
+
+            if (_config.sync_pages_on_unlock) {
+                // Sync the OS page.
+                int sn = msync(mapped_page_itr->second.ptr, page_size, MS_ASYNC);
+                diag_base::ensure(suborigin, sn == 0, 0x103ab, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)page_pos, mapped_page_itr->second.ptr, sn, errno);
+            }
         }
 
         log_stats();
@@ -428,7 +440,11 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
         diag_base::expect(suborigin, mapped_page_itr->second.ptr != nullptr, __TAG__, "mapped_page_itr->second.ptr != nullptr");
 
-        //// TODO: sync the page according to config. 
+        if (_config.sync_locked_pages_on_destroy) {
+            // Sync the OS page. 
+            int sn = msync(mapped_page_itr->second.ptr, page_size, MS_ASYNC);
+            diag_base::ensure(suborigin, sn == 0, __TAG__, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr, sn, errno);
+        }
 
         // Unmap the OS page.
         int um = munmap(mapped_page_itr->second.ptr, page_size);
@@ -451,8 +467,11 @@ namespace abc { namespace vmem {
 
         if (_mapped_pages.size() == _config.max_mapped_page_count) {
             //// TODO: Free capacity
-            //// a) If the average keep count of unlocked pages is lower than the average keep count of locked pages => unmap such unlocked pages.
-            //// b) Unmap all unlocked pages.
+            //// a) If there are no unlocked pages => nothing could be done.
+            //// b) If there are no locked pages => unmap pages with keep count below the average.
+            //// c) If the average keep count of unlocked pages is lower than the average keep count of locked pages => unmap such unlocked pages.
+            //// d) Unmap all unlocked pages.
+
         }
 
         diag_base::ensure(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
