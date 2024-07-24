@@ -466,12 +466,25 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, _mapped_pages.size() <= _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() <= _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
         if (_mapped_pages.size() == _config.max_mapped_page_count) {
-            //// TODO: Free capacity
-            //// a) If there are no unlocked pages => nothing could be done.
-            //// b) If there are no locked pages => unmap pages with keep count below the average.
-            //// c) If the average keep count of unlocked pages is lower than the average keep count of locked pages => unmap such unlocked pages.
-            //// d) Unmap all unlocked pages.
+            //// TODO: A combination of a container and algorithms should be used so that the following requirements are met:
+            // 1. A mapped page entry should not be moved from one container to another when its "locked" state changes.
+            // 2. Ditto, especially when an already locked page is being re-locked.
+            // 3. No situation should lead to full, sequential, traversal of container.
 
+            // If there are no unlocked pages, then nothing can be freed.
+            if (_stats.unlocked_page_count == 0) {
+                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+            }
+
+            // Remove all unlocked pages with a keep count not higher than the average.
+            count_t avg_keep_count = (_stats.unlocked_page_keep_count + _stats.unlocked_page_count - 1) / _stats.unlocked_page_count;
+            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "avg_keep_count=%u", (unsigned)avg_keep_count);
+
+            for (mapped_page_container::iterator mapped_page_itr = _mapped_pages.begin(); mapped_page_itr != _mapped_pages.end(); mapped_page_itr++) {
+                if (mapped_page_itr->second.keep_count <= avg_keep_count) {
+                    unmap_page(mapped_page_itr);
+                }
+            }
         }
 
         diag_base::ensure(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
