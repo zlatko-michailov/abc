@@ -345,7 +345,7 @@ namespace abc { namespace vmem {
             _stats.unlocked_page_keep_count -= mapped_page->keep_count;
 
             _stats.locked_page_count++;
-            _stats.locked_page_keep_count += mapped_page->keep_count;
+            _stats.locked_page_keep_count += mapped_page->keep_count + 1;
         }
 
         mapped_page->lock_count++;
@@ -415,7 +415,7 @@ namespace abc { namespace vmem {
             diag_base::ensure(suborigin, ptr != MAP_FAILED, __TAG__, "ptr != MAP_FAILED, ptr=%p, errno=%d", ptr, errno);
 
             // Init a mapped_page entry.
-            std::pair<page_pos_t, mapped_page> mapped_page_kvp;
+            std::pair<page_pos_t, mapped_page> mapped_page_kvp { };
             mapped_page_kvp.first = page_pos;
             mapped_page_kvp.second.pos = page_pos;
             mapped_page_kvp.second.ptr = ptr;
@@ -423,6 +423,9 @@ namespace abc { namespace vmem {
             std::pair<mapped_page_container::iterator, bool> inserted_mapped_page = _mapped_pages.insert(std::move(mapped_page_kvp));
             diag_base::ensure(suborigin, inserted_mapped_page.second, __TAG__, "inserted_mapped_page.second");
             mapped_page_itr = std::move(inserted_mapped_page.first);            
+
+            // There is one more unlocked page in the container.
+            _stats.unlocked_page_count++;
         }
 
         diag_base::ensure(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
@@ -433,14 +436,14 @@ namespace abc { namespace vmem {
     }
 
 
-    inline void pool::unmap_page(const mapped_page_container::iterator& mapped_page_itr) {
+    inline pool::mapped_page_container::iterator pool::unmap_page(const mapped_page_container::iterator& mapped_page_itr) {
         constexpr const char* suborigin = "unmap_page()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x103a0, "Begin:");
 
         diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
         diag_base::expect(suborigin, mapped_page_itr->second.ptr != nullptr, __TAG__, "mapped_page_itr->second.ptr != nullptr");
 
-        if (_config.sync_locked_pages_on_destroy) {
+        if (!_config.sync_pages_on_unlock || (_config.sync_locked_pages_on_destroy && mapped_page_itr->second.lock_count > 0)) {
             // Sync the OS page. 
             int sn = msync(mapped_page_itr->second.ptr, page_size, MS_ASYNC);
             diag_base::ensure(suborigin, sn == 0, __TAG__, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr, sn, errno);
@@ -450,12 +453,23 @@ namespace abc { namespace vmem {
         int um = munmap(mapped_page_itr->second.ptr, page_size);
         diag_base::ensure(suborigin, um == 0, __TAG__, "um == 0");
 
+        if (mapped_page_itr->second.lock_count > 0) {
+            _stats.locked_page_keep_count -= mapped_page_itr->second.keep_count;
+            _stats.locked_page_count--;
+        }
+        else {
+            _stats.unlocked_page_keep_count -= mapped_page_itr->second.keep_count;
+            _stats.unlocked_page_count--;
+        }
+
         diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "pos=0x%llx, ptr=%p", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr);
 
         // Remove the mapped page entry from the container.
-        _mapped_pages.erase(mapped_page_itr);
+        mapped_page_container::iterator ret_itr = _mapped_pages.erase(mapped_page_itr);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104c2, "End:");
+
+        return ret_itr;
     }
 
 
@@ -480,9 +494,13 @@ namespace abc { namespace vmem {
             count_t avg_keep_count = (_stats.unlocked_page_keep_count + _stats.unlocked_page_count - 1) / _stats.unlocked_page_count;
             diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "avg_keep_count=%u", (unsigned)avg_keep_count);
 
-            for (mapped_page_container::iterator mapped_page_itr = _mapped_pages.begin(); mapped_page_itr != _mapped_pages.end(); mapped_page_itr++) {
-                if (mapped_page_itr->second.keep_count <= avg_keep_count) {
-                    unmap_page(mapped_page_itr);
+            mapped_page_container::iterator mapped_page_itr = _mapped_pages.begin();
+            while (mapped_page_itr != _mapped_pages.end()) {
+                if (mapped_page_itr->second.lock_count == 0 && mapped_page_itr->second.keep_count <= avg_keep_count) {
+                    mapped_page_itr = unmap_page(mapped_page_itr);
+                }
+                else {
+                    mapped_page_itr++;
                 }
             }
         }

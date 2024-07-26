@@ -259,8 +259,9 @@ namespace abc { namespace vmem {
         /**
          * @brief                 Unconditionally unmaps a mapped page.
          * @param mapped_page_itr Iterator on the mapped pages container.
+         * @return                An iterator pointing "after" the erased item.
          */
-        void unmap_page(const mapped_page_container::iterator& mapped_page_itr);
+        mapped_page_container::iterator unmap_page(const mapped_page_container::iterator& mapped_page_itr);
 
         /**
          * @brief Ensures that `_mapped_page_count` is less than `_max_mapped_page_count`, so that a new page can be mapped.

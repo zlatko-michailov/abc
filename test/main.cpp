@@ -262,8 +262,8 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_pool_fit",                              test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
                 { "test_vmem_pool_reopen",                           test_vmem_pool_reopen },
-#if 0 //// TODO:
                 { "test_vmem_pool_freepages",                        test_vmem_pool_freepages },
+#if 0 //// TODO:
                 { "test_vmem_linked_mixedone",                       test_vmem_linked_mixedone },
                 { "test_vmem_linked_mixedmany",                      test_vmem_linked_mixedmany },
                 { "test_vmem_linked_splice",                         test_vmem_linked_splice },

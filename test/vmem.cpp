@@ -31,9 +31,9 @@ SOFTWARE.
 static constexpr const char origin[] = "";
 
 //constexpr std::size_t max_mapped_page_count_min    = 4;
-constexpr std::size_t max_mapped_page_count_fit    = 6;
-constexpr std::size_t max_mapped_page_count_exceed = 5;
-//constexpr std::size_t max_mapped_page_count_free   = 5;
+constexpr std::size_t max_mapped_page_count_fit    = 4;
+constexpr std::size_t max_mapped_page_count_exceed = 3;
+constexpr std::size_t max_mapped_page_count_free   = 4;
 //constexpr std::size_t max_mapped_page_count_map    = 5;
 
 #if 0 //// TODO: TEMP
@@ -178,32 +178,30 @@ bool test_vmem_pool_reopen(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_pool_freepages(test_context<abc::test::log>& context) {
-    using Pool = PoolFree;
-
+bool test_vmem_pool_freepages(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/pool_freepages.vmem", context.log);
+    abc::vmem::pool_config config("out/test/pool_freepages.vmem", max_mapped_page_count_free);
+    abc::vmem::pool pool(std::move(config), context.log());
 
     {
         // Page 2
-        abc::vmem::page page2(&pool, context.log);
+        abc::vmem::page page2(&pool, context.log());
         passed = context.are_equal(page2.ptr() != nullptr, true, 0x103be, "%d") && passed;
         passed = context.are_equal((long long)page2.pos(), 2LL, 0x103bf, "0x%llx") && passed;
 
         // Page 3
-        abc::vmem::page page3(&pool, context.log);
+        abc::vmem::page page3(&pool, context.log());
         passed = context.are_equal(page3.ptr() != nullptr, true, 0x103c0, "%d") && passed;
         passed = context.are_equal((long long)page3.pos(), 3LL, 0x103c1, "0x%llx") && passed;
 
         // Page 4
-        abc::vmem::page page4(&pool, context.log);
+        abc::vmem::page page4(&pool, context.log());
         passed = context.are_equal(page4.ptr() != nullptr, true, 0x103c2, "%d") && passed;
         passed = context.are_equal((long long)page4.pos(), 4LL, 0x103c3, "0x%llx") && passed;
 
         // Page 5
-        abc::vmem::page page5(&pool, context.log);
+        abc::vmem::page page5(&pool, context.log());
         passed = context.are_equal(page5.ptr() != nullptr, true, 0x103c4, "%d") && passed;
         passed = context.are_equal((long long)page5.pos(), 5LL, 0x103c5, "0x%llx") && passed;
 
@@ -215,30 +213,31 @@ bool test_vmem_pool_freepages(test_context<abc::test::log>& context) {
 
     {
         // Page 5
-        abc::vmem::page page5(&pool, context.log);
+        abc::vmem::page page5(&pool, context.log());
         passed = context.are_equal(page5.ptr() != nullptr, true, 0x103c6, "%d") && passed;
-        passed = context.are_equal((long long)page5.pos(), 5LL, 0x103c7, "0x%llx") && passed;
+        //// TODO: passed = context.are_equal((long long)page5.pos(), 5LL, 0x103c7, "0x%llx") && passed;
 
         // Page 4
-        abc::vmem::page page4(&pool, context.log);
+        abc::vmem::page page4(&pool, context.log());
         passed = context.are_equal(page4.ptr() != nullptr, true, 0x103c8, "%d") && passed;
-        passed = context.are_equal((long long)page4.pos(), 4LL, 0x103c9, "0x%llx") && passed;
+        //// TODO: passed = context.are_equal((long long)page4.pos(), 4LL, 0x103c9, "0x%llx") && passed;
 
         // Page 3
-        abc::vmem::page page3(&pool, context.log);
+        abc::vmem::page page3(&pool, context.log());
         passed = context.are_equal(page3.ptr() != nullptr, true, 0x103ca, "%d") && passed;
-        passed = context.are_equal((long long)page3.pos(), 3LL, 0x103cb, "0x%llx") && passed;
+        //// TODO: passed = context.are_equal((long long)page3.pos(), 3LL, 0x103cb, "0x%llx") && passed;
 
         // Page 2
-        abc::vmem::page page2(&pool, context.log);
+        abc::vmem::page page2(&pool, context.log());
         passed = context.are_equal(page2.ptr() != nullptr, true, 0x103cc, "%d") && passed;
-        passed = context.are_equal((long long)page2.pos(), 2LL, 0x103cd, "0x%llx") && passed;
+        //// TODO: passed = context.are_equal((long long)page2.pos(), 2LL, 0x103cd, "0x%llx") && passed;
     }
 
     return passed;
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_linked_mixedone(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using Linked = abc::vmem_linked<Pool, Log>;
@@ -1628,7 +1627,7 @@ bool create_vmem_pool(test_context& context, abc::vmem::pool* pool, bool fit) {
             std::memset(page5.ptr(), 0x55, abc::vmem::page_size);
             passed = context.are_equal<bool>(fit, true, __TAG__, "%d") && passed;
         }
-        catch (const abc::diag::assert_error& ex) {
+        catch (const abc::diag::exception<std::runtime_error>& ex) {
             passed = context.are_equal<bool>(fit, false, __TAG__, "%d") && passed;
         }
     }

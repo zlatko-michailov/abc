@@ -20,13 +20,15 @@
 - __UNTABIFY each file before making changes!__
 - `vmem`
     - pool
-        - To free capacity, unmap unlocked pages with a keep_count below the average keep_count of locked pages.
+        - Remove unused methods.
+        - To free capacity, use an efficient container and algorithms.
         - Use a lock! (Minimize public surface.)
     - Entities
         - page.h
         - ptr.h
         - pool/h
         - Remove util.h or merge it with the main util.h.
+        - linked.h
     - Samples
         - tictactoe
         - connect4
