@@ -27,224 +27,222 @@ SOFTWARE.
 
 #include <cstdint>
 
-#include "log.i.h"
+#include "../../size.h"
+#include "../../diag/i/diag_ready.i.h"
+#include "layout.i.h"
+#include "ptr.i.h"
+#include "iterator.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-	template <typename Pool, typename Log>
-	class vmem_linked;
+    class linked;
 
-	template <typename Pool, typename Log = null_log>
-	using vmem_linked_iterator_state = vmem_basic_iterator_state<vmem_linked<Pool, Log>, Pool, Log>;
+    using linked_iterator_state = basic_iterator_state<linked>;
 
-	template <typename Pool, typename Log = null_log>
-	using vmem_linked_iterator = vmem_iterator<vmem_linked<Pool, Log>, vmem_page_pos_t, Pool, Log>;
+    using linked_iterator = iterator<linked, page_pos_t>;
 
-	template <typename Pool, typename Log = null_log>
-	using vmem_linked_const_iterator = vmem_const_iterator<vmem_linked<Pool, Log>, vmem_page_pos_t, Pool, Log>;
+    using linked_const_iterator = const_iterator<linked, page_pos_t>;
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	/**
-	 * @brief					Doubly linked list of pool pages.
-	 * @details					The struct is stateless. It uses an external state.
-	 * @tparam Pool				Pool. Must be a specialization of `vmem_pool`.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Pool, typename Log = null_log>
-	class vmem_linked {
-		using iterator_state			= vmem_linked_iterator_state<Pool, Log>;
+    /**
+     * @brief    Doubly linked list of pool pages.
+     * @details The struct is stateless. It uses an external state.
+     */
+    class linked
+        : protected diag::diag_ready<const char*> {
 
-	public:
-		using pool_type					= Pool;
-		using value_type				= vmem_page_pos_t;
-		using pointer					= vmem_ptr<value_type, Pool, Log>;
-		using const_pointer				= vmem_ptr<const value_type, Pool, Log>;
-		using reference					= value_type&;
-		using const_reference			= const value_type&;
-		using iterator					= vmem_linked_iterator<Pool, Log>;
-		using const_iterator			= vmem_linked_const_iterator<Pool, Log>;
-		using reverse_iterator			= iterator;
-		using const_reverse_iterator	= const_iterator;
+        using diag_base = diag::diag_ready<const char*>;
+        using iterator_state = linked_iterator_state;
 
-	public:
-		/**
-		 * @brief				Returns `true` if the given state is uninitialized; `false` if it is initialized.
-		 */
-		static constexpr bool	is_uninit(const vmem_linked_state* state) noexcept;
+    public:
+        using value_type             = page_pos_t;
+        using pointer                = ptr<value_type>;
+        using const_pointer          = ptr<const value_type>;
+        using reference              = value_type&;
+        using const_reference        = const value_type&;
+        using iterator               = linked_iterator;
+        using const_iterator         = linked_const_iterator;
+        using reverse_iterator       = iterator;
+        using const_reverse_iterator = const_iterator;
 
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param state			Pointer to a `vmem_linked_state` instance.
-		 * @param pool			Pointer to a `vmem_pool` instance.
-		 * @param log			Pointer to a `log_ostream` instance.
-		 */
-		vmem_linked<Pool, Log>(vmem_linked_state* state, Pool* pool, Log* log);
+    public:
+        /**
+         * @brief Returns `true` if the given state is uninitialized; `false` if it is initialized.
+         */
+        static constexpr bool is_uninit(const linked_state* state) noexcept;
 
-		/**
-		 * @brief				Move constructor.
-		 */
-		vmem_linked<Pool, Log>(vmem_linked<Pool, Log>&& other) noexcept = default;
+    public:
+        /**
+         * @brief       Constructor.
+         * @param state Pointer to a `linked_state` instance.
+         * @param pool  Pointer to a `pool` instance.
+         * @param log   Pointer to a `log_ostream` instance.
+         */
+        linked(linked_state* state, pool* pool, diag::log_ostream* log = nullptr);
 
-		/**
-		 * @brief				Copy constructor.
-		 */
-		vmem_linked<Pool, Log>(const vmem_linked<Pool, Log>& other) noexcept = default;
+        /**
+         * @brief Move constructor.
+         */
+        linked(linked&& other) noexcept = default;
 
-	public:
-		iterator				begin() noexcept;
-		const_iterator			begin() const noexcept;
-		const_iterator			cbegin() const noexcept;
+        /**
+         * @brief Copy constructor.
+         */
+        linked(const linked& other) noexcept = default;
 
-		iterator				end() noexcept;
-		const_iterator			end() const noexcept;
-		const_iterator			cend() const noexcept;
+    public:
+        iterator               begin() noexcept;
+        const_iterator         begin() const noexcept;
+        const_iterator         cbegin() const noexcept;
 
-		reverse_iterator		rend() noexcept;
-		const_reverse_iterator	rend() const noexcept;
-		const_reverse_iterator	crend() const noexcept;
+        iterator               end() noexcept;
+        const_iterator         end() const noexcept;
+        const_iterator         cend() const noexcept;
 
-		reverse_iterator		rbegin() noexcept;
-		const_reverse_iterator	rbegin() const noexcept;
-		const_reverse_iterator	crbegin() const noexcept;
+        reverse_iterator       rend() noexcept;
+        const_reverse_iterator rend() const noexcept;
+        const_reverse_iterator crend() const noexcept;
 
-	public:
-		bool					empty() const noexcept;
+        reverse_iterator       rbegin() noexcept;
+        const_reverse_iterator rbegin() const noexcept;
+        const_reverse_iterator crbegin() const noexcept;
 
-		reference				front();
-		const_reference			front() const;
+    public:
+        bool                   empty() const noexcept;
 
-		reference				back();
-		const_reference			back() const;
+        reference              front();
+        const_reference        front() const;
 
-		/**
-		 * @brief				Links a page after the back.
-		 * @param page_pos		Position of the page to be linked.
-		 */
-		void push_back(const_reference page_pos);
+        reference              back();
+        const_reference        back() const;
 
-		/**
-		 * @brief				Unlinks the back page.
-		 */
-		void pop_back();
+        /**
+         * @brief          Links a page after the back.
+         * @param page_pos Position of the page to be linked.
+         */
+        void push_back(const_reference page_pos);
 
-		/**
-		 * @brief				Links a page before the front.
-		 * @param page_pos		Position of the page to be linked.
-		 */
-		void push_front(const_reference page_pos);
+        /**
+         * @brief Unlinks the back page.
+         */
+        void pop_back();
 
-		/**
-		 * @brief				Unlinks the front page.
-		 */
-		void pop_front();
+        /**
+         * @brief          Links a page before the front.
+         * @param page_pos Position of the page to be linked.
+         */
+        void push_front(const_reference page_pos);
 
-		/**
-		 * @brief				Links a page at the given iterator.
-		 * @param itr			Iterator.
-		 * @param page_pos		Position of the page to be linked.
-		 * @return				Iterator referencing the newly linked page.
-		 */
-		iterator insert(const_iterator itr, const_reference page_pos);
+        /**
+         * @brief Unlinks the front page.
+         */
+        void pop_front();
 
-		/**
-		 * @brief				Links a page at the given iterator.
-		 * @param itr			Iterator.
-		 * @return				Iterator referencing the page next to the newly linked one.
-		 */
-		iterator erase(const_iterator itr);
+        /**
+         * @brief          Links a page at the given iterator.
+         * @param itr      Iterator.
+         * @param page_pos Position of the page to be linked.
+         * @return         Iterator referencing the newly linked page.
+         */
+        iterator insert(const_iterator itr, const_reference page_pos);
 
-		/**
-		 * @brief				Unlinks all the pages.
-		 */
-		void clear();
+        /**
+         * @brief     Links a page at the given iterator.
+         * @param itr Iterator.
+         * @return    Iterator referencing the page next to the newly linked one.
+         */
+        iterator erase(const_iterator itr);
 
-		/**
-		 * @brief				Links the other linked list at the end of this one.
-		 * @param other			Other linked list. Its state is reset after this.
-		 */
-		void splice(vmem_linked<Pool, Log>& other);
+        /**
+         * @brief Unlinks all the pages.
+         */
+        void clear();
 
-		/**
-		 * @brief				Links the other linked list at the end of this one.
-		 * @param other			Other linked list. Its state is reset after this.
-		 */
-		void splice(vmem_linked<Pool, Log>&& other);
+        /**
+         * @brief       Links the other linked list at the end of this one.
+         * @param other Other linked list. Its state is reset after this.
+         */
+        void splice(linked& other);
 
-	private:
-		/**
-		 * @brief				Links a page at the given iterator without modifying the state.
-		 * @param itr			Iterator.
-		 * @param page_pos		Position of the page to be linked.
-		 * @param back_page_pos	Position of the back page.
-		 * @return				`true` == success; `false` = error.
-		 */
-		bool insert_nostate(const_iterator itr, const_reference page_pos, vmem_page_pos_t back_page_pos) noexcept;
+        /**
+         * @brief       Links the other linked list at the end of this one.
+         * @param other Other linked list. Its state is reset after this.
+         */
+        void splice(linked&& other);
 
-		/**
-		 * @brief				Links a page at the given iterator.
-		 * @param itr			Iterator.
-		 * @param back_page_pos	Position of the back page.
-		 * @return				`true` == success; `false` = error.
-		 */
-		bool erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept;
+    private:
+        /**
+         * @brief               Links a page at the given iterator without modifying the state.
+         * @param itr           Iterator.
+         * @param page_pos      Position of the page to be linked.
+         * @param back_page_pos Position of the back page.
+         * @return              `true` == success; `false` = error.
+         */
+        bool insert_nostate(const_iterator itr, const_reference page_pos, page_pos_t back_page_pos) noexcept;
 
-	private:
-		friend iterator_state;
-		friend const_iterator;
-		friend iterator;
+        /**
+         * @brief               Unlinks a page at the given iterator.
+         * @param itr           Iterator.
+         * @param back_page_pos Position of the back page.
+         * @return              `true` == success; `false` = error.
+         */
+        bool erase_nostate(const_iterator itr, page_pos_t& back_page_pos) noexcept;
 
-		/**
-		 * @brief				Returns the iterator immediately following a given one.  
-		 * @param itr			Iterator.
-		 */
-		iterator next(const iterator_state& itr) const noexcept;
+    private:
+        friend iterator_state;
+        friend const_iterator;
+        friend iterator;
 
-		/**
-		 * @brief				Returns the iterator immediately preceding a given one.  
-		 * @param itr			Iterator.
-		 */
-		iterator prev(const iterator_state& itr) const noexcept;
+        /**
+         * @brief     Returns the iterator immediately following a given one.  
+         * @param itr Iterator.
+         */
+        iterator next(const iterator_state& itr) const noexcept;
 
-		/**
-		 * @brief				Dereferences an iterator.
-		 * @param itr			Iterator.
-		 * @return				`vmem_ptr`. 
-		 */
-		pointer at(const iterator_state& itr) const noexcept;
+        /**
+         * @brief     Returns the iterator immediately preceding a given one.  
+         * @param itr Iterator.
+         */
+        iterator prev(const iterator_state& itr) const noexcept;
 
-	private:
-		/**
-		 * @brief				Returns an iterator referencing the first page.
-		 */
-		iterator begin_itr() const noexcept;
+        /**
+         * @brief     Dereferences an iterator.
+         * @param itr Iterator.
+         * @return    A `ptr` instance. 
+         */
+        pointer at(const iterator_state& itr) const noexcept;
 
-		/**
-		 * @brief				Returns an iterator referencing past the last page.
-		 */
-		iterator end_itr() const noexcept;
+    private:
+        /**
+         * @brief Returns an iterator referencing the first page.
+         */
+        iterator begin_itr() const noexcept;
 
-		/**
-		 * @brief				Returns a reverse iterator referencing the last page.
-		 */
-		reverse_iterator rend_itr() const noexcept;
+        /**
+         * @brief Returns an iterator referencing past the last page.
+         */
+        iterator end_itr() const noexcept;
 
-		/**
-		 * @brief				Returns a reverse iterator referencing before the first page.
-		 */
-		reverse_iterator rbegin_itr() const noexcept;
+        /**
+         * @brief Returns a reverse iterator referencing the last page.
+         */
+        reverse_iterator rend_itr() const noexcept;
 
-	private:
-		vmem_linked_state*		_state;
-		Pool*					_pool;
-		Log*					_log;
-	};
+        /**
+         * @brief Returns a reverse iterator referencing before the first page.
+         */
+        reverse_iterator rbegin_itr() const noexcept;
+
+    private:
+        linked_state* _state;
+        pool*         _pool;
+    };
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
-}
+} }
