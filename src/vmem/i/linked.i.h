@@ -25,9 +25,6 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstdint>
-
-#include "../../size.h"
 #include "../../diag/i/diag_ready.i.h"
 #include "layout.i.h"
 #include "ptr.i.h"
