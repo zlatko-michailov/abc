@@ -89,7 +89,7 @@ namespace abc { namespace vmem {
         count_t unlocked_page_count;
         count_t unlocked_page_keep_count;
 
-        count_t make_capacity_count;
+        count_t free_capacity_count;
     };
 
 
@@ -325,7 +325,7 @@ namespace abc { namespace vmem {
          *          so that they can be found using fewer comparisons.
          * @param i Position on the array of mapped pages.
          */
-        void optimize_mapped_page(std::size_t i) noexcept;
+        void optimize_mapped_page(std::size_t i) noexcept; //// TODO: Remove
 
         /**
          * @brief         Tries to find an empty slot on the array of mapped pages before a given position `i`.
@@ -333,7 +333,7 @@ namespace abc { namespace vmem {
          * @param empty_i Lower bound (exclusive) for the sought empty position.
          * @return        The lowest position of an empty slot on the array of mapped pages, or `i` if no such empty slot exists.
          */
-        std::size_t next_empty_i(std::size_t i, std::size_t empty_i) noexcept;
+        std::size_t next_empty_i(std::size_t i, std::size_t empty_i) noexcept; //// TODO: Remove
 
         /**
          * @brief Logs performance stats.

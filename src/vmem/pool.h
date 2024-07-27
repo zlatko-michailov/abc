@@ -353,7 +353,7 @@ namespace abc { namespace vmem {
 
         log_stats();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x1039b, "Begin: lock_count=%u", (unsigned)mapped_page->lock_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1039b, "End: lock_count=%u", (unsigned)mapped_page->lock_count);
 
         return mapped_page->ptr;
     }
@@ -430,6 +430,8 @@ namespace abc { namespace vmem {
 
         diag_base::ensure(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
 
+        log_stats();
+
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: mapped_page=%p", &*mapped_page_itr);
 
         return &mapped_page_itr->second;
@@ -467,6 +469,8 @@ namespace abc { namespace vmem {
         // Remove the mapped page entry from the container.
         mapped_page_container::iterator ret_itr = _mapped_pages.erase(mapped_page_itr);
 
+        log_stats();
+
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104c2, "End:");
 
         return ret_itr;
@@ -480,6 +484,11 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, _mapped_pages.size() <= _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() <= _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
         if (_mapped_pages.size() == _config.max_mapped_page_count) {
+            _stats.free_capacity_count++;
+
+            diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Trying to free capacity.");
+            log_stats();
+
             //// TODO: A combination of a container and algorithms should be used so that the following requirements are met:
             // 1. A mapped page entry should not be moved from one container to another when its "locked" state changes.
             // 2. Ditto, especially when an already locked page is being re-locked.
@@ -506,6 +515,8 @@ namespace abc { namespace vmem {
         }
 
         diag_base::ensure(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+
+        log_stats();
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: count=%zu, max_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
     }
@@ -716,6 +727,16 @@ namespace abc { namespace vmem {
 
 
     inline void pool::log_stats() noexcept {
+        constexpr const char* suborigin = "log_stat()";
+
+        count_t map_count = _stats.map_hit_count + _stats.map_miss_count;
+        count_t map_hit_percent = map_count == 0 ? 0 : 100 * _stats.map_hit_count / map_count;
+        count_t map_miss_percent = map_count == 0 ? 0 : 100 * _stats.map_miss_count / map_count;
+
+        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Pages: container=%zu, locked=%u, unlocked=%u", _mapped_pages.size(), (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Map: hit=%u (%u%%), miss=%u (%u%%)", (unsigned)_stats.map_hit_count, (unsigned)map_hit_percent, (unsigned)_stats.map_miss_count, (unsigned)map_miss_percent);
+        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Keep: locked=%u, unlocked=%u", (unsigned)_stats.locked_page_keep_count, (unsigned)_stats.unlocked_page_keep_count);
+        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Capacity: count=%u", (unsigned)_stats.free_capacity_count);
     }
 
 
