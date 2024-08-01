@@ -31,9 +31,9 @@ SOFTWARE.
 static constexpr const char origin[] = "";
 
 //constexpr std::size_t max_mapped_page_count_min    = 4;
-constexpr std::size_t max_mapped_page_count_fit    = 4;
-constexpr std::size_t max_mapped_page_count_exceed = 3;
-constexpr std::size_t max_mapped_page_count_free   = 4;
+constexpr std::size_t max_mapped_page_count_fit    = 6;
+constexpr std::size_t max_mapped_page_count_exceed = 5;
+constexpr std::size_t max_mapped_page_count_free   = 6;
 //constexpr std::size_t max_mapped_page_count_map    = 5;
 
 #if 0 //// TODO: TEMP

@@ -117,8 +117,15 @@ namespace abc { namespace vmem {
 
     public:
         /**
+         * @brief          Returns `true` if the page at the given position is required for the pool to function properly.
+         * @param page_pos Page position.
+         */
+        static constexpr bool is_required_page(page_pos_t page_pos) noexcept;
+
+    public:
+        /**
          * @brief        Constructor.
-         * @param config `pool_config` instance
+         * @param config `pool_config` instance.
          * @param log    Pointer to a `log_ostream` instance.
          */
         pool(pool_config&& config, diag::log_ostream* log = nullptr);

@@ -47,6 +47,11 @@ namespace abc { namespace vmem {
     }
 
 
+    inline constexpr bool pool::is_required_page(page_pos_t page_pos) noexcept {
+        return page_pos == page_pos_root || page_pos == page_pos_start;
+    }
+
+
     inline pool::pool(pool_config&& config, diag::log_ostream* log)
         : diag_base(abc::copy(origin()), log)
         , _config(std::move(config))
@@ -496,21 +501,40 @@ namespace abc { namespace vmem {
 
             // If there are no unlocked pages, then nothing can be freed.
             if (_stats.unlocked_page_count == 0) {
-                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. (1) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
             }
 
-            // Remove all unlocked pages with a keep count not higher than the average.
+            // Pass 1: Remove all unlocked pages with a keep count not higher than the average.
             count_t avg_keep_count = (_stats.unlocked_page_keep_count + _stats.unlocked_page_count - 1) / _stats.unlocked_page_count;
             diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "avg_keep_count=%u", (unsigned)avg_keep_count);
 
             mapped_page_container::iterator mapped_page_itr = _mapped_pages.begin();
             while (mapped_page_itr != _mapped_pages.end()) {
-                if (mapped_page_itr->second.lock_count == 0 && mapped_page_itr->second.keep_count <= avg_keep_count) {
+                // Don't unmap required pages.
+                if (!is_required_page(mapped_page_itr->second.pos) && mapped_page_itr->second.lock_count == 0 && mapped_page_itr->second.keep_count <= avg_keep_count) {
                     mapped_page_itr = unmap_page(mapped_page_itr);
                 }
                 else {
                     mapped_page_itr++;
                 }
+            }
+
+            // Pass 2: If Pass 1didn't free up anything, free all unlocked pages.
+            if (_mapped_pages.size() == _config.max_mapped_page_count) {
+                mapped_page_itr = _mapped_pages.begin();
+                while (mapped_page_itr != _mapped_pages.end()) {
+                    // Don't unmap required pages.
+                    if (!is_required_page(mapped_page_itr->second.pos) && mapped_page_itr->second.lock_count == 0) {
+                        mapped_page_itr = unmap_page(mapped_page_itr);
+                    }
+                    else {
+                        mapped_page_itr++;
+                    }
+                }
+            }
+
+            if (_mapped_pages.size() == _config.max_mapped_page_count) {
+                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. (2) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
             }
         }
 
