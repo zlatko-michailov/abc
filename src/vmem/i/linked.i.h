@@ -55,6 +55,8 @@ namespace abc { namespace vmem {
         using diag_base = diag::diag_ready<const char*>;
         using iterator_state = linked_iterator_state;
 
+        static constexpr const char* _origin = "abc::vmem::linked";
+
     public:
         using value_type             = page_pos_t;
         using pointer                = ptr<value_type>;
@@ -177,9 +179,8 @@ namespace abc { namespace vmem {
          * @param itr           Iterator.
          * @param page_pos      Position of the page to be linked.
          * @param back_page_pos Position of the back page.
-         * @return              `true` == success; `false` = error.
          */
-        bool insert_nostate(const_iterator itr, const_reference page_pos, page_pos_t back_page_pos) noexcept;
+        void insert_nostate(const_iterator itr, const_reference page_pos, page_pos_t back_page_pos);
 
         /**
          * @brief               Unlinks a page at the given iterator.

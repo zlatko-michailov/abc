@@ -27,20 +27,21 @@ SOFTWARE.
 
 #include <cstring>
 
-#include "../exception.h"
-#include "../i/vmem.i.h"
+#include "../util.h"
+#include "../diag/diag_ready.h"
+#include "ptr.h"
+#include "i/linked.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-	template <typename Pool, typename Log>
-	inline constexpr bool vmem_linked<Pool, Log>::is_uninit(const vmem_linked_state* state) noexcept {
+	inline constexpr bool linked::is_uninit(const linked_state* state) noexcept {
 		return
 			// nil
 			(
 				state != nullptr
-				&& state->front_page_pos == vmem_page_pos_nil
-				&& state->back_page_pos == vmem_page_pos_nil
+				&& state->front_page_pos == page_pos_nil
+				&& state->back_page_pos == page_pos_nil
 			)
 			||
 			// zero
@@ -52,159 +53,129 @@ namespace abc {
 	}
 
 
-	template <typename Pool, typename Log>
-	inline vmem_linked<Pool, Log>::vmem_linked(vmem_linked_state* state, Pool* pool, Log* log)
-		: _state(state)
-		, _pool(pool)
-		, _log(log) {
+	inline linked::linked(linked_state* state, pool* pool, diag::log_ostream* log)
+        : diag_base(abc::copy(_origin), log)
+		, _state(state)
+		, _pool(pool) {
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1048a, "vmem_linked::vmem_linked() state=%p, pool=%p", state, pool);
-		}
+        constexpr const char* suborigin = "linked()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1048a, "Begin: state=%p, pool=%p", state, pool);
 
-		if (state == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_linked::vmem_linked(state)", 0x1048b);
-		}
-
-		if (pool == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_linked::vmem_linked(pool)", 0x1048c);
-		}
+        diag_base::expect(suborigin, state != nullptr, 0x1048b, "state != nullptr");
+        diag_base::expect(suborigin, pool != nullptr, 0x1048c, "pool != nullptr");
 
 		if (is_uninit(state)) {
-			_state->front_page_pos = vmem_page_pos_nil;
-			_state->back_page_pos = vmem_page_pos_nil;
+			_state->front_page_pos = page_pos_nil;
+			_state->back_page_pos = page_pos_nil;
 		}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x1048d, "vmem_linked::vmem_linked() front_page_pos=0x%llx, back_page_pos=0x%llx", 
-				(long long)_state->front_page_pos, (long long)_state->back_page_pos);
-		}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: front_page_pos=0x%llx, back_page_pos=0x%llx", 
+				(unsigned long long)_state->front_page_pos, (unsigned long long)_state->back_page_pos);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::begin() noexcept {
+	inline typename linked::iterator linked::begin() noexcept {
 		return begin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::begin() const noexcept {
+	inline typename linked::const_iterator linked::begin() const noexcept {
 		return begin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::cbegin() const noexcept {
+	inline typename linked::const_iterator linked::cbegin() const noexcept {
 		return begin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::end() noexcept {
+	inline typename linked::iterator linked::end() noexcept {
 		return end_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::end() const noexcept {
+	inline typename linked::const_iterator linked::end() const noexcept {
 		return end_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::cend() const noexcept {
+	inline typename linked::const_iterator linked::cend() const noexcept {
 		return end_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::rend() noexcept {
+	inline typename linked::iterator linked::rend() noexcept {
 		return rend_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::rend() const noexcept {
+	inline typename linked::const_iterator linked::rend() const noexcept {
 		return rend_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::crend() const noexcept {
+	inline typename linked::const_iterator linked::crend() const noexcept {
 		return rend_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::rbegin() noexcept {
+	inline typename linked::iterator linked::rbegin() noexcept {
 		return rbegin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::rbegin() const noexcept {
+	inline typename linked::const_iterator linked::rbegin() const noexcept {
 		return rbegin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_iterator vmem_linked<Pool, Log>::crbegin() const noexcept {
+	inline typename linked::const_iterator linked::crbegin() const noexcept {
 		return rbegin_itr();
 	}
 
 
-	template <typename Pool, typename Log>
-	inline bool vmem_linked<Pool, Log>::empty() const noexcept {
-		return _state->front_page_pos == vmem_page_pos_nil
-			|| _state->back_page_pos == vmem_page_pos_nil;
+	inline bool linked::empty() const noexcept {
+		return _state->front_page_pos == page_pos_nil
+			|| _state->back_page_pos == page_pos_nil;
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::reference vmem_linked<Pool, Log>::front() {
+	inline typename linked::reference linked::front() {
 		return *at(begin());
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_reference vmem_linked<Pool, Log>::front() const {
+	inline typename linked::const_reference linked::front() const {
 		return *at(begin());
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::reference vmem_linked<Pool, Log>::back() {
+	inline typename linked::reference linked::back() {
 		return *at(rend());
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::const_reference vmem_linked<Pool, Log>::back() const {
+	inline typename linked::const_reference linked::back() const {
 		return *at(rend());
 	}
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::push_back(const_reference page_pos) {
+	inline void linked::push_back(const_reference page_pos) {
 		insert(end(), page_pos);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::pop_back() {
+	inline void linked::pop_back() {
 		erase(rend());
 	}
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::push_front(const_reference page_pos) {
+	inline void linked::push_front(const_reference page_pos) {
 		insert(begin(), page_pos);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::pop_front() {
+	inline void linked::pop_front() {
 		erase(begin());
 	}
 
@@ -212,165 +183,100 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::insert(const_iterator itr, const_reference page_pos) {
-		if (itr.item_pos() != vmem_item_pos_nil) {
-			throw exception<std::logic_error, Log>("vmem_linked::insert(itr.item_pos)", 0x1048e);
-		}
+	inline typename linked::iterator linked::insert(const_iterator itr, const_reference page_pos) {
+        constexpr const char* suborigin = "insert()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10490, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, page_pos=0x%llx",
+			(unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), (unsigned long long)page_pos);
 
-		if (itr.page_pos() == vmem_page_pos_nil && itr.edge() != vmem_iterator_edge::end) {
-			throw exception<std::logic_error, Log>("vmem_linked::insert(itr.page_pos)", 0x1048f);
-		}
+        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, 0x1048e, "itr.item_pos() == item_pos_nil");
+        diag_base::expect(suborigin, itr.page_pos() != page_pos_nil || itr.edge() == iterator_edge::end, 0x1048f, "itr.page_pos() != page_pos_nil || itr.edge() == iterator_edge::end");
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x10490, "vmem_linked::insert() Start. itr.page_pos=0x%llx, page_pos=0x%llx",
-				(long long)itr.page_pos(), (long long)page_pos);
-		}
-
-		// Regardless of where we insert, the result should be this iterator upon success.
-		iterator result(this, page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+		// Regardless of where we insert, the result will be this iterator upon success.
+		iterator result(this, page_pos, item_pos_nil, iterator_edge::none, diag_base::log());
 
 		// Insert without changing the state.
-		bool ok = insert_nostate(itr, page_pos, _state->back_page_pos);
+		insert_nostate(itr, page_pos, _state->back_page_pos);
 
-		if (ok) {
-			// We have inserted successfully.
-
-			// Update the front page pos.
-			if (_state->front_page_pos == vmem_page_pos_nil || _state->front_page_pos == itr.page_pos()) {
-				_state->front_page_pos = page_pos;
-			}
-
-			// Update the back page pos.
-			if (_state->back_page_pos == vmem_page_pos_nil || itr.edge() == vmem_iterator_edge::end) {
-				_state->back_page_pos = page_pos;
-			}
-		}
-		else {
-			// We have failed to insert.
-
-			// Return end().
-			result = end();
+		// Update the front page pos, if needed.
+		if (_state->front_page_pos == page_pos_nil || _state->front_page_pos == itr.page_pos()) {
+			_state->front_page_pos = page_pos;
 		}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::important, 0x10491, "vmem_linked::insert() Done. itr.page_pos=0x%llx, result.page_pos=0x%llx, result.edge=%u",
-				(long long)itr.page_pos(), (long long)result.page_pos(), result.edge());
+		// Update the back page pos, if needed.
+		if (_state->back_page_pos == page_pos_nil || itr.edge() == iterator_edge::end) {
+			_state->back_page_pos = page_pos;
 		}
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10491, "End:");
 
 		return result;
 	}
 
 
-	template <typename Pool, typename Log>
-	inline bool vmem_linked<Pool, Log>::insert_nostate(const_iterator itr, const_reference page_pos, vmem_page_pos_t back_page_pos) noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10492, "vmem_linked::insert_nostate() Start. itr.page_pos=0x%llx, page_pos=0x%llx",
-				(long long)itr.page_pos(), (long long)page_pos);
+	inline void linked::insert_nostate(const_iterator itr, const_reference page_pos, page_pos_t back_page_pos) {
+        constexpr const char* suborigin = "insert_nostate()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10492, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, page_pos=0x%llx",
+			(unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), (unsigned long long)page_pos);
+
+		vmem::page page(_pool, page_pos, diag_base::log());
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10493, "page.ptr() != nullptr");
+
+		// Init the page layout.
+		vmem::linked_page* linked_page = reinterpret_cast<vmem::linked_page*>(page.ptr());
+		linked_page->page_pos = page_pos;
+		linked_page->prev_page_pos = page_pos_nil;
+		linked_page->next_page_pos = page_pos_nil;
+
+		if (empty()) {
+			// Nothing to do.
 		}
+		else if (itr.page_pos() == page_pos_nil) {
+			// Inserting at the end.
 
-		bool ok = true;
+			vmem::page back_page(_pool, back_page_pos, diag_base::log());
+	        diag_base::expect(suborigin, back_page.ptr() != nullptr, 0x10494, "page.ptr() != nullptr");
 
-		vmem_page<Pool, Log> page(_pool, page_pos, _log);
-		vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
-
-		if (linked_page == nullptr) {
-			ok = false;
-
-			if (_log != nullptr) {
-				_log->put_any(category::abc::vmem, severity::warning, 0x10493, "vmem_linked::insert_nostate() Could not load page.");
-			}
+			vmem::linked_page* back_linked_page = reinterpret_cast<vmem::linked_page*>(back_page.ptr());
+			back_linked_page->next_page_pos = page.pos();
+			linked_page->prev_page_pos = back_page_pos;
 		}
+		else {
+			// Inserting at the middle or at the front.
+			// A previous page may or may not exist, but the next page does, and itr is pointing at it.
 
-		if (ok) {
-			// Init the page layout.
-			linked_page->page_pos = page_pos;
-			linked_page->prev_page_pos = vmem_page_pos_nil;
-			linked_page->next_page_pos = vmem_page_pos_nil;
+			vmem::page next_page(_pool, itr.page_pos(), diag_base::log());
+	        diag_base::expect(suborigin, next_page.ptr() != nullptr, 0x10495, "page.ptr() != nullptr");
 
-			if (empty()) {
-				// Nothing to do.
-			}
-			else if (itr.page_pos() == vmem_page_pos_nil) {
-				// Inserting at the end.
+			vmem::linked_page* next_linked_page = reinterpret_cast<vmem::linked_page*>(next_page.ptr());
 
-				vmem_page<Pool, Log> back_page(_pool, back_page_pos, _log);
-				vmem_linked_page* back_linked_page = reinterpret_cast<vmem_linked_page*>(back_page.ptr());
-
-				if (back_linked_page == nullptr) {
-					ok = false;
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::warning, 0x10494, "vmem_linked::insert_nostate() Could not load back page.");
-					}
-				}
-
-				if (ok) {
-					back_linked_page->next_page_pos = page.pos();
-					linked_page->prev_page_pos = back_page_pos;
-				}
+			if (next_linked_page->prev_page_pos == page_pos_nil) {
+				// Inserting at the front.
+				linked_page->next_page_pos = next_page.pos();
+				next_linked_page->prev_page_pos = page.pos();
 			}
 			else {
-				// Inserting at the middle or at the front.
-				// A previous page may or may not exist, but the next page does, and itr is pointing at it.
+				// Inserting at the middle.
+				vmem::page prev_page(_pool, next_linked_page->prev_page_pos, diag_base::log());
+		        diag_base::expect(suborigin, next_page.ptr() != nullptr, 0x10496, "page.ptr() != nullptr");
+	
+				vmem::linked_page* prev_linked_page = reinterpret_cast<vmem::linked_page*>(prev_page.ptr());
+				prev_linked_page->next_page_pos = page.pos();
+				linked_page->prev_page_pos = prev_page.pos();
 
-				vmem_page<Pool, Log> next_page(_pool, itr.page_pos(), _log);
-				vmem_linked_page* next_linked_page = reinterpret_cast<vmem_linked_page*>(next_page.ptr());
-
-				if (next_linked_page == nullptr) {
-					ok = false;
-
-					if (_log != nullptr) {
-						_log->put_any(category::abc::vmem, severity::warning, 0x10495, "vmem_linked::insert_nostate() Could not load next page.");
-					}
-				}
-
-				if (ok) {
-					if (next_linked_page->prev_page_pos == vmem_page_pos_nil) {
-						// Inserting at the front.
-						linked_page->next_page_pos = next_page.pos();
-						next_linked_page->prev_page_pos = page.pos();
-					}
-					else {
-						// Inserting at the middle.
-						vmem_page<Pool, Log> prev_page(_pool, next_linked_page->prev_page_pos, _log);
-						vmem_linked_page* prev_linked_page = reinterpret_cast<vmem_linked_page*>(prev_page.ptr());
-
-						if (prev_linked_page == nullptr) {
-							ok = false;
-
-							if (_log != nullptr) {
-								_log->put_any(category::abc::vmem, severity::warning, 0x10496, "vmem_linked::insert_nostate() Could not load prev page.");
-							}
-						}
-
-						if (ok) {
-							prev_linked_page->next_page_pos = page.pos();
-							linked_page->prev_page_pos = prev_page.pos();
-
-							linked_page->next_page_pos = next_page.pos();
-							next_linked_page->prev_page_pos = page.pos();
-						}
-					}
-				}
+				linked_page->next_page_pos = next_page.pos();
+				next_linked_page->prev_page_pos = page.pos();
 			}
 		}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::optional, 0x10497, "vmem_linked::insert_nostate() Done. ok=%d, itr.page_pos=0x%llx, page_pos=0x%llx",
-				ok, (long long)itr.page_pos(), page_pos);
-		}
-
-		return ok;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10497, "End:");
 	}
 
 
 	// ..............................................................
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::erase(const_iterator itr) {
-		if (itr.page_pos() == vmem_page_pos_nil || itr.edge() != vmem_iterator_edge::none) {
+	inline typename linked::iterator linked::erase(const_iterator itr) {
+		if (itr.page_pos() == page_pos_nil || itr.edge() != iterator_edge::none) {
 			throw exception<std::logic_error, Log>("vmem_linked::erase(itr)", 0x10498);
 		}
 
@@ -381,7 +287,7 @@ namespace abc {
 		// The result, upon success, is the next of itr.
 		iterator result = next(itr);
 
-		vmem_page_pos_t back_page_pos = vmem_page_pos_nil;
+		vmem_page_pos_t back_page_pos = page_pos_nil;
 		bool ok = erase_nostate(itr, back_page_pos);
 
 		if (ok) {
@@ -408,8 +314,7 @@ namespace abc {
 	}
 
 
-	template <typename Pool, typename Log>
-	inline bool vmem_linked<Pool, Log>::erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept {
+	inline bool linked::erase_nostate(const_iterator itr, vmem_page_pos_t& back_page_pos) noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x1049b, "vmem_linked::erase_nostate() Start. itr.page_pos=0x%llx", (long long)itr.page_pos());
 		}
@@ -428,7 +333,7 @@ namespace abc {
 		}
 
 		if (ok) {
-			if (linked_page->prev_page_pos != vmem_page_pos_nil) {
+			if (linked_page->prev_page_pos != page_pos_nil) {
 				// There is a prev page.
 				vmem_page<Pool, Log> prev_page(_pool, linked_page->prev_page_pos, _log);
 				vmem_linked_page* prev_linked_page = reinterpret_cast<vmem_linked_page*>(prev_page.ptr());
@@ -448,7 +353,7 @@ namespace abc {
 		}
 
 		if (ok) {
-			if (linked_page->next_page_pos != vmem_page_pos_nil) {
+			if (linked_page->next_page_pos != page_pos_nil) {
 				// There is a next page.
 				vmem_page<Pool, Log> next_page(_pool, linked_page->next_page_pos, _log);
 				vmem_linked_page* next_linked_page = reinterpret_cast<vmem_linked_page*>(next_page.ptr());
@@ -489,8 +394,7 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::clear() {
+	inline void linked::clear() {
 		_pool->clear_linked(*this);
 	}
 
@@ -498,14 +402,12 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>& other) {
+	inline void linked::splice(linked& other) {
 		splice(std::move(other));
 	}
 
 
-	template <typename Pool, typename Log>
-	inline void vmem_linked<Pool, Log>::splice(vmem_linked<Pool, Log>&& other) {
+	inline void linked::splice(linked&& other) {
 		if (_state == other._state) {
 			throw exception<std::logic_error, Log>("vmem_linked::splice(other.state)", 0x104a0);
 		}
@@ -558,8 +460,8 @@ namespace abc {
 					_state->back_page_pos = other._state->back_page_pos;
 
 					// Empty other state.
-					other._state->front_page_pos = vmem_page_pos_nil;
-					other._state->back_page_pos = vmem_page_pos_nil;
+					other._state->front_page_pos = page_pos_nil;
+					other._state->back_page_pos = page_pos_nil;
 				}
 			}
 		}
@@ -574,8 +476,7 @@ namespace abc {
 	// ..............................................................
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::next(const iterator_state& itr) const noexcept {
+	inline typename linked::iterator linked::next(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x104a5, "vmem_linked::next() Start. itr.page_pos=0x%llx, itr.edge=%u",
 				(long long)itr.page_pos(), itr.edge());
@@ -592,7 +493,7 @@ namespace abc {
 		else if (itr == static_cast<iterator_state>(rend())) {
 			// Nothing to do.
 		}
-		else if (itr.page_pos() != vmem_page_pos_nil) {
+		else if (itr.page_pos() != page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
@@ -603,8 +504,8 @@ namespace abc {
 			else {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
 
-				vmem_iterator_edge_t edge = linked_page->next_page_pos == vmem_page_pos_nil ? vmem_iterator_edge::end : vmem_iterator_edge::none;
-				result = iterator(this, linked_page->next_page_pos, vmem_item_pos_nil, edge, _log);
+				iterator_edge_t edge = linked_page->next_page_pos == page_pos_nil ? iterator_edge::end : iterator_edge::none;
+				result = iterator(this, linked_page->next_page_pos, item_pos_nil, edge, _log);
 			}
 		}
 
@@ -617,8 +518,7 @@ namespace abc {
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::prev(const iterator_state& itr) const noexcept {
+	inline typename linked::iterator linked::prev(const iterator_state& itr) const noexcept {
 		if (_log != nullptr) {
 			_log->put_any(category::abc::vmem, severity::abc::important, 0x104a8, "vmem_linked::prev() Start. itr.page_pos=0x%llx, itr.edge=%u",
 				(long long)itr.page_pos(), itr.edge());
@@ -635,7 +535,7 @@ namespace abc {
 		else if (itr == static_cast<iterator_state>(end())) {
 			result = rend_itr();
 		}
-		else if (itr.page_pos() != vmem_page_pos_nil) {
+		else if (itr.page_pos() != page_pos_nil) {
 			vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
 
 			if (page.ptr() == nullptr) {
@@ -646,8 +546,8 @@ namespace abc {
 			else {
 				vmem_linked_page* linked_page = reinterpret_cast<vmem_linked_page*>(page.ptr());
 
-				vmem_iterator_edge_t edge = linked_page->prev_page_pos == vmem_page_pos_nil ? vmem_iterator_edge::rbegin : vmem_iterator_edge::none;
-				result = iterator(this, linked_page->prev_page_pos, vmem_item_pos_nil, edge, _log);
+				iterator_edge_t edge = linked_page->prev_page_pos == page_pos_nil ? iterator_edge::rbegin : iterator_edge::none;
+				result = iterator(this, linked_page->prev_page_pos, item_pos_nil, edge, _log);
 			}
 		}
 
@@ -660,41 +560,36 @@ namespace abc {
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::pointer vmem_linked<Pool, Log>::at(const iterator_state& itr) const noexcept {
+	inline typename linked::pointer linked::at(const iterator_state& itr) const noexcept {
 		return pointer(_pool, itr.page_pos(), 0, _log);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::begin_itr() const noexcept {
-		if (_state->front_page_pos == vmem_page_pos_nil) {
+	inline typename linked::iterator linked::begin_itr() const noexcept {
+		if (_state->front_page_pos == page_pos_nil) {
 			return end_itr();
 		}
 
-		return iterator(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+		return iterator(this, _state->front_page_pos, item_pos_nil, iterator_edge::none, _log);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::iterator vmem_linked<Pool, Log>::end_itr() const noexcept {
-		return iterator(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+	inline typename linked::iterator linked::end_itr() const noexcept {
+		return iterator(this, page_pos_nil, item_pos_nil, iterator_edge::end, _log);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::reverse_iterator vmem_linked<Pool, Log>::rend_itr() const noexcept {
-		if (_state->back_page_pos == vmem_page_pos_nil) {
+	inline typename linked::reverse_iterator linked::rend_itr() const noexcept {
+		if (_state->back_page_pos == page_pos_nil) {
 			return rbegin_itr();
 		}
 
-		return iterator(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::none, _log);
+		return iterator(this, _state->back_page_pos, item_pos_nil, iterator_edge::none, _log);
 	}
 
 
-	template <typename Pool, typename Log>
-	inline typename vmem_linked<Pool, Log>::reverse_iterator vmem_linked<Pool, Log>::rbegin_itr() const noexcept {
-		return vmem_linked_iterator<Pool, Log>(this, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+	inline typename linked::reverse_iterator linked::rbegin_itr() const noexcept {
+		return vmem_linked_iterator<Pool, Log>(this, page_pos_nil, item_pos_nil, iterator_edge::rbegin, _log);
 	}
 
-}
+} }
