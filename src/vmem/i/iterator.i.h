@@ -86,7 +86,7 @@ namespace abc { namespace vmem {
         basic_iterator_state<Container>(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
     
     public:
-        basic_iterator_state<Container>& operator =(const basic_iterator_state<Container>& other) noexcept = default;
+        basic_iterator_state<Container>& operator =(const basic_iterator_state<Container>& other) = default;
         basic_iterator_state<Container>& operator =(basic_iterator_state<Container>&& other) noexcept = default;
 
     public:
@@ -182,7 +182,7 @@ namespace abc { namespace vmem {
         basic_iterator<Base, Container, T>(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
 
     public:
-        basic_iterator<Base, Container, T>& operator =(const basic_iterator<Base, Container, T>& other) noexcept = default;
+        basic_iterator<Base, Container, T>& operator =(const basic_iterator<Base, Container, T>& other) = default;
         basic_iterator<Base, Container, T>& operator =(basic_iterator<Base, Container, T>&& other) noexcept = default;
 
     public:

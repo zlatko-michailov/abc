@@ -186,9 +186,8 @@ namespace abc { namespace vmem {
          * @brief               Unlinks a page at the given iterator.
          * @param itr           Iterator.
          * @param back_page_pos Position of the back page.
-         * @return              `true` == success; `false` = error.
          */
-        bool erase_nostate(const_iterator itr, page_pos_t& back_page_pos) noexcept;
+        void erase_nostate(const_iterator itr, page_pos_t& back_page_pos);
 
     private:
         friend iterator_state;
@@ -199,20 +198,20 @@ namespace abc { namespace vmem {
          * @brief     Returns the iterator immediately following a given one.  
          * @param itr Iterator.
          */
-        iterator next(const iterator_state& itr) const noexcept;
+        iterator next(const iterator_state& itr) const;
 
         /**
          * @brief     Returns the iterator immediately preceding a given one.  
          * @param itr Iterator.
          */
-        iterator prev(const iterator_state& itr) const noexcept;
+        iterator prev(const iterator_state& itr) const;
 
         /**
          * @brief     Dereferences an iterator.
          * @param itr Iterator.
          * @return    A `ptr` instance. 
          */
-        pointer at(const iterator_state& itr) const noexcept;
+        pointer at(const iterator_state& itr) const;
 
     private:
         /**
