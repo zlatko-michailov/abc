@@ -59,6 +59,10 @@ namespace abc { namespace diag {
         diag_ready(const diag_ready& other) = default;
 
     protected:
+        diag_ready<OriginStr>& operator =(const diag_ready<OriginStr>& other) = default;
+        diag_ready<OriginStr>& operator =(diag_ready<OriginStr>&& other) noexcept = default;
+
+    protected:
         /**
          * @brief           Write a formatted message.
          * @param suborigin Entry suborigin, e.g. method.
