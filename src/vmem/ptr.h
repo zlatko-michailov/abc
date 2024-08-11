@@ -34,8 +34,14 @@ SOFTWARE.
 namespace abc { namespace vmem {
 
     template <typename T>
+    inline constexpr const char* ptr<T>::origin() noexcept {
+        return "abc::vmem::ptr";
+    }
+
+
+    template <typename T>
     inline ptr<T>::ptr(vmem::pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log)
-        : diag_base(abc::copy(_origin), log)
+        : diag_base(abc::copy(origin()), log)
         , _page(page_pos != page_pos_nil ? page(pool, page_pos, log) : page(nullptr))
         , _byte_pos(byte_pos) {
 
@@ -122,7 +128,7 @@ namespace abc { namespace vmem {
     inline T& ptr<T>::deref() const {
         constexpr const char* suborigin = "deref()";
 
-        T* p = p();
+        T* p = ptr<T>::p();
 
         diag_base::expect(suborigin, p != nullptr, 0x103b5, "p != nullptr");
 
