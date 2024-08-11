@@ -56,6 +56,9 @@ namespace abc { namespace vmem {
 
         using diag_base = diag::diag_ready<const char*>;
 
+    private:
+        static constexpr const char* origin() noexcept;
+
     public:
         using container_type = Container;
 
@@ -141,22 +144,27 @@ namespace abc { namespace vmem {
      * @tparam T         Item type.
      */
     template <typename Base, typename Container, typename T>
-    class basic_iterator : public Base {
+    class basic_iterator
+        : public Base {
+
+        using base = Base;
+        using diag_base = diag::diag_ready<const char*>;
+
     public:
         using value_type      = T;
-        using pointer         = vmem_ptr<T>;
-        using const_pointer   = vmem_ptr<const T>;
+        using pointer         = vmem::ptr<T>;
+        using const_pointer   = vmem::ptr<const T>;
         using reference       = T&;
         using const_reference = const T&;
 
     public:
         /**
-         * @brief                Constructor.
-         * @param container        Container
-         * @param page_pos        Page position.
-         * @param item_pos        Item position.
-         * @param edge            Edge.
-         * @param log            Pointer to a `log_ostream` instance.
+         * @brief           Constructor.
+         * @param container Container
+         * @param page_pos  Page position.
+         * @param item_pos  Item position.
+         * @param edge      Edge.
+         * @param log       Pointer to a `log_ostream` instance.
          */
         basic_iterator<Base, Container, T>(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log = nullptr) noexcept;
 

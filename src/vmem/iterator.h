@@ -27,234 +27,250 @@ SOFTWARE.
 
 #include <cstring>
 
-#include "../exception.h"
-#include "../i/vmem.i.h"
+#include "../diag/diag_ready.h"
+#include "i/iterator.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
-		: _container(container)
-		, _page_pos(page_pos)
-		, _item_pos(item_pos)
-		, _edge(edge)
-		, _log(log) {
+    template <typename Container>
+    inline constexpr const char* basic_iterator_state<Container>::origin() noexcept {
+        return "abc::vmem::basic_iterator_state";
+    }
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10604, "vmem_basic_iterator_state::vmem_basic_iterator_state() _page_pos=0x%llx, _item_pos=0x%x", (long long)_page_pos, _item_pos);
-		}
-	}
 
+    template <typename Container>
+    inline basic_iterator_state<Container>::basic_iterator_state(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log) noexcept
+        : diag_base(abc::copy(origin()), log),
+         _container(container)
+        , _page_pos(page_pos)
+        , _item_pos(item_pos)
+        , _edge(edge) {
 
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_basic_iterator_state<Container, Pool, Log>::vmem_basic_iterator_state(std::nullptr_t, Log* log) noexcept
-		: vmem_basic_iterator_state<Container, Pool, Log>(nullptr, vmem_page_pos_nil, vmem_item_pos_nil, vmem_iterator_edge::end, log) {
-	}
+        constexpr const char* suborigin = "basic_iterator_state()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10604, "Begin: _page_pos=0x%llx, _item_pos=0x%x", (unsigned long long)_page_pos, (unsigned)_item_pos);
 
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline bool vmem_basic_iterator_state<Container, Pool, Log>::operator ==(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::vmem, severity::abc::debug, 0x10605, "vmem_basic_iterator_state::operator ==() _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
-				(long long)_page_pos, _item_pos, _edge, (long long)other._page_pos, other._item_pos, other._edge);
-		}
 
-		return _container == other._container
-			&& _page_pos == other._page_pos
-			&& _item_pos == other._item_pos
-			&& _edge == other._edge;
-	}
+    template <typename Container>
+    inline basic_iterator_state<Container>::basic_iterator_state(std::nullptr_t, diag::log_ostream* log) noexcept
+        : basic_iterator_state<Container>(nullptr, page_pos_nil, item_pos_nil, iterator_edge::end, log) {
+    }
 
 
-	template <typename Container, typename Pool, typename Log>
-	inline bool vmem_basic_iterator_state<Container, Pool, Log>::operator !=(const vmem_basic_iterator_state<Container, Pool, Log>& other) const noexcept {
-		return !operator ==(other);
-	}
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::operator ==(const basic_iterator_state<Container>& other) const noexcept {
+        constexpr const char* suborigin = "operator ==()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10605, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u, other._page_pos=0x%llx, other._item_pos=0x%x, other._edge=%u",
+            (unsigned long long)_page_pos, (unsigned)_item_pos, (unsigned)_edge, (unsigned long long)other._page_pos, (unsigned)other._item_pos, (unsigned)other._edge);
 
+        bool are_equal = _container == other._container
+            && _page_pos == other._page_pos
+            && _item_pos == other._item_pos
+            && _edge == other._edge;
 
-	template <typename Container, typename Pool, typename Log>
-	inline bool vmem_basic_iterator_state<Container, Pool, Log>::is_valid() const noexcept {
-		return _container != nullptr;
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: are_equal=%d", are_equal);
 
+        return are_equal;
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline bool vmem_basic_iterator_state<Container, Pool, Log>::can_deref() const noexcept {
-		return is_valid()
-			&& _page_pos != vmem_page_pos_nil
-			&& _item_pos != vmem_item_pos_nil
-			&& _edge == vmem_iterator_edge::none;
-	}
 
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::operator !=(const basic_iterator_state<Container>& other) const noexcept {
+        return !operator ==(other);
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline const Container* vmem_basic_iterator_state<Container, Pool, Log>::container() const noexcept {
-		return _container;
-	}
 
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::is_valid() const noexcept {
+        return _container != nullptr;
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_page_pos_t vmem_basic_iterator_state<Container, Pool, Log>::page_pos() const noexcept {
-		return _page_pos;
-	}
 
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::can_deref() const noexcept {
+        return is_valid()
+            && _page_pos != page_pos_nil
+            && _item_pos != item_pos_nil
+            && _edge == iterator_edge::none;
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_item_pos_t vmem_basic_iterator_state<Container, Pool, Log>::item_pos() const noexcept {
-		return _item_pos;
-	}
 
+    template <typename Container>
+    inline const Container* basic_iterator_state<Container>::container() const noexcept {
+        return _container;
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline vmem_iterator_edge_t vmem_basic_iterator_state<Container, Pool, Log>::edge() const noexcept {
-		return _edge;
-	}
 
+    template <typename Container>
+    inline page_pos_t basic_iterator_state<Container>::page_pos() const noexcept {
+        return _page_pos;
+    }
 
-	template <typename Container, typename Pool, typename Log>
-	inline Log* vmem_basic_iterator_state<Container, Pool, Log>::log() const noexcept {
-		return _log;
-	}
 
+    template <typename Container>
+    inline item_pos_t basic_iterator_state<Container>::item_pos() const noexcept {
+        return _item_pos;
+    }
 
-	// --------------------------------------------------------------
 
+    template <typename Container>
+    inline iterator_edge basic_iterator_state<Container>::edge() const noexcept {
+        return _edge;
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(const Container* container, vmem_page_pos_t page_pos, vmem_item_pos_t item_pos, vmem_iterator_edge_t edge, Log* log) noexcept
-		: Base(container, page_pos, item_pos, edge, log) {
-	}
 
+    // --------------------------------------------------------------
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	template <typename OtherIterator>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(const OtherIterator& other) noexcept
-		: Base(other.container(), other.page_pos(), other.item_pos(), other.edge(), other.log()) {
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T>::basic_iterator(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log) noexcept
+        : Base(container, page_pos, item_pos, edge, log) {
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>::vmem_basic_iterator(std::nullptr_t, Log* log) noexcept
-		: Base(nullptr, log) {
-	}
 
+    template <typename Base, typename Container, typename T>
+    template <typename OtherIterator>
+    inline basic_iterator<Base, Container, T>::basic_iterator(const OtherIterator& other) noexcept
+        : Base(other.container(), other.page_pos(), other.item_pos(), other.edge(), other.log()) {
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline bool vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ==(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept {
-		return Base::operator ==(other);
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T>::basic_iterator(std::nullptr_t, diag::log_ostream* log) noexcept
+        : Base(nullptr, log) {
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline bool vmem_basic_iterator<Base, Container, T, Pool, Log>::operator !=(const vmem_basic_iterator<Base, Container, T, Pool, Log>& other) const noexcept {
-		return Base::operator !=(other);
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline bool basic_iterator<Base, Container, T>::operator ==(const basic_iterator<Base, Container, T>& other) const noexcept {
+        return Base::operator ==(other);
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++() noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107ae, "++itr");
 
-		if (Base::is_valid()) {
-			*this = Base::_container->next(*this);
-		}
+    template <typename Base, typename Container, typename T>
+    inline bool basic_iterator<Base, Container, T>::operator !=(const basic_iterator<Base, Container, T>& other) const noexcept {
+        return Base::operator !=(other);
+    }
 
-		return *this;
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T>& basic_iterator<Base, Container, T>::operator ++() noexcept {
+        constexpr const char* suborigin = "operator ++()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x107ae, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ++(int) noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107af, "itr++");
+        if (Base::is_valid()) {
+            *this = Base::_container->next(*this);
+        }
 
-		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-		if (Base::is_valid()) {
-			*this = Base::_container->next(*this);
-		}
+        return *this;
+    }
 
-		return thisCopy;
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T> basic_iterator<Base, Container, T>::operator ++(int) noexcept {
+        constexpr const char* suborigin = "operator ++(int)";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x107af, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log>& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --() noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b0, "--itr");
+        basic_iterator<Base, Container, T> thisCopy = *this;
 
-		if (Base::is_valid()) {
-			*this = Base::_container->prev(*this);
-		}
+        if (Base::is_valid()) {
+            *this = Base::_container->next(*this);
+        }
 
-		return *this;
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
+        return thisCopy;
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline vmem_basic_iterator<Base, Container, T, Pool, Log> vmem_basic_iterator<Base, Container, T, Pool, Log>::operator --(int) noexcept {
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b1, "itr--");
 
-		vmem_basic_iterator<Base, Container, T, Pool, Log> thisCopy = *this;
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T>& basic_iterator<Base, Container, T>::operator --() noexcept {
+        constexpr const char* suborigin = "operator --()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x107b0, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-		if (Base::is_valid()) {
-			*this = Base::_container->prev(*this);
-		}
+        if (Base::is_valid()) {
+            *this = Base::_container->prev(*this);
+        }
 
-		return thisCopy;
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
+        return *this;
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ->() noexcept {
-		return ptr();
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline basic_iterator<Base, Container, T> basic_iterator<Base, Container, T>::operator --(int) noexcept {
+        constexpr const char* suborigin = "operator --(int)";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x107b1, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::const_pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::operator ->() const noexcept {
-		return ptr();
-	}
+        basic_iterator<Base, Container, T> thisCopy = *this;
 
+        if (Base::is_valid()) {
+            *this = Base::_container->prev(*this);
+        }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline T& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator *() {
-		return deref();
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
+        return thisCopy;
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline const T& vmem_basic_iterator<Base, Container, T, Pool, Log>::operator *() const {
-		return deref();
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline typename basic_iterator<Base, Container, T>::pointer basic_iterator<Base, Container, T>::operator ->() noexcept {
+        return ptr();
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline typename vmem_basic_iterator<Base, Container, T, Pool, Log>::pointer vmem_basic_iterator<Base, Container, T, Pool, Log>::ptr() const noexcept {
-		if (Base::is_valid()) {
-			typename Container::pointer ptr = const_cast<Container*>(Base::_container)->at(*this);
-			return pointer(ptr.pool(), ptr.page_pos(), ptr.byte_pos(), Base::_log);
-		}
-		
-		return pointer(nullptr);
-	}
 
+    template <typename Base, typename Container, typename T>
+    inline typename basic_iterator<Base, Container, T>::const_pointer basic_iterator<Base, Container, T>::operator ->() const noexcept {
+        return ptr();
+    }
 
-	template <typename Base, typename Container, typename T, typename Pool, typename Log>
-	inline T& vmem_basic_iterator<Base, Container, T, Pool, Log>::deref() const {
-		vmem_ptr<T, Pool, Log> p = ptr();
 
-		if (p == nullptr) {
-			throw exception<std::runtime_error, Log>("vmem_iterator::deref() Dereferencing invalid iterator", 0x10606);
-		}
+    template <typename Base, typename Container, typename T>
+    inline T& basic_iterator<Base, Container, T>::operator *() {
+        return deref();
+    }
 
-		Base::_log->put_any(category::abc::vmem, severity::abc::debug, 0x107b2, "deref()");
 
-		return *p;
-	}
+    template <typename Base, typename Container, typename T>
+    inline const T& basic_iterator<Base, Container, T>::operator *() const {
+        return deref();
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename Base, typename Container, typename T>
+    inline typename basic_iterator<Base, Container, T>::pointer basic_iterator<Base, Container, T>::ptr() const noexcept {
+        if (base::is_valid()) {
+            typename Container::pointer ptr = const_cast<Container*>(base::_container)->at(*this);
+            return pointer(ptr.pool(), ptr.page_pos(), ptr.byte_pos(), diag_base::log());
+        }
+        
+        return pointer(nullptr);
+    }
 
 
+    template <typename Base, typename Container, typename T>
+    inline T& basic_iterator<Base, Container, T>::deref() const {
+        constexpr const char* suborigin = "deref()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
-}
+        pointer p = ptr();
+        diag_base::expect(suborigin, p != nullptr, 0x10606, "p != nullptr");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x107b2, "End: page_pos=0x%llx, byte_pos=0x%x", (unsigned long long)p.page_pos(), (unsigned)p.byte_pos());
+
+        return *p;
+    }
+
+
+    // --------------------------------------------------------------
+
+
+
+} }
