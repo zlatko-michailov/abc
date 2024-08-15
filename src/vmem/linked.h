@@ -30,10 +30,17 @@ SOFTWARE.
 #include "../util.h"
 #include "../diag/diag_ready.h"
 #include "ptr.h"
+#include "iterator.h"
+#include "pool.h"
 #include "i/linked.i.h"
 
 
 namespace abc { namespace vmem {
+
+    inline constexpr const char* linked::origin() noexcept {
+        return "abc::vmem::linked";
+    }
+
 
     inline constexpr bool linked::is_uninit(const linked_state* state) noexcept {
         return
@@ -54,17 +61,17 @@ namespace abc { namespace vmem {
 
 
     inline linked::linked(linked_state* state, pool* pool, diag::log_ostream* log)
-        : diag_base(abc::copy(_origin), log)
+        : diag_base(abc::copy(origin()), log)
         , _state(state)
         , _pool(pool) {
 
         constexpr const char* suborigin = "linked()";
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x1048a, "Begin: state=%p, pool=%p", state, pool);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1048a, "Begin: _state=%p, _pool=%p", _state, _pool);
 
-        diag_base::expect(suborigin, state != nullptr, 0x1048b, "state != nullptr");
-        diag_base::expect(suborigin, pool != nullptr, 0x1048c, "pool != nullptr");
+        diag_base::expect(suborigin, _state != nullptr, 0x1048b, "_state != nullptr");
+        diag_base::expect(suborigin, _pool != nullptr, 0x1048c, "_pool != nullptr");
 
-        if (is_uninit(state)) {
+        if (is_uninit(_state)) {
             _state->front_page_pos = page_pos_nil;
             _state->back_page_pos = page_pos_nil;
         }
@@ -476,7 +483,7 @@ namespace abc { namespace vmem {
     }
 
 
-    inline typename linked::pointer linked::at(const iterator_state& itr) const noexcept {
+    inline typename linked::pointer linked::at(const iterator_state& itr) const {
         return pointer(_pool, itr.page_pos(), 0, diag_base::log());
     }
 

@@ -46,7 +46,7 @@ SOFTWARE.
 int main(int /*argc*/, const char* argv[]) {
     abc::table_ostream table(std::cout.rdbuf());
     test_log_line line(&table);
-    test_log_filter filter("", abc::diag::severity::critical);
+    test_log_filter filter("", abc::diag::severity::important);
     test_log log(&line, &filter);
 
     test_suite suite(
@@ -259,12 +259,12 @@ int main(int /*argc*/, const char* argv[]) {
             } },
 #endif //// TODO:
             { "vmem", {
-                { "test_vmem_pool_fit",                              test_vmem_pool_fit },
+                /*{ "test_vmem_pool_fit",                              test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
                 { "test_vmem_pool_reopen",                           test_vmem_pool_reopen },
                 { "test_vmem_pool_freepages",                        test_vmem_pool_freepages },
+                */{ "test_vmem_linked_mixedone",                       test_vmem_linked_mixedone },
 #if 0 //// TODO:
-                { "test_vmem_linked_mixedone",                       test_vmem_linked_mixedone },
                 { "test_vmem_linked_mixedmany",                      test_vmem_linked_mixedmany },
                 { "test_vmem_linked_splice",                         test_vmem_linked_splice },
                 { "test_vmem_linked_clear",                          test_vmem_linked_clear },

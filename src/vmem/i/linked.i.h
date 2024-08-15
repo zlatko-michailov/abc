@@ -29,6 +29,7 @@ SOFTWARE.
 #include "layout.i.h"
 #include "ptr.i.h"
 #include "iterator.i.h"
+#include "pool.i.h"
 
 
 namespace abc { namespace vmem {
@@ -55,7 +56,8 @@ namespace abc { namespace vmem {
         using diag_base = diag::diag_ready<const char*>;
         using iterator_state = linked_iterator_state;
 
-        static constexpr const char* _origin = "abc::vmem::linked";
+    private:
+        static constexpr const char* origin() noexcept;
 
     public:
         using value_type             = page_pos_t;

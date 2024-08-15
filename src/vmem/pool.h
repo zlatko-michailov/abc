@@ -35,7 +35,7 @@ SOFTWARE.
 #include "../util.h"
 #include "../diag/diag_ready.h"
 #include "page.h"
-//// TODO: #include "linked.h"
+#include "linked.h"
 #include "i/layout.i.h"
 #include "i/pool.i.h"
 
@@ -273,23 +273,26 @@ namespace abc { namespace vmem {
 
         page_pos_t page_pos = page_pos_nil;
 
-#if 0 //// TODO: Linked
-        // Get the root page to get the free pages linked state.
-        vmem::page page(this, page_pos_root, diag_base::log());
-        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
+        if (_ready) {
+            // Get the root page to get the free pages linked state.
+            vmem::page page(this, page_pos_root, diag_base::log());
+            diag_base::expect(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
 
-        vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
-        vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
+            vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
+            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
 
-        if (!free_pages_linked.empty()) {
-            diag_base::put_any(suborigin, diag::severity::optional, 0x10393, "!empty");
+            if (!free_pages_linked.empty()) {
+                diag_base::put_any(suborigin, diag::severity::optional, 0x10393, "!empty");
 
-            page_pos = free_pages_linked.back();
-            free_pages_linked.pop_back();
+                page_pos = free_pages_linked.back();
+                free_pages_linked.pop_back();
 
-            diag_base::put_any(suborigin, diag::severity::optional, 0x10394, "page_pos=0x%llx", (unsigned long long)page_pos);
+                diag_base::put_any(suborigin, diag::severity::optional, 0x10394, "page_pos=0x%llx", (unsigned long long)page_pos);
+            }
         }
-#endif
+        else {
+            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "!_ready");
+        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b4, "End: page_pos=0x%llx", (unsigned long long)page_pos);
 
@@ -301,16 +304,19 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "push_free_page_pos()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b5, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
-#if 0 //// TODO: Linked
-        // Get the root page to get the free pages linked state.
-        vmem:page page(this, page_pos_root, _log);
-        diag_base::expect(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
+        if (_ready) {
+            // Get the root page to get the free pages linked state.
+            vmem::page page(this, page_pos_root, diag_base::log());
+            diag_base::expect(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
 
-        vmem::root_page* root_page = reinterpret_cast<root_page*>(page.ptr());
-        vmem::linked free_pages_linked(&root_page->free_pages, this, _log);
+            vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
+            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
 
-        free_pages_linked.push_back(page_pos);
-#endif
+            free_pages_linked.push_back(page_pos);
+        }
+        else {
+            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "!_ready");
+        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b6, "End:");
     }
