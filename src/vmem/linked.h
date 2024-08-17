@@ -354,7 +354,7 @@ namespace abc { namespace vmem {
 
 
     inline void linked::clear() {
-        _pool->clear_linked(this);
+        _pool->clear_linked(*this);
     }
 
 

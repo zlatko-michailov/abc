@@ -525,7 +525,7 @@ namespace abc { namespace vmem {
                 }
             }
 
-            // Pass 2: If Pass 1didn't free up anything, free all unlocked pages.
+            // Pass 2: If Pass 1 didn't free up anything, free all unlocked pages.
             if (_mapped_pages.size() == _config.max_mapped_page_count) {
                 mapped_page_itr = _mapped_pages.begin();
                 while (mapped_page_itr != _mapped_pages.end()) {
@@ -727,33 +727,22 @@ namespace abc { namespace vmem {
                 (unsigned)_mapped_page_totals.check_count, (unsigned)(check_factor_x10 / 10), (unsigned)(check_factor_x10 % 10), (unsigned)check_factor_percent);
         }
     }
-
-
-    template <std::size_t MaxMappedPages, typename Log>
-    inline void pool<MaxMappedPages, Log>::clear_linked(linked<Pool, Log>& linked) {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104c3, "pool::clear_linked() Start");
-        }
-
-        page<Pool, Log> page(this, page_pos_root, _log);
-
-        if (page.ptr() == nullptr) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::warning, 0x104c4, "pool::clear_linked() Could not check free_pages");
-            }
-        }
-        else {
-            root_page* root_page = reinterpret_cast<root_page*>(page.ptr());
-
-            linked<Pool, Log> free_pages_linked(&root_page->free_pages, this, _log);
-            free_pages_linked.splice(linked);
-        }
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x104c5, "pool::clear_linked() Done.");
-        }
-    }
 #endif
+
+
+    inline void pool::clear_linked(linked& linked) {
+        constexpr const char* suborigin = "clear_linked()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104c3, "Begin:");
+
+        vmem::page root_page(this, page_pos_root, diag_base::log());
+        diag_base::expect(suborigin, root_page.ptr() != nullptr, 0x104c4, "root_page.ptr() != nullptr");
+
+        vmem::root_page* root_linked_page = reinterpret_cast<vmem::root_page*>(root_page.ptr());
+        vmem::linked free_pages_linked(&root_linked_page->free_pages, this, diag_base::log());
+        free_pages_linked.splice(linked);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x104c5, "End:");
+    }
 
 
     inline void pool::log_stats() noexcept {

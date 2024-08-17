@@ -23,8 +23,6 @@ SOFTWARE.
 */
 
 
-#include <array> //// TODO: Remove?
-
 #include "inc/vmem.h"
 
 
@@ -34,6 +32,7 @@ constexpr std::size_t max_mapped_page_count_min    = 4;
 constexpr std::size_t max_mapped_page_count_fit    = 6;
 constexpr std::size_t max_mapped_page_count_exceed = 5;
 constexpr std::size_t max_mapped_page_count_free   = 6;
+constexpr std::size_t max_mapped_page_count_linked = 5;
 //constexpr std::size_t max_mapped_page_count_map    = 5;
 
 using LinkedPageData = unsigned long long;
@@ -213,22 +212,22 @@ bool test_vmem_pool_freepages(test_context& context) {
         // Page 5
         abc::vmem::page page5(&pool, context.log());
         passed = context.are_equal(page5.ptr() != nullptr, true, 0x103c6, "%d") && passed;
-        //// TODO: passed = context.are_equal((long long)page5.pos(), 5LL, 0x103c7, "0x%llx") && passed;
+        passed = context.are_equal((long long)page5.pos(), 5LL, 0x103c7, "0x%llx") && passed;
 
         // Page 4
         abc::vmem::page page4(&pool, context.log());
         passed = context.are_equal(page4.ptr() != nullptr, true, 0x103c8, "%d") && passed;
-        //// TODO: passed = context.are_equal((long long)page4.pos(), 4LL, 0x103c9, "0x%llx") && passed;
+        passed = context.are_equal((long long)page4.pos(), 4LL, 0x103c9, "0x%llx") && passed;
 
         // Page 3
         abc::vmem::page page3(&pool, context.log());
         passed = context.are_equal(page3.ptr() != nullptr, true, 0x103ca, "%d") && passed;
-        //// TODO: passed = context.are_equal((long long)page3.pos(), 3LL, 0x103cb, "0x%llx") && passed;
+        passed = context.are_equal((long long)page3.pos(), 3LL, 0x103cb, "0x%llx") && passed;
 
         // Page 2
         abc::vmem::page page2(&pool, context.log());
         passed = context.are_equal(page2.ptr() != nullptr, true, 0x103cc, "%d") && passed;
-        //// TODO: passed = context.are_equal((long long)page2.pos(), 2LL, 0x103cd, "0x%llx") && passed;
+        passed = context.are_equal((long long)page2.pos(), 2LL, 0x103cd, "0x%llx") && passed;
     }
 
     return passed;
@@ -290,24 +289,20 @@ bool test_vmem_linked_mixedone(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using Linked = abc::vmem_linked<Pool, Log>;
-    using Iterator = abc::vmem_linked::const_iterator<Pool, Log>;
-
+bool test_vmem_linked_mixedmany(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/linked_mixedmany.vmem", context.log);
+    abc::vmem::pool_config config("out/test/linked_mixedmany.vmem", max_mapped_page_count_linked);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_linked_state linked_state;
-    Linked linked(&linked_state, &pool, context.log);
+    abc::vmem::linked_state linked_state;
+    abc::vmem::linked linked(&linked_state, &pool, context.log());
 
     // Insert four pages
     {
         // Page 2
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104d2, "%d") && passed;
         passed = context.are_equal(actual_itr == linked.crend(), true, 0x104d3, "%d") && passed;
@@ -316,8 +311,8 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // Page 3
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.end(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.crend(), true, 0x104d4, "%d") && passed;
     }
@@ -325,9 +320,9 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // Page 4
-        Iterator actual_itr = linked.end();
-        Iterator itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-        Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator itr = abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, itr, expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == expected_itr, true, 0x104d5, "%d") && passed;
     }
@@ -335,8 +330,8 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // Page 5
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 5U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 5U, 0x0065, linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104d6, "%d") && passed;
     }
@@ -344,12 +339,12 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     // Iterate after all inserts
     {
-        using Pair = std::pair<LinkedPageData, Iterator>;
+        using Pair = std::pair<LinkedPageData, abc::vmem::linked::const_iterator>;
         const Pair expected[] = {
-            { 0x0065ULL, Iterator(&linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0062ULL, Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0064ULL, Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0063ULL, Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+            { 0x0065ULL, abc::vmem::linked::const_iterator(&linked, 5U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0062ULL, abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0064ULL, abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0063ULL, abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
         };
         constexpr std::size_t expected_len = sizeof(expected) / sizeof(Pair); 
 
@@ -361,17 +356,17 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // erase(middle)
-        Iterator itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-        Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-        Iterator actual_itr = linked.erase(itr);
+        abc::vmem::linked::const_iterator itr = abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
+        abc::vmem::linked::const_iterator actual_itr = linked.erase(itr);
         passed = context.are_equal(actual_itr == expected_itr, true, 0x104d7, "%d") && passed;
     }
     // 5 4 3
 
     {
         // erase(begin)
-        Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
-        Iterator actual_itr = linked.erase(linked.begin());
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
+        abc::vmem::linked::const_iterator actual_itr = linked.erase(linked.begin());
         passed = context.are_equal(actual_itr == expected_itr, true, 0x104d8, "%d") && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104d9, "%d") && passed;
     }
@@ -379,8 +374,8 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // erase(rend)
-        Iterator actual_itr = linked.erase(linked.rend());
-        Iterator expected_itr = linked.end();
+        abc::vmem::linked::const_iterator actual_itr = linked.erase(linked.rend());
+        abc::vmem::linked::const_iterator expected_itr = linked.end();
         passed = context.are_equal(actual_itr == expected_itr, true, 0x104da, "%d") && passed;
         passed = context.are_equal(actual_itr == linked.cend(), true, 0x104db, "%d") && passed;
     }
@@ -388,9 +383,9 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     // Iterate after all erases
     {
-        using Pair = std::pair<LinkedPageData, Iterator>;
+        using Pair = std::pair<LinkedPageData, abc::vmem::linked::const_iterator>;
         const Pair expected[] = {
-            { 0x0064ULL, Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+            { 0x0064ULL, abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
         };
         constexpr std::size_t expected_len = sizeof(expected) / sizeof(Pair); 
 
@@ -400,7 +395,7 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
     // Allocate again
     {
         // Page 3
-        abc::vmem::page page3(&pool, context.log);
+        abc::vmem::page page3(&pool, context.log());
         LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
         passed = context.are_equal(linked_page3 != nullptr, true, 0x104dc, "%d") && passed;
         passed = context.are_equal((long long)page3.pos(), 3LL, 0x104dd, "0x%llx") && passed;
@@ -408,7 +403,7 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // Page 5
-        abc::vmem::page page5(&pool, context.log);
+        abc::vmem::page page5(&pool, context.log());
         LinkedPage* linked_page5 = reinterpret_cast<LinkedPage*>(page5.ptr());
         passed = context.are_equal(linked_page5 != nullptr, true, 0x104de, "%d") && passed;
         passed = context.are_equal((long long)page5.pos(), 5LL, 0x104df, "0x%llx") && passed;
@@ -416,7 +411,7 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 
     {
         // Page 2
-        abc::vmem::page page2(&pool, context.log);
+        abc::vmem::page page2(&pool, context.log());
         LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
         passed = context.are_equal(linked_page2 != nullptr, true, 0x104e0, "%d") && passed;
         passed = context.are_equal((long long)page2.pos(), 2LL, 0x104e1, "0x%llx") && passed;
@@ -426,23 +421,20 @@ bool test_vmem_linked_mixedmany(test_context<abc::test::log>& context) {
 }
 
 
-bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using Linked = abc::vmem_linked<Pool, Log>;
-    using Iterator = abc::vmem_linked::const_iterator<Pool, Log>;
-
+bool test_vmem_linked_splice(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/linked_splice.vmem", context.log);
+    abc::vmem::pool_config config("out/test/linked_splice.vmem", max_mapped_page_count_min);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_linked_state linked_state;
-    Linked linked(&linked_state, &pool, context.log);
+    abc::vmem::linked_state linked_state;
+    abc::vmem::linked linked(&linked_state, &pool, context.log());
 
     // Insert three pages
     {
         // Page 2
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 2U, 0x0062, linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104e2, "%d") && passed;
         passed = context.are_equal(actual_itr == linked.crend(), true, 0x104e3, "%d") && passed;
@@ -451,8 +443,8 @@ bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 
     {
         // Page 3
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 3U, 0x0063, linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104e4, "%d") && passed;
     }
@@ -460,21 +452,21 @@ bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 
     {
         // Page 4
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 4U, 0x0064, linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.cbegin(), true, 0x104e5, "%d") && passed;
     }
     // 4 3 2
 
-    abc::vmem_linked_state other_linked_state;
-    Linked other_linked(&other_linked_state, &pool, context.log);
+    abc::vmem::linked_state other_linked_state;
+    abc::vmem::linked other_linked(&other_linked_state, &pool, context.log());
 
     // Insert two pages
     {
         // Page 5
-        Iterator actual_itr = other_linked.end();
-        Iterator expected_itr = Iterator(&other_linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = other_linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&other_linked, 5U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, other_linked, 5U, 0x0065, other_linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == other_linked.cbegin(), true, 0x104e6, "%d") && passed;
         passed = context.are_equal(actual_itr == other_linked.crend(), true, 0x104e7, "%d") && passed;
@@ -483,8 +475,8 @@ bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 
     {
         // Page 6
-        Iterator actual_itr = other_linked.end();
-        Iterator expected_itr = Iterator(&other_linked, 6U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = other_linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&other_linked, 6U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, other_linked, 6U, 0x0066, other_linked.begin(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == other_linked.cbegin(), true, 0x104e8, "%d") && passed;
     }
@@ -498,13 +490,13 @@ bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 
     // Iterate
     {
-        using Pair = std::pair<LinkedPageData, Iterator>;
+        using Pair = std::pair<LinkedPageData, abc::vmem::linked::const_iterator>;
         const Pair expected[] = {
-            { 0x0064ULL, Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0063ULL, Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0062ULL, Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0066ULL, Iterator(&linked, 6U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
-            { 0x0065ULL, Iterator(&linked, 5U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log) },
+            { 0x0064ULL, abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0063ULL, abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0062ULL, abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0066ULL, abc::vmem::linked::const_iterator(&linked, 6U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
+            { 0x0065ULL, abc::vmem::linked::const_iterator(&linked, 5U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log()) },
         };
         constexpr std::size_t expected_len = sizeof(expected) / sizeof(Pair); 
 
@@ -515,23 +507,20 @@ bool test_vmem_linked_splice(test_context<abc::test::log>& context) {
 }
 
 
-bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using Linked = abc::vmem_linked<Pool, Log>;
-    using Iterator = abc::vmem_linked_iterator<Pool, Log>;
-
+bool test_vmem_linked_clear(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/linked_clear.vmem", context.log);
+    abc::vmem::pool_config config("out/test/linked_clear.vmem", max_mapped_page_count_min);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_linked_state linked_state;
-    Linked linked(&linked_state, &pool, context.log);
+    abc::vmem::linked_state linked_state;
+    abc::vmem::linked linked(&linked_state, &pool, context.log());
 
     // Allocate and insert
     {
         // Page 2
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 2U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 2U, 0x0072, linked.end(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.begin(), true, 0x104eb, "%d") && passed;
         passed = context.are_equal(actual_itr == linked.rend(), true, 0x104ec, "%d") && passed;
@@ -539,16 +528,16 @@ bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
 
     {
         // Page 3
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 3U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 3U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 3U, 0x0073, linked.end(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.rend(), true, 0x104ed, "%d") && passed;
     }
 
     {
         // Page 4
-        Iterator actual_itr = linked.end();
-        Iterator expected_itr = Iterator(&linked, 4U, vmem_item_pos_nil, abc::vmem_iterator_edge::none, context.log);
+        abc::vmem::linked::const_iterator actual_itr = linked.end();
+        abc::vmem::linked::const_iterator expected_itr = abc::vmem::linked::const_iterator(&linked, 4U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::none, context.log());
         passed = insert_linked_page(context, &pool, linked, 4U, 0x0074, linked.end(), expected_itr, actual_itr) && passed;
         passed = context.are_equal(actual_itr == linked.rend(), true, 0x104ee, "%d") && passed;
     }
@@ -559,21 +548,21 @@ bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
     // Allocate again
     {
         // Page 4
-        abc::vmem::page page4(&pool, context.log);
+        abc::vmem::page page4(&pool, context.log());
         LinkedPage* linked_page4 = reinterpret_cast<LinkedPage*>(page4.ptr());
         passed = context.are_equal(linked_page4 != nullptr, true, 0x104ef, "%d") && passed;
         passed = context.are_equal((long long)page4.pos(), 4LL, 0x104f0, "0x%llx") && passed;
     }
     {
         // Page 3
-        abc::vmem::page page3(&pool, context.log);
+        abc::vmem::page page3(&pool, context.log());
         LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
         passed = context.are_equal(linked_page3 != nullptr, true, 0x104f1, "%d") && passed;
         passed = context.are_equal((long long)page3.pos(), 3LL, 0x104f2, "0x%llx") && passed;
     }
     {
         // Page 2
-        abc::vmem::page page2(&pool, context.log);
+        abc::vmem::page page2(&pool, context.log());
         LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
         passed = context.are_equal(linked_page2 != nullptr, true, 0x104f3, "%d") && passed;
         passed = context.are_equal((long long)page2.pos(), 2LL, 0x104f4, "0x%llx") && passed;
@@ -583,6 +572,7 @@ bool test_vmem_linked_clear(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_list_insert(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using Item = std::array<std::uint8_t, 900>;

@@ -187,9 +187,9 @@ namespace abc { namespace vmem {
 
         /**
          * @brief        Frees up all pages of the `linked` struct at once.
-         * @param linked Pointer to a `linked` instance.
+         * @param linked A `linked` instance.
          */
-        void clear_linked(linked* linked);
+        void clear_linked(linked& linked);
 
 
     // Constructor helpers

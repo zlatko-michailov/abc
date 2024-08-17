@@ -26,7 +26,7 @@
     - Entities
         - page.h
         - ptr.h
-        - pool/h
+        - pool.h
         - Remove util.h or merge it with the main util.h.
         - linked.h
     - Samples
