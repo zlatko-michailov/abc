@@ -20,15 +20,17 @@
 - __UNTABIFY each file before making changes!__
 - `vmem`
     - pool
-        - Remove unused methods.
+        - __Remove unused methods.__
         - To free capacity, use an efficient container and algorithms.
         - Use a lock! (Minimize public surface.)
     - Entities
         - page.h
         - ptr.h
         - pool.h
-        - Remove util.h or merge it with the main util.h.
+        - __Remove util.h or merge it with the main util.h.__
+        - iterator.h
         - linked.h
+        - container.h
     - Samples
         - tictactoe
         - connect4
