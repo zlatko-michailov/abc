@@ -235,6 +235,9 @@ namespace abc { namespace vmem {
         using diag_base = diag::diag_ready<const char*>;
         using iterator_state = container_iterator_state<T, Header>;
 
+    private:
+        static constexpr const char* origin() noexcept;
+
     public:
         using value_type             = T;
         using pointer                = ptr<T>;
@@ -406,20 +409,20 @@ namespace abc { namespace vmem {
          * @param itr  Iterator.
          * @param item Item.
          */
-        result2 insert_nostate(const_iterator itr, const_reference item) noexcept;
+        result2 insert_nostate(const_iterator itr, const_reference item);
 
         /**
          * @brief      Insert an item to an empty container.
          * @param item Item.
          */
-        result2 insert_empty(const_reference item) noexcept;
+        result2 insert_empty(const_reference item);
 
         /**
          * @brief      Insert an item to a non-empty container.
          * @param itr  Iterator.
          * @param item Item.
          */
-        result2 insert_nonempty(const_iterator itr, const_reference item) noexcept;
+        result2 insert_nonempty(const_iterator itr, const_reference item);
 
         /**
          * @brief                Insert an item to a page that is full.
@@ -427,7 +430,7 @@ namespace abc { namespace vmem {
          * @param item           Item.
          * @param container_page Pointer to a `container_page`.
          */
-        result2 insert_with_overflow(const_iterator itr, const_reference item, vmem::container_page<T, Header>* container_page) noexcept;
+        result2 insert_with_overflow(const_iterator itr, const_reference item, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief                Insert an item to a page that has capacity.
@@ -451,9 +454,8 @@ namespace abc { namespace vmem {
          * @param after_page_pos     Position of the page to insert the new one after.
          * @param new_page           The newly inserted page as a reference to `page`. The caller must keep this page locked until the insert is complete.
          * @param new_container_page The newly inserted page as a pointer to `container_page`.
-         * @return                   `true` = success; `false` = error.
          */
-        bool insert_page_after(page_pos_t after_page_pos, page& new_page, container_page<T, Header>*& new_container_page) noexcept; //// TODO: throwable?
+        void insert_page_after(page_pos_t after_page_pos, page& new_page, container_page<T, Header>*& new_container_page);
 
         /**
          * @brief                Evaluates the balancing policy on insert.

@@ -31,13 +31,13 @@ SOFTWARE.
 namespace abc {
 
 	template <typename T>
-	void vmem_init(T& dest) noexcept {
+	void vmem_init(T& dest) noexcept { //// TODO: REMOVE
 		std::memset(&dest, 0, sizeof(T));
 	}
 
 
 	template <typename T>
-	void vmem_copy(T& dest, const T& src) noexcept {
+	void vmem_copy(T& dest, const T& src) noexcept { //// TODO: REMOVE
 		std::memmove(&dest, &src, sizeof(T));
 	}
 

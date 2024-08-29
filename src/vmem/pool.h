@@ -30,7 +30,6 @@ SOFTWARE.
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <cstring>
 
 #include "../util.h"
 #include "../diag/diag_ready.h"

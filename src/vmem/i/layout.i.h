@@ -147,8 +147,8 @@ namespace abc { namespace vmem {
     struct container_state
         : public linked_state {
 
-        item_pos_t item_size        = 0;
-        page_pos_t total_item_count = 0;
+        item_pos_t  item_size        = 0;
+        std::size_t total_item_count = 0;
     };
 
 
