@@ -329,33 +329,25 @@ namespace abc { namespace vmem {
 
         // Insert without changing the state.
         result2 result = insert_nostate(itr, item_copy);
+        diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
-        if (result.iterator.is_valid()) {
-            // We have inserted successfully.
-
-            // Update the front page pos.
-            if (_state->front_page_pos == vmem_page_pos_nil) {
-                _state->front_page_pos = result.iterator.page_pos();
-            }
-
-            // Update the back page pos.
-            if (_state->back_page_pos == vmem_page_pos_nil) {
-                _state->back_page_pos = result.iterator.page_pos();
-            }
-            else if (_state->back_page_pos == itr.page_pos() && result.page_leads[0].page_pos != vmem_page_pos_nil) {
-                _state->back_page_pos = result.page_leads[0].page_pos;
-            } 
-
-            // Update the total item count.
-            _state->total_item_count++;
+        // Update the front page pos.
+        if (_state->front_page_pos == vmem_page_pos_nil) {
+            _state->front_page_pos = result.iterator.page_pos();
         }
-        else {
-            // We have failed to insert.
 
-            // Return end().
-            result.iterator = end_itr();
-            result.page_leads[0] = result.page_leads[1] = page_lead();
+        // Update the back page pos.
+        if (_state->back_page_pos == vmem_page_pos_nil) {
+            _state->back_page_pos = result.iterator.page_pos();
         }
+        else if (_state->back_page_pos == itr.page_pos() && result.page_leads[0].page_pos != vmem_page_pos_nil) {
+            _state->back_page_pos = result.page_leads[0].page_pos;
+        } 
+
+        // Update the total item count.
+        _state->total_item_count++;
+
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1044d, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx, total_item_count=%zu",
                 (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (unsigned long long)result.page_leads[0].page_pos, (std::size_t)_state->total_item_count);
@@ -403,8 +395,10 @@ namespace abc { namespace vmem {
             result = insert_nonempty(itr, item);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x10450, "End: result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
-                result.iterator.is_valid(), (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (unsigned long long)result.page_leads[0].page_pos);
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10450, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u, result.page_pos=0x%llx",
+                (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge(), (unsigned long long)result.page_leads[0].page_pos);
 
         return result;
     }
@@ -426,55 +420,42 @@ namespace abc { namespace vmem {
         iterator itr = iterator(this, new_page.pos(), 0, iterator_edge::none, diag_base::log());
         result2 result = insert_with_capacity(itr, item, new_container_page);
 
-        diag_base::ensure(suborigin, result.iterator.is_valid(), __TAG__, "result.iterator.is_valid()");
-        diag_base::ensure(suborigin, result.iterator.page_pos() != page_pos_nil, __TAG__, "result.iterator.page_pos() != page_pos_nil");
-        diag_base::ensure(suborigin, result.page_leads[0].page_pos != page_pos_nil, __TAG__, "result.page_leads[0].page_pos != page_pos_nil");
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x10452, "End: result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-                result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_leads[0].page_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10452, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+                (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), (unsigned long long)result.page_leads[0].page_pos);
 
         return result;
     }
 
 
-    //// TODO: Continue here.
     template <typename T, typename Header>
     inline typename container<T, Header>::result2 container<T, Header>::insert_nonempty(const_iterator itr, const_reference item) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x10453, "container::insert_nonempty() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
-                (long long)itr.page_pos(), itr.item_pos());
-        }
+        constexpr const char* suborigin = "insert_nonempty";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10453, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), itr.item_pos());
 
         result2 result;
 
-        vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
+        vmem::page page(_pool, itr.page_pos(), diag_base::log());
+        diag_base::expect(suborigin, page.pos() == itr.page_pos(), __TAG__, "page.pos() == itr.page_pos()");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10454, "page.ptr() != nullptr");
 
-        if (page.ptr() == nullptr) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::warning, 0x10454, "container::insert_nonempty() Could not load page pos=0x%llx", (long long)page.pos());
-            }
+        container_page<T, Header>* container_page = reinterpret_cast<container_page<T, Header>*>(page.ptr());
+        diag_base::put_any(suborigin, diag::severity::verbose, 0x10455, "item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
+
+        if (container_page->item_count == page_capacity()) {
+            // The page has no capacity.
+            result = insert_with_overflow(itr, item, container_page);
         }
         else {
-            container_page<T, Header>* container_page = reinterpret_cast<container_page<T, Header>*>(page.ptr());
-
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x10455, "container::insert_nonempty() item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
-            }
-
-            if (container_page->item_count == page_capacity()) {
-                // The page has no capacity.
-                result = insert_with_overflow(itr, item, container_page);
-            }
-            else {
-                // The page has capacity.
-                result = insert_with_capacity(itr, item, container_page);
-            }
+            // The page has capacity.
+            result = insert_with_capacity(itr, item, container_page);
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x10456, "container::insert_nonempty() Done. result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-                result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), (long long)result.page_leads[0].page_pos);
-        }
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10456, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+                (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), (unsigned long long)result.page_leads[0].page_pos);
 
         return result;
     }
@@ -517,22 +498,22 @@ namespace abc { namespace vmem {
         result.page_leads[1] = page_lead(container_page_lead_operation::original, itr.page_pos());
         result.page_leads[1].items[0], container_page->items[0];
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x10458, "End: result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
-                result.iterator.is_valid(), (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), (unsigned long long)result.page_leads[0].page_pos);
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10458, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
+                (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), (unsigned long long)result.page_leads[0].page_pos);
 
         return result;
     }
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::result2 container<T, Header>::insert_with_capacity(const_iterator itr, const_reference item, container_page<T, Header>* container_page) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x10459, "container::insert_with_capacity() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x",
-                (long long)itr.page_pos(), itr.item_pos());
-        }
+    inline typename container<T, Header>::result2 container<T, Header>::insert_with_capacity(const_iterator itr, const_reference item, container_page<T, Header>* container_page) {
+        constexpr const char* suborigin = "insert_with_overflow";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10459, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), itr.item_pos());
 
         result2 result;
-        result.iterator = iterator(this, itr.page_pos(), itr.item_pos() != vmem_item_pos_nil ? itr.item_pos() : container_page->item_count, vmem_iterator_edge::none, _log);
+        result.iterator = iterator(this, itr.page_pos(), itr.item_pos() != item_pos_nil ? itr.item_pos() : container_page->item_count, iterator_edge::none, diag_base::log());
 
         // Shift items from the insertion position to free up a slot.
         std::size_t move_item_count = container_page->item_count - result.iterator.item_pos();
@@ -542,21 +523,19 @@ namespace abc { namespace vmem {
 
         // Insert the item.
         ++container_page->item_count;
-        vmem_copy(container_page->items[result.iterator.item_pos()], item);
+        container_page->items[result.iterator.item_pos()] = item;
+        diag_base::put_any(suborigin, diag::severity::debug, 0x1045a, &container_page->items[result.iterator.item_pos()], std::min(sizeof(T), (std::size_t)16));
 
-        if (_log != nullptr) {
-            _log->put_binary(category::abc::vmem, severity::abc::debug, 0x1045a, &container_page->items[result.iterator.item_pos()], std::min(sizeof(T), (std::size_t)16));
-        }
+        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x1045b, "container::insert_with_capacity() Done. result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x",
-                (long long)result.iterator.page_pos(), result.iterator.item_pos());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10459, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x",
+                (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos());
 
         return result;
     }
 
 
+    //// TODO: Continue here.
     template <typename T, typename Header>
     inline void container<T, Header>::balance_split(vmem_page_pos_t page_pos, container_page<T, Header>* container_page, vmem_page_pos_t new_page_pos, container_page<T, Header>* new_container_page) noexcept {
         if (_log != nullptr) {

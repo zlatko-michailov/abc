@@ -438,7 +438,7 @@ namespace abc { namespace vmem {
          * @param item           Item.
          * @param container_page Pointer to a `container_page`.
          */
-        result2 insert_with_capacity(const_iterator itr, const_reference item, vmem::container_page<T, Header>* container_page) noexcept;
+        result2 insert_with_capacity(const_iterator itr, const_reference item, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief                    Splits items among two pages.
