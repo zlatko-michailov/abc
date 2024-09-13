@@ -90,11 +90,32 @@ namespace abc { namespace vmem {
 
 
     template <typename Container>
+    inline bool basic_iterator_state<Container>::is_valid(Container* container) const noexcept {
+        return is_valid()
+            && _container == container;
+    }
+
+
+    template <typename Container>
     inline bool basic_iterator_state<Container>::can_deref() const noexcept {
         return is_valid()
             && _page_pos != page_pos_nil
             && _item_pos != item_pos_nil
             && _edge == iterator_edge::none;
+    }
+
+
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::is_rbegin() const noexcept {
+        return _item_pos == item_pos_nil
+            && _edge == iterator_edge::rbegin;
+    }
+
+
+    template <typename Container>
+    inline bool basic_iterator_state<Container>::is_end() const noexcept {
+        return _item_pos == item_pos_nil
+            && _edge == iterator_edge::end;
     }
 
 

@@ -103,9 +103,26 @@ namespace abc { namespace vmem {
         bool is_valid() const noexcept;
 
         /**
+         * @brief           Checks whether this iterator state is associated with the given container.
+         * @param container Container.
+         */
+        bool is_valid(Container* container) const noexcept;
+
+        /**
          * @brief Checks whether this iterator state can be dereferenced.
          */
         bool can_deref() const noexcept;
+
+    public:
+        /**
+         * @brief Checks whether this iterator state represents rbegin.
+         */
+        bool is_rbegin() const noexcept;
+
+        /**
+         * @brief Checks whether this iterator state represents end.
+         */
+        bool is_end() const noexcept;
 
     public:
         /**
