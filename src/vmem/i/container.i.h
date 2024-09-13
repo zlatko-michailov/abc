@@ -400,7 +400,7 @@ namespace abc { namespace vmem {
         /**
          * @brief Erases all items.
          */
-        void clear() noexcept;
+        void clear();
 
     // insert() helpers
     private:
@@ -447,7 +447,7 @@ namespace abc { namespace vmem {
          * @param new_page_pos       New page position.
          * @param new_container_page New page - pointer to `container_page`.
          */
-        void balance_split(page_pos_t page_pos, container_page<T, Header>* container_page, page_pos_t new_page_pos, container_page<T, Header>* new_container_page) noexcept;
+        void balance_split(page_pos_t page_pos, vmem::container_page<T, Header>* container_page, page_pos_t new_page_pos, vmem::container_page<T, Header>* new_container_page);
 
         /**
          * @brief                    Inserts a new page after another page.
@@ -455,7 +455,7 @@ namespace abc { namespace vmem {
          * @param new_page           The newly inserted page as a reference to `page`. The caller must keep this page locked until the insert is complete.
          * @param new_container_page The newly inserted page as a pointer to `container_page`.
          */
-        void insert_page_after(page_pos_t after_page_pos, page& new_page, container_page<T, Header>*& new_container_page);
+        void insert_page_after(page_pos_t after_page_pos, page& new_page, vmem::container_page<T, Header>*& new_container_page);
 
         /**
          * @brief                Evaluates the balancing policy on insert.
@@ -463,7 +463,7 @@ namespace abc { namespace vmem {
          * @param container_page Pointer to a `container_page` to insert to.
          * @return               `true` if an insert is subject to balancing items; `false` otherwise.
          */
-        bool should_balance_insert(const_iterator itr, const container_page<T, Header>* container_page) const noexcept; //// TODO: throwable?
+        bool should_balance_insert(const_iterator itr, const vmem::container_page<T, Header>* container_page) const noexcept;
 
     // erase() helpers
     private:
@@ -472,7 +472,7 @@ namespace abc { namespace vmem {
          * @param itr Iterator.
          * @return    `result2`. 
          */
-        result2 erase_nostate(const_iterator itr) noexcept;
+        result2 erase_nostate(const_iterator itr);
 
         /**
          * @brief                Erases an item from a page that has more than one item.
@@ -480,7 +480,7 @@ namespace abc { namespace vmem {
          * @param container_page Pointer to a `container_page`.
          * @return               `result2`. 
          */
-        result2 erase_from_many(const_iterator itr, container_page<T, Header>* container_page) noexcept;
+        result2 erase_from_many(const_iterator itr, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief                Merges the items of the given page with the items from one of its adjacent pages.
@@ -489,7 +489,7 @@ namespace abc { namespace vmem {
          * @param container_page Page to be merged as a pointer to a `container_page`
          * @return               `result2`. 
          */
-        result2 balance_merge(const_iterator itr, page<Pool, Log>& page, container_page<T, Header>* container_page) noexcept;
+        result2 balance_merge(const_iterator itr, vmem::page& page, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief                Merges the items of the given page with the items from the page following it.
@@ -498,7 +498,7 @@ namespace abc { namespace vmem {
          * @param container_page Page to be merged as a pointer to a `container_page`
          * @return               `result2`. 
          */
-        result2 balance_merge_next(const_iterator itr, page<Pool, Log>& page, container_page<T, Header>* container_page) noexcept;
+        result2 balance_merge_next(const_iterator itr, vmem::page& page, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief                Merges the items of the given page with the items from the page preceding it.
@@ -507,21 +507,19 @@ namespace abc { namespace vmem {
          * @param container_page Page to be merged as a pointer to a `container_page`
          * @return               `result2`. 
          */
-        result2 balance_merge_prev(const_iterator itr, page<Pool, Log>& page, container_page<T, Header>* container_page) noexcept;
+        result2 balance_merge_prev(const_iterator itr, vmem::page& page, vmem::container_page<T, Header>* container_page);
 
         /**
          * @brief      Unlinks a page from the container, and puts it on the pool's free page list.
          * @param page Page to be erased as a reference to `page`.
-         * @return     `true` = success; `false` = error.
          */
-        bool erase_page(page<Pool, Log>& page) noexcept; //// TODO: throwable?
+        void erase_page(vmem::page& page);
 
         /**
          * @brief          Unlinks a page from the container.
          * @param page_pos Page position.
-         * @return         `true` = success; `false` = error.
          */
-        bool erase_page_pos(page_pos_t page_pos) noexcept;  //// TODO: throwable?
+        void erase_page_pos(page_pos_t page_pos);
 
         /**
          * @brief                Evaluates the balancing policy on erase.
@@ -529,7 +527,7 @@ namespace abc { namespace vmem {
          * @param item_pos       Position of the item to be erased.
          * @return               `true` if an erase is subject to balancing items; `false` otherwise.
          */
-        bool should_balance_erase(const container_page<T, Header>* container_page, item_pos_t item_pos) const noexcept;
+        bool should_balance_erase(const vmem::container_page<T, Header>* container_page, item_pos_t item_pos) const noexcept;
 
     private:
         friend iterator_state;
@@ -540,20 +538,20 @@ namespace abc { namespace vmem {
          * @brief     Returns the iterator immediately following a given one.  
          * @param itr Iterator.
          */
-        iterator next(const iterator_state& itr) const noexcept;
+        iterator next(const iterator_state& itr) const;
 
         /**
          * @brief     Returns the iterator immediately preceding a given one.  
          * @param itr Iterator.
          */
-        iterator prev(const iterator_state& itr) const noexcept;
+        iterator prev(const iterator_state& itr) const;
 
         /**
          * @brief     Dereferences an iterator.
          * @param itr Iterator.
          * @return    `ptr`. 
          */
-        pointer at(const iterator_state& itr) const noexcept; //// TODO: throwable?
+        pointer at(const iterator_state& itr) const;
 
     private:
         /**
