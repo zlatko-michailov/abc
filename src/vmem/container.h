@@ -954,7 +954,7 @@ namespace abc { namespace vmem {
     template <typename T, typename Header>
     inline typename container<T, Header>::iterator container<T, Header>::next(const iterator_state& itr) const {
         constexpr const char* suborigin = "next";
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x1047d, "Begin:  Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1047d, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
                 (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
 
         diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
@@ -978,6 +978,7 @@ namespace abc { namespace vmem {
             }
             else {
                 if (container_page->next_page_pos != page_pos_nil) {
+                    // The first item on the next page is well known - 0.
                     result = iterator(this, container_page->next_page_pos, 0, iterator_edge::none, diag_base::log());
                 }
             }
@@ -992,140 +993,151 @@ namespace abc { namespace vmem {
     }
 
 
-    //// TODO: Continue here.
     template <typename T, typename Header>
     inline typename container<T, Header>::iterator container<T, Header>::prev(const iterator_state& itr) const noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10480, "container::prev() Before itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+        constexpr const char* suborigin = "prev";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10480, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+                (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
+
+        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
+        diag_base::expect(suborigin, itr.is_end() || itr.can_deref(), __TAG__, "itr.is_end() || itr.can_deref()");
 
         iterator result = rbegin_itr();
 
-        if (itr.item_pos() == vmem_item_pos_nil && itr.edge() == vmem_iterator_edge::end) {
+        if (itr.is_end()) {
             result = rend_itr();
         }
-        else if (itr.page_pos() != vmem_page_pos_nil) {
-            vmem_page<Pool, Log> page(_pool, itr.page_pos(), _log);
+        else {
+            vmem::page page(_pool, itr.page_pos(), diag_base::log());
+            diag_base::expect(suborigin, page.pos() == itr.page_pos(), __TAG__, "page.pos() == itr.page_pos()");
+            diag_base::expect(suborigin, page.ptr() != nullptr, 0x10481, "page.ptr() != nullptr");
 
-            if (page.ptr() == nullptr) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::warning, 0x10481, "container::prev() Could not load page pos=0x%llx", (long long)itr.page_pos());
-                }
+            vmem::container_page<T, Header>* container_page = reinterpret_cast<vmem::container_page<T, Header>*>(page.ptr());
+            diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item_count=%u, page_capacity=%zu", container_page->item_count, (std::size_t)page_capacity());
+
+            if (itr.item_pos() > 0) {
+                result = iterator(this, itr.page_pos(), itr.item_pos() - 1, iterator_edge::none, diag_base::log());
             }
             else {
-                container_page<T, Header>* container_page = reinterpret_cast<container_page<T, Header>*>(page.ptr());
+                if (container_page->prev_page_pos != vmem_page_pos_nil) {
+                    // The last item on the previous page has to be determined.
+                    vmem::page prev_page(_pool, container_page->prev_page_pos, diag_base::log());
+                    diag_base::expect(suborigin, page.pos() == itr.page_pos(), __TAG__, "page.pos() == itr.page_pos()");
+                    diag_base::expect(suborigin, page.ptr() != nullptr, 0x10482, "page.ptr() != nullptr");
 
-                if (itr.item_pos() > 0) {
-                    result = iterator(this, itr.page_pos(), itr.item_pos() - 1, vmem_iterator_edge::none, _log);
-                }
-                else {
-                    if (container_page->prev_page_pos != vmem_page_pos_nil) {
-                        vmem_page<Pool, Log> prev_page(_pool, container_page->prev_page_pos, _log);
+                    vmem::container_page<T, Header>* prev_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(prev_page.ptr());
+                    diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item_count=%u, page_capacity=%zu", prev_container_page->item_count, (std::size_t)page_capacity());
 
-                        if (prev_page.ptr() == nullptr) {
-                            if (_log != nullptr) {
-                                _log->put_any(category::abc::vmem, severity::warning, 0x10482, "container::prev() Could not load page pos=0x%llx", (long long)container_page->prev_page_pos);
-                            }
-                        }
-                        else {
-                            container_page<T, Header>* prev_container_page = reinterpret_cast<container_page<T, Header>*>(prev_page.ptr());
-        
-                            result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, vmem_iterator_edge::none, _log);
-                        }
-                    }
+                    result = iterator(this, container_page->prev_page_pos, prev_container_page->item_count - 1, iterator_edge::none, diag_base::log());
                 }
             }
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10483, "container::prev() After result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
-                (long long)result.page_pos(), result.item_pos(), result.edge());
-        }
+        diag_base::ensure(suborigin, result.is_valid(this), __TAG__, "result.is_valid(this)");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10483, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
 
         return result;
     }
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::pointer container<T, Header>::at(const iterator_state& itr) const noexcept {
-        vmem_item_pos_t byte_pos =
-            itr.item_pos() == vmem_item_pos_nil ?
-                vmem_item_pos_nil :
+    inline typename container<T, Header>::pointer container<T, Header>::at(const iterator_state& itr) const {
+        constexpr const char* suborigin = "at";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+                (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
+
+        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
+
+        item_pos_t byte_pos =
+            itr.item_pos() == item_pos_nil ?
+                item_pos_nil :
                 items_pos() + (itr.item_pos() * sizeof(T));
 
-        return pointer(_pool, itr.page_pos(), byte_pos, _log);
+        pointer result(_pool, itr.page_pos(), byte_pos, diag_base::log());
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: result.page_pos=0x%llx, result.item_pos=0x%x",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos());
+
+        return result;
     }
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::iterator container<T, Header>::begin_itr() const noexcept {
-        iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+    inline typename container<T, Header>::iterator container<T, Header>::begin_itr() const {
+        constexpr const char* suborigin = "begin_itr";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        if (_state->front_page_pos != vmem_page_pos_nil) {
-            itr = iterator(this, _state->front_page_pos, 0, vmem_iterator_edge::none, _log);
+        // If the container is empty, set to "end".
+        iterator result(this, _state->back_page_pos, item_pos_nil, iterator_edge::end, diag_base::log());
+
+        // If the container is not empty, set to the first item.
+        if (_state->front_page_pos != page_pos_nil) {
+            result = iterator(this, _state->front_page_pos, 0, iterator_edge::none, diag_base::log());
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10484, "container::begin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10484, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
 
-        return itr;
+        return result;
     }
 
 
     template <typename T, typename Header>
     inline typename container<T, Header>::iterator container<T, Header>::end_itr() const noexcept {
-        iterator itr(this, _state->back_page_pos, vmem_item_pos_nil, vmem_iterator_edge::end, _log);
+        constexpr const char* suborigin = "end_itr";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10486, "container::end_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+        // Empty or not, set to "end".
+        iterator result(this, _state->back_page_pos, item_pos_nil, iterator_edge::end, diag_base::log());
 
-        return itr;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10486, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
+
+        return result;
     }
 
 
     template <typename T, typename Header>
     inline typename container<T, Header>::reverse_iterator container<T, Header>::rend_itr() const noexcept {
-        iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+        constexpr const char* suborigin = "rend_itr";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        if (_state->back_page_pos != vmem_page_pos_nil) {
-            vmem_page<Pool, Log> page(_pool, _state->back_page_pos, _log);
+        // If the container is empty, set to "rbegin".
+        iterator result(this, _state->front_page_pos, item_pos_nil, iterator_edge::rbegin, diag_base::log());
 
-            if (page.ptr() == nullptr) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::warning, 0x10487, "container::rend_itr() Could not load page pos=0x%llx", (long long)_state->back_page_pos);
-                }
-            }
-            else {
-                container_page<T, Header>* container_page = reinterpret_cast<container_page<T, Header>*>(page.ptr());
-                itr = iterator(this, _state->back_page_pos, container_page->item_count - 1, vmem_iterator_edge::none, _log);
-            }
+        // If the container is not empty, set to the last item.
+        if (_state->back_page_pos != page_pos_nil) {
+            vmem::page back_page(_pool, _state->back_page_pos, diag_base::log());
+            diag_base::expect(suborigin, back_page.pos() == _state->back_page_pos, __TAG__, "back_page.pos() == _state->back_page_pos");
+            diag_base::expect(suborigin, back_page.ptr() != nullptr, 0x10487, "back_page.ptr() != nullptr");
+
+            vmem::container_page<T, Header>* back_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(back_page.ptr());
+            diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item_count=%u, page_capacity=%zu", back_container_page->item_count, (std::size_t)page_capacity());
+
+            result = iterator(this, _state->back_page_pos, container_page->item_count - 1, iterator_edge::none, diag_base::log());
         }
 
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10488, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10488, "container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
-
-        return itr;
+        return result;
     }
 
 
     template <typename T, typename Header>
     inline typename container<T, Header>::reverse_iterator container<T, Header>::rbegin_itr() const noexcept {
-        iterator itr(this, _state->front_page_pos, vmem_item_pos_nil, vmem_iterator_edge::rbegin, _log);
+        constexpr const char* suborigin = "rbegin_itr";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10485, "container::rbegin_itr() page_pos=0x%llx, item_pos=0x%x, edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+        // Empty or not, set to "rbegin".
+        iterator result(this, _state->front_page_pos, item_pos_nil, iterator_edge::rbegin, diag_base::log());
 
-        return itr;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10488, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
+
+        return result;
     }
 
 

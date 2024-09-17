@@ -20,9 +20,10 @@
 - __UNTABIFY each file before making changes!__
 - `vmem`
     - pool
-        - __Remove unused methods.__
         - To free capacity, use an efficient container and algorithms.
         - Use a lock! (Minimize public surface.)
+    - container
+        - Keep the count of the back page in the state, so we don't have to map the back page to create an rend() iterator.
     - Entities
         - page.h
         - ptr.h

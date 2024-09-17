@@ -557,22 +557,22 @@ namespace abc { namespace vmem {
         /**
          * @brief Returns an iterator referencing the first item.
          */
-        iterator begin_itr() const noexcept;
+        iterator begin_itr() const;
 
         /**
          * @brief Returns an iterator referencing past the last item.
          */
-        iterator end_itr() const noexcept;
+        iterator end_itr() const;
 
         /**
          * @brief Returns a reverse iterator referencing the last item.
          */
-        reverse_iterator rend_itr() const noexcept;
+        reverse_iterator rend_itr() const;
 
         /**
          * @brief Returns a reverse iterator referencing before the first item.
          */
-        reverse_iterator rbegin_itr() const noexcept;
+        reverse_iterator rbegin_itr() const;
 
     private:
         container_state* _state;
