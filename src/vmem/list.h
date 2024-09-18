@@ -25,42 +25,40 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstring>
-
-#include "../exception.h"
-#include "../i/vmem.i.h"
+#include "container.h"
+#include "i/list.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-	template <typename T, typename Pool, typename Log>
-	inline vmem_list<T, Pool, Log>::vmem_list(vmem_list_state* state, Pool* pool, Log* log)
-		: base(state, balance_insert, balance_erase, pool, log) {
-	}
-
-
-	// --------------------------------------------------------------
+    template <typename T>
+    inline list<T>::list(list_state* state, vmem::pool* pool, diag::log_ostream* log)
+        : base(state, balance_insert, balance_erase, pool, log) {
+    }
 
 
-	template <typename T, typename Pool, typename Log>
-	inline vmem_stack<T, Pool, Log>::vmem_stack(vmem_stack_state* state, Pool* pool, Log* log)
-		: base(state, balance_insert, balance_erase, pool, log) {
-	}
+    // --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+    template <typename T>
+    inline stack<T>::stack(stack_state* state, vmem::pool* pool, diag::log_ostream* log)
+        : base(state, balance_insert, balance_erase, pool, log) {
+    }
 
 
-	template <typename Container>
-	template <typename... Args>
-	vmem_temp<Container>::vmem_temp(Args&&... args)
-		: Container(std::forward<Args>(args)...) {
-	}
+    // --------------------------------------------------------------
 
 
-	template <typename Container>
-	vmem_temp<Container>::~vmem_temp() noexcept {
-		Container::clear();
-	}
+    template <typename Container>
+    template <typename... Args>
+    temp<Container>::temp(Args&&... args)
+        : Container(std::forward<Args>(args)...) {
+    }
 
-}
+
+    template <typename Container>
+    temp<Container>::~temp() noexcept {
+        Container::clear();
+    }
+
+} }
