@@ -213,7 +213,7 @@ namespace abc { namespace diag {
         template <typename Exception = std::runtime_error>
         void requirev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
 
-    protected:
+    public:
         /**
          * @brief Returns the Log pointer.
          */

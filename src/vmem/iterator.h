@@ -90,7 +90,7 @@ namespace abc { namespace vmem {
 
 
     template <typename Container>
-    inline bool basic_iterator_state<Container>::is_valid(Container* container) const noexcept {
+    inline bool basic_iterator_state<Container>::is_valid(const Container* container) const noexcept {
         return is_valid()
             && _container == container;
     }

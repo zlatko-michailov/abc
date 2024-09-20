@@ -73,22 +73,22 @@ namespace abc { namespace vmem {
     /**
      * @brief Returns the bitwise negation of `value`.
      */
-    page_balance operator ~(page_balance value) noexcept;
+    constexpr page_balance operator ~(page_balance value) noexcept;
 
     /**
      * @brief Returns the bitwise OR of `left` and `right`.
      */
-    page_balance operator |(page_balance left, page_balance right) noexcept;
+    constexpr page_balance operator |(page_balance left, page_balance right) noexcept;
 
     /**
      * @brief Returns the bitwise AND of `left` and `right`.
      */
-    page_balance operator &(page_balance left, page_balance right) noexcept;
+    constexpr page_balance operator &(page_balance left, page_balance right) noexcept;
 
     /**
      * @brief Returns `true` if all of the given `bits` are set on the given `value`.
      */
-    bool test(page_balance value, page_balance bits) noexcept;
+    constexpr bool test(page_balance value, page_balance bits) noexcept;
 
 
     // --------------------------------------------------------------
@@ -161,7 +161,7 @@ namespace abc { namespace vmem {
         container_page_lead() noexcept;
 
         /**
-         * @brief   "Copy" constructor.
+         * @brief   Pseudo-Copy constructor.
          * @details Used for `map` to copy the leading keys from another type -
          *          the items on the leaf-level pages are of a different type than the items on the inner-level pages. 
          */
@@ -190,17 +190,17 @@ namespace abc { namespace vmem {
         /**
          * @brief Operation performed on the page.
          */
-        const container_page_lead_operation operation;
+        container_page_lead_operation operation;
 
         /**
          * @brief Position of the page.
          */
-        const page_pos_t page_pos;
+        page_pos_t page_pos;
 
         /**
          * @brief Leading 2 items on the page.
          */
-        const T items[2];
+        T items[2];
     };
 
 

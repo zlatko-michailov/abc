@@ -52,7 +52,7 @@ namespace abc { namespace vmem {
      */
     template <typename Container>
     class basic_iterator_state
-        : protected diag::diag_ready<const char*> {
+        : public diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
 
@@ -106,7 +106,7 @@ namespace abc { namespace vmem {
          * @brief           Checks whether this iterator state is associated with the given container.
          * @param container Container.
          */
-        bool is_valid(Container* container) const noexcept;
+        bool is_valid(const Container* container) const noexcept;
 
         /**
          * @brief Checks whether this iterator state can be dereferenced.

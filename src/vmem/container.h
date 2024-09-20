@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../diag/diag_ready.h"
+#include "../diag/diag_ready.h"
 #include "iterator.h"
 #include "linked.h"
 #include "pool.h"
@@ -34,19 +34,19 @@ SOFTWARE.
 
 namespace abc { namespace vmem {
 
-    inline page_balance operator ~(page_balance value) noexcept {
+    inline constexpr page_balance operator ~(page_balance value) noexcept {
         return static_cast<page_balance>(~ static_cast<std::uint8_t>(value));
     }
 
-    inline page_balance operator |(page_balance left, page_balance right) noexcept {
+    inline constexpr page_balance operator |(page_balance left, page_balance right) noexcept {
         return static_cast<page_balance>(static_cast<std::uint8_t>(left) | static_cast<std::uint8_t>(right));
     }
 
-    inline page_balance operator &(page_balance left, page_balance right) noexcept {
+    inline constexpr page_balance operator &(page_balance left, page_balance right) noexcept {
         return static_cast<page_balance>(static_cast<std::uint8_t>(left) & static_cast<std::uint8_t>(right));
     }
 
-    inline bool test(page_balance value, page_balance bits) noexcept {
+    inline constexpr bool test(page_balance value, page_balance bits) noexcept {
         return (value & bits) == bits;
     }
 
@@ -87,7 +87,8 @@ namespace abc { namespace vmem {
     // --------------------------------------------------------------
 
 
-    inline constexpr const char* pool::origin() noexcept {
+    template <typename T, typename Header>
+    inline constexpr const char* container<T, Header>::origin() noexcept {
         return "abc::vmem::container";
     }
 
@@ -232,8 +233,8 @@ namespace abc { namespace vmem {
 
     template <typename T, typename Header>
     inline bool container<T, Header>::empty() const noexcept {
-        return _state->front_page_pos == vmem_page_pos_nil
-            || _state->back_page_pos == vmem_page_pos_nil;
+        return _state->front_page_pos == page_pos_nil
+            || _state->back_page_pos == page_pos_nil;
     }
 
 
@@ -320,9 +321,9 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "insert2()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1044c, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u", (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
 
-        diag_base::expect(suborigin, itr.page_pos() != vmem_page_pos_nil || (itr.item_pos() == vmem_item_pos_nil && empty()), 0x1044a, "itr.page_pos() != vmem_page_pos_nil || (itr.item_pos() == vmem_item_pos_nil && empty()");
-        diag_base::expect(suborigin, itr.item_pos() != vmem_item_pos_nil || (itr.page_pos() == _state->back_page_pos && itr.edge() == iterator_edge::end), 0x1044b, "itr.item_pos() != vmem_item_pos_nil && (itr.page_pos() == _state->back_page_pos || itr.edge() == iterator_edge::end)");
-                                                                                                          //// TODO: ^ was ||
+        diag_base::expect(suborigin, itr.page_pos() != page_pos_nil || (itr.item_pos() == item_pos_nil && empty()), 0x1044a, "itr.page_pos() != page_pos_nil || (itr.item_pos() == item_pos_nil && empty()");
+        diag_base::expect(suborigin, itr.item_pos() != item_pos_nil || (itr.page_pos() == _state->back_page_pos && itr.edge() == iterator_edge::end), 0x1044b, "itr.item_pos() != item_pos_nil && (itr.page_pos() == _state->back_page_pos && itr.edge() == iterator_edge::end)");
+                                                                                                      //// TODO: ^ was ||
 
         // Copy the item to a local variable to make sure the reference is valid and copyable before we change any page.
         T item_copy(item);
@@ -332,15 +333,15 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
         // Update the front page pos.
-        if (_state->front_page_pos == vmem_page_pos_nil) {
+        if (_state->front_page_pos == page_pos_nil) {
             _state->front_page_pos = result.iterator.page_pos();
         }
 
         // Update the back page pos.
-        if (_state->back_page_pos == vmem_page_pos_nil) {
+        if (_state->back_page_pos == page_pos_nil) {
             _state->back_page_pos = result.iterator.page_pos();
         }
-        else if (_state->back_page_pos == itr.page_pos() && result.page_leads[0].page_pos != vmem_page_pos_nil) {
+        else if (_state->back_page_pos == itr.page_pos() && result.page_leads[0].page_pos != page_pos_nil) {
             _state->back_page_pos = result.page_leads[0].page_pos;
         } 
 
@@ -430,7 +431,7 @@ namespace abc { namespace vmem {
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::result2 container<T, Header>::insert_nonempty(const_iterator itr, const_reference item) noexcept {
+    inline typename container<T, Header>::result2 container<T, Header>::insert_nonempty(const_iterator itr, const_reference item) {
         constexpr const char* suborigin = "insert_nonempty";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10453, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), itr.item_pos());
 
@@ -524,7 +525,7 @@ namespace abc { namespace vmem {
         // Insert the item.
         ++container_page->item_count;
         std::memmove(&container_page->items[result.iterator.item_pos()], &item, sizeof(T));
-        diag_base::put_any(suborigin, diag::severity::debug, 0x1045a, &container_page->items[result.iterator.item_pos()], std::min(sizeof(T), (std::size_t)16));
+        diag_base::put_binary(suborigin, diag::severity::debug, 0x1045a, &container_page->items[result.iterator.item_pos()], std::min(sizeof(T), (std::size_t)16));
 
         diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
@@ -565,7 +566,7 @@ namespace abc { namespace vmem {
         new_container_page_local->item_count = 0;
 
         vmem::linked linked(_state, _pool, diag_base::log());
-        linked_iterator<Pool, Log> itr = linked.end();
+        linked_iterator itr = linked.end();
 
         if (after_page_pos != page_pos_nil) {
             itr = linked_iterator(&linked, after_page_pos, item_pos_nil, iterator_edge::none, diag_base::log());
@@ -869,11 +870,11 @@ namespace abc { namespace vmem {
             // Update the result only if itr references this page.
             // If we deleted the last item on this page, itr references item[0] on the next page, and will not be affected by this balancing.
             if (itr.page_pos() == page.pos()) {
-                if (itr.item_pos() != vmem_item_pos_nil) {
-                    result.iterator = iterator(this, prev_page.pos(), itr.item_pos() + prev_container_page->item_count, vmem_iterator_edge::none, _log);
+                if (itr.item_pos() != item_pos_nil) {
+                    result.iterator = iterator(this, prev_page.pos(), itr.item_pos() + prev_container_page->item_count, iterator_edge::none, diag_base::log());
                 }
                 else {
-                    result.iterator = iterator(this, prev_page.pos(), itr.item_pos(), itr.edge(), _log);
+                    result.iterator = iterator(this, prev_page.pos(), itr.item_pos(), itr.edge(), diag_base::log());
                 }
             }
 
@@ -994,7 +995,7 @@ namespace abc { namespace vmem {
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::iterator container<T, Header>::prev(const iterator_state& itr) const noexcept {
+    inline typename container<T, Header>::iterator container<T, Header>::prev(const iterator_state& itr) const {
         constexpr const char* suborigin = "prev";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10480, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
                 (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
@@ -1019,7 +1020,7 @@ namespace abc { namespace vmem {
                 result = iterator(this, itr.page_pos(), itr.item_pos() - 1, iterator_edge::none, diag_base::log());
             }
             else {
-                if (container_page->prev_page_pos != vmem_page_pos_nil) {
+                if (container_page->prev_page_pos != page_pos_nil) {
                     // The last item on the previous page has to be determined.
                     vmem::page prev_page(_pool, container_page->prev_page_pos, diag_base::log());
                     diag_base::expect(suborigin, page.pos() == itr.page_pos(), __TAG__, "page.pos() == itr.page_pos()");
@@ -1057,8 +1058,8 @@ namespace abc { namespace vmem {
 
         pointer result(_pool, itr.page_pos(), byte_pos, diag_base::log());
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: result.page_pos=0x%llx, result.item_pos=0x%x",
-                (unsigned long long)result.page_pos(), (unsigned)result.item_pos());
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: result.page_pos=0x%llx, result.byte_pos=0x%x",
+                (unsigned long long)result.page_pos(), (unsigned)result.byte_pos());
 
         return result;
     }
@@ -1085,7 +1086,7 @@ namespace abc { namespace vmem {
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::iterator container<T, Header>::end_itr() const noexcept {
+    inline typename container<T, Header>::iterator container<T, Header>::end_itr() const {
         constexpr const char* suborigin = "end_itr";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1100,7 +1101,7 @@ namespace abc { namespace vmem {
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::reverse_iterator container<T, Header>::rend_itr() const noexcept {
+    inline typename container<T, Header>::reverse_iterator container<T, Header>::rend_itr() const {
         constexpr const char* suborigin = "rend_itr";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1116,7 +1117,7 @@ namespace abc { namespace vmem {
             vmem::container_page<T, Header>* back_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(back_page.ptr());
             diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item_count=%u, page_capacity=%zu", back_container_page->item_count, (std::size_t)page_capacity());
 
-            result = iterator(this, _state->back_page_pos, container_page->item_count - 1, iterator_edge::none, diag_base::log());
+            result = iterator(this, _state->back_page_pos, back_container_page->item_count - 1, iterator_edge::none, diag_base::log());
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10488, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
@@ -1127,7 +1128,7 @@ namespace abc { namespace vmem {
 
 
     template <typename T, typename Header>
-    inline typename container<T, Header>::reverse_iterator container<T, Header>::rbegin_itr() const noexcept {
+    inline typename container<T, Header>::reverse_iterator container<T, Header>::rbegin_itr() const {
         constexpr const char* suborigin = "rbegin_itr";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 

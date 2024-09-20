@@ -116,7 +116,7 @@ namespace abc { namespace vmem {
     class stack
         : public container<T, noheader> {
 
-        using base = container<T, noheader, Pool, Log>;
+        using base = container<T, noheader>;
         using diag_base = diag::diag_ready<const char*>;
 
         static constexpr page_balance balance_insert = page_balance::none;

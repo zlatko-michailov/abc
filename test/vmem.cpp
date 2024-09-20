@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#include <array>
+
 #include "inc/vmem.h"
 
 
@@ -33,6 +35,7 @@ constexpr std::size_t max_mapped_page_count_fit    = 6;
 constexpr std::size_t max_mapped_page_count_exceed = 5;
 constexpr std::size_t max_mapped_page_count_free   = 6;
 constexpr std::size_t max_mapped_page_count_linked = 5;
+constexpr std::size_t max_mapped_page_count_list   = 5;
 //constexpr std::size_t max_mapped_page_count_map    = 5;
 
 using LinkedPageData = unsigned long long;
@@ -572,25 +575,25 @@ bool test_vmem_linked_clear(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_list_insert(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
+bool test_vmem_list_insert(test_context& context) {
+    constexpr const char* suborigin = "test_vmem_list_insert";
+
     using Item = std::array<std::uint8_t, 900>;
-    using List = abc::vmem_list<Item, Pool, Log>;
-    using Iterator = abc::vmem_list_iterator<Item, Pool, Log>;
 
     bool passed = true;
 
-    Pool pool("out/test/list_insert.vmem", context.log);
+    abc::vmem::pool_config config("out/test/list_insert.vmem", max_mapped_page_count_list);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_list_state list_state;
-    List list(&list_state, &pool, context.log);
+    abc::vmem::list_state list_state;
+    abc::vmem::list<Item> list(&list_state, &pool, context.log());
+
     Item item;
 
     item.fill(0x21);
-    Iterator actual_itr = list.insert(list.end(), item);
-    Iterator expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
-    Iterator itr21 = actual_itr;
+    abc::vmem::list_iterator<Item> actual_itr = list.insert(list.end(), item);
+    abc::vmem::list_iterator<Item> expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
+    abc::vmem::list_iterator<Item> itr21 = actual_itr;
     passed = context.are_equal(actual_itr == expected_itr, true, 0x1040e, "%d") && passed;
     passed = context.are_equal(actual_itr == list.begin(), true, 0x103ce, "%d") && passed;
     passed = context.are_equal(actual_itr == list.rend(), true, 0x103cf, "%d") && passed;
@@ -600,7 +603,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x22);
     actual_itr = list.insert(list.end(), item);
-    expected_itr = Iterator(&list, 2U, 1U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 1U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x1040f, "%d") && passed;
     passed = context.are_equal(actual_itr == list.rend(), true, 0x103d1, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 2, 0x103d2, "%zu") && passed;
@@ -609,7 +612,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x23);
     actual_itr = list.insert(itr21, item);
-    expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10410, "%d") && passed;
     passed = context.are_equal(actual_itr == itr21, true, 0x103d3, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 3, 0x103d4, "%zu") && passed;
@@ -618,19 +621,19 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x24);
     actual_itr = list.insert(list.begin(), item);
-    expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10411, "%d") && passed;
     passed = context.are_equal(actual_itr == list.begin(), true, 0x103d5, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 4, 0x103d6, "%zu") && passed;
     // | (2)
     // | 24 23 21 22 |
 
-    itr21 = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
+    itr21 = abc::vmem::list_iterator<Item>(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
     item.fill(0x25);
     actual_itr = list.insert(itr21, item);
-    expected_itr = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10412, "%d") && passed;
-    Iterator rend_itr = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+    abc::vmem::list_iterator<Item> rend_itr = abc::vmem::list_iterator<Item>(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(list.rend() == rend_itr, true, 0x10413, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 5, 0x103d8, "%zu") && passed;
     // | (2)         | (3)
@@ -638,7 +641,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x26);
     actual_itr = list.insert(list.end(), item);
-    expected_itr = Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 3U, 2U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10414, "%d") && passed;
     passed = context.are_equal(actual_itr == list.rend(), true, 0x103d9, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 6, 0x103da, "%zu") && passed;
@@ -647,7 +650,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x27);
     actual_itr = list.insert(list.begin(), item);
-    expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10415, "%d") && passed;
     passed = context.are_equal(actual_itr == list.begin(), true, 0x103db, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 7, 0x103dc, "%zu") && passed;
@@ -656,7 +659,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x28);
     actual_itr = list.insert(list.begin(), item);
-    expected_itr = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10416, "%d") && passed;
     passed = context.are_equal(actual_itr == list.begin(), true, 0x103dd, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 8, 0x103de, "%zu") && passed;
@@ -665,7 +668,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x29);
     actual_itr = list.insert(list.end(), item);
-    expected_itr = Iterator(&list, 3U, 3U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 3U, 3U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x10417, "%d") && passed;
     passed = context.are_equal(actual_itr == list.rend(), true, 0x10418, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 9, 0x10419, "%zu") && passed;
@@ -674,32 +677,32 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 
     item.fill(0x2a);
     actual_itr = list.insert(list.end(), item);
-    expected_itr = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+    expected_itr = abc::vmem::list_iterator<Item>(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
     passed = context.are_equal(actual_itr == expected_itr, true, 0x1041a, "%d") && passed;
     passed = context.are_equal(actual_itr == list.rend(), true, 0x1041b, "%d") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 10, 0x1041c, "%zu") && passed;
     // | (2)         | (4)         | (3)         | (5)
     // | 28 27 24 __ | 23 25 __ __ | 21 22 26 29 | 2a __ __ __ |
 
-    using Pair = std::pair<std::uint8_t, Iterator>;
+    using Pair = std::pair<std::uint8_t, abc::vmem::list_iterator<Item>>;
     const Pair exp[] = {
-        { 0x28, Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x27, Iterator(&list, 2U, 1U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x24, Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x23, Iterator(&list, 4U, 0U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x25, Iterator(&list, 4U, 1U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x21, Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x22, Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x26, Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x29, Iterator(&list, 3U, 3U, abc::vmem_iterator_edge::none, context.log) },
-        { 0x2a, Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log) },
+        { 0x28, abc::vmem::list_iterator<Item>(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x27, abc::vmem::list_iterator<Item>(&list, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x24, abc::vmem::list_iterator<Item>(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x23, abc::vmem::list_iterator<Item>(&list, 4U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x25, abc::vmem::list_iterator<Item>(&list, 4U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x21, abc::vmem::list_iterator<Item>(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x22, abc::vmem::list_iterator<Item>(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x26, abc::vmem::list_iterator<Item>(&list, 3U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x29, abc::vmem::list_iterator<Item>(&list, 3U, 3U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x2a, abc::vmem::list_iterator<Item>(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log()) },
     };
     constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
     // Iterate forward.
     actual_itr = list.cbegin();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041d, "forward[%zd]=0x%x", i, exp[i].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1041d, "forward[%zu]=0x%x", i, exp[i].first);
 
         passed = context.are_equal(actual_itr == exp[i].second, true, 0x1041e, "%d") && passed;
         passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[i].first, 0x104f5) && passed;
@@ -710,7 +713,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
     // Iterate backwards.
     actual_itr = list.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1041f, "backward[%zd]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1041f, "backward[%zu]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
 
         passed = context.are_equal(actual_itr == exp[exp_len - i - 1].second, true, 0x10420, "%d") && passed;
         passed = verify_bytes(context, actual_itr->data(), 0, sizeof(Item), exp[exp_len - i - 1].first, 0x104f6) && passed;
@@ -722,6 +725,7 @@ bool test_vmem_list_insert(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_list_insertmany(test_context<abc::test::log>& context) {
     using Pool = PoolFit;
     using List = abc::vmem_list<ItemMany, Pool, Log>;
