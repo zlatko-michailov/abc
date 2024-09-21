@@ -467,6 +467,9 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "insert_with_overflow";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10457, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), itr.item_pos());
 
+        // Check whether we should balance before we do anything.
+        bool should_balance = should_balance_insert(itr, container_page);
+        
         vmem::page new_page(nullptr);
         vmem::container_page<T, Header>* new_container_page = nullptr;
 
@@ -475,8 +478,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, new_page.ptr() != nullptr, __TAG__, "new_page.ptr() != nullptr");
         diag_base::expect(suborigin, new_container_page == new_page.ptr(), __TAG__, "new_container_page == new_page.ptr()");
 
-        // Balance if needed. Do that before inserting.
-        if (should_balance_insert(itr, container_page)) {
+        if (should_balance) {
             balance_split(itr.page_pos(), container_page, new_page.pos(), new_container_page);
         }
 
