@@ -16,6 +16,7 @@
     - `strprintf()`
 
 ## To Do
+- Make list test pass.
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`

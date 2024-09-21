@@ -62,29 +62,29 @@ namespace abc { namespace vmem {
          * @param byte_pos Byte position on the page. //// TODO: Can this be item position?
          * @param log      Pointer to a `log_ostream` instance.
          */
-        ptr<T>(pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log = nullptr);
+        ptr(vmem::pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        ptr<T>(ptr<T>&& other) noexcept = default;
+        ptr(ptr<T>&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
          */
-        ptr<T>(const ptr<T>& other) noexcept = default;
+        ptr(const ptr<T>& other) noexcept = default;
 
         /**
          * @brief     Constructor.
          * @details   Constructs an invalid/null pointer.
          * @param log Pointer to a `log_ostream` instance.
          */
-        ptr<T>(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
+        ptr(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Destructor.
          */
-        ~ptr<T>() = default;
+        ~ptr() = default;
 
     public:
         ptr<T>& operator =(const ptr<T>& other) noexcept = default;

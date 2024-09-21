@@ -281,17 +281,17 @@ namespace abc { namespace vmem {
          * @param pool           Pointer to a `pool` instance.
          * @param log            Pointer to a `log_ostream` instance.
          */
-        container<T, Header>(container_state* state, page_balance balance_insert, page_balance balance_erase, vmem::pool* pool, diag::log_ostream* log = nullptr);
+        container(container_state* state, page_balance balance_insert, page_balance balance_erase, vmem::pool* pool, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        container<T, Header>(container<T, Header>&& other) noexcept = default;
+        container(container<T, Header>&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
          */
-        container<T, Header>(const container<T, Header>& other) noexcept = default;
+        container(const container<T, Header>& other) noexcept = default;
 
     public:
         iterator               begin() noexcept;

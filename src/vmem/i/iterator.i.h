@@ -71,22 +71,22 @@ namespace abc { namespace vmem {
          * @param edge      Edge.
          * @param log       Pointer to a `log_ostream` instance.
          */
-        basic_iterator_state<Container>(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log = nullptr) noexcept;
+        basic_iterator_state(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
          */
-        basic_iterator_state<Container>(basic_iterator_state<Container>&& other) noexcept = default;
+        basic_iterator_state(basic_iterator_state<Container>&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
          */
-        basic_iterator_state<Container>(const basic_iterator_state<Container>& other) = default;
+        basic_iterator_state(const basic_iterator_state<Container>& other) = default;
 
         /**
          * @brief Default-like constructor.
          */
-        basic_iterator_state<Container>(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
+        basic_iterator_state(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
     
     public:
         basic_iterator_state<Container>& operator =(const basic_iterator_state<Container>& other) = default;
@@ -183,28 +183,28 @@ namespace abc { namespace vmem {
          * @param edge      Edge.
          * @param log       Pointer to a `log_ostream` instance.
          */
-        basic_iterator<Base, Container, T>(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log = nullptr) noexcept;
+        basic_iterator(const Container* container, page_pos_t page_pos, item_pos_t item_pos, iterator_edge edge, diag::log_ostream* log = nullptr) noexcept;
 
         /**
          * @brief Move constructor.
          */
-        basic_iterator<Base, Container, T>(basic_iterator<Base, Container, T>&& other) noexcept = default;
+        basic_iterator(basic_iterator<Base, Container, T>&& other) noexcept = default;
 
         /**
          * @brief Copy constructor.
          */
-        basic_iterator<Base, Container, T>(const basic_iterator<Base, Container, T>& other) = default;
+        basic_iterator(const basic_iterator<Base, Container, T>& other) = default;
 
         /**
          * @brief Copy constructor from const_iterator.
          */
         template <typename OtherIterator>
-        basic_iterator<Base, Container, T>(const OtherIterator& other) noexcept;
+        basic_iterator(const OtherIterator& other) noexcept;
 
         /**
          * @brief Default-like constructor.
          */
-        basic_iterator<Base, Container, T>(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
+        basic_iterator(std::nullptr_t, diag::log_ostream* log = nullptr) noexcept;
 
     public:
         basic_iterator<Base, Container, T>& operator =(const basic_iterator<Base, Container, T>& other) = default;
