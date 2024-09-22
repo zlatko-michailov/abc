@@ -43,12 +43,12 @@ struct LinkedPage : abc::vmem::linked_page {
     LinkedPageData                    data;
 };
 
-#if 0 //// TODO: TEMP
 struct ItemMany {
-    std::uint64_t                    data;
-    std::array<std::uint8_t, 900>    dummy;
+    std::uint64_t                 data;
+    std::array<std::uint8_t, 900> dummy;
 };
 
+#if 0 //// TODO: TEMP
 struct Key {
     std::uint64_t                    data;
     std::array<std::uint8_t, 900>    dummy;
@@ -75,14 +75,13 @@ struct Key {
 };
 using Value = std::uint64_t;
 using MapItem = vmem_map_value<Key, Value>;
+#endif
 
 
-template <typename List>
-bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count);
+bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count);
 
 template <typename Map>
-bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std::size_t count);
-#endif
+bool insert_map_items(test_context& context, Map& map, std::size_t count);
 
 bool insert_linked_page(test_context& context, abc::vmem::pool* pool, abc::vmem::linked& linked, abc::vmem::page_pos_t expected_page_pos, LinkedPageData data,
                         const abc::vmem::linked::const_iterator& itr, const abc::vmem::linked::const_iterator& expected_itr,
@@ -725,24 +724,22 @@ bool test_vmem_list_insert(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_list_insertmany(test_context<abc::test::log>& context) {
-    using Pool = PoolFit;
-    using List = abc::vmem_list<ItemMany, Pool, Log>;
-
+bool test_vmem_list_insertmany(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/list_insertmany.vmem", context.log);
+    abc::vmem::pool_config config("out/test/list_insertmany.vmem", max_mapped_page_count_list);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_list_state list_state;
-    List list(&list_state, &pool, context.log);
+    abc::vmem::list_state list_state;
+    abc::vmem::list<ItemMany> list(&list_state, &pool, context.log());
 
-    passed = insert_vmem_list_items(context, list, 4000) && passed;
+    passed = insert_list_items(context, list, 4000) && passed;
 
     return passed;
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using List = abc::vmem_list<ItemMany, Pool, Log>;
@@ -1444,10 +1441,10 @@ bool test_vmem_page_move(test_context<abc::test::log>& context) {
 
     return passed;
 }
+#endif
 
 
-template <typename List>
-bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, std::size_t count) {
+bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count) {
     bool passed = true;
 
     // Insert.
@@ -1457,7 +1454,7 @@ bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, s
     }
 
     // Iterate forward.
-    typename List::iterator itr = list.cbegin();
+    abc::vmem::list<ItemMany>::iterator itr = list.cbegin();
     for (std::size_t i = 0; i < count; i++) {
         passed = context.are_equal<unsigned long long>(itr->data, i, 0x103ed, "%llu") && passed;
         itr++;
@@ -1476,6 +1473,7 @@ bool insert_vmem_list_items(test_context<abc::test::log>& context, List& list, s
 }
 
 
+#if 0 //// TODO: TEMP
 template <typename Map>
 bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std::size_t count) {
     constexpr std::size_t base_value = 0x90000000;
