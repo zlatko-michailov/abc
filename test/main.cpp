@@ -269,8 +269,8 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_linked_clear",                          test_vmem_linked_clear },
                 { "test_vmem_list_insert",                           test_vmem_list_insert },
                 { "test_vmem_list_insertmany",                       test_vmem_list_insertmany },
-#if 0 //// TODO:
                 { "test_vmem_list_erase",                            test_vmem_list_erase },
+#if 0 //// TODO:
                 { "test_vmem_temp_destructor",                       test_vmem_temp_destructor },
                 { "test_vmem_map_insert",                            test_vmem_map_insert },
                 { "test_vmem_map_insertmany",                        test_vmem_map_insertmany },

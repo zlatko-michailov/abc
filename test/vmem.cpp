@@ -739,34 +739,30 @@ bool test_vmem_list_insertmany(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_list_erase(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using List = abc::vmem_list<ItemMany, Pool, Log>;
-    using Iterator = abc::vmem_list_iterator<ItemMany, Pool, Log>;
-
+bool test_vmem_list_erase(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/list_erase.vmem", context.log);
+    abc::vmem::pool_config config("out/test/list_erase.vmem", max_mapped_page_count_list);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_list_state list_state;
-    List list(&list_state, &pool, context.log);
+    abc::vmem::list_state list_state;
+    abc::vmem::list<ItemMany> list(&list_state, &pool, context.log());
 
-    passed = insert_vmem_list_items(context, list, 16) && passed;
+    passed = insert_list_items(context, list, 16) && passed;
     // | (2)         | (3)         | (4)         | (5)
     // | 00 01 02 03 | 04 05 06 07 | 08 09 0a 0b | 0c 0d 0e 0f
 
-    typename List::iterator itr_target = Iterator(&list, 4U, 3U, abc::vmem_iterator_edge::none, context.log);
-    typename List::iterator itr_expected = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
-    typename List::iterator itr_actual = list.erase(itr_target);
+    abc::vmem::list<ItemMany>::iterator itr_target = abc::vmem::list<ItemMany>::iterator(&list, 4U, 3U, abc::vmem::iterator_edge::none, context.log());
+    abc::vmem::list<ItemMany>::iterator itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
+    abc::vmem::list<ItemMany>::iterator itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10421, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, 0x10422, "0x%2.2llx") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 15, 0x10423, "%zu") && passed;
     // | (2)         | (3)         | (4)         | (5)
     // | 00 01 02 03 | 04 05 06 07 | 08 09 0a __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 4U, 0U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 4U, 0U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 4U, 0U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 4U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10424, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, 0x10425, "0x%2.2llx") && passed;
@@ -774,8 +770,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (4)         | (5)
     // | 00 01 02 03 | 04 05 06 07 | 09 0a __ __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 3U, 2U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 3U, 2U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10427, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x07, 0x10428, "0x%2.2llx") && passed;
@@ -783,8 +779,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (4)         | (5)
     // | 00 01 02 03 | 04 05 07 __ | 09 0a __ __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x1042a, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x07, 0x1042b, "0x%2.2llx") && passed;
@@ -792,8 +788,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (5)
     // | 00 01 02 03 | 04 07 09 0a | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 3U, 1U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x1042d, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, 0x1042e, "0x%2.2llx") && passed;
@@ -801,8 +797,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (5)
     // | 00 01 02 03 | 04 09 0a __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 2U, 0U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10430, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x01, 0x10431, "0x%2.2llx") && passed;
@@ -810,8 +806,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (5)
     // | 01 02 03 __ | 04 09 0a __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10433, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x04, 0x10434, "0x%2.2llx") && passed;
@@ -819,8 +815,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (3)         | (5)
     // | 01 02 __ __ | 04 09 0a __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 3U, 0U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10436, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, 0x10437, "0x%2.2llx") && passed;
@@ -828,8 +824,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (5)
     // | 01 02 09 0a | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 2U, 3U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 3U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10439, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, 0x1043a, "0x%2.2llx") && passed;
@@ -837,8 +833,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (5)
     // | 01 02 09 __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 2U, 2U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 5U, 0U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x104f7, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, 0x104f8, "0x%2.2llx") && passed;
@@ -846,7 +842,7 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (5)
     // | 01 02 __ __ | 0c 0d 0e 0f
 
-    itr_target = Iterator(&list, 5U, 3U, abc::vmem_iterator_edge::none, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 5U, 3U, abc::vmem::iterator_edge::none, context.log());
     itr_expected = list.end();
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x104fa, "%d") && passed;
@@ -854,8 +850,8 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
     // | (2)         | (5)
     // | 01 02 __ __ | 0c 0d 0e __
 
-    itr_target = Iterator(&list, 5U, 2U, abc::vmem_iterator_edge::none, context.log);
-    itr_expected = Iterator(&list, 2U, abc::vmem_item_pos_nil, abc::vmem_iterator_edge::end, context.log);
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 5U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::end, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x104fc, "%d") && passed;
     passed = context.are_equal<bool>(itr_actual == list.end(), true, 0x104fd, "%d") && passed;
@@ -867,6 +863,7 @@ bool test_vmem_list_erase(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using List = abc::vmem_list<ItemMany, Pool, Log>;

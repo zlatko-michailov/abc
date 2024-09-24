@@ -807,7 +807,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, next_page.pos() == container_page->next_page_pos, __TAG__, "next_page.pos() == container_page->next_page_pos");
         diag_base::expect(suborigin, next_page.ptr() != nullptr, 0x10470, "next_page.ptr() != nullptr");
 
-        vmem::container_page<T, Header>* next_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(page.ptr());
+        vmem::container_page<T, Header>* next_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(next_page.ptr());
         diag_base::put_any(suborigin, diag::severity::optional, 0x10471, "page_item_count=%u, next_page_pos=0x%llx, next_page_item_count=%u",
                 (unsigned)container_page->item_count, (unsigned long long)next_page.pos(), (unsigned)next_container_page->item_count);
 
@@ -855,7 +855,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, prev_page.pos() == container_page->prev_page_pos, __TAG__, "prev_page.pos() == container_page->prev_page_pos");
         diag_base::expect(suborigin, prev_page.ptr() != nullptr, 0x10475, "prev_page.ptr() != nullptr");
 
-        vmem::container_page<T, Header>* prev_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(page.ptr());
+        vmem::container_page<T, Header>* prev_container_page = reinterpret_cast<vmem::container_page<T, Header>*>(prev_page.ptr());
         diag_base::put_any(suborigin, diag::severity::optional, 0x10476, "page_item_count=%u, prev_page_pos=0x%llx, prev_page_item_count=%u",
                 (unsigned)container_page->item_count, (unsigned long long)prev_page.pos(), (unsigned)prev_container_page->item_count);
 
