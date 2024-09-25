@@ -863,20 +863,17 @@ bool test_vmem_list_erase(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using List = abc::vmem_list<ItemMany, Pool, Log>;
-
+bool test_vmem_temp_destructor(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/empty_destructor.vmem", context.log);
+    abc::vmem::pool_config config("out/test/temp_destructor.vmem", max_mapped_page_count_list);
+    abc::vmem::pool pool(std::move(config), context.log());
 
     {
-        abc::vmem_list_state list_state;
-        abc::vmem_temp<List> temp_list(&list_state, &pool, context.log);
+        abc::vmem::list_state list_state;
+        abc::vmem::temp<abc::vmem::list<ItemMany>> temp_list(&list_state, &pool, context.log());
 
-        passed = insert_vmem_list_items(context, temp_list, 8) && passed;
+        passed = insert_list_items(context, temp_list, 8) && passed;
         // | (2)         | (3)
         // | 00 01 02 03 | 04 05 06 07
     }
@@ -884,14 +881,14 @@ bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
     // Allocate again
     {
         // Page 3
-        abc::vmem::page page3(&pool, context.log);
+        abc::vmem::page page3(&pool, context.log());
         LinkedPage* linked_page3 = reinterpret_cast<LinkedPage*>(page3.ptr());
         passed = context.are_equal(linked_page3 != nullptr, true, 0x10538, "%d") && passed;
         passed = context.are_equal((long long)page3.pos(), 3LL, 0x10539, "0x%llx") && passed;
     }
     {
         // Page 2
-        abc::vmem::page page2(&pool, context.log);
+        abc::vmem::page page2(&pool, context.log());
         LinkedPage* linked_page2 = reinterpret_cast<LinkedPage*>(page2.ptr());
         passed = context.are_equal(linked_page2 != nullptr, true, 0x1053a, "%d") && passed;
         passed = context.are_equal((long long)page2.pos(), 2LL, 0x1053b, "0x%llx") && passed;
@@ -901,6 +898,7 @@ bool test_vmem_temp_destructor(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_map_insert(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using Map = abc::vmem_map<Key, Value, Pool, Log>;
