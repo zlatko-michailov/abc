@@ -18,6 +18,7 @@
 ## To Do
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
+- __Remove TODO:__
 - `vmem`
     - pool
         - To free capacity, use an efficient container and algorithms.
@@ -34,6 +35,7 @@
         - container.h
         - list.h
         - map.h
+        - string.h
     - Samples
         - tictactoe
         - connect4
