@@ -180,11 +180,7 @@ namespace abc { namespace vmem {
      * @tparam T   Value type.
      */
     template <typename Key, typename T>
-    struct map_result2
-        : protected diag::diag_ready<const char*> {
-
-        using diag_base = diag::diag_ready<const char*>;
-
+    struct map_result2 {
         /**
          * @brief Default-like constructor.
          */
@@ -211,9 +207,9 @@ namespace abc { namespace vmem {
         map_iterator<Key, T> iterator;
 
         /**
-         * @brief`true` = the operation was performed; `false` = the operation was not performed.
+         * @brief `true` = the operation was performed; `false` = the operation was not performed.
          */
-        bool ok; //// TODO: Remove?
+        bool ok;
     };
 
 
@@ -226,8 +222,6 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     struct map_find_result2
         : public map_result2<Key, T> {
-
-        using diag_base = diag::diag_ready<const char*>;
 
         /**
          * @brief      Constructor.
@@ -279,6 +273,9 @@ namespace abc { namespace vmem {
 
         using diag_base = diag::diag_ready<const char*>;
         using iterator_state = map_iterator_state<Key, T>;
+
+    private:
+        static constexpr const char* origin() noexcept;
 
     public:
         using key_type                 = Key;
@@ -569,7 +566,7 @@ namespace abc { namespace vmem {
         /**
          * @brief Converts a value-level iterator to a map iterator.
          */
-        iterator itr_from_values(value_level_iterator values_itr) const noexcept;
+        iterator itr_from_values(const value_level_iterator& values_itr) const noexcept;
 
     private:
         map_state*            _state;

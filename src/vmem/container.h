@@ -155,7 +155,7 @@ namespace abc { namespace vmem {
 
         diag_base::ensure(suborigin, _state->item_size == sizeof(T), 0x10448, "state != nullptr");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x10449, "Begin: front_page_pos=0x%llx, back_page_pos=0x%llx", (unsigned long long)_state->front_page_pos, (unsigned long long)_state->back_page_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10449, "End: front_page_pos=0x%llx, back_page_pos=0x%llx", (unsigned long long)_state->front_page_pos, (unsigned long long)_state->back_page_pos);
     }
 
 
