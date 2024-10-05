@@ -545,9 +545,8 @@ namespace abc { namespace vmem {
 
         constexpr std::size_t new_page_item_count = page_capacity() / 2;
         constexpr std::size_t page_item_count = page_capacity() - new_page_item_count;
-        for (std::size_t i = 0; i < new_page_item_count; i++) {
-            new_container_page->items[i] = container_page->items[page_item_count + i];
-        }
+        std::memmove(&new_container_page->items[0], &container_page->items[page_item_count], new_page_item_count * sizeof(T));
+
         new_container_page->item_count = new_page_item_count;
         container_page->item_count = page_item_count;
 
