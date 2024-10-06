@@ -244,12 +244,12 @@ namespace abc { namespace vmem {
         result2 result(nullptr);
 
         if (!find_result.ok) {
-            diag_base::put_any(suborigin, diag::severity::important, 0x10515, "Not found. Inserting.");
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10515, "Not found. Inserting.");
 
             result = insert2(std::move(find_result), item);
         }
         else {
-            diag_base::put_any(suborigin, diag::severity::important, 0x10516, "Found. Bailing.");
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10516, "Found. Bailing.");
 
             result.iterator = find_result.iterator;
             result.ok = false;
@@ -280,7 +280,6 @@ namespace abc { namespace vmem {
 
         for (InputItr item_itr = first; item_itr != last; item_itr++) {
             bool inserted = insert(*item_itr).second;
-
             diag_base::ensure(suborigin, !inserted, 0x10518, "!inserted");
         }
 
@@ -300,15 +299,13 @@ namespace abc { namespace vmem {
         value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), diag_base::log());
 
         value_level_result2 values_result = _values.insert2(values_itr, item);
-
-        diag_base::ensure(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
-        diag_base::ensure(suborigin, values_result.iterator.can_deref(), __TAG__, "values_result.iterator.can_deref()");
+        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
+        diag_base::expect(suborigin, values_result.iterator.can_deref(), __TAG__, "values_result.iterator.can_deref()");
 
         result2 result = update_key_levels(true /*is_insert*/, std::move(find_result), std::move(values_result));
-
-        diag_base::ensure(suborigin, result.ok, __TAG__, "result.ok");
-        diag_base::ensure(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
-        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+        diag_base::expect(suborigin, result.ok, __TAG__, "result.ok");
+        diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1051a, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%d",
                 (unsigned long long)result.iterator.page_pos(), (unsigned)result.iterator.item_pos(), result.iterator.edge());
@@ -322,26 +319,21 @@ namespace abc { namespace vmem {
 
     template <typename Key, typename T>
     inline std::size_t map<Key, T>::erase(const Key& key) {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1051b, "map::erase(key) Start.");
-        }
+        constexpr const char* suborigin = "erase(key)";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1051b, "Begin:");
 
         std::size_t result = 0;
 
         find_result2 find_result = find2(key);
 
         if (find_result.ok) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x1051c, "map::erase(key) Found. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%d",
+            diag_base::put_any(suborigin, diag::severity::optional, 0x1051c, "Found. Found. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
                     (long long)find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge());
-            }
 
             result = erase2(std::move(find_result));
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1051d, "map::erase(key) Done. result=%zu", result);
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1051d, "End: result=%zu", result);
 
         return result;
     }
@@ -350,33 +342,44 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     template <typename InputItr>
     inline void map<Key, T>::erase(InputItr first, InputItr last) {
+        constexpr const char* suborigin = "erase(first, last)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
         for (InputItr item_itr = first; item_itr != last; item_itr++) {
-            erase(*item_itr);
+            std::size_t result = erase(*item_itr);
+
+            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "result=%zu", result);
         }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
     template <typename Key, typename T>
-    inline std::size_t map<Key, T>::erase2(find_result2&& find_result) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1051e, "map::erase(find_result2) Start.");
-        }
+    inline std::size_t map<Key, T>::erase2(find_result2&& find_result) {
+        constexpr const char* suborigin = "erase(find_result2)";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1051e, "Begin:");
 
-        value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), _log);
+        diag_base::expect(suborigin, find_result.iterator.is_valid(this), __TAG__, "find_result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, find_result.iterator.can_deref(), __TAG__, "find_result.iterator.can_deref()");
+
+        value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), diag_base::log());
 
         value_level_result2 values_result = _values.erase2(values_itr);
+        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
 
         result2 result(nullptr);
-        if (values_result.iterator.is_valid()) {
-            result = update_key_levels(false, std::move(find_result), std::move(values_result));
+
+        values_itr = values_result.iterator;
+        if (values_itr.can_deref()) {
+            result = update_key_levels(false /*is_insert*/, std::move(find_result), std::move(values_result));
+            diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1051f, "map::erase(find_result2) Done. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
-                (long long)values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1051f, "End: values_itr.page_pos=0x%llx, values_itr.item_pos=0x%x, values_itr.edge=%d",
+                (unsigned long long)values_itr.page_pos(), (unsigned)values_itr.item_pos(), values_itr.edge());
 
-        return values_result.iterator.is_valid() ? 1 : 0;
+        return values_itr.can_deref() ? 1 : 0;
     }
 
 
@@ -384,197 +387,148 @@ namespace abc { namespace vmem {
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::result2 map<Key, T>::update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x10520, "map::update_key_levels() Start.");
-        }
+    inline typename map<Key, T>::result2 map<Key, T>::update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) {
+        constexpr const char* suborigin = "update_key_levels";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10520, "Begin:");
 
-        bool ok = true;
+        if (values_result.page_leads[0].operation != container_page_lead_operation::none || values_result.page_leads[1].operation != container_page_lead_operation::none) {
+            diag_base::expect(suborigin, _key_stack.size() == find_result.path.size(), 0x10521, "_key_stack.size(%zu) == find_result.path.size(%zu)", _key_stack.size(), find_result.path.size());
 
-        if (values_result.iterator.is_valid()
-            && (values_result.page_leads[0].operation != container_page_lead_operation::none || values_result.page_leads[1].operation != container_page_lead_operation::none)) {
-            if (_key_stack.size() != find_result.path.size()) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::warning, 0x10521, "map::update_key_levels() Mismatch key_stack.size=%zu, path.size=%zu",
-                        _key_stack.size(), find_result.path.size());
+            key_level_stack_iterator key_stack_itr = _key_stack.begin();
+            path_reverse_iterator path_itr = find_result.path.rend();
+
+            page_lead page_leads[] = { values_result.page_leads[0], values_result.page_leads[1] };
+
+            // While there is rebalance, keep going back the path (and up the levels).
+            while ((page_leads[0].operation != container_page_lead_operation::none || page_leads[1].operation != container_page_lead_operation::none)
+                    && key_stack_itr != _key_stack.end()
+                    && path_itr != find_result.path.rbegin()) {
+                // IMPORTANT: Save the ptr instance to keep the page locked.
+                vmem::ptr<container_state> key_level_state_ptr = key_stack_itr.operator->();
+
+                map_key_level<Key> parent_keys(key_level_state_ptr.operator->(), _pool, diag_base::log());
+                page_pos_t parent_page_pos = *path_itr;
+
+                key_level_result2 keys_result;
+                if (is_insert) {
+                    // page_leads[0] - insert; new page
+                    // page_leads[1] - original; used only when a new level is created
+                    diag_base::expect(suborigin, page_leads[0].operation == container_page_lead_operation::insert, __TAG__, "page_leads[0].operation == container_page_lead_operation::insert");
+                    
+                    item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
+                    diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
+
+                    key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, diag_base::log());
+
+                    map_key<Key> key_item;
+                    std::memmove(&key_item.key, &page_leads[0].items[0].key, sizeof(Key));
+                    key_item.page_pos = page_leads[0].page_pos;
+
+                    keys_result = parent_keys.insert2(parent_keys_itr, key_item);
+                }
+                else {
+                    // page_leads[0] - replace or none; doesn't create new leads
+                    // page_leads[1] - erase
+
+                    if (page_leads[0].operation == container_page_lead_operation::replace) {
+                        item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
+                        diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
+    
+                        key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, diag_base::log());
+                        if (parent_keys_itr.can_deref()) {
+                            ptr<map_key<Key>> key_ptr = parent_keys_itr.operator->();
+                            std::memmove(&key_ptr->key, &page_leads[0].items[1].key, sizeof(Key));
+                        }
+                    }
+
+                    item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[1].items[0].key);
+                    diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
+
+                    key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, diag_base::log());
+
+                    keys_result = parent_keys.erase2(parent_keys_itr);
                 }
 
-                ok = false;
+                diag_base::ensure(suborigin, keys_result.iterator.can_deref(), 0x10522, "keys_result.iterator.can_deref()");
+
+                page_leads[0] = keys_result.page_leads[0];
+                page_leads[1] = keys_result.page_leads[1];
+
+                key_stack_itr++;
+                path_itr--;
+            } // while (rebalance)
+
+            // If there is still a rebalance, then a key level at the top has to be added/removed.
+            if (is_insert) {
+                if (page_leads[0].page_pos != page_pos_nil) {
+                    container_state new_keys_state;
+                    map_key_level<Key> new_keys(&new_keys_state, _pool, _log);
+
+                    // original
+                    map_key<Key> other_key_item;
+                    std::memmove(&other_key_item.key, &page_leads[1].items[0].key, sizeof(Key));
+                    other_key_item.page_pos = page_leads[1].page_pos;
+                    new_keys.push_back(other_key_item);
+
+                    // new page
+                    map_key<Key> new_key_item;
+                    std::memmove(&new_key_item.key, &page_leads[0].items[0].key, sizeof(Key));
+                    new_key_item.page_pos = page_leads[0].page_pos;
+                    new_keys.push_back(new_key_item);
+
+                    _key_stack.push_back(new_keys_state);
+                }
             }
             else {
-                key_level_stack_iterator key_stack_itr = _key_stack.begin();
-                path_reverse_iterator path_itr = find_result.path.rend();
-
-                page_lead page_leads[] = { values_result.page_leads[0], values_result.page_leads[1] };
-
-                // While there is rebalance, keep going back the path (and up the levels).
-                while ((page_leads[0].operation != container_page_lead_operation::none || page_leads[1].operation != container_page_lead_operation::none)
-                        && key_stack_itr != _key_stack.end()
-                        && path_itr != find_result.path.rbegin()) {
-                    // IMPORTANT: Save the ptr instance to keep the page locked.
-                    ptr<container_state> key_level_state_ptr = key_stack_itr.operator->();
-
-                    map_key_level<Key> parent_keys(key_level_state_ptr.operator->(), _pool, _log);
-                    page_pos_t parent_page_pos = *path_itr;
-
-                    key_level_result2 keys_result;
-                    if (is_insert) {
-                        // page_leads[0] - insert; new page
-                        // page_leads[1] - original; used only when a new level is created
-                        
-                        item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
-                        if (parent_item_pos == item_pos_nil) {
-                            ok = false;
-                            break;
-                        }
-
-                        key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, _log);
-
-                        map_key<Key> key_item;
-                        copy(key_item.key, page_leads[0].items[0].key);
-                        key_item.page_pos = page_leads[0].page_pos;
-
-                        keys_result = parent_keys.insert2(parent_keys_itr, key_item);
-                    }
-                    else {
-                        // page_leads[0] - replace or none; doesn't create new leads
-                        // page_leads[1] - erase
-
-                        if (page_leads[0].operation == container_page_lead_operation::replace) {
-                            item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
-                            if (parent_item_pos == item_pos_nil) {
-                                ok = false;
-                                break;
-                            }
-
-                            key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, _log);
-                            if (parent_keys_itr.can_deref()) {
-                                ptr<map_key<Key>> key_ptr = parent_keys_itr.operator->();
-                                copy(key_ptr->key, page_leads[0].items[1].key);
-                            }
-                        }
-
-                        item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[1].items[0].key);
-                        if (parent_item_pos == item_pos_nil) {
-                            ok = false;
-                            break;
-                        }
-
-                        key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, _log);
-
-                        keys_result = parent_keys.erase2(parent_keys_itr);
+                //// TODO: What is the condition that there is an erase rebalance.
+                if (!_key_stack.empty()) {
+                    std::size_t top_keys_size = 2;
+                    {
+                        container_state top_keys_state = _key_stack.back();
+                        map_key_level<Key> top_keys(&top_keys_state, _pool, diag_base::log());
+                        top_keys_size = top_keys.size();
                     }
 
-                    if (!keys_result.iterator.is_valid()) {
-                        if (_log != nullptr) {
-                            _log->put_any(category::abc::vmem, severity::warning, 0x10522, "map::update_key_levels() Could not insert key to page pos=0x%llx", (long long)parent_page_pos);
-                        }
-
-                        ok = false;
-                        break;
-                    }
-
-                    if (page_leads[0].operation != container_page_lead_operation::none || page_leads[1].operation != container_page_lead_operation::none) {
-                        page_leads[0] = keys_result.page_leads[0];
-                        page_leads[1] = keys_result.page_leads[1];
-                    }
-
-                    key_stack_itr++;
-                    path_itr--;
-                } // while (new_page_pos != nil)
-
-                // If we still have a new_page_pos, then we have to add/remove a key level at the top.
-                if (ok) {
-                    if (is_insert) {
-                        if (page_leads[0].page_pos != page_pos_nil) {
-                            container_state new_keys_state;
-                            map_key_level<Key> new_keys(&new_keys_state, _pool, _log);
-
-                            // items[0]
-                            map_key<Key> other_key_item;
-                            copy(other_key_item.key, page_leads[1].items[0].key);
-                            other_key_item.page_pos = page_leads[1].page_pos;
-                            new_keys.push_back(other_key_item);
-
-                            // items[1]
-                            map_key<Key> new_key_item;
-                            copy(new_key_item.key, page_leads[0].items[0].key);
-                            new_key_item.page_pos = page_leads[0].page_pos;
-                            new_keys.push_back(new_key_item);
-
-                            _key_stack.push_back(new_keys_state);
-                        }
-                    }
-                    else {
-                        if (!_key_stack.empty()) {
-                            std::size_t top_keys_size = 2;
-                            {
-                                container_state top_keys_state = _key_stack.back();
-                                map_key_level<Key> top_keys(&top_keys_state, _pool, _log);
-                                top_keys_size = top_keys.size();
-                            }
-
-                            if (top_keys_size == 1) {
-                                _key_stack.pop_back();
-                            }
-                        }
-                    }
-
-                    if (_log != nullptr) {
-                        _log->put_any(category::abc::vmem, severity::abc::debug, 0x10523, "map::update_key_levels() key_stack.size=%zu", _key_stack.size());
+                    if (top_keys_size == 1) {
+                        _key_stack.pop_back();
                     }
                 }
             }
+
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10523, "key_stack.size=%zu", _key_stack.size());
         }
 
         result2 result(nullptr);
+        result.iterator = iterator(this, values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge(), diag_base::log());
+        result.ok = true;
 
-        if (ok) {
-            result.iterator = iterator(this, values_result.iterator.page_pos(), values_result.iterator.item_pos(), values_result.iterator.edge(), _log);
-            result.ok = true;
-        }
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::optional, 0x10524, "map::update_key_levels() Done. ok=%d, iterator.valid=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
-                result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10524, "End: ok=%d, iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+                result.ok, (unsigned long long)result.iterator.page_pos(), (unsigned)result.iterator.item_pos(), result.iterator.edge());
 
         return result;
     }
 
 
     template <typename Key, typename T>
-    inline item_pos_t map<Key, T>::key_item_pos(page_pos_t key_page_pos, const Key& key) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10525, "map::key_item_pos() Start. key_page_pos=0x%llx..., key=0x%llx...",
-                (long long)key_page_pos, *(long long*)&key);
-        }
+    inline item_pos_t map<Key, T>::key_item_pos(page_pos_t key_page_pos, const Key& key) {
+        constexpr const char* suborigin = "key_item_pos";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10525, "Begin: key_page_pos=0x%llx..., key=0x%llx...", (unsigned long long)key_page_pos, *(unsigned long long*)&key);
 
         item_pos_t item_pos = item_pos_nil;
-        page<Pool, Log> page(_pool, key_page_pos, _log);
+        vmem::page page(_pool, key_page_pos, diag_base::log());
+        diag_base::expect(suborigin, page.pos() == key_page_pos, __TAG__, "page.pos() == key_page_pos");
+        diag_base::expect(suborigin, page.ptr() != nullptr, 0x10526, "page.ptr() != nullptr");
 
-        if (page.ptr() == nullptr) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::warning, 0x10526, "map::key_item_pos() Could not load key page pos=0x%llx", (long long)key_page_pos);
-            }
-        }
-        else {
-            map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
+        map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
 
-            item_pos = 0;
-            for (std::size_t i = 0; i < key_page->item_count && is_less(key_page->items[i].key, key); i++) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::abc::debug, 0x10527, "map::key_item_pos() item[%zu]=0x%llx..., key=0x%llx...",
-                        i, *(long long*)&key_page->items[i].key, *(long long*)&key);
-                }
+        item_pos = 0;
+        for (std::size_t i = 0; i < key_page->item_count && key_page->items[i].key < key; i++) {
+            diag_base::put_any(suborigin, diag::severity::verbose, 0x10527, "item[%zu]=0x%llx..., key=0x%llx...", i, *(unsigned long long*)&key_page->items[i].key, *(unsigned long long*)&key);
 
-                item_pos++;
-            }
+            item_pos++;
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10528, "map::key_item_pos() Done. item_pos=0x%x", item_pos);
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10528, "End: item_pos=0x%x", (unsigned)item_pos);
 
         return item_pos;
     }
@@ -584,18 +538,23 @@ namespace abc { namespace vmem {
 
 
     template <typename Key, typename T>
-    inline void map<Key, T>::clear() noexcept {
+    inline void map<Key, T>::clear() {
+        constexpr const char* suborigin = "clear";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
         for (key_level_stack_iterator key_stack_itr = _key_stack.rend(); key_stack_itr != _key_stack.rbegin(); key_stack_itr--) {
             // IMPORTANT: Save the ptr instance to keep the page locked.
-            ptr<container_state> key_level_state_ptr = key_stack_itr.operator->();
+            vmem::ptr<container_state> key_level_state_ptr = key_stack_itr.operator->();
 
-            map_key_level<Key> keys(key_level_state_ptr.operator->(), _pool, _log);
+            map_key_level<Key> keys(key_level_state_ptr.operator->(), _pool, diag_base::log());
             keys.clear();
         }
 
         _key_stack.clear();
 
         _values.clear();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
@@ -603,44 +562,40 @@ namespace abc { namespace vmem {
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::iterator map<Key, T>::next(const iterator_state& itr) const noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10529, "map::next() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+    inline typename map<Key, T>::iterator map<Key, T>::next(const iterator_state& itr) const {
+        constexpr const char* suborigin = "next";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10529, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+                (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
 
-        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
+        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
+        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), __TAG__, "itr.is_rbegin() || itr.can_deref()");
 
+        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), diag_base::log());
         values_itr++;
+        iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), diag_base::log());
 
-        iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
-
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x1052a, "map::next() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
-                (long long)result.page_pos(), result.item_pos(), result.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1052a, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
 
         return result;
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::iterator map<Key, T>::prev(const iterator_state& itr) const noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x1052b, "map::prev() Start. itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
-                (long long)itr.page_pos(), itr.item_pos(), itr.edge());
-        }
+    inline typename map<Key, T>::iterator map<Key, T>::prev(const iterator_state& itr) const {
+        constexpr const char* suborigin = "prev";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1052b, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
+                (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
+
+        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
+        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), __TAG__, "itr.is_rbegin() || itr.can_deref()");
 
         value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
-
         values_itr--;
-
         iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::debug, 0x1052c, "map::prev() Done. result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
-                (long long)result.page_pos(), result.item_pos(), result.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1052c, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
+                (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
 
         return result;
     }

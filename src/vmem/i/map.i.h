@@ -439,7 +439,7 @@ namespace abc { namespace vmem {
          * @param find_result Find result.
          * @return            `1` = the item was erased; `0` = the item was not erased.
          */
-        std::size_t erase2(find_result2&& find_result) noexcept;
+        std::size_t erase2(find_result2&& find_result);
 
     // update_key_levels() helpers
     private:
@@ -450,20 +450,20 @@ namespace abc { namespace vmem {
          * @param values_result `value_level_result_2`
          * @return              `result2`
          */
-        result2 update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) noexcept;
+        result2 update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result);
 
         /**
          * @brief              Returns the position of a key on a key page.
          * @param key_page_pos Key page position.
          * @param key          Key
          */
-        item_pos_t key_item_pos(page_pos_t key_page_pos, const Key& key) noexcept;
+        item_pos_t key_item_pos(page_pos_t key_page_pos, const Key& key);
 
     public:
         /**
          * @brief Erases all items.
          */
-        void clear() noexcept;
+        void clear();
 
     private:
         friend iterator_state;
@@ -474,13 +474,13 @@ namespace abc { namespace vmem {
          * @brief     Returns the iterator immediately following a given one.  
          * @param itr Iterator.
          */
-        iterator next(const iterator_state& itr) const noexcept;
+        iterator next(const iterator_state& itr) const;
 
         /**
          * @brief     Returns the iterator immediately preceding a given one.  
          * @param itr Iterator.
          */
-        iterator prev(const iterator_state& itr) const noexcept;
+        iterator prev(const iterator_state& itr) const;
 
     public:
         /**

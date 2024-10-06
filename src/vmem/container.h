@@ -420,8 +420,7 @@ namespace abc { namespace vmem {
 
         iterator itr = iterator(this, new_page.pos(), 0, iterator_edge::none, diag_base::log());
         result2 result = insert_with_capacity(itr, item, new_container_page);
-
-        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+        diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10452, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.page_pos=0x%llx",
                 (unsigned long long)result.iterator.page_pos(), result.iterator.item_pos(), (unsigned long long)result.page_leads[0].page_pos);
