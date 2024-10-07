@@ -462,7 +462,7 @@ namespace abc { namespace vmem {
             if (is_insert) {
                 if (page_leads[0].page_pos != page_pos_nil) {
                     container_state new_keys_state;
-                    map_key_level<Key> new_keys(&new_keys_state, _pool, _log);
+                    map_key_level<Key> new_keys(&new_keys_state, _pool, diag_base::log());
 
                     // original
                     map_key<Key> other_key_item;
@@ -590,9 +590,9 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
         diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), __TAG__, "itr.is_rbegin() || itr.can_deref()");
 
-        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
+        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), diag_base::log());
         values_itr--;
-        iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), _log);
+        iterator result = iterator(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), diag_base::log());
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1052c, "End: result.page_pos=0x%llx, result.item_pos=0x%x, result.edge=%u",
                 (unsigned long long)result.page_pos(), (unsigned)result.item_pos(), result.edge());
@@ -712,7 +712,7 @@ namespace abc { namespace vmem {
 
     template <typename Key, typename T>
     inline typename map<Key, T>::pointer map<Key, T>::at(const iterator_state& itr) {
-        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
+        value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), diag_base::log());
         return values_itr.operator->();
     }
 

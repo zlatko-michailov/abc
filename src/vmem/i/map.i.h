@@ -43,8 +43,8 @@ namespace abc { namespace vmem {
         using base = container<map_key<Key>, noheader>;
         using diag_base = diag::diag_ready<const char*>;
 
-        static constexpr page_balance_t balance_insert = page_balance::all;
-        static constexpr page_balance_t balance_erase  = page_balance::all;
+        static constexpr page_balance balance_insert = page_balance::all;
+        static constexpr page_balance balance_erase  = page_balance::all;
 
     public:
         /**
@@ -113,8 +113,8 @@ namespace abc { namespace vmem {
         using base = container<map_value<Key, T>, noheader>;
         using diag_base = diag::diag_ready<const char*>;
 
-        static constexpr page_balance_t balance_insert = page_balance::all;
-        static constexpr page_balance_t balance_erase  = page_balance::all;
+        static constexpr page_balance balance_insert = page_balance::all;
+        static constexpr page_balance balance_erase  = page_balance::all;
 
     public:
         /**
