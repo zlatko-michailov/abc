@@ -489,7 +489,7 @@ namespace abc { namespace vmem {
          * @param key Key.
          * @return    `find_result2` 
          */
-        find_result2 find2(const Key& key) noexcept;
+        find_result2 find2(const Key& key);
 
         /**
          * @brief     Finds an item by key.
@@ -497,7 +497,7 @@ namespace abc { namespace vmem {
          * @param key Key.
          * @return    `iterator` 
          */
-        iterator find(const Key& key) noexcept;
+        iterator find(const Key& key);
 
         /**
          * @brief     Finds an item by key.
@@ -505,42 +505,42 @@ namespace abc { namespace vmem {
          * @param key Key.
          * @return    `const_iterator` 
          */
-        const_iterator find(const Key& key) const noexcept;
+        const_iterator find(const Key& key) const;
 
         /**
          * @brief     Checks if an item with a key exists.
          * @param key Key.
          * @return    `true` = exists; `false` = does not exist. 
          */
-        bool contains(const Key& key) const noexcept;
+        bool contains(const Key& key) const;
 
         /**
          * @brief     Finds an item by key, and dereferences it.
          * @param key Key.
          * @return    `pointer` 
          */
-        pointer operator [](const Key& key) noexcept;
+        pointer operator [](const Key& key);
 
         /**
          * @brief     Finds an item by key, and dereferences it.
          * @param key Key.
          * @return    `const_pointer` 
          */
-        const_pointer operator [](const Key& key) const noexcept;
+        const_pointer operator [](const Key& key) const;
 
         /**
          * @brief     Dereferences an iterator.
          * @param itr Iterator.
          * @return    `pointer`
          */
-        pointer at(const iterator_state& itr) noexcept;
+        pointer at(const iterator_state& itr);
 
         /**
          * @brief     Dereferences an iterator.
          * @param itr Iterator.
          * @return    `const_pointer`
          */
-        const_pointer at(const iterator_state& itr) const noexcept;
+        const_pointer at(const iterator_state& itr) const;
 
     private:
         /**

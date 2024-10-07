@@ -602,155 +602,123 @@ namespace abc { namespace vmem {
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::find_result2 map<Key, T>::find2(const Key& key) noexcept {
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x1052d, "map::find2() Start.");
-        }
+    inline typename map<Key, T>::find_result2 map<Key, T>::find2(const Key& key) {
+        constexpr const char* suborigin = "find2";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1052d, "Begin:");
 
         page_pos_t page_pos = page_pos_nil;
         item_pos_t item_pos = item_pos_nil;
-        bool found = false;
+        bool is_found = false;
 
-        find_result2 result(_pool, _log);
+        find_result2 result(_pool, diag_base::log());
 
         if (!_key_stack.empty()) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x1052e, "map::find2() %zu key levels. root page_pos=0x%llx",
-                    _key_stack.size(), (long long)_key_stack.back().front_page_pos);
-            }
-
             // There are key levels.
             page_pos = _key_stack.back().front_page_pos;
+            diag_base::expect(suborigin, page_pos != page_pos_nil, __TAG__, "page_pos != page_pos_nil");
+
             result.path.push_back(page_pos);
+            diag_base::put_any(suborigin, diag::severity::optional, 0x1052e, "Loop key levels=%zu, Add root page_pos=0x%llx", _key_stack.size(), (unsigned long long)page_pos);
 
             for (std::size_t lev = 0; page_pos != page_pos_nil && lev < _key_stack.size(); lev++) {
-                page<Pool, Log> page(_pool, page_pos, _log);
+                vmem::page page(_pool, page_pos, diag_base::log());
+                diag_base::expect(suborigin, page.pos() == page_pos, __TAG__, "page.pos() == page_pos");
+                diag_base::expect(suborigin, page.ptr() != nullptr, 0x1052f, "page.ptr() != nullptr");
 
-                if (page.ptr() == nullptr) {
-                    if (_log != nullptr) {
-                        _log->put_any(category::abc::vmem, severity::warning, 0x1052f, "map::find2() Could not load key page pos=0x%llx", (long long)page_pos);
-                    }
+                map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
+                diag_base::put_any(suborigin, diag::severity::optional, 0x10530, "Examine key lev=%zu, page_pos=0x%llx", lev, (unsigned long long)page.pos());
 
-                    page_pos = page_pos_nil;
-                    break;
+                page_pos = key_page->items[0].page_pos;
+                diag_base::put_any(suborigin, diag::severity::optional, 0x10531, "Item i=0 page_pos=0x%llx", (unsigned long long)page_pos);
+
+                for (std::size_t i = 1; i < key_page->item_count && key_page->items[i].key <= key; i++) {
+                    page_pos = key_page->items[i].page_pos;
+                    diag_base::put_any(suborigin, diag::severity::optional, 0x10532, "Item i=%zu page_pos=0x%llx", i, (unsigned long long)page_pos);
                 }
-                else {
-                    if (_log != nullptr) {
-                        _log->put_any(category::abc::vmem, severity::abc::debug, 0x10530, "map::find2() Examine key lev=%zu, page_pos=0x%llx", lev, (long long)page.pos());
-                    }
+                diag_base::put_any(suborigin, diag::severity::optional, 0x10533, "Child page_pos=0x%llx", (unsigned long long)page_pos);
 
-                    map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
-
-                    page_pos = key_page->items[0].page_pos;
-                    if (_log != nullptr) {
-                        _log->put_any(category::abc::vmem, severity::abc::debug, 0x10531, "map::find2() Item i=0 page_pos=0x%llx", (long long)page_pos);
-                    }
-
-                    for (std::size_t i = 1; i < key_page->item_count && is_less_or_equal(key_page->items[i].key, key); i++) {
-                        page_pos = key_page->items[i].page_pos;
-                        if (_log != nullptr) {
-                            _log->put_any(category::abc::vmem, severity::abc::debug, 0x10532, "map::find2() Item i=%zu page_pos=0x%llx", i, (long long)page_pos);
-                        }
-                    }
-
-                    if (_log != nullptr) {
-                        _log->put_any(category::abc::vmem, severity::abc::debug, 0x10533, "map::find2() Child page_pos=0x%llx", (long long)page_pos);
-                    }
-
-                    if (lev != _key_stack.size() - 1) {
-                        result.path.push_back(page_pos);
-                    }
+                if (lev != _key_stack.size() - 1) {
+                    result.path.push_back(page_pos);
+                    diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "Add page_pos=0x%llx", (unsigned long long)page_pos);
                 }
             }
         }
         else {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::vmem, severity::abc::debug, 0x10534, "map::find2() No key levels. value page_pos=0x%llx",
-                    (long long)_state->values.front_page_pos);
-            }
-
             // There are no key levels. There must be at most 1 value page.
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10534, "No key levels. value page_pos=0x%llx", (unsigned long long)_state->values.front_page_pos);
             page_pos = _state->values.front_page_pos;
         }
 
         // page_pos must be the pos of a value page.
         if (page_pos != page_pos_nil) {
-            page<Pool, Log> page(_pool, page_pos, _log);
+            vmem::page page(_pool, page_pos, diag_base::log());
+            diag_base::expect(suborigin, page.pos() == page_pos, __TAG__, "page.pos() == page_pos");
+            diag_base::expect(suborigin, page.ptr() != nullptr, 0x10535, "page.ptr() != nullptr");
 
-            if (page.ptr() == nullptr) {
-                if (_log != nullptr) {
-                    _log->put_any(category::abc::vmem, severity::warning, 0x10535, "map::find2() Could not load value page pos=0x%llx", (long long)page_pos);
-                }
+            map_value_page<Key, T>* value_page = reinterpret_cast<map_value_page<Key, T>*>(page.ptr());
 
-                page_pos = page_pos_nil;
+            item_pos = 0;
+            for (std::size_t i = 0; i < value_page->item_count && value_page->items[i].key < key; i++) {
+                item_pos++;
             }
-            else {
-                map_value_page<Key, T>* value_page = reinterpret_cast<map_value_page<Key, T>*>(page.ptr());
 
-                item_pos = 0;
-                for (std::size_t i = 0; i < value_page->item_count && is_less(value_page->items[i].key, key); i++) {
-                    item_pos++;
-                }
-
-                found = are_equal(value_page->items[item_pos].key, key);
-            }
+            is_found = value_page->items[item_pos].key == key;
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10536, "Value item_pos=%zu, is_found=%d", item_pos, is_found);
         }
 
-        result.ok = found;
+        result.ok = is_found;
 
         if (page_pos != item_pos_nil && item_pos != item_pos_nil) {
-            result.iterator = iterator(this, page_pos, item_pos, iterator_edge::none, _log);
+            result.iterator = iterator(this, page_pos, item_pos, iterator_edge::none, diag_base::log());
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::vmem, severity::abc::important, 0x10536, "map::find2() Done. result.ok=%d, result.iterator.valid=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
-                result.ok, result.iterator.is_valid(), (long long)result.iterator.page_pos(), result.iterator.item_pos(), result.iterator.edge());
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10536, "End:  result.ok=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
+                result.ok, (unsigned long long)result.iterator.page_pos(), (unsigned)result.iterator.item_pos(), result.iterator.edge());
 
         return result;
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::iterator map<Key, T>::find(const Key& key) noexcept {
+    inline typename map<Key, T>::iterator map<Key, T>::find(const Key& key) {
         result2 result = find2(key);
         return result.ok ? result.iterator : end_itr();
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::const_iterator map<Key, T>::find(const Key& key) const noexcept {
+    inline typename map<Key, T>::const_iterator map<Key, T>::find(const Key& key) const {
         return const_cast<map<Key, T>>(this)->find(key);
     }
 
 
     template <typename Key, typename T>
-    inline bool map<Key, T>::contains(const Key& key) const noexcept {
+    inline bool map<Key, T>::contains(const Key& key) const {
         return find(key).can_deref();
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::pointer map<Key, T>::operator [](const Key& key) noexcept {
+    inline typename map<Key, T>::pointer map<Key, T>::operator [](const Key& key) {
         return find(key).operator->();
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::const_pointer map<Key, T>::operator [](const Key& key) const noexcept {
+    inline typename map<Key, T>::const_pointer map<Key, T>::operator [](const Key& key) const {
         return const_cast<map<Key, T>*>(this)->operator[](key);
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::pointer map<Key, T>::at(const iterator_state& itr) noexcept {
+    inline typename map<Key, T>::pointer map<Key, T>::at(const iterator_state& itr) {
         value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), _log);
         return values_itr.operator->();
     }
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::const_pointer map<Key, T>::at(const iterator_state& itr) const noexcept {
+    inline typename map<Key, T>::const_pointer map<Key, T>::at(const iterator_state& itr) const {
         return const_cast<map<Key, T>*>(this)->at(itr);
     }
 
