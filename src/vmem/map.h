@@ -137,8 +137,8 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, sizeof(map_key<Key>) <= max_key_item_size(), 0x1050d, "sizeof(map_key<Key>) <= max_key_item_size()");
         diag_base::expect(suborigin, sizeof(map_value<Key, T>) <= max_value_item_size(), 0x1050e, "sizeof(map_value<Key, T>) <= max_value_item_size()");
         diag_base::expect(suborigin, key_page_capacity() >= 2, 0x1050f, "key_page_capacity() >= 2");
-        diag_base::expect(suborigin, !key_level_stack::is_uninit(_state->keys), __TAG__, "!key_level_stack::is_uninit(_state->keys)");
-        diag_base::expect(suborigin, !value_level_container::is_uninit(_state->values), __TAG__, "!value_level_container::is_uninit(_state->values)");
+        diag_base::expect(suborigin, !key_level_stack::is_uninit(&_state->keys), __TAG__, "!key_level_stack::is_uninit(_state->keys)");
+        diag_base::expect(suborigin, !value_level_container::is_uninit(&_state->values), __TAG__, "!value_level_container::is_uninit(_state->values)");
         diag_base::expect(suborigin, _state->keys.item_size == sizeof(container_state), 0x10511, "_state->keys.item_size == sizeof(container_state)");
         diag_base::expect(suborigin, _state->values.item_size == sizeof(map_value<Key, T>), 0x10512, "_state->values.item_size == sizeof(map_value<Key, T>)");
 
@@ -294,7 +294,7 @@ namespace abc { namespace vmem {
                 (unsigned long long)find_result.iterator.page_pos(), (unsigned)find_result.iterator.item_pos(), find_result.iterator.edge());
 
         diag_base::expect(suborigin, find_result.iterator.is_valid(this), __TAG__, "find_result.iterator.is_valid(this)");
-        diag_base::expect(suborigin, find_result.iterator.can_deref(), __TAG__, "find_result.iterator.can_deref()");
+        diag_base::expect(suborigin, find_result.iterator.can_deref() || find_result.iterator == end_itr(), __TAG__, "find_result.iterator.can_deref() || find_result.iterator == end_itr()");
 
         value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), diag_base::log());
 
@@ -668,8 +668,11 @@ namespace abc { namespace vmem {
 
         result.ok = is_found;
 
-        if (page_pos != item_pos_nil && item_pos != item_pos_nil) {
+        if (page_pos != page_pos_nil && item_pos != item_pos_nil) {
             result.iterator = iterator(this, page_pos, item_pos, iterator_edge::none, diag_base::log());
+        }
+        else {
+            result.iterator = end_itr();
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10536, "End:  result.ok=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",

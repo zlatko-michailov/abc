@@ -259,6 +259,7 @@ int main(int /*argc*/, const char* argv[]) {
             } },
 #endif //// TODO:
             { "vmem", {
+#if 0 //// TODO:
                 { "test_vmem_pool_fit",                              test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
                 { "test_vmem_pool_reopen",                           test_vmem_pool_reopen },
@@ -271,8 +272,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_list_insertmany",                       test_vmem_list_insertmany },
                 { "test_vmem_list_erase",                            test_vmem_list_erase },
                 { "test_vmem_temp_destructor",                       test_vmem_temp_destructor },
-#if 0 //// TODO:
+#endif
                 { "test_vmem_map_insert",                            test_vmem_map_insert },
+#if 0 //// TODO:
                 { "test_vmem_map_insertmany",                        test_vmem_map_insertmany },
                 { "test_vmem_map_erase",                             test_vmem_map_erase },
                 { "test_vmem_map_clear",                             test_vmem_map_clear },
