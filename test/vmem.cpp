@@ -80,8 +80,7 @@ using MapItem = vmem_map_value<Key, Value>;
 
 bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count);
 
-template <typename Map>
-bool insert_map_items(test_context& context, Map& map, std::size_t count);
+bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count);
 
 bool insert_linked_page(test_context& context, abc::vmem::pool* pool, abc::vmem::linked& linked, abc::vmem::page_pos_t expected_page_pos, LinkedPageData data,
                         const abc::vmem::linked::const_iterator& itr, const abc::vmem::linked::const_iterator& expected_itr,
@@ -1109,24 +1108,22 @@ bool test_vmem_map_insert(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_map_insertmany(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using Map = abc::vmem_map<Key, Value, Pool, Log>;
-
+bool test_vmem_map_insertmany(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/map_insertmany.vmem", context.log());
+    abc::vmem::pool_config config("out/test/map_insertmany.vmem", max_mapped_page_count_map);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_map_state map_state;
-    Map map(&map_state, &pool, context.log());
+    abc::vmem::map_state map_state;
+    abc::vmem::map<Key, Value> map(&map_state, &pool, context.log());
 
-    passed = insert_vmem_map_items(context, map, 4000) && passed;
+    passed = insert_map_items(context, map, 4000) && passed;
 
     return passed;
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_map_erase(test_context<abc::test::log>& context) {
     using Pool = PoolMap;
     using Map = abc::vmem_map<Key, Value, Pool, Log>;
@@ -1469,16 +1466,14 @@ bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, s
 }
 
 
-#if 0 //// TODO: TEMP
-template <typename Map>
-bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std::size_t count) {
+bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count) {
     constexpr std::size_t base_value = 0x90000000;
 
     bool passed = true;
 
     // Insert.
     for (std::size_t i = 0; i < count; i++) {
-        MapItem item;
+        abc::vmem::map<Key, Value>::value_type item;
         item.key.data = i;
         item.value = base_value + i;
 
@@ -1486,7 +1481,7 @@ bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std:
     }
 
     // Iterate forward.
-    typename Map::const_iterator itr = map.cbegin();
+    abc::vmem::map<Key, Value>::const_iterator itr = map.cbegin();
     for (std::size_t i = 0; i < count; i++) {
         passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "%llu") && passed;
         passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "%llu") && passed;
@@ -1505,7 +1500,6 @@ bool insert_vmem_map_items(test_context<abc::test::log>& context, Map& map, std:
 
     return passed;
 }
-#endif
 
 
 bool insert_linked_page(test_context& context, abc::vmem::pool* pool, abc::vmem::linked& linked, abc::vmem::page_pos_t expected_page_pos, LinkedPageData data,
