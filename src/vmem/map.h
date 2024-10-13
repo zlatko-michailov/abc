@@ -327,7 +327,7 @@ namespace abc { namespace vmem {
         find_result2 find_result = find2(key);
 
         if (find_result.ok) {
-            diag_base::put_any(suborigin, diag::severity::optional, 0x1051c, "Found. Found. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
+            diag_base::put_any(suborigin, diag::severity::optional, 0x1051c, "Found. iterator.page_pos=0x%llx, iterator.item_pos=0x%x, iterator.edge=%d",
                     (long long)find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge());
 
             result = erase2(std::move(find_result));
