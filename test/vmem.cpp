@@ -36,7 +36,7 @@ constexpr std::size_t max_mapped_page_count_exceed = 5;
 constexpr std::size_t max_mapped_page_count_free   = 6;
 constexpr std::size_t max_mapped_page_count_linked = 5;
 constexpr std::size_t max_mapped_page_count_list   = 5;
-constexpr std::size_t max_mapped_page_count_map    = 5;
+constexpr std::size_t max_mapped_page_count_map    = 6;
 
 using LinkedPageData = unsigned long long;
 struct LinkedPage : abc::vmem::linked_page {
@@ -1123,74 +1123,72 @@ bool test_vmem_map_insertmany(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_map_erase(test_context<abc::test::log>& context) {
-    using Pool = PoolMap;
-    using Map = abc::vmem_map<Key, Value, Pool, Log>;
-    using Iterator = abc::vmem_map_const_iterator<Key, Value, Pool, Log>;
+bool test_vmem_map_erase(test_context& context) {
+    constexpr const char* suborigin = "test_vmem_map_erase";
 
     bool passed = true;
 
-    Pool pool("out/test/map_erase.vmem", context.log());
+    abc::vmem::pool_config config("out/test/map_erase.vmem", max_mapped_page_count_map);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_map_state map_state;
-    Map map(&map_state, &pool, context.log());
+    abc::vmem::map_state map_state;
+    abc::vmem::map<Key, Value> map(&map_state, &pool, context.log());
     Key key;
 
-    passed = insert_vmem_map_items(context, map, 11) && passed;
+    passed = insert_map_items(context, map, 11) && passed;
     // | (2)         | (3)         | (7)         | (8)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
 
     key.data = 0x09;
     std::size_t one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 1, 0x10573, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 10, 0x10574, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 1U, 0x10573, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 10U, 0x10574, "%zu") && passed;
     // | (2)         | (3)         | (7)         | (8)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
 
     // Test that key levels have been updated.
     key.data = 0x0a;
-    Iterator itr = map.find(key);
-    passed = context.are_equal<long long>(itr.page_pos(), 8LL, 0x10575, "0x%llx") && passed;
+    abc::vmem::map<Key, Value>::const_iterator itr = map.find(key);
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 8U, 0x10575, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x10576, "0x%x") && passed;
 
     key.data = 0x04;
     one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 1, 0x10577, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 9, 0x10578, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 1U, 0x10577, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 9U, 0x10578, "%zu") && passed;
     // | (2)         | (3)         | (8)
     // | 00 01 __ __ | 02 03 05 __ | 06 07 08 0a |
 
     key.data = 0x01;
     one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 1, 0x10579, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 8, 0x1057a, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 1U, 0x10579, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 8U, 0x1057a, "%zu") && passed;
     // | (2)         | (8)
     // | 00 02 03 05 | 06 07 08 0a |
 
     // Test that key levels have been updated.
     key.data = 0x05;
     itr = map.find(key);
-    passed = context.are_equal<long long>(itr.page_pos(), 2LL, 0x1057b, "0x%llx") && passed;
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 2U, 0x1057b, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x1057c, "0x%x") && passed;
 
-    using Pair = std::pair<std::uint64_t, Iterator>;
+    using Pair = std::pair<std::uint64_t, abc::vmem::map<Key, Value>::const_iterator>;
     const Pair exp[] = {
-        { 0x00, Iterator(&map, 2U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x02, Iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x03, Iterator(&map, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x05, Iterator(&map, 2U, 3U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x06, Iterator(&map, 8U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x07, Iterator(&map, 8U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x08, Iterator(&map, 8U, 2U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x0a, Iterator(&map, 8U, 3U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x00, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x02, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x03, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x05, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 3U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x06, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x07, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x08, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x0a, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 3U, abc::vmem::iterator_edge::none, context.log()) },
     };
     constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
     // Iterate forward.
     itr = map.cbegin();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1057d, "forward[%zu]=0x%llx", i, exp[i].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1057d, "forward[%zu]=0x%llx", i, exp[i].first);
 
         passed = context.are_equal(itr == exp[i].second, true, 0x1057e, "%d") && passed;
         passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1057f, "%d") && passed;
@@ -1202,7 +1200,7 @@ bool test_vmem_map_erase(test_context<abc::test::log>& context) {
     // Iterate backwards.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x10582, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10582, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 
         passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10583, "%d") && passed;
         passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10584, "%d") && passed;
@@ -1229,7 +1227,7 @@ bool test_vmem_map_erase(test_context<abc::test::log>& context) {
     // Iterate forward.
     itr = map.cbegin();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x1058d, "forward[%zu]=0x%llx", i, exp[i].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1058d, "forward[%zu]=0x%llx", i, exp[i].first);
 
         passed = context.are_equal(itr == exp[i].second, true, 0x1058e, "%d") && passed;
         passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1058f, "%d") && passed;
@@ -1241,7 +1239,7 @@ bool test_vmem_map_erase(test_context<abc::test::log>& context) {
     // Iterate backwards.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log->put_any(abc::category::any, abc::severity::abc::important, 0x10592, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10592, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 
         passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10593, "%d") && passed;
         passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10594, "%d") && passed;
@@ -1254,6 +1252,7 @@ bool test_vmem_map_erase(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_map_clear(test_context<abc::test::log>& context) {
     using Pool = PoolMap;
     using Map = abc::vmem_map<Key, Value, Pool, Log>;

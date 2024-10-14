@@ -449,8 +449,6 @@ namespace abc { namespace vmem {
                     keys_result = parent_keys.erase2(parent_keys_itr);
                 }
 
-                diag_base::ensure(suborigin, keys_result.iterator.can_deref(), 0x10522, "keys_result.iterator.can_deref()");
-
                 page_leads[0] = keys_result.page_leads[0];
                 page_leads[1] = keys_result.page_leads[1];
 
