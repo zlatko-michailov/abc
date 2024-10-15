@@ -1252,24 +1252,20 @@ bool test_vmem_map_erase(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_map_clear(test_context<abc::test::log>& context) {
-    using Pool = PoolMap;
-    using Map = abc::vmem_map<Key, Value, Pool, Log>;
-    using Linked = abc::vmem_linked<Pool, Log>;
-
+bool test_vmem_map_clear(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/map_clear.vmem", context.log());
+    abc::vmem::pool_config config("out/test/map_clear.vmem", max_mapped_page_count_map);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_map_state map_state;
-    Map map(&map_state, &pool, context.log());
+    abc::vmem::map_state map_state;
+    abc::vmem::map<Key, Value> map(&map_state, &pool, context.log());
 
-    passed = insert_vmem_map_items(context, map, 11) && passed;
+    passed = insert_map_items(context, map, 11) && passed;
     // | (2)         | (3)         | (7)         | (8)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
 
-    constexpr vmem_page_pos_t max_page_pos = 0x0c;
+    constexpr abc::vmem::page_pos_t max_page_pos = 0x0c;
 
     // This is only used to find out the above max_page_pos.
     {
@@ -1291,8 +1287,8 @@ bool test_vmem_map_clear(test_context<abc::test::log>& context) {
     // Verify all pages 2..max_page_pos are free.
     {
         unsigned long long bits = 0LLU;
-        abc::vmem_linked_state linked_state;
-        Linked linked(&linked_state, &pool, context.log());
+        abc::vmem::linked_state linked_state;
+        abc::vmem::linked linked(&linked_state, &pool, context.log());
 
         for (std::size_t i = 2; i <= max_page_pos; i++) {
             abc::vmem::page page(&pool, context.log());
@@ -1314,6 +1310,7 @@ bool test_vmem_map_clear(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_string_iterator(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using String = abc::vmem_string<Pool, Log>;
