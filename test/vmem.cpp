@@ -73,9 +73,6 @@ struct Key {
     }
 };
 using Value = std::uint64_t;
-#if 0 //// TODO: TEMP
-using MapItem = vmem_map_value<Key, Value>;
-#endif
 
 
 bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count);
@@ -1313,7 +1310,7 @@ bool test_vmem_map_clear(test_context& context) {
 bool test_vmem_string_iterator(test_context& context) {
     bool passed = true;
 
-    abc::vmem::pool_config config("out/test/string_iterator.vmem", max_mapped_page_count_map);
+    abc::vmem::pool_config config("out/test/string_iterator.vmem", max_mapped_page_count_min);
     abc::vmem::pool pool(std::move(config), context.log());
 
     abc::vmem::string_state string_state;
@@ -1335,18 +1332,14 @@ bool test_vmem_string_iterator(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_string_stream(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using String = abc::vmem_string<Pool, Log>;
-    using Streambuf = abc::vmem_string_streambuf<Pool, Log>;
-
+bool test_vmem_string_stream(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/string_stream.vmem", context.log());
+    abc::vmem::pool_config config("out/test/string_stream.vmem", max_mapped_page_count_min);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_string_state string_state;
-    String str(&string_state, &pool, context.log());
+    abc::vmem::string_state string_state;
+    abc::vmem::string str(&string_state, &pool, context.log());
 
     int expected[] = {
         42,
@@ -1355,7 +1348,7 @@ bool test_vmem_string_stream(test_context<abc::test::log>& context) {
         0
     };
 
-    Streambuf sb(&str, context.log());
+    abc::vmem::string_streambuf sb(&str, context.log());
     std::ostream ostrm(&sb);
 
     for (const int* exp = expected; *exp != 0; exp++) {
@@ -1373,18 +1366,22 @@ bool test_vmem_string_stream(test_context<abc::test::log>& context) {
 }
 
 
-bool test_vmem_pool_move(test_context<abc::test::log>& context) {
-    using Pool = PoolFree;
-
+bool test_vmem_pool_move(test_context& context) {
     bool passed = true;
 
-    Pool pool1("out/test/pool_move.vmem", context.log());
-    Pool pool2(std::move(pool1));
+    abc::vmem::pool_config config("out/test/pool_move.vmem", max_mapped_page_count_min);
+    abc::vmem::pool pool1(std::move(config), context.log());
+    abc::vmem::pool pool2(std::move(pool1));
 
     {
         // Page Fail
-        abc::vmem::page pageFail(&pool1, context.log());
-        passed = context.are_equal(pageFail.ptr() == nullptr, true, 0x10739, "%d") && passed;
+        try {
+            abc::vmem::page pageFail(&pool1, context.log());
+            passed = context.are_equal(true, false, 0x10739, "Expected exception.") && passed;
+        }
+        catch (const abc::diag::assert_error&) {
+            passed = true && passed;
+        }
     }
 
     {
@@ -1400,34 +1397,32 @@ bool test_vmem_pool_move(test_context<abc::test::log>& context) {
 }
 
 
-bool test_vmem_page_move(test_context<abc::test::log>& context) {
-    using Pool = PoolFree;
-
+bool test_vmem_page_move(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/page_move.vmem", context.log());
+    abc::vmem::pool_config config("out/test/page_move.vmem", max_mapped_page_count_min);
+    abc::vmem::pool pool(std::move(config), context.log());
 
     // Page 2
     abc::vmem::page page2(&pool, context.log());
     passed = context.are_equal(page2.ptr() != nullptr, true, 0x1073c, "%d") && passed;
-    passed = context.are_equal((long long)page2.pos(), 2LL, 0x1073d, "0x%llx") && passed;
+    passed = context.are_equal((unsigned long long)page2.pos(), 2ULL, 0x1073d, "0x%llx") && passed;
 
     int* ptrActual = reinterpret_cast<int*>(page2.ptr());
     *ptrActual = 42; 
 
     abc::vmem::page page2Moved(std::move(page2));
     passed = context.are_equal(page2Moved.ptr() != nullptr, true, 0x1073e, "%d") && passed;
-    passed = context.are_equal((long long)page2Moved.pos(), 2LL, 0x1073f, "0x%llx") && passed;
+    passed = context.are_equal((unsigned long long)page2Moved.pos(), 2ULL, 0x1073f, "0x%llx") && passed;
     passed = context.are_equal(*(int*)page2Moved.ptr(), 42, 0x10740, "%d") && passed;
 
     passed = context.are_equal(page2.ptr() == nullptr, true, 0x10741, "%d") && passed;
-    passed = context.are_equal((long long)page2.pos(), -1LL, 0x10742, "0x%llx") && passed;
+    passed = context.are_equal(page2.pos(), abc::vmem::page_pos_nil, 0x10742, "0x%llx") && passed;
 
     page2Moved.free();
 
     return passed;
 }
-#endif
 
 
 bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count) {

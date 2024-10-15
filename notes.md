@@ -18,8 +18,10 @@
 ## To Do
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
-- __Remove TODO:__
 - `vmem`
+    - __TODO: Remove util.h or merge it with the main util.h.__
+    - __TODO: Add a map test that mixes insert-erase-insert.__
+    - __Remove TODO:. Add issues.__
     - pool
         - To free capacity, use an efficient container and algorithms.
         - Use a lock! (Minimize public surface.)
@@ -29,13 +31,11 @@
         - page.h
         - ptr.h
         - pool.h
-        - __TODO: Remove util.h or merge it with the main util.h.__
         - iterator.h
         - linked.h
         - container.h
         - list.h
         - map.h
-        - __TODO: Add a map test that mixes insert-erase-insert.__
         - string.h
     - Samples
         - tictactoe

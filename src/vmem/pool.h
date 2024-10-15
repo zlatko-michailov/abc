@@ -331,7 +331,7 @@ namespace abc { namespace vmem {
 
         std::uint8_t blank_page[page_size] = { };
         ssize_t wb = write(_fd, blank_page, page_size);
-        diag_base::ensure(suborigin, wb == page_size, 0x10398, "wb == page_size, wb=%l, errno=%d", (long)wb, errno);
+        diag_base::ensure(suborigin, wb == page_size, 0x10398, "wb == page_size, wb=%ld, errno=%d", (long)wb, errno);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b8, "End: page_pos=0x%llx", (unsigned long long)page_pos);
 

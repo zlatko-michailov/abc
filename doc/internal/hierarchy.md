@@ -41,11 +41,11 @@ Up to [Documentation](README.md).
         - linked.h
         - container.h
         - list.h
-        - map.h __NEXT. TODO:__
+        - map.h
         - string.h
         - util.h
         - string_streambuf.h
-    - __gpio ::__
+    - __gpio ::__  __NEXT. TODO:__
         - __i__
         - base.h
         - chip.h
