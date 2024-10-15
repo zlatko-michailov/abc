@@ -1310,18 +1310,14 @@ bool test_vmem_map_clear(test_context& context) {
 }
 
 
-#if 0 //// TODO: TEMP
-bool test_vmem_string_iterator(test_context<abc::test::log>& context) {
-    using Pool = PoolMin;
-    using String = abc::vmem_string<Pool, Log>;
-    using ConstIterator = abc::vmem_string_const_iterator<Pool, Log>; 
-
+bool test_vmem_string_iterator(test_context& context) {
     bool passed = true;
 
-    Pool pool("out/test/string_iterator.vmem", context.log());
+    abc::vmem::pool_config config("out/test/string_iterator.vmem", max_mapped_page_count_map);
+    abc::vmem::pool pool(std::move(config), context.log());
 
-    abc::vmem_string_state string_state;
-    String str(&string_state, &pool, context.log());
+    abc::vmem::string_state string_state;
+    abc::vmem::string str(&string_state, &pool, context.log());
 
     const char* expected = "abc 12 xyz";
 
@@ -1330,7 +1326,7 @@ bool test_vmem_string_iterator(test_context<abc::test::log>& context) {
     }
 
     const char* ch = expected;
-    for (ConstIterator itr = str.cbegin(); itr != str.cend(); itr++, ch++) {
+    for (abc::vmem::string_const_iterator itr = str.cbegin(); itr != str.cend(); itr++, ch++) {
         passed = context.are_equal(*itr, *ch, 0x107b4, "%c") && passed;
     }
     passed = context.are_equal('\0', *ch, 0x107b5, "\\x%2.2x") && passed;
@@ -1339,6 +1335,7 @@ bool test_vmem_string_iterator(test_context<abc::test::log>& context) {
 }
 
 
+#if 0 //// TODO: TEMP
 bool test_vmem_string_stream(test_context<abc::test::log>& context) {
     using Pool = PoolMin;
     using String = abc::vmem_string<Pool, Log>;
