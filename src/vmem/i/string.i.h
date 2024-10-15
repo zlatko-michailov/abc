@@ -27,163 +27,143 @@ SOFTWARE.
 
 #include <streambuf>
 
-#include "vmem_list.i.h"
-#include "log.i.h"
+#include "list.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-	/**
-	 * @brief					Virtually contiguous generic string.
-	 * @tparam Char			    Character.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-    template <typename Char, typename Pool, typename Log = null_log>
-    using vmem_basic_string = vmem_list<Char, Pool, Log>;
+    /**
+     * @brief       Virtually contiguous generic string.
+     * @tparam Char Character.
+     */
+    template <typename Char>
+    using basic_string = list<Char>;
 
 
-	/**
-	 * @brief					Virtually contiguous `char` string.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-    template <typename Pool, typename Log = null_log>
-    using vmem_string = vmem_basic_string<char, Pool, Log>;
+    /**
+     * @brief Virtually contiguous `char` string.
+     */
+    using string = basic_string<char>;
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	/**
-	 * @brief					Generic string iterator.
-	 * @tparam Char			    Character.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Char, typename Pool, typename Log = null_log>
-	using vmem_basic_string_iterator = vmem_list_iterator<Char, Pool, Log>;
+    /**
+     * @brief       Generic string iterator.
+     * @tparam Char Character.
+     */
+    template <typename Char>
+    using basic_string_iterator = list_iterator<Char>;
 
 
-	/**
-	 * @brief					Generic string const iterator.
-	 * @tparam Char			    Character.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Char, typename Pool, typename Log = null_log>
-	using vmem_basic_string_const_iterator = vmem_list_const_iterator<Char, Pool, Log>;
+    /**
+     * @brief       Generic string const iterator.
+     * @tparam Char Character.
+     */
+    template <typename Char>
+    using basic_string_const_iterator = list_const_iterator<Char>;
 
 
-	/**
-	 * @brief					String iterator.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Pool, typename Log = null_log>
-	using vmem_string_iterator = vmem_basic_string_iterator<char, Pool, Log>;
+    /**
+     * @brief String iterator.
+     */
+    using string_iterator = basic_string_iterator<char>;
 
 
-	/**
-	 * @brief					String const iterator.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-	template <typename Pool, typename Log = null_log>
-	using vmem_string_const_iterator = vmem_basic_string_const_iterator<char, Pool, Log>;
+    /**
+     * @brief String const iterator.
+     */
+    using string_const_iterator = basic_string_const_iterator<char>;
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	/**
-	 * @brief					`std::streambuf` specialization that is backed by a generic string.
-	 * @tparam Char			    Character.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-    template <typename Char, typename Pool, typename Log = null_log>
-	class vmem_basic_string_streambuf : public std::basic_streambuf<Char> {
-		using base = std::basic_streambuf<Char>;
-        using String = vmem_basic_string<Char, Pool, Log>;
-        using Iterator = vmem_basic_string_iterator<Char, Pool, Log>;
+    /**
+     * @brief       `std::streambuf` specialization that is backed by a vmem string.
+     * @tparam Char Character.
+     */
+    template <typename Char>
+    class basic_string_streambuf
+        : public std::basic_streambuf<Char>
+        , protected diag::diag_ready<const char*> {
 
-	public:
-		/**
-		 * @brief				Constructor.
-		 * @param string		Pointer to a `String` instance.
-		 * @param log			Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		vmem_basic_string_streambuf(String* string, Log* log = nullptr);
+        using base = std::basic_streambuf<Char>;
+        using diag_base = diag::diag_ready<const char*>;
+        using String = basic_string<Char>;
+        using Iterator = basic_string_iterator<Char>;
 
-		/**
-		 * @brief				Move constructor.
-		 */
-		vmem_basic_string_streambuf(vmem_basic_string_streambuf&& other) noexcept;
+    private:
+        static constexpr const char* origin() noexcept;
 
-		/**
-		 * @brief				Deleted.
-		 */
-		vmem_basic_string_streambuf(const vmem_basic_string_streambuf& other) = delete;
+    public:
+        /**
+         * @brief        Constructor.
+         * @param string Pointer to a `vmem::basic_string<Char>` instance.
+         * @param log    Pointer to a `log_ostream` instance.
+         */
+        basic_string_streambuf(String* string, diag::log_ostream* log = nullptr);
 
-	protected:
-		/**
-		 * @brief				Handler that reads a char from the string.
-		 * @return				The char received.
-		 */
-		virtual typename std::basic_streambuf<Char>::int_type underflow() override;
+        /**
+         * @brief Move constructor.
+         */
+        basic_string_streambuf(basic_string_streambuf&& other) noexcept;
 
-		/**
-		 * @brief				Handler that appends a char to the string.
-		 * @param ch			Char to be sent.
-		 * @return				`ch`
-		 */
-		virtual typename std::basic_streambuf<Char>::int_type overflow(typename base::int_type ch) override;
+        /**
+         * @brief Deleted.
+         */
+        basic_string_streambuf(const basic_string_streambuf& other) = delete;
 
-		/**
-		 * @brief				Flushes.
-		 * @return				`0`
-		 */
-		virtual int sync() override;
+    protected:
+        /**
+         * @brief  Handler that reads a char from the string.
+         * @return The char received.
+         */
+        virtual typename std::basic_streambuf<Char>::int_type underflow() override;
 
-	private:
-		/**
-		 * @brief				The String pointer passed in to the constructor.
-		 */
-		String* _string;
+        /**
+         * @brief    Handler that appends a char to the string.
+         * @param ch Char to be sent.
+         * @return   `ch`
+         */
+        virtual typename std::basic_streambuf<Char>::int_type overflow(typename base::int_type ch) override;
 
-		/**
-		 * @brief				The Log pointer passed in to the constructor.
-		 */
-		Log* _log;
+        /**
+         * @brief  Flushes.
+         * @return `0`
+         */
+        virtual int sync() override;
 
-		/**
-		 * @brief				'get' iterator.
-		 */
-		Iterator _get_itr;
+    private:
+        /**
+         * @brief The `String` pointer passed in to the constructor.
+         */
+        String* _string;
 
-		/**
-		 * @brief				Cached 'get' char.
-		 */
-		Char _get_ch;
+        /**
+         * @brief 'get' iterator.
+         */
+        Iterator _get_itr;
 
-		/**
-		 * @brief				Cached 'put' char.
-		 */
-		Char _put_ch;
-	};
+        /**
+         * @brief Cached 'get' char.
+         */
+        Char _get_ch;
 
-
-	// --------------------------------------------------------------
+        /**
+         * @brief Cached 'put' char.
+         */
+        Char _put_ch;
+    };
 
 
-	/**
-	 * @brief					`std::streambuf` specialization that is backed by a `char` string.
-	 * @tparam Pool			    Pool.
-	 * @tparam Log				Logging facility.
-	 */
-    template <typename Pool, typename Log = null_log>
-	using vmem_string_streambuf = vmem_basic_string_streambuf<char, Pool, Log>;
+    // --------------------------------------------------------------
 
 
-}
+    /**
+     * @brief `std::streambuf` specialization that is backed by a `char` vmmem string.
+     */
+    using string_streambuf = basic_string_streambuf<char>;
+
+} }

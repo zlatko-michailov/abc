@@ -27,84 +27,101 @@ SOFTWARE.
 
 #include <string>
 
-#include "../i/vmem.i.h"
+#include "list.h"
+#include "i/string.i.h"
 
 
-namespace abc {
+namespace abc { namespace vmem {
 
-    template <typename Char, typename Pool, typename Log>
-	inline vmem_basic_string_streambuf<Char, Pool, Log>::vmem_basic_string_streambuf(String* string, Log* log)
-		: base()
-		, _string(string)
-		, _log(log)
-		, _get_itr(nullptr)
-		, _get_ch(0)
-		, _put_ch(0) {
-		if (string == nullptr) {
-			throw exception<std::logic_error, Log>("vmem_basic_string_streambuf::vmem_basic_string_streambuf(string)", 0x107b3, _log);
-		}
-
-		base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
-		base::setp(&_put_ch, &_put_ch + 1);
-	}
+    template <typename Char>
+    inline constexpr const char* basic_string_streambuf<Char>::origin() noexcept {
+        return "abc::vmem::basic_string_streambuf";
+    }
 
 
-    template <typename Char, typename Pool, typename Log>
-	inline vmem_basic_string_streambuf<Char, Pool, Log>::vmem_basic_string_streambuf(vmem_basic_string_streambuf&& other) noexcept
-		: base()
-		, _string(other._string)
-		, _log(other._log)
-		, _get_itr(std::move(other._get_itr))
-		, _get_ch(other._get_ch)
-		, _put_ch(other._put_ch) {
-		base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
-		base::setp(&_put_ch, &_put_ch + 1);
+    template <typename Char>
+    inline basic_string_streambuf<Char>::basic_string_streambuf(String* string, diag::log_ostream* log)
+        : base()
+        , diag_base(abc::copy(origin()), log)
+        , _string(string)
+        , _get_itr(nullptr)
+        , _get_ch(0)
+        , _put_ch(0) {
 
-		other._string = nullptr;
-		other._log = nullptr;
-		other._get_itr = nullptr;
-		other.setg(nullptr, nullptr, nullptr);
-		other.setp(nullptr, nullptr);
-	}
+        constexpr const char* suborigin = "basic_string_streambuf()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: string=%p", string);
+
+        diag_base::expect(suborigin, string != nullptr, 0x107b3, "string != nullptr");
+
+        base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
+        base::setp(&_put_ch, &_put_ch + 1);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-    template <typename Char, typename Pool, typename Log>
-	inline typename std::basic_streambuf<Char>::int_type vmem_basic_string_streambuf<Char, Pool, Log>::underflow() {
-		if (_get_itr == nullptr) {
-			_get_itr = _string->begin();
-		}
+    template <typename Char>
+    inline basic_string_streambuf<Char>::basic_string_streambuf(basic_string_streambuf&& other) noexcept
+        : base()
+        , diag_base(other.log())
+        , _string(other._string)
+        , _get_itr(std::move(other._get_itr))
+        , _get_ch(other._get_ch)
+        , _put_ch(other._put_ch) {
 
-		if (!_get_itr.can_deref())
-		{
-			return std::char_traits<Char>::eof();
-		}
+        constexpr const char* suborigin = "basic_string_streambuf(move)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: other._string=%p", other._string);
 
-		_get_ch = *_get_itr++;
+        base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
+        base::setp(&_put_ch, &_put_ch + 1);
 
-		base::setg(&_get_ch, &_get_ch, &_get_ch + 1);
+        other._string = nullptr;
+        other._log = nullptr;
+        other._get_itr = nullptr;
+        other.setg(nullptr, nullptr, nullptr);
+        other.setp(nullptr, nullptr);
 
-		return _get_ch;
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
-    template <typename Char, typename Pool, typename Log>
-	inline typename std::basic_streambuf<Char>::int_type vmem_basic_string_streambuf<Char, Pool, Log>::overflow(typename base::int_type ch) {
-		_string->push_back(_put_ch);
-		_string->push_back(ch);
 
-		base::setp(&_put_ch, &_put_ch + 1);
+    template <typename Char>
+    inline typename std::basic_streambuf<Char>::int_type basic_string_streambuf<Char>::underflow() {
+        if (_get_itr == nullptr) {
+            _get_itr = _string->begin();
+        }
 
-		return ch;
-	}
+        typename base::int_type ch = std::char_traits<Char>::eof();
 
-    template <typename Char, typename Pool, typename Log>
-	inline int vmem_basic_string_streambuf<Char, Pool, Log>::sync() {
-		if (base::pptr() != &_put_ch) {
-			_string->push_back(_put_ch);
-		}
+        if (_get_itr.can_deref()) {
+            ch = _get_ch = *_get_itr++;
 
-		base::setp(&_put_ch, &_put_ch + 1);
+            base::setg(&_get_ch, &_get_ch, &_get_ch + 1);
+        }
 
-		return 0;
-	}
+        return ch;
+    }
 
-}
+
+    template <typename Char>
+    inline typename std::basic_streambuf<Char>::int_type basic_string_streambuf<Char>::overflow(typename base::int_type ch) {
+        _string->push_back(_put_ch);
+        _string->push_back(ch);
+
+        base::setp(&_put_ch, &_put_ch + 1);
+
+        return ch;
+    }
+
+    template <typename Char>
+    inline int basic_string_streambuf<Char>::sync() {
+        if (base::pptr() != &_put_ch) {
+            _string->push_back(_put_ch);
+        }
+
+        base::setp(&_put_ch, &_put_ch + 1);
+
+        return 0;
+    }
+
+} }

@@ -31,7 +31,4 @@ SOFTWARE.
 #include "container.h"
 #include "list.h"
 #include "map.h"
-
-#if 0 //// TODO:
 #include "string.h"
-#endif //// TODO:
