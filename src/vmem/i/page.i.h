@@ -131,25 +131,11 @@ namespace abc { namespace vmem {
         void alloc();
 
         /**
-         * @brief  Tries to allocate a pool page for this instance.
-         * @return `true` = success; `false` = error.
-         */
-        bool try_alloc() noexcept; //// TODO: Is this needed?
-
-        /**
          * @brief   Locks this page in memory.
          * @details A page's pointer may be used only after the page has been locked.
          *          A page may be called multiple times. It gets unlocked after the lock count goes down to `0`.
          */
         void lock();
-
-        /**
-         * @brief   Tries to lock this page in memory.
-         * @details A page's pointer may be used only after the page has been locked.
-         *          A page may be called multiple times. It gets unlocked after the lock count goes down to `0`.
-         * @return  `true` = success; `false` = error.
-         */
-        bool try_lock() noexcept; //// TODO: Is this needed?
 
         /**
          * @brief   Unlocks this page.
