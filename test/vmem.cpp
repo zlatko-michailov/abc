@@ -1430,7 +1430,7 @@ bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, s
 
     // Insert.
     for (std::size_t i = 0; i < count; i++) {
-        ItemMany item = { i, { 0 } };
+        ItemMany item{ i, { } };
         list.insert(list.end(), item);
     }
 

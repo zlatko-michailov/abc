@@ -79,6 +79,7 @@ namespace abc { namespace vmem {
     template <typename Key>
     container_page_lead<T>::container_page_lead(container_page_lead_operation operation, page_pos_t page_pos, const Key& items_0_key, const Key& items_1_key) noexcept
         : container_page_lead(operation, page_pos) {
+
         std::memmove(&items[0].key, &items_0_key, sizeof(Key));
         std::memmove(&items[1].key, &items_1_key, sizeof(Key));
     }

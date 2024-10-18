@@ -466,15 +466,15 @@ namespace abc { namespace vmem {
                     map_key<Key> other_key_item;
                     std::memmove(&other_key_item.key, &page_leads[1].items[0].key, sizeof(Key));
                     other_key_item.page_pos = page_leads[1].page_pos;
-                    new_keys.push_back(other_key_item);
+                    new_keys.push_back(std::move(other_key_item));
 
                     // new page
                     map_key<Key> new_key_item;
                     std::memmove(&new_key_item.key, &page_leads[0].items[0].key, sizeof(Key));
                     new_key_item.page_pos = page_leads[0].page_pos;
-                    new_keys.push_back(new_key_item);
+                    new_keys.push_back(std::move(new_key_item));
 
-                    _key_stack.push_back(new_keys_state);
+                    _key_stack.push_back(std::move(new_keys_state));
                 }
             }
             else {
