@@ -45,10 +45,10 @@ int main(int /*argc*/, const char* argv[]) {
     // Create an endpoint configuration.
     std::string process_dir = abc::parent_path(argv[0]);
     abc::net::http::endpoint_config config(
-        "30301",              // port
-        5,                    // listen_queue_size
+        "30301",             // port
+        5,                   // listen_queue_size
         process_dir.c_str(), // root_dir (Note: No trailing slash!)
-        "/resources/"         // files_prefix
+        "/resources/"        // files_prefix
     );
 
     // Create an endpoint.
