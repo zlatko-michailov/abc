@@ -59,7 +59,7 @@ namespace abc { namespace vmem {
          * @details        Contains a `page` instance for the referenced page to keep it locked. 
          * @param pool     Pointer to a `pool` instance.
          * @param page_pos Page position.
-         * @param byte_pos Byte position on the page. //// TODO: Can this be item position?
+         * @param byte_pos Byte position on the page.
          * @param log      Pointer to a `log_ostream` instance.
          */
         ptr(vmem::pool* pool, page_pos_t page_pos, item_pos_t byte_pos, diag::log_ostream* log = nullptr);

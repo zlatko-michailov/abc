@@ -456,8 +456,8 @@ namespace abc { namespace vmem {
                 path_itr--;
             } // while (rebalance)
 
-            // If there is still a rebalance, then a key level at the top has to be added/removed.
             if (is_insert) {
+                // If there is still a rebalance, then a key level at the top has to be added.
                 if (page_leads[0].page_pos != page_pos_nil) {
                     container_state new_keys_state;
                     map_key_level<Key> new_keys(&new_keys_state, _pool, diag_base::log());
@@ -478,7 +478,7 @@ namespace abc { namespace vmem {
                 }
             }
             else {
-                //// TODO: What is the condition that there is an erase rebalance.
+                // If there is a single key left on the top-level page, that page has to be removed.
                 if (!_key_stack.empty()) {
                     std::size_t top_keys_size = 2;
                     {

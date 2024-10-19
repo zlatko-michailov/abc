@@ -324,7 +324,6 @@ namespace abc { namespace vmem {
 
         diag_base::expect(suborigin, itr.page_pos() != page_pos_nil || (itr.item_pos() == item_pos_nil && empty()), 0x1044a, "itr.page_pos() != page_pos_nil || (itr.item_pos() == item_pos_nil && empty()");
         diag_base::expect(suborigin, itr.item_pos() != item_pos_nil || (itr.page_pos() == _state->back_page_pos && itr.edge() == iterator_edge::end), 0x1044b, "itr.item_pos() != item_pos_nil && (itr.page_pos() == _state->back_page_pos && itr.edge() == iterator_edge::end)");
-                                                                                                      //// TODO: ^ was ||
 
         // Copy the item to a local variable to make sure the reference is valid and copyable before we change any page.
         T item_copy(item);
