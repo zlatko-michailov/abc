@@ -76,6 +76,17 @@ namespace abc { namespace vmem {
          */
         static constexpr bool is_uninit(const linked_state* state) noexcept;
 
+    private:
+        friend class vmem::pool;
+
+        /**
+         * @brief       Constructor.
+         * @param state Pointer to a `linked_state` instance.
+         * @param pool  Pointer to a `pool` instance.
+         * @param log   Pointer to a `log_ostream` instance.
+         */
+        linked(linked_state* state, vmem::pool* pool, diag::log_ostream* log, bool is_free_pages);
+
     public:
         /**
          * @brief       Constructor.
@@ -83,7 +94,7 @@ namespace abc { namespace vmem {
          * @param pool  Pointer to a `pool` instance.
          * @param log   Pointer to a `log_ostream` instance.
          */
-        linked(linked_state* state, pool* pool, diag::log_ostream* log = nullptr);
+        linked(linked_state* state, vmem::pool* pool, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
@@ -238,7 +249,8 @@ namespace abc { namespace vmem {
 
     private:
         linked_state* _state;
-        pool*         _pool;
+        vmem::pool*   _pool;
+        bool          _is_free_pages;
     };
 
 

@@ -902,7 +902,6 @@ namespace abc { namespace vmem {
 
         page_pos_t page_pos = page.pos();
         erase_page_pos(page_pos);
-        page.free();
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1047a, "End: page_pos=0x%llx", (unsigned long long)page_pos);
     }

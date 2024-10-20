@@ -19,13 +19,13 @@
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`
-    - __TODO: Add a map test that mixes insert-erase-insert.__
-    - __Remove TODO:. Add issues.__
+    - //// TODO: Add a map test that mixes insert-erase-insert.
     - pool
-        - To free capacity, use an efficient container and algorithms.
-        - Use a lock! (Minimize public surface.)
+        - //// TODO: Free pages don't seem to get reused.
+        - //// TODO: (linked) A page number should not get pushed twice to the free_pages container.
+        - //// TODO: Use a lock, if it makes sense.
     - container
-        - Keep the count of the back page in the state, so we don't have to map the back page to create an rend() iterator.
+        - //// TODO: Balance-merge functions should take `page&&`, so the `page` instance cannot be used afterwards.
     - Entities
         - page.h
         - ptr.h
@@ -44,9 +44,6 @@
 - Remove `virtual` from `override` definitions?
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
-- log:
-  - Rename `category` to `origin`.
-  - Rename `severity` to `level`.
 
 - Namespace `vmem`
   - `blob`

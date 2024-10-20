@@ -278,7 +278,7 @@ namespace abc { namespace vmem {
             diag_base::expect(suborigin, page.ptr() != nullptr, 0x10392, "page.ptr() != nullptr");
 
             vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
-            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
+            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log(), true /*is_free_pages*/);
 
             if (!free_pages_linked.empty()) {
                 diag_base::put_any(suborigin, diag::severity::optional, 0x10393, "!empty");
@@ -309,7 +309,7 @@ namespace abc { namespace vmem {
             diag_base::expect(suborigin, page.ptr() != nullptr, 0x1039a, "page.ptr() != nullptr");
 
             vmem::root_page* root_page = reinterpret_cast<vmem::root_page*>(page.ptr());
-            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log());
+            vmem::linked free_pages_linked(&root_page->free_pages, this, diag_base::log(), true /*is_free_pages*/);
 
             free_pages_linked.push_back(page_pos);
         }
@@ -559,7 +559,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, root_page.ptr() != nullptr, 0x104c4, "root_page.ptr() != nullptr");
 
         vmem::root_page* root_linked_page = reinterpret_cast<vmem::root_page*>(root_page.ptr());
-        vmem::linked free_pages_linked(&root_linked_page->free_pages, this, diag_base::log());
+        vmem::linked free_pages_linked(&root_linked_page->free_pages, this, diag_base::log(), true /*is_free_pages*/);
         free_pages_linked.splice(linked);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104c5, "End:");
