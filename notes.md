@@ -19,13 +19,11 @@
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`
-    - //// TODO: Add a map test that mixes insert-erase-insert.
-    - pool
-        - //// TODO: Free pages don't seem to get reused.
-        - //// TODO: (linked) A page number should not get pushed twice to the free_pages container.
-        - //// TODO: Use a lock, if it makes sense.
     - container
-        - //// TODO: Balance-merge functions should take `page&&`, so the `page` instance cannot be used afterwards.
+        - //// TODO: Remove `merge_prev()`.
+    - map
+        - //// TODO: Assert that at least 2 key instances fit in a page.
+        - //// TODO: Add a map test that mixes insert-erase-insert.
     - Entities
         - page.h
         - ptr.h

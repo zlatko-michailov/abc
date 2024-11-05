@@ -43,12 +43,14 @@ bool test_vmem_linked_clear(test_context& context);
 bool test_vmem_list_insert(test_context& context);
 bool test_vmem_list_insertmany(test_context& context);
 bool test_vmem_list_erase(test_context& context);
+bool test_vmem_list_find(test_context& context);
 
 bool test_vmem_temp_destructor(test_context& context);
 
 bool test_vmem_map_insert(test_context& context);
 bool test_vmem_map_insertmany(test_context& context);
 bool test_vmem_map_erase(test_context& context);
+bool test_vmem_map_mixed(test_context& context);
 bool test_vmem_map_clear(test_context& context);
 
 bool test_vmem_string_iterator(test_context& context);

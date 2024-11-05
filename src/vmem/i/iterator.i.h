@@ -25,6 +25,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
+#include <iterator>
+
 #include "../../diag/i/diag_ready.i.h"
 #include "layout.i.h"
 #include "ptr.i.h"
@@ -168,11 +171,13 @@ namespace abc { namespace vmem {
         using diag_base = diag::diag_ready<const char*>;
 
     public:
-        using value_type      = T;
-        using pointer         = vmem::ptr<T>;
-        using const_pointer   = vmem::ptr<const T>;
-        using reference       = T&;
-        using const_reference = const T&;
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = vmem::ptr<T>;
+        using const_pointer     = vmem::ptr<const T>;
+        using reference         = T&;
+        using const_reference   = const T&;
+        using iterator_category = std::bidirectional_iterator_tag;
 
     public:
         /**
