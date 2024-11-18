@@ -120,31 +120,30 @@ namespace abc { namespace vmem {
         none = 0,
 
         /**
-         * @brief   A lead has been erased.
-         * @details The lead has been the only item on the page that has been erased.
+         * @brief   A lead has been replaced.
+         * @details The lead has been erased, but there have been other items on the page.
+         *          The former second item has become the new lead.
+         *          item[0] - new item
+         *          item[1] - old item
          */
-        erase = 1,
+        replace = 1,
 
         /**
          * @brief   A new lead has been inserted.
          * @details A new item has been inserted to a full page, which has caused a new page to be inserted.
          *          This is the lead of the new page.
+         *          item[0] - new item
+         *          item[1] - ignore
          */
         insert = 2,
 
         /**
-         * @brief   A lead has been replaced.
-         * @details The lead has been erased, but there have been other items on the page.
-         *          The former second item has become the new lead.
+         * @brief   A lead has been erased.
+         * @details The lead has been the only item on the page that has been erased.
+         *          item[0] - old item
+         *          item[1] - ignore
          */
-        replace = 3,
-
-        /**
-         * @brief   A new lead has been inserted.
-         * @details A new item has been inserted to a full page, which has caused a new page to be inserted.
-         *          This is the lead of the original page.
-         */
-        original = 4,
+        erase = 3,
     };
 
 
@@ -198,7 +197,7 @@ namespace abc { namespace vmem {
         page_pos_t page_pos;
 
         /**
-         * @brief Leading 2 items on the page.
+         * @brief Leading item (new/old) on the page.
          */
         T items[2];
     };

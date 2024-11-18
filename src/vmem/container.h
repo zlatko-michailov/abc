@@ -484,21 +484,36 @@ namespace abc { namespace vmem {
         result2 result;
 
         if (itr.item_pos() != item_pos_nil && itr.item_pos() <= container_page->item_count) {
-            // Inserting to the former page.
+            // Inserting to the old page.
             result = insert_with_capacity(itr, item, container_page);
         }
         else {
-            // Inserting to the latter page.
+            // Inserting to the new page.
             container_iterator<T, Header> new_itr(this, new_page.pos(), itr.item_pos() != item_pos_nil ? itr.item_pos() - container_page->item_count : new_container_page->item_count, iterator_edge::none, diag_base::log());
             result = insert_with_capacity(new_itr, item, new_container_page);
         }
 
-        // page_leads[0] - insert; new page
-        // page_leads[1] - original; used only when a new level is created
-        result.page_leads[0] = page_lead(container_page_lead_operation::insert, new_page.pos());
-        std::memmove(&result.page_leads[0].items[0], &new_container_page->items[0], sizeof(T));
-        result.page_leads[1] = page_lead(container_page_lead_operation::original, itr.page_pos());
-        std::memmove(&result.page_leads[1].items[0], &container_page->items[0], sizeof(T));
+        if (result.iterator.page_pos() == itr.page_pos()) {
+            // Inserted to the old page.
+            // page_leads[0] - as returned from insert_with_capacity()
+            // page_leads[1] - insert: item[0] from the new page
+            result.page_leads[1] = page_lead(container_page_lead_operation::insert, new_page.pos());
+            std::memmove(&result.page_leads[1].items[0], &new_container_page->items[0], sizeof(T));
+        }
+        else {
+            // Inserted to the new page.
+            if (result.page_leads[0].operation == container_page_lead_operation::replace) {
+                // page_leads[0] - almost as returned from insert_with_capacity(): replace -> insert
+                // page_leads[1] - none
+                result.page_leads[0].operation = container_page_lead_operation::insert;
+            }
+            else {
+                // page_leads[0] - none
+                // page_leads[1] - insert: item[0] from the new page
+                result.page_leads[1] = page_lead(container_page_lead_operation::insert, new_page.pos());
+                std::memmove(&result.page_leads[1].items[0], &new_container_page->items[0], sizeof(T));
+            }
+        }
 
         diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
 
@@ -516,6 +531,25 @@ namespace abc { namespace vmem {
 
         result2 result;
         result.iterator = iterator(this, itr.page_pos(), itr.item_pos() != item_pos_nil ? itr.item_pos() : container_page->item_count, iterator_edge::none, diag_base::log());
+        if (result.iterator.item_pos() == 0) {
+            if (container_page->item_count > 0) {
+                // page_leads[0] - replace: new item, old item
+                // page_leads[1] - none
+                result.page_leads[0] = page_lead(container_page_lead_operation::replace, result.iterator.page_pos());
+                std::memmove(&result.page_leads[0].items[0], &item, sizeof(T));
+                std::memmove(&result.page_leads[0].items[1], &container_page->items[0], sizeof(T));
+            }
+            else {
+                // page_leads[0] - insert: new item
+                // page_leads[1] - none
+                result.page_leads[0] = page_lead(container_page_lead_operation::insert, result.iterator.page_pos());
+                std::memmove(&result.page_leads[0].items[0], &item, sizeof(T));
+            }
+        }
+        else {
+            // page_leads[0] - none
+            // page_leads[1] - none
+        }
 
         // Shift items from the insertion position to free up a slot.
         std::size_t move_item_count = container_page->item_count - result.iterator.item_pos();
@@ -676,10 +710,15 @@ namespace abc { namespace vmem {
 
             // Balance if the item count drops below half of capacity.
             if (should_balance && 2 * container_page->item_count <= page_capacity()) {
+                // erase_from_many() may return up to 1 lead, which would be 'replace' as leads[0].
+                // It always clears leads[1].
                 container_page_lead<T> page_lead_0 = result.page_leads[0];
 
+                // balance_merge() may return up to 1 lead, which would be 'erase' as leads[1].
+                // It always clears leads[0].
                 result = balance_merge(result.iterator, page, container_page);
 
+                // Restore leads[0].
                 result.page_leads[0] = page_lead_0;
             }
         }
@@ -725,11 +764,11 @@ namespace abc { namespace vmem {
 
         if (itr.item_pos() < container_page->item_count - 1) {
             if (itr.item_pos() == 0) {
-                // page_leads[0] - replace
+                // page_leads[0] - replace: new item, old item
                 // page_leads[1] - none
                 result.page_leads[0] = page_lead(container_page_lead_operation::replace, itr.page_pos());
-                std::memmove(&result.page_leads[0].items[0], &container_page->items[0], sizeof(T));
-                std::memmove(&result.page_leads[0].items[1], &container_page->items[1], sizeof(T));
+                std::memmove(&result.page_leads[0].items[0], &container_page->items[1], sizeof(T));
+                std::memmove(&result.page_leads[0].items[1], &container_page->items[0], sizeof(T));
                 result.page_leads[1] = page_lead();
             }
 
@@ -781,7 +820,8 @@ namespace abc { namespace vmem {
 
         // Try the previous page.
         if (container_page->prev_page_pos != page_pos_nil) {
-            result = balance_merge_prev(itr, page, container_page);
+            //// TODO: Remove balance_merge_prev()
+            //// result = balance_merge_prev(itr, page, container_page);
         }
 
         diag_base::ensure(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
@@ -810,8 +850,8 @@ namespace abc { namespace vmem {
                 (unsigned)container_page->item_count, (unsigned long long)next_page.pos(), (unsigned)next_container_page->item_count);
 
         if (container_page->item_count + next_container_page->item_count <= page_capacity()) {
-            // page_leads[0] - none
-            // page_leads[1] - erase
+            // page_leads[0] - replace: new item (curr page lead), old item (next page lead)
+            // page_leads[1] - erase: old item (curr page lead)
             result.page_leads[0] = page_lead();
             result.page_leads[1] = page_lead(container_page_lead_operation::erase, next_page.pos());
             std::memmove(&result.page_leads[1].items[0], &next_container_page->items[0], sizeof(T));

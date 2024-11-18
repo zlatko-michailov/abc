@@ -46,7 +46,7 @@ SOFTWARE.
 int main(int /*argc*/, const char* argv[]) {
     abc::table_ostream table(std::cout.rdbuf());
     test_log_line line(&table);
-    test_log_filter filter("", abc::diag::severity::critical);
+    test_log_filter filter("", abc::diag::severity::important);
     test_log log(&line, &filter);
 
     test_suite suite(
@@ -271,16 +271,15 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_list_insert",                           test_vmem_list_insert },
                 { "test_vmem_list_insertmany",                       test_vmem_list_insertmany },
                 { "test_vmem_list_erase",                            test_vmem_list_erase },
-#endif //// TODO:
                 { "test_vmem_list_find",                             test_vmem_list_find },
-#if 0 //// TODO:
                 { "test_vmem_temp_destructor",                       test_vmem_temp_destructor },
                 { "test_vmem_map_insert",                            test_vmem_map_insert },
                 { "test_vmem_map_insertmany",                        test_vmem_map_insertmany },
                 { "test_vmem_map_erase",                             test_vmem_map_erase },
 #endif //// TODO:
-                ////{ "test_vmem_map_mixed",                             test_vmem_map_mixed },
+                { "test_vmem_map_erasemany",                         test_vmem_map_erasemany },
 #if 0 //// TODO:
+                { "test_vmem_map_mixed",                             test_vmem_map_mixed },
                 { "test_vmem_map_clear",                             test_vmem_map_clear },
                 { "test_vmem_string_iterator",                       test_vmem_string_iterator },
                 { "test_vmem_string_stream",                         test_vmem_string_stream },

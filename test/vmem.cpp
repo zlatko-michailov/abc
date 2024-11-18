@@ -823,24 +823,24 @@ bool test_vmem_list_erase(test_context& context) {
     // | 01 02 __ __ | 04 09 0a __ | 0c 0d 0e 0f
 
     itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log());
-    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10436, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x09, 0x10437, "0x%2.2llx") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 8, 0x10438, "%zu") && passed;
-    // | (2)         | (5)
-    // | 01 02 09 0a | 0c 0d 0e 0f
+    // | (2)         | (3)         | (5)
+    // | 01 02 __ __ | 09 0a __ __ | 0c 0d 0e 0f
 
-    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 3U, abc::vmem::iterator_edge::none, context.log());
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 1U, abc::vmem::iterator_edge::none, context.log());
     itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x10439, "%d") && passed;
     passed = context.are_equal<unsigned long long>(itr_actual->data, 0x0c, 0x1043a, "0x%2.2llx") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 7, 0x1043b, "%zu") && passed;
-    // | (2)         | (5)
-    // | 01 02 09 __ | 0c 0d 0e 0f
+    // | (2)         | (3)         | (5)
+    // | 01 02 __ __ | 09 __ __ __ | 0c 0d 0e 0f
 
-    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 2U, abc::vmem::iterator_edge::none, context.log());
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 3U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 5U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x104f7, "%d") && passed;
@@ -857,14 +857,14 @@ bool test_vmem_list_erase(test_context& context) {
     // | (2)         | (5)
     // | 01 02 __ __ | 0c 0d 0e __
 
-    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 5U, 2U, abc::vmem::iterator_edge::none, context.log());
-    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, abc::vmem::item_pos_nil, abc::vmem::iterator_edge::end, context.log());
+    itr_target = abc::vmem::list<ItemMany>::iterator(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
+    itr_expected = abc::vmem::list<ItemMany>::iterator(&list, 2U, 0U, abc::vmem::iterator_edge::none, context.log());
     itr_actual = list.erase(itr_target);
     passed = context.are_equal<bool>(itr_actual == itr_expected, true, 0x104fc, "%d") && passed;
-    passed = context.are_equal<bool>(itr_actual == list.end(), true, 0x104fd, "%d") && passed;
+    passed = context.are_equal<unsigned long long>(itr_actual->data, 0x02, 0x104fd, "0x%2.2llx") && passed;
     passed = context.are_equal<std::size_t>(list.size(), 4, 0x104fe, "%zu") && passed;
     // | (2)
-    // | 01 02 0c 0d
+    // | 02 0c 0d 0e
 
     return passed;
 }
@@ -1207,12 +1207,12 @@ bool test_vmem_map_erase(test_context& context) {
     // | (2)         | (3)         | (7)         | (8)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
 
-    key.data = 0x09;
+    key.data = 0x07;
     std::size_t one = map.erase(key);
     passed = context.are_equal<std::size_t>(one, 1U, 0x10573, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 10U, 0x10574, "%zu") && passed;
     // | (2)         | (3)         | (7)         | (8)
-    // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
+    // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 08 09 0a |
 
     // Test that key levels have been updated.
     key.data = 0x0a;
@@ -1220,35 +1220,37 @@ bool test_vmem_map_erase(test_context& context) {
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 8U, 0x10575, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x10576, "0x%x") && passed;
 
-    key.data = 0x04;
+    key.data = 0x02;
     one = map.erase(key);
     passed = context.are_equal<std::size_t>(one, 1U, 0x10577, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 9U, 0x10578, "%zu") && passed;
     // | (2)         | (3)         | (8)
-    // | 00 01 __ __ | 02 03 05 __ | 06 07 08 0a |
+    // | 00 01 __ __ | 03 04 05 __ | 06 08 09 0a |
 
     key.data = 0x01;
     one = map.erase(key);
     passed = context.are_equal<std::size_t>(one, 1U, 0x10579, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 8U, 0x1057a, "%zu") && passed;
     // | (2)         | (8)
-    // | 00 02 03 05 | 06 07 08 0a |
+    // | 00 03 04 05 | 06 08 09 0a |
 
     // Test that key levels have been updated.
     key.data = 0x05;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 2U, 0x1057b, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 3U, 0x1057c, "0x%x") && passed;
+    // | (2)         | (8)
+    // | 00 03 04 05 | 06 08 09 0a |
 
     using Pair = std::pair<std::uint64_t, abc::vmem::map<Key, Value>::const_iterator>;
     const Pair exp[] = {
         { 0x00, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x02, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x03, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x03, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x04, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
         { 0x05, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 3U, abc::vmem::iterator_edge::none, context.log()) },
         { 0x06, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x07, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x08, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x08, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x09, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 2U, abc::vmem::iterator_edge::none, context.log()) },
         { 0x0a, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 3U, abc::vmem::iterator_edge::none, context.log()) },
     };
     constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
@@ -1277,12 +1279,15 @@ bool test_vmem_map_erase(test_context& context) {
     }
     passed = context.are_equal(itr == map.crbegin(), true, 0x10586, "%d") && passed;
 
-    key.data = 0x09;
+    // | (2)         | (8)
+    // | 00 03 04 05 | 06 08 09 0a |
+
+    key.data = 0x07;
     one = map.erase(key);
     passed = context.are_equal<std::size_t>(one, 0, 0x10587, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 8, 0x10588, "%zu") && passed;
 
-    key.data = 0x04;
+    key.data = 0x0b;
     one = map.erase(key);
     passed = context.are_equal<std::size_t>(one, 0, 0x10589, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 8, 0x1058a, "%zu") && passed;
@@ -1320,6 +1325,46 @@ bool test_vmem_map_erase(test_context& context) {
 }
 
 
+bool test_vmem_map_erasemany(test_context& context) {
+    bool passed = true;
+
+    abc::vmem::pool_config config("out/test/map_erasemany.vmem", max_mapped_page_count_map);
+    abc::vmem::pool pool(std::move(config), context.log());
+
+    abc::vmem::map_state map_state;
+    abc::vmem::map<Key, Value> map(&map_state, &pool, context.log());
+
+    constexpr std::size_t count = 1000U;
+    Key key;
+
+    // Erase forward
+    {
+        passed = insert_map_items(context, map, count) && passed;
+        for (std::size_t i = 0; i < count; i++)
+        {
+            key.data = i;
+            std::size_t one = map.erase(key);
+            passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
+            passed = context.are_equal<std::size_t>(map.size(), count - i - 1, __TAG__, "%zu") && passed;
+        }
+    }
+
+    // Erase backward
+    {
+        passed = insert_map_items(context, map, count) && passed;
+        for (std::size_t i = count; 0 < i; i--)
+        {
+            key.data = i - 1;
+            std::size_t one = map.erase(key);
+            passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
+            passed = context.are_equal<std::size_t>(map.size(), i - 1, __TAG__, "%zu") && passed;
+        }
+    }
+
+    return passed;
+}
+
+
 bool test_vmem_map_mixed(test_context& context) {
     constexpr const char* suborigin = "test_vmem_map_mixed";
     constexpr std::size_t base_value = 0x90000000;
@@ -1335,56 +1380,47 @@ bool test_vmem_map_mixed(test_context& context) {
     abc::vmem::map<Key, Value>::const_iterator itr(nullptr);
 
     passed = insert_map_items(context, map, 11) && passed;
-    map.log_internals(format_map_key);
     // | (2)         | (3)         | (7)         | (8)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 09 0a __ |
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 01");
     // Find an existing key.
     key.data = 0x05;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 1U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 02");
     // Find an existing key.
     key.data = 0x06;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 8U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 0U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 10");
     // Erase.
     key.data = 0x09;
     std::size_t one = map.erase(key);
-    map.log_internals(format_map_key);
     passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 10U, __TAG__, "%zu") && passed;
-    // | (2)         | (3)         | (7)         | (8)
-    // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 08 0a |
+    // | (2)         | (3)         | (7)         | (8)         | (9)
+    // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 0a __ __ |
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 11");
     // Find an existing key.
     key.data = 0x05;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 1U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 12");
     // Find an existing key.
     key.data = 0x06;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 8U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 0U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 13");
     // Find an existing key.
     key.data = 0x0a;
     itr = map.find(key);
-    passed = context.are_equal<unsigned long long>(itr.page_pos(), 8U, __TAG__, "0x%llx") && passed;
-    passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 9U, __TAG__, "0x%llx") && passed;
+    passed = context.are_equal<unsigned>(itr.item_pos(), 1U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 20");
     // Insert 0x0b
     {
         abc::vmem::map<Key, Value>::value_type item;
@@ -1392,77 +1428,64 @@ bool test_vmem_map_mixed(test_context& context) {
         item.value = base_value + 0x0b;
 
         abc::vmem::map<Key, Value>::iterator_bool itr_b = map.insert(item);
-        map.log_internals(format_map_key);
         passed = context.are_equal<bool>(itr_b.second, true, __TAG__, "%d") && passed;
-        passed = context.are_equal<unsigned long long>(itr_b.first.page_pos(), 0xa, __TAG__, "0x%llx") && passed;
+        passed = context.are_equal<unsigned long long>(itr_b.first.page_pos(), 0x9, __TAG__, "0x%llx") && passed;
         passed = context.are_equal<unsigned>(itr_b.first.item_pos(), 2U, __TAG__, "0x%x") && passed;
     }
-    // | (2)         | (3)         | (7)         | (8)         | (a)
+    // | (2)         | (3)         | (7)         | (8)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 04 05 __ __ | 06 07 __ __ | 08 0a 0b __ |
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 21");
     // Find an existing key.
     key.data = 0x0b;
     itr = map.find(key);
-    passed = context.are_equal<unsigned long long>(itr.page_pos(), 0xA, __TAG__, "0x%llx") && passed;
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 9U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 2U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 30");
     // Erase.
     key.data = 0x04;
     one = map.erase(key);
-    map.log_internals(format_map_key);
     passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 10U, __TAG__, "%zu") && passed;
-    // | (2)         | (3)         | (7)         | (a)
+    // | (2)         | (3)         | (7)         | (9)
     // | 00 01 __ __ | 02 03 __ __ | 05 06 07 __ | 08 0a 0b __ |
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 31");
     // Find a non-existing key.
     key.data = 0x04;
     itr = map.find(key);
     passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 32");
-    // Find an existing key.
-    key.data = 0x05;
-    itr = map.find(key);
-    passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
-    passed = context.are_equal<unsigned>(itr.item_pos(), 0U, __TAG__, "0x%x") && passed;
-
-    map.log_internals(format_map_key);
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 33");
     // Find an existing key.
     key.data = 0x06;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 1U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 34");
+    // Find an existing key.
+    key.data = 0x05;
+    itr = map.find(key);
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
+    passed = context.are_equal<unsigned>(itr.item_pos(), 0U, __TAG__, "0x%x") && passed;
+
     // Find an existing key.
     key.data = 0x07;
     itr = map.find(key);
     passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
     passed = context.are_equal<unsigned>(itr.item_pos(), 2U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 40");
     // Erase.
     key.data = 0x06;
     one = map.erase(key);
-    map.log_internals(format_map_key);
     passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
     passed = context.are_equal<std::size_t>(map.size(), 9U, __TAG__, "%zu") && passed;
-    // | (2)         | (3)         | (8)         | (10)
-    // | 00 01 __ __ | 02 03 __ __ | 05 07 __ __ | 08 09 0b __ |
+    // | (2)         | (3)         | (7)         | (9)
+    // | 00 01 __ __ | 02 03 __ __ | 05 07 __ __ | 08 0a 0b __ |
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 41");
     // Test that key levels have been updated.
     key.data = 0x07;
     itr = map.find(key);
-    passed = context.are_equal<unsigned long long>(itr.page_pos(), 3U, __TAG__, "0x%llx") && passed;
-    passed = context.are_equal<unsigned>(itr.item_pos(), 3U, __TAG__, "0x%x") && passed;
+    passed = context.are_equal<unsigned long long>(itr.page_pos(), 7U, __TAG__, "0x%llx") && passed;
+    passed = context.are_equal<unsigned>(itr.item_pos(), 1U, __TAG__, "0x%x") && passed;
 
-    context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "-- 50");
     // Insert 0x04
     {
         abc::vmem::map<Key, Value>::value_type item;
@@ -1470,86 +1493,90 @@ bool test_vmem_map_mixed(test_context& context) {
         item.value = base_value + 0x04;
 
         map.insert(item);
-        map.log_internals(format_map_key);
 }
-    // | (2)         | (3)         | (8)         | (9)
-    // | 00 01 __ __ | 02 03 04 __ | 05 07 __ __ | 08 09 0b __ |
+    // | (2)         | (3)         | (7)         | (9)
+    // | 00 01 __ __ | 02 03 04 __ | 05 07 __ __ | 08 0a 0b __ |
 
     using Pair = std::pair<std::uint64_t, abc::vmem::map<Key, Value>::const_iterator>;
     const Pair exp[] = {
         { 0x00, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x02, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x03, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 2U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x05, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 3U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x06, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 0U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x07, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 1U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x08, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 2U, abc::vmem::iterator_edge::none, context.log()) },
-        { 0x0a, abc::vmem::map<Key, Value>::const_iterator(&map, 8U, 3U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x01, abc::vmem::map<Key, Value>::const_iterator(&map, 2U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x02, abc::vmem::map<Key, Value>::const_iterator(&map, 3U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x03, abc::vmem::map<Key, Value>::const_iterator(&map, 3U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x04, abc::vmem::map<Key, Value>::const_iterator(&map, 3U, 2U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x05, abc::vmem::map<Key, Value>::const_iterator(&map, 7U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x07, abc::vmem::map<Key, Value>::const_iterator(&map, 7U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x08, abc::vmem::map<Key, Value>::const_iterator(&map, 9U, 0U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x0a, abc::vmem::map<Key, Value>::const_iterator(&map, 9U, 1U, abc::vmem::iterator_edge::none, context.log()) },
+        { 0x0b, abc::vmem::map<Key, Value>::const_iterator(&map, 9U, 2U, abc::vmem::iterator_edge::none, context.log()) },
     };
     constexpr std::size_t exp_len = sizeof(exp) / sizeof(Pair); 
 
     // Iterate forward.
     itr = map.cbegin();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1057d, "forward[%zu]=0x%llx", i, exp[i].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
 
-        passed = context.are_equal(itr == exp[i].second, true, 0x1057e, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1057f, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, 0x10580, "%d") && passed;
+        passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%llx") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%llx") && passed;
         itr++;
     }
-    passed = context.are_equal(itr == map.cend(), true, 0x10581, "%d") && passed;
+    passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
     // Iterate backwards.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10582, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 
-        passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10583, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10584, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, 0x10585, "%d") && passed;
+        passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%llx") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%llx") && passed;
         itr--;
     }
-    passed = context.are_equal(itr == map.crbegin(), true, 0x10586, "%d") && passed;
+    passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
 
+    // Erase non-existant.
     key.data = 0x09;
     one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 0, 0x10587, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 8, 0x10588, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 10U, __TAG__, "%zu") && passed;
 
-    key.data = 0x04;
+    // Erase non-existant.
+    key.data = 0x06;
     one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 0, 0x10589, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 8, 0x1058a, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 10U, __TAG__, "%zu") && passed;
 
-    key.data = 0x01;
+    // Erase non-existant.
+    key.data = 0x0c;
     one = map.erase(key);
-    passed = context.are_equal<std::size_t>(one, 0, 0x1058b, "%zu") && passed;
-    passed = context.are_equal<std::size_t>(map.size(), 8, 0x1058c, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(one, 0, __TAG__, "%zu") && passed;
+    passed = context.are_equal<std::size_t>(map.size(), 10U, __TAG__, "%zu") && passed;
 
     // Iterate forward.
     itr = map.cbegin();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1058d, "forward[%zu]=0x%llx", i, exp[i].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "forward[%zu]=0x%llx", i, exp[i].first);
 
-        passed = context.are_equal(itr == exp[i].second, true, 0x1058e, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, 0x1058f, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, 0x10590, "%d") && passed;
+        passed = context.are_equal(itr == exp[i].second, true, __TAG__, "%d") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[i].first, __TAG__, "%llx") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[i].first, __TAG__, "%llx") && passed;
         itr++;
     }
-    passed = context.are_equal(itr == map.cend(), true, 0x10591, "%d") && passed;
+    passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
     // Iterate backwards.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10592, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
+        context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
 
-        passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, 0x10593, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, 0x10594, "%d") && passed;
-        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, 0x10595, "%d") && passed;
+        passed = context.are_equal(itr == exp[exp_len - i - 1].second, true, __TAG__, "%d") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->key.data, exp[exp_len - i - 1].first, __TAG__, "%llx") && passed;
+        passed = context.are_equal<std::uint64_t>(itr->value, 0x90000000 + exp[exp_len - i - 1].first, __TAG__, "%llx") && passed;
         itr--;
     }
-    passed = context.are_equal(itr == map.crbegin(), true, 0x10596, "%d") && passed;
+    passed = context.are_equal(itr == map.crbegin(), true, __TAG__, "%d") && passed;
 
     return passed;
 }
@@ -1773,13 +1800,14 @@ bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, st
         item.value = base_value + i;
 
         map.insert(item);
+        map.log_internals(format_map_key); //// TODO: Temp
     }
 
     // Iterate forward.
     abc::vmem::map<Key, Value>::const_iterator itr = map.cbegin();
     for (std::size_t i = start; i < finish; i++) {
-        passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "%llu") && passed;
-        passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "%llu") && passed;
+        passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "0x%llx") && passed;
+        passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "0x%llx") && passed;
         itr++;
     }
     passed = context.are_equal(itr == map.cend(), true, 0x1059f, "%d") && passed;
@@ -1787,8 +1815,8 @@ bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, st
     // Iterate backwards.
     itr = map.crend();
     for (std::size_t i = start; i < finish; i++) {
-        passed = context.are_equal<unsigned long long>(itr->key.data, finish - i - 1, 0x105a0, "%llu") && passed;
-        passed = context.are_equal<unsigned long long>(itr->value, base_value + (finish - i - 1), 0x105a1, "%llu") && passed;
+        passed = context.are_equal<unsigned long long>(itr->key.data, finish - i - 1, 0x105a0, "0x%llx") && passed;
+        passed = context.are_equal<unsigned long long>(itr->value, base_value + (finish - i - 1), 0x105a1, "0x%llx") && passed;
         itr--;
     }
     passed = context.are_equal(itr == map.crbegin(), true, 0x105a2, "%d") && passed;

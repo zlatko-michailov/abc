@@ -19,11 +19,11 @@
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`
+    - //// TODO: Build with g++ and remove warnings.
     - container
         - //// TODO: Remove `merge_prev()`.
     - map
-        - //// TODO: Assert that at least 2 key instances fit in a page.
-        - //// TODO: Add a map test that mixes insert-erase-insert.
+        - //// TODO: Add map tests insertmany_forward and insertmany_backward.
     - Entities
         - page.h
         - ptr.h
@@ -95,6 +95,7 @@
 
 ---
         context.log->filter()->min_severity(abc::severity::critical); ////
+        context.log()->put_any(origin, "TEMP", abc::diag::severity::important, __TAG__, "Backward");
 ---
 
   export LDFLAGS="-L/usr/local/opt/openssl/lib"

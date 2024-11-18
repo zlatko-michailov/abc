@@ -25,7 +25,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <functional>
 #include <utility>
+
 #include "list.i.h"
 
 
@@ -459,6 +461,13 @@ namespace abc { namespace vmem {
          */
         item_pos_t key_item_pos(page_pos_t key_page_pos, const Key& key);
 
+        /**
+         * @brief          Returns the position of a key on a key page.
+         * @param key_page Key page.
+         * @param key      Key
+         */
+        item_pos_t key_item_pos(map_key_page<Key>* key_page, const Key& key);
+
     public:
         /**
          * @brief Erases all items.
@@ -567,6 +576,15 @@ namespace abc { namespace vmem {
          * @brief Converts a value-level iterator to a map iterator.
          */
         iterator itr_from_values(const value_level_iterator& values_itr) const noexcept;
+
+    public:
+        /**
+         * @brief            Logs the whole internal structure.
+         * @details          This method is intended to use only for debugging purposes.
+         * @param format_key Callback to format a key as a string.
+         * @param severity   Severity of the logged messages. Optional. Default: `important`.
+         */
+        void log_internals(std::function<std::string(const Key&)>&& format_key, diag::severity_t severity = diag::severity::important);
 
     private:
         map_state*            _state;
