@@ -374,6 +374,9 @@ namespace abc { namespace vmem {
 
     inline void linked::clear() {
         _pool->clear_linked(*this);
+
+        _state->front_page_pos = page_pos_nil;
+        _state->back_page_pos = page_pos_nil;
     }
 
 
