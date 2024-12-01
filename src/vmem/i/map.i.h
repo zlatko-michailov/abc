@@ -447,12 +447,11 @@ namespace abc { namespace vmem {
     private:
         /**
          * @brief               Inserts/erases keys throughout key levels as necessary after an insert/erase to the value level has finished.
-         * @param is_insert     `true` = insert; `false` = erase.
          * @param find_result   `find_result2`
          * @param values_result `value_level_result_2`
          * @return              `result2`
          */
-        result2 update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result);
+        result2 update_key_levels(find_result2&& find_result, value_level_result2&& values_result);
 
         /**
          * @brief              Returns the position of a key on a key page.

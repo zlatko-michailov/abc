@@ -303,7 +303,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
         diag_base::expect(suborigin, values_result.iterator.can_deref(), __TAG__, "values_result.iterator.can_deref()");
 
-        result2 result = update_key_levels(true /*is_insert*/, std::move(find_result), std::move(values_result));
+        result2 result = update_key_levels(std::move(find_result), std::move(values_result));
         diag_base::expect(suborigin, result.ok, __TAG__, "result.ok");
         diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
         diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
@@ -370,7 +370,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
         values_itr = values_result.iterator;
 
-        result2 result = update_key_levels(false /*is_insert*/, std::move(find_result), std::move(values_result));
+        result2 result = update_key_levels(std::move(find_result), std::move(values_result));
         diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1051f, "End: values_itr.page_pos=0x%llx, values_itr.item_pos=0x%x, values_itr.edge=%d",
@@ -384,7 +384,7 @@ namespace abc { namespace vmem {
 
 
     template <typename Key, typename T>
-    inline typename map<Key, T>::result2 map<Key, T>::update_key_levels(bool is_insert, find_result2&& find_result, value_level_result2&& values_result) {
+    inline typename map<Key, T>::result2 map<Key, T>::update_key_levels(find_result2&& find_result, value_level_result2&& values_result) {
         constexpr const char* suborigin = "update_key_levels";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10520, "Begin:");
 
@@ -504,58 +504,6 @@ namespace abc { namespace vmem {
                 page_leads[0] = parent_page_leads[0];
                 page_leads[1] = parent_page_leads[1];
 
-#if 0 //// TODO:
-                key_level_result2 keys_result;
-                if (is_insert) {
-                    // page_leads[0] - insert; new page
-                    // page_leads[1] - original; used only when a new level is created
-                    diag_base::expect(suborigin, page_leads[0].operation == container_page_lead_operation::insert, __TAG__, "page_leads[0].operation == container_page_lead_operation::insert");
-                    
-                    item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
-                    diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
-
-                    // Since the item is being inserted, it must not exist, nevertheless on a key page.
-                    // Therefore, parent_item_pos must be incremented.
-                    key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, ++parent_item_pos, iterator_edge::none, diag_base::log());
-
-                    map_key<Key> key_item;
-                    std::memmove(&key_item.key, &page_leads[0].items[0].key, sizeof(Key));
-                    key_item.page_pos = page_leads[0].page_pos;
-
-                    keys_result = parent_keys.insert2(parent_keys_itr, key_item);
-                }
-                else {
-                    // page_leads[0] - replace or none; doesn't create new leads
-                    // page_leads[1] - erase
-                    if (page_leads[0].operation == container_page_lead_operation::replace) {
-                        item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[0].items[0].key);
-                        diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
-    
-                        key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, diag_base::log());
-                        if (parent_keys_itr.can_deref()) {
-                            ptr<map_key<Key>> key_ptr = parent_keys_itr.operator->();
-                            std::memmove(&key_ptr->key, &page_leads[0].items[1].key, sizeof(Key));
-                        }
-
-                        keys_result.page_leads[0] = page_leads[0];
-                        keys_result.page_leads[1] = page_leads[1];
-                    }
-
-                    //// TODO: Why is lead[1] 'none' when erase 0x04?
-                    if (page_leads[1].operation == container_page_lead_operation::erase) {
-                        item_pos_t parent_item_pos = key_item_pos(parent_page_pos, page_leads[1].items[0].key);
-                        diag_base::expect(suborigin, parent_item_pos != item_pos_nil, __TAG__, "parent_item_pos != item_pos_nil");
-
-                        key_level_iterator parent_keys_itr(&parent_keys, parent_page_pos, parent_item_pos, iterator_edge::none, diag_base::log());
-
-                        keys_result = parent_keys.erase2(parent_keys_itr); //// TODO: Should not overwrite lead[0]
-                    }
-                }
-
-                page_leads[0] = keys_result.page_leads[0];
-                page_leads[1] = keys_result.page_leads[1];
-#endif
-
                 key_stack_itr++;
                 path_itr--;
             } // while (rebalance)
@@ -615,45 +563,6 @@ namespace abc { namespace vmem {
                     _key_stack.pop_back();
                 }
             }
-
-#if 0
-            if (is_insert) {
-                // If there is still a rebalance, then a key level at the top has to be added.
-                if (page_leads[0].page_pos != page_pos_nil) {
-                    container_state new_keys_state;
-                    map_key_level<Key> new_keys(&new_keys_state, _pool, diag_base::log());
-
-                    // original
-                    map_key<Key> other_key_item;
-                    std::memmove(&other_key_item.key, &page_leads[1].items[0].key, sizeof(Key));
-                    other_key_item.page_pos = page_leads[1].page_pos;
-                    new_keys.push_back(std::move(other_key_item));
-
-                    // new page
-                    map_key<Key> new_key_item;
-                    std::memmove(&new_key_item.key, &page_leads[0].items[0].key, sizeof(Key));
-                    new_key_item.page_pos = page_leads[0].page_pos;
-                    new_keys.push_back(std::move(new_key_item));
-
-                    _key_stack.push_back(std::move(new_keys_state));
-                }
-            }
-            else {
-                // If there is a single key left on the top-level page, that page has to be removed.
-                if (!_key_stack.empty()) {
-                    std::size_t top_keys_size = 2;
-                    {
-                        container_state top_keys_state = _key_stack.back();
-                        map_key_level<Key> top_keys(&top_keys_state, _pool, diag_base::log());
-                        top_keys_size = top_keys.size();
-                    }
-
-                    if (top_keys_size == 1) {
-                        _key_stack.pop_back();
-                    }
-                }
-            }
-#endif
 
             diag_base::put_any(suborigin, diag::severity::optional, 0x10523, "key_stack.size=%zu", _key_stack.size());
         }
@@ -855,7 +764,7 @@ namespace abc { namespace vmem {
 
             // Value page: when done, item_pos should reference the smallest key that is bigger or equal to key.
             item_pos = value_page->item_count;
-            for (item_pos_t i = value_page->item_count - 1; 0 <= i && i < value_page->item_count && key <= value_page->items[i].key; i--) {
+            for (item_pos_t i = value_page->item_count - 1; /* 0 <= i && */ i < value_page->item_count && key <= value_page->items[i].key; i--) {
                 diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item[%u]=0x%llx..., key=0x%llx...", (unsigned)i, *(unsigned long long*)&value_page->items[i].key, *(unsigned long long*)&key);
 
                 item_pos = i;

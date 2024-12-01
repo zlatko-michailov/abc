@@ -19,7 +19,6 @@
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`
-    - //// TODO: Build with g++ and remove warnings.
     - container
         - //// TODO: Remove `merge_prev()`.
     - Entities
