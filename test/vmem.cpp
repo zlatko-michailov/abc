@@ -86,7 +86,7 @@ using Value = std::uint64_t;
 
 bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, std::size_t count);
 
-bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count, std::size_t start = 0);
+bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count, bool reverse = false);
 
 bool insert_linked_page(test_context& context, abc::vmem::pool* pool, abc::vmem::linked& linked, abc::vmem::page_pos_t expected_page_pos, LinkedPageData data,
                         const abc::vmem::linked::const_iterator& itr, const abc::vmem::linked::const_iterator& expected_itr,
@@ -716,7 +716,7 @@ bool test_vmem_list_insert(test_context& context) {
     }
     passed = context.are_equal(actual_itr == list.end(), true, 0x103df, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     actual_itr = list.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1041f, "backward[%zu]=0x%x", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1160,7 +1160,7 @@ bool test_vmem_map_insert(test_context& context) {
     }
     passed = context.are_equal(itr == map.cend(), true, 0x1056d, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x1056e, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1185,7 +1185,19 @@ bool test_vmem_map_insertmany(test_context& context) {
     abc::vmem::map_state map_state;
     abc::vmem::map<Key, Value> map(&map_state, &pool, context.log());
 
-    passed = insert_map_items(context, map, 4000) && passed;
+    constexpr std::size_t count = 1000U;
+
+    // Insert forward
+    {
+        passed = insert_map_items(context, map, count, false /*reverse*/) && passed;
+        map.clear();
+    }
+
+    // Insert backward
+    {
+        passed = insert_map_items(context, map, count, true /*reverse*/) && passed;
+        map.clear();
+    }
 
     return passed;
 }
@@ -1267,7 +1279,7 @@ bool test_vmem_map_erase(test_context& context) {
     }
     passed = context.are_equal(itr == map.cend(), true, 0x10581, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10582, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1309,7 +1321,7 @@ bool test_vmem_map_erase(test_context& context) {
     }
     passed = context.are_equal(itr == map.cend(), true, 0x10591, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, 0x10592, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1352,12 +1364,12 @@ bool test_vmem_map_erasemany(test_context& context) {
     // Erase backward
     {
         passed = insert_map_items(context, map, count) && passed;
-        for (std::size_t i = count; 0 < i; i--)
+        for (std::size_t i = 0; i < count; i++)
         {
-            key.data = i - 1;
+            key.data = count - i - 1;
             std::size_t one = map.erase(key);
             passed = context.are_equal<std::size_t>(one, 1U, __TAG__, "%zu") && passed;
-            passed = context.are_equal<std::size_t>(map.size(), i - 1, __TAG__, "%zu") && passed;
+            passed = context.are_equal<std::size_t>(map.size(), count - i - 1, __TAG__, "%zu") && passed;
         }
     }
 
@@ -1524,7 +1536,7 @@ bool test_vmem_map_mixed(test_context& context) {
     }
     passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1566,7 +1578,7 @@ bool test_vmem_map_mixed(test_context& context) {
     }
     passed = context.are_equal(itr == map.cend(), true, __TAG__, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
     for (std::size_t i = 0; i < exp_len; i++) {
         context.log()->put_any(origin, suborigin, abc::diag::severity::optional, __TAG__, "backward[%zu]=0x%llx", exp_len - i - 1, exp[exp_len - i - 1].first);
@@ -1775,7 +1787,7 @@ bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, s
     }
     passed = context.are_equal(itr == list.end(), true, 0x103ee, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = list.crend();
     for (std::size_t i = 0; i < count; i++) {
         passed = context.are_equal<unsigned long long>(itr->data, count - i - 1, 0x103ef, "%llu") && passed;
@@ -1787,36 +1799,37 @@ bool insert_list_items(test_context& context, abc::vmem::list<ItemMany>& list, s
 }
 
 
-bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count, std::size_t start) {
+bool insert_map_items(test_context& context, abc::vmem::map<Key, Value>& map, std::size_t count, bool reverse) {
     constexpr std::size_t base_value = 0x90000000;
 
     bool passed = true;
-    std::size_t finish = start + count;
 
     // Insert.
-    for (std::size_t i = start; i < finish; i++) {
+    for (std::size_t i = 0; i < count; i++) {
+        std::size_t v = reverse ? (count - i - 1) : i;
+
         abc::vmem::map<Key, Value>::value_type item;
-        item.key.data = i;
-        item.value = base_value + i;
+        item.key.data = v;
+        item.value = base_value + v;
 
         map.insert(item);
-        map.log_internals(format_map_key); //// TODO: Temp
     }
 
     // Iterate forward.
     abc::vmem::map<Key, Value>::const_iterator itr = map.cbegin();
-    for (std::size_t i = start; i < finish; i++) {
+    for (std::size_t i = 0; i < count; i++) {
         passed = context.are_equal<unsigned long long>(itr->key.data, i, 0x1059d, "0x%llx") && passed;
         passed = context.are_equal<unsigned long long>(itr->value, base_value + i, 0x1059e, "0x%llx") && passed;
         itr++;
     }
     passed = context.are_equal(itr == map.cend(), true, 0x1059f, "%d") && passed;
 
-    // Iterate backwards.
+    // Iterate backward.
     itr = map.crend();
-    for (std::size_t i = start; i < finish; i++) {
-        passed = context.are_equal<unsigned long long>(itr->key.data, finish - i - 1, 0x105a0, "0x%llx") && passed;
-        passed = context.are_equal<unsigned long long>(itr->value, base_value + (finish - i - 1), 0x105a1, "0x%llx") && passed;
+    for (std::size_t i = 0; i < count; i++) {
+        std::size_t v = count - i - 1;
+        passed = context.are_equal<unsigned long long>(itr->key.data, v, 0x105a0, "0x%llx") && passed;
+        passed = context.are_equal<unsigned long long>(itr->value, base_value + v, 0x105a1, "0x%llx") && passed;
         itr--;
     }
     passed = context.are_equal(itr == map.crbegin(), true, 0x105a2, "%d") && passed;

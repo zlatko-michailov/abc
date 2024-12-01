@@ -22,8 +22,6 @@
     - //// TODO: Build with g++ and remove warnings.
     - container
         - //// TODO: Remove `merge_prev()`.
-    - map
-        - //// TODO: Add map tests insertmany_forward and insertmany_backward.
     - Entities
         - page.h
         - ptr.h

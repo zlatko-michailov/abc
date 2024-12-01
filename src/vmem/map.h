@@ -571,13 +571,12 @@ namespace abc { namespace vmem {
                         // If the other lead is a replace, that should be the new root key.
                         // Otherwise, the saved root key from above should be used.
                         map_key<Key> lead_key_item;
+                        lead_key_item.page_pos = root_page_pos;
                         if (page_leads[1 - i].operation == container_page_lead_operation::replace) {
                             std::memmove(&lead_key_item.key, &page_leads[1 - i].items[0].key, sizeof(Key)); // New key
-                            lead_key_item.page_pos = page_leads[1 - i].page_pos;
                         }
                         else {
                             std::memmove(&lead_key_item.key, &root_key, sizeof(Key)); 
-                            lead_key_item.page_pos = root_page_pos;
                         }
                         new_keys.push_back(std::move(lead_key_item));
 
@@ -814,7 +813,7 @@ namespace abc { namespace vmem {
                 diag_base::put_any(suborigin, diag::severity::optional, 0x10530, "Examine key lev=%zu, page_pos=0x%llx", level, (unsigned long long)page.pos());
 
                 // Find the key on the key page.
-                item_pos_t item_pos = key_item_pos(key_page, key);
+                item_pos = key_item_pos(key_page, key);
 
                 //// TODO: This logic is not needed.
                 // If key is smaller than the smallest key in the tree, 0 will be returned.
