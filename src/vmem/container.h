@@ -985,6 +985,8 @@ namespace abc { namespace vmem {
     inline void container<T, Header>::clear() {
         vmem::linked linked(_state, _pool, diag_base::log());
         linked.clear();
+
+        _state->total_item_count = 0;
     }
 
 
