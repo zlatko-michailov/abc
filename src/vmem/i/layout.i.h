@@ -149,7 +149,7 @@ namespace abc { namespace vmem {
 
         item_pos_t  item_size        = 0;
         std::size_t total_item_count = 0;
-        //// TODO: Keep the count of the back page in the state, so we don't have to map the back page to create an rend() iterator.
+        //// TODO: Keep the count of the back page in the state, so the back page doesn't have to be mapped to create a rend() iterator.
     };
 
 

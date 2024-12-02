@@ -19,8 +19,6 @@
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
 - `vmem`
-    - container
-        - //// TODO: Remove `merge_prev()`.
     - Entities
         - page.h
         - ptr.h

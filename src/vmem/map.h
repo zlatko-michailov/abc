@@ -723,14 +723,6 @@ namespace abc { namespace vmem {
 
                 // Find the key on the key page.
                 item_pos = key_item_pos(key_page, key);
-
-                //// TODO: This logic is not needed.
-                // If key is smaller than the smallest key in the tree, 0 will be returned.
-                // In that case, if key is strictly smaller than item[0], this search is finalized as 'not found'.
-                /*if (item_pos == 0 && key < key_page->items[0].key) {
-                    is_found = false;
-                    is_found_final = true;
-                }*/
                 diag_base::expect(suborigin, item_pos < key_page->item_count, __TAG__, "item_pos < key_page->item_count");
 
                 // Child page pos.

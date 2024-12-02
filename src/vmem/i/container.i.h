@@ -500,15 +500,6 @@ namespace abc { namespace vmem {
         result2 balance_merge_next(const_iterator itr, vmem::page& page, vmem::container_page<T, Header>* container_page);
 
         /**
-         * @brief                Merges the items of the given page with the items from the page preceding it.
-         * @param itr            Iterator.
-         * @param page           Page to be merged as a reference to `page`.
-         * @param container_page Page to be merged as a pointer to a `container_page`
-         * @return               `result2`. 
-         */
-        result2 balance_merge_prev(const_iterator itr, vmem::page& page, vmem::container_page<T, Header>* container_page);
-
-        /**
          * @brief      Unlinks a page from the container, and puts it on the pool's free page list.
          * @param page Page to be erased as a reference to `page`.
          */
