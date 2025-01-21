@@ -26,295 +26,317 @@ SOFTWARE.
 #include <cstdint>
 #include <thread>
 #include <mutex>
+#include <vector>
 
-#include "../../src/log.h"
-#include "../../src/vmem.h"
-#include "../../src/endpoint.h"
+#include "../../src/diag/diag_ready.h"
+#include "../../src/net/endpoint.h"
+#include "../../src/vmem/map.h"
 
 
-namespace abc { namespace samples {
+////using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
+////using results_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
+////using limits = abc::endpoint_limits;
 
-	using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-	using results_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
-	using limits = abc::endpoint_limits;
 
+// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
 
+using board_state_t = std::uint32_t;
+using score_calc_t = std::int16_t;
+using score_t = std::int8_t;
+using move_t = std::int32_t;
 
-	using board_state_t = std::uint32_t;
-	using score_calc_t = std::int16_t;
-	using score_t = std::int8_t;
-	using move_t = std::int32_t;
+constexpr move_t row_count = 3;
+constexpr move_t col_count = 3;
 
-	constexpr move_t row_count = 3;
-	constexpr move_t col_count = 3;
+namespace score { //// TODO: enum?
+    constexpr score_t none = -1;
 
-	namespace score {
-		constexpr score_t none	= -1;
+    constexpr score_t max  = 20;
+    constexpr score_t mid  = 10;
+    constexpr score_t min  =  1;
 
-		constexpr score_t max	= 20;
-		constexpr score_t mid	= 10;
-		constexpr score_t min	=  1;
+    constexpr score_t win  =  3;
+    constexpr score_t draw =  1;
+    constexpr score_t loss = -1;
+}
 
-		constexpr score_t win	=  3;
-		constexpr score_t draw	=  1;
-		constexpr score_t loss	= -1;
-	}
 
+// IMPORTANT: Ensure a predictable layout of the data on disk!
+#pragma pack(push, 1)
 
-	// IMPORTANT: Ensure a predictable layout of the data on disk!
-	#pragma pack(push, 1)
+using scores = score_t[row_count][col_count];
 
-	using scores = score_t[row_count][col_count];
+struct start_page_layout {
+    abc::vmem::map_state map_state;
+};
 
-	struct start_page_layout {
-		vmem_map_state	map_state;
-	};
+#pragma pack(pop)
 
-	#pragma pack(pop)
 
+// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
 
+// Max 8 pages = 32KB in memory.
+////using vmem_pool = abc::vmem::pool;
+////using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
+using state_scores_map = abc::vmem::map<board_state_t, scores>;
 
-	// Max 8 pages = 32KB in memory.
-	using vmem_pool = abc::vmem_pool<8, log_ostream>;
-	using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
-	using vmem_map = abc::vmem_map<board_state_t, scores, vmem_pool, log_ostream>;
 
+struct vmem_bundle { //// TODO: knowledge_base?
+    vmem_bundle(abc::vmem::pool_config&& pool_config, abc::diag::log_ostream* log);
 
-	struct vmem_bundle {
-		vmem_bundle(const char* path, log_ostream* log);
+    std::mutex              mutex;
+    abc::vmem::pool         pool;
+    abc::vmem::page         start_page;
+    ::state_scores_map      state_scores_map;
+    abc::diag::log_ostream* log;
+};
 
-		std::mutex		mutex;
-		vmem_pool		pool;
-		vmem_page		start_page;
-		vmem_map		state_scores_map;
-		log_ostream*	log;
-	};
 
+// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
 
+using player_id_t    = std::uint8_t;
 
-	using player_id_t	= std::uint8_t;
+namespace player_id { //// TODO: enum?
+    constexpr player_id_t none = 0x0;
+    constexpr player_id_t x    = 0x2; // First player
+    constexpr player_id_t o    = 0x3; // Second player
+    constexpr player_id_t mask = 0x3;
+}
 
-	namespace player_id {
-		constexpr player_id_t	none		= 0x0;
-		constexpr player_id_t	x			= 0x2;
-		constexpr player_id_t	o			= 0x3;
-		constexpr player_id_t	mask		= 0x3;
-	}
 
+// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
 
+using player_type_t    = std::uint8_t;
 
-	using player_type_t	= std::uint8_t;
+namespace player_type { //// TODO: enum?
+    constexpr player_type_t none        = 0;
+    constexpr player_type_t external    = 1;
+    constexpr player_type_t slow_engine = 2;
+    constexpr player_type_t fast_engine = 3;
 
-	namespace player_type {
-		constexpr player_type_t	none		= 0;
-		constexpr player_type_t	external	= 1;
-		constexpr player_type_t	slow_engine	= 2;
-		constexpr player_type_t	fast_engine	= 3;
+    player_type_t from_text(const char* text);
+}
 
-		player_type_t	from_text(const char* text);
-	}
 
+struct player_types {
+    player_type_t player_x_type;
+    player_type_t player_o_type;
+};
 
-	// --------------------------------------------------------------
 
+// --------------------------------------------------------------
 
-	struct move {
-		move_t	row;
-		move_t	col;
 
-		bool	is_valid() const;
-	};
+struct move {
+    move_t row;
+    move_t col;
 
+    bool is_valid() const;
+};
 
-	// --------------------------------------------------------------
 
+// --------------------------------------------------------------
 
-	class board {
-	public:
-		void				reset();
 
-	public:
-		bool				accept_move(const move& move);
-		bool				undo_move(const move& move);
+class board
+    : public abc::diag::diag_ready<const char*> {
 
-	public:
-		bool				is_game_over() const;
-		player_id_t			winner() const;
-		player_id_t			get_move(const move& move) const;
-		unsigned			move_count() const;
-		bool				has_move(player_id_t player_id, const move& move) const;
-		player_id_t			current_player_id() const;
-		board_state_t		state() const;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
-		static player_id_t	opponent(player_id_t player_id);
-		
-	private:
-		static board_state_t shift_up(player_id_t player_id, const move& move);
-		player_id_t			shift_down(const move& move) const;
+public:
+    board(abc::diag::log_ostream* log);
 
-		void				set_move(const move& move);
-		void				clear_move(const move& move);
-		bool				check_winner();
-		void				switch_current_player_id();
+public:
+    void reset();
 
-	private:
-		bool				_is_game_over		= false;
-		player_id_t			_winner				= player_id::none;
-		player_id_t			_current_player_id	= player_id::x;
-		board_state_t		_board_state		= { };
-		move_t				_move_count			= 0;
-	};
+public:
+    void accept_move(const move& move);
+    void undo_move(const move& move);
 
+public:
+    bool                 is_game_over() const;
+    player_id_t          winner() const;
+    player_id_t          get_move(const move& move) const;
+    unsigned             move_count() const;
+    bool                 has_move(player_id_t player_id, const move& move) const;
+    player_id_t          current_player_id() const;
+    board_state_t        state() const;
 
-	// --------------------------------------------------------------
+    static player_id_t   opponent(player_id_t player_id);
+    
+private:
+    static board_state_t shift_up(player_id_t player_id, const move& move);
+    player_id_t          shift_down(const move& move) const;
 
+    void                 set_move(const move& move);
+    void                 clear_move(const move& move);
+    bool                 check_winner();
+    void                 switch_current_player_id();
 
-	class game;
+private:
+    bool                 _is_game_over      = false;
+    player_id_t          _winner            = player_id::none;
+    player_id_t          _current_player_id = player_id::x;
+    board_state_t        _board_state       = { };
+    move_t               _move_count        = 0;
+};
 
 
-	class player_agent {
-	public:
-		void				reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log);
-		void				make_move_async();
-		void				learn();
-		player_type_t		player_type() const;
+// --------------------------------------------------------------
 
-	private:
-		static void			make_move_proc(player_agent* this_ptr);
-		void				make_move();
 
-	// Thinking slow
-	private:
-		void				slow_make_move();
-		int					slow_find_best_move_for(player_id_t player_id, move& best_move);
+class game;
 
-	// Thinking fast
-	private:
-		void				fast_make_move();
-		move				fast_find_best_move();
-		vmem_map::iterator	ensure_board_state_in_map(board_state_t board_state);
 
-	private:
-		game*				_game			= nullptr;
-		player_id_t			_player_id		= player_id::none;
-		player_type_t		_player_type	= player_type::none;
-		board				_temp_board;
-		log_ostream*		_log			= nullptr;
+class player_agent
+    : public abc::diag::diag_ready<const char*> {
 
-	public:
-		static vmem_bundle*	_vmem;
-	};
+    using diag_base = abc::diag::diag_ready<const char*>;
 
+public:
+    player_agent(abc::diag::log_ostream* log);
 
-	// --------------------------------------------------------------
+public:
+    void          reset(::game* game, player_id_t player_id, player_type_t player_type);
+    void          make_move_async();
+    void          learn();
+    player_type_t player_type() const;
 
+private:
+    static void   make_move_proc(player_agent* this_ptr);
+    void          make_move();
 
-	class game {
-	public:
-		static constexpr std::size_t max_move_count = row_count * col_count;
+// Thinking slow
+private:
+    void          slow_make_move();
+    int           slow_find_best_move_for(player_id_t player_id, move& best_move);
 
-	public:
-		void					reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log);
-		void					start();
-		bool					accept_move(player_id_t player_id, const move& move);
+// Thinking fast
+private:
+    void          fast_make_move();
+    move          fast_find_best_move();
+    state_scores_map::iterator ensure_board_state_in_map(board_state_t board_state);
 
-	public:
-		const samples::board&	board() const;
-		const move*				moves() const;
+private:
+    game*         _game        = nullptr;
+    player_id_t   _player_id   = player_id::none;
+    player_type_t _player_type = player_type::none;
+    ::board       _temp_board;
 
-	private:
-		samples::board			_board;
-		player_agent			_agent_x;
-		player_agent			_agent_o;
-		log_ostream*			_log			= nullptr;
+public:
+    static vmem_bundle* _vmem;
+};
 
-		move					_moves[max_move_count];
-	};
 
+// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
 
+class game
+    : public abc::diag::diag_ready<const char*> {
 
-	using endpoint_player_id_t = std::uint32_t;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
+public:
+    game(abc::diag::log_ostream* log);
 
-	struct endpoint_player {
-		endpoint_player_id_t	endpoint_player_id		= 0;
-		bool					is_claimed				= true;
-	};
+protected:
+    game(const char* origin, abc::diag::log_ostream* log);
 
+public:
+    void reset(const player_types& player_types);
+    void start();
+    void accept_move(player_id_t player_id, const move& move);
 
-	// --------------------------------------------------------------
+public:
+    const ::board&           board() const;
+    const std::vector<move>& moves() const;
 
+private:
+    ::board           _board;
+    player_agent      _agent_x;
+    player_agent      _agent_o;
 
-	using endpoint_game_id_t = std::uint32_t;
+    std::vector<move> _moves;
+};
 
 
-	class endpoint_game: public game {
-		using base = game;
+// --------------------------------------------------------------
 
-	public:
-		void					reset(endpoint_game_id_t endpoint_game_id,
-									 player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
-									 player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id,
-									 log_ostream* log);
-		bool					claim_player(unsigned player_i, endpoint_player_id_t& endpoint_player_id);
 
-		endpoint_game_id_t		id() const;
-		player_id_t				player_id(endpoint_player_id_t endpoint_player_id) const;
+using endpoint_player_id_t = std::uint32_t;
 
-	private:
-		endpoint_game_id_t		_endpoint_game_id		= 0;
-		endpoint_player			_endpoint_player_x;
-		endpoint_player			_endpoint_player_o;
-	};
 
+struct endpoint_player {
+    endpoint_player_id_t endpoint_player_id = 0;
+    bool                 is_claimed         = true;
+};
 
-	// --------------------------------------------------------------
 
+// --------------------------------------------------------------
 
-	template <typename Limits, typename Log>
-	class game_endpoint : public endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log> {
-		using base = endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log>;
 
-		static constexpr std::size_t max_game_count = 1;
+using endpoint_game_id_t = std::uint32_t;
 
-	public:
-		game_endpoint(endpoint_config* config, Log* log);
 
-	protected:
-		virtual abc::tcp_server_socket<Log>	create_server_socket() override;
-		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
+class endpoint_game
+    : public game {
 
-	private:
-		void			process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource);
-		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
+    using base = game;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
-		bool			create_game(abc::http_server_stream<Log>& http, const char* method);
-		bool			get_player_types(abc::http_server_stream<Log>& http, const char* method, player_type_t& player_x_type, player_type_t& player_o_type);
-		bool			claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
-		bool			accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
-		bool			get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
+public:
+    endpoint_game(abc::diag::log_ostream* log);
 
-		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method);
-		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method);
-		bool			verify_header_json(abc::http_server_stream<Log>& http);
+public:
+    void reset(endpoint_game_id_t endpoint_game_id,
+               player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
+               player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id);
+    endpoint_player_id_t claim_player(unsigned player_i);
 
-	private:
-		std::size_t				_game_count 		= 0;
-		endpoint_game			_games[max_game_count];
-	};
+    endpoint_game_id_t id() const;
+    player_id_t        player_id(endpoint_player_id_t endpoint_player_id) const;
 
+private:
+    endpoint_game_id_t _endpoint_game_id   = 0;
+    endpoint_player    _endpoint_player_x;
+    endpoint_player    _endpoint_player_o;
+};
 
-	// --------------------------------------------------------------
 
-}}
+// --------------------------------------------------------------
 
+
+class game_endpoint
+    : public abc::net::http::endpoint {
+
+    using base = abc::net::http::endpoint;
+    using diag_base = abc::diag::diag_ready<const char*>;
+
+public:
+    game_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
+
+protected:
+    virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
+    virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
+
+private:
+    void process_games(abc::net::http::server& http, const abc::net::http::request& request);
+    void process_shutdown(abc::net::http::server& http, const char* method);
+
+    void create_game(abc::net::http::server& http, const char* method);
+    player_types get_player_types(abc::net::http::server& http, const char* method);
+    void claim_player(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
+    bool accept_move(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
+    bool get_moves(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
+
+    bool verify_method_get(abc::net::http::server& http, const char* method);
+    bool verify_method_post(abc::net::http::server& http, const char* method);
+    bool verify_header_json(abc::net::http::server& http);
+
+private:
+    std::vector<endpoint_game> _games;
+};
