@@ -183,6 +183,60 @@ namespace abc { namespace net { namespace http {
 
     // --------------------------------------------------------------
 
+
+    /**
+     * @brief Endpoint error.
+     */
+    struct endpoint_error
+        : public std::runtime_error {
+
+        using base = std::runtime_error;
+
+        /**
+         * @brief               Constructor.
+         * @param tag           Originating tag.
+         * @param status_code   Status code.
+         * @param reason_phrase Reason phrase.
+         * @param content_type  Content-Type response header value.
+         * @param body          Body.
+         */
+        endpoint_error(diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body);
+
+        /**
+         * @brief Copy constructor.
+         */
+        endpoint_error(const endpoint_error& other) = default;
+
+        /**
+         * @brief Tag.
+         */
+        diag::tag_t tag;
+
+        /**
+         * @brief Status code.
+         */
+        status_code_t status_code;
+
+        /**
+         * @brief Reason phrase.
+         */
+        std::string reason_phrase;
+
+        /**
+         * @brief Content-Type response header value.
+         */
+        std::string content_type;
+
+        /**
+         * @brief Body.
+         */
+        std::string body;
+    };
+
+
+    // --------------------------------------------------------------
+
+
     /**
      * @brief               Base http endpoint.
      * @details             This class supports the most common functionality - reads requests and dispatches them for REST- or file-processing.
@@ -300,6 +354,31 @@ namespace abc { namespace net { namespace http {
          * @brief Makes a physical path under `root_dir` from the virtual path of the request.
          */
         std::string make_root_dir_path(const request& request) const;
+
+        /**
+         * @brief               Throws `endpoint_error` with the properties necessary to be sent back to the client typically via `send_simple_response()`.
+         * @tparam Exception    Exception base type.
+         * @param suborigin     Entry suborigin, e.g. method.
+         * @param condition     Required condition.
+         * @param tag           Origination tag.
+         * @param status_code   Status code.
+         * @param reason_phrase Reason phrase.
+         * @param content_type  Content-Type response header value.
+         * @param body          Body.
+         */
+        void require(const char* suborigin, bool condition, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const;
+
+        /**
+         * @brief               Throws `endpoint_error` with the properties necessary to be sent back to the client typically via `send_simple_response()`.
+         * @tparam Exception    Exception base type.
+         * @param suborigin     Entry suborigin, e.g. method.
+         * @param tag           Origination tag.
+         * @param status_code   Status code.
+         * @param reason_phrase Reason phrase.
+         * @param content_type  Content-Type response header value.
+         * @param body          Body.
+         */
+        void throw_exception(const char* suborigin, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const;
 
     private:
         /**

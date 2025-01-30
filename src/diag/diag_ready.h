@@ -98,6 +98,15 @@ namespace abc { namespace diag {
 
 
     template <typename OriginStr>
+    template <typename Exception>
+    inline void diag_ready<OriginStr>::throw_exception(const char* suborigin, tag_t tag, const Exception& ex) const {
+        put_any(origin, suborigin, severity::warning, tag, "Exception thrown! %s", ex.what());
+
+        throw ex;
+    }
+
+
+    template <typename OriginStr>
     inline void diag_ready<OriginStr>::assert(const char* suborigin, bool condition, tag_t tag, const char* format, ...) const {
         std::va_list vlist;
         va_start(vlist, format);

@@ -43,6 +43,17 @@ namespace abc { namespace diag {
 
 
     template <typename Exception>
+    inline exception<Exception>::exception(const char* origin, const char* suborigin, tag_t tag, const Exception& ex, log_ostream* log)
+        : Exception(ex)
+        , _tag(tag) {
+
+        if (log != nullptr) {
+            log->put_any(origin, suborigin, severity::warning, tag, "Exception thrown! %s", ex.what());
+        }
+    }
+
+
+    template <typename Exception>
     inline tag_t exception<Exception>::tag() const noexcept {
         return _tag;
     }

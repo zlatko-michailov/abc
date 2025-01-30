@@ -122,6 +122,15 @@ namespace abc { namespace diag {
         void throw_exceptionv(const char* suborigin, tag_t tag, const char* format, std::va_list vlist) const;
 
         /**
+         * @brief            Throws a given exception instance.
+         * @tparam Exception Exception base type.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param ex         `Exception` instance to throw.
+         */
+        template <typename Exception>
+        void throw_exception(const char* suborigin, tag_t tag, const Exception& ex) const;
+
+        /**
          * @brief            Throws an exception derived from `assert_error` if `condition` is `false`.
          * @details          Use this facility to assert general assumptions in the middle of a method.
          * @param suborigin  Entry suborigin, e.g. method.
@@ -205,13 +214,23 @@ namespace abc { namespace diag {
          * @details          Use this facility to assert runtime requirements.
          * @tparam Exception Exception base type.
          * @param suborigin  Entry suborigin, e.g. method.
-         * @param condition  Asserted condition.
+         * @param condition  Required condition.
          * @param tag        Origination tag.
          * @param format     Message format.
          * @param vlist      Message arguments.
          */
         template <typename Exception = std::runtime_error>
         void requirev(const char* suborigin, bool condition, tag_t tag, const char* format, std::va_list vlist) const;
+
+        /**
+         * @brief            Throws a given exception instance.
+         * @tparam Exception Exception base type.
+         * @param suborigin  Entry suborigin, e.g. method.
+         * @param condition  Required condition.
+         * @param ex         `Exception` instance to throw.
+         */
+        template <typename Exception>
+        void require(const char* suborigin, bool condition, tag_t tag, const Exception& ex) const;
 
     public:
         /**

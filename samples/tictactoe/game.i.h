@@ -33,11 +33,6 @@ SOFTWARE.
 #include "../../src/vmem/map.h"
 
 
-////using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-////using results_ostream = abc::log_ostream<abc::test_line_ostream<>, abc::log_filter>;
-////using limits = abc::endpoint_limits;
-
-
 // --------------------------------------------------------------
 
 
@@ -325,17 +320,17 @@ protected:
 
 private:
     void process_games(abc::net::http::server& http, const abc::net::http::request& request);
-    void process_shutdown(abc::net::http::server& http, const char* method);
+    void process_shutdown(abc::net::http::server& http, const abc::net::http::request& request);
 
-    void create_game(abc::net::http::server& http, const char* method);
-    player_types get_player_types(abc::net::http::server& http, const char* method);
-    void claim_player(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i);
-    bool accept_move(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
-    bool get_moves(abc::net::http::server& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
+    void create_game(abc::net::http::server& http, const abc::net::http::request& request);
+    player_types get_player_types(abc::net::http::server& http, const abc::net::http::request& request);
+    void claim_player(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned player_i);
+    void accept_move(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
+    bool get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
 
-    bool verify_method_get(abc::net::http::server& http, const char* method);
-    bool verify_method_post(abc::net::http::server& http, const char* method);
-    bool verify_header_json(abc::net::http::server& http);
+    void require_method_get(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
+    void require_method_post(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
+    void require_content_type_json(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
 
 private:
     std::vector<endpoint_game> _games;

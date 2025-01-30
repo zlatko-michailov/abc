@@ -14,6 +14,7 @@
     - `writer`
 - `util`
     - `strprintf()`
+- `vmem`
 
 ## To Do
 - __Rename `master` to `main`.__
@@ -30,7 +31,8 @@
         - map.h
         - string.h
     - Samples
-        - tictactoe
+        - __tictactoe__
+            - `send_simple_response()` to take `endpoint_error`.
         - connect4
 - Update docs when all classes are done.
 

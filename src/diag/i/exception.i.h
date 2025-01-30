@@ -66,6 +66,16 @@ namespace abc { namespace diag {
         exception(const char* origin, const char* suborigin, tag_t tag, const char* message, log_ostream* log = nullptr);
 
         /**
+         * @brief           Constructor.
+         * @param suborigin Entry suborigin, e.g. method.
+         * @param origin    Thrower's origin.
+         * @param tag       Unique tag.
+         * @param ex        `Exception` instance.
+         * @param log       Pointer to a `log_ostream` instance.
+         */
+        exception(const char* origin, const char* suborigin, tag_t tag, const Exception& ex, log_ostream* log = nullptr);
+
+        /**
          * @brief Copy constructor.
          */
         exception(const exception& other) noexcept = default;

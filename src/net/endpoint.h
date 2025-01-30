@@ -45,6 +45,19 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace http {
 
+    inline endpoint_error::endpoint_error(diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body)
+        : base(body)
+        , tag(tag)
+        , status_code(status_code)
+        , reason_phrase(reason_phrase)
+        , content_type(content_type)
+        , body(body) {
+    }
+
+
+    // --------------------------------------------------------------
+
+
     inline endpoint::endpoint(endpoint_config&& config, diag::log_ostream* log)
         : endpoint("abc::net::http::endpoint", std::move(config), log) {
     }
@@ -337,6 +350,16 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: path='%s'", filepath.c_str());
 
         return filepath;
+    }
+
+
+    inline void endpoint::require(const char* suborigin, bool condition, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const {
+        diag_base::require(suborigin, condition, tag, abc::net::http::endpoint_error(tag, status_code, reason_phrase, content_type, body));
+    }
+
+
+    inline void endpoint::throw_exception(const char* suborigin, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const {
+        diag_base::throw_exception(suborigin, tag, abc::net::http::endpoint_error(tag, status_code, reason_phrase, content_type, body));
     }
 
 
