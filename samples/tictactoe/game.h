@@ -866,7 +866,7 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
         _games[game_i].reset(endpoint_game_id, player_types.player_x_type, endpoint_player_x_id, player_types.player_o_type, endpoint_player_o_id);
     }
 
-    // Write the JSON to a char buffer, so the Content-Length can be calculated before the body is sent.
+    // 200.
     std::stringbuf sb;
     abc::net::json::writer json(&sb, diag_base::log());
 
@@ -875,21 +875,7 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
     };
     json.put_value(abc::net::json::value(std::move(obj)));
 
-    std::string body = sb.str();
-    char content_length[abc::size::_32 + 1];
-    std::snprintf(content_length, sizeof(content_length), "%zu", body.length());
-
-    // Send the http response
-    diag_base::put_any(suborigin, abc::diag::severity::optional, 0x105c0, "Sending response 200");
-
-    abc::net::http::response response;
-    response.status_code = abc::net::http::status_code::OK;
-    response.reason_phrase = abc::net::http::reason_phrase::OK;
-    response.headers[abc::net::http::header::Connection] = abc::net::http::connection::close;
-    response.headers[abc::net::http::header::Content_Type] = abc::net::http::content_type::json;
-    response.headers[abc::net::http::header::Content_Length] = content_length;
-
-    http.put_body(body.c_str(), body.length());
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
@@ -953,7 +939,7 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
         if (_games[game_i].id() == endpoint_game_id) {
             endpoint_player_id_t endpoint_player_id = _games[game_i].claim_player(player_i);
 
-            // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+            // 200
             std::stringbuf sb;
             abc::net::json::writer json(&sb, diag_base::log());
 
@@ -962,21 +948,7 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
             };
             json.put_value(abc::net::json::value(std::move(obj)));
 
-            std::string body = sb.str();
-            char content_length[abc::size::_32 + 1];
-            std::snprintf(content_length, sizeof(content_length), "%zu", body.length());
-
-            // Send the http response
-            diag_base::put_any(suborigin, abc::diag::severity::optional, 0x105d9, "Sending response 200");
-
-            abc::net::http::response response;
-            response.status_code = abc::net::http::status_code::OK;
-            response.reason_phrase = abc::net::http::reason_phrase::OK;
-            response.headers[abc::net::http::header::Connection] = abc::net::http::connection::close;
-            response.headers[abc::net::http::header::Content_Type] = abc::net::http::content_type::json;
-            response.headers[abc::net::http::header::Content_Length] = content_length;
-
-            http.put_body(body.c_str(), body.length());
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
             diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105da, "End:");
             return;
@@ -1029,108 +1001,50 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
         mv.col = static_cast<move_t>(col_itr->second.number());
     }
 
-//// TODO: Continue from here.
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
             player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
+            require(suborigin, 0x105ec, player_id != player_id::none,
+               abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.");
 
-            if (player_id == player_id::none) {
-                diag_base::put_any(suborigin, abc::diag::severity::optional, 0x105ec, "Resource error: Player not found. player_id=%u", (unsigned)endpoint_player_id);
-
-                // 404
-                base::send_simple_response(http, abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.", 0x105ed);
-                diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
-                return;
-            }
-
-            if (!_games[game_i].accept_move(player_id, mv)) {
-                if (base::_log != nullptr) {
-                    base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x105ee, "Resource error: Move not accepted. move={ %u, %u }", mv.row, mv.col);
-                }
-
-                // 403
-                base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "The move was not accepted.", 0x105ef);
-                return false;
-            }
+            bool is_move_accepted = _games[game_i].accept_move(player_id, mv);
+            require(suborigin, 0x105ee, is_move_accepted,
+               abc::net::http::status_code::Forbidden, abc::net::http::reason_phrase::Forbidden, abc::net::http::content_type::text, "The move was not accepted.");
 
             // Return 200.
-            // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-            char body[abc::size::k1 + 1];
-            abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-            abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+            // Write the JSON to a char buffer, so the Content-Length can be calculated before the body is sent.
+            std::stringbuf sb;
+            abc::net::json::writer json(&sb, diag_base::log());
 
-            json.put_begin_object();
-                json.put_property("i");
-                json.put_number(_games[game_i].board().move_count() - 1);
-
-                if (_games[game_i].board().is_game_over()) {
-                    json.put_property("winner");
-                    json.put_number(_games[game_i].board().winner());
-                }
-
-            json.put_end_object();
-            json.put_char('\0');
-            json.flush();
-
-            char content_length[abc::size::_32 + 1];
-            std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-            // Send the http response
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x105f0, "Sending response 200");
+            abc::net::json::literal::object obj = {
+                { "i", abc::net::json::literal::number(_games[game_i].board().move_count() - 1) }
+            };
+            if (_games[game_i].board().is_game_over()) {
+                obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
             }
+            json.put_value(abc::net::json::value(std::move(obj)));
 
-            http.put_protocol(protocol::HTTP_11);
-            http.put_status_code(status_code::OK);
-            http.put_reason_phrase(reason_phrase::OK);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
-            http.put_header_name(header::Connection);
-            http.put_header_value(connection::close);
-            http.put_header_name(header::Content_Type);
-            http.put_header_value(content_type::json);
-            http.put_header_name(header::Content_Length);
-            http.put_header_value(content_length);
-            http.end_headers();
-
-            http.put_body(body);
-
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f1, "game_endpoint::get_moves: Done.");
-            }
-
-            return true;
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
         }
-    }
-
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x105f2, "Resource error: Game not found. game_id=%u", (unsigned)endpoint_game_id);
     }
 
     // 404
-    base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x105f3);
-    return false;
+    throw_exception(suborigin, 0x105f3,
+        abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A game with the supplied ID was not found.");
 }
 
 
-template <typename Limits, typename Log>
-inline bool game_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f4, "game_endpoint::get_moves: Start.");
-    }
+//// TODO: Continue from here.
+inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
+    constexpr const char* suborigin = "get_moves";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105f4, "Begin: method=%s, game_id=%u, move_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, since_move_i);
 
-    if (!verify_method_get(http, method)) {
-        return false;
-    }
+    require_method_get(suborigin, __TAG__, http, request);
 
-    if (endpoint_game_id == 0) {
-        if (base::_log != nullptr) {
-            base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x105f5, "Resource error: game_id=%u", (unsigned)endpoint_game_id);
-        }
-
-        // 400
-        base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x105f6);
-        return false;
-    }
+    require(suborigin, 0x105f5, endpoint_game_id > 0,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID was supplied.");
 
     for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {

@@ -326,7 +326,7 @@ private:
     player_types get_player_types(abc::net::http::server& http, const abc::net::http::request& request);
     void claim_player(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned player_i);
     void accept_move(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
-    bool get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
+    void get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
 
     void require_method_get(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
     void require_method_post(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
