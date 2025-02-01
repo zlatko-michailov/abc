@@ -107,7 +107,7 @@ inline void board::accept_move(const move& move) {
     constexpr const char* suborigin = "accept_move()";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
 
-    //// TODO: Do not assert. Return bool.
+    //// TODO: Do not assert. Use require.
     diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
     diag_base::expect(suborigin, !is_game_over(), __TAG__, "!is_game_over()");
     diag_base::expect(suborigin, get_move(move) == player_id::none, __TAG__, "get_move(move) == player_id::none"); 
@@ -866,7 +866,7 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
         _games[game_i].reset(endpoint_game_id, player_types.player_x_type, endpoint_player_x_id, player_types.player_o_type, endpoint_player_o_id);
     }
 
-    // 200.
+    // 200
     std::stringbuf sb;
     abc::net::json::writer json(&sb, diag_base::log());
 
@@ -1007,12 +1007,9 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
             require(suborigin, 0x105ec, player_id != player_id::none,
                abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.");
 
-            bool is_move_accepted = _games[game_i].accept_move(player_id, mv);
-            require(suborigin, 0x105ee, is_move_accepted,
-               abc::net::http::status_code::Forbidden, abc::net::http::reason_phrase::Forbidden, abc::net::http::content_type::text, "The move was not accepted.");
+            _games[game_i].accept_move(player_id, mv);
 
-            // Return 200.
-            // Write the JSON to a char buffer, so the Content-Length can be calculated before the body is sent.
+            // 200
             std::stringbuf sb;
             abc::net::json::writer json(&sb, diag_base::log());
 
@@ -1027,6 +1024,7 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
             base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
             diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            return;
         }
     }
 
@@ -1036,7 +1034,6 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
 }
 
 
-//// TODO: Continue from here.
 inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
     constexpr const char* suborigin = "get_moves";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105f4, "Begin: method=%s, game_id=%u, move_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, since_move_i);
@@ -1046,172 +1043,74 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
     require(suborigin, 0x105f5, endpoint_game_id > 0,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID was supplied.");
 
-    for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
+    for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
-            // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-            char body[abc::size::k1 + 1];
-            abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-            abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
+            // 200
+            std::stringbuf sb;
+            abc::net::json::writer json(&sb, diag_base::log());
 
-            json.put_begin_object();
-                json.put_property("moves");
-                    json.put_begin_array();
-
-                    for (std::size_t move_i = since_move_i; move_i < _games[game_i].board().move_count(); move_i++) {
-                        json.put_begin_object();
-                            json.put_property("i");
-                            json.put_number(move_i);
-                            json.put_property("move");
-                            json.put_begin_object();
-                                json.put_property("row");
-                                json.put_number(_games[game_i].moves()[move_i].row);
-                                json.put_property("col");
-                                json.put_number(_games[game_i].moves()[move_i].col);
-                            json.put_end_object();
-                        json.put_end_object();
-                    }
-
-                    json.put_end_array();
-
-                if (_games[game_i].board().is_game_over()) {
-                    json.put_property("winner");
-                    json.put_number(_games[game_i].board().winner());
-                }
-
-            json.put_end_object();
-            json.put_char('\0');
-            json.flush();
-
-            char content_length[abc::size::_32 + 1];
-            std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-            // Send the http response
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x105f7, "Sending response 200");
+            abc::net::json::literal::array moves;
+            for (std::size_t move_i = since_move_i; move_i < _games[game_i].board().move_count(); move_i++) {
+                moves.push_back(abc::net::json::literal::object({
+                    { "i",    abc::net::json::literal::number(move_i) },
+                    { "move", abc::net::json::literal::object( {
+                        { "row", abc::net::json::literal::number(_games[game_i].moves()[move_i].row) },
+                        { "col", abc::net::json::literal::number(_games[game_i].moves()[move_i].col) },
+                    }) },
+                }));
             }
 
-            http.put_protocol(protocol::HTTP_11);
-            http.put_status_code(status_code::OK);
-            http.put_reason_phrase(reason_phrase::OK);
-
-            http.put_header_name(header::Connection);
-            http.put_header_value(connection::close);
-            http.put_header_name(header::Content_Type);
-            http.put_header_value(content_type::json);
-            http.put_header_name(header::Content_Length);
-            http.put_header_value(content_length);
-            http.end_headers();
-
-            http.put_body(body);
-
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105f8, "game_endpoint::get_moves: Done.");
+            abc::net::json::literal::object obj = {
+                { "moves", std::move(moves) }
+            };
+            if (_games[game_i].board().is_game_over()) {
+                obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
             }
+            json.put_value(abc::net::json::value(std::move(obj)));
 
-            return true;
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            return;
         }
     }
 
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x105f9, "Resource error: Game not found. game_id=%u, since_move_i=%u", (unsigned)endpoint_game_id, since_move_i);
-    }
-
     // 404
-    base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x105fa);
-    return false;
+    throw_exception(suborigin, 0x105f9,
+        abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A game with the supplied ID was not found.");
 }
 
 
-template <typename Limits, typename Log>
-inline void game_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
-    if (!verify_method_post(http, method)) {
-        return;
-    }
+inline void game_endpoint::process_shutdown(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_shutdown";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s", request.method.c_str());
+
+    require_method_post(suborigin, __TAG__, http, request);
 
     base::set_shutdown_requested();
 
     // 200
-    base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x105fb);
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x105fb);
 }
 
 
-template <typename Limits, typename Log>
-inline bool game_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
-    if (!ascii::are_equal_i(method, method::GET)) {
-        if (base::_log != nullptr) {
-            base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x105fc, "Method error: Expected 'GET'.");
-        }
-
-        // 405
-        base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", 0x105fd);
-        return false;
-    }
-
-    return true;
+inline void game_endpoint::require_method_get(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+    require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::GET),
+        abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'GET'.");
 }
 
 
-inline bool game_endpoint::verify_method_post(abc::net::http::server& http, const char* method) {
-    if (!abc::ascii::are_equal_i(method, abc::net::http::method::POST)) {
-        diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
-        diag_base::put_any(abc::category::abc::samples, abc::severity::optional, 0x105fe, "Method error: Expected 'POST'.");
-
-        // 405
-        base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", 0x105ff);
-        return false;
-    }
-
-    return true;
+inline void game_endpoint::require_method_post(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+    require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST),
+        abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'POST'.");
 }
 
 
-template <typename Limits, typename Log>
-inline bool game_endpoint<Limits, Log>::verify_header_json(abc::http_server_stream<Log>& http) {
-    bool has_content_type_json = false;
+inline void game_endpoint::require_content_type_json(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+    abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
 
-    // Read all headers
-    while (true) {
-        char header[abc::size::k1 + 1];
-
-        // No more headers
-        http.get_header_name(header, sizeof(header));
-        if (http.gcount() == 0) {
-            break;
-        }
-
-        if (ascii::are_equal_i(header, header::Content_Type)) {
-            if (has_content_type_json) {
-                // We've already received a Content-Type header.
-                if (base::_log != nullptr) {
-                    base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10600, "Header error: Already received 'Content-Type'.");
-                }
-
-                // 400
-                base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x10601);
-                return false;
-            }
-
-            http.get_header_value(header, sizeof(header));
-
-            static const std::size_t content_type_json_len = std::strlen(content_type::json);
-            if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
-                // The Content-Type is not json.
-                if (base::_log != nullptr) {
-                    base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10602, "Header error: Expected `application/json` as 'Content-Type'.");
-                }
-
-                // 400
-                base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x10603);
-                return false;
-            }
-
-            has_content_type_json = true;
-        }
-        else {
-            // Future-proof: Ignore unknown headers.
-            http.get_header_value(header, sizeof(header));
-        }
-    }
-
-    return has_content_type_json;
+    require(suborigin, tag, content_type_itr != request.headers.cend(),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The 'Content-Type' header was not supplied.");
+    require(suborigin, tag, abc::ascii::are_equal_i(content_type_itr->second.c_str(), abc::net::http::content_type::json),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The value of header 'Content-Type' must be `application/json`.");
 }
