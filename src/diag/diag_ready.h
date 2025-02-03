@@ -100,7 +100,7 @@ namespace abc { namespace diag {
     template <typename OriginStr>
     template <typename Exception>
     inline void diag_ready<OriginStr>::throw_exception(const char* suborigin, tag_t tag, const Exception& ex) const {
-        put_any(origin, suborigin, severity::warning, tag, "Exception thrown! %s", ex.what());
+        put_any(_origin, suborigin, severity::warning, tag, "Exception thrown! %s", ex.what());
 
         throw ex;
     }
