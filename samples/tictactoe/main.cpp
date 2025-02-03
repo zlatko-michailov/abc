@@ -36,7 +36,7 @@ SOFTWARE.
 // --------------------------------------------------------------
 
 
-abc::samples::vmem_bundle* abc::samples::player_agent::_vmem = nullptr;
+vmem_bundle* player_agent::_vmem = nullptr;
 
 
 // --------------------------------------------------------------

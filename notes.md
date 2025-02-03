@@ -32,7 +32,6 @@
         - string.h
     - Samples
         - __tictactoe__
-            - `send_simple_response()` to take `endpoint_error`.
         - connect4
 - Update docs when all classes are done.
 

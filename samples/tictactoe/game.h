@@ -107,7 +107,6 @@ inline void board::accept_move(const move& move) {
     constexpr const char* suborigin = "accept_move()";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
 
-    //// TODO: Do not assert. Use require.
     diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
     diag_base::expect(suborigin, !is_game_over(), __TAG__, "!is_game_over()");
     diag_base::expect(suborigin, get_move(move) == player_id::none, __TAG__, "get_move(move) == player_id::none"); 
@@ -128,6 +127,7 @@ inline void board::undo_move(const move& move) {
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
 
     diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
+    diag_base::expect(suborigin, get_move(move) != player_id::none, __TAG__, "get_move(move) != player_id::none"); 
 
     if (!is_game_over()) {
         switch_current_player_id();
@@ -708,6 +708,8 @@ inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
     constexpr const char* suborigin = "claim_player";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
 
+    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+
     endpoint_player_id_t endpoint_player_id;
 
     if (player_i == 0) {
@@ -730,6 +732,20 @@ inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: endpoint_player_id=%u", endpoint_player_id);
 
     return endpoint_player_id;
+}
+
+
+inline bool endpoint_game::is_player_claimed(unsigned player_i) {
+    constexpr const char* suborigin = "is_player_claimed";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
+
+    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+
+    bool is_claimed = player_i == 0 ? _endpoint_player_x.is_claimed : _endpoint_player_o.is_claimed;
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: is_claimed=%d", is_claimed);
+
+    return is_claimed;
 }
 
 
@@ -765,7 +781,7 @@ inline std::unique_ptr<abc::net::tcp_server_socket> game_endpoint::create_server
 
 inline void game_endpoint::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_rest_request";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105b9, "Begin: method=%s, path=%s", request.method, request.resource.path);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105b9, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
 
     try {
         if (abc::ascii::are_equal_i_n(request.resource.path.c_str(), "/games", len_request_path_games)) {
@@ -793,7 +809,7 @@ inline void game_endpoint::process_rest_request(abc::net::http::server& http, co
 
 inline void game_endpoint::process_games(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_games";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s, path=%s", request.method, request.resource.path);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
 
     const char* request_path_games = request.resource.path.c_str() + len_request_path_games;
     if (abc::ascii::are_equal_i(request_path_games, "")) {
@@ -833,8 +849,8 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
     constexpr const char* suborigin = "create_game";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105bc, "Begin: method=%s", request.method.c_str());
 
-    require_method_post(suborigin, __TAG__, http, request);
-    require_content_type_json(suborigin, __TAG__, http, request);
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
 
     player_types player_types = get_player_types(http, request);
     require(suborigin, __TAG__, player_types.player_x_type != player_type::none && player_types.player_o_type != player_type::none,
@@ -930,13 +946,16 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
     constexpr const char* suborigin = "claim_player";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105d4, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)player_i);
 
-    require_method_post(suborigin, __TAG__, http, request);
+    require_method_post(suborigin, __TAG__, request);
 
     require(suborigin, __TAG__, endpoint_game_id > 0 && player_i <= 1,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID or player ID was supplied.");
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
+            require(suborigin, __TAG__, _games[game_i].is_player_claimed(player_i),
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The player with the given index has already been claimed.");
+
             endpoint_player_id_t endpoint_player_id = _games[game_i].claim_player(player_i);
 
             // 200
@@ -965,8 +984,8 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
     constexpr const char* suborigin = "accept_move";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105dd, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
 
-    require_method_post(suborigin, __TAG__, http, request);
-    require_content_type_json(suborigin, __TAG__, http, request);
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
 
     require(suborigin, 0x105de, abc::ascii::are_equal_i(moves, "moves"),
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: The segment after the player ID must be 'moves'.");
@@ -1003,9 +1022,15 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
+            require(suborigin, __TAG__, !_games[game_i].board().is_game_over(),
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The game with the supplied ID is over.");
+
             player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
             require(suborigin, 0x105ec, player_id != player_id::none,
                abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.");
+
+            require(suborigin, __TAG__, _games[game_i].board().get_move(mv) == player_id::none,
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The square of the supplied move is occupied.");
 
             _games[game_i].accept_move(player_id, mv);
 
@@ -1038,7 +1063,7 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
     constexpr const char* suborigin = "get_moves";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x105f4, "Begin: method=%s, game_id=%u, move_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, since_move_i);
 
-    require_method_get(suborigin, __TAG__, http, request);
+    require_method_get(suborigin, __TAG__, request);
 
     require(suborigin, 0x105f5, endpoint_game_id > 0,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID was supplied.");
@@ -1085,7 +1110,7 @@ inline void game_endpoint::process_shutdown(abc::net::http::server& http, const 
     constexpr const char* suborigin = "process_shutdown";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s", request.method.c_str());
 
-    require_method_post(suborigin, __TAG__, http, request);
+    require_method_post(suborigin, __TAG__, request);
 
     base::set_shutdown_requested();
 
@@ -1094,19 +1119,19 @@ inline void game_endpoint::process_shutdown(abc::net::http::server& http, const 
 }
 
 
-inline void game_endpoint::require_method_get(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+inline void game_endpoint::require_method_get(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
     require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::GET),
         abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'GET'.");
 }
 
 
-inline void game_endpoint::require_method_post(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+inline void game_endpoint::require_method_post(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
     require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST),
         abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'POST'.");
 }
 
 
-inline void game_endpoint::require_content_type_json(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request) {
+inline void game_endpoint::require_content_type_json(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
     abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
 
     require(suborigin, tag, content_type_itr != request.headers.cend(),

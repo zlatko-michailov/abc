@@ -119,6 +119,7 @@ namespace abc { namespace net { namespace http {
         constexpr status_code_t Forbidden             = 403;
         constexpr status_code_t Not_Found             = 404;
         constexpr status_code_t Method_Not_Allowed    = 405;
+        constexpr status_code_t Conflict              = 409;
         constexpr status_code_t Payload_Too_Large     = 413;
         constexpr status_code_t URI_Too_Long          = 414;
         constexpr status_code_t Too_Many_Requests     = 429;
@@ -142,6 +143,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* Forbidden               = "Forbidden";
         constexpr const char* Not_Found               = "Not Found";
         constexpr const char* Method_Not_Allowed      = "Method Not Allowed";
+        constexpr const char* Conflict                = "Conflict";
         constexpr const char* Payload_Too_Large       = "Payload Too Large";
         constexpr const char* URI_Too_Long            = "URI Too Long";
         constexpr const char* Too_Many_Requests       = "Too Many Requests";

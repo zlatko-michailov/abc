@@ -291,6 +291,7 @@ public:
                player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
                player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id);
     endpoint_player_id_t claim_player(unsigned player_i);
+    bool is_player_claimed(unsigned player_i);
 
     endpoint_game_id_t id() const;
     player_id_t        player_id(endpoint_player_id_t endpoint_player_id) const;
@@ -328,9 +329,9 @@ private:
     void accept_move(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves);
     void get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i);
 
-    void require_method_get(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
-    void require_method_post(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
-    void require_content_type_json(const char* suborigin, abc::diag::tag_t tag, abc::net::http::server& http, const abc::net::http::request& request);
+    void require_method_get(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
+    void require_method_post(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
+    void require_content_type_json(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
 
 private:
     std::vector<endpoint_game> _games;
