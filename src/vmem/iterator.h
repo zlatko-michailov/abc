@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstring>
 
 #include "../diag/diag_ready.h"
+#include "pool.h"
 #include "i/iterator.i.h"
 
 

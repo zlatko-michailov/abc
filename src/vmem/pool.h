@@ -33,7 +33,7 @@ SOFTWARE.
 
 #include "../util.h"
 #include "../diag/diag_ready.h"
-#include "page.h"
+#include "ptr.h"
 #include "linked.h"
 #include "i/layout.i.h"
 #include "i/pool.i.h"

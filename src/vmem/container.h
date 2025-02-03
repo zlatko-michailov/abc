@@ -26,9 +26,8 @@ SOFTWARE.
 #pragma once
 
 #include "../diag/diag_ready.h"
-#include "iterator.h"
+#include "page.h"
 #include "linked.h"
-#include "pool.h"
 #include "i/container.i.h"
 
 
