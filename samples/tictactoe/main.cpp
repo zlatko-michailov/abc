@@ -42,13 +42,13 @@ int main(int /*argc*/, const char* argv[]) {
     // Create a log.
     abc::table_ostream table(std::cout.rdbuf());
     abc::diag::debug_line_ostream<> line(&table);
-    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
+    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::optional);
     abc::diag::log_ostream log(&line, &filter);
 
     // Use the path to this program to build the path to the pool file.
     std::string process_dir = abc::parent_path(argv[0]);
-    std::string vmem_path = process_dir.append("/tictactoe.vmem");
-    std::string results_path = process_dir.append("/results.csv");
+    std::string vmem_path = process_dir + "/tictactoe.vmem";
+    std::string results_path = process_dir + "/results.csv";
 
     // Construct a pool and a map on it.
     // If the file doesn't exist, the pool will be initialized.

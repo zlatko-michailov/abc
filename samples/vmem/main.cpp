@@ -51,7 +51,7 @@ using start_page_layout = struct {
 #pragma pack(pop)
 
 
-constexpr const char* origin = "sample::vmem";
+constexpr const char* origin = "sample_vmem";
 
 
 void work_with_list(abc::vmem::list_state* list_state, abc::vmem::pool* pool, abc::diag::log_ostream* log, const char* list_name, std::size_t items_to_add);

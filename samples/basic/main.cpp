@@ -30,7 +30,7 @@ SOFTWARE.
 #include "equations.h"
 
 
-constexpr const char* origin = "basic_sample";
+constexpr const char* origin = "sample_basic";
 
 
 int main(int /*argc*/, const char* argv[]) {
