@@ -247,7 +247,7 @@ namespace abc { namespace net { namespace http {
 
         std::string content_length = std::to_string(std::strlen(body));
 
-        diag_base::put_any(suborigin, diag::severity::callstack, tag, "Status Code    = %s", status_code);
+        diag_base::put_any(suborigin, diag::severity::callstack, tag, "Status Code    = %u", (unsigned)status_code);
         diag_base::put_any(suborigin, diag::severity::callstack, tag, "Content-Type   = %s", content_type);
         diag_base::put_any(suborigin, diag::severity::callstack, tag, "Content-Length = %s", content_length.c_str());
         diag_base::put_any(suborigin, diag::severity::callstack, tag, "Body           = %s", body);
