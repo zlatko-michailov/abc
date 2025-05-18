@@ -317,7 +317,7 @@ namespace abc { namespace net {
         }
         else {
             // stream
-            sent_size = ::send(base::fd(), buffer, size, 0);
+            sent_size = ::send(base::fd(), buffer, size, MSG_NOSIGNAL);
         }
 
         if (sent_size < 0) {
