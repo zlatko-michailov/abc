@@ -1043,8 +1043,6 @@ namespace abc { namespace samples {
 		http.put_status_code(status_code::OK);
 		http.put_reason_phrase(reason_phrase::OK);
 
-		http.put_header_name(header::Connection);
-		http.put_header_value(connection::close);
 		http.put_header_name(header::Content_Type);
 		http.put_header_value(content_type::json);
 		http.put_header_name(header::Content_Length);
@@ -1259,8 +1257,6 @@ namespace abc { namespace samples {
 				http.put_status_code(status_code::OK);
 				http.put_reason_phrase(reason_phrase::OK);
 
-				http.put_header_name(header::Connection);
-				http.put_header_value(connection::close);
 				http.put_header_name(header::Content_Type);
 				http.put_header_value(content_type::json);
 				http.put_header_name(header::Content_Length);
@@ -1451,8 +1447,6 @@ namespace abc { namespace samples {
 				http.put_status_code(status_code::OK);
 				http.put_reason_phrase(reason_phrase::OK);
 
-				http.put_header_name(header::Connection);
-				http.put_header_value(connection::close);
 				http.put_header_name(header::Content_Type);
 				http.put_header_value(content_type::json);
 				http.put_header_name(header::Content_Length);
@@ -1547,8 +1541,6 @@ namespace abc { namespace samples {
 				http.put_status_code(status_code::OK);
 				http.put_reason_phrase(reason_phrase::OK);
 
-				http.put_header_name(header::Connection);
-				http.put_header_value(connection::close);
 				http.put_header_name(header::Content_Type);
 				http.put_header_value(content_type::json);
 				http.put_header_name(header::Content_Length);

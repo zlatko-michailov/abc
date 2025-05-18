@@ -205,7 +205,6 @@ namespace abc { namespace net { namespace http {
         response.status_code = status_code::OK;
         response.reason_phrase = reason_phrase::OK;
         response.headers = {
-            { header::Connection,     connection::close },
             { header::Content_Length, std::move(content_length) },
         }; 
 
@@ -257,7 +256,6 @@ namespace abc { namespace net { namespace http {
         response.status_code = status_code;
         response.reason_phrase = reason_phrase;
         response.headers = {
-            { header::Connection,     connection::close },
             { header::Content_Type,   content_type },
             { header::Content_Length, std::move(content_length) },
         }; 

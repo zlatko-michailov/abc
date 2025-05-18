@@ -155,14 +155,8 @@ namespace abc { namespace net { namespace http {
 
 
     namespace header {
-        constexpr const char* Connection              = "Connection";
         constexpr const char* Content_Type            = "Content-Type";
         constexpr const char* Content_Length          = "Content-Length";
-    }
-
-
-    namespace connection {
-        constexpr const char* close                   = "close";
     }
 
 

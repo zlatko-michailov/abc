@@ -197,7 +197,6 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     response.status_code = abc::net::http::status_code::OK;
     response.reason_phrase = abc::net::http::reason_phrase::OK;
     response.headers = abc::net::http::headers {
-        { abc::net::http::header::Connection,     abc::net::http::connection::close },
         { abc::net::http::header::Content_Type,   abc::net::http::content_type::json },
         { abc::net::http::header::Content_Length, content_length },
     };
