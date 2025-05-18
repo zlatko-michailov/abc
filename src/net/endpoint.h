@@ -351,7 +351,7 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    inline void endpoint::require(const char* suborigin, bool condition, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const {
+    inline void endpoint::require(const char* suborigin, diag::tag_t tag, bool condition, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const {
         if (!condition) {
             throw_exception(suborigin, tag, status_code, reason_phrase, content_type, body);
         }

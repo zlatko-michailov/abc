@@ -355,14 +355,14 @@ namespace abc { namespace net { namespace http {
          * @brief               Throws `endpoint_error` with the properties necessary to be sent back to the client typically via `send_simple_response()`.
          * @tparam Exception    Exception base type.
          * @param suborigin     Entry suborigin, e.g. method.
-         * @param condition     Required condition.
          * @param tag           Origination tag.
+         * @param condition     Required condition.
          * @param status_code   Status code.
          * @param reason_phrase Reason phrase.
          * @param content_type  Content-Type response header value.
          * @param body          Body.
          */
-        void require(const char* suborigin, bool condition, diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const;
+        void require(const char* suborigin, diag::tag_t tag, bool condition, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body) const;
 
         /**
          * @brief               Throws `endpoint_error` with the properties necessary to be sent back to the client typically via `send_simple_response()`.
