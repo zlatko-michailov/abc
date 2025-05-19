@@ -626,7 +626,7 @@ inline void game::accept_move(player_id_t player_id, const move& move) {
     diag_base::expect(suborigin, player_id == _board.current_player_id(), __TAG__, "player_id == _board.current_player_id()");
 
     _board.accept_move(move);
-    _moves[_board.move_count() - 1] = move;
+    _moves.push_back(move);
 
     if (_board.is_game_over()) {
         if (_board.winner() != player_id::none) {

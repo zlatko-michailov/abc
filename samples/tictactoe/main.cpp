@@ -42,7 +42,7 @@ int main(int /*argc*/, const char* argv[]) {
     // Create a log.
     abc::table_ostream table(std::cout.rdbuf());
     abc::diag::debug_line_ostream<> line(&table);
-    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::optional);
+    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
     abc::diag::log_ostream log(&line, &filter);
 
     // Use the path to this program to build the path to the pool file.
