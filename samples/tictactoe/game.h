@@ -168,11 +168,6 @@ inline void board::clear_move(const move& move) {
 }
 
 
-inline unsigned board::move_count() const {
-    return _move_count;
-}
-
-
 inline bool board::has_move(player_id_t player_id, const move& move) const {
     //// TODO: board_state_t bits = shift_up(player_id, move);
     //// TODO: board_state_t mask = shift_up(player_id::mask, move);
@@ -496,7 +491,7 @@ inline void player_agent::learn() {
     board learning_key_board(diag_base::log());
 
     // Replay each move of the game, and update the scores for the learning player.
-    for (unsigned i = 0; i < _game->board().move_count(); i++) {
+    for (unsigned i = 0; i < _game->moves().size(); i++) {
         move mv(_game->moves()[i]);
 
         if (learning_key_board.current_player_id() == _player_id) {
@@ -636,7 +631,7 @@ inline void game::accept_move(player_id_t player_id, const move& move) {
             diag_base::put_any(suborigin, abc::diag::severity::important, 0x105b7, "GAME OVER - draw");
         }
 
-        for (std::size_t i = 0; i < _board.move_count(); i++) {
+        for (std::size_t i = 0; i < _moves.size(); i++) {
             diag_base::put_any(suborigin, abc::diag::severity::optional, 0x105b8, "%zu (%c) - {%u,%u}", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
         }
 
@@ -953,7 +948,7 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
-            require(suborigin, __TAG__, _games[game_i].is_player_claimed(player_i),
+            require(suborigin, __TAG__, !_games[game_i].is_player_claimed(player_i),
                 abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The player with the given index has already been claimed.");
 
             endpoint_player_id_t endpoint_player_id = _games[game_i].claim_player(player_i);
@@ -1039,7 +1034,7 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
             abc::net::json::writer json(&sb, diag_base::log());
 
             abc::net::json::literal::object obj = {
-                { "i", abc::net::json::literal::number(_games[game_i].board().move_count() - 1) }
+                { "i", abc::net::json::literal::number(_games[game_i].moves().size() - 1) }
             };
             if (_games[game_i].board().is_game_over()) {
                 obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
@@ -1075,7 +1070,7 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
             abc::net::json::writer json(&sb, diag_base::log());
 
             abc::net::json::literal::array moves;
-            for (std::size_t move_i = since_move_i; move_i < _games[game_i].board().move_count(); move_i++) {
+            for (std::size_t move_i = since_move_i; move_i < _games[game_i].moves().size(); move_i++) {
                 moves.push_back(abc::net::json::literal::object({
                     { "i",    abc::net::json::literal::number(move_i) },
                     { "move", abc::net::json::literal::object( {

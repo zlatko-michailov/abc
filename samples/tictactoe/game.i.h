@@ -156,7 +156,6 @@ public:
     bool                 is_game_over() const;
     player_id_t          winner() const;
     player_id_t          get_move(const move& move) const;
-    unsigned             move_count() const;
     bool                 has_move(player_id_t player_id, const move& move) const;
     player_id_t          current_player_id() const;
     board_state_t        state() const;

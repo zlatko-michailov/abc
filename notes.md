@@ -32,6 +32,7 @@
         - string.h
     - Samples
         - __tictactoe__
+            - Bug in making a slow move, possibly in accept_move() or in get_moves().
         - connect4
 - Update docs when all classes are done.
 
