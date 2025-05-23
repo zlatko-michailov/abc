@@ -344,6 +344,8 @@ namespace abc { namespace diag {
     inline void log_ostream::put_anyv(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const char* format, va_list vlist) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
+                std::lock_guard<std::mutex> lock(_put_mutex);
+
                 _line->put_anyv(origin, suborigin, severity, tag, format, vlist);
                 _line->flush();
             }
@@ -354,6 +356,8 @@ namespace abc { namespace diag {
     inline void log_ostream::put_binary(const char* origin, const char* suborigin, severity_t severity, tag_t tag, const void* buffer, std::size_t buffer_size) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
+                std::lock_guard<std::mutex> lock(_put_mutex);
+
                 _line->put_binary(origin, suborigin, severity, tag, buffer, buffer_size);
                 _line->flush();
             }
@@ -364,6 +368,8 @@ namespace abc { namespace diag {
     inline void log_ostream::put_blank_line(const char* origin, severity_t severity) noexcept {
         if (_filter == nullptr || _filter->is_enabled(origin, severity)) {
             if (_line != nullptr) {
+                std::lock_guard<std::mutex> lock(_put_mutex);
+
                 _line->put_blank();
                 _line->flush();
             }

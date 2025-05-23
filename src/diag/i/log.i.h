@@ -25,11 +25,12 @@ SOFTWARE.
 
 #pragma once
 
-#include <cstddef>
 #include <chrono>
+#include <cstdarg>
+#include <cstddef>
 #include <iostream>
 #include <fstream>
-#include <cstdarg>
+#include <mutex>
 #include <thread>
 
 #include "../../i/timestamp.i.h"
@@ -568,6 +569,11 @@ namespace abc { namespace diag {
          * @brief Pointer to the `log_filter` instance passed in to the constructor.
          */
         const log_filter* _filter;
+
+        /**
+         * @brief `std::mutex` to lock 'put' operations.
+         */
+        std::mutex _put_mutex;
     };
 
 
