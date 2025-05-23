@@ -616,14 +616,13 @@ inline void game::start() {
 
 inline std::size_t game::accept_move(player_id_t player_id, const move& move) {
     constexpr const char* suborigin = "accept_move";
-    diag_base::put_any(suborigin, abc::diag::severity::important, __TAG__, "Begin: player_id=%u, move={%u,%u}", player_id, move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, move={%u,%u}", player_id, move.row, move.col);
 
     diag_base::expect(suborigin, player_id == _board.current_player_id(), __TAG__, "player_id == _board.current_player_id()");
 
     _board.accept_move(move);
     _moves.push_back(move);
     std::size_t move_i = _moves.size() - 1;
-    diag_base::put_any(suborigin, abc::diag::severity::important, __TAG__, "move_i=%zu", move_i);
 
     if (_board.is_game_over()) {
         if (_board.winner() != player_id::none) {
@@ -1045,10 +1044,7 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
             }
             json.put_value(abc::net::json::value(std::move(obj)));
 
-            std::string str = sb.str();
-            diag_base::put_any(suborigin, abc::diag::severity::important, __TAG__, "JSON=%s", str.c_str());
-
-            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, str.c_str(), __TAG__);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
             diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
             return;
@@ -1076,12 +1072,8 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
             std::stringbuf sb;
             abc::net::json::writer json(&sb, diag_base::log());
 
-            bool shouldLog = true;
-            unsigned i = 0;
             abc::net::json::literal::array moves;
             for (std::size_t move_i = since_move_i; move_i < _games[game_i].moves().size(); move_i++) {
-                shouldLog = true;
-                i = (unsigned)move_i;
                 moves.push_back(abc::net::json::literal::object({
                     { "i",    abc::net::json::literal::number(move_i) },
                     { "move", abc::net::json::literal::object( {
@@ -1098,10 +1090,6 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
                 obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
             }
             json.put_value(abc::net::json::value(std::move(obj)));
-
-            if (shouldLog) {
-                ////diag_base::put_any(suborigin, abc::diag::severity::important, __TAG__, "since=%u, i=%u, JSON=%s", since_move_i, i, sb.str().c_str());
-            }
 
             base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
 
