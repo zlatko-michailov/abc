@@ -455,9 +455,13 @@ inline move player_agent::fast_find_best_move() {
                 move mv{ r, c };
 
                 if (_game->board().get_move(mv) == player_id::none) {
-                    if (score::min < curr_score && (should_explore || curr_score != score::none)) {
+                    if (score::min <= curr_score && curr_score <= score::max) {
                         some_move = mv;
                         rand_sum -= curr_score;
+                    }
+                    else if (should_explore && curr_score == score::none) {
+                        some_move = mv;
+                        rand_sum -= score::mid;
                     }
 
                     if (rand_sum <= 0) {
