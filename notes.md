@@ -1,5 +1,6 @@
 ## Done
 - internal doc pages. UNLINKED!
+- `log_ostream` lock 'put' operations.
 - `diag_ready`
 - `vector_streambuf`
 - Remove the `Log` template parameter from all classes.
@@ -32,7 +33,7 @@
         - string.h
     - Samples
         - __tictactoe__
-            - Bug in making a slow move, possibly in accept_move() or in get_moves().
+            - One browser can create multiple games.
         - connect4
 - Update docs when all classes are done.
 

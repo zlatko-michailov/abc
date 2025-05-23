@@ -243,7 +243,7 @@ protected:
 public:
     void reset(const player_types& player_types);
     void start();
-    void accept_move(player_id_t player_id, const move& move);
+    std::size_t accept_move(player_id_t player_id, const move& move);
 
 public:
     const ::board&           board() const;
