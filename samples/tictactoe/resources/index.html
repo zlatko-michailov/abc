@@ -229,6 +229,7 @@ SOFTWARE.
 
 		<script>
 			let isRunning = true;
+			let canCreateGame = true;
 			let gameId = 0;
 			let playerIds = [];
 			let sinceMoveI = 0;
@@ -241,6 +242,11 @@ SOFTWARE.
 			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
 			function createGame() {
+				if (!canCreateGame) {
+					document.getElementById("status").innerHTML += "A game is already in progress. <br />";
+					return;
+				}
+
 				const playerX = document.getElementById("playerX").value;
 				const playerO = document.getElementById("playerO").value;
 
@@ -269,6 +275,7 @@ SOFTWARE.
 						console.log("Received status " + response.status + ": " + response.statusText);
 
 						if (response.status === 200) {
+							canCreateGame = false;
 							gameId = 0;
 							playerIds = [];
 							sinceMoveI = 0;
@@ -415,6 +422,7 @@ SOFTWARE.
 
 			function checkWinner(winner) {
 				if (typeof(winner) === "number") {
+					canCreateGame = true;
 					canAcceptMove = false;
 					canRefreshMoves = false;
 

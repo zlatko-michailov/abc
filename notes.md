@@ -33,7 +33,6 @@
         - string.h
     - Samples
         - __tictactoe__
-            - One browser can create multiple games.
         - connect4
 - Update docs when all classes are done.
 
