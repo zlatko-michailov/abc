@@ -215,6 +215,8 @@ private:
     move          fast_find_best_move();
     state_scores_map::iterator ensure_board_state_in_map(board_state_t board_state);
 
+    static score_calc_t learning_weight(score_calc_t score) noexcept;
+
 private:
     game*         _game        = nullptr;
     player_id_t   _player_id   = player_id::none;

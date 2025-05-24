@@ -379,7 +379,7 @@ inline move player_agent::fast_find_best_move() {
     score_calc_t min_count  = 0;
     score_calc_t none_count = 0;
     score_calc_t score_count = 0;
-    score_calc_t score_sum  = 0; //// TODO: Use scores' squares (or cubes) to put more weight on good moves.
+    score_calc_t score_sum  = 0;
 
     for (move_t r = 0; r < row_count; r++) {
         for (move_t c = 0; c < col_count; c++) {
@@ -397,7 +397,7 @@ inline move player_agent::fast_find_best_move() {
                 }
                 else {
                     score_count++;
-                    score_sum += curr_score;
+                    score_sum += learning_weight(curr_score);
                 }
             }
         }
@@ -444,7 +444,7 @@ inline move player_agent::fast_find_best_move() {
     // Make a weighted pick - the weight of each move is its score.
     else {
         if (should_explore) {
-            score_sum += none_count * score::mid;
+            score_sum += none_count * learning_weight(score::mid);
         }
 
         score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
@@ -457,11 +457,11 @@ inline move player_agent::fast_find_best_move() {
                 if (_game->board().get_move(mv) == player_id::none) {
                     if (score::min <= curr_score && curr_score <= score::max) {
                         some_move = mv;
-                        rand_sum -= curr_score;
+                        rand_sum -= learning_weight(curr_score);
                     }
                     else if (should_explore && curr_score == score::none) {
                         some_move = mv;
-                        rand_sum -= score::mid;
+                        rand_sum -= learning_weight(score::mid);
                     }
 
                     if (rand_sum <= 0) {
@@ -571,6 +571,11 @@ inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 
     return itr_b.first;
+}
+
+
+inline score_calc_t player_agent::learning_weight(score_calc_t score) noexcept {
+    return score * score * score;
 }
 
 
