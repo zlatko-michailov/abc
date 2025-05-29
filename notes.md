@@ -32,8 +32,7 @@
         - map.h
         - string.h
     - Samples
-        - __tictactoe__
-        - connect4
+        - __connect4__
 - Update docs when all classes are done.
 
 - Remove `virtual` from `override` definitions?
