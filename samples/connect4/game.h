@@ -26,1642 +26,1288 @@ SOFTWARE.
 #include <cstdlib>
 #include <cstdio>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 #include "../../src/ascii.h"
-#include "../../src/endpoint.h"
-#include "../../src/http.h"
-#include "../../src/json.h"
+#include "../../src/net/endpoint.h"
+#include "../../src/net/http.h"
+#include "../../src/net/json.h"
 
 #include "game.i.h"
 
 
-namespace abc { namespace samples {
+// --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+constexpr std::size_t len_request_path_games = 6U;
 
 
-	inline vmem_bundle::vmem_bundle(const char* path, log_ostream* log)
-		: pool(path, log)
-		, start_page(&pool, vmem_page_pos_start, log)
-		, state_scores_map(&static_cast<start_page_layout*>(start_page.ptr())->map_state, &pool, log)
-		, log(log) {
-	}
+// --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+inline vmem_bundle::vmem_bundle(abc::vmem::pool_config&& pool_config, abc::diag::log_ostream* log)
+    : pool(std::move(pool_config), log)
+    , start_page(&pool, abc::vmem::page_pos_start, log)
+    , state_scores_map(&static_cast<start_page_layout*>(start_page.ptr())->map_state, &pool, log)
+    , log(log) {
+}
 
 
-	inline player_type_t player_type::from_text(const char* text) {
-		if (ascii::are_equal(text, "external")) {
-			return player_type::external;
-		}
-		else if (ascii::are_equal(text, "slow_engine")) {
-			return player_type::slow_engine;
-		}
-		else if (ascii::are_equal(text, "fast_engine")) {
-			return player_type::fast_engine;
-		}
-		else {
-			return player_type::none;
-		}
-	}
+// --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+inline player_type_t player_type::from_text(const char* text) {
+    if (abc::ascii::are_equal(text, "external")) {
+        return player_type::external;
+    }
+    else if (abc::ascii::are_equal(text, "slow_engine")) {
+        return player_type::slow_engine;
+    }
+    else if (abc::ascii::are_equal(text, "fast_engine")) {
+        return player_type::fast_engine;
+    }
+    else {
+        return player_type::none;
+    }
+}
 
 
-	inline bool move::is_valid() const {
-		return (0 <= row && row < row_count && 0 <= col && col < col_count);
-	}
+// --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+inline bool move::is_valid() const {
+    return (0 <= row && row < row_count && 0 <= col && col < col_count);
+}
 
 
-	inline void board::reset(log_ostream* log) {
-		_is_game_over		= false;
-		_winner				= player_id::none;
-		_current_player_id	= player_id::x;
-		_board_state		= { };
-		_move_count			= 0;
-		_log				= log;
-	}
+// --------------------------------------------------------------
 
 
-	inline bool board::accept_move(const move& move) {
-		if (!move.is_valid()) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, 0x10607, "board::accept_move(): false - not valid");
-			}
+inline board::board(abc::diag::log_ostream* log)
+    : diag_base("board", log) {
+}
 
-			return false;
-		}
 
-		if (is_game_over()) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, 0x10608, "board::accept_move(): false - game over");
-			}
+inline void board::reset() {
+    constexpr const char* suborigin = "reset()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-			return false;
-		}
+    _is_game_over      = false;
+    _winner            = player_id::none;
+    _current_player_id = player_id::x;
+    _board_state       = { };
+    _move_count        = 0;
 
-		if (get_move(move) != player_id::none) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, 0x10609, "board::accept_move(): false - taken");
-			}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-			return false;
-		}
 
-		if (0 < move.row && get_move({move.row - 1, move.col}) == player_id::none) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, 0x1060a, "board::accept_move(): false - in the air");
-			}
+inline void board::accept_move(const move& move) {
+    constexpr const char* suborigin = "accept_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
 
-			return false;
-		}
+    diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
+    diag_base::expect(suborigin, !is_game_over(), __TAG__, "!is_game_over()");
+    diag_base::expect(suborigin, get_move(move) == player_id::none, __TAG__, "get_move(move) == player_id::none"); 
+    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, __TAG__, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
 
-		set_move(move);
-		check_winner(move);
+    set_move(move);
+    check_winner(move);
 
-		if (!is_game_over()) {
-			switch_current_player_id();
-		}
+    if (!is_game_over()) {
+        switch_current_player_id();
+    }
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x1060b, "board::accept_move(): true");
-		}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-		return true;
-	}
 
+inline void board::undo_move(const move& move) {
+    constexpr const char* suborigin = "undo_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
 
-	inline bool board::undo_move(const move& move) {
-		if (!move.is_valid()) {
-			return false;
-		}
+    diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
+    diag_base::expect(suborigin, get_move(move) != player_id::none, __TAG__, "get_move(move) != player_id::none"); 
+    diag_base::expect(suborigin, move.row == row_count - 1 || get_move({move.row + 1, move.col}) != player_id::none, __TAG__, "move.row == row_count - 1 || get_move({move.row + 1, move.col}) != player_id::none"); 
 
-		if (move.row < row_count - 1 && get_move({move.row + 1, move.col}) != player_id::none) {
-			return false;
-		}
+    if (!is_game_over()) {
+        switch_current_player_id();
+    }
+    clear_move(move);
 
-		if (!is_game_over()) {
-			switch_current_player_id();
-		}
-		clear_move(move);
+    _winner = player_id::none;
+    _is_game_over = false;
 
-		_winner = player_id::none;
-		_is_game_over = false;
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-		return true;
-	}
 
+inline bool board::is_game_over() const {
+    return _is_game_over;
+}
 
-	inline bool board::is_game_over() const {
-		return _is_game_over;
-	}
 
+inline player_id_t board::winner() const {
+    return _winner;
+}
 
-	inline player_id_t board::winner() const {
-		return _winner;
-	}
 
+inline player_id_t board::get_move(const move& move) const {
+    constexpr const char* suborigin = "get_move()";
+    count_t col_sz = col_size(move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
 
-	inline player_id_t board::get_move(const move& move) const {
-		count_t col_sz = col_size(move.col);
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x1060c, "board::get_move(): board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
-		}
+    player_id_t ret = player_id::none;
+    if (col_sz == 0 || move.row >= col_sz) {
+        ret = player_id::none;
+    }
+    else {
+        ret = get_move_bits(move);
+    }
 
-		if (col_sz == 0 || col_sz <= move.row) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::samples, severity::debug, 0x1060d, "board::get_move(): none");
-			}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: player_id=%u", ret);
 
-			return player_id::none;
-		}
+    return ret;
+}
 
-		return get_move_bits(move);
-	}
 
+inline void board::set_move(const move& move) {
+    inc_col_size(move.col);
+    set_move_bits(move, _current_player_id);
+    _move_count++;
+}
 
-	inline void board::set_move(const move& move) {
-		inc_col_size(move.col);
-		set_move_bits(move, _current_player_id);
-		_move_count++;
-	}
 
+inline void board::clear_move(const move& move) {
+    dec_col_size(move.col);
+    clear_move_bits(move);
+    _move_count--;
+}
 
-	inline void board::clear_move(const move& move) {
-		dec_col_size(move.col);
-		clear_move_bits(move);
-		_move_count--;
-	}
 
+inline bool board::has_move(player_id_t player_id, const move& move) const {
+    return get_move(move) == player_id;
+}
 
-	inline unsigned board::move_count() const {
-		return _move_count;
-	}
 
+inline bool board::check_winner(const move& move) {
+    count_t west_count = 0;
+    for (count_t c = move.col - 1; 0 <= c && has_move(_current_player_id, { move.row, c }); c--) {
+        west_count++;
+    }
 
-	inline bool board::has_move(player_id_t player_id, const move& move) const {
-		return get_move(move) == player_id;
-	}
+    count_t east_count = 0;
+    for (count_t c = move.col + 1; c < col_count && has_move(_current_player_id, { move.row, c }); c++) {
+        east_count++;
+    }
 
+    count_t south_count = 0;
+    for (count_t r = move.row - 1; 0 <= r && has_move(_current_player_id, { r, move.col }); r--) {
+        south_count++;
+    }
 
-	inline bool board::check_winner(const move& move) {
-		count_t west_count = 0;
-		for (count_t c = move.col - 1; 0 <= c && has_move(_current_player_id, { move.row, c }); c--) {
-			west_count++;
-		}
+    count_t southwest_count = 0;
+    for (count_t i = 1; 0 <= move.row - i && 0 <= move.col - i && has_move(_current_player_id, { move.row - i, move.col - i }); i++) {
+        southwest_count++;
+    }
 
-		count_t east_count = 0;
-		for (count_t c = move.col + 1; c < col_count && has_move(_current_player_id, { move.row, c }); c++) {
-			east_count++;
-		}
+    count_t northeast_count = 0;
+    for (count_t i = 1; move.row + i < row_count && move.col + i < col_count && has_move(_current_player_id, { move.row + i, move.col + i }); i++) {
+        northeast_count++;
+    }
 
-		count_t south_count = 0;
-		for (count_t r = move.row - 1; 0 <= r && has_move(_current_player_id, { r, move.col }); r--) {
-			south_count++;
-		}
+    count_t southeast_count = 0;
+    for (count_t i = 1; 0 <= move.row - i && move.col + i < col_count && has_move(_current_player_id, { move.row - i, move.col + i }); i++) {
+        southeast_count++;
+    }
 
-		count_t southwest_count = 0;
-		for (count_t i = 1; 0 <= move.row - i && 0 <= move.col - i && has_move(_current_player_id, { move.row - i, move.col - i }); i++) {
-			southwest_count++;
-		}
+    count_t northwest_count = 0;
+    for (count_t i = 1; move.row + i < row_count && 0 <= move.col - i && has_move(_current_player_id, { move.row + i, move.col - i }); i++) {
+        northwest_count++;
+    }
 
-		count_t northeast_count = 0;
-		for (count_t i = 1; move.row + i < row_count && move.col + i < col_count && has_move(_current_player_id, { move.row + i, move.col + i }); i++) {
-			northeast_count++;
-		}
+    bool horizontal  = west_count + east_count >= 3;
+    bool vertical    = south_count >= 3;
+    bool diagonal1   = southwest_count + northeast_count >= 3;
+    bool diagonal2   = southeast_count + northwest_count >= 3;
 
-		count_t southeast_count = 0;
-		for (count_t i = 1; 0 <= move.row - i && move.col + i < col_count && has_move(_current_player_id, { move.row - i, move.col + i }); i++) {
-			southeast_count++;
-		}
+    bool win = (horizontal || vertical || diagonal1 || diagonal2);
 
-		count_t northwest_count = 0;
-		for (count_t i = 1; move.row + i < row_count && 0 <= move.col - i && has_move(_current_player_id, { move.row + i, move.col - i }); i++) {
-			northwest_count++;
-		}
+    bool draw = (_move_count == (row_count * col_count));
 
-		bool horizontal	= west_count + east_count >= 3;
-		bool vertical	= south_count >= 3;
-		bool diagonal1	= southwest_count + northeast_count >= 3;
-		bool diagonal2	= southeast_count + northwest_count >= 3;
+    if (win) {
+        _is_game_over = true;
+        _winner = _current_player_id;
+    }
+    else if (draw) {
+        _is_game_over = true;
+        _winner = player_id::none;
+    }
 
-		bool win = (horizontal || vertical || diagonal1 || diagonal2);
+    return _is_game_over;
+}
 
-		bool draw = (_move_count == (row_count * col_count));
 
-		if (win) {
-			_is_game_over = true;
-			_winner = _current_player_id;
-		}
-		else if (draw) {
-			_is_game_over = true;
-			_winner = player_id::none;
-		}
+inline player_id_t board::current_player_id() const {
+    return _current_player_id;
+}
 
-		return _is_game_over;
-	}
 
+inline void board::switch_current_player_id() {
+    _current_player_id = opponent(_current_player_id);
+}
 
-	inline player_id_t board::current_player_id() const {
-		return _current_player_id;
-	}
 
+inline board_state_t board::state() const {
+    return _board_state;
+}
 
-	inline void board::switch_current_player_id() {
-		_current_player_id = opponent(_current_player_id);
-	}
 
+inline player_id_t board::opponent(player_id_t player_id) {
+    return player_id ^ player_id::mask;
+}
 
-	inline board_state_t board::state() const {
-		return _board_state;
-	}
 
+inline count_t board::col_size(count_t col) const {
+    count_t col_sz = ( (_board_state >> col_pos(col)) & col_size_mask );
 
-	inline player_id_t board::opponent(player_id_t player_id) {
-		return player_id ^ player_id::mask;
-	}
+    return col_sz;
+}
 
 
-	inline count_t board::col_size(count_t col) const {
-		count_t col_sz = ( (_board_state >> col_pos(col)) & col_size_mask );
+inline void board::inc_col_size(count_t col) {
+    constexpr const char* suborigin = "inc_col_size()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x1060e, "board::col_size(): col=%u, col_sz=%u", col, col_sz);
-		}
+    _board_state += (board_state_1 << col_pos(col));
 
-		return col_sz;
-	}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+}
 
-	inline void board::inc_col_size(count_t col) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x1060f, "board::inc_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
-		}
 
-		_board_state += (board_state_1 << col_pos(col));
+inline void board::dec_col_size(count_t col) {
+    constexpr const char* suborigin = "dec_col_size()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10610, "board::inc_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
-		}
-	}
+    _board_state -= (board_state_1 << col_pos(col));
 
-	inline void board::dec_col_size(count_t col) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10611, "board::dec_col_size(): before - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
-		}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+}
 
-		_board_state -= (board_state_1 << col_pos(col));
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10612, "board::dec_col_size(): after  - board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
-		}
-	}
+inline count_t board::col_pos(count_t col) const {
+    return sizes_pos + col * col_size_bit_count;
+}
 
-	inline count_t board::col_pos(count_t col) const {
-		return sizes_pos + col * col_size_bit_count;
-	}
 
-	inline player_id_t board::get_move_bits(const move& move) const {
-		count_t pos = move_pos(move);
-		player_id_t move_bits = ( (_board_state >> pos) & move_mask );
+inline player_id_t board::get_move_bits(const move& move) const {
+    constexpr const char* suborigin = "get_move_bits()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10613, "board::get_move_bits(): pos=%u, move_bits=%u", pos, move_bits);
-		}
+    count_t pos = move_pos(move);
+    player_id_t move_bits = ( (_board_state >> pos) & move_mask );
 
-		return move_bits;
-	}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: bits=%u", move_bits);
 
-	inline void board::set_move_bits(const move& move, count_t bits) {
-		count_t pos = move_pos(move);
+    return move_bits;
+}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10614, "board::set_move_bits(): start  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
-		}
 
-		clear_move_bits(move);
+inline void board::set_move_bits(const move& move, count_t bits) {
+    constexpr const char* suborigin = "set_move_bits()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}, bits=%u", (unsigned long long)_board_state, move.row, move.col, bits);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10615, "board::set_move_bits(): before - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
-		}
+    count_t pos = move_pos(move);
 
-		_board_state |= ((board_state_t)bits << pos);
+    clear_move_bits(move);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10616, "board::set_move_bits(): after  - board_state=0x%16.16llx, pos=%u, bits=%u", (unsigned long long)_board_state, pos, bits);
-		}
-	}
+    _board_state |= ((board_state_t)bits << pos);
 
-	inline void board::clear_move_bits(const move& move) {
-		count_t pos = move_pos(move);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+}
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10617, "board::clear_move_bits(): before - board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
-		}
 
-		_board_state &= ( ~((board_state_t)move_mask << pos) );
+inline void board::clear_move_bits(const move& move) {
+    constexpr const char* suborigin = "clear_move_bits()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10618, "board::clear_move_bits(): after  -_board_state=0x%16.16llx, pos=%u", (unsigned long long)_board_state, pos);
-		}
-	}
+    count_t pos = move_pos(move);
 
-	inline count_t board::move_pos(const move& move) const {
-		return moves_pos + move.col * col_bit_count + move.row * move_bit_count;
-	}
+    _board_state &= ( ~((board_state_t)move_mask << pos) );
 
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+}
 
-	// --------------------------------------------------------------
 
+inline count_t board::move_pos(const move& move) const {
+    return moves_pos + move.col * col_bit_count + move.row * move_bit_count;
+}
 
-	inline void player_agent::reset(game* game, player_id_t player_id, player_type_t player_type, log_ostream* log) {
-		_game = game;
-		_player_id = player_id;
-		_player_type = player_type;
-		_log = log;
-	}
 
+// --------------------------------------------------------------
 
-	inline void player_agent::make_move_async() {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x10619, "player_agent::make_move_async()");
-		}
 
-		std::thread(player_agent::make_move_proc, this).detach();
-	}
+inline void player_agent::reset(::game* game, player_id_t player_id, player_type_t player_type) {
+    constexpr const char* suborigin = "reset()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, player_type=%u", player_id, player_type);
 
+    _game        = game;
+    _player_id   = player_id;
+    _player_type = player_type;
 
-	inline void player_agent::make_move_proc(player_agent* this_ptr) {
-		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::samples, severity::debug, 0x1061a, "player_agent::make_move_proc()");
-		}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-		this_ptr->make_move();
-	}
 
+inline void player_agent::make_move_async() {
+    constexpr const char* suborigin = "make_move_async()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10619, "Begin:");
 
-	inline void player_agent::make_move() {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::debug, 0x1061b, "player_agent::make_move()");
-		}
+    std::thread(player_agent::make_move_proc, this).detach();
 
-		switch (_player_type) {
-			case player_type::slow_engine:
-				slow_make_move();
-				break;
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-			case player_type::fast_engine:
-				fast_make_move();
-				break;
-		}
-	}
 
+inline void player_agent::make_move_proc(player_agent* this_ptr) {
+    this_ptr->make_move();
+}
 
-	inline void player_agent::slow_make_move() {
-		_temp_board = _game->board();
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, 0x1061c, "player_agent::slow_make_move(): move_count=%u, player_id=%u, board_state=0x%16.16llx, temp_board_state=0x%16.16llx",
-				_game->board().move_count(), _player_id, (unsigned long long)_game->board().state(), (unsigned long long)_temp_board.state());
-		}
+inline void player_agent::make_move() {
+    constexpr const char* suborigin = "make_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1061b, "Begin:");
 
-		move best_move;
-		if (!slow_make_first_move(best_move)) {
-			int max_depth = slow_choose_max_depth();
-			slow_find_best_move(best_move, max_depth, max_depth);
-		}
+    switch (_player_type) {
+        case player_type::slow_engine:
+            slow_make_move();
+            break;
 
-		_game->accept_move(_player_id, best_move);
-	}
+        case player_type::fast_engine:
+            fast_make_move();
+            break;
+    }
 
-	inline bool player_agent::slow_make_first_move(move& best_move) {
-		unsigned move_count = _game->board().move_count();
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
 
-		if (move_count >= 4) {
-			return false;
-		}
 
-		move mid_next{ _game->board().col_size(col_count / 2), col_count / 2 };
-		move right{ 0, col_count / 2 + 1 };
-		move left{ 0, col_count / 2 - 1 };
+inline void player_agent::slow_make_move() {
+    constexpr const char* suborigin = "slow_make_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1061c, "Begin: player_id=%u, board_state=0x%16.16llx", _player_id, (unsigned long long)_game->board().state());
 
-		player_id_t opo = board::opponent(_player_id);
+    _temp_board = _game->board();
 
-		if (move_count < 2) {
-			best_move = mid_next;
-		}
-		else if (_game->board().get_move(move{ 0, col_count / 2 }) == _player_id) {
-			best_move = mid_next;
-		}
-		else if (_game->board().get_move(right) == opo) {
-			best_move = left;
-		}
-		else {
-			best_move = right;
-		}
+    move best_move;
+    if (_game->moves().size() < 4) {
+        slow_make_first_move(best_move);
+    }
+    else {
+        int max_depth = slow_choose_max_depth();
+        slow_find_best_move(best_move, max_depth, max_depth);
+    }
 
-		return true;
-	}
+    _game->accept_move(_player_id, best_move);
 
-	inline int player_agent::slow_choose_max_depth() const {
-		unsigned move_count = _game->board().move_count();
-		int max_depth = -1;
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+}
 
-		if (move_count < 12) {
-			max_depth = 6;
-		}
-		else if (move_count < 18) {
-			max_depth = 8;
-		}
-		else if (move_count < 24) {
-			max_depth = 10;
-		}
-		else if (move_count < 30) {
-			max_depth = 16;
-		}
-		else {
-			max_depth = 20;
-		}
 
-		return max_depth;
-	}
+inline void player_agent::slow_make_first_move(move& best_move) {
+    constexpr const char* suborigin = "slow_make_first_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
 
-	inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int depth) {
-		int best_score = -(2 * max_depth);
+    unsigned move_count = _game->moves().size();
+    diag_base::expect(suborigin, move_count < 4, __TAG__, "move_count < 4");
 
-		int sign = -1;
-		int mid = col_count / 2;
-		for (int i = 0; i < col_count; i++) {
-			count_t c = (count_t)(mid + sign * (i + 1) / 2);
-			sign = -sign;
+    move mid_next{ _game->board().col_size(col_count / 2), col_count / 2 };
+    move right{ 0, col_count / 2 + 1 };
+    move left{ 0, col_count / 2 - 1 };
 
-			move mv{ _temp_board.col_size(c), c };
+    player_id_t opo = board::opponent(_player_id);
 
-			if (mv.is_valid()) {
-				if (_temp_board.accept_move(mv)) {
-					int score = -max_depth;
+    if (move_count < 2) {
+        best_move = mid_next;
+    }
+    else if (_game->board().get_move(move{ 0, col_count / 2 }) == _player_id) {
+        best_move = mid_next;
+    }
+    else if (_game->board().get_move(right) == opo) {
+        best_move = left;
+    }
+    else {
+        best_move = right;
+    }
 
-					if (_temp_board.is_game_over()) {
-						score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
-					}
-					else if (depth > 0 && _temp_board.move_count() < row_count * col_count) {
-						move dummy_mv;
-						score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
-					}
-					else {
-						score = -1;
-					}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+}
 
-					if (score > best_score) {
-						best_move = mv;
-						best_score = score;
-					}
 
-					_temp_board.undo_move(mv);
+inline int player_agent::slow_choose_max_depth() const {
+    constexpr const char* suborigin = "slow_choose_max_depth()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
 
-					if (depth == max_depth && _log != nullptr) {
-						_log->put_any(category::abc::samples, severity::optional, 0x1061d, "player_agent::slow_find_best_move_for() mv.col=%d, score=%d", mv.col, score);
-					}
-				}
-			}
-		}
+    unsigned move_count = _game->moves().size();
+    int max_depth = -1;
 
-		return best_score;
-	}
+    if (move_count < 12) {
+        max_depth = 6;
+    }
+    else if (move_count < 18) {
+        max_depth = 8;
+    }
+    else if (move_count < 24) {
+        max_depth = 10;
+    }
+    else if (move_count < 30) {
+        max_depth = 16;
+    }
+    else {
+        max_depth = 20;
+    }
 
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: max_depth=%d", max_depth);
 
-	inline void player_agent::fast_make_move() {
-		move best_move = fast_find_best_move();
-		_game->accept_move(_player_id, best_move);
-	}
+    return max_depth;
+}
 
 
-	inline move player_agent::fast_find_best_move() {
-		std::lock_guard<std::mutex> lock(_vmem->mutex);
+inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int depth) {
+    constexpr const char* suborigin = "slow_find_best_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, max_depth=%d, depth=%d", _player_id, max_depth, depth);
 
-		vmem_map::iterator itr = ensure_board_state_in_map(_game->board().state());
+    int best_score = -(2 * max_depth);
 
-		move some_move;
-		if (itr.can_deref()) {
-			bool should_explore = true; // TODO: Calculate exploration
+    int sign = -1;
+    int mid = col_count / 2;
+    for (int i = 0; i < col_count; i++) {
+        count_t c = (count_t)(mid + sign * (i + 1) / 2);
+        sign = -sign;
 
-			// Analyze what we have.
-			score_calc_t max_count = 0;
-			score_calc_t min_count = 0;
-			score_calc_t none_count = 0;
-			score_calc_t valid_count = 0;
-			score_calc_t score_sum = 0;
+        move mv{ _temp_board.col_size(c), c };
 
-			for (count_t c = 0; c < col_count; c++) {
-				move mv{ _game->board().col_size(c), c };
+        if (mv.is_valid()) {
+            _temp_board.accept_move(mv);
+            int score = -max_depth;
 
-				if (mv.is_valid()) {
-					valid_count++;
-					score_calc_t curr_score = itr->value[c];
+            if (_temp_board.is_game_over()) {
+                score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
+            }
+            else if (depth > 0 && _temp_board.move_count() < row_count * col_count) {
+                move dummy_mv;
+                score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
+            }
+            else {
+                score = -1;
+            }
 
-					if (curr_score == score::max) {
-						max_count++;
-					}
-					else if (curr_score == score::min) {
-						min_count++;
-					}
-					else if (curr_score == score::none) {
-						none_count++;
-					}
-					else {
-						score_sum += curr_score;
-					}
-				}
-			}
-
-			// If there is one or more max scores, pick one of them.
-			if (max_count > 0) {
-				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
-
-				for (count_t c = 0; c < col_count; c++) {
-					move mv{ _game->board().col_size(c), c };
-
-					if (mv.is_valid() && itr->value[c] == score::max) {
-						if (--rand_i == 0) {
-							return mv;
-						}
-					}
-				}
-			}
-
-			// If all the scores are min, pick one of them.
-			else if (min_count == valid_count) {
-				score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
-
-				count_t c = static_cast<count_t>(rand_i % (score_calc_t)col_count);
-				count_t r = _game->board().col_size(c);
-				move mv{ r, c };
-
-				return mv;
-			}
-
-			// Make a weighted pick.
-			else {
-				if (should_explore) {
-					score_sum += none_count * score::mid;
-				}
-
-				score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
-
-				for (count_t c = 0; c < col_count; c++) {
-					count_t r = _game->board().col_size(c);
-					move mv{ r, c };
-	
-					score_calc_t curr_score = itr->value[c];
-
-					if (mv.is_valid()) {
-						if (score::min <= curr_score && curr_score <= score::max) {
-							some_move = mv;
-							rand_sum -= curr_score;
-						}
-						else if (should_explore && curr_score == score::none) {
-							some_move = mv;
-							rand_sum -= score::mid;
-						}
-
-						if (rand_sum <= 0) {
-							if (_log != nullptr) {
-								_log->put_any(category::abc::samples, severity::optional, 0x1061e, "player_agent::fast_find_best_move(): row=%d, col=%d, score=%d", r, c, curr_score);
-							}
-
-							return mv;
-						}
-					}
-				}
-			}
-		}
-
-		// We should never end up here.
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::important, 0x1061f, "player_agent::fast_find_best_move(): Impossible!");
-		}
+            if (score > best_score) {
+                best_move = mv;
+                best_score = score;
+            }
 
-		return some_move;
-	}
-
+            _temp_board.undo_move(mv);
 
-	inline void player_agent::learn() {
-		unsigned move_count = _game->board().move_count();
+            if (depth == max_depth) {
+                diag_base::put_any(suborigin, abc::diag::severity::optional, 0x1061d, "mv.col=%d, score=%d", mv.col, score);
+            }
+        }
+    }
 
-		const char* label = "ERROR!";
-		score_t gain = 0;
-		if (_game->board().winner() == _player_id) {
-			// Win
-			label = "win";
-			gain = score::win;
-		}
-		else if (_game->board().winner() == player_id::none) {
-			// Draw
-			label = "draw";
-			gain = score::draw;
-		}
-		else {
-			label = "loss";
-			gain = score::loss;
-		}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_score=%d", best_score);
 
-		if (_game->board().winner() != _player_id) {
-			if (move_count > 32) {
-				gain += 3;
-			}
-			else if (move_count > 24) {
-				gain += 2;
-			}
-			else if (move_count > 18) {
-				gain += 1;
-			}
-		}
+    return best_score;
+}
 
-		std::lock_guard<std::mutex> lock(_vmem->mutex);
 
-		board temp_board;
-		for (unsigned i = 0; i < move_count; i++) {
-			move mv(_game->moves()[i]);
-
-			if (temp_board.current_player_id() == _player_id) {
-				vmem_map::iterator itr = ensure_board_state_in_map(temp_board.state());
-
-				score_t old_score = itr->value[mv.col] == score::none ? score::mid : itr->value[mv.col];
-				score_t new_score = old_score + gain;
-
-				if (new_score > 0) {
-					itr->value[mv.col] = std::min(score::max, new_score);
-				}
-				else {
-					itr->value[mv.col] = std::max(score::min, new_score);
-				}
-
-				if (_log != nullptr) {
-					_log->put_any(category::abc::samples, severity::debug, 0x10620, "player_agent::learn: (%s) move:%u, temp_board_state=0x%16.16llx, row=%d, col=%d, old_score=%d, new_score=%d",
-						label, i, (unsigned long long)temp_board.state(), mv.row, mv.col, old_score, new_score);
-				}
-			}
-
-			temp_board.accept_move(mv);
-		}
-	}
-
-
-	inline player_type_t player_agent::player_type() const {
-		return _player_type;
-	}
-
-
-	inline vmem_map::iterator player_agent::ensure_board_state_in_map(board_state_t board_state) {
-		vmem_map::iterator itr = _vmem->state_scores_map.find(board_state);
-
-		if (itr.can_deref()) {
-			return itr;
-		}
-
-		// An item with this key was not found. We'll insert it.
-
-		// Init the item before inserting it.
-		vmem_map::value_type item;
-		item.key = board_state;
-		for (int c = 0; c < col_count; c++) {
-			item.value[c] = score::none;
-		}
-
-		// Insert the item.
-		vmem_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
-		return itr_b.first;
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	inline void game::reset(player_type_t player_x_type, player_type_t player_o_type, log_ostream* log) {
-		_agent_x.reset(this, player_id::x, player_x_type, log);
-		_agent_o.reset(this, player_id::o, player_o_type, log);
-		_log = log;
-		_board.reset(log);
-	}
-
-
-	inline void game::start() {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, 0x10621, "game::start(): player_id=%u", _board.current_player_id());
-		}
-
-		if (_board.current_player_id() == player_id::x) {
-			_agent_x.make_move_async();
-		}
-		else if (_board.current_player_id() == player_id::o) {
-			_agent_o.make_move_async();
-		}
-	}
-
-
-	inline bool game::accept_move(player_id_t player_id, const move& move) {
-		if (player_id != _board.current_player_id()) {
-			return false;
-		}
-
-		bool accepted = _board.accept_move(move);
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::samples, severity::optional, 0x10622, "game::accept_move(): accepted=%d, move_count=%u, player_id=%u, best_move={%d, %d}",
-				accepted, _board.move_count(), player_id, move.row, move.col);
-		}
-
-		if (accepted) {
-			_moves[_board.move_count() - 1] = move;
-		}
-
-		if (_board.is_game_over()) {
-			if (_log != nullptr) {
-				if (_board.winner() != player_id::none) {
-					_log->put_any(category::abc::samples, severity::important, 0x10623, "game::accept_move(): GAME OVER - player_id=%u wins", _board.winner());
-				}
-				else {
-					_log->put_any(category::abc::samples, severity::important, 0x10624, "game::accept_move(): GAME OVER - draw");
-				}
-
-				for (std::size_t i = 0; i < _board.move_count(); i++) {
-					_log->put_any(category::abc::samples, severity::optional, 0x10625, "game::accept_move(): %zu (%c) - { %d, %d }", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
-				}
-			}
+inline void player_agent::fast_make_move() {
+    constexpr const char* suborigin = "fast_make_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, board_state=0x%8.8x", _player_id, (unsigned)_game->board().state());
 
-			if (_agent_x.player_type() == player_type::fast_engine && _agent_o.player_type() == player_type::slow_engine) {
-				_agent_x.learn();
-			}
-			else if (_agent_o.player_type() == player_type::fast_engine && _agent_x.player_type() == player_type::slow_engine) {
-				_agent_o.learn();
-			}
-		}
-		else if (accepted) {
-			if (_board.current_player_id() == player_id::x) {
-				_agent_x.make_move_async();
-			}
-			else if (_board.current_player_id() == player_id::o) {
-				_agent_o.make_move_async();
-			}
-		}
+    move best_move = fast_find_best_move();
+    _game->accept_move(_player_id, best_move);
 
-		return accepted;
-	}
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+}
 
 
-	inline const samples::board& game::board() const {
-		return _board;
-	}
-
-
-	inline const move* game::moves() const {
-		return _moves;
-	}
-
-
-	// --------------------------------------------------------------
-
+inline move player_agent::fast_find_best_move() {
+    constexpr const char* suborigin = "fast_find_best_move()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, board_state=0x%16.16llx", _player_id, (unsigned long long)_game->board().state());
 
-	inline void endpoint_game::reset(endpoint_game_id_t endpoint_game_id,
-									player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
-									player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id,
-									log_ostream* log) {
-		base::reset(player_x_type, player_o_type, log);
-
-		_endpoint_game_id						= endpoint_game_id;
-		_endpoint_player_x.endpoint_player_id	= endpoint_player_x_id;
-		_endpoint_player_x.is_claimed			= endpoint_player_x_id == 0;
-		_endpoint_player_o.endpoint_player_id	= endpoint_player_o_id;
-		_endpoint_player_o.is_claimed			= endpoint_player_o_id == 0;
-
-		if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
-			start();
-		}
-	}
-
-
-	inline bool endpoint_game::claim_player(unsigned player_i, endpoint_player_id_t& endpoint_player_id) {
-		if (player_i == 0) {
-			if (_endpoint_player_x.is_claimed) {
-				return false;
-			}
-
-			endpoint_player_id = _endpoint_player_x.endpoint_player_id;
-			_endpoint_player_x.is_claimed = true;
-		}
-		else {
-			if (_endpoint_player_o.is_claimed) {
-				return false;
-			}
-
-			endpoint_player_id = _endpoint_player_o.endpoint_player_id;
-			_endpoint_player_o.is_claimed = true;
-		}
-
-		if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
-			start();
-		}
-
-		return true;
-	}
-
-
-	inline endpoint_game_id_t endpoint_game::id() const {
-		return _endpoint_game_id;
-	}
-
-
-	inline player_id_t endpoint_game::player_id(endpoint_player_id_t endpoint_player_id) const {
-		if (endpoint_player_id == _endpoint_player_x.endpoint_player_id) {
-			return player_id::x;
-		}
-		else if (endpoint_player_id == _endpoint_player_o.endpoint_player_id) {
-			return player_id::o;
-		}
-
-		return player_id::none;
-	}
-
-
-	// --------------------------------------------------------------
-
-
-	template <typename Limits, typename Log>
-	inline game_endpoint<Limits, Log>::game_endpoint(endpoint_config* config, Log* log)
-		: base(config, log) {
-	}
-
-
-	template <typename Limits, typename Log>
-	inline abc::tcp_server_socket<Log> game_endpoint<Limits, Log>::create_server_socket() {
-		return abc::tcp_server_socket<Log>(socket::family::ipv4, base::_log);
-	}
-
-
-	template <typename Limits, typename Log>
-	inline void game_endpoint<Limits, Log>::process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10626, "game_endpoint::process_rest_request: Start.");
-		}
-
-		if (ascii::are_equal_i_n(resource, "/games", 6)) {
-			process_games(http, method, resource);
-		}
-		else if (ascii::are_equal_i(resource, "/shutdown")) {
-			process_shutdown(http, method);
-		}
-		else {
-			// 404
-			base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "The requested resource was not found.", 0x10627);
-		}
-
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10628, "game_endpoint::process_rest_request: Done.");
-		}
-	}
-
-
-	template <typename Limits, typename Log>
-	inline void game_endpoint<Limits, Log>::process_games(abc::http_server_stream<Log>& http, const char* method, const char* resource) {
-		const char* resource_games = resource + 6;
-
-		if (ascii::are_equal_i(resource_games, "")) {
-			create_game(http, method);
-		}
-		else {
-			unsigned game_id = 0;
-			unsigned player_id = 0;
-			unsigned player_i = 0;
-			unsigned since_move_i = 0;
-			char moves[6 + 1 + 1];
-			moves[0] = '\0';
-
-			if (std::sscanf(resource_games, "/%u/players/%u/%6s", &game_id, &player_id, moves) == 3) {
-				accept_move(http, method, static_cast<endpoint_game_id_t>(game_id), static_cast<endpoint_player_id_t>(player_id), moves);
-			}
-			else if (std::sscanf(resource_games, "/%u/players/%u", &game_id, &player_i) == 2) {
-				claim_player(http, method, static_cast<endpoint_game_id_t>(game_id), player_i);
-			}
-			else if (std::sscanf(resource_games, "/%u/moves?since=%u", &game_id, &since_move_i) == 2) {
-				get_moves(http, method, static_cast<endpoint_game_id_t>(game_id), since_move_i);
-			}
-		}
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::create_game(abc::http_server_stream<Log>& http, const char* method) {
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10629, "game_endpoint::create_game: Start.");
-		}
-
-		if (!verify_method_post(http, method)) {
-			return false;
-		}
-
-		if (!verify_header_json(http)) {
-			return false;
-		}
-
-		player_type_t player_x_type;
-		player_type_t player_o_type;
-
-		if (!get_player_types(http, method, player_x_type, player_o_type)) {
-			return false;
-		}
-
-		// Find a slot
-		std::size_t game_i = max_game_count;
-		if (_game_count < max_game_count) {
-			game_i = _game_count++;
-		}
-		else {
-			for (std::size_t i = 0; i < max_game_count; i++) {
-				if (_games[i].board().is_game_over()) {
-					game_i = i;
-
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1062a, "game_endpoint::create_game: game_i=%zu", game_i);
-					}
-					break;
-				}
-			}
-		}
-
-		if (game_i >= max_game_count) {
-			constexpr const char* no_game_capacity = "The service has a temporary game capacity shortage.";
-
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1062b, "Service error: Out of game capacity.");
-			}
-
-			// 503
-			base::send_simple_response(http, status_code::Service_Unavailable, reason_phrase::Service_Unavailable, content_type::text, no_game_capacity, 0x1062c);
-			return false;
-		}
-
-		endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
-
-		endpoint_player_id_t endpoint_player_x_id = 0;
-		endpoint_player_id_t endpoint_player_o_id = 0;
-
-		if (player_x_type == player_type::external) {
-			endpoint_player_x_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
-		}
-
-		if (player_o_type == player_type::external) {
-			endpoint_player_o_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
-		}
-
-		_games[game_i].reset(endpoint_game_id, player_x_type, endpoint_player_x_id, player_o_type, endpoint_player_o_id, base::_log);
-
-		// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-		char body[abc::size::k1 + 1];
-		abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-		abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
-		json.put_begin_object();
-			json.put_property("gameId");
-			json.put_number(endpoint_game_id);
-		json.put_end_object();
-		json.put_char('\0');
-		json.flush();
-
-		char content_length[abc::size::_32 + 1];
-		std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-		// Send the http response
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1062d, "Sending response 200");
-		}
-
-		http.put_protocol(protocol::HTTP_11);
-		http.put_status_code(status_code::OK);
-		http.put_reason_phrase(reason_phrase::OK);
-
-		http.put_header_name(header::Content_Type);
-		http.put_header_value(content_type::json);
-		http.put_header_name(header::Content_Length);
-		http.put_header_value(content_length);
-		http.end_headers();
-
-		http.put_body(body);
-
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1062e, "game_endpoint::create_game: Done.");
-		}
-
-		return true;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::get_player_types(abc::http_server_stream<Log>& http, const char* /*method*/, player_type_t& player_x_type, player_type_t& player_o_type) {
-		char players[2][abc::size::_64 + 1];
-		bool has_players = false;
-
-		std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
-		abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
-		char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
-		abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-		constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"players\": [ \"external\", \"slow_engine\" ]}.";
-
-		json.get_token(token, sizeof(buffer));
-		if (token->item != abc::json::item::begin_object) {
-			// The body is not a JSON object.
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1062f, "Content error: Expected '{'.");
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10630);
-			return false;
-		}
-
-		// Read all properties.
-		while (true) {
-			// The tokens at this level must be properties or }.
-			json.get_token(token, sizeof(buffer));
-
-			// If we reached }, then we are done parsing.
-			if (token->item == abc::json::item::end_object) {
-				break;
-			}
-
-			if (token->item != abc::json::item::property) {
-				// Not a property.
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10631, "Content error: Expected a property.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10632);
-				return false;
-			}
-
-			// We expect 1 property - "players".
-			if (ascii::are_equal(token->value.property, "players")) {
-				// Parse array [2].
-				json.get_token(token, sizeof(buffer));
-
-				if (token->item != abc::json::item::begin_array) {
-					// Not [.
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10633, "Content error: Expected '['.");
-					}
-
-					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10634);
-					return false;
-				}
-
-				for (std::size_t i = 0; i < 2; i++) {
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10635, "Parsing players[%zu]", i);
-					}
-
-					json.get_token(token, sizeof(buffer));
-					if (token->item != abc::json::item::string) {
-						// Not a string.
-						if (base::_log != nullptr) {
-							base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10636, "Content error: Expected a string.");
-						}
-
-						// 400
-						base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10637);
-						return false;
-					}
-
-					std::strcpy(players[i], token->value.string);
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10638, "players[%zu]='%s'", i, players[i]);
-					}
-				}
-
-				json.get_token(token, sizeof(buffer));
-				if (token->item != abc::json::item::end_array) {
-					// Not ].
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10639, "Content error: Expected ']'.");
-					}
-
-					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1063a);
-					return false;
-				}
-
-				has_players = true;
-			}
-			else {
-				// Future-proof: Ignore unknown properties.
-				json.skip_value();
-			}
-		}
-
-		if (!has_players) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063b, "Content error: Players not received.");
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1063c);
-			return false;
-		}
-
-		// Player types
-		constexpr const char* invalid_player_type = "An invalid player type was received.";
-
-		player_x_type = player_type::from_text(players[0]);
-		if (player_x_type == player_type::none) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063d, "Content error: Invalid value of players[0]='%s'.", players[0]);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, 0x1063e);
-			return false;
-		}
-
-		player_o_type = player_type::from_text(players[1]);
-		if (player_o_type == player_type::none) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1063f, "Content error: Invalid value of players[1]='%s'.", players[1]);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_player_type, 0x10640);
-			return false;
-		}
-
-		return true;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::claim_player(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10641, "game_endpoint::claim_player: Start.");
-		}
-
-		if (!verify_method_post(http, method)) {
-			return false;
-		}
-
-		if (endpoint_game_id == 0 || player_i > 1) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10642, "Resource error: game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x10643);
-			return false;
-		}
-
-		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
-			if (_games[game_i].id() == endpoint_game_id) {
-				endpoint_player_id_t endpoint_player_id;
-				if (!_games[game_i].claim_player(player_i, endpoint_player_id)) {
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10644, "Security error: Player already claimed. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
-					}
-
-					// 403
-					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "This play has already been claimed.", 0x10645);
-					return false;
-				}
-
-				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-				char body[abc::size::k1 + 1];
-				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
-				json.put_begin_object();
-					json.put_property("playerId");
-					json.put_number(endpoint_player_id);
-				json.put_end_object();
-				json.put_char('\0');
-				json.flush();
-
-				char content_length[abc::size::_32 + 1];
-				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-				// Send the http response
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10646, "Sending response 200");
-				}
-
-				http.put_protocol(protocol::HTTP_11);
-				http.put_status_code(status_code::OK);
-				http.put_reason_phrase(reason_phrase::OK);
-
-				http.put_header_name(header::Content_Type);
-				http.put_header_value(content_type::json);
-				http.put_header_name(header::Content_Length);
-				http.put_header_value(content_length);
-				http.end_headers();
-
-				http.put_body(body);
-
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10647, "game_endpoint::claim_player: Done.");
-				}
-
-				return true;
-			}
-		}
-
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10648, "Resource error: Game not found. game_id=%u, player_i=%u", (unsigned)endpoint_game_id, player_i);
-		}
-
-		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10649);
-		return false;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::accept_move(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1064a, "game_endpoint::accept_move: Start.");
-		}
-
-		if (!ascii::are_equal_i(moves, "moves")) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064b, "Resource error: '%s' must be 'moves'.", moves);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x1064c);
-			return false;
-		}
-
-		if (!verify_method_post(http, method)) {
-			return false;
-		}
-
-		if (!verify_header_json(http)) {
-			return false;
-		}
-
-		if (endpoint_game_id == 0 || endpoint_player_id == 0) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064d, "Resource error: game_id=%u, player_id=%u",
-					(unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x1064e);
-			return false;
-		}
-
-		move mv;
-		// Read move from JSON
-		{
-			std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
-			abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
-			char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
-			abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-			constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"row\": 0, \"col\": 1}.";
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::begin_object) {
-				// Not {.
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1064f, "Content error: Expected '{'.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10650);
-				return false;
-			}
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "row")) {
-				// Not "row".
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10651, "Content error: Expected \"row\".");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10652);
-				return false;
-			}
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < row_count)) {
-				// Not a valid row.
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10653, "Content error: Expected 0 <= number <= 5.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10654);
-				return false;
-			}
-
-			mv.row = token->value.number;
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "col")) {
-				// Not "col".
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10655, "Content error: Expected \"col\".");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10656);
-				return false;
-			}
-
-			json.get_token(token, sizeof(buffer));
-			if (token->item != abc::json::item::number || !(0 <= token->value.number && token->value.number < col_count)) {
-				// Not a valid row.
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10657, "Content error: Expected 0 <= number <= 7.");
-				}
-
-				// 400
-				base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10658);
-				return false;
-			}
-
-			mv.col = token->value.number;
-		}
-
-		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
-			if (_games[game_i].id() == endpoint_game_id) {
-				player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
-
-				if (player_id == player_id::none) {
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10659, "Resource error: Player not found. player_id=%u", (unsigned)endpoint_player_id);
-					}
-
-					// 404
-					base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A player with the supplied ID was not found.", 0x1065a);
-					return false;
-				}
-
-				if (!_games[game_i].accept_move(player_id, mv)) {
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1065b, "Resource error: Move not accepted. move={ %u, %u }", mv.row, mv.col);
-					}
-
-					// 403
-					base::send_simple_response(http, status_code::Forbidden, reason_phrase::Forbidden, content_type::text, "The move was not accepted.", 0x1065c);
-					return false;
-				}
-
-				// Return 200.
-				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-				char body[abc::size::k1 + 1];
-				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
-
-				json.put_begin_object();
-					json.put_property("i");
-					json.put_number(_games[game_i].board().move_count() - 1);
-
-					if (_games[game_i].board().is_game_over()) {
-						json.put_property("winner");
-						json.put_number(_games[game_i].board().winner());
-					}
-
-				json.put_end_object();
-				json.put_char('\0');
-				json.flush();
-
-				char content_length[abc::size::_32 + 1];
-				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-				// Send the http response
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x1065d, "Sending response 200");
-				}
-
-				http.put_protocol(protocol::HTTP_11);
-				http.put_status_code(status_code::OK);
-				http.put_reason_phrase(reason_phrase::OK);
-
-				http.put_header_name(header::Content_Type);
-				http.put_header_value(content_type::json);
-				http.put_header_name(header::Content_Length);
-				http.put_header_value(content_length);
-				http.end_headers();
-
-				http.put_body(body);
-
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1065e, "game_endpoint::accept_moves: Done.");
-				}
-
-				return true;
-			}
-		}
-
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1065f, "Resource error: Game not found. game_id=%u", (unsigned)endpoint_game_id);
-		}
-
-		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10660);
-		return false;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::get_moves(abc::http_server_stream<Log>& http, const char* method, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10661, "game_endpoint::get_moves: Start.");
-		}
-
-		if (!verify_method_get(http, method)) {
-			return false;
-		}
-
-		if (endpoint_game_id == 0) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10662, "Resource error: game_id=%u", (unsigned)endpoint_game_id);
-			}
-
-			// 400
-			base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "An invalid resource was supplied.", 0x10663);
-			return false;
-		}
-
-		for (std::size_t game_i = 0; game_i < _game_count; game_i++) {
-			if (_games[game_i].id() == endpoint_game_id) {
-				// Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-				char body[abc::size::k2 + 1];
-				abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-				abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
-
-				json.put_begin_object();
-					json.put_property("moves");
-						json.put_begin_array();
-
-						for (std::size_t move_i = since_move_i; move_i < _games[game_i].board().move_count(); move_i++) {
-							json.put_begin_object();
-								json.put_property("i");
-								json.put_number(move_i);
-								json.put_property("move");
-								json.put_begin_object();
-									json.put_property("row");
-									json.put_number(_games[game_i].moves()[move_i].row);
-									json.put_property("col");
-									json.put_number(_games[game_i].moves()[move_i].col);
-								json.put_end_object();
-							json.put_end_object();
-						}
-
-						json.put_end_array();
-
-					if (_games[game_i].board().is_game_over()) {
-						json.put_property("winner");
-						json.put_number(_games[game_i].board().winner());
-					}
-
-				json.put_end_object();
-				json.put_char('\0');
-				json.flush();
-
-				char content_length[abc::size::_32 + 1];
-				std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
-
-				// Send the http response
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10664, "Sending response 200");
-				}
-
-				http.put_protocol(protocol::HTTP_11);
-				http.put_status_code(status_code::OK);
-				http.put_reason_phrase(reason_phrase::OK);
-
-				http.put_header_name(header::Content_Type);
-				http.put_header_value(content_type::json);
-				http.put_header_name(header::Content_Length);
-				http.put_header_value(content_length);
-				http.end_headers();
-
-				http.put_body(body);
-
-				if (base::_log != nullptr) {
-					base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10665, "game_endpoint::get_moves: Done.");
-				}
-
-				return true;
-			}
-		}
-
-		if (base::_log != nullptr) {
-			base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10666, "Resource error: Game not found. game_id=%u, since_move_i=%u", (unsigned)endpoint_game_id, since_move_i);
-		}
-
-		// 404
-		base::send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "A game with the supplied ID was not found.", 0x10667);
-		return false;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline void game_endpoint<Limits, Log>::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
-		if (!verify_method_post(http, method)) {
-			return;
-		}
-
-		base::set_shutdown_requested();
-
-		// 200
-		base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x10668);
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::verify_method_get(abc::http_server_stream<Log>& http, const char* method) {
-		if (!ascii::are_equal_i(method, method::GET)) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10669, "Method error: Expected 'GET'.");
-			}
-
-			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method GET for this request.", 0x1066a);
-			return false;
-		}
-
-		return true;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::verify_method_post(abc::http_server_stream<Log>& http, const char* method) {
-		if (!ascii::are_equal_i(method, method::POST)) {
-			if (base::_log != nullptr) {
-				base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066b, "Method error: Expected 'POST'.");
-			}
-
-			// 405
-			base::send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "Expected method POST for this request.", 0x1066c);
-			return false;
-		}
-
-		return true;
-	}
-
-
-	template <typename Limits, typename Log>
-	inline bool game_endpoint<Limits, Log>::verify_header_json(abc::http_server_stream<Log>& http) {
-		bool has_content_type_json = false;
-
-		// Read all headers
-		while (true) {
-			char header[abc::size::k1 + 1];
-
-			// No more headers
-			http.get_header_name(header, sizeof(header));
-			if (http.gcount() == 0) {
-				break;
-			}
-
-			if (ascii::are_equal_i(header, header::Content_Type)) {
-				if (has_content_type_json) {
-					// We've already received a Content-Type header.
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066d, "Header error: Already received 'Content-Type'.");
-					}
-
-					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "The Content-Type header was supplied more than once.", 0x1066e);
-					return false;
-				}
-
-				http.get_header_value(header, sizeof(header));
-
-				static const std::size_t content_type_json_len = std::strlen(content_type::json);
-				if (!ascii::are_equal_i_n(header, content_type::json, content_type_json_len)) {
-					// The Content-Type is not json.
-					if (base::_log != nullptr) {
-						base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1066f, "Header error: Expected `application/json` as 'Content-Type'.");
-					}
-
-					// 400
-					base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, "'application/json' is the only supported Content-Type.", 0x10670);
-					return false;
-				}
-
-				has_content_type_json = true;
-			}
-			else {
-				// Future-proof: Ignore unknown headers.
-				http.get_header_value(header, sizeof(header));
-			}
-		}
-
-		return has_content_type_json;
-	}
-
-}}
+    std::lock_guard<std::mutex> lock(_vmem->mutex);
 
+    state_scores_map::iterator itr = ensure_board_state_in_map(_game->board().state());
+    diag_base::expect(suborigin, itr.can_deref(), __TAG__, "itr.can_deref()");
+
+    move some_move;
+    bool should_explore = true; //// TODO: Calculate exploration
+
+    // Analyze what we have.
+    score_calc_t max_count   = 0;
+    score_calc_t min_count   = 0;
+    score_calc_t none_count  = 0;
+    score_calc_t score_count = 0;
+    score_calc_t score_sum   = 0;
+
+    for (count_t c = 0; c < col_count; c++) {
+        move mv{ _game->board().col_size(c), c };
+
+        if (_game->board().get_move(mv) == player_id::none) {
+            score_calc_t curr_score = itr->value[c];
+
+            if (curr_score == score::max) {
+                max_count++;
+            }
+            else if (curr_score == score::min) {
+                min_count++;
+            }
+            else if (curr_score == score::none) {
+                none_count++;
+            }
+            else {
+                score_count++;
+                score_sum += learning_weight(curr_score);
+            }
+        }
+    }
+
+    // If there is one or more max scores, pick one of them.
+    if (max_count > 0) {
+        score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
+
+        for (count_t c = 0; c < col_count; c++) {
+            move mv{ _game->board().col_size(c), c };
+
+            if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::max) {
+                if (--rand_i == 0) {
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (max) mv={%u,%u}", mv.row, mv.col);
+
+                    return mv;
+                }
+            }
+        }
+    }
+
+    // If all the scores are min, pick one of them.
+    else if (min_count > 0 && none_count == 0 && score_count == 0) {
+        score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
+
+        count_t c = static_cast<count_t>(rand_i % (score_calc_t)col_count);
+        count_t r = _game->board().col_size(c);
+        move mv{ r, c };
+
+        if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::min) {
+            if (--rand_i == 0) {
+                diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (min) mv={%u,%u}", mv.row, mv.col);
+
+                return mv;
+            }
+        }
+    }
+
+    // Make a weighted pick - the weight of each move is its score.
+    else {
+        if (should_explore) {
+            score_sum += none_count * learning_weight(score::mid);
+        }
+
+        score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
+
+        for (count_t c = 0; c < col_count; c++) {
+            count_t r = _game->board().col_size(c);
+            score_calc_t curr_score = itr->value[c];
+            move mv{ r, c };
+
+            if (_game->board().get_move(mv) == player_id::none) {
+                if (score::min <= curr_score && curr_score <= score::max) {
+                    some_move = mv;
+                    rand_sum -= learning_weight(curr_score);
+                }
+                else if (should_explore && curr_score == score::none) {
+                    some_move = mv;
+                    rand_sum -= learning_weight(score::mid);
+                }
+
+                if (rand_sum <= 0) {
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: mv={%u,%u}, curr_score=%d", mv.row, mv.col, curr_score);
+
+                    return mv;
+                }
+            }
+        }
+    }
+
+    diag_base::assert(suborigin, false, __TAG__, "Impossible!");
+
+    return some_move;
+}
+
+
+inline void player_agent::learn() {
+    constexpr const char* suborigin = "learn()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
+
+    // Learning is a process that takes place after a game is over.
+    // If the game was won by the agent's player, a "reward" is added to the score of each move made by the learning player, but the final can't be higher `max`.
+    // If the game was drawn by the agent's player, a reward is still added, but it is smaller.
+    // If the game was lost by the agent's player, a "penalty" is subtracted, but the final can't be lower than 'min'.
+
+    std::lock_guard<std::mutex> lock(_vmem->mutex);
+
+    // The temp board is used as a key in the knowledge base.
+    board learning_key_board(diag_base::log());
+
+    // Replay each move of the game, and update the scores for the learning player.
+    for (unsigned i = 0; i < _game->moves().size(); i++) {
+        move mv(_game->moves()[i]);
+
+        if (learning_key_board.current_player_id() == _player_id) {
+            // Find the current state in the knowledge base. 
+            state_scores_map::iterator itr = ensure_board_state_in_map(learning_key_board.state());
+
+            score_t old_score = itr->value[mv.col] == score::none ? score::mid : itr->value[mv.col];
+
+            if (_game->board().winner() == _player_id) {
+                // Win
+                score_t new_score = old_score + score::win;
+                itr->value[mv.col] = std::min(score::max, new_score);
+
+                diag_base::put_any(suborigin, abc::diag::severity::debug, 0x105b1, "(win) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+                        i, learning_key_board.state(), mv.row, mv.col, old_score, new_score);
+            }
+            else if (_game->board().winner() == player_id::none) {
+                // Draw
+                score_t new_score = old_score + score::draw;
+                itr->value[mv.col] = std::min(score::max, new_score);
+
+                diag_base::put_any(suborigin, abc::diag::severity::debug, 0x105b2, "(draw) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+                        i, learning_key_board.state(), mv.row, mv.col, old_score, new_score);
+            }
+            else {
+                // Loss
+                score_t new_score = old_score + score::loss;
+                itr->value[mv.col] = std::max(score::min, new_score);
+
+                diag_base::put_any(suborigin, abc::diag::severity::debug, 0x105b3, "(loss) move:%u, state=%8.8x, row=%d, col=%d, old_score=%d, new_score=%d",
+                        i, learning_key_board.state(), mv.row, mv.col, old_score, new_score);
+            }
+        }
+
+        learning_key_board.accept_move(mv);
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline player_type_t player_agent::player_type() const {
+    return _player_type;
+}
+
+
+inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_state_t board_state) {
+    constexpr const char* suborigin = "ensure_board_state_in_map";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    state_scores_map::iterator itr = _vmem->state_scores_map.find(board_state);
+
+    if (itr.can_deref()) {
+        diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+
+        return itr;
+    }
+
+    // An item with this key was not found. Insert a 'none' one.
+
+    // Init the item before inserting it.
+    state_scores_map::value_type item;
+    item.key = board_state;
+    for (int c = 0; c < col_count; c++) {
+        item.value[c] = score::none;
+    }
+
+    // Insert the item.
+    state_scores_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
+    diag_base::expect(suborigin, itr_b.second, __TAG__, "itr_b.second");
+    diag_base::expect(suborigin, itr_b.first.can_deref(), __TAG__, "itr_b.first.can_deref()");
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+
+    return itr_b.first;
+}
+
+
+inline score_calc_t player_agent::learning_weight(score_calc_t score) noexcept {
+    return score * score * score;
+}
+
+
+// --------------------------------------------------------------
+
+
+inline game::game(abc::diag::log_ostream* log) 
+    : game("game", log) {
+
+}
+
+
+inline game::game(const char* origin, abc::diag::log_ostream* log)
+    : diag_base(abc::copy(origin), log)
+    , _board(log)
+    , _agent_x(log)
+    , _agent_o(log) {
+}
+
+
+inline void game::reset(const player_types& player_types) {
+    constexpr const char* suborigin = "reset";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    _agent_x.reset(this, player_id::x, player_types.player_x_type);
+    _agent_o.reset(this, player_id::o, player_types.player_o_type);
+    _board.reset();
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline void game::start() {
+    constexpr const char* suborigin = "start";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10621, "Begin: current_player_id=%u", _board.current_player_id());
+
+    if (_board.current_player_id() == player_id::x) {
+        _agent_x.make_move_async();
+    }
+    else if (_board.current_player_id() == player_id::o) {
+        _agent_o.make_move_async();
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline std::size_t game::accept_move(player_id_t player_id, const move& move) {
+    constexpr const char* suborigin = "accept_move";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, move={%u,%u}", player_id, move.row, move.col);
+
+    diag_base::expect(suborigin, player_id == _board.current_player_id(), __TAG__, "player_id == _board.current_player_id()");
+
+    _board.accept_move(move);
+    _moves.push_back(move);
+    std::size_t move_i = _moves.size() - 1;
+
+    if (_board.is_game_over()) {
+        if (_board.winner() != player_id::none) {
+            diag_base::put_any(suborigin, abc::diag::severity::important, 0x10623, "GAME OVER - player_id=%u wins", _board.winner());
+        }
+        else {
+            diag_base::put_any(suborigin, abc::diag::severity::important, 0x10624, "GAME OVER - draw");
+        }
+
+        for (std::size_t i = 0; i < _moves.size(); i++) {
+            diag_base::put_any(suborigin, abc::diag::severity::optional, 0x10625, "%zu (%c) - {%u,%u}", i, (i & 1) == 0 ? 'X' : 'O', _moves[i].row, _moves[i].col);
+        }
+
+        if (_agent_x.player_type() == player_type::fast_engine && _agent_o.player_type() == player_type::slow_engine) {
+            _agent_x.learn();
+        }
+        else if (_agent_o.player_type() == player_type::fast_engine && _agent_x.player_type() == player_type::slow_engine) {
+            _agent_o.learn();
+        }
+    }
+    else {
+        if (_board.current_player_id() == player_id::x) {
+            _agent_x.make_move_async();
+        }
+        else if (_board.current_player_id() == player_id::o) {
+            _agent_o.make_move_async();
+        }
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: move_i=%zu", move_i);
+
+    return move_i;
+}
+
+
+inline const board& game::board() const {
+    return _board;
+}
+
+
+inline const std::vector<move>& game::moves() const {
+    return _moves;
+}
+
+
+// --------------------------------------------------------------
+
+
+inline endpoint_game::endpoint_game(abc::diag::log_ostream* log)
+    : base("endpoint_game", log) {
+}
+
+
+inline void endpoint_game::reset(endpoint_game_id_t endpoint_game_id,
+                                player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
+                                player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id) {
+    constexpr const char* suborigin = "reset";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: endpoint_game_id=%u", endpoint_game_id);
+
+    player_types player_types;
+    player_types.player_x_type = player_x_type;
+    player_types.player_o_type = player_o_type;
+
+    base::reset(player_types);
+
+    _endpoint_game_id                        = endpoint_game_id;
+    _endpoint_player_x.endpoint_player_id    = endpoint_player_x_id;
+    _endpoint_player_x.is_claimed            = endpoint_player_x_id == 0;
+    _endpoint_player_o.endpoint_player_id    = endpoint_player_o_id;
+    _endpoint_player_o.is_claimed            = endpoint_player_o_id == 0;
+
+    if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
+        start();
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
+    constexpr const char* suborigin = "claim_player";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
+
+    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+
+    endpoint_player_id_t endpoint_player_id;
+
+    if (player_i == 0) {
+        diag_base::expect(suborigin, !_endpoint_player_x.is_claimed, __TAG__, "!_endpoint_player_x.is_claimed");
+
+        endpoint_player_id = _endpoint_player_x.endpoint_player_id;
+        _endpoint_player_x.is_claimed = true;
+    }
+    else {
+        diag_base::expect(suborigin, !_endpoint_player_o.is_claimed, __TAG__, "!_endpoint_player_o.is_claimed");
+
+        endpoint_player_id = _endpoint_player_o.endpoint_player_id;
+        _endpoint_player_o.is_claimed = true;
+    }
+
+    if (_endpoint_player_x.is_claimed && _endpoint_player_o.is_claimed) {
+        start();
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: endpoint_player_id=%u", endpoint_player_id);
+
+    return endpoint_player_id;
+}
+
+
+inline bool endpoint_game::is_player_claimed(unsigned player_i) {
+    constexpr const char* suborigin = "is_player_claimed";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
+
+    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+
+    bool is_claimed = player_i == 0 ? _endpoint_player_x.is_claimed : _endpoint_player_o.is_claimed;
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: is_claimed=%d", is_claimed);
+
+    return is_claimed;
+}
+
+
+inline endpoint_game_id_t endpoint_game::id() const {
+    return _endpoint_game_id;
+}
+
+
+inline player_id_t endpoint_game::player_id(endpoint_player_id_t endpoint_player_id) const {
+    if (endpoint_player_id == _endpoint_player_x.endpoint_player_id) {
+        return player_id::x;
+    }
+    else if (endpoint_player_id == _endpoint_player_o.endpoint_player_id) {
+        return player_id::o;
+    }
+
+    return player_id::none;
+}
+
+
+// --------------------------------------------------------------
+
+
+inline game_endpoint::game_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log)
+    : base(std::move(config), log) {
+}
+
+
+inline std::unique_ptr<abc::net::tcp_server_socket> game_endpoint::create_server_socket() {
+    return std::unique_ptr<abc::net::tcp_server_socket>(new abc::net::tcp_server_socket(abc::net::socket::family::ipv4, base::log()));
+}
+
+
+inline void game_endpoint::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_rest_request";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10626, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
+
+    try {
+        if (abc::ascii::are_equal_i_n(request.resource.path.c_str(), "/games", len_request_path_games)) {
+            process_games(http, request);
+        }
+        else if (abc::ascii::are_equal_i(request.resource.path.c_str(), "/shutdown")) {
+            process_shutdown(http, request);
+        }
+        else {
+            // 404
+            throw_exception(suborigin, 0x10627,
+                abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "The requested resource was not found.");
+        }
+    }
+    catch (const abc::net::http::endpoint_error& err) {
+        base::send_simple_response(http, err.status_code, err.reason_phrase.c_str(), err.content_type.c_str(), err.body.c_str(), err.tag);
+    }
+    catch (const std::runtime_error& err) {
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, err.what(), __TAG__);
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10628, "End:");
+}
+
+
+inline void game_endpoint::process_games(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_games";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
+
+    const char* request_path_games = request.resource.path.c_str() + len_request_path_games;
+    if (abc::ascii::are_equal_i(request_path_games, "")) {
+        create_game(http, request);
+    }
+    else {
+        unsigned game_id = 0;
+        unsigned player_id = 0;
+        unsigned player_i = 0;
+        unsigned since_move_i = 0;
+        char moves[6 + 1 + 1];
+        moves[0] = '\0';
+
+        if (std::sscanf(request_path_games, "/%u/players/%u/%6s", &game_id, &player_id, moves) == 3) {
+            accept_move(http, request, static_cast<endpoint_game_id_t>(game_id), static_cast<endpoint_player_id_t>(player_id), moves);
+        }
+        else if (std::sscanf(request_path_games, "/%u/players/%u", &game_id, &player_i) == 2) {
+            claim_player(http, request, static_cast<endpoint_game_id_t>(game_id), player_i);
+        }
+        else {
+            abc::net::http::query::const_iterator query_since = request.resource.query.find("since");
+
+            if (std::sscanf(request_path_games, "/%u/moves", &game_id) == 1
+                && query_since != request.resource.query.end()
+                && std::sscanf(query_since->second.c_str(), "%u", &since_move_i) == 1) {
+
+                get_moves(http, request, static_cast<endpoint_game_id_t>(game_id), since_move_i);
+            }
+        }
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline void game_endpoint::create_game(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "create_game";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10629, "Begin: method=%s", request.method.c_str());
+
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
+
+    player_types player_types = get_player_types(http, request);
+    require(suborigin, __TAG__, player_types.player_x_type != player_type::none && player_types.player_o_type != player_type::none,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "At least one of the player types provided was invalid.");
+
+    // Create an endpoint_game in memory.
+    std::size_t game_i;
+    {
+        {
+            //// TODO: Take a lock;
+            game_i = _games.size();
+            _games.push_back(endpoint_game(diag_base::log()));
+            diag_base::put_any(suborigin, abc::diag::severity::optional, 0x105bd, "game_i=%zu", game_i);
+        }
+
+        endpoint_game_id_t endpoint_game_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+
+        endpoint_player_id_t endpoint_player_x_id = 0;
+        endpoint_player_id_t endpoint_player_o_id = 0;
+
+        if (player_types.player_x_type == player_type::external) {
+            endpoint_player_x_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+        }
+
+        if (player_types.player_o_type == player_type::external) {
+            endpoint_player_o_id = ((std::rand() & 0xffff) << 16) | ((std::rand() & 0xffff));
+        }
+
+        _games[game_i].reset(endpoint_game_id, player_types.player_x_type, endpoint_player_x_id, player_types.player_o_type, endpoint_player_o_id);
+    }
+
+    // 200
+    std::stringbuf sb;
+    abc::net::json::writer json(&sb, diag_base::log());
+
+    abc::net::json::literal::object obj = {
+        { "gameId", abc::net::json::literal::number(_games[game_i].id()) }
+    };
+    json.put_value(abc::net::json::value(std::move(obj)));
+
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline player_types game_endpoint::get_player_types(abc::net::http::server& http, const abc::net::http::request& /*request*/) {
+    constexpr const char* suborigin = "get_player_types";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    player_types player_types{ player_type::none, player_type::none };
+
+    std::streambuf* sb = static_cast<abc::net::http::request_reader&>(http).rdbuf();
+    abc::net::json::reader json(sb, diag_base::log());
+
+    abc::net::json::value val = json.get_value();
+    require(suborigin, 0x1062f, val.type() == abc::net::json::value_type::object,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a JSON object.");
+
+    abc::net::json::literal::object::const_iterator players_itr = val.object().find("players");
+    require(suborigin, __TAG__, players_itr != val.object().cend(),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" property.");
+    require(suborigin, __TAG__, players_itr->second.type() == abc::net::json::value_type::array,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" array.");
+
+    const abc::net::json::literal::array& players_array = players_itr->second.array();
+    require(suborigin, __TAG__, players_array.size() == 2,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" array of size 2.");
+
+    for (std::size_t i = 0; i < 2; i++) {
+        require(suborigin, __TAG__, players_array[i].type() == abc::net::json::value_type::string,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a string item in the \"players\" array.");
+
+        player_type_t current_player_type = player_type::from_text(players_array[i].string().c_str());
+        require(suborigin, __TAG__, current_player_type != player_type::none,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a valid player_type item in the \"players\" array.");
+
+        // { player_x_type, player_o_type }
+        if (player_types.player_x_type == player_type::none) {
+            player_types.player_x_type = current_player_type;
+        }
+        else {
+            player_types.player_o_type = current_player_type;
+        }
+    }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    return player_types;
+}
+
+
+inline void game_endpoint::claim_player(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned player_i) {
+    constexpr const char* suborigin = "claim_player";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10641, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)player_i);
+
+    require_method_post(suborigin, __TAG__, request);
+
+    require(suborigin, __TAG__, endpoint_game_id > 0 && player_i <= 1,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID or player ID was supplied.");
+
+    for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
+        if (_games[game_i].id() == endpoint_game_id) {
+            require(suborigin, __TAG__, !_games[game_i].is_player_claimed(player_i),
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The player with the given index has already been claimed.");
+
+            endpoint_player_id_t endpoint_player_id = _games[game_i].claim_player(player_i);
+
+            // 200
+            std::stringbuf sb;
+            abc::net::json::writer json(&sb, diag_base::log());
+
+            abc::net::json::literal::object obj = {
+                { "playerId", abc::net::json::literal::number(endpoint_player_id) }
+            };
+            json.put_value(abc::net::json::value(std::move(obj)));
+
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10647, "End:");
+            return;
+        }
+    }
+
+    // 404
+    throw_exception(suborigin, 0x10649,
+        abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A game with the supplied ID was not found.");
+}
+
+
+inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, endpoint_player_id_t endpoint_player_id, const char* moves) {
+    constexpr const char* suborigin = "accept_move";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1064a, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
+
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
+
+    require(suborigin, 0x1064b, abc::ascii::are_equal_i(moves, "moves"),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: The segment after the player ID must be 'moves'.");
+
+    require(suborigin, 0x1064d, endpoint_game_id > 0 && endpoint_player_id > 0,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID or player ID was supplied.");
+
+    move mv;
+    // Read move from JSON
+    {
+        std::streambuf* sb = static_cast<abc::net::http::request_reader&>(http).rdbuf();
+        abc::net::json::reader json(sb, diag_base::log());
+
+        abc::net::json::value val = json.get_value();
+        require(suborigin, 0x1064f, val.type() == abc::net::json::value_type::object,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a JSON object.");
+
+        abc::net::json::literal::object::const_iterator row_itr = val.object().find("row");
+        require(suborigin, 0x10651, val.type() == abc::net::json::value_type::object,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Missing property \"row\".");
+        require(suborigin, 0x10653, row_itr->second.type() == abc::net::json::value_type::number && static_cast<int>(row_itr->second.number()) == row_itr->second.number() && 0 <= row_itr->second.number() && row_itr->second.number() < row_count,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected 0 <= row <= 2.");
+
+        mv.row = static_cast<count_t>(row_itr->second.number());
+
+        abc::net::json::literal::object::const_iterator col_itr = val.object().find("col");
+        require(suborigin, 0x10655, val.type() == abc::net::json::value_type::object,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Missing property \"col\".");
+        require(suborigin, 0x10657, col_itr->second.type() == abc::net::json::value_type::number && static_cast<int>(col_itr->second.number()) == col_itr->second.number() && 0 <= col_itr->second.number() && col_itr->second.number() < col_count,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected 0 <= col <= 2.");
+
+        mv.col = static_cast<count_t>(col_itr->second.number());
+    }
+
+    for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
+        if (_games[game_i].id() == endpoint_game_id) {
+            require(suborigin, __TAG__, !_games[game_i].board().is_game_over(),
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The game with the supplied ID is over.");
+
+            player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
+            require(suborigin, 0x10659, player_id != player_id::none,
+               abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.");
+
+            require(suborigin, __TAG__, _games[game_i].board().get_move(mv) == player_id::none,
+                abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The square of the supplied move is occupied.");
+
+            std::size_t move_i = _games[game_i].accept_move(player_id, mv);
+
+            // 200
+            std::stringbuf sb;
+            abc::net::json::writer json(&sb, diag_base::log());
+
+            abc::net::json::literal::object obj = {
+                { "i", abc::net::json::literal::number(move_i) }
+            };
+            if (_games[game_i].board().is_game_over()) {
+                obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
+            }
+            json.put_value(abc::net::json::value(std::move(obj)));
+
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            return;
+        }
+    }
+
+    // 404
+    throw_exception(suborigin, 0x1065f,
+        abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A game with the supplied ID was not found.");
+}
+
+
+inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::net::http::request& request, endpoint_game_id_t endpoint_game_id, unsigned since_move_i) {
+    constexpr const char* suborigin = "get_moves";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10661, "Begin: method=%s, game_id=%u, move_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, since_move_i);
+
+    require_method_get(suborigin, __TAG__, request);
+
+    require(suborigin, 0x10662, endpoint_game_id > 0,
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID was supplied.");
+
+    for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
+        if (_games[game_i].id() == endpoint_game_id) {
+            // 200
+            std::stringbuf sb;
+            abc::net::json::writer json(&sb, diag_base::log());
+
+            abc::net::json::literal::array moves;
+            for (std::size_t move_i = since_move_i; move_i < _games[game_i].moves().size(); move_i++) {
+                moves.push_back(abc::net::json::literal::object({
+                    { "i",    abc::net::json::literal::number(move_i) },
+                    { "move", abc::net::json::literal::object( {
+                        { "row", abc::net::json::literal::number(_games[game_i].moves()[move_i].row) },
+                        { "col", abc::net::json::literal::number(_games[game_i].moves()[move_i].col) },
+                    }) },
+                }));
+            }
+
+            abc::net::json::literal::object obj = {
+                { "moves", std::move(moves) }
+            };
+            if (_games[game_i].board().is_game_over()) {
+                obj["winner"] = abc::net::json::literal::number(_games[game_i].board().winner());
+            }
+            json.put_value(abc::net::json::value(std::move(obj)));
+
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            return;
+        }
+    }
+
+    // 404
+    throw_exception(suborigin, 0x10666,
+        abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A game with the supplied ID was not found.");
+}
+
+
+inline void game_endpoint::process_shutdown(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_shutdown";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s", request.method.c_str());
+
+    require_method_post(suborigin, __TAG__, request);
+
+    base::set_shutdown_requested();
+
+    // 200
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x10668);
+}
+
+
+inline void game_endpoint::require_method_get(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
+    require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::GET),
+        abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'GET'.");
+}
+
+
+inline void game_endpoint::require_method_post(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
+    require(suborigin, tag, abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST),
+        abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Method error: Expected 'POST'.");
+}
+
+
+inline void game_endpoint::require_content_type_json(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request) {
+    abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
+
+    require(suborigin, tag, content_type_itr != request.headers.cend(),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The 'Content-Type' header was not supplied.");
+    require(suborigin, tag, abc::ascii::are_equal_i(content_type_itr->second.c_str(), abc::net::http::content_type::json),
+        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The value of header 'Content-Type' must be `application/json`.");
+}

@@ -23,526 +23,534 @@ SOFTWARE.
 -->
 
 <html>
-	<head>
-		<title>Connect 4 (abc Samples)</title>
-		<style>
-			a
-			{
-				color: honeydew;
-			}
-			.readonly
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18;
-				background-color: rgb(60, 60, 60);
-				color: rgb(210, 210, 210);
-			}
+    <head>
+        <title>Connect 4 (abc Samples)</title>
+        <style>
+            a
+            {
+                color: honeydew;
+            }
+            .readonly
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 18;
+                background-color: rgb(60, 60, 60);
+                color: rgb(210, 210, 210);
+            }
 
-			.edit
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18;
-				background-color: rgb(210, 210, 210);
-				color: rgb(60, 60, 60);
-			}
+            .edit
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 18;
+                background-color: rgb(210, 210, 210);
+                color: rgb(60, 60, 60);
+            }
 
-			.title
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 36;
-				text-align: center;
-			}
+            .title
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 36;
+                text-align: center;
+            }
 
-			.subtitle
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 26;
-				text-align: center;
-			}
+            .subtitle
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 26;
+                text-align: center;
+            }
 
-			.copyright
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 14;
-				text-align: center;
-			}
+            .copyright
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14;
+                text-align: center;
+            }
 
-			.board
-			{
-				font-family: 'Courier New', Courier, monospace;
-				font-size: 64;
-				text-align: center;
-				border-style: solid;
-				border-color:grey;
-				border-width: 1pt;
-				border-spacing: 0pt;
-			}
-			.x
-			{
-				color: red;
-			}
-			.o
-			{
-				color: green;
-			}
-		</style>
-	</head>
-	<body class="readonly">
-		<table>
-			<tr>
-				<td>
-					<div class="title">Connect 4</div>
-					<div class="subtitle">abc Samples</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+            .board
+            {
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 64;
+                text-align: center;
+                border-style: solid;
+                border-color:grey;
+                border-width: 1pt;
+                border-spacing: 0pt;
+            }
+            .x
+            {
+                color: red;
+            }
+            .o
+            {
+                color: green;
+            }
+        </style>
+    </head>
+    <body class="readonly">
+        <table>
+            <tr>
+                <td>
+                    <div class="title">Connect 4</div>
+                    <div class="subtitle">abc Samples</div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<div class="readonly">This is a C++ program that implements different strategies for playing Connect 4.</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <div class="readonly">This is a C++ program that implements different strategies for playing Connect 4.</div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<hr />
-					<br />
-					<div>
-						<a href="javascript:createGame()">Create game</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<select id="playerX">
-							<option value="external">User</option>
-							<option value="slow_engine" selected>Computer, slow</option>
-							<option value="fast_engine">Computer, fast</option>
-						</select>
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<select id="playerO">
-							<option value="external">User</option>
-							<option value="slow_engine" selected>Computer, slow</option>
-							<option value="fast_engine">Computer, fast</option>
-						</select>
-					</div>
-					<br />
-					<div>
-						<a href="javascript:claimPlayer()">Claim player</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<select id="playerI">
-							<option value="0">X</option>
-							<option value="1">O</option>
-						</select>
-					</div>
-					<br />
-					<div>
-						<a href="javascript:getMoves()">Get moves</a>
-					</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <hr />
+                    <br />
+                    <div>
+                        <a href="javascript:createGame()">Create game</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <select id="playerX">
+                            <option value="external">User</option>
+                            <option value="slow_engine" selected>Computer, slow</option>
+                            <option value="fast_engine">Computer, fast</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <select id="playerO">
+                            <option value="external">User</option>
+                            <option value="slow_engine" selected>Computer, slow</option>
+                            <option value="fast_engine">Computer, fast</option>
+                        </select>
+                    </div>
+                    <br />
+                    <div>
+                        <a href="javascript:claimPlayer()">Claim player</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <select id="playerI">
+                            <option value="0">X</option>
+                            <option value="1">O</option>
+                        </select>
+                    </div>
+                    <br />
+                    <div>
+                        <a href="javascript:getMoves()">Get moves</a>
+                    </div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<table class="board">
-						<tr>
-							<td id="0_5" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_5" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_5" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_5" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_5" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_5" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_5" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-						<tr>
-							<td id="0_4" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_4" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_4" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_4" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_4" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_4" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_4" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-						<tr>
-							<td id="0_3" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_3" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_3" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_3" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_3" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_3" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_3" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-						<tr>
-							<td id="0_2" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_2" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_2" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_2" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_2" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_2" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_2" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-						<tr>
-							<td id="0_1" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_1" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_1" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_1" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_1" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_1" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_1" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-						<tr>
-							<td id="0_0" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="1_0" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="2_0" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="3_0" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="4_0" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="5_0" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
-							<td id="6_0" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <table class="board">
+                        <tr>
+                            <td id="0_5" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_5" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_5" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_5" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_5" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_5" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_5" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td id="0_4" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_4" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_4" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_4" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_4" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_4" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_4" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td id="0_3" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_3" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_3" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_3" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_3" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_3" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_3" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td id="0_2" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_2" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_2" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_2" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_2" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_2" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_2" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td id="0_1" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_1" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_1" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_1" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_1" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_1" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_1" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td id="0_0" class="board" onclick="acceptMove(0)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="1_0" class="board" onclick="acceptMove(1)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="2_0" class="board" onclick="acceptMove(2)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="3_0" class="board" onclick="acceptMove(3)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="4_0" class="board" onclick="acceptMove(4)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="5_0" class="board" onclick="acceptMove(5)">&nbsp;&nbsp;&nbsp;</td>
+                            <td id="6_0" class="board" onclick="acceptMove(6)">&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<br />
-					<div>
-						<a href="javascript:shutdown()">Shutdown</a>
-					</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <br />
+                    <div>
+                        <a href="javascript:shutdown()">Shutdown</a>
+                    </div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<hr />
-					<table>
-						<tr>
-							<td>
-								Learning games:
-							</td>
-							<td>
-								<div id="gameCount" class="readonly"></div>
-							</td>
-						</tr>
-						<tr>
-							<td>Learning streak:</td>
-							<td>
-								<div id="currentStreak" class="readonly"></div>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Learning streaks:
-							</td>
-							<td>
-								<div id="streaks" class="readonly"></div>
-							</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <hr />
+                    <table>
+                        <tr>
+                            <td>
+                                Learning games:
+                            </td>
+                            <td>
+                                <div id="gameCount" class="readonly"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Learning streak:</td>
+                            <td>
+                                <div id="currentStreak" class="readonly"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Learning streaks:
+                            </td>
+                            <td>
+                                <div id="streaks" class="readonly"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<hr />
-					<br />
-					<div id="status" class="readonly"></div>
-					<br />
-					<hr />
-					<br />
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <hr />
+                    <br />
+                    <div id="status" class="readonly"></div>
+                    <br />
+                    <hr />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<br />
-					<br />
-					<div class="copyright">Copyright (c) 2018-2024 by Zlatko Michailov, MIT License</div>
-				</td>
-			</tr>
-		</table>
+            <tr>
+                <td>
+                    <br />
+                    <br />
+                    <div class="copyright">Copyright (c) 2018-2024 by Zlatko Michailov, MIT License</div>
+                </td>
+            </tr>
+        </table>
 
 
-		<script>
-			let isRunning = true;
-			let gameId = 0;
-			let playerIds = [];
-			let sinceMoveI = 0;
-			let canAcceptMove = true;
-			let canRefreshMoves = true;
-			let gameCount = 0;
-			let currentStreak = 0;
-			let autoCreateGame = false;
-			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
+        <script>
+            let isRunning = true;
+            let canCreateGame = true;
+            let gameId = 0;
+            let playerIds = [];
+            let sinceMoveI = 0;
+            let canAcceptMove = true;
+            let canRefreshMoves = true;
+            let gameCount = 0;
+            let currentStreak = 0;
+            let autoCreateGame = false;
+            const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
-			function createGame() {
-				const playerX = document.getElementById("playerX").value;
-				const playerO = document.getElementById("playerO").value;
+            function createGame() {
+                if (!canCreateGame) {
+                    document.getElementById("status").innerHTML += "A game is already in progress. <br />";
+                    return;
+                }
 
-				autoCreateGame = (playerX === "fast_engine" || playerX === "slow_engine") && (playerO === "fast_engine" || playerO === "slow_engine");
+                const playerX = document.getElementById("playerX").value;
+                const playerO = document.getElementById("playerO").value;
 
-				clearBoard();
+                autoCreateGame = (playerX === "fast_engine" || playerX === "slow_engine") && (playerO === "fast_engine" || playerO === "slow_engine");
 
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+                clearBoard();
 
-				let requestInit = {
-					method: "POST",
-					headers: requestHeaders,
-					mode: "same-origin",
-					body: JSON.stringify({
-						players: [
-							document.getElementById("playerX").value,
-							document.getElementById("playerO").value
-						]
-					})
-				};
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-				let request = new Request("/games");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
+                let requestInit = {
+                    method: "POST",
+                    headers: requestHeaders,
+                    mode: "same-origin",
+                    body: JSON.stringify({
+                        players: [
+                            document.getElementById("playerX").value,
+                            document.getElementById("playerO").value
+                        ]
+                    })
+                };
 
-						if (response.status === 200) {
-							gameId = 0;
-							playerIds = [];
-							sinceMoveI = 0;
-							canAcceptMove = true;
-						}
+                let request = new Request("/games");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
 
-						canRefreshMoves = true;
-						refreshMoves();
+                        if (response.status === 200) {
+                            canCreateGame = false;
+                            gameId = 0;
+                            playerIds = [];
+                            sinceMoveI = 0;
+                            canAcceptMove = true;
+                        }
 
-						return response.json();
-					})
-					.then(function (result) {
-						console.log(result);
-						gameId = result.gameId;
-						document.getElementById("status").innerHTML += "gameId=" + gameId + "<br />";
-					});
-			}
+                        canRefreshMoves = true;
+                        refreshMoves();
 
-			function claimPlayer() {
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log(result);
+                        gameId = result.gameId;
+                        document.getElementById("status").innerHTML += "gameId=" + gameId + "<br />";
+                    });
+            }
 
-				let requestInit = {
-					method: "POST",
-					mode: "same-origin",
-				};
+            function claimPlayer() {
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-				let request = new Request("/games/" + gameId + "/players/" + document.getElementById("playerI").value);
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.json();
-					})
-					.then(function (result) {
-						console.log(result);
-						playerIds[parseInt(document.getElementById("playerI").value)] = result.playerId;
-						document.getElementById("status").innerHTML += "playerId[" + document.getElementById("playerI").value + "]=" + playerIds[parseInt(document.getElementById("playerI").value)] + "<br />";
-					});
-			}
+                let requestInit = {
+                    method: "POST",
+                    mode: "same-origin",
+                };
 
-			function acceptMove(col) {
-				if (!canAcceptMove) {
-					document.getElementById("status").innerHTML += "Still waiting for the game to accept the move. <br />";
-					return;
-				}
+                let request = new Request("/games/" + gameId + "/players/" + document.getElementById("playerI").value);
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log(result);
+                        playerIds[parseInt(document.getElementById("playerI").value)] = result.playerId;
+                        document.getElementById("status").innerHTML += "playerId[" + document.getElementById("playerI").value + "]=" + playerIds[parseInt(document.getElementById("playerI").value)] + "<br />";
+                    });
+            }
 
-				let playerI = sinceMoveI % 2;
-				let playerSymbol = playerI == 0 ? "X" : "O";
-				if (!playerIds[playerI]) {
-					document.getElementById("status").innerHTML += "Player " + playerSymbol + " has not been claimed by this console. <br />";
-					return;
-				}
+            function acceptMove(col) {
+                if (!canAcceptMove) {
+                    document.getElementById("status").innerHTML += "Still waiting for the game to accept the move. <br />";
+                    return;
+                }
 
-				let row;
-				for (row = 5; row >= 0; row--) {
-					let square = document.getElementById(col + "_" + row);
-					if (square.childElementCount > 0) {
-						break;
-					}
-				}
-				row++;
+                let playerI = sinceMoveI % 2;
+                let playerSymbol = playerI == 0 ? "X" : "O";
+                if (!playerIds[playerI]) {
+                    document.getElementById("status").innerHTML += "Player " + playerSymbol + " has not been claimed by this console. <br />";
+                    return;
+                }
 
-				if (row >= 6) {
-					document.getElementById("status").innerHTML += "Column [" + col + "] is not available. <br />";
-					return;
-				}
+                let row;
+                for (row = 5; row >= 0; row--) {
+                    let square = document.getElementById(col + "_" + row);
+                    if (square.childElementCount > 0) {
+                        break;
+                    }
+                }
+                row++;
 
-				canAcceptMove = false;
+                if (row >= 6) {
+                    document.getElementById("status").innerHTML += "Column [" + col + "] is not available. <br />";
+                    return;
+                }
 
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+                canAcceptMove = false;
 
-				let requestInit = {
-					method: "POST",
-					headers: requestHeaders,
-					mode: "same-origin",
-					body: JSON.stringify({
-						row: row,
-						col: col
-					})
-				};
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-				let request = new Request("/games/" + gameId + "/players/" + playerIds[playerI] + "/moves");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.json();
-					})
-					.then(function (result) {
-						console.log(result);
+                let requestInit = {
+                    method: "POST",
+                    headers: requestHeaders,
+                    mode: "same-origin",
+                    body: JSON.stringify({
+                        row: row,
+                        col: col
+                    })
+                };
 
-						canAcceptMove = true;
-						document.getElementById("status").innerHTML += result.i + ": { " + row + ", " + col + "} <br />";
-						sinceMoveI = Math.max(sinceMoveI, result.i + 1);
+                let request = new Request("/games/" + gameId + "/players/" + playerIds[playerI] + "/moves");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log(result);
 
-						let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;" + playerSymbol.toUpperCase() + "&nbsp;</span>";
-						let square = document.getElementById(col + "_" + row);
-						square.innerHTML = html;
-					});
-			}
+                        canAcceptMove = true;
+                        document.getElementById("status").innerHTML += result.i + ": { " + row + ", " + col + "} <br />";
+                        sinceMoveI = Math.max(sinceMoveI, result.i + 1);
 
-			function refreshMoves() {
-				if (canRefreshMoves) {
-					setTimeout(function () {
-						getMoves()
-						.then(function () {
-							refreshMoves();
-						})
-					}, 1000);
-				}
-			}
+                        let html = "<span class=\"" + playerSymbol.toLowerCase() + "\">&nbsp;" + playerSymbol.toUpperCase() + "&nbsp;</span>";
+                        let square = document.getElementById(col + "_" + row);
+                        square.innerHTML = html;
+                    });
+            }
 
-			function getMoves() {
-				let requestInit = {
-					method: "GET",
-					mode: "same-origin",
-				};
+            function refreshMoves() {
+                if (canRefreshMoves) {
+                    setTimeout(function () {
+                        getMoves()
+                        .then(function () {
+                            refreshMoves();
+                        })
+                    }, 1000);
+                }
+            }
 
-				let request = new Request("/games/" + gameId + "/moves?since=" + sinceMoveI);
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						console.log("Content-Length " + response.headers.get("Content-Length"));
-						return response.text();
-					})
-					.then(function (text) {
-						console.log("Body <" + text + ">");
-						return JSON.parse(text);
-					})
-					.then(function (result) {
-						console.log(result);
-						showMoves(result.moves);
-						checkWinner(result.winner);
-					});
-			}
+            function getMoves() {
+                let requestInit = {
+                    method: "GET",
+                    mode: "same-origin",
+                };
 
-			function showMoves(mvs) {
-				sinceMoveISaved = sinceMoveI;
-				mvs.forEach(mv => {
-					if (mv.i < sinceMoveISaved) {
-						return;
-					}
+                let request = new Request("/games/" + gameId + "/moves?since=" + sinceMoveI);
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        console.log("Content-Length " + response.headers.get("Content-Length"));
+                        return response.text();
+                    })
+                    .then(function (text) {
+                        console.log("Body <" + text + ">");
+                        return JSON.parse(text);
+                    })
+                    .then(function (result) {
+                        console.log(result);
+                        showMoves(result.moves);
+                        checkWinner(result.winner);
+                    });
+            }
 
-					sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
+            function showMoves(mvs) {
+                sinceMoveISaved = sinceMoveI;
+                mvs.forEach(mv => {
+                    if (mv.i < sinceMoveISaved) {
+                        return;
+                    }
 
-					document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
-					let html;
-					if (mv.i % 2 == 0) {
-						html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
-					}
-					else {
-						html = "<span class=\"o\">&nbsp;O&nbsp;</span>";
-					}
-					document.getElementById(mv.move.col + "_" + mv.move.row).innerHTML = html;
-				});
+                    sinceMoveI = Math.max(sinceMoveI, mv.i + 1);
 
-			}
+                    document.getElementById("status").innerHTML += mv.i + ": { " + mv.move.row + ", " + mv.move.col + "} <br />";
+                    let html;
+                    if (mv.i % 2 == 0) {
+                        html = "<span class=\"x\">&nbsp;X&nbsp;</span>";
+                    }
+                    else {
+                        html = "<span class=\"o\">&nbsp;O&nbsp;</span>";
+                    }
+                    document.getElementById(mv.move.col + "_" + mv.move.row).innerHTML = html;
+                });
 
-			function checkWinner(winner) {
-				if (typeof(winner) === "number") {
-					canAcceptMove = false;
-					canRefreshMoves = false;
+            }
 
-					if (winner === 2) {
-						document.getElementById("status").innerHTML += "The game ends in a DRAW. <br />";
+            function checkWinner(winner) {
+                if (typeof(winner) === "number") {
+                    canCreateGame = true;
+                    canAcceptMove = false;
+                    canRefreshMoves = false;
 
-						document.getElementById("streaks").innerHTML += " " + currentStreak;
-						currentStreak = 0;
-					}
-					else if (winner === 0) {
-						document.getElementById("status").innerHTML += "Player X wins! <br />";
+                    if (winner === 2) {
+                        document.getElementById("status").innerHTML += "The game ends in a DRAW. <br />";
 
-						if (document.getElementById("playerX").value === "fast_engine") {
-							document.getElementById("streaks").innerHTML += " " + currentStreak;
-							currentStreak = 0;
-						}
-						else {
-							currentStreak++;
-						}
-					}
-					else if (winner === 1) {
-						document.getElementById("status").innerHTML += "Player O wins! <br />";
+                        document.getElementById("streaks").innerHTML += " " + currentStreak;
+                        currentStreak = 0;
+                    }
+                    else if (winner === 0) {
+                        document.getElementById("status").innerHTML += "Player X wins! <br />";
 
-						if (document.getElementById("playerO").value === "fast_engine") {
-							document.getElementById("streaks").innerHTML += " " + currentStreak;
-							currentStreak = 0;
-						}
-						else {
-							currentStreak++;
-						}
-					}
-					else {
-						document.getElementById("status").innerHTML += "Unexpected winner " + winner + " <br />";
-					}
+                        if (document.getElementById("playerX").value === "fast_engine") {
+                            document.getElementById("streaks").innerHTML += " " + currentStreak;
+                            currentStreak = 0;
+                        }
+                        else {
+                            currentStreak++;
+                        }
+                    }
+                    else if (winner === 1) {
+                        document.getElementById("status").innerHTML += "Player O wins! <br />";
 
-					document.getElementById("currentStreak").innerHTML = currentStreak;
+                        if (document.getElementById("playerO").value === "fast_engine") {
+                            document.getElementById("streaks").innerHTML += " " + currentStreak;
+                            currentStreak = 0;
+                        }
+                        else {
+                            currentStreak++;
+                        }
+                    }
+                    else {
+                        document.getElementById("status").innerHTML += "Unexpected winner " + winner + " <br />";
+                    }
 
-					gameCount++;
-					document.getElementById("gameCount").innerHTML = gameCount;
+                    document.getElementById("currentStreak").innerHTML = currentStreak;
 
-					if (autoCreateGame) {
-						setTimeout(createGame, 1000);
-					}
-				}
-			}
+                    gameCount++;
+                    document.getElementById("gameCount").innerHTML = gameCount;
 
-			function shutdown() {
-				let requestInit = {
-					method: "POST",
-					mode: "same-origin",
-				};
+                    if (autoCreateGame) {
+                        setTimeout(createGame, 1000);
+                    }
+                }
+            }
 
-				let request = new Request("/shutdown");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
+            function shutdown() {
+                let requestInit = {
+                    method: "POST",
+                    mode: "same-origin",
+                };
 
-						if (response.ok) {
-							isRunning = false;
-							document.getElementById("status").innerHTML += remoteIsDown + "<br />";
-						}
-						else {
-							document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
-						}
-					});
-			}
+                let request = new Request("/shutdown");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
 
-			function clearBoard() {
-				for (let col = 0; col < 7; col++) {
-					for (let row = 0; row < 6; row++) {
-						document.getElementById(col + "_" + row).innerHTML = "&nbsp;&nbsp;&nbsp;";
-					}
-				}
+                        if (response.ok) {
+                            isRunning = false;
+                            document.getElementById("status").innerHTML += remoteIsDown + "<br />";
+                        }
+                        else {
+                            document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
+                        }
+                    });
+            }
 
-				document.getElementById("status").innerHTML = "";
-			}
-		</script>
-	</body>
+            function clearBoard() {
+                for (let col = 0; col < 7; col++) {
+                    for (let row = 0; row < 6; row++) {
+                        document.getElementById(col + "_" + row).innerHTML = "&nbsp;&nbsp;&nbsp;";
+                    }
+                }
+
+                document.getElementById("status").innerHTML = "";
+            }
+        </script>
+    </body>
 </html>

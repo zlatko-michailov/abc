@@ -24,108 +24,71 @@ SOFTWARE.
 
 
 #include <iostream>
-#include <fstream>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <algorithm>
+#include <string>
+#include <future>
 
 #include "game.h"
 
 
-// --------------------------------------------------------------
+constexpr const char* origin = "sample_connect4";
 
-
-abc::samples::vmem_bundle* abc::samples::player_agent::_vmem = nullptr;
-
-
-// --------------------------------------------------------------
+vmem_bundle* player_agent::_vmem = nullptr;
 
 
 int main(int /*argc*/, const char* argv[]) {
-	std::srand(std::time(nullptr));
+    constexpr const char* suborigin = "main()";
+    std::srand(std::time(nullptr));
 
-	// Create a log.
-	abc::log_filter filter(abc::severity::optional);
-	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);
+    // Create a log.
+    abc::table_ostream table(std::cout.rdbuf());
+    abc::diag::debug_line_ostream<> line(&table);
+    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
+    abc::diag::log_ostream log(&line, &filter);
 
-	// Use the path to this program to build the path to the pool file.
-	constexpr std::size_t max_path = abc::size::k1;
-	char path[max_path];
-	path[0] = '\0';
+    // Use the path to this program to build the path to the pool file.
+    std::string process_dir = abc::parent_path(argv[0]);
+    std::string vmem_path = process_dir + "/connect4.vmem";
+    std::string results_path = process_dir + "/results.csv";
 
-	constexpr const char vmem_path[] = "connect4.vmem";
-	std::size_t vmem_path_len = std::strlen(vmem_path); 
+    // Construct a pool and a map on it.
+    // If the file doesn't exist, the pool will be initialized.
+    // If the fie exists, it should be a valid pool.
+    vmem_bundle vmem(vmem_path.c_str(), &log);
+    player_agent::_vmem = &vmem;
 
-	constexpr const char results_path[] = "results.csv";
-	std::size_t results_path_len = std::strlen(results_path); 
+    log.put_any(origin, suborigin, abc::diag::severity::debug, 0x10673, "KB >>>");
+    for (state_scores_map::const_iterator itr = vmem.state_scores_map.cbegin(); itr != vmem.state_scores_map.cend(); itr++) {
+        log.put_any(origin, suborigin, abc::diag::severity::debug, 0x10674, "%16.16llx: %d %d %d %d %d %d %d",
+            (unsigned long long)itr->key,
+            itr->value[0], itr->value[1], itr->value[2], itr->value[3], itr->value[4], itr->value[5], itr->value[6]);
+    }
+    log.put_any(origin, suborigin, abc::diag::severity::debug, 0x10675, "<<< KB");
 
-	const char* prog_last_separator = std::strrchr(argv[0], '/');
-	std::size_t prog_path_len = 0;
-	std::size_t prog_path_len_1 = 0;
+    log.put_any(origin, suborigin, abc::severity::optional, 0x10676, "results_path='%s'", results_path.c_str());
+    std::ofstream results_stream(results_path, std::ios::ate);
 
-	if (prog_last_separator != nullptr) {
-		prog_path_len = prog_last_separator - argv[0];
-		prog_path_len_1 = prog_path_len + 1;
-		std::size_t full_path_len = prog_path_len_1 + std::max(vmem_path_len, results_path_len);
+    abc::table_ostream results_table(std::cout.rdbuf());
+    abc::diag::debug_line_ostream<> results_line(&table);
+    abc::diag::str_log_filter<const char *> results_filter("", abc::diag::severity::optional);
+    abc::diag::log_ostream results(&results_line, &results_filter);
 
-		if (full_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x10671,
-				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
-				max_path, full_path_len);
+    // Create an endpoint configuration.
+    abc::net::http::endpoint_config config(
+        "30304",             // port
+        5,                   // listen_queue_size
+        process_dir.c_str(), // root_dir (Note: No trailing slash!)
+        "/resources/"        // files_prefix
+    );
 
-			return 1;
-		}
+    // Create an endpoint.
+    game_endpoint endpoint(std::move(config), &log);
 
-		std::strncpy(path, argv[0], prog_path_len_1);
-	}
-	std::strcpy(path + prog_path_len_1, vmem_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10672, "vmem_path='%s'", path);
+    log.put_any(origin, suborigin, abc::diag::severity::warning, 0x10677, "Open a browser and navigate to http://<host>:30304/resources/index.html.");
+    log.put_blank_line(origin, suborigin, abc::diag::severity::warning);
 
+    // Let the endpoint listen in a separate thread.
+    std::future<void> done = endpoint.start_async();
+    done.wait();
 
-	// Construct a pool and a map on it.
-	// If the file doesn't exist, the pool will be initialized.
-	// If the fie exists, it should be a valid pool.
-	abc::samples::vmem_bundle vmem(path, &log);
-	abc::samples::player_agent::_vmem = &vmem;
-
-	log.put_any(abc::category::abc::samples, abc::severity::debug, 0x10673, "KB >>>");
-	for (abc::samples::vmem_map::const_iterator itr = vmem.state_scores_map.cbegin(); itr != vmem.state_scores_map.cend(); itr++) {
-		log.put_any(abc::category::abc::samples, abc::severity::debug, 0x10674, "%16.16llx: %d %d %d %d %d %d %d",
-			(unsigned long long)itr->key,
-			itr->value[0], itr->value[1], itr->value[2], itr->value[3], itr->value[4], itr->value[5], itr->value[6]);
-	}
-	log.put_any(abc::category::abc::samples, abc::severity::debug, 0x10675, "<<< KB");
-
-
-	std::strcpy(path + prog_path_len_1, results_path);
-	log.put_any(abc::category::abc::samples, abc::severity::optional, 0x10676, "results_path='%s'", path);
-	std::ofstream results_stream(path, std::ios::ate);
-
-	abc::log_filter results_filter(abc::severity::optional);
-	abc::samples::results_ostream results(results_stream.rdbuf(), &results_filter);
-
-
-	path[prog_path_len] = '\0';
-
-
-	// Create a endpoint.
-	abc::endpoint_config config(
-		"30304",			// port
-		5,					// listen_queue_size
-		path,				// root_dir (Note: No trailing slash!)
-		"/resources/"		// files_prefix
-	);
-	abc::samples::game_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
-
-	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x10677, "Open a browser and navigate to http://<host>:30304/resources/index.html.");
-	log.put_blank_line(abc::category::abc::samples, abc::severity::warning);
-
-	// Let the endpoint listen in a separate thread.
-	std::future<void> done = endpoint.start_async();
-	done.wait();
-
-	return 0;
+    return 0;
 }
-
-

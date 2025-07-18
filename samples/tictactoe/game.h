@@ -317,8 +317,8 @@ inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& be
     int best_score = -1;
 
     // For simplicity, try cells in order.
-    for (move_t r = 0; r < row_count; r++) {
-        for (move_t c = 0; c < col_count; c++) {
+    for (count_t r = 0; r < row_count; r++) {
+        for (count_t c = 0; c < col_count; c++) {
             move mv{ r, c };
 
             if (best_score < 1 && _temp_board.get_move(mv) == player_id::none) {
@@ -352,7 +352,7 @@ inline int player_agent::slow_find_best_move_for(player_id_t player_id, move& be
 
 
 inline void player_agent::fast_make_move() {
-    constexpr const char* suborigin = "slow_make_move()";
+    constexpr const char* suborigin = "fast_make_move()";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, board_state=0x%8.8x", _player_id, (unsigned)_game->board().state());
 
     move best_move = fast_find_best_move();
@@ -375,14 +375,14 @@ inline move player_agent::fast_find_best_move() {
     bool should_explore = true; //// TODO: Calculate exploration
 
     // Analyze what we have.
-    score_calc_t max_count  = 0;
-    score_calc_t min_count  = 0;
-    score_calc_t none_count = 0;
+    score_calc_t max_count   = 0;
+    score_calc_t min_count   = 0;
+    score_calc_t none_count  = 0;
     score_calc_t score_count = 0;
-    score_calc_t score_sum  = 0;
+    score_calc_t score_sum   = 0;
 
-    for (move_t r = 0; r < row_count; r++) {
-        for (move_t c = 0; c < col_count; c++) {
+    for (count_t r = 0; r < row_count; r++) {
+        for (count_t c = 0; c < col_count; c++) {
             if (_game->board().get_move(move{ r, c }) == player_id::none) {
                 score_calc_t curr_score = itr->value[r][c];
 
@@ -407,8 +407,8 @@ inline move player_agent::fast_find_best_move() {
     if (max_count > 0) {
         score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
-        for (move_t r = 0; r < row_count; r++) {
-            for (move_t c = 0; c < col_count; c++) {
+        for (count_t r = 0; r < row_count; r++) {
+            for (count_t c = 0; c < col_count; c++) {
                 move mv{ r, c };
 
                 if (_game->board().get_move(mv) == player_id::none && itr->value[r][c] == score::max) {
@@ -426,8 +426,8 @@ inline move player_agent::fast_find_best_move() {
     else if (min_count > 0 && none_count == 0 && score_count == 0) {
         score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
 
-        for (move_t r = 0; r < row_count; r++) {
-            for (move_t c = 0; c < col_count; c++) {
+        for (count_t r = 0; r < row_count; r++) {
+            for (count_t c = 0; c < col_count; c++) {
                 move mv{ r, c };
 
                 if (_game->board().get_move(mv) == player_id::none && itr->value[r][c] == score::min) {
@@ -449,8 +449,8 @@ inline move player_agent::fast_find_best_move() {
 
         score_calc_t rand_sum = static_cast<score_calc_t>(1 + std::rand() % score_sum);
 
-        for (move_t r = 0; r < row_count; r++) {
-            for (move_t c = 0; c < col_count; c++) {
+        for (count_t r = 0; r < row_count; r++) {
+            for (count_t c = 0; c < col_count; c++) {
                 score_calc_t curr_score = itr->value[r][c];
                 move mv{ r, c };
 
@@ -485,7 +485,7 @@ inline void player_agent::learn() {
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
 
     // Learning is a process that takes place after a game is over.
-    // If the game was won by the agent's player, a "reward" is added to the score of each move made by the learning player, but the final can't ne higher `max`.
+    // If the game was won by the agent's player, a "reward" is added to the score of each move made by the learning player, but the final can't be higher `max`.
     // If the game was drawn by the agent's player, a reward is still added, but it is smaller.
     // If the game was lost by the agent's player, a "penalty" is subtracted, but the final can't be lower than 'min'.
 
@@ -549,13 +549,15 @@ inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_
     state_scores_map::iterator itr = _vmem->state_scores_map.find(board_state);
 
     if (itr.can_deref()) {
+        diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+
         return itr;
     }
 
     // An item with this key was not found. Insert a 'none' one.
 
     // Init the item before inserting it.
-    ::state_scores_map::value_type item;
+    state_scores_map::value_type item;
     item.key = board_state;
     for (int r = 0; r < row_count; r++) {
         for (int c = 0; c < col_count; c++) {
@@ -564,7 +566,7 @@ inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_
     }
 
     // Insert the item.
-    ::state_scores_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
+    state_scores_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
     diag_base::expect(suborigin, itr_b.second, __TAG__, "itr_b.second");
     diag_base::expect(suborigin, itr_b.first.can_deref(), __TAG__, "itr_b.first.can_deref()");
 
@@ -1016,7 +1018,7 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
         require(suborigin, 0x105e6, row_itr->second.type() == abc::net::json::value_type::number && static_cast<int>(row_itr->second.number()) == row_itr->second.number() && 0 <= row_itr->second.number() && row_itr->second.number() < row_count,
             abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected 0 <= row <= 2.");
 
-        mv.row = static_cast<move_t>(row_itr->second.number());
+        mv.row = static_cast<count_t>(row_itr->second.number());
 
         abc::net::json::literal::object::const_iterator col_itr = val.object().find("col");
         require(suborigin, 0x105e8, val.type() == abc::net::json::value_type::object,
@@ -1024,7 +1026,7 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
         require(suborigin, 0x105ea, col_itr->second.type() == abc::net::json::value_type::number && static_cast<int>(col_itr->second.number()) == col_itr->second.number() && 0 <= col_itr->second.number() && col_itr->second.number() < col_count,
             abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected 0 <= col <= 2.");
 
-        mv.col = static_cast<move_t>(col_itr->second.number());
+        mv.col = static_cast<count_t>(col_itr->second.number());
     }
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {

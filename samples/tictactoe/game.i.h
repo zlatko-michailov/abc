@@ -39,10 +39,10 @@ SOFTWARE.
 using board_state_t = std::uint32_t;
 using score_calc_t = std::int16_t;
 using score_t = std::int8_t;
-using move_t = std::int32_t;
+using count_t = int;
 
-constexpr move_t row_count = 3;
-constexpr move_t col_count = 3;
+constexpr count_t row_count = 3;
+constexpr count_t col_count = 3;
 
 namespace score { //// TODO: enum?
     constexpr score_t none = -1;
@@ -72,7 +72,6 @@ struct start_page_layout {
 // --------------------------------------------------------------
 
 
-// Max 8 pages = 32KB in memory.
 ////using vmem_pool = abc::vmem::pool;
 ////using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
 using state_scores_map = abc::vmem::map<board_state_t, scores>;
@@ -92,7 +91,7 @@ struct vmem_bundle { //// TODO: knowledge_base?
 // --------------------------------------------------------------
 
 
-using player_id_t    = std::uint8_t;
+using player_id_t = std::uint8_t;
 
 namespace player_id { //// TODO: enum?
     constexpr player_id_t none = 0x0;
@@ -127,8 +126,8 @@ struct player_types {
 
 
 struct move {
-    move_t row;
-    move_t col;
+    count_t row;
+    count_t col;
 
     bool is_valid() const;
 };
@@ -176,7 +175,7 @@ private:
     player_id_t          _winner            = player_id::none;
     player_id_t          _current_player_id = player_id::x;
     board_state_t        _board_state       = { };
-    move_t               _move_count        = 0;
+    count_t              _move_count        = 0;
 };
 
 
