@@ -129,7 +129,7 @@ inline void board::undo_move(const move& move) {
 
     diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
     diag_base::expect(suborigin, get_move(move) != player_id::none, __TAG__, "get_move(move) != player_id::none"); 
-    diag_base::expect(suborigin, move.row == row_count - 1 || get_move({move.row + 1, move.col}) != player_id::none, __TAG__, "move.row == row_count - 1 || get_move({move.row + 1, move.col}) != player_id::none"); 
+    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, __TAG__, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
 
     if (!is_game_over()) {
         switch_current_player_id();
@@ -348,6 +348,12 @@ inline count_t board::move_pos(const move& move) const {
 // --------------------------------------------------------------
 
 
+inline player_agent::player_agent(abc::diag::log_ostream* log)
+    : diag_base("player_agent", log)
+    , _temp_board(log) {
+}
+
+
 inline void player_agent::reset(::game* game, player_id_t player_id, player_type_t player_type) {
     constexpr const char* suborigin = "reset()";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, player_type=%u", player_id, player_type);
@@ -489,29 +495,28 @@ inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int
 
         if (mv.is_valid()) {
             _temp_board.accept_move(mv);
-            int score = -max_depth;
 
-            if (_temp_board.is_game_over()) {
-                score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
-            }
-            else if (depth > 0 && _temp_board.move_count() < row_count * col_count) {
-                move dummy_mv;
-                score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
-            }
-            else {
-                score = -1;
-            }
+            {
+                int score = -max_depth;
+                if (_temp_board.is_game_over()) {
+                    score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
+                }
+                else {
+                    move dummy_mv;
+                    score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
+                }
 
-            if (score > best_score) {
-                best_move = mv;
-                best_score = score;
+                if (score > best_score) {
+                    best_move = mv;
+                    best_score = score;
+                }
+
+                if (depth == max_depth) {
+                    diag_base::put_any(suborigin, abc::diag::severity::optional, 0x1061d, "mv.col=%d, score=%d", mv.col, score);
+                }
             }
 
             _temp_board.undo_move(mv);
-
-            if (depth == max_depth) {
-                diag_base::put_any(suborigin, abc::diag::severity::optional, 0x1061d, "mv.col=%d, score=%d", mv.col, score);
-            }
         }
     }
 

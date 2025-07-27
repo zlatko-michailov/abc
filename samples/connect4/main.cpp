@@ -64,7 +64,7 @@ int main(int /*argc*/, const char* argv[]) {
     }
     log.put_any(origin, suborigin, abc::diag::severity::debug, 0x10675, "<<< KB");
 
-    log.put_any(origin, suborigin, abc::severity::optional, 0x10676, "results_path='%s'", results_path.c_str());
+    log.put_any(origin, suborigin, abc::diag::severity::optional, 0x10676, "results_path='%s'", results_path.c_str());
     std::ofstream results_stream(results_path, std::ios::ate);
 
     abc::table_ostream results_table(std::cout.rdbuf());
@@ -84,7 +84,7 @@ int main(int /*argc*/, const char* argv[]) {
     game_endpoint endpoint(std::move(config), &log);
 
     log.put_any(origin, suborigin, abc::diag::severity::warning, 0x10677, "Open a browser and navigate to http://<host>:30304/resources/index.html.");
-    log.put_blank_line(origin, suborigin, abc::diag::severity::warning);
+    log.put_blank_line(origin, abc::diag::severity::warning);
 
     // Let the endpoint listen in a separate thread.
     std::future<void> done = endpoint.start_async();

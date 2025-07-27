@@ -60,6 +60,25 @@
 					"ignoreFailures": true
 				}
 			]
+		},
+		{
+			"name": "Debug Sample Connect4",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/out/samples/connect4/connect4",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
 		}
 	]
 }
