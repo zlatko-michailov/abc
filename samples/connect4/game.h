@@ -501,7 +501,7 @@ inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int
                 if (_temp_board.is_game_over()) {
                     score = _temp_board.winner() != player_id::none ? depth + 2 : 0;
                 }
-                else {
+                else if (depth > 0) {
                     move dummy_mv;
                     score = -slow_find_best_move(dummy_mv, max_depth, depth - 1);
                 }
