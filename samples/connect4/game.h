@@ -557,7 +557,12 @@ inline move player_agent::fast_find_best_move() {
     score_calc_t score_sum   = 0;
 
     for (count_t c = 0; c < col_count; c++) {
-        move mv{ _game->board().col_size(c), c };
+        count_t r = _game->board().col_size(c);
+        if (r >= row_count) {
+            continue;
+        }
+
+        move mv{ r, c };
 
         if (_game->board().get_move(mv) == player_id::none) {
             score_calc_t curr_score = itr->value[c];
@@ -583,10 +588,16 @@ inline move player_agent::fast_find_best_move() {
         score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % max_count);
 
         for (count_t c = 0; c < col_count; c++) {
-            move mv{ _game->board().col_size(c), c };
+            count_t r = _game->board().col_size(c);
+            if (r >= row_count) {
+                continue;
+            }
+
+            move mv{ r, c };
 
             if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::max) {
                 if (--rand_i == 0) {
+                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
                     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (max) mv={%u,%u}", mv.row, mv.col);
 
                     return mv;
@@ -599,15 +610,21 @@ inline move player_agent::fast_find_best_move() {
     else if (min_count > 0 && none_count == 0 && score_count == 0) {
         score_calc_t rand_i = static_cast<score_calc_t>(1 + std::rand() % min_count);
 
-        count_t c = static_cast<count_t>(rand_i % (score_calc_t)col_count);
-        count_t r = _game->board().col_size(c);
-        move mv{ r, c };
+        for (count_t c = 0; c < col_count; c++) {
+            count_t r = _game->board().col_size(c);
+            if (r >= row_count) {
+                continue;
+            }
 
-        if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::min) {
-            if (--rand_i == 0) {
-                diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (min) mv={%u,%u}", mv.row, mv.col);
+            move mv{ r, c };
 
-                return mv;
+            if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::min) {
+                if (--rand_i == 0) {
+                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (min) mv={%u,%u}", mv.row, mv.col);
+
+                    return mv;
+                }
             }
         }
     }
@@ -622,11 +639,15 @@ inline move player_agent::fast_find_best_move() {
 
         for (count_t c = 0; c < col_count; c++) {
             count_t r = _game->board().col_size(c);
-            score_calc_t curr_score = itr->value[c];
+            if (r >= row_count) {
+                continue;
+            }
+
             move mv{ r, c };
+            score_calc_t curr_score = itr->value[c];
 
             if (_game->board().get_move(mv) == player_id::none) {
-                if (score::min <= curr_score && curr_score <= score::max) {
+                if (score::min < curr_score && curr_score < score::max) {
                     some_move = mv;
                     rand_sum -= learning_weight(curr_score);
                 }
@@ -636,6 +657,7 @@ inline move player_agent::fast_find_best_move() {
                 }
 
                 if (rand_sum <= 0) {
+                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
                     diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: mv={%u,%u}, curr_score=%d", mv.row, mv.col, curr_score);
 
                     return mv;
@@ -745,7 +767,7 @@ inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_
 
 
 inline score_calc_t player_agent::learning_weight(score_calc_t score) noexcept {
-    return score * score * score;
+    return score * score;
 }
 
 
