@@ -20,28 +20,12 @@
 ## To Do
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
-- `vmem`
-    - Entities
-        - page.h
-        - ptr.h
-        - pool.h
-        - iterator.h
-        - linked.h
-        - container.h
-        - list.h
-        - map.h
-        - string.h
-- `stream`
-    - Entities
-        - buffer_streambuf.h
-        - multifile_streambuf.h
-        - stream.h
-        - table_stream.h
-        - vector_streambuf.h
 - `gpio`
     - Entities
     - Samples
+- `timestamp.h` - either remove .i.h or move to a namespace.
 - Update docs when all classes are done.
+- Copyright - year.
 
 - Remove `virtual` from `override` definitions?
 - Update doc/ref/*.md for all classes that have been done.

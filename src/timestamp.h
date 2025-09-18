@@ -186,19 +186,19 @@ namespace abc {
             remaining_days = remaining_days % days_per_400_years;
         }
 
-        // The first century bounary is leap.
+        // The first century boundary is leap.
         if (remaining_days >= days_per_100_years_leap) {
             year += 100;
             remaining_days -= days_per_100_years_leap;
         }
 
         // The following century boundaries are not leap.
-        // We artificailly make them leap.
+        // We artificially make them leap.
         if (remaining_days >= days_per_100_years) {
             remaining_days += (remaining_days / days_per_100_years);
         }
 
-        // Now we have homogenious 4-year chunks.
+        // Now we have homogeneous 4-year chunks.
         if (remaining_days >= days_per_4_years) {
             year += 4 * (remaining_days / days_per_4_years);
             remaining_days = remaining_days % days_per_4_years;
