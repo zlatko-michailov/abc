@@ -28,7 +28,7 @@ SOFTWARE.
 #include "i/stream.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     template <typename Stream>
     inline stream<Stream>::stream(std::streambuf* sb)
@@ -187,5 +187,5 @@ namespace abc {
         base::flush();
     }
 
-}
+} }
 

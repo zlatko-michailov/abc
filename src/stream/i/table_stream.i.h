@@ -37,7 +37,7 @@ SOFTWARE.
 #include "stream.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     /**
      * @brief Output stream that puts lines.
@@ -193,4 +193,4 @@ namespace abc {
         vector_streambuf _sb;
     };
 
-}
+} }

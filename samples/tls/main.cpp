@@ -33,7 +33,7 @@ SOFTWARE.
 #include "../../src/net/openssl/socket.h"
 
 
-using log_table = abc::table_ostream;
+using log_table = abc::stream::table_ostream;
 using log_line = abc::diag::debug_line_ostream<>;
 using log_filter = abc::diag::str_log_filter<const char*>;
 using log_ostream = abc::diag::log_ostream;

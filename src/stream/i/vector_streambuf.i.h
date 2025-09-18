@@ -32,7 +32,7 @@ SOFTWARE.
 #include "buffer_streambuf.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     /**
      * @brief       A combination of an `abc::basic_buffer_streambuf` and an underlying `std::vector`.
@@ -100,5 +100,5 @@ namespace abc {
      */
     using vector_streambuf = basic_vector_streambuf<char>;
 
-}
+} }
 

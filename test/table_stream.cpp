@@ -30,8 +30,8 @@ SOFTWARE.
 #include "inc/table_stream.h"
 
 
-using thread_id_line_ostream = abc::line_ostream;
-using timestamp_line_ostream = abc::line_ostream;
+using thread_id_line_ostream = abc::stream::line_ostream;
+using timestamp_line_ostream = abc::stream::line_ostream;
 
 
 bool test_line_debug(test_context& context) {
@@ -63,8 +63,8 @@ bool test_line_debug(test_context& context) {
 
     char actual[abc::size::k2 + 1];
     actual[0] = abc::ascii::endl;
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
-    abc::table_ostream table(&sb);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
+    abc::stream::table_ostream table(&sb);
 
     bool passed = true;
 
@@ -131,8 +131,8 @@ bool test_line_diag(test_context& context) {
 
     char actual[abc::size::k2 + 1];
     actual[0] = abc::ascii::endl;
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
-    abc::table_ostream table(&sb);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
+    abc::stream::table_ostream table(&sb);
 
     bool passed = true;
 
@@ -197,8 +197,8 @@ bool test_line_test(test_context& context) {
 
     char actual[abc::size::k2 + 1];
     actual[0] = abc::ascii::endl;
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
-    abc::table_ostream table(&sb);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 1, sizeof(actual) - 1);
+    abc::stream::table_ostream table(&sb);
 
     bool passed = true;
 
@@ -238,16 +238,16 @@ bool test_line_test(test_context& context) {
 
 bool test_table_move(test_context& context) {
     char actual[abc::size::_256 + 1] = { };
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 
-    abc::table_ostream os1(&sb);
+    abc::stream::table_ostream os1(&sb);
     os1.put_line("first\n");
     os1.flush();
     passed = context.are_equal(actual, "first\n", 0x10731) && passed;
 
-    abc::table_ostream os2(std::move(os1));
+    abc::stream::table_ostream os2(std::move(os1));
     os2.put_line("second\n");
     os2.flush();
     passed = context.are_equal(actual, "first\nsecond\n", 0x10732) && passed;
@@ -258,11 +258,11 @@ bool test_table_move(test_context& context) {
 
 bool test_log_move(test_context& context) {
     char actual[abc::size::_256 + 1] = { };
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 
-    abc::table_ostream table(&sb);
+    abc::stream::table_ostream table(&sb);
     abc::diag::test_line_ostream<test_clock> line(&table);
     test_log_filter filter("", abc::diag::severity::optional);
 
@@ -280,17 +280,17 @@ bool test_log_move(test_context& context) {
 
 bool test_line_move(test_context& context) {
     char actual[abc::size::_256 + 1] = { };
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 
-    abc::table_ostream table(&sb);
-    abc::line_ostream os1(&table);
+    abc::stream::table_ostream table(&sb);
+    abc::stream::line_ostream os1(&table);
     os1.put_any("first first first first first ");
     os1.flush();
     passed = context.are_equal(actual, "first first first first first \n", 0x10735) && passed;
 
-    abc::line_ostream os2(std::move(os1));
+    abc::stream::line_ostream os2(std::move(os1));
     os2.put_any("second second second second second");
     os2.flush();
     passed = context.are_equal(actual, "first first first first first \nsecond second second second second\n", 0x10736) && passed;
@@ -305,13 +305,13 @@ bool _test_line_move(test_context& context, const char* line1_pattern, const cha
     thread_id.put_thread_id(std::this_thread::get_id());
 
     char actual[abc::size::k1 + 1] = { };
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     char expected[abc::size::k1 + 1];
 
     bool passed = true;
 
-    abc::table_ostream table(&sb);
+    abc::stream::table_ostream table(&sb);
     Line os1(&table);
     os1.put_any("origin_1", "suborigin_2", abc::diag::severity::critical, 0x01, "first");
     os1.flush();

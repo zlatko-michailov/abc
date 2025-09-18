@@ -411,10 +411,10 @@ namespace abc { namespace net { namespace json {
      * @details Reads a JSON payload token by token. To deserialize a `json::value`, see `json::reader`.
      */
     class istream
-        : public abc::istream
+        : public abc::stream::istream
         , public state {
 
-        using base       = abc::istream;
+        using base       = abc::stream::istream;
         using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
@@ -618,10 +618,10 @@ namespace abc { namespace net { namespace json {
      * @details Writes a JSON payload token by token. To serialize a `json::value`, see `json::writer`.
      */
     class ostream
-        : public abc::ostream
+        : public abc::stream::ostream
         , public state {
 
-        using base       = abc::ostream;
+        using base       = abc::stream::ostream;
         using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 

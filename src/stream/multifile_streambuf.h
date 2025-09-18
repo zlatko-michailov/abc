@@ -33,7 +33,7 @@ SOFTWARE.
 #include "i/multifile_streambuf.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     template <typename Clock>
     inline multifile_streambuf<Clock>::multifile_streambuf(std::string&& path, std::ios_base::openmode mode)
@@ -176,4 +176,4 @@ namespace abc {
 
 
     // --------------------------------------------------------------
-}
+} }

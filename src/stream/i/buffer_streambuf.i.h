@@ -28,7 +28,7 @@ SOFTWARE.
 #include <streambuf>
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     /**
      * @brief       `std::streambuf` implementation over a char buffer.
@@ -150,5 +150,5 @@ namespace abc {
      */
     using buffer_streambuf = basic_buffer_streambuf<char>;
 
-}
+} }
 

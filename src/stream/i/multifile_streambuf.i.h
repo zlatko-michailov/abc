@@ -34,7 +34,7 @@ SOFTWARE.
 #include "../../i/timestamp.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     /**
      * @brief        `streambuf` specialization that is backed by files whose names are made of timestamps.
@@ -227,4 +227,4 @@ namespace abc {
         std::size_t _current_size;
     };
 
-}
+} }

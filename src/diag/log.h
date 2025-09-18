@@ -42,7 +42,7 @@ namespace abc { namespace diag {
     }
 
 
-    inline log_line_ostream::log_line_ostream(table_ostream* table)
+    inline log_line_ostream::log_line_ostream(abc::stream::table_ostream* table)
         : base(table) {
     }
 
@@ -62,7 +62,7 @@ namespace abc { namespace diag {
 
 
     template <typename Clock>
-    inline debug_line_ostream<Clock>::debug_line_ostream(table_ostream* table)
+    inline debug_line_ostream<Clock>::debug_line_ostream(abc::stream::table_ostream* table)
         : ctor_base(table) {
     }
 
@@ -129,7 +129,7 @@ namespace abc { namespace diag {
 
 
     template <typename Clock>
-    inline diag_line_ostream<Clock>::diag_line_ostream(table_ostream* table)
+    inline diag_line_ostream<Clock>::diag_line_ostream(abc::stream::table_ostream* table)
         : ctor_base(table) {
     }
 
@@ -196,7 +196,7 @@ namespace abc { namespace diag {
 
 
     template <typename Clock>
-    inline test_line_ostream<Clock>::test_line_ostream(table_ostream* table)
+    inline test_line_ostream<Clock>::test_line_ostream(abc::stream::table_ostream* table)
         : ctor_base(table) {
     }
 

@@ -43,7 +43,7 @@ bool test_http_request_istream_extraspaces(test_context& context) {
         "\r\n"
         "  123 \t abc \r x \n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::request_istream istream(&sb, context.log());
 
@@ -92,7 +92,7 @@ bool test_http_request_istream_bodytext(test_context& context) {
         "  \"bar\": \"qwerty\"\r\n"
         "}";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::request_istream istream(&sb, context.log());
 
@@ -147,7 +147,7 @@ bool test_http_request_istream_bodybinary(test_context& context) {
         "\r\n"
         "\x01\x05\x10 text \x02\x03\x12 mixed \x04\x18\x19 with \x7f\x80 bytes \xaa\xff";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::request_istream istream(&sb, context.log());
 
@@ -204,7 +204,7 @@ bool test_http_request_istream_realworld_01(test_context& context) {
         "Cache-Control: max-age=0\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::request_istream istream(&sb, context.log());
 
@@ -681,7 +681,7 @@ bool test_http_response_istream_extraspaces(test_context& context) {
         "Header-Name:Header-Value\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::response_istream istream(&sb, context.log());
 
@@ -722,7 +722,7 @@ bool test_http_response_istream_realworld_01(test_context& context) {
         "Date: Sun, 31 May 2020 01:26:44 GMT\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::response_istream istream(&sb, context.log());
 
@@ -767,7 +767,7 @@ bool test_http_response_istream_realworld_02(test_context& context) {
         "{\"next\":\"https://centralus.notifications.teams.microsoft.com/users/8:orgid:66c7bbfd-e15c-4257-ad6b-867c195de604/endpoints/0bf687c1-c864-45df-891a-90f548dee242/events/poll?cursor=1590886559&epfs=srt&sca=2\"}\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::response_istream istream(&sb, context.log());
 
@@ -1090,7 +1090,7 @@ bool test_http_request_istream_move(test_context& context) {
         "GET https://en.cppreference.com/w/cpp/io/basic_streambuf HTTP/1.1\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::request_istream istream1(&sb, context.log());
 
@@ -1143,7 +1143,7 @@ bool test_http_response_istream_move(test_context& context) {
         "HTTP/1.1 302\r\n"
         "\r\n";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     abc::net::http::response_istream istream1(&sb, context.log());
 
@@ -1208,7 +1208,7 @@ bool http_request_reader_move(test_context& context) {
         "  \"bar\": \"qwerty\"\r\n"
         "}";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     HttpRequestReader reader1(&sb, context.log());
 
@@ -1299,7 +1299,7 @@ bool http_response_reader_move(test_context& context) {
         "  \"bar\": \"qwerty\"\r\n"
         "}";
 
-    abc::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(content, 0, std::strlen(content), nullptr, 0, 0);
 
     HttpResponseReader reader1(&sb, context.log());
 

@@ -33,7 +33,7 @@ SOFTWARE.
 #include "i/table_stream.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     inline table_ostream::table_ostream(std::streambuf* sb)
         : base(sb) {
@@ -264,4 +264,4 @@ namespace abc {
             _sb.move_current_put_pos(-1);
         }
     }
-}
+} }

@@ -178,10 +178,10 @@ namespace abc { namespace net { namespace http {
      * @brief Internal. Common http input stream. Used to read a request on the server or to read a response on the client.
      */
     class istream
-        : public abc::istream
+        : public abc::stream::istream
         , public state {
 
-        using base       = abc::istream;
+        using base       = abc::stream::istream;
         using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 
@@ -342,10 +342,10 @@ namespace abc { namespace net { namespace http {
      * @brief Internal. Common http output stream. Used to write a request on the client or to write a response on the server.
      */
     class ostream
-        : public abc::ostream
+        : public abc::stream::ostream
         , public state {
 
-        using base       = abc::ostream;
+        using base       = abc::stream::ostream;
         using state_base = state;
         using diag_base  = diag::diag_ready<const char*>;
 

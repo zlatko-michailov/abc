@@ -81,9 +81,9 @@ namespace abc { namespace diag {
      * @brief Line output stream for diagnostic purposes.
      */
     class log_line_ostream
-        : public line_ostream {
+        : public abc::stream::line_ostream {
 
-        using base = line_ostream;
+        using base = abc::stream::line_ostream;
 
     protected:
         /**
@@ -95,7 +95,7 @@ namespace abc { namespace diag {
          * @brief       Constructor.
          * @param table Pointer to a `table_ostream` instance to write the line to.
          */
-        log_line_ostream(table_ostream* table);
+        log_line_ostream(abc::stream::table_ostream* table);
 
         /**
          * @brief Move constructor.
@@ -155,7 +155,7 @@ namespace abc { namespace diag {
     class debug_line_ostream
         : public log_line_ostream {
 
-        using base = line_ostream;
+        using base = abc::stream::line_ostream;
         using ctor_base = log_line_ostream;
 
     public:
@@ -168,7 +168,7 @@ namespace abc { namespace diag {
          * @brief       Constructor.
          * @param table Pointer to a `table_ostream` instance to write the line to.
          */
-        debug_line_ostream(table_ostream* table);
+        debug_line_ostream(abc::stream::table_ostream* table);
 
         /**
          * @brief Move constructor.
@@ -237,7 +237,7 @@ namespace abc { namespace diag {
     class diag_line_ostream
         : public log_line_ostream {
 
-        using base = line_ostream;
+        using base = abc::stream::line_ostream;
         using ctor_base = log_line_ostream;
 
     public:
@@ -250,7 +250,7 @@ namespace abc { namespace diag {
          * @brief       Constructor.
          * @param table Pointer to a `table_ostream` instance to write the line to.
          */
-        diag_line_ostream(table_ostream* table);
+        diag_line_ostream(abc::stream::table_ostream* table);
 
         /**
          * @brief Move constructor.
@@ -319,7 +319,7 @@ namespace abc { namespace diag {
     class test_line_ostream
         : public log_line_ostream {
 
-        using base = line_ostream;
+        using base = abc::stream::line_ostream;
         using ctor_base = log_line_ostream;
 
     public:
@@ -332,7 +332,7 @@ namespace abc { namespace diag {
          * @brief       Constructor.
          * @param table Pointer to a `table_ostream` instance to write the line to.
          */
-        test_line_ostream(table_ostream* table);
+        test_line_ostream(abc::stream::table_ostream* table);
 
         /**
          * @brief Move constructor.

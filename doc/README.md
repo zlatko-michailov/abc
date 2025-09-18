@@ -37,6 +37,8 @@ Provide the title and the link to the page along with as much information as you
 - [timestamp](ref/timestamp.md)
 - [util](ref/util.md)
 -
+### Namespace `abc::stream`
+
 - [buffer_streambuf](ref/buffer_streambuf.md)
 - [multifile_streambuf](ref/multifile_streambuf.md)
 - [duration_multifile_streambuf](ref/multifile_streambuf.md)

@@ -30,7 +30,7 @@ SOFTWARE.
 #include <ostream>
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     /**
      * @brief         Common stream functionality.
@@ -230,5 +230,5 @@ namespace abc {
         void flush();
     };
 
-}
+} }
 

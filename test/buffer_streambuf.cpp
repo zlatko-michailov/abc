@@ -46,12 +46,12 @@ bool test_buffer_streambuf_move(test_context& context) {
 
     bool passed = true;
 
-    abc::buffer_streambuf sb1(actual1, 0, sizeof(actual1), actual1, 0, sizeof(actual1));
+    abc::stream::buffer_streambuf sb1(actual1, 0, sizeof(actual1), actual1, 0, sizeof(actual1));
     std::ostream out(&sb1);
     out.write(expected, std::strlen(expected) + 1);
     passed = context.are_equal(actual1, expected, 0x1072f) && passed;
 
-    abc::buffer_streambuf sb2(std::move(sb1));
+    abc::stream::buffer_streambuf sb2(std::move(sb1));
     std::istream in(&sb2);
     char actual2[abc::size::_256 + 1];
     in.read(actual2, std::strlen(expected) + 1);
@@ -68,7 +68,7 @@ bool test_buffer_streambuf(test_context& context, const char* text) {
     char actual[abc::size::_256 + 1];
     std::memset(actual, 0, sizeof(actual));
 
-    abc::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
+    abc::stream::buffer_streambuf sb(expected, 0, std::strlen(expected), actual, 0, sizeof(actual));
 
     std::istream in(&sb);
     std::ostream out(&sb);

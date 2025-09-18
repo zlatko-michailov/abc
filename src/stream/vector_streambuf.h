@@ -30,7 +30,7 @@ SOFTWARE.
 #include "../ascii.h"
 #include "i/vector_streambuf.i.h"
 
-namespace abc {
+namespace abc { namespace stream {
 
     template <typename Char>
     inline basic_vector_streambuf<Char>::basic_vector_streambuf(std::size_t inital_capacity)
@@ -86,5 +86,5 @@ namespace abc {
         return _vector;
     }
 
-}
+} }
 

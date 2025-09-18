@@ -51,13 +51,13 @@ public:
     }
 };
 
-using test_istream = test_stream<abc::istream>;
-using test_ostream = test_stream<abc::ostream>;
+using test_istream = test_stream<abc::stream::istream>;
+using test_ostream = test_stream<abc::stream::ostream>;
 
 
 bool test_istream_move(test_context& context) {
     char expected[abc::size::_256 + 1] = "first second";
-    abc::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
+    abc::stream::buffer_streambuf sb(expected, 0, sizeof(expected) - 1, nullptr, 0, 0);
 
     char actual[abc::size::_256 + 1] = { };
 
@@ -77,7 +77,7 @@ bool test_istream_move(test_context& context) {
 
 bool test_ostream_move(test_context& context) {
     char actual[abc::size::_256 + 1] = { };
-    abc::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
+    abc::stream::buffer_streambuf sb(nullptr, 0, 0, actual, 0, sizeof(actual) - 1);
 
     bool passed = true;
 

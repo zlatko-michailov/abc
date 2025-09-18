@@ -57,18 +57,18 @@ bool test_move(Streambuf& sb1, test_context& context) {
 
 
 bool test_multifile_streambuf_move(test_context& context) {
-    abc::multifile_streambuf<std::chrono::system_clock> sb1("out/test", std::ios_base::out);
+    abc::stream::multifile_streambuf<std::chrono::system_clock> sb1("out/test", std::ios_base::out);
     return test_move(sb1, context);
 }
 
 
 bool test_duration_multifile_streambuf_move(test_context& context) {
-    abc::duration_multifile_streambuf<std::chrono::system_clock> sb1(std::chrono::minutes(1), "out/test", std::ios_base::out);
+    abc::stream::duration_multifile_streambuf<std::chrono::system_clock> sb1(std::chrono::minutes(1), "out/test", std::ios_base::out);
     return test_move(sb1, context);
 }
 
 
 bool test_size_multifile_streambuf_move(test_context& context) {
-    abc::size_multifile_streambuf<std::chrono::system_clock> sb1(abc::size::k1, "out/test", std::ios_base::out);
+    abc::stream::size_multifile_streambuf<std::chrono::system_clock> sb1(abc::size::k1, "out/test", std::ios_base::out);
     return test_move(sb1, context);
 }

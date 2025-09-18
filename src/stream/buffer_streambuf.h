@@ -28,7 +28,7 @@ SOFTWARE.
 #include "i/buffer_streambuf.i.h"
 
 
-namespace abc {
+namespace abc { namespace stream {
 
     template <typename Char>
     inline basic_buffer_streambuf<Char>::basic_buffer_streambuf(Char* get_buffer, std::size_t begin_get_pos, std::size_t end_get_pos, Char* put_buffer, std::size_t begin_put_pos, std::size_t end_put_pos) noexcept
@@ -113,4 +113,4 @@ namespace abc {
         base::pbump(count);
     }
 
-}
+} }

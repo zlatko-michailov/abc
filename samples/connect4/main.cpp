@@ -40,7 +40,7 @@ int main(int /*argc*/, const char* argv[]) {
     std::srand(std::time(nullptr));
 
     // Create a log.
-    abc::table_ostream table(std::cout.rdbuf());
+    abc::stream::table_ostream table(std::cout.rdbuf());
     abc::diag::debug_line_ostream<> line(&table);
     abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
     abc::diag::log_ostream log(&line, &filter);
@@ -67,7 +67,7 @@ int main(int /*argc*/, const char* argv[]) {
     log.put_any(origin, suborigin, abc::diag::severity::optional, 0x10676, "results_path='%s'", results_path.c_str());
     std::ofstream results_stream(results_path, std::ios::ate);
 
-    abc::table_ostream results_table(std::cout.rdbuf());
+    abc::stream::table_ostream results_table(std::cout.rdbuf());
     abc::diag::debug_line_ostream<> results_line(&table);
     abc::diag::str_log_filter<const char *> results_filter("", abc::diag::severity::optional);
     abc::diag::log_ostream results(&results_line, &results_filter);

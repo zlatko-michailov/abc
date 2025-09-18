@@ -93,12 +93,12 @@ namespace abc { namespace test {
         for (;;) {
             std::size_t original_offset = offset;
 
-            line_ostream line_actual;
+            abc::stream::line_ostream line_actual;
             if (line_actual.put_binary(actual, size, offset) == 0) {
                 break;
             };
 
-            line_ostream line_expected;
+            abc::stream::line_ostream line_expected;
             line_expected.put_binary(expected, size, original_offset);
 
             char line_format[size::k2];

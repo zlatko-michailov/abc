@@ -182,7 +182,7 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
 
     // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
     char body[abc::size::k1 + 1] { };
-    abc::buffer_streambuf response_body_sb(nullptr, 0, 0, body, 0, sizeof(body));
+    abc::stream::buffer_streambuf response_body_sb(nullptr, 0, 0, body, 0, sizeof(body));
     abc::net::json::writer json_writer(&response_body_sb, base::log());
     json_writer.put_value(output_value);
 
