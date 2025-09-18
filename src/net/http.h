@@ -29,7 +29,7 @@ SOFTWARE.
 
 #include "../ascii.h"
 #include "../util.h"
-#include "../stream.h"
+#include "../stream/stream.h"
 #include "../diag/diag_ready.h"
 #include "i/http.i.h"
 

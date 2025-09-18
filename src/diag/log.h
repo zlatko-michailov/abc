@@ -30,8 +30,8 @@ SOFTWARE.
 
 #include "../util.h"
 #include "../timestamp.h"
-#include "../buffer_streambuf.h"
-#include "../table_stream.h"
+#include "../stream/buffer_streambuf.h"
+#include "../stream/table_stream.h"
 #include "i/log.i.h"
 
 

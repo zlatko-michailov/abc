@@ -9,10 +9,12 @@ Up to [Documentation](README.md).
     - ascii.h
     - timestamp.h
     - util.h
-    - buffer_streambuf.h
-    - multifile_streambuf.h
-    - stream.h
-    - table_stream.h
+    - __stream ::__
+        - __i__
+        - buffer_streambuf.h
+        - multifile_streambuf.h
+        - stream.h
+        - table_stream.h
     - __diag ::__
         - __i__
         - tag.h

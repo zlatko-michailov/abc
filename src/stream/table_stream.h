@@ -28,8 +28,8 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
-#include "stream.h"
-#include "vector_streambuf.h"
+#include "stream/stream.h"
+#include "stream/vector_streambuf.h"
 #include "i/table_stream.i.h"
 
 

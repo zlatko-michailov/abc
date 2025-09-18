@@ -4,7 +4,7 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [stream.h](../../src/stream.h)
-Interface        | [i/stream.i.h](../../src/i/stream.i.h)
+Include          | [stream/stream.h](../../src/stream/stream.h)
+Interface        | [stream/i/stream.i.h](../../src/stream/i/stream.i.h)
 
 Base `istream` and `ostream`classes.

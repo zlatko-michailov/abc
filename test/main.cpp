@@ -51,7 +51,6 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
-#if 0 //// TODO:
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -257,10 +256,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
-#endif //// TODO:
             { "vmem", {
-#if 0 //// TODO:
-#endif //// TODO:
                 { "test_vmem_pool_fit",                              test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
                 { "test_vmem_pool_reopen",                           test_vmem_pool_reopen },
@@ -284,8 +280,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_string_stream",                         test_vmem_string_stream },
                 { "test_vmem_pool_move",                             test_vmem_pool_move },
                 { "test_vmem_page_move",                             test_vmem_page_move },
-#if 0 //// TODO:
-#endif //// TODO:
             } },
         },
         &log,

@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [multifile_streambuf.h](../../src/multifile_streambuf.h)
-Interface        | [i/multifile_streambuf.i.h](../../src/i/multifile_streambuf.i.h)
+Include          | [stream/multifile_streambuf.h](../../src/stream/multifile_streambuf.h)
+Interface        | [stream/i/multifile_streambuf.i.h](../../src/stream/i/multifile_streambuf.i.h)
 Tests / Examples | n/a
 
 `multifile_streambuf` is a specialization of `std::filebuf`.

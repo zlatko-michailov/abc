@@ -30,8 +30,8 @@ SOFTWARE.
 
 #include "../size.h"
 #include "../ascii.h"
-#include "../stream.h"
 #include "../util.h"
+#include "../stream/stream.h"
 #include "../diag/diag_ready.h"
 #include "i/json.i.h"
 

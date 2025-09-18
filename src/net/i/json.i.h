@@ -34,7 +34,7 @@ SOFTWARE.
 #include <map>
 #include <stack>
 
-#include "../../i/stream.i.h"
+#include "../../stream/i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
 
 

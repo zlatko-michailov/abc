@@ -31,8 +31,16 @@
         - list.h
         - map.h
         - string.h
+- `stream`
+    - Entities
+        - buffer_streambuf.h
+        - multifile_streambuf.h
+        - stream.h
+        - table_stream.h
+        - vector_streambuf.h
+- `gpio`
+    - Entities
     - Samples
-        - __connect4__
 - Update docs when all classes are done.
 
 - Remove `virtual` from `override` definitions?

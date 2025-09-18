@@ -32,7 +32,7 @@ SOFTWARE.
 #include <map>
 
 #include "../../util.h"
-#include "../../i/stream.i.h"
+#include "../../stream/i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
 
 
