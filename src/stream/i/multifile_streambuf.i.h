@@ -31,7 +31,7 @@ SOFTWARE.
 #include <ios>
 #include <string>
 
-#include "timestamp.i.h"
+#include "../../i/timestamp.i.h"
 
 
 namespace abc {

@@ -28,8 +28,8 @@ SOFTWARE.
 #include <cstring>
 #include <cstdio>
 
-#include "timestamp.h"
-#include "diag/exception.h"
+#include "../timestamp.h"
+#include "../diag/exception.h"
 #include "i/multifile_streambuf.i.h"
 
 

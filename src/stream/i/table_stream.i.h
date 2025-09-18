@@ -31,9 +31,9 @@ SOFTWARE.
 #include <vector>
 #include <cstdarg>
 
-#include "../size.h"
-#include "../i/vector_streambuf.i.h"
-#include "timestamp.i.h"
+#include "../../size.h"
+#include "../../i/timestamp.i.h"
+#include "vector_streambuf.i.h"
 #include "stream.i.h"
 
 
