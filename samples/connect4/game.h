@@ -29,7 +29,7 @@ SOFTWARE.
 #include <sstream>
 #include <string>
 
-#include "../../src/ascii.h"
+#include "../../src/root/ascii.h"
 #include "../../src/net/endpoint.h"
 #include "../../src/net/http.h"
 #include "../../src/net/json.h"

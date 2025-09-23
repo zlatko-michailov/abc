@@ -33,7 +33,7 @@ SOFTWARE.
 #include <mutex>
 #include <thread>
 
-#include "../../i/timestamp.i.h"
+#include "../../root/i/timestamp.i.h"
 #include "../../stream/i/table_stream.i.h"
 #include "../tag.h"
 

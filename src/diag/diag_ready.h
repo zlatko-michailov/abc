@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../util.h"
+#include "../root/util.h"
 #include "i/diag_ready.i.h"
 #include "log.h"
 #include "exception.h"

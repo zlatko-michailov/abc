@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <iostream>
 
-#include "../ascii.h"
+#include "../root/ascii.h"
 #include "i/vector_streambuf.i.h"
 
 namespace abc { namespace stream {

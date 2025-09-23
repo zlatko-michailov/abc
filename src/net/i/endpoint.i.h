@@ -27,7 +27,7 @@ SOFTWARE.
 #include <atomic>
 #include <string>
 
-#include "../../size.h"
+#include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
 #include "socket.i.h"
 #include "http.i.h"

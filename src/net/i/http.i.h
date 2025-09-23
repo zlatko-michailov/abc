@@ -31,7 +31,7 @@ SOFTWARE.
 #include <string>
 #include <map>
 
-#include "../../util.h"
+#include "../../root/util.h"
 #include "../../stream/i/stream.i.h"
 #include "../../diag/i/diag_ready.i.h"
 

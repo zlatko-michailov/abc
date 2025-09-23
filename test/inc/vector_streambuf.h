@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/ascii.h"
+#include "../../src/root/ascii.h"
 #include "../../src/stream/vector_streambuf.h"
 
 #include "test.h"

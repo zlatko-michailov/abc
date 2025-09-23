@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <cstring>
 
-#include "../util.h"
+#include "../root/util.h"
 #include "../diag/diag_ready.h"
 #include "ptr.h"
 #include "iterator.h"

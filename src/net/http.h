@@ -27,8 +27,8 @@ SOFTWARE.
 
 #include <cstring>
 
-#include "../ascii.h"
-#include "../util.h"
+#include "../root/ascii.h"
+#include "../root/util.h"
 #include "../stream/stream.h"
 #include "../diag/diag_ready.h"
 #include "i/http.i.h"

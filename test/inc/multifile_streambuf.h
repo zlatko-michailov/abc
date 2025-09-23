@@ -25,7 +25,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "../../src/size.h"
+#include "../../src/root/size.h"
 #include "../../src/stream/multifile_streambuf.h"
 
 #include "test.h"

@@ -31,7 +31,7 @@ SOFTWARE.
 #include <ios>
 #include <string>
 
-#include "../../i/timestamp.i.h"
+#include "../../root/i/timestamp.i.h"
 
 
 namespace abc { namespace stream {

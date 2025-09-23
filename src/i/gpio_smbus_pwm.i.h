@@ -31,7 +31,7 @@ SOFTWARE.
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
-#include "../size.h"
+#include "../root/size.h"
 #include "gpio_base.i.h"
 #include "gpio_pwm_base.i.h"
 #include "gpio_smbus.i.h"

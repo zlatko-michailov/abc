@@ -28,8 +28,8 @@ SOFTWARE.
 #include <cstdarg>
 #include <cstring>
 
-#include "../util.h"
-#include "../timestamp.h"
+#include "../root/util.h"
+#include "../root/timestamp.h"
 #include "../stream/buffer_streambuf.h"
 #include "../stream/table_stream.h"
 #include "i/log.i.h"

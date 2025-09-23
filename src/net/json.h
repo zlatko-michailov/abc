@@ -28,9 +28,9 @@ SOFTWARE.
 #include <cstdlib>
 #include <cstdio>
 
-#include "../size.h"
-#include "../ascii.h"
-#include "../util.h"
+#include "../root/size.h"
+#include "../root/ascii.h"
+#include "../root/util.h"
 #include "../stream/stream.h"
 #include "../diag/diag_ready.h"
 #include "i/json.i.h"

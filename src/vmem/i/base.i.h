@@ -28,7 +28,7 @@ SOFTWARE.
 #include <cstdint>
 #include <climits>
 
-#include "../../size.h"
+#include "../../root/size.h"
 
 
 namespace abc { namespace vmem {

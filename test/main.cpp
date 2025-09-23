@@ -25,7 +25,7 @@ SOFTWARE.
 
 #include <iostream>
 
-#include "../src/util.h"
+#include "../src/root/util.h"
 
 #include "inc/test.h"
 #include "inc/ascii.h"

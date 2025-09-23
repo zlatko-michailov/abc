@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [ascii.h](../../src/ascii.h)
-Interface        | [ascii.h](../../src/ascii.h)
+Include          | [ascii.h](../../src/root/ascii.h)
+Interface        | [ascii.h](../../src/root/ascii.h)
 Tests / Examples | n/a
 
 Simple predicates to check ASCII code category.

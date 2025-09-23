@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <cstdint>
 
-#include "../size.h"
+#include "../root/size.h"
 #include "gpio_base.i.h"
 
 
