@@ -16,6 +16,8 @@
 - `util`
     - `strprintf()`
 - `vmem`
+- `root`
+- `stream`
 
 ## To Do
 - __Rename `master` to `main`.__
@@ -23,7 +25,6 @@
 - `gpio`
     - Entities
     - Samples
-- `timestamp.h` - either remove .i.h or move to a namespace.
 - Update docs when all classes are done.
 - Copyright - year.
 
@@ -34,10 +35,8 @@
 - Namespace `vmem`
   - `blob`
 
-- Namespace `patterns`
-  - `vmem_json_value`
-
-- Namespace `ml`.
+- Namespace `ai`.
+  - `mcp`
   - `neural_net`
 
 ## To Do Refactoring
