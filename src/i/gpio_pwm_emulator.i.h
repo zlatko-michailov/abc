@@ -64,7 +64,7 @@ namespace abc {
 		 * @param log						Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		template <typename PulseWidthDuration>
-		gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
+		gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 
 		/**
 		 * @brief							Constructor for motors or other peripherals where the pulse width is not restricted.
@@ -73,7 +73,7 @@ namespace abc {
 		 * @param frequency					Signal frequency.
 		 * @param log						Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
+		gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 
 		/**
 		 * @brief							Move constructor.

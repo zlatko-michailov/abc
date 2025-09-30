@@ -38,7 +38,7 @@ namespace abc {
 
 	template <typename Log>
 	template <typename PulseWidthDuration>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
 		: _line(chip, line_pos, log)
 		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
 		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
@@ -67,7 +67,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, gpio_line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log)
+	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log)
 		: gpio_pwm_emulator<Log>(chip, line_pos, gpio_pwm_duration(0), gpio_pwm_period(frequency), frequency, log) {
 	}
 
@@ -151,14 +151,14 @@ namespace abc {
 					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d7, "gpio_pwm_emulator::thread_func() Quitting.");
 				}
 
-				this_ptr->_line.put_level(gpio_level::low);
+				this_ptr->_line.put_level(level::low);
 				break;
 			}
 
 			if (duty_cycle == gpio_pwm_duty_cycle::min || duty_cycle == gpio_pwm_duty_cycle::max) {
 				// Constant level:
 				// Set the level, and block until the duty_cycle changes.
-				gpio_level_t level = duty_cycle != gpio_pwm_duty_cycle::min ? gpio_level::high : gpio_level::low;
+				level_t level = duty_cycle != gpio_pwm_duty_cycle::min ? level::high : level::low;
 				this_ptr->_line.put_level(level);
 				{
 					std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
@@ -179,7 +179,7 @@ namespace abc {
 				typename clock::time_point low_end_time_point = high_end_time_point + low_duration;
 
 				// High level.
-				this_ptr->_line.put_level(gpio_level::high);
+				this_ptr->_line.put_level(level::high);
 				if (high_duration >= low_duration) {
 					quit = this_ptr->_quit;
 					duty_cycle = this_ptr->_duty_cycle;
@@ -187,7 +187,7 @@ namespace abc {
 				std::this_thread::sleep_until(high_end_time_point);
 
 				// Low level.
-				this_ptr->_line.put_level(gpio_level::low);
+				this_ptr->_line.put_level(level::low);
 				if (high_duration < low_duration) {
 					quit = this_ptr->_quit;
 					duty_cycle = this_ptr->_duty_cycle;

@@ -42,19 +42,19 @@ abc::gpio_output_line line(&chip, line_pos, &log);
 ### Set the Voltage Level on `gpio_output_line`
 When you set the voltage level on a line, you most likely intend to do that for a known duration:
 ``` c++
-line.put_level(abc::gpio_level::high, std::chrono::microseconds(50));
+line.put_level(abc::gpio::level::high, std::chrono::microseconds(50));
 ```
 The second argument is optional, i.e. you can set/clear the voltage level for an undetermined duration.
 
 ### Read the Voltage Level on `gpio_input_line`
 If you simply want to probe the current level of a line, you can do:
 ``` c++
-abc::gpio_level_t level = line.get_level();
+abc::gpio::level_t level = line.get_level();
 ```
 
 If you want to wait until the level changes to an expected value, you can do:
 ``` c++
-if (line.expect_level(abc::gpio_level::high, std::chrono::milliseconds(10)) != abc::gpio_level::invalid) {
+if (line.expect_level(abc::gpio::level::high, std::chrono::milliseconds(10)) != abc::gpio::level::invalid) {
     // ...
 }
 ```

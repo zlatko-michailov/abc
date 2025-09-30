@@ -36,7 +36,7 @@ namespace abc {
 	/**
 	 * @brief		Wrapper around the corresponding Linux kernel struct.
 	 */
-	struct gpio_chip_info : public gpio_chip_info_base {
+	struct gpio_chip_info : public chip_info_base {
 		/**
 		 * @brief	Constructor. Zeroes out the base struct.
 		 */
@@ -52,7 +52,7 @@ namespace abc {
 	/**
 	 * @brief		Wrapper around the corresponding Linux kernel struct.
 	 */
-	struct gpio_line_info : public gpio_line_info_base {
+	struct gpio_line_info : public line_info_base {
 		/**
 		 * @brief	Constructor. Zeroes out the base struct.
 		 */
@@ -130,18 +130,18 @@ namespace abc {
 		 * @brief					Returns the `gpio_line_info` for the identified line.
 		 * @param pos				Chip-specific position of the requested line.
 		 */
-		gpio_line_info line_info(gpio_line_pos_t pos) const noexcept;
+		gpio_line_info line_info(line_pos_t pos) const noexcept;
 
 	private:
 		/**
 		 * @brief					Copy of the GPIO chip device path.
 		 */
-		char _path[gpio_max_path];
+		char _path[max_path];
 
 		/**
 		 * @brief					Copy of the consumer label.
 		 */
-		char _consumer[gpio_max_consumer];
+		char _consumer[max_consumer];
 
 		/**
 		 * @brief					The log passed in to the constructor.

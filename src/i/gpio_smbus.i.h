@@ -214,12 +214,12 @@ namespace abc {
 		/**
 		 * @brief						Copy of the SMBus device path.
 		 */
-		char _path[gpio_max_path];
+		char _path[max_path];
 
 		/**
 		 * @brief						File descriptor of the SMBus device.
 		 */
-		gpio_fd_t _fd;
+		fd_t _fd;
 
 		/**
 		 * @brief						Functionality bits.

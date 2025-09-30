@@ -35,7 +35,7 @@ SOFTWARE.
 namespace abc {
 
 	template <typename Log>
-	inline gpio_smbus_motor<Log>::gpio_smbus_motor(const gpio_chip<Log>* chip, gpio_line_pos_t direction_line_pos,
+	inline gpio_smbus_motor<Log>::gpio_smbus_motor(const gpio_chip<Log>* chip, line_pos_t direction_line_pos,
 				gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
 				gpio_pwm_pulse_frequency_t frequency,
 				gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
@@ -53,7 +53,7 @@ namespace abc {
 	template <typename Log>
 	inline void gpio_smbus_motor<Log>::set_forward(bool forward) noexcept {
 		_forward = forward;
-		_direction_line.put_level(_forward ? gpio_level::low : gpio_level::high);
+		_direction_line.put_level(_forward ? level::low : level::high);
 	}
 
 

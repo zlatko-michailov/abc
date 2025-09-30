@@ -59,7 +59,7 @@ void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_chip_info chip_info = chip.chip_info();
 
-	for (abc::gpio_line_pos_t pos = 0; pos < chip_info.lines; pos++) {
+	for (abc::line_pos_t pos = 0; pos < chip_info.lines; pos++) {
 		abc::gpio_line_info line_info = chip.line_info(pos);
 
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a7, "line %2u info:", (unsigned)pos);
@@ -67,7 +67,7 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a9, "  name     = %s", line_info.name);
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106aa, "  consumer = %s", line_info.consumer);
 		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ab, "  flags    = %llx", (long long)line_info.flags);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::gpio_line_flag::output) != 0 ? "OUTPUT" : "INPUT");
+		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::line_flags::output) != 0 ? "OUTPUT" : "INPUT");
 		log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	}
 }
@@ -82,32 +82,32 @@ void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log)
 
 	for (int i = 0; i < 10; i++) {
 		// Clear and send a pulse.
-		trigger_line.put_level(abc::gpio_level::low, microseconds(10));
-		trigger_line.put_level(abc::gpio_level::high, microseconds(10));
-		trigger_line.put_level(abc::gpio_level::low);
+		trigger_line.put_level(abc::level::low, microseconds(10));
+		trigger_line.put_level(abc::level::high, microseconds(10));
+		trigger_line.put_level(abc::level::low);
 
 		clock::time_point echo_not_ready_tp = clock::now();
 		microseconds timeout((2 * std::mega::num) / 340); // ~6,000 us
 
 		// Make sure there is no echo in progress.
-		abc::gpio_level_t level = echo_line.expect_level(abc::gpio_level::low, timeout);
+		abc::level_t level = echo_line.expect_level(abc::level::low, timeout);
 		clock::time_point echo_ready_tp = clock::now();
 
 		// Wait until the echo starts.
-		if (level != abc::gpio_level::invalid) {
+		if (level != abc::level::invalid) {
 			timeout -= std::chrono::duration_cast<microseconds>(echo_ready_tp - echo_not_ready_tp);
-			level = echo_line.expect_level(abc::gpio_level::high, timeout);
+			level = echo_line.expect_level(abc::level::high, timeout);
 		}
 		clock::time_point echo_start_tp = clock::now();
 
 		// Wait until the echo ends.
-		if (level != abc::gpio_level::invalid) {
+		if (level != abc::level::invalid) {
 			timeout -= std::chrono::duration_cast<microseconds>(echo_start_tp - echo_ready_tp);
-			level = echo_line.expect_level(abc::gpio_level::low, timeout);
+			level = echo_line.expect_level(abc::level::low, timeout);
 		}
 		clock::time_point echo_end_tp = clock::now();
 
-		if (level == abc::gpio_level::invalid) {
+		if (level == abc::level::invalid) {
 			log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ad, "TIMEOUT us = %llu", (long long)timeout.count());
 			continue;
 		}
@@ -189,8 +189,8 @@ void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 
 	abc::gpio_output_line<log_ostream> reset_line(&chip, 21, &log);
 
-	reset_line.put_level(abc::gpio_level::low, milliseconds(1));
-	reset_line.put_level(abc::gpio_level::high, milliseconds(3));
+	reset_line.put_level(abc::level::low, milliseconds(1));
+	reset_line.put_level(abc::level::high, milliseconds(3));
 }
 
 
@@ -268,15 +268,15 @@ void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 			std::size_t count_rear_left  = 0;
 			std::size_t count_rear_right = 0;
 
-			abc::gpio_level_t level_prev_rear_left	= abc::gpio_level::invalid;
-			abc::gpio_level_t level_prev_rear_right	= abc::gpio_level::invalid;
+			abc::level_t level_prev_rear_left	= abc::level::invalid;
+			abc::level_t level_prev_rear_right	= abc::level::invalid;
 
 			char bit_rear_left[101] = { };
 			char bit_rear_right[101] = { };
 
 			for (std::size_t c = 0; c < 100; c++) {
-				abc::gpio_level_t level_curr_rear_left	= speed_rear_left.get_level();
-				abc::gpio_level_t level_curr_rear_right	= speed_rear_right.get_level();
+				abc::level_t level_curr_rear_left	= speed_rear_left.get_level();
+				abc::level_t level_curr_rear_right	= speed_rear_right.get_level();
 
 				if (c < 100) {
 					bit_rear_left[c] = '0' + level_curr_rear_left;

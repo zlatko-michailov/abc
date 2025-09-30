@@ -54,8 +54,8 @@ namespace abc { namespace samples {
 	inline void picar_4wd_hat<Log>::reset() {
 		abc::gpio_output_line<Log> reset_line(_chip, 21, _log);
 
-		reset_line.put_level(abc::gpio_level::low,  std::chrono::milliseconds(1));
-		reset_line.put_level(abc::gpio_level::high, std::chrono::milliseconds(3));
+		reset_line.put_level(abc::gpio::level::low,  std::chrono::milliseconds(1));
+		reset_line.put_level(abc::gpio::level::high, std::chrono::milliseconds(3));
 	}
 
 	// --------------------------------------------------------------
@@ -83,13 +83,13 @@ namespace abc { namespace samples {
 
 	static constexpr abc::gpio_pwm_pulse_frequency_t	frequency						= 50; // 50 Hz
 
-	static constexpr abc::gpio_line_pos_t				pos_line_dir_front_left			= 23;
-	static constexpr abc::gpio_line_pos_t				pos_line_dir_front_right		= 24;
-	static constexpr abc::gpio_line_pos_t				pos_line_dir_rear_left			= 13;
-	static constexpr abc::gpio_line_pos_t				pos_line_dir_rear_right			= 20;
+	static constexpr abc::gpio::line_pos_t				pos_line_dir_front_left			= 23;
+	static constexpr abc::gpio::line_pos_t				pos_line_dir_front_right		= 24;
+	static constexpr abc::gpio::line_pos_t				pos_line_dir_rear_left			= 13;
+	static constexpr abc::gpio::line_pos_t				pos_line_dir_rear_right			= 20;
 
-	static constexpr abc::gpio_line_pos_t				pos_line_ultrasonic_trigger		= 5;
-	static constexpr abc::gpio_line_pos_t				pos_line_ultrasonic_echo		= 6;
+	static constexpr abc::gpio::line_pos_t				pos_line_ultrasonic_trigger		= 5;
+	static constexpr abc::gpio::line_pos_t				pos_line_ultrasonic_echo		= 6;
 	static constexpr std::size_t						ultrasonic_max_cm				= 100;
 
 	static constexpr abc::gpio_smbus_register_t			reg_servo						= 0x00;

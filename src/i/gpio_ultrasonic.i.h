@@ -52,7 +52,7 @@ namespace abc {
 		 * @param echo_line_pos		Chip-specific position of the input (echo) line.
 		 * @param log				Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_ultrasonic(const gpio_chip<Log>* chip, gpio_line_pos_t trigger_line_pos, gpio_line_pos_t echo_line_pos, Log* log = nullptr);
+		gpio_ultrasonic(const gpio_chip<Log>* chip, line_pos_t trigger_line_pos, line_pos_t echo_line_pos, Log* log = nullptr);
 
 		/**
 		 * @brief					Move constructor.

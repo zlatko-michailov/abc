@@ -48,7 +48,7 @@ namespace abc {
 		 * @param flags		Line flags.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log = nullptr);
+		gpio_line(const gpio_chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log = nullptr);
 
 		/**
 		 * @brief			Move constructor.
@@ -69,7 +69,7 @@ namespace abc {
 		/**
 		 * @brief			Returns the current level on the line.
 		 */
-		gpio_level_t get_level() const noexcept;
+		level_t get_level() const noexcept;
 
 		/**
 		 * @brief			Wait until the current level on the line matches the expected one.
@@ -79,14 +79,14 @@ namespace abc {
 		 * @return			The expected level if there was match, or `invalid` if the wait timed out. 
 		 */
 		template <typename Duration>
-		gpio_level_t expect_level(gpio_level_t level, Duration timeout) const noexcept;
+		level_t expect_level(level_t level, Duration timeout) const noexcept;
 
 		/**
 		 * @brief			Set the current level on the line.
 		 * @param level		Desired level.
 		 * @return			The desired level upon success, or `invalid` upon failure.
 		 */
-		gpio_level_t put_level(gpio_level_t level) const noexcept;
+		level_t put_level(level_t level) const noexcept;
 
 		/**
 		 * @brief			Sets the current level on the line, and blocks for the specified duration
@@ -96,13 +96,13 @@ namespace abc {
 		 * @return			The desired level upon success, or `invalid` upon failure.
 		 */
 		template <typename Duration>
-		gpio_level_t put_level(gpio_level_t level, Duration duration) const noexcept;
+		level_t put_level(level_t level, Duration duration) const noexcept;
 
 	private:
 		/**
 		 * @brief			The line's device file descriptor.
 		 */
-		gpio_fd_t _fd = -1;
+		fd_t _fd = -1;
 
 		/**
 		 * @brief			The log passed in to the constructor.
@@ -127,19 +127,19 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @see gpio_line
 		 */
-		gpio_input_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
+		gpio_input_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
 
 	public:
 		/**
 		 * @brief			Deleted.
 		 */
-		gpio_level_t put_level(gpio_level_t level) const noexcept = delete;
+		level_t put_level(level_t level) const noexcept = delete;
 
 		/**
 		 * @brief			Deleted.
 		 */
 		template <typename Duration>
-		gpio_level_t put_level(gpio_level_t level, Duration duration) const noexcept = delete;
+		level_t put_level(level_t level, Duration duration) const noexcept = delete;
 	};
 
 
@@ -159,19 +159,19 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @see gpio_line
 		 */
-		gpio_output_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log = nullptr);
+		gpio_output_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
 
 	public:
 		/**
 		 * @brief			Deleted.
 		 */
-		gpio_level_t get_level() const noexcept = delete;
+		level_t get_level() const noexcept = delete;
 
 		/**
 		 * @brief			Deleted.
 		 */
 		template <typename Duration>
-		gpio_level_t expect_level(gpio_level_t level, Duration timeout) const noexcept = delete;
+		level_t expect_level(level_t level, Duration timeout) const noexcept = delete;
 	};
 
 

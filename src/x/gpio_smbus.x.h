@@ -45,8 +45,8 @@ namespace abc {
 		, _functionality(0)
 		, _addr(0)
 		, _log(log) {
-		char path[gpio_max_path];
-		std::snprintf(path, gpio_max_path, "/dev/i2c-%d", dev_i2c_pos);
+		char path[max_path];
+		std::snprintf(path, max_path, "/dev/i2c-%d", dev_i2c_pos);
 
 		init(path);
 	}
@@ -88,8 +88,8 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path == nullptr", 0x106dc);
 		}
 
-		if (std::strlen(path) >= gpio_max_path) {
-			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= gpio_max_path", 0x106dd);
+		if (std::strlen(path) >= max_path) {
+			throw exception<std::logic_error, Log>("gpio_smbus::gpio_smbus() path >= max_path", 0x106dd);
 		}
 
 		_fd = open(path, O_RDWR);
@@ -105,7 +105,7 @@ namespace abc {
 			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106e0, "gpio_smbus::gpio_smbus() functionality = 0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
 		}
 
-		std::strncpy(_path, path, gpio_max_path);
+		std::strncpy(_path, path, max_path);
 
 		if (_log != nullptr) {
 			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106e1, "gpio_smbus::gpio_smbus() Done. _fd = %d", _fd);

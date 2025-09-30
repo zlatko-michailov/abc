@@ -58,7 +58,7 @@ namespace abc {
 		 * @param reg_prescaler			Prescaler register on the HAT for the motor connection.
 		 * @param log					Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_smbus_motor(const gpio_chip<Log>* chip, gpio_line_pos_t direction_line_pos,
+		gpio_smbus_motor(const gpio_chip<Log>* chip, line_pos_t direction_line_pos,
 					gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
 					gpio_pwm_pulse_frequency_t frequency,
 					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,

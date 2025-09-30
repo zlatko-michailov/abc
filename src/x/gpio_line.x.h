@@ -43,7 +43,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, gpio_line_flags_t flags, Log* log)
+	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log)
 		: _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, 0x106c8, "gpio_line::gpio_line() Start.");
@@ -53,25 +53,25 @@ namespace abc {
 			throw exception<std::logic_error, Log>("gpio_line::gpio_line() chip == nullptr", 0x106c9);
 		}
 
-		gpio_fd_t fd = open(chip->path(), O_RDONLY);
+		fd_t fd = open(chip->path(), O_RDONLY);
 		if (fd < 0) {
 			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", 0x106ca);
 		}
 
-		gpio_line_request line_request{ };
+		line_request line_request{ };
 #if ((__ABC__GPIO_VER) == 2)
 		line_request.num_lines = 1;
 		line_request.offsets[0] = pos;
-		std::strncpy(line_request.consumer, chip->consumer(), gpio_max_consumer);
+		std::strncpy(line_request.consumer, chip->consumer(), max_consumer);
 		line_request.config.flags = flags;
 #else
 		line_request.lines = 1;
 		line_request.lineoffsets[0] = pos;
-		std::strncpy(line_request.consumer_label, chip->consumer(), gpio_max_consumer);
+		std::strncpy(line_request.consumer_label, chip->consumer(), max_consumer);
 		line_request.flags = flags;
 #endif
 
-		int ret = ioctl(fd, gpio_ioctl::get_line, &line_request);
+		int ret = ioctl(fd, ioctl::get_line, &line_request);
 		if (ret < 0) {
 			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl() < 0", 0x106cb);
 		}
@@ -97,35 +97,35 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_level_t gpio_line<Log>::get_level() const noexcept {
-		gpio_line_values values{ };
+	inline level_t gpio_line<Log>::get_level() const noexcept {
+		line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
-		values.mask = gpio_level::mask;
+		values.mask = level::mask;
 #endif		
 
-		int ret = ioctl(_fd, gpio_ioctl::get_line_values, &values);
+		int ret = ioctl(_fd, ioctl::get_line_values, &values);
 		if (ret < 0) {
-			return gpio_level::invalid;
+			return level::invalid;
 		}
 
 #if ((__ABC__GPIO_VER) == 2)
-		return (values.bits & gpio_level::mask);
+		return (values.bits & level::mask);
 #else
-		return (values.values[0] & gpio_level::mask);
+		return (values.values[0] & level::mask);
 #endif
 	}
 
 
 	template <typename Log>
 	template <typename Duration>
-	gpio_level_t gpio_line<Log>::expect_level(gpio_level_t level, Duration timeout) const noexcept {
+	level_t gpio_line<Log>::expect_level(level_t level, Duration timeout) const noexcept {
 		clock::time_point start_tp = clock::now();
 		clock::time_point current_tp = clock::now();
-		gpio_level_t current_level = get_level();
+		level_t current_level = get_level();
 
 		while (current_level != level) {
 			if (std::chrono::duration_cast<Duration>(current_tp - start_tp) > timeout) {
-				return gpio_level::invalid;
+				return level::invalid;
 			}
 
 			current_tp = clock::now();
@@ -137,22 +137,22 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_level_t gpio_line<Log>::put_level(gpio_level_t level) const noexcept {
-		if ((level & ~gpio_level::mask) != 0) {
-			return gpio_level::invalid;
+	inline level_t gpio_line<Log>::put_level(level_t level) const noexcept {
+		if ((level & ~level::mask) != 0) {
+			return level::invalid;
 		}
 
-		gpio_line_values values{ };
+		line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
-		values.mask = gpio_level::mask;
-		values.bits = (level & gpio_level::mask);
+		values.mask = level::mask;
+		values.bits = (level & level::mask);
 #else
 		values.values[0] = level;
 #endif
 
-		int ret = ioctl(_fd, gpio_ioctl::set_line_values, &values);
+		int ret = ioctl(_fd, ioctl::set_line_values, &values);
 		if (ret < 0) {
-			return gpio_level::invalid;
+			return level::invalid;
 		}
 
 		return level;
@@ -161,10 +161,10 @@ namespace abc {
 
 	template <typename Log>
 	template <typename Duration>
-	inline gpio_level_t gpio_line<Log>::put_level(gpio_level_t level, Duration duration) const noexcept {
-		gpio_level_t ret = put_level(level);
+	inline level_t gpio_line<Log>::put_level(level_t level, Duration duration) const noexcept {
+		level_t ret = put_level(level);
 
-		if (ret != gpio_level::invalid) {
+		if (ret != level::invalid) {
 			std::this_thread::sleep_for(duration);
 		}
 
@@ -176,8 +176,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_input_line<Log>::gpio_input_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log)
-		: base(chip, pos, gpio_line_flag::input, log) {
+	inline gpio_input_line<Log>::gpio_input_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log)
+		: base(chip, pos, line_flags::input, log) {
 	}
 
 
@@ -185,8 +185,8 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_output_line<Log>::gpio_output_line(const gpio_chip<Log>* chip, gpio_line_pos_t pos, Log* log)
-		: base(chip, pos, gpio_line_flag::output, log) {
+	inline gpio_output_line<Log>::gpio_output_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log)
+		: base(chip, pos, line_flags::output, log) {
 	}
 
 
