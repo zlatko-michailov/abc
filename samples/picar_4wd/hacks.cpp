@@ -29,46 +29,51 @@ SOFTWARE.
 #include <vector>
 #include <cmath>
 
-#include "../../src/gpio.h"
+#include "../../src/diag/log.h"
+#include "../../src/gpio/chip.h"
+////#include "../../src/gpio/line.h"
 
 
-using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-
-
-constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
-constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
+////constexpr abc::gpio_smbus_clock_frequency_t	smbus_hat_clock_frequency		= 72 * std::mega::num;
+////constexpr abc::gpio_smbus_address_t			smbus_hat_addr					= 0x14;
 constexpr bool								smbus_hat_requires_byte_swap	= true;
-constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
-constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
-constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
+////constexpr abc::gpio_smbus_register_t		smbus_hat_reg_base_pwm			= 0x20;
+////constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
+////constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
 
 
-void log_chip_info(const abc::chip<log_ostream>& chip, log_ostream& log) {
-	abc::chip_info chip_info = chip.chip_info();
+constexpr const char* origin = "sample_picar_4wd_hacks";
 
-	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
-	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a2, "chip info:");
-	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a3, "  is_valid = %d", chip_info.is_valid);
-	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a4, "  name     = %s", chip_info.name);
-	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a5, "  label    = %s", chip_info.label);
-	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a6, "  lines    = %u", chip_info.lines);
-	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
+
+void log_chip_info(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "log_chip_info()";
+
+	abc::gpio::chip_info chip_info = chip.chip_info();
+
+	log.put_blank_line(origin, abc::diag::severity::important);
+	log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a2, "chip info:");
+	log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a4, "  name  = %s", chip_info.name);
+	log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a5, "  label = %s", chip_info.label);
+	log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a6, "  lines = %u", chip_info.lines);
+	log.put_blank_line(origin, abc::diag::severity::important);
 }
 
 
-void log_all_line_info(const abc::chip<log_ostream>& chip, log_ostream& log) {
-	abc::chip_info chip_info = chip.chip_info();
+void log_all_line_info(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "log_all_line_info()";
 
-	for (abc::line_pos_t pos = 0; pos < chip_info.lines; pos++) {
-		abc::gpio_line_info line_info = chip.line_info(pos);
+	abc::gpio::chip_info chip_info = chip.chip_info();
 
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a7, "line %2u info:", (unsigned)pos);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a8, "  is_valid = %d", line_info.is_valid);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a9, "  name     = %s", line_info.name);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106aa, "  consumer = %s", line_info.consumer);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ab, "  flags    = %llx", (long long)line_info.flags);
-		log.put_any(abc::category::abc::samples, abc::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::line_flags::output) != 0 ? "OUTPUT" : "INPUT");
-		log.put_blank_line(abc::category::abc::samples, abc::severity::important);
+	log.put_blank_line(origin, abc::diag::severity::important);
+	for (abc::gpio::line_pos_t pos = 0; pos < chip_info.lines; pos++) {
+		abc::gpio::line_info line_info = chip.line_info(pos);
+
+		log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a7, "line %2u info:", (unsigned)pos);
+		log.put_any(origin, suborigin, abc::diag::severity::important, 0x106a9, "  name     = %s", line_info.name);
+		log.put_any(origin, suborigin, abc::diag::severity::important, 0x106aa, "  consumer = %s", line_info.consumer);
+		log.put_any(origin, suborigin, abc::diag::severity::important, 0x106ab, "  flags    = %llx", (long long)line_info.flags);
+		log.put_any(origin, suborigin, abc::diag::severity::important, 0x106ac, "  in/out   = %s", (line_info.flags & abc::gpio::line_flags::output) != 0 ? "OUTPUT" : "INPUT");
+	log.put_blank_line(origin, abc::diag::severity::important);
 	}
 }
 
