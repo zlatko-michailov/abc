@@ -28,9 +28,9 @@ SOFTWARE.
 #include <ratio>
 
 #include "../../src/root/ascii.h"
-#include "../../src/endpoint.h"
-#include "../../src/http.h"
-#include "../../src/json.h"
+#include "../../src/net/endpoint.h"
+#include "../../src/net/http.h"
+#include "../../src/net/json.h"
 
 #include "car.i.h"
 
@@ -42,7 +42,7 @@ namespace abc { namespace samples {
 
 
 	template <typename Log>
-	inline picar_4wd_hat<Log>::picar_4wd_hat(abc::gpio_chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log)
+	inline picar_4wd_hat<Log>::picar_4wd_hat(abc::gpio::chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log)
 		: base(addr, clock_frequency, requires_byte_swap, log)
 		, _chip(chip)
 		, _log(log) {

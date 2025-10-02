@@ -115,7 +115,7 @@ Up to [Documentation](README.md).
 - Additions
   - GPIO
     - Plain GPIO
-      - `gpio_chip`, `gpio_input_line`, `gpio_output_line`, `gpio_pwm_emulator`
+      - `chip`, `gpio_input_line`, `gpio_output_line`, `gpio_pwm_emulator`
     - SMBus
       - `gpio_smbus`, `gpio_smbus_pwm`
     - Specializations

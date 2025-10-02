@@ -4,13 +4,13 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [gpio.h](../../src/gpio.h)
-Interface        | [gpio.i.h](../../src/i/gpio.i.h)
+Include          | [gpio/*.h](../../src/gpio/*.h)
+Interface        | [gpio/*.i.h](../../src/gpio/*.i.h)
 Tests / Examples | [samples/picar_4wd/main.cpp](../../samples/picar_4wd/main.cpp)
 
-`gpio_chip` provides information about the line functions.
+`chip` provides information about the line functions.
 It is also needed to access a particular line on it.
-The `gpio_chip` instance must be kept alive for as long as any line that was constructed with it is alive.
+The `chip` instance must be kept alive for as long as any line that was constructed with it is alive.
 
 `gpio_line` is a generic representation of a GPIO line.
 It is recommended to use one of the specializations:

@@ -31,7 +31,7 @@ SOFTWARE.
 #include <linux/gpio.h>
 
 #include "gpio_base.i.h"
-#include "gpio_chip.i.h"
+#include "chip.i.h"
 #include "gpio_line.i.h"
 #include "gpio_smbus.i.h"
 #include "gpio_smbus_pwm.i.h"

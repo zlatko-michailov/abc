@@ -40,7 +40,7 @@ namespace abc {
 
 
 	template <typename DistanceScale, typename Log>
-	inline gpio_ultrasonic<DistanceScale, Log>::gpio_ultrasonic(const gpio_chip<Log>* chip, line_pos_t trigger_line_pos, line_pos_t echo_line_pos, Log* log)
+	inline gpio_ultrasonic<DistanceScale, Log>::gpio_ultrasonic(const chip<Log>* chip, line_pos_t trigger_line_pos, line_pos_t echo_line_pos, Log* log)
 		: _trigger_line(chip, trigger_line_pos, log)
 		, _echo_line(chip, echo_line_pos, log)
 		, _log(log) {

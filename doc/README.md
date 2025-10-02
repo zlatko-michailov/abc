@@ -101,7 +101,7 @@ Provide the title and the link to the page along with as much information as you
 
 
 - [gpio](ref/gpio.md)
-  - [gpio_chip](ref/gpio.md)
+  - [chip](ref/gpio.md)
   - [gpio_line](ref/gpio.md)
   - [gpio_pwm_emulator](ref/gpio.md)
   - [gpio_smbus](ref/gpio.md)

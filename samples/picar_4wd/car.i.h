@@ -32,9 +32,9 @@ SOFTWARE.
 #include <thread>
 #include <atomic>
 
-#include "../../src/log.h"
-#include "../../src/endpoint.h"
-#include "../../src/gpio.h"
+#include "../../src/diag/log.h"
+#include "../../src/net/endpoint.h"
+#include "../../src/gpio/chip.h"
 
 
 namespace abc { namespace samples {
@@ -51,14 +51,14 @@ namespace abc { namespace samples {
 		using base = abc::gpio_smbus_target<Log>;
 
 	public:
-		picar_4wd_hat(abc::gpio_chip<Log>* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log);
+		picar_4wd_hat(abc::gpio::chip* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log);
 
 	public:
 		void reset();
 
 	private:
-		abc::gpio_chip<Log>*	_chip;
-		Log*					_log;
+		abc::gpio::chip* _chip;
+		Log*             _log;
 	};
 
 
@@ -100,7 +100,7 @@ namespace abc { namespace samples {
 		void			auto_limit_power() noexcept;
 
 	private:
-		abc::gpio_chip<Log>										_chip;
+		abc::gpio::chip											_chip;
 		abc::gpio_smbus<Log>									_smbus;
 		picar_4wd_hat<Log>										_hat;
 

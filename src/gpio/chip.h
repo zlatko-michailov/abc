@@ -30,180 +30,122 @@ SOFTWARE.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
+#include "../../diag/diag_ready.h"
+#include "i/chip.i.h"
 
 
 
-namespace abc {
+namespace abc { namespace gpio {
 
-	inline gpio_chip_info::gpio_chip_info() noexcept
-		: chip_info_base{ }
-		, is_valid(false) {
-	}
-
-
-	inline gpio_line_info::gpio_line_info() noexcept
-		: line_info_base{ }
-		, is_valid(false) {
-	}
+    inline chip_info::chip_info() noexcept
+        : chip_info_base{ }
+        , is_valid(false) {
+    }
 
 
-	// --------------------------------------------------------------
+    inline line_info::line_info() noexcept
+        : line_info_base{ }
+        , is_valid(false) {
+    }
 
 
-	template <typename Log>
-	inline gpio_chip<Log>::gpio_chip(int dev_gpiochip_pos, const char* consumer, Log* log)
-		: _log(log) {
-		char path[max_path];
-		std::snprintf(path, max_path, "/dev/gpiochip%d", dev_gpiochip_pos);
-
-		init(path, consumer);
-	}
+    // --------------------------------------------------------------
 
 
-	template <typename Log>
-	inline gpio_chip<Log>::gpio_chip(const char* path, const char* consumer, Log* log)
-		: _log(log) {
-		init(path, consumer);
-	}
+    inline chip::chip(int dev_gpiochip_pos, const char* consumer, diag::log_ostream* log)
+        : diag_base("abc::gpio::chip", log) {
+
+        char path[max_path];
+        std::snprintf(path, max_path, "/dev/gpiochip%d", dev_gpiochip_pos);
+
+        init(path, consumer);
+    }
 
 
-	template <typename Log>
-	inline void gpio_chip<Log>::init(const char* path, const char* consumer) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106b9, "gpio_chip::init() Start.");
-		}
+    inline chip::chip(const char* path, const char* consumer, diag::log_ostream* log)
+        : diag_base("abc::gpio::chip", log) {
 
-		if (path == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() path == nullptr", 0x106ba);
-		}
-
-		if (std::strlen(path) >= max_path) {
-			throw exception<std::logic_error, Log>("gpio_chip::int() path >= gpo_max_path", 0x106bb);
-		}
-
-		if (consumer == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() consumer == nullptr", 0x106bc);
-		}
-
-		if (std::strlen(consumer) >= max_consumer) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() consumer >= max_consumer", 0x106bd);
-		}
-
-		fd_t fd = open(path, O_RDONLY);
-		if (fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_chip::init() open() < 0", 0x106be);
-		}
-		close(fd);
-
-		std::strncpy(_path, path, max_path);
-		std::strncpy(_consumer, consumer, max_consumer);
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106bf, "gpio_chip::init() Done.");
-		}
-	}
+        init(path, consumer);
+    }
 
 
-	template <typename Log>
-	inline const char* gpio_chip<Log>::path() const noexcept {
-		return _path;
-	}
+    inline void chip::init(const char* path, const char* consumer) {
+        constexpr const char* suborigin = "init()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106b9, "Begin: consumer='%s'", consumer);
+
+        diag_base::expect(suborigin, path != nullptr, 0x106ba, "path != nullptr");
+        diag_base::expect(suborigin, std::strlen(path) < max_path, 0x106bb, "std::strlen(path) < max_path");
+        diag_base::expect(suborigin, consumer != nullptr, 0x106bc, "consumer != nullptr");
+        diag_base::expect(suborigin, std::strlen(consumer) < max_consumer, 0x106bd, "std::strlen(path) < max_consumer");
+
+        fd_t fd = open(path, O_RDONLY);
+        diag_base::expect(suborigin, fd >= 0, 0x106be, "fd >= 0");
+        close(fd);
+
+        std::strncpy(_path, path, max_path);
+        std::strncpy(_consumer, consumer, max_consumer);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106bf, "End:");
+    }
 
 
-	template <typename Log>
-	inline const char* gpio_chip<Log>::consumer() const noexcept {
-		return _consumer;
-	}
+    inline const char* chip::path() const noexcept {
+        return _path;
+    }
 
 
-	template <typename Log>
-	inline gpio_chip_info gpio_chip<Log>::chip_info() const noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c0, "gpio_chip::chip_info() Start.");
-		}
-
-		gpio_chip_info info;
-		info.is_valid = false;
-
-		fd_t fd = open(_path, O_RDONLY);
-		if (fd < 0) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c1, "gpio_chip::chip_info() Could not open()");
-			}
-
-			return info;
-		}
-
-		int stat = ioctl(fd, ioctl::get_chip_info, &info);
-		close(fd);
-
-		if (stat < 0)
-		{
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c2, "gpio_chip::chip_info() Could not ioctl()");
-			}
-
-			return info;
-		}
-
-		info.is_valid = true;
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c3, "gpio_chip::chip_info() Done.");
-		}
-
-		return info;
-	}
+    inline const char* chip::consumer() const noexcept {
+        return _consumer;
+    }
 
 
-	template <typename Log>
-	inline gpio_line_info gpio_chip<Log>::line_info(line_pos_t pos) const noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c4, "gpio_chip::line_info() Start.");
-		}
+    inline gpio::chip_info chip::chip_info() const {
+        constexpr const char* suborigin = "chip_info()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106c0, "Begin:");
 
-		gpio_line_info info;
-		info.is_valid = false;
+        gpio::chip_info info;
+        info.is_valid = false;
+
+        fd_t fd = open(_path, O_RDONLY);
+        diag_base::expect(suborigin, fd >= 0, 0x106c1, "fd >= 0");
+
+        int stat = ::ioctl(fd, ioctl::get_chip_info, &info);
+        close(fd);
+        diag_base::expect(suborigin, stat >= 0, 0x106c2, "stat >= 0");
+
+        info.is_valid = true;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106c3, "End:");
+
+        return info;
+    }
+
+
+    inline gpio::line_info chip::line_info(line_pos_t pos) const {
+        constexpr const char* suborigin = "line_info()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106c4, "Begin: pos=%u", pos);
+
+        gpio::line_info info;
+        info.is_valid = false;
 #if ((__ABC__GPIO_VER) == 2)
-		info.offset = pos;
+        info.offset = pos;
 #else
-		info.line_offset = pos;
+        info.line_offset = pos;
 #endif
 
-		fd_t fd = open(_path, O_RDONLY);
-		if (fd < 0) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c5, "gpio_chip::line_info() Could not open()");
-			}
+        fd_t fd = open(_path, O_RDONLY);
+        diag_base::expect(suborigin, fd >= 0, 0x106c5, "fd >= 0");
 
-			return info;
-		}
+        int stat = ::ioctl(fd, ioctl::get_line_info, &info);
+        close(fd);
+        diag_base::expect(suborigin, stat >= 0, 0x106c6, "stat >= 0");
 
-		int stat = ioctl(fd, ioctl::get_line_info, &info);
-		close(fd);
+        info.is_valid = true;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106c7, "End:");
 
-		if (stat < 0)
-		{
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106c6, "gpio_chip::line_info() Could not ioctl()");
-			}
-
-			return info;
-		}
-
-		info.is_valid = true;
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106c7, "gpio_chip::line_info() Done.");
-		}
-
-		return info;
-	}
+        return info;
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
-}
+} }

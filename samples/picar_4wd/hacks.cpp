@@ -43,8 +43,8 @@ constexpr abc::gpio_smbus_register_t		reg_base_autoreload				= 0x44;
 constexpr abc::gpio_smbus_register_t		reg_base_prescaler				= 0x40;
 
 
-void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
-	abc::gpio_chip_info chip_info = chip.chip_info();
+void log_chip_info(const abc::chip<log_ostream>& chip, log_ostream& log) {
+	abc::chip_info chip_info = chip.chip_info();
 
 	log.put_blank_line(abc::category::abc::samples, abc::severity::important);
 	log.put_any(abc::category::abc::samples, abc::severity::important, 0x106a2, "chip info:");
@@ -56,8 +56,8 @@ void log_chip_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
 }
 
 
-void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
-	abc::gpio_chip_info chip_info = chip.chip_info();
+void log_all_line_info(const abc::chip<log_ostream>& chip, log_ostream& log) {
+	abc::chip_info chip_info = chip.chip_info();
 
 	for (abc::line_pos_t pos = 0; pos < chip_info.lines; pos++) {
 		abc::gpio_line_info line_info = chip.line_info(pos);
@@ -73,7 +73,7 @@ void log_all_line_info(const abc::gpio_chip<log_ostream>& chip, log_ostream& log
 }
 
 
-void measure_obstacle(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void measure_obstacle(const abc::chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
 
@@ -159,7 +159,7 @@ void turn_servo(log_ostream& log) {
 }
 
 
-void turn_servo_emulator(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void turn_servo_emulator(const abc::chip<log_ostream>& chip, log_ostream& log) {
 	using microseconds = std::chrono::microseconds;
 	using milliseconds = std::chrono::milliseconds;
 
@@ -184,7 +184,7 @@ void turn_servo_emulator(const abc::gpio_chip<log_ostream>& chip, log_ostream& l
 }
 
 
-void reset_hat(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void reset_hat(const abc::chip<log_ostream>& chip, log_ostream& log) {
 	using milliseconds = std::chrono::milliseconds;
 
 	abc::gpio_output_line<log_ostream> reset_line(&chip, 21, &log);
@@ -220,7 +220,7 @@ void turn_wheels(log_ostream& log) {
 }
 
 
-void measure_speed(const abc::gpio_chip<log_ostream>& chip, log_ostream& log) {
+void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
 	abc::gpio_smbus<log_ostream> smbus(1, &log);
 	abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
@@ -533,7 +533,7 @@ void run_all() {
 	log_ostream log(std::cout.rdbuf(), &filter);
 
 	// Create a chip.
-	abc::gpio_chip<log_ostream> chip(0, "picar_4wd", &log);
+	abc::chip<log_ostream> chip(0, "picar_4wd", &log);
 
 	// Init hat
 	reset_hat(chip, log);

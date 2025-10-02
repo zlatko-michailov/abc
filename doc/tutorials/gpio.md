@@ -24,10 +24,10 @@ GPIO chips are accessible through `/dev/gpiochip*` starting with 0.
 
 ``` c++
 // Variation 1:
-abc::gpio_chip chip(0, "MyProgram", &log);
+abc::gpio::chip chip(0, "MyProgram", &log);
 
 // Variation 2:
-abc::gpio_chip chip("/dev/gpiochip0", "MyProgram", &log);
+abc::gpio::chip chip("/dev/gpiochip0", "MyProgram", &log);
 ```
 
 ## Set/Read the Voltage Level on a Line

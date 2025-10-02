@@ -43,7 +43,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_line<Log>::gpio_line(const gpio_chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log)
+	inline gpio_line<Log>::gpio_line(const chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log)
 		: _log(log) {
 		if (log != nullptr) {
 			log->put_any(category::abc::gpio, severity::abc::optional, 0x106c8, "gpio_line::gpio_line() Start.");
@@ -176,7 +176,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_input_line<Log>::gpio_input_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log)
+	inline gpio_input_line<Log>::gpio_input_line(const chip<Log>* chip, line_pos_t pos, Log* log)
 		: base(chip, pos, line_flags::input, log) {
 	}
 
@@ -185,7 +185,7 @@ namespace abc {
 
 
 	template <typename Log>
-	inline gpio_output_line<Log>::gpio_output_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log)
+	inline gpio_output_line<Log>::gpio_output_line(const chip<Log>* chip, line_pos_t pos, Log* log)
 		: base(chip, pos, line_flags::output, log) {
 	}
 

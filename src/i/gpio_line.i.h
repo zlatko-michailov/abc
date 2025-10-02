@@ -29,7 +29,7 @@ SOFTWARE.
 #include <linux/gpio.h>
 
 #include "gpio_base.i.h"
-#include "gpio_chip.i.h"
+#include "chip.i.h"
 
 
 namespace abc {
@@ -43,12 +43,12 @@ namespace abc {
 	public:
 		/**
 		 * @brief			Constructor.
-		 * @param chip		Pointer to the owning `gpio_chip` instance.
+		 * @param chip		Pointer to the owning `chip` instance.
 		 * @param pos		Chip-specific line position.
 		 * @param flags		Line flags.
 		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_line(const gpio_chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log = nullptr);
+		gpio_line(const chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log = nullptr);
 
 		/**
 		 * @brief			Move constructor.
@@ -127,7 +127,7 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @see gpio_line
 		 */
-		gpio_input_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
+		gpio_input_line(const chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
 
 	public:
 		/**
@@ -159,7 +159,7 @@ namespace abc {
 		 * @brief			Constructor.
 		 * @see gpio_line
 		 */
-		gpio_output_line(const gpio_chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
+		gpio_output_line(const chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
 
 	public:
 		/**

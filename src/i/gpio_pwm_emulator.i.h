@@ -33,7 +33,7 @@ SOFTWARE.
 #include <atomic>
 #include <linux/gpio.h>
 
-#include "gpio_chip.i.h"
+#include "chip.i.h"
 #include "gpio_pwm_base.i.h"
 
 
@@ -56,7 +56,7 @@ namespace abc {
 		/**
 		 * @brief							Constructor for servos or other peripherals where the pulse width must be within a given range.
 		 * @tparam PulseWidthDuration		`std::duration` type.
-		 * @param chip						Pointer to the `gpio_chip` instance that owns the GPIO line.
+		 * @param chip						Pointer to the `chip` instance that owns the GPIO line.
 		 * @param line_pos					Chip-specific line position.
 		 * @param min_pulse_width			Minimum pulse width.
 		 * @param max_pulse_width			Maximum pulse width.
@@ -64,16 +64,16 @@ namespace abc {
 		 * @param log						Pointer to a `Log` instance. May be `nullptr`.
 		 */
 		template <typename PulseWidthDuration>
-		gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
+		gpio_pwm_emulator(const chip<Log>* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 
 		/**
 		 * @brief							Constructor for motors or other peripherals where the pulse width is not restricted.
-		 * @param chip						Pointer to the `gpio_chip` instance that owns the GPIO line.
+		 * @param chip						Pointer to the `chip` instance that owns the GPIO line.
 		 * @param line_pos					Chip-specific line position.
 		 * @param frequency					Signal frequency.
 		 * @param log						Pointer to a `Log` instance. May be `nullptr`.
 		 */
-		gpio_pwm_emulator(const gpio_chip<Log>* chip, line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
+		gpio_pwm_emulator(const chip<Log>* chip, line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log = nullptr);
 
 		/**
 		 * @brief							Move constructor.
