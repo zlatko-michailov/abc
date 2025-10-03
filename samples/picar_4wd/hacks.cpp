@@ -78,6 +78,17 @@ void log_all_line_info(const abc::gpio::chip& chip, abc::diag::log_ostream& log)
 }
 
 
+#if 0
+void reset_hat(const abc::chip& chip, log_ostream& log) {
+	using milliseconds = std::chrono::milliseconds;
+
+	abc::gpio_output_line<log_ostream> reset_line(&chip, 21, &log);
+
+	reset_line.put_level(abc::level::low, milliseconds(1));
+	reset_line.put_level(abc::level::high, milliseconds(3));
+}
+
+
 void measure_obstacle(const abc::chip<log_ostream>& chip, log_ostream& log) {
 	using clock = std::chrono::steady_clock;
 	using microseconds = std::chrono::microseconds;
@@ -186,16 +197,6 @@ void turn_servo_emulator(const abc::chip<log_ostream>& chip, log_ostream& log) {
 
 		std::this_thread::sleep_for(sleep_duration);
 	}
-}
-
-
-void reset_hat(const abc::chip<log_ostream>& chip, log_ostream& log) {
-	using milliseconds = std::chrono::milliseconds;
-
-	abc::gpio_output_line<log_ostream> reset_line(&chip, 21, &log);
-
-	reset_line.put_level(abc::level::low, milliseconds(1));
-	reset_line.put_level(abc::level::high, milliseconds(3));
 }
 
 
@@ -530,23 +531,26 @@ void measure_grayscale(log_ostream& log) {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
+#endif
 
 
 void run_all() {
 	// Create a log.
-	abc::log_filter filter(abc::severity::abc::important);
-	log_ostream log(std::cout.rdbuf(), &filter);
+    abc::stream::table_ostream table(std::cout.rdbuf());
+    abc::diag::debug_line_ostream<> line(&table);
+    abc::diag::str_log_filter<const char*> filter("", abc::diag::severity::important);
+    abc::diag::log_ostream log(&line, &filter);
 
 	// Create a chip.
-	abc::chip<log_ostream> chip(0, "picar_4wd", &log);
+	abc::gpio::chip chip(0, "picar_4wd", &log);
 
-	// Init hat
-	reset_hat(chip, log);
-
-#if 0
 	// Info
 	log_chip_info(chip, log);
 	log_all_line_info(chip, log);
+
+#if 0
+	// Init hat
+	reset_hat(chip, log);
 
 	// Ultrasonic - binary input
 	measure_obstacle(chip, log);
@@ -562,10 +566,10 @@ void run_all() {
 	measure_speed(chip, log);
 #endif
 
+#if 0
 	// Speed - accelerometer
 	measure_accel_and_spin(log);
 
-#if 0
 	// Wheels - pwm output
 	make_turns(log);
 

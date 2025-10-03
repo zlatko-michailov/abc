@@ -30,7 +30,7 @@ SOFTWARE.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "../../diag/diag_ready.h"
+#include "../diag/diag_ready.h"
 #include "i/chip.i.h"
 
 

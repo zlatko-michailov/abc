@@ -23,7 +23,10 @@ SOFTWARE.
 */
 
 
+#include "../../src/root/ascii.h"
+#if 0
 #include "car.h"
+#endif
 
 
 // --------------------------------------------------------------
@@ -32,11 +35,12 @@ extern void run_all();
 
 
 int main(int argc, const char* argv[]) {
-	if (argc >= 2 && std::strcmp(argv[1], "hacks") == 0) { 
+	if (argc >= 2 && abc::ascii::are_equal(argv[1], "hacks")) { 
 		run_all();
 		return 0;
 	}
 
+#if 0
 	// Create a log.
 	abc::log_filter filter(abc::severity::abc::important);
 	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);
@@ -81,6 +85,7 @@ int main(int argc, const char* argv[]) {
 	// Let the endpoint listen in a separate thread.
 	std::future<void> done = endpoint.start_async();
 	done.wait();
+#endif
 
 	return 0;
 }
