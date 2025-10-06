@@ -26,155 +26,165 @@ SOFTWARE.
 #pragma once
 
 #include <cstdint>
-#include <linux/gpio.h>
 
-#include "gpio_base.i.h"
+#include "../../diag/i/diag_ready.i.h"
+#include "base.i.h"
 #include "chip.i.h"
 
 
-namespace abc {
+namespace abc { namespace gpio {
 
-	/**
-	 * @brief				Base GPIO line. Should not be used directly. Either `gpio_input_line` or `gpio_output_line` should be used.
-	 * @tparam Log			Logging facility.
-	 */
-	template <typename Log = null_log>
-	class gpio_line {
-	public:
-		/**
-		 * @brief			Constructor.
-		 * @param chip		Pointer to the owning `chip` instance.
-		 * @param pos		Chip-specific line position.
-		 * @param flags		Line flags.
-		 * @param log		Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		gpio_line(const chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log = nullptr);
+    /**
+     * @brief Base GPIO line. Should not be used directly. Either `input_line` or `output_line` should be used.
+     */
+    class line
+        : protected diag::diag_ready<const char*> {
 
-		/**
-		 * @brief			Move constructor.
-		 */
-		gpio_line(gpio_line<Log>&& other) noexcept = default;
+        using diag_base = diag::diag_ready<const char*>;
 
-		/**
-		 * @brief			Deleted.
-		 */
-		gpio_line(const gpio_line<Log>& other) = delete;
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param chip   Pointer to the owning `chip` instance.
+         * @param pos    Chip-specific line position.
+         * @param flags  Line flags.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        line(const char* origin, const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log = nullptr);
 
-		/**
-		 * @brief			Destructor.
-		 */
-		virtual ~gpio_line() noexcept;
+    public:
+        /**
+         * @brief       Constructor.
+         * @param chip  Pointer to the owning `chip` instance.
+         * @param pos   Chip-specific line position.
+         * @param flags Line flags.
+         * @param log   `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        //// REMOVE? line(const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log = nullptr);
 
-	public:
-		/**
-		 * @brief			Returns the current level on the line.
-		 */
-		level_t get_level() const noexcept;
+        /**
+         * @brief Move constructor.
+         */
+        line(line&& other) noexcept = default;
 
-		/**
-		 * @brief			Wait until the current level on the line matches the expected one.
-		 * @tparam Duration	`std::duration` type.
-		 * @param level		Expected level.
-		 * @param timeout	Timeout.
-		 * @return			The expected level if there was match, or `invalid` if the wait timed out. 
-		 */
-		template <typename Duration>
-		level_t expect_level(level_t level, Duration timeout) const noexcept;
+        /**
+         * @brief Deleted.
+         */
+        line(const line& other) = delete;
 
-		/**
-		 * @brief			Set the current level on the line.
-		 * @param level		Desired level.
-		 * @return			The desired level upon success, or `invalid` upon failure.
-		 */
-		level_t put_level(level_t level) const noexcept;
+        /**
+         * @brief Destructor.
+         */
+        virtual ~line() noexcept;
 
-		/**
-		 * @brief			Sets the current level on the line, and blocks for the specified duration
-		 * @tparam Duration	`std::duration` type.
-		 * @param level		Desired level.
-		 * @param duration	Duration.
-		 * @return			The desired level upon success, or `invalid` upon failure.
-		 */
-		template <typename Duration>
-		level_t put_level(level_t level, Duration duration) const noexcept;
+    public:
+        /**
+         * @brief Returns the current level on the line.
+         */
+        level_t get_level() const;
 
-	private:
-		/**
-		 * @brief			The line's device file descriptor.
-		 */
-		fd_t _fd = -1;
+        /**
+         * @brief           Wait until the current level on the line matches the expected one.
+         * @tparam Duration `std::duration` type.
+         * @param level     Expected level.
+         * @param timeout   Timeout.
+         * @return          The expected level if there was match, or `invalid` if the wait timed out. 
+         */
+        template <typename Duration>
+        level_t expect_level(level_t level, Duration timeout) const;
 
-		/**
-		 * @brief			The log passed in to the constructor.
-		 */
-		Log* _log;
-	};
+        /**
+         * @brief       Set the current level on the line.
+         * @param level Desired level.
+         * @return      The desired level upon success, or `invalid` upon failure.
+         */
+        level_t put_level(level_t level) const;
 
+        /**
+         * @brief           Sets the current level on the line, and blocks for the specified duration
+         * @tparam Duration `std::duration` type.
+         * @param level     Desired level.
+         * @param duration  Duration.
+         * @return          The desired level upon success, or `invalid` upon failure.
+         */
+        template <typename Duration>
+        level_t put_level(level_t level, Duration duration) const;
 
-	// --------------------------------------------------------------
-
-
-	/**
-	 * @brief				GPIO input line.
-	 * @tparam Log			Logging facility.
-	 */
-	template <typename Log = null_log>
-	class gpio_input_line : public gpio_line<Log> {
-		using base = gpio_line<Log>;
-
-	public:
-		/**
-		 * @brief			Constructor.
-		 * @see gpio_line
-		 */
-		gpio_input_line(const chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
-
-	public:
-		/**
-		 * @brief			Deleted.
-		 */
-		level_t put_level(level_t level) const noexcept = delete;
-
-		/**
-		 * @brief			Deleted.
-		 */
-		template <typename Duration>
-		level_t put_level(level_t level, Duration duration) const noexcept = delete;
-	};
+    private:
+        /**
+         * @brief The line's device file descriptor.
+         */
+        fd_t _fd = -1;
+    };
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
 
-	/**
-	 * @brief				GPIO output line.
-	 * @tparam Log			Logging facility.
-	 */
-	template <typename Log = null_log>
-	class gpio_output_line : public gpio_line<Log> {
-		using base = gpio_line<Log>;
+    /**
+     * @brief GPIO input line.
+     */
+    class input_line
+        : public line {
 
-	public:
-		/**
-		 * @brief			Constructor.
-		 * @see gpio_line
-		 */
-		gpio_output_line(const chip<Log>* chip, line_pos_t pos, Log* log = nullptr);
+        using base = line;
+        using diag_base = diag::diag_ready<const char*>;
 
-	public:
-		/**
-		 * @brief			Deleted.
-		 */
-		level_t get_level() const noexcept = delete;
+    public:
+        /**
+         * @brief Constructor.
+         * @see `line`
+         */
+        input_line(const chip* chip, line_pos_t pos, diag::log_ostream* log = nullptr);
 
-		/**
-		 * @brief			Deleted.
-		 */
-		template <typename Duration>
-		level_t expect_level(level_t level, Duration timeout) const noexcept = delete;
-	};
+    public:
+        /**
+         * @brief Deleted.
+         */
+        level_t put_level(level_t level) const noexcept = delete;
+
+        /**
+         * @brief Deleted.
+         */
+        template <typename Duration>
+        level_t put_level(level_t level, Duration duration) const noexcept = delete;
+    };
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
-}
+
+    /**
+     * @brief GPIO output line.
+     */
+    class output_line
+        : public line {
+
+        using base = line;
+        using diag_base = diag::diag_ready<const char*>;
+
+    public:
+        /**
+         * @brief Constructor.
+         * @see `line`
+         */
+        output_line(const chip* chip, line_pos_t pos, diag::log_ostream* log = nullptr);
+
+    public:
+        /**
+         * @brief Deleted.
+         */
+        level_t get_level() const noexcept = delete;
+
+        /**
+         * @brief Deleted.
+         */
+        template <typename Duration>
+        level_t expect_level(level_t level, Duration timeout) const noexcept = delete;
+    };
+
+
+    // --------------------------------------------------------------
+
+} }

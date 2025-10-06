@@ -80,7 +80,7 @@ namespace abc { namespace gpio {
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
-    
+
     public:
         /**
          * @brief                  Constructor. Identifies the GPIO chip device by number - `/dev/gpiochip0`.

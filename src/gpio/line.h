@@ -32,164 +32,162 @@ SOFTWARE.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
+#include "../diag/diag_ready.h"
+#include "chip.h"
+#include "i/line.i.h"
 
 
-namespace abc {
+namespace abc { namespace gpio {
 
-	using clock = std::chrono::steady_clock;
+    using clock = std::chrono::steady_clock;
 
 
-	template <typename Log>
-	inline gpio_line<Log>::gpio_line(const chip<Log>* chip, line_pos_t pos, line_flags_t flags, Log* log)
-		: _log(log) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x106c8, "gpio_line::gpio_line() Start.");
-		}
+    inline line::line(const char* origin, const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log)
+        : diag_base(copy(origin), log) {
 
-		if (chip == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_line::gpio_line() chip == nullptr", 0x106c9);
-		}
+        constexpr const char* suborigin = "line()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106c8, "Begin: pos=%u, flags=0x%llx", pos, (unsigned long long)flags);
 
-		fd_t fd = open(chip->path(), O_RDONLY);
-		if (fd < 0) {
-			throw exception<std::logic_error, Log>("gpio_line::gpio_line() open() < 0", 0x106ca);
-		}
+        diag_base::expect(suborigin, chip != nullptr, 0x106c9, "chip != nullptr");
 
-		line_request line_request{ };
+        fd_t fd = open(chip->path(), O_RDONLY);
+        diag_base::expect(suborigin, fd >= 0, 0x106ca, "fd >= 0");
+
+        line_request line_request{ };
 #if ((__ABC__GPIO_VER) == 2)
-		line_request.num_lines = 1;
-		line_request.offsets[0] = pos;
-		std::strncpy(line_request.consumer, chip->consumer(), max_consumer);
-		line_request.config.flags = flags;
+        line_request.num_lines = 1;
+        line_request.offsets[0] = pos;
+        std::strncpy(line_request.consumer, chip->consumer(), max_consumer);
+        line_request.config.flags = flags;
 #else
-		line_request.lines = 1;
-		line_request.lineoffsets[0] = pos;
-		std::strncpy(line_request.consumer_label, chip->consumer(), max_consumer);
-		line_request.flags = flags;
+        line_request.lines = 1;
+        line_request.lineoffsets[0] = pos;
+        std::strncpy(line_request.consumer_label, chip->consumer(), max_consumer);
+        line_request.flags = flags;
 #endif
 
-		int ret = ioctl(fd, ioctl::get_line, &line_request);
-		if (ret < 0) {
-			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() ioctl() < 0", 0x106cb);
-		}
+        int ret = ::ioctl(fd, ioctl::get_line, &line_request);
+        close(fd);
+        diag_base::expect(suborigin, ret >= 0, 0x106cb, "ret >= 0");
 
-		if (close(fd) < 0) {
-			throw exception<std::runtime_error, Log>("gpio_line::gpio_line() close(fd) < 0", 0x106cc);
-		}
+        _fd = line_request.fd;
 
-		_fd = line_request.fd;
-
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x106cd, "gpio_line::gpio_line() Done.");
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106cd, "End: _fd=%d", _fd);
+    }
 
 
-	template <typename Log>
-	inline gpio_line<Log>::~gpio_line() noexcept {
-		if (_fd >= 0) {
-			close(_fd);
-		}
-	}
+    inline line::~line() noexcept {
+        constexpr const char* suborigin = "~line()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        if (_fd >= 0) {
+            close(_fd);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline level_t gpio_line<Log>::get_level() const noexcept {
-		line_values values{ };
+    inline level_t line::get_level() const {
+        constexpr const char* suborigin = "get_level()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
-		values.mask = level::mask;
-#endif		
+        values.mask = level::mask;
+#endif        
 
-		int ret = ioctl(_fd, ioctl::get_line_values, &values);
-		if (ret < 0) {
-			return level::invalid;
-		}
+        int ret = ::ioctl(_fd, ioctl::get_line_values, &values);
+        diag_base::expect(suborigin, ret >= 0, __TAG__, "ret >= 0");
 
+        level_t level;
 #if ((__ABC__GPIO_VER) == 2)
-		return (values.bits & level::mask);
+        level = (values.bits & level::mask);
 #else
-		return (values.values[0] & level::mask);
-#endif
-	}
-
-
-	template <typename Log>
-	template <typename Duration>
-	level_t gpio_line<Log>::expect_level(level_t level, Duration timeout) const noexcept {
-		clock::time_point start_tp = clock::now();
-		clock::time_point current_tp = clock::now();
-		level_t current_level = get_level();
-
-		while (current_level != level) {
-			if (std::chrono::duration_cast<Duration>(current_tp - start_tp) > timeout) {
-				return level::invalid;
-			}
-
-			current_tp = clock::now();
-			current_level = get_level();
-		}
-
-		return level;
-	}
-
-
-	template <typename Log>
-	inline level_t gpio_line<Log>::put_level(level_t level) const noexcept {
-		if ((level & ~level::mask) != 0) {
-			return level::invalid;
-		}
-
-		line_values values{ };
-#if ((__ABC__GPIO_VER) == 2)
-		values.mask = level::mask;
-		values.bits = (level & level::mask);
-#else
-		values.values[0] = level;
+        level = (values.values[0] & level::mask);
 #endif
 
-		int ret = ioctl(_fd, ioctl::set_line_values, &values);
-		if (ret < 0) {
-			return level::invalid;
-		}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
 
-		return level;
-	}
+        return level;
+    }
 
 
-	template <typename Log>
-	template <typename Duration>
-	inline level_t gpio_line<Log>::put_level(level_t level, Duration duration) const noexcept {
-		level_t ret = put_level(level);
+    template <typename Duration>
+    level_t line::expect_level(level_t level, Duration timeout) const {
+        constexpr const char* suborigin = "expect_level()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-		if (ret != level::invalid) {
-			std::this_thread::sleep_for(duration);
-		}
+        clock::time_point start_tp = clock::now();
+        clock::time_point current_tp = clock::now();
+        level_t current_level = get_level();
 
-		return ret;
-	}
+        while (current_level != level) {
+            diag_base::expect(suborigin, std::chrono::duration_cast<Duration>(current_tp - start_tp) <= timeout, __TAG__, "std::chrono::duration_cast<Duration>(current_tp - start_tp) <= timeout");
 
+            current_tp = clock::now();
+            current_level = get_level();
+        }
 
-	// --------------------------------------------------------------
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
 
-
-	template <typename Log>
-	inline gpio_input_line<Log>::gpio_input_line(const chip<Log>* chip, line_pos_t pos, Log* log)
-		: base(chip, pos, line_flags::input, log) {
-	}
-
-
-	// --------------------------------------------------------------
+        return level;
+    }
 
 
-	template <typename Log>
-	inline gpio_output_line<Log>::gpio_output_line(const chip<Log>* chip, line_pos_t pos, Log* log)
-		: base(chip, pos, line_flags::output, log) {
-	}
+    inline level_t line::put_level(level_t level) const {
+        constexpr const char* suborigin = "put_level()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: level=%u", level);
+
+        diag_base::expect(suborigin, (level & ~level::mask) != 0, __TAG__, "(level & ~level::mask) != 0");
+
+        line_values values{ };
+#if ((__ABC__GPIO_VER) == 2)
+        values.mask = level::mask;
+        values.bits = (level & level::mask);
+#else
+        values.values[0] = level;
+#endif
+
+        int ret = ::ioctl(_fd, ioctl::set_line_values, &values);
+        diag_base::expect(suborigin, ret >= 0, __TAG__, "ret >= 0");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+
+        return level;
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename Duration>
+    inline level_t line::put_level(level_t level, Duration duration) const {
+        constexpr const char* suborigin = "put_level(duration)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: level=%u", level);
 
-}
+        level = put_level(level);
+        std::this_thread::sleep_for(duration);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+
+        return level;
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    inline input_line::input_line(const chip* chip, line_pos_t pos, diag::log_ostream* log)
+        : base("input_line", chip, pos, line_flags::input, log) {
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    inline output_line::output_line(const chip* chip, line_pos_t pos, diag::log_ostream* log)
+        : base("output_line", chip, pos, line_flags::output, log) {
+    }
+
+
+    // --------------------------------------------------------------
+
+} }
