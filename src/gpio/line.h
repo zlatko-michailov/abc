@@ -139,7 +139,7 @@ namespace abc { namespace gpio {
         constexpr const char* suborigin = "put_level()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: level=%u", level);
 
-        diag_base::expect(suborigin, (level & ~level::mask) != 0, __TAG__, "(level & ~level::mask) != 0");
+        diag_base::expect(suborigin, (level & ~level::mask) == 0, __TAG__, "(level & ~level::mask) == 0");
 
         line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)

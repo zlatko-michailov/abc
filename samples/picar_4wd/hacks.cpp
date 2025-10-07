@@ -552,10 +552,10 @@ void run_all() {
     // Init hat
     reset_hat(chip, log);
 
-#if 0
     // Ultrasonic - binary input
     measure_obstacle(chip, log);
 
+#if 0
     // Servo - pwm output
     turn_servo(log);
     turn_servo_emulator(chip, log);
