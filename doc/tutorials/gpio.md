@@ -54,7 +54,7 @@ abc::gpio::level_t level = line.get_level();
 
 If you want to wait until the level changes to an expected value, you can do:
 ``` c++
-if (line.expect_level(abc::gpio::level::high, std::chrono::milliseconds(10)) != abc::gpio::level::invalid) {
+if (line.wait_for_level(abc::gpio::level::high, std::chrono::milliseconds(10)) != abc::gpio::level::invalid) {
     // ...
 }
 ```

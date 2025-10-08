@@ -134,7 +134,7 @@ namespace abc { namespace gpio {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: current_level=%u", current_level);
 
-        return level;
+        return current_level;
     }
 
 
