@@ -108,22 +108,26 @@ void measure_obstacle(const abc::gpio::chip& chip, abc::diag::log_ostream& log) 
 
         clock::time_point echo_start_tp;
         clock::time_point echo_end_tp;
-        try {
-            // Make sure there is no echo in progress.
-            echo_line.expect_level(abc::gpio::level::low, timeout);
-            clock::time_point echo_ready_tp = clock::now();
 
-            // Wait until the echo starts.
+        // Make sure there is no echo in progress.
+        abc::gpio::level_t level = echo_line.wait_for_level(abc::gpio::level::low, timeout);
+        clock::time_point echo_ready_tp = clock::now();
+
+        // Wait until the echo starts.
+        if (level != abc::gpio::level::invalid) {
             timeout -= std::chrono::duration_cast<microseconds>(echo_ready_tp - echo_not_ready_tp);
-            echo_line.expect_level(abc::gpio::level::high, timeout);
-            echo_start_tp = clock::now();
-
-            // Wait until the echo ends.
-            timeout -= std::chrono::duration_cast<microseconds>(echo_start_tp - echo_ready_tp);
-            echo_line.expect_level(abc::gpio::level::low, timeout);
-            echo_end_tp = clock::now();
+            level = echo_line.wait_for_level(abc::gpio::level::high, timeout);
         }
-        catch (const abc::diag::expect_error& ex) {
+        echo_start_tp = clock::now();
+
+        // Wait until the echo ends.
+        if (level != abc::gpio::level::invalid) {
+            timeout -= std::chrono::duration_cast<microseconds>(echo_start_tp - echo_ready_tp);
+            level = echo_line.wait_for_level(abc::gpio::level::low, timeout);
+        }
+        echo_end_tp = clock::now();
+
+        if (level == abc::gpio::level::invalid) {
             log.put_any(origin, suborigin, abc::diag::severity::important, 0x106ad, "TIMEOUT us = %llu", (long long)timeout.count());
             continue;
         }

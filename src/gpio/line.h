@@ -114,8 +114,8 @@ namespace abc { namespace gpio {
 
 
     template <typename Duration>
-    level_t line::expect_level(level_t level, Duration timeout) const {
-        constexpr const char* suborigin = "expect_level()";
+    level_t line::wait_for_level(level_t level, Duration timeout) const {
+        constexpr const char* suborigin = "wait_for_level()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         clock::time_point start_tp = clock::now();
@@ -123,13 +123,16 @@ namespace abc { namespace gpio {
         level_t current_level = get_level();
 
         while (current_level != level) {
-            diag_base::expect(suborigin, std::chrono::duration_cast<Duration>(current_tp - start_tp) <= timeout, __TAG__, "std::chrono::duration_cast<Duration>(current_tp - start_tp) <= timeout");
+            if (std::chrono::duration_cast<Duration>(current_tp - start_tp) > timeout) {
+                current_level = level::invalid;
+                break;
+            }
 
             current_tp = clock::now();
             current_level = get_level();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: current_level=%u", current_level);
 
         return level;
     }

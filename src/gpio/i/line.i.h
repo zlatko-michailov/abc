@@ -92,7 +92,7 @@ namespace abc { namespace gpio {
          * @return          The expected level if there was match, or `invalid` if the wait timed out. 
          */
         template <typename Duration>
-        level_t expect_level(level_t level, Duration timeout) const;
+        level_t wait_for_level(level_t level, Duration timeout) const;
 
         /**
          * @brief       Set the current level on the line.
@@ -181,7 +181,7 @@ namespace abc { namespace gpio {
          * @brief Deleted.
          */
         template <typename Duration>
-        level_t expect_level(level_t level, Duration timeout) const noexcept = delete;
+        level_t wait_for_level(level_t level, Duration timeout) const noexcept = delete;
     };
 
 
