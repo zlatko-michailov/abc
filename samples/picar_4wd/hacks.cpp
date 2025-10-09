@@ -32,6 +32,7 @@ SOFTWARE.
 #include "../../src/diag/log.h"
 #include "../../src/gpio/chip.h"
 #include "../../src/gpio/line.h"
+#include "../../src/gpio/ultrasonic.h"
 
 
 ////constexpr abc::gpio_smbus_clock_frequency_t    smbus_hat_clock_frequency        = 72 * std::mega::num;
@@ -88,8 +89,8 @@ void reset_hat(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
 }
 
 
-void measure_obstacle(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
-    constexpr const char* suborigin = "measure_obstacle()";
+void measure_obstacle_raw(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_obstacle_raw()";
 
     using clock = std::chrono::steady_clock;
     using microseconds = std::chrono::microseconds;
@@ -142,6 +143,25 @@ void measure_obstacle(const abc::gpio::chip& chip, abc::diag::log_ostream& log) 
         double distance_cm = roundtrip_cm / 2.0;
         log.put_any(origin, suborigin, abc::diag::severity::important, 0x106af, "cm = %.2f", distance_cm);
         log.put_blank_line(origin, abc::diag::severity::important);
+
+        // Sleep for 1 sec between iterations.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+
+void measure_obstacle_ultrasonic(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_obstacle_ultrasonic()";
+
+    const abc::gpio::line_pos_t trigger_line_pos = 5;
+    const abc::gpio::line_pos_t echo_line_pos = 6;
+    abc::gpio::ultrasonic<std::milli> ultrasonic_mm(&chip, trigger_line_pos, echo_line_pos, &log);
+
+    for (int i = 0; i < 10; i++) {
+        const std::size_t max_distance_mm = 500;
+        std::size_t distance_mm = ultrasonic_mm.measure_distance(max_distance_mm);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "mm = %zu", distance_mm);
 
         // Sleep for 1 sec between iterations.
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -557,7 +577,8 @@ void run_all() {
     reset_hat(chip, log);
 
     // Ultrasonic - binary input
-    measure_obstacle(chip, log);
+    measure_obstacle_raw(chip, log);
+    measure_obstacle_ultrasonic(chip, log);
 
 #if 0
     // Servo - pwm output

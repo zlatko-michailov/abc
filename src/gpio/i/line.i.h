@@ -61,7 +61,7 @@ namespace abc { namespace gpio {
          * @param flags Line flags.
          * @param log   `diag::log_ostream` pointer. May be `nullptr`.
          */
-        //// REMOVE? line(const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log = nullptr);
+        //// TODO: REMOVE? line(const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
