@@ -85,7 +85,13 @@
 		"codecvt": "cpp",
 		"cinttypes": "cpp",
 		"format": "cpp",
-		"span": "cpp"
+		"span": "cpp",
+		"charconv": "cpp",
+		"numbers": "cpp",
+		"semaphore": "cpp",
+		"variant": "cpp",
+		"stack": "cpp",
+		"text_encoding": "cpp"
 	},
 	"cSpell.enabled": true,
 	"cSpell.words": [
