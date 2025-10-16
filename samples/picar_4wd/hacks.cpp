@@ -569,9 +569,11 @@ void run_all() {
     // Create a chip.
     abc::gpio::chip chip(0, "picar_4wd", &log);
 
+#if 0
     // Info
     log_chip_info(chip, log);
     log_all_line_info(chip, log);
+#endif
 
     // Init hat
     reset_hat(chip, log);
