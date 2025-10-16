@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../../src/gpio/chip.h"
 #include "../../src/gpio/line.h"
 #include "../../src/gpio/ultrasonic.h"
+#include "../../src/gpio/pwm_emulator.h"
 
 
 ////constexpr abc::gpio_smbus_clock_frequency_t    smbus_hat_clock_frequency        = 72 * std::mega::num;
@@ -578,9 +579,11 @@ void run_all() {
     // Init hat
     reset_hat(chip, log);
 
+#if 0
     // Ultrasonic - binary input
     measure_obstacle_raw(chip, log);
     measure_obstacle_ultrasonic(chip, log);
+#endif
 
 #if 0
     // Servo - pwm output

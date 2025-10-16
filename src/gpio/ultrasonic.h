@@ -30,7 +30,6 @@ SOFTWARE.
 #include "../diag/diag_ready.h"
 #include "chip.h"
 #include "line.h"
-#include "chip.h"
 #include "i/ultrasonic.i.h"
 
 

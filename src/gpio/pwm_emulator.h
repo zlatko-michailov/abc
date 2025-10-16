@@ -30,178 +30,158 @@ SOFTWARE.
 #include <chrono>
 #include <linux/gpio.h>
 
-#include "../log.h"
-#include "../i/gpio.i.h"
+#include "../diag/diag_ready.h"
+#include "chip.h"
+#include "line.h"
+#include "i/pwm_emulator.i.h"
 
 
-namespace abc {
+namespace abc { namespace gpio {
 
-	template <typename Log>
-	template <typename PulseWidthDuration>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const chip<Log>* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, gpio_pwm_pulse_frequency_t frequency, Log* log)
-		: _line(chip, line_pos, log)
-		, _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
-		, _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
-		, _frequency(frequency)
-		, _period(gpio_pwm_period(frequency))
-		, _duty_cycle(0)
-		, _quit(false)
-		, _log(log)
-		, _thread(thread_func, this) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x106ce, "gpio_pwm_emulator::gpio_pwm_emulator() Start.");
-		}
+    template <typename PulseWidthDuration>
+    inline pwm_emulator::pwm_emulator(const chip* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, pwm_pulse_frequency_t frequency, diag::log_ostream* log)
+        : diag_base("abc::gpio::pwm_emulator", log)
+        , _line(chip, line_pos, log)
+        , _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
+        , _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
+        , _frequency(frequency)
+        , _period(pwm_period(frequency))
+        , _duty_cycle(0)
+        , _quit(false)
+        , _thread(thread_func, this) {
 
-		if (min_pulse_width > max_pulse_width) {
-			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() min_pulse_width", 0x106cf);
-		}
+        constexpr const char* suborigin = "pwm_emulator()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106ce, "Begin:");
 
-		if (max_pulse_width > _period) {
-			throw exception<std::logic_error, Log>("gpio_pwm_emulator::gpio_pwm_emulator() max_pulse_width", 0x106d0);
-		}
+        diag_base::expect(suborigin, min_pulse_width <= max_pulse_width, 0x106cf, "min_pulse_width <= max_pulse_width");
+        diag_base::expect(suborigin, max_pulse_width <= _period, 0x106d0, "min_pulse_width <= max_pulse_width");
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x106d1, "gpio_pwm_emulator::gpio_pwm_emulator() Done.");
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106d1, "End:");
+    }
 
 
-	template <typename Log>
-	inline gpio_pwm_emulator<Log>::gpio_pwm_emulator(const chip<Log>* chip, line_pos_t line_pos, gpio_pwm_pulse_frequency_t frequency, Log* log)
-		: gpio_pwm_emulator<Log>(chip, line_pos, gpio_pwm_duration(0), gpio_pwm_period(frequency), frequency, log) {
-	}
+    inline pwm_emulator::pwm_emulator(const chip* chip, line_pos_t line_pos, pwm_pulse_frequency_t frequency, diag::log_ostream* log)
+        : pwm_emulator(chip, line_pos, pwm_duration(0), pwm_period(frequency), frequency, log) {
+    }
 
 
-	template <typename Log>
-	inline gpio_pwm_emulator<Log>::~gpio_pwm_emulator() noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d2, "gpio_pwm_emulator::~gpio_pwm_emulator() Start.");
-		}
+    inline pwm_emulator::~pwm_emulator() noexcept {
+        constexpr const char* suborigin = "~pwm_emulator()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106d2, "Begin:");
 
-		{
-			_quit = true;
+        {
+            _quit = true;
 
-			_control_condition.notify_all();
-		}
+            _control_condition.notify_all();
+        }
 
-		_thread.join();
+        _thread.join();
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d3, "gpio_pwm_emulator::~gpio_pwm_emulator() Done.");
-		}
-	}
-
-	template <typename Log>
-	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
-		if (duty_cycle == _duty_cycle) {
-			return;
-		}
-
-		if (duty_cycle < gpio_pwm_duty_cycle::min) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106d4, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
-					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
-			}
-
-			duty_cycle = gpio_pwm_duty_cycle::min;
-		}
-		else if (duty_cycle > gpio_pwm_duty_cycle::max) {
-			if (_log != nullptr) {
-				_log->put_any(category::abc::gpio, severity::abc::important, 0x106d5, "gpio_pwm_emulator::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
-					(unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
-			}
-
-			duty_cycle = gpio_pwm_duty_cycle::max;
-		}
-
-		bool should_notify = (_duty_cycle == gpio_pwm_duty_cycle::min || _duty_cycle == gpio_pwm_duty_cycle::max);
-
-		{
-			_duty_cycle = duty_cycle;
-
-			if (should_notify) {
-				_control_condition.notify_all();
-			}
-		}
-	}
-
-	template <typename Log>
-	template <typename PwmDuration>
-	inline void gpio_pwm_emulator<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept {
-		set_duty_cycle(duty_cycle);
-		std::this_thread::sleep_for(duration);
-		set_duty_cycle(gpio_pwm_duty_cycle::min);
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x106d3, "End:");
+    }
 
 
-	template <typename Log>
-	inline void gpio_pwm_emulator<Log>::thread_func(gpio_pwm_emulator* this_ptr) noexcept {
-		using clock = std::chrono::steady_clock;
+    inline void pwm_emulator::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
+        constexpr const char* suborigin = "set_duty_cycle()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _duty_cycle=%u, duty_cycle=%u", _duty_cycle, duty_cycle);
 
-		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d6, "gpio_pwm_emulator::thread_func() Start.");
-		}
+        if (duty_cycle == _duty_cycle) {
+            diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: (noop)");
+            return;
+        }
 
-		bool quit = this_ptr->_quit;
-		gpio_pwm_duty_cycle_t duty_cycle = this_ptr->_duty_cycle;
+        diag_base::expect(suborigin, duty_cycle >= pwm_duty_cycle::min, 0x106d4, "duty_cycle >= pwm_duty_cycle::min");
+        diag_base::expect(suborigin, duty_cycle <= pwm_duty_cycle::max, 0x106d5, "duty_cycle <= pwm_duty_cycle::max");
 
-		for (;;) {
-			if (quit) {
-				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d7, "gpio_pwm_emulator::thread_func() Quitting.");
-				}
+        bool should_notify = (_duty_cycle == pwm_duty_cycle::min || _duty_cycle == pwm_duty_cycle::max);
 
-				this_ptr->_line.put_level(level::low);
-				break;
-			}
+        {
+            _duty_cycle = duty_cycle;
 
-			if (duty_cycle == gpio_pwm_duty_cycle::min || duty_cycle == gpio_pwm_duty_cycle::max) {
-				// Constant level:
-				// Set the level, and block until the duty_cycle changes.
-				level_t level = duty_cycle != gpio_pwm_duty_cycle::min ? level::high : level::low;
-				this_ptr->_line.put_level(level);
-				{
-					std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
-					this_ptr->_control_condition.wait_for(lock, this_ptr->const_level_period);
+            if (should_notify) {
+                _control_condition.notify_all();
+            }
+        }
 
-					quit = this_ptr->_quit;
-					duty_cycle = this_ptr->_duty_cycle;
-				}
-			}
-			else {
-				// Alternating level:
-				// Calculate the time points when the level should change, and use the longer interval to refresh the control variables. 
-				gpio_pwm_duration high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / gpio_pwm_duty_cycle::max;
-				gpio_pwm_duration low_duration  = this_ptr->_period - high_duration;
-
-				typename clock::time_point start_time_point = clock::now();
-				typename clock::time_point high_end_time_point = start_time_point + high_duration;
-				typename clock::time_point low_end_time_point = high_end_time_point + low_duration;
-
-				// High level.
-				this_ptr->_line.put_level(level::high);
-				if (high_duration >= low_duration) {
-					quit = this_ptr->_quit;
-					duty_cycle = this_ptr->_duty_cycle;
-				}
-				std::this_thread::sleep_until(high_end_time_point);
-
-				// Low level.
-				this_ptr->_line.put_level(level::low);
-				if (high_duration < low_duration) {
-					quit = this_ptr->_quit;
-					duty_cycle = this_ptr->_duty_cycle;
-				}
-				std::this_thread::sleep_until(low_end_time_point);
-			}
-		}
-
-		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x106d8, "gpio_pwm_emulator::thread_func() Done.");
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename PwmDuration>
+    inline void pwm_emulator::set_duty_cycle(pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
+        constexpr const char* suborigin = "set_duty_cycle(duration)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-}
+        set_duty_cycle(duty_cycle);
+        std::this_thread::sleep_for(duration);
+        set_duty_cycle(pwm_duty_cycle::min);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void pwm_emulator::thread_func(pwm_emulator* this_ptr) noexcept {
+        using clock = std::chrono::steady_clock;
+
+        constexpr const char* suborigin = "thread_func()";
+        this_ptr->put_any(suborigin, diag::severity::callstack, 0x106d6, "Begin:");
+
+        bool quit = this_ptr->_quit;
+        pwm_duty_cycle_t duty_cycle = this_ptr->_duty_cycle;
+
+        for (;;) {
+            if (quit) {
+            this_ptr->put_any(suborigin, diag::severity::optional, 0x106d7, "Quitting.");
+
+                this_ptr->_line.put_level(level::low);
+                break;
+            }
+
+            if (duty_cycle == pwm_duty_cycle::min || duty_cycle == pwm_duty_cycle::max) {
+                // Constant level:
+                // Set the level, and block until the duty_cycle changes.
+                level_t level = duty_cycle != pwm_duty_cycle::min ? level::high : level::low;
+                this_ptr->_line.put_level(level);
+                {
+                    std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
+                    this_ptr->_control_condition.wait_for(lock, this_ptr->const_level_period);
+
+                    quit = this_ptr->_quit;
+                    duty_cycle = this_ptr->_duty_cycle;
+                }
+            }
+            else {
+                // Alternating level:
+                // Calculate the time points when the level should change, and use the longer interval to refresh the control variables. 
+                pwm_duration high_duration = this_ptr->_min_pulse_width + duty_cycle * (this_ptr->_max_pulse_width - this_ptr->_min_pulse_width) / pwm_duty_cycle::max;
+                pwm_duration low_duration  = this_ptr->_period - high_duration;
+
+                typename clock::time_point start_time_point = clock::now();
+                typename clock::time_point high_end_time_point = start_time_point + high_duration;
+                typename clock::time_point low_end_time_point = high_end_time_point + low_duration;
+
+                // High level.
+                this_ptr->_line.put_level(level::high);
+                if (high_duration >= low_duration) {
+                    quit = this_ptr->_quit;
+                    duty_cycle = this_ptr->_duty_cycle;
+                }
+                std::this_thread::sleep_until(high_end_time_point);
+
+                // Low level.
+                this_ptr->_line.put_level(level::low);
+                if (high_duration < low_duration) {
+                    quit = this_ptr->_quit;
+                    duty_cycle = this_ptr->_duty_cycle;
+                }
+                std::this_thread::sleep_until(low_end_time_point);
+            }
+        }
+
+        this_ptr->put_any(suborigin, diag::severity::callstack, 0x106d8, "End:");
+    }
+
+
+    // --------------------------------------------------------------
+
+} }
