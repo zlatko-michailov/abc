@@ -59,7 +59,7 @@ constexpr board_state_t    board_state_0    = 0;
 constexpr board_state_t    board_state_1    = 1;
 
 
-namespace score { //// TODO: enum?
+namespace score {
     constexpr score_t none = -1;
 
     constexpr score_t max  = 100;
@@ -108,7 +108,7 @@ struct vmem_bundle { //// TODO: knowledge_base?
 
 using player_id_t = std::uint8_t;
 
-namespace player_id { //// TODO: enum?
+namespace player_id {
     constexpr player_id_t none = 0x2;
     constexpr player_id_t x    = 0x0; // First player
     constexpr player_id_t o    = 0x1; // Second player
@@ -121,7 +121,7 @@ namespace player_id { //// TODO: enum?
 
 using player_type_t    = std::uint8_t;
 
-namespace player_type { //// TODO: enum?
+namespace player_type {
     constexpr player_type_t none        = 0;
     constexpr player_type_t external    = 1;
     constexpr player_type_t slow_engine = 2;

@@ -44,7 +44,7 @@ using count_t = int;
 constexpr count_t row_count = 3;
 constexpr count_t col_count = 3;
 
-namespace score { //// TODO: enum?
+namespace score { 
     constexpr score_t none = -1;
 
     constexpr score_t max  = 20;
@@ -93,7 +93,7 @@ struct vmem_bundle { //// TODO: knowledge_base?
 
 using player_id_t = std::uint8_t;
 
-namespace player_id { //// TODO: enum?
+namespace player_id {
     constexpr player_id_t none = 0x0;
     constexpr player_id_t x    = 0x2; // First player
     constexpr player_id_t o    = 0x3; // Second player
@@ -106,7 +106,7 @@ namespace player_id { //// TODO: enum?
 
 using player_type_t    = std::uint8_t;
 
-namespace player_type { //// TODO: enum?
+namespace player_type {
     constexpr player_type_t none        = 0;
     constexpr player_type_t external    = 1;
     constexpr player_type_t slow_engine = 2;

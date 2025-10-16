@@ -43,7 +43,6 @@ namespace abc { namespace gpio {
     // --------------------------------------------------------------
 
 
-    //// TODO: Make enum
     using level_t = std::uint32_t;
 
     namespace level {
@@ -51,6 +50,7 @@ namespace abc { namespace gpio {
 
         static constexpr level_t low     = 0x0;
         static constexpr level_t high    = 0x1;
+
         static constexpr level_t invalid = mask + 1;
     }
 
@@ -74,7 +74,6 @@ namespace abc { namespace gpio {
     using line_values    = gpio_v2_line_values;
     
 
-    //// TODO: Make enum
     using ioctl_t = unsigned long;
 
     namespace ioctl {
@@ -86,7 +85,6 @@ namespace abc { namespace gpio {
     }
 
 
-    //// TODO: Make enum
     using line_flags_t = std::uint64_t;
 
     namespace line_flags {
@@ -124,7 +122,6 @@ namespace abc { namespace gpio {
     using line_values    = gpiohandle_data;
 
 
-    //// TODO: Make enum
     using ioctl_t = unsigned long;
 
     namespace ioctl {
@@ -136,7 +133,6 @@ namespace abc { namespace gpio {
     }
 
 
-    //// TODO: Make enum
     using line_flags_t = std::uint32_t;
 
     namespace line_flags {
