@@ -29,35 +29,35 @@ SOFTWARE.
 #include <chrono>
 
 
-namespace abc {
+namespace abc { namespace gpio {
 
-	using gpio_pwm_pulse_frequency_t	= std::uint16_t;
-	using gpio_pwm_duration				= std::chrono::microseconds;
-
-
-	// --------------------------------------------------------------
+    using pwm_pulse_frequency_t = std::uint16_t;
+    using pwm_duration          = std::chrono::microseconds;
 
 
-	using gpio_pwm_duty_cycle_t = std::uint16_t;
-
-	namespace gpio_pwm_duty_cycle {
-		constexpr gpio_pwm_duty_cycle_t min =   0;
-		constexpr gpio_pwm_duty_cycle_t max = 100;
-	}
+    // --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+    using pwm_duty_cycle_t = std::uint16_t;
+
+    namespace pwm_duty_cycle {
+        constexpr pwm_duty_cycle_t min =   0;
+        constexpr pwm_duty_cycle_t max = 100;
+    }
 
 
-	/**
-	 * @brief			Returns the duration of the PWM period in `gpio_pwm_duration` units based on the given frequency.
-	 * @param frequency	Frequency in Hz (ticks per second).
-	 */
-	constexpr gpio_pwm_duration gpio_pwm_period(gpio_pwm_pulse_frequency_t frequency) noexcept {
-		return gpio_pwm_duration(gpio_pwm_duration::period::den / frequency);
-	}
+    // --------------------------------------------------------------
 
 
-	// --------------------------------------------------------------
+    /**
+     * @brief           Returns the duration of the PWM period in `pwm_duration` units based on the given frequency.
+     * @param frequency Frequency in Hz (ticks per second).
+     */
+    constexpr pwm_duration pwm_period(pwm_pulse_frequency_t frequency) noexcept {
+        return pwm_duration(pwm_duration::period::den / frequency);
+    }
 
-}
+
+    // --------------------------------------------------------------
+
+} }
