@@ -170,6 +170,33 @@ void measure_obstacle_ultrasonic(const abc::gpio::chip& chip, abc::diag::log_ost
 }
 
 
+void turn_servo_emulator(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "turn_servo_emulator()";
+
+    using microseconds = std::chrono::microseconds;
+    using milliseconds = std::chrono::milliseconds;
+
+    const microseconds min_pulse_width = microseconds(500);
+    const microseconds max_pulse_width = microseconds(2500);
+    const abc::gpio::pwm_pulse_frequency_t frequency = 50; // 50 Hz
+
+    abc::gpio::pwm_emulator pwm_servo(&chip, 5, min_pulse_width, max_pulse_width, frequency, &log);
+
+    const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
+
+    for (std::uint32_t duty_cycle : duty_cycles) {
+        const milliseconds duty_duration = milliseconds(250);
+        const milliseconds sleep_duration = milliseconds(500);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b1, "duty_cycle = %u", duty_cycle);
+
+        pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
+
+        std::this_thread::sleep_for(sleep_duration);
+    }
+}
+
+
 #if 0
 void turn_servo(log_ostream& log) {
     using microseconds = std::chrono::microseconds;
@@ -193,31 +220,6 @@ void turn_servo(log_ostream& log) {
         const milliseconds sleep_duration = milliseconds(500);
 
         log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b0, "duty_cycle = %u", duty_cycle);
-
-        pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
-
-        std::this_thread::sleep_for(sleep_duration);
-    }
-}
-
-
-void turn_servo_emulator(const abc::chip<log_ostream>& chip, log_ostream& log) {
-    using microseconds = std::chrono::microseconds;
-    using milliseconds = std::chrono::milliseconds;
-
-    const microseconds min_pulse_width = microseconds(500);
-    const microseconds max_pulse_width = microseconds(2500);
-    const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
-
-    abc::gpio_pwm_emulator<log_ostream> pwm_servo(&chip, 5, min_pulse_width, max_pulse_width, frequency, &log);
-
-    const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
-
-    for (std::uint32_t duty_cycle : duty_cycles) {
-        const milliseconds duty_duration = milliseconds(250);
-        const milliseconds sleep_duration = milliseconds(500);
-
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b1, "duty_cycle = %u", duty_cycle);
 
         pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
 
@@ -585,11 +587,11 @@ void run_all() {
     measure_obstacle_ultrasonic(chip, log);
 #endif
 
-#if 0
     // Servo - pwm output
-    turn_servo(log);
     turn_servo_emulator(chip, log);
+    //turn_servo(log);
 
+#if 0
     // Wheels - pwm output
     turn_wheels(log);
 

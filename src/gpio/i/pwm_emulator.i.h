@@ -52,11 +52,6 @@ namespace abc { namespace gpio {
 
         using diag_base = diag::diag_ready<const char*>;
 
-        /**
-         * @brief Break const level sleeps periodically to prevent notification misses.
-         */
-        static constexpr std::chrono::milliseconds const_level_period = std::chrono::milliseconds(200);
-
     public:
         /**
          * @brief                     Constructor for servos or other peripherals where the pulse width must be within a given range.
@@ -83,7 +78,7 @@ namespace abc { namespace gpio {
         /**
          * @brief Move constructor.
          */
-        pwm_emulator(pwm_emulator& other) noexcept = default;
+        pwm_emulator(pwm_emulator&& other) noexcept;
 
         /**
          * @brief Deleted.
@@ -136,11 +131,6 @@ namespace abc { namespace gpio {
         pwm_duration _max_pulse_width;
 
         /**
-         * @briefSignal frequency.
-         */
-        pwm_pulse_frequency_t _frequency;
-
-        /**
          * @brief Calculated period.
          */
         pwm_duration _period;
@@ -171,6 +161,11 @@ namespace abc { namespace gpio {
          * @brief The thread on which PWM is emulated.
          */
         std::thread _thread;
+
+        /**
+         * @brief Break const level sleeps periodically to prevent notification misses.
+         */
+        const std::chrono::milliseconds _const_level_period = std::chrono::milliseconds(200);
     };
 
 

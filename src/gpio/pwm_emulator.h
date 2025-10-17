@@ -42,9 +42,8 @@ namespace abc { namespace gpio {
     inline pwm_emulator::pwm_emulator(const chip* chip, line_pos_t line_pos, PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width, pwm_pulse_frequency_t frequency, diag::log_ostream* log)
         : diag_base("abc::gpio::pwm_emulator", log)
         , _line(chip, line_pos, log)
-        , _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width))
-        , _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width))
-        , _frequency(frequency)
+        , _min_pulse_width(std::chrono::duration_cast<pwm_duration>(min_pulse_width))
+        , _max_pulse_width(std::chrono::duration_cast<pwm_duration>(max_pulse_width))
         , _period(pwm_period(frequency))
         , _duty_cycle(0)
         , _quit(false)
@@ -62,6 +61,18 @@ namespace abc { namespace gpio {
 
     inline pwm_emulator::pwm_emulator(const chip* chip, line_pos_t line_pos, pwm_pulse_frequency_t frequency, diag::log_ostream* log)
         : pwm_emulator(chip, line_pos, pwm_duration(0), pwm_period(frequency), frequency, log) {
+    }
+
+
+    inline pwm_emulator::pwm_emulator(pwm_emulator&& other) noexcept
+        : diag_base("abc::gpio::pwm_emulator", other.log())
+        , _line(std::move(other._line))
+        , _min_pulse_width(other._min_pulse_width)
+        , _max_pulse_width(other._max_pulse_width)
+        , _period(other._period)
+        , _duty_cycle(other._duty_cycle.load())
+        , _quit(other._quit.load())
+        , _thread(thread_func, this) {
     }
 
 
@@ -83,7 +94,7 @@ namespace abc { namespace gpio {
 
     inline void pwm_emulator::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
         constexpr const char* suborigin = "set_duty_cycle()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _duty_cycle=%u, duty_cycle=%u", _duty_cycle, duty_cycle);
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _duty_cycle=%u, duty_cycle=%u", _duty_cycle.load(), duty_cycle);
 
         if (duty_cycle == _duty_cycle) {
             diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: (noop)");
@@ -144,7 +155,7 @@ namespace abc { namespace gpio {
                 this_ptr->_line.put_level(level);
                 {
                     std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
-                    this_ptr->_control_condition.wait_for(lock, this_ptr->const_level_period);
+                    this_ptr->_control_condition.wait_for(lock, this_ptr->_const_level_period);
 
                     quit = this_ptr->_quit;
                     duty_cycle = this_ptr->_duty_cycle;
