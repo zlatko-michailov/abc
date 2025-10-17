@@ -33,15 +33,21 @@ SOFTWARE.
 
 #include "../../../root/size.h"
 #include "../../../diag/i/diag_ready.i.h"
-#include "../../i/base.i.h"
 
 
-namespace abc { namespace gpio { namespace smbus {
+namespace abc { namespace smbus {
 
+    using fd_t              = int;
     using functionality_t   = unsigned long;
     using address_t         = std::uint8_t;
     using register_t        = std::uint8_t;
     using clock_frequency_t = std::uint64_t;
+
+
+    // --------------------------------------------------------------
+
+
+    constexpr std::size_t max_path = 32;
 
 
     // --------------------------------------------------------------
@@ -53,7 +59,7 @@ namespace abc { namespace gpio { namespace smbus {
     /**
      * @brief SMBus (I2C).
      */
-    class smbus
+    class controller
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
@@ -64,29 +70,29 @@ namespace abc { namespace gpio { namespace smbus {
          * @param dev_i2c_pos SMBus device number.
          * @param log         `diag::log_ostream` pointer. May be `nullptr`.
          */
-        smbus(int dev_i2c_pos, diag::log_ostream* log = nullptr);
+        controller(int dev_i2c_pos, diag::log_ostream* log = nullptr);
 
         /**
          * @brief      Construct a new gpio smbus object
          * @param path Device path - `/dev/i2c-0`.
          * @param log  `diag::log_ostream` pointer. May be `nullptr`.
          */
-        smbus(const char* path, diag::log_ostream* log = nullptr);
+        controller(const char* path, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        smbus(smbus&& other) noexcept = default;
+        controller(controller&& other) noexcept = default;
 
         /**
          * @brief Deleted.
          */
-        smbus(const smbus& other) = delete;
+        controller(const controller& other) = delete;
 
         /**
          * @brief Destructor.
          */
-        ~smbus() noexcept;
+        ~controller() noexcept;
 
     private:
         /**
@@ -307,4 +313,4 @@ namespace abc { namespace gpio { namespace smbus {
 
     // --------------------------------------------------------------
 
-} } }
+} }

@@ -32,10 +32,10 @@ SOFTWARE.
 #include <sys/ioctl.h>
 
 #include "../../diag/i/diag_ready.i.h"
-#include "i/smbus.i.h"
+#include "i/controller.i.h"
 
 
-namespace abc { namespace gpio { namespace smbus {
+namespace abc { namespace smbus {
 
     template <typename Log>
     inline gpio_smbus<Log>::gpio_smbus(int dev_i2c_pos, Log* log)
@@ -536,4 +536,4 @@ namespace abc { namespace gpio { namespace smbus {
 
     // --------------------------------------------------------------
 
-} } }
+} }
