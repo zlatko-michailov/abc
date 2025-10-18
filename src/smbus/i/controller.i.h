@@ -117,27 +117,24 @@ namespace abc { namespace smbus {
          * @brief        Send a signal with no data to a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
-         * @return       `true` = success. `false` = error.
          */
-        bool put_nodata(const target& target, register_t reg) noexcept;
+        void put_nodata(const target& target, register_t reg);
 
         /**
          * @brief        Send a byte (8 bits) to a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
          * @param byte   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool put_byte(const target& target, register_t reg, std::uint8_t byte) noexcept;
+        void put_byte(const target& target, register_t reg, std::uint8_t byte);
 
         /**
          * @brief        Send a word (16 bits) to a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
          * @param word   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool put_word(const target& target, register_t reg, std::uint16_t word) noexcept;
+        void put_word(const target& target, register_t reg, std::uint16_t word);
 
         /**
          * @brief        Send a block/array to a target's register.
@@ -145,43 +142,38 @@ namespace abc { namespace smbus {
          * @param reg    Register on the target.
          * @param block  Data buffer.
          * @param size   Size of the data buffer.
-         * @return       `true` = success. `false` = error.
          */
-        bool put_block(const target& target, register_t reg, const void* block, std::size_t size) noexcept;
+        void put_block(const target& target, register_t reg, const void* block, std::size_t size);
 
         /**
          * @brief        Receive a byte (8 bits) from a target with no register.
          * @param target Target/HAT.
          * @param byte   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool get_noreg(const target& target, std::uint8_t& byte) noexcept;
+        void get_noreg(const target& target, std::uint8_t& byte);
 
         /**
          * @brief        Receive a word (16 bits) from a target with no register.
          * @param target Target/HAT.
          * @param word   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool get_noreg_2(const target& target, std::uint16_t& word) noexcept;
+        void get_noreg_2(const target& target, std::uint16_t& word);
 
         /**
          * @brief        Receive a byte (8 bits) from a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
          * @param byte   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool get_byte(const target& target, register_t reg, std::uint8_t& byte) noexcept;
+        void get_byte(const target& target, register_t reg, std::uint8_t& byte);
 
         /**
          * @brief        Receive a word (16 bits) from a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
          * @param word   Data.
-         * @return       `true` = success. `false` = error.
          */
-        bool get_word(const target& target, register_t reg, std::uint16_t& word) noexcept;
+        void get_word(const target& target, register_t reg, std::uint16_t& word);
 
         /**
          * @brief        Receive a block/array from a target's register.
@@ -189,17 +181,15 @@ namespace abc { namespace smbus {
          * @param reg    Register on the target.
          * @param block  Data buffer.
          * @param size   Size of the data buffer.
-         * @return       `true` = success. `false` = error.
          */
-        bool get_block(const target& target, register_t reg, void* block, std::size_t& size) noexcept;
+        void get_block(const target& target, register_t reg, void* block, std::size_t& size);
 
     private:
         /**
          * @brief      Ensure the SMBus is currently targeting the target's address.
          * @param addr Target's address. 
-         * @return     `true` = success. `false` = error.
          */
-        bool ensure_address(address_t addr) noexcept;
+        void ensure_address(address_t addr);
 
         /**
          * @brief      Calls `ioctl()` while a mutex is being acquired.
