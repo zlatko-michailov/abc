@@ -148,32 +148,32 @@ namespace abc { namespace smbus {
         /**
          * @brief        Receive a byte (8 bits) from a target with no register.
          * @param target Target/HAT.
-         * @param byte   Data.
+         * @return       Data.
          */
-        void get_noreg(const target& target, std::uint8_t& byte);
+        std::uint8_t get_noreg_byte(const target& target);
 
         /**
          * @brief        Receive a word (16 bits) from a target with no register.
          * @param target Target/HAT.
-         * @param word   Data.
+         * @return       Data.
          */
-        void get_noreg_2(const target& target, std::uint16_t& word);
+        std::uint16_t get_noreg_word(const target& target);
 
         /**
          * @brief        Receive a byte (8 bits) from a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
-         * @param byte   Data.
+         * @return       Data.
          */
-        void get_byte(const target& target, register_t reg, std::uint8_t& byte);
+        std::uint8_t get_byte(const target& target, register_t reg);
 
         /**
          * @brief        Receive a word (16 bits) from a target's register.
          * @param target Target/HAT.
          * @param reg    Register on the target.
-         * @param word   Data.
+         * @return       Data.
          */
-        void get_word(const target& target, register_t reg, std::uint16_t& word);
+        std::uint16_t get_word(const target& target, register_t reg);
 
         /**
          * @brief        Receive a block/array from a target's register.
@@ -181,15 +181,26 @@ namespace abc { namespace smbus {
          * @param reg    Register on the target.
          * @param block  Data buffer.
          * @param size   Size of the data buffer.
+         * @return       The size of the received data.
          */
-        void get_block(const target& target, register_t reg, void* block, std::size_t& size);
+        std::size_t get_block(const target& target, register_t reg, void* block, std::size_t size);
 
     private:
         /**
          * @brief      Ensure the SMBus is currently targeting the target's address.
-         * @param addr Target's address. 
+         * @param addr Target's address.
+         * @param tag  Origination tag.
          */
-        void ensure_address(address_t addr);
+        void ensure_address(address_t addr, diag::tag_t tag);
+
+        /**
+         * @brief      Calls `ioctl()` while a mutex is being acquired.
+         * @tparam Arg Argument type.
+         * @param arg  Argument value. 
+         * @param tag  Origination tag.
+         */
+        template <typename Arg>
+        void ensure_ioctl(int command, Arg arg, diag::tag_t tag);
 
         /**
          * @brief      Calls `ioctl()` while a mutex is being acquired.
@@ -242,20 +253,15 @@ namespace abc { namespace smbus {
     /**
      * @brief SMBus target identification and properties.
      */
-    class target
-        : protected diag::diag_ready<const char*> {
-
-        using diag_base = diag::diag_ready<const char*>;
-
+    class target {
     public:
         /**
          * @brief                    Constructor.
          * @param addr               Target address.
          * @param clock_frequency    Frequency of the target's clock.
          * @param requires_byte_swap true = bytes must be swapped before sending and after receiving. false = no swap is needed.
-         * @param log                `diag::log_ostream` pointer. May be `nullptr`.
          */
-        target(address_t addr, clock_frequency_t clock_frequency, bool requires_byte_swap, diag::log_ostream* log = nullptr);
+        target(address_t addr, clock_frequency_t clock_frequency, bool requires_byte_swap);
 
         /**
          * @brief Move constructor.
