@@ -31,23 +31,17 @@ SOFTWARE.
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
-#include "../../../root/size.h"
-#include "../../../diag/i/diag_ready.i.h"
+#include "../../root/size.h"
+#include "../../diag/i/diag_ready.i.h"
+#include "../../gpio/i/base.i.h"
 
 
 namespace abc { namespace smbus {
 
-    using fd_t              = int;
     using functionality_t   = unsigned long;
     using address_t         = std::uint8_t;
     using register_t        = std::uint8_t;
     using clock_frequency_t = std::uint64_t;
-
-
-    // --------------------------------------------------------------
-
-
-    constexpr std::size_t max_path = 32;
 
 
     // --------------------------------------------------------------
@@ -223,12 +217,12 @@ namespace abc { namespace smbus {
         /**
          * @brief Copy of the SMBus device path.
          */
-        char _path[max_path];
+        char _path[gpio::max_path];
 
         /**
          * @brief File descriptor of the SMBus device.
          */
-        fd_t _fd;
+        gpio::fd_t _fd;
 
         /**
          * @brief Functionality bits.

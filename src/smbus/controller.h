@@ -31,7 +31,7 @@ SOFTWARE.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "../../diag/i/diag_ready.i.h"
+#include "../diag/i/diag_ready.i.h"
 #include "i/controller.i.h"
 
 
@@ -43,8 +43,8 @@ namespace abc { namespace smbus {
         , _functionality(0)
         , _addr(0) {
 
-        char path[max_path];
-        std::snprintf(path, max_path, "/dev/i2c-%d", dev_i2c_pos);
+        char path[gpio::max_path];
+        std::snprintf(path, gpio::max_path, "/dev/i2c-%d", dev_i2c_pos);
 
         init(path);
     }
@@ -77,9 +77,9 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106db, "Begin:");
 
         diag_base::expect(suborigin, path != nullptr, 0x106dc, "path != nullptr");
-        diag_base::expect(suborigin, std::strlen(path) < max_path, 0x106dd, "std::strlen(path) < max_path");
+        diag_base::expect(suborigin, std::strlen(path) < gpio::max_path, 0x106dd, "std::strlen(path) < gpio::max_path");
 
-        std::strncpy(_path, path, max_path);
+        std::strncpy(_path, path, gpio::max_path);
 
         _fd = open(path, O_RDWR);
         diag_base::expect(suborigin, _fd >= 0, 0x106de, "_fd >= 0");
