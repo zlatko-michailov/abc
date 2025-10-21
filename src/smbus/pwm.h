@@ -30,57 +30,49 @@ SOFTWARE.
 #include <cmath>
 #include <linux/gpio.h>
 
-#include "../log.h"
-#include "../i/gpio.i.h"
+#include "../diag/diag_ready.h"
+#include "controller.h"
+#include "i/pwm.i.h"
 
 
-namespace abc {
+namespace abc { namespace smbus {
 
-    template <typename Log>
     template <typename PulseWidthDuration>
-    inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-                                        PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
-                                        gpio_pwm_pulse_frequency_t frequency,
-                                        gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
-                                        Log* log)
-        : _smbus(smbus)
-        , _smbus_target(smbus_target)
-        , _min_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(min_pulse_width).count())
-        , _max_pulse_width(std::chrono::duration_cast<gpio_pwm_duration>(max_pulse_width).count())
+    inline pwm::pwm(controller* controller, const target& target,
+                    PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+                    pwm_pulse_frequency_t frequency,
+                    register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
+                    diag::log_ostream* log)
+        : diag_base("abc::smbus::pwm", log)
+        , _controller(controller)
+        , _target(target)
+        , _min_pulse_width(std::chrono::duration_cast<pwm_duration>(min_pulse_width).count())
+        , _max_pulse_width(std::chrono::duration_cast<pwm_duration>(max_pulse_width).count())
         , _frequency(frequency)
         , _period(0)
         , _autoreload(0)
         , _prescaler(0)
         , _reg_pwm(reg_pwm)
         , _reg_autoreload(reg_autoreload)
-        , _reg_prescaler(reg_prescaler)
-        , _log(log) {
-        if (log != nullptr) {
-            log->put_any(category::abc::gpio, severity::abc::optional, 0x10705, "gpio_smbus_pwm::gpio_smbus_pwm() Start.");
-        }
+        , _reg_prescaler(reg_prescaler) {
 
-        if (smbus == nullptr) {
-            throw exception<std::logic_error, Log>("gpio_smbus_pwm::gpio_smbus_pwm() smbus == nullptr", 0x10706);
-        }
+        constexpr const char* suborigin = "pwm()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10705, "Begin:");
+
+        diag_base::expect(suborigin, controller != nullptr, 0x10706, "controller != nullptr");
 
         // Adjust min/max_pulse_width to lock frequency.
-        if (_max_pulse_width != 0) {
-            if (log != nullptr) {
-                log->put_any(category::abc::gpio, severity::abc::debug, 0x10707, "gpio_smbus_pwm::gpio_smbus_pwm() (1) min = %lu, max = %lu.",
-                    (long)_min_pulse_width, (long)_max_pulse_width);
-            }
+        {
+            diag_base::put_any(suborigin, diag::severity::debug, 0x10707, "(1) min=%lu, max=%lu", (long)_min_pulse_width, (long)_max_pulse_width);
 
-            _min_pulse_width = (_min_pulse_width * _smbus_target.clock_frequency()) / gpio_pwm_duration::period::den;
-            _max_pulse_width = (_max_pulse_width * _smbus_target.clock_frequency()) / gpio_pwm_duration::period::den;
+            _min_pulse_width = (_min_pulse_width * _target.clock_frequency()) / gpio_pwm_duration::period::den;
+            _max_pulse_width = (_max_pulse_width * _target.clock_frequency()) / gpio_pwm_duration::period::den;
 
-            if (log != nullptr) {
-                log->put_any(category::abc::gpio, severity::abc::debug, 0x10708, "gpio_smbus_pwm::gpio_smbus_pwm() (2) min = %lu, max = %lu.",
-                    (long)_min_pulse_width, (long)_max_pulse_width);
-            }
+            diag_base::put_any(suborigin, diag::severity::debug, 0x10708, "(2) min=%lu, max=%lu", (long)_min_pulse_width, (long)_max_pulse_width);
         }
 
         // Calculate auto_reload and prescaler.
-        _period = _smbus_target.clock_frequency() / _frequency;
+        _period = _target.clock_frequency() / _frequency;
         _autoreload = get_autoreload_from_period(_period);
         _prescaler = _period / _autoreload;
 
@@ -93,78 +85,65 @@ namespace abc {
             _max_pulse_width /= _prescaler;
         }
 
-        if (log != nullptr) {
-            log->put_any(category::abc::gpio, severity::abc::debug, 0x10709, "gpio_smbus_pwm::gpio_smbus_pwm() (3) period = %lu | autoreload = %lu | prescaler = %lu | min = %lu | max = %lu",
+        diag_base::put_any(suborigin, diag::severity::debug, 0x10709, "(3) period=%lu, autoreload=%lu, prescaler=%lu, min=%lu, max=%lu",
                 (long)_period, (long)_autoreload, (long)_prescaler, (long)_min_pulse_width, (long)_max_pulse_width);
-        }
 
-        _smbus->put_word(_smbus_target, _reg_autoreload, _autoreload - 1);
-        _smbus->put_word(_smbus_target, _reg_prescaler, _prescaler - 1);
+        _controller->put_word(_target, _reg_autoreload, _autoreload - 1);
+        _controller->put_word(_target, _reg_prescaler, _prescaler - 1);
 
-        if (log != nullptr) {
-            log->put_any(category::abc::gpio, severity::abc::optional, 0x1070a, "gpio_smbus_pwm::gpio_smbus_pwm() Done.");
-        }
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1070a, "End:");
     }
 
 
-    template <typename Log>
-    inline gpio_smbus_pwm<Log>::gpio_smbus_pwm(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-                                        gpio_pwm_pulse_frequency_t frequency,
-                                        gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
-                                        Log* log)
-        : gpio_smbus_pwm<Log>(smbus, smbus_target, gpio_pwm_duration(0), gpio_pwm_duration(0), frequency, reg_pwm, reg_autoreload, reg_prescaler, log) {
+    inline pwm::pwm(controller* controller, const target& target,
+                    pwm_pulse_frequency_t frequency,
+                    register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
+                    diag::log_ostream* log)
+        : pwm(controller, target, pwm_duration(0), pwm_duration(0), frequency, reg_pwm, reg_autoreload, reg_prescaler, log) {
     }
 
 
-    template <typename Log>
-    inline void gpio_smbus_pwm<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
-        if (duty_cycle < gpio_pwm_duty_cycle::min) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::gpio, severity::abc::important, 0x1070b, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming min.",
-                    (unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
-            }
+    inline void pwm::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
+        constexpr const char* suborigin = "set_duty_cycle()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-            duty_cycle = gpio_pwm_duty_cycle::min;
-        }
-        else if (duty_cycle > gpio_pwm_duty_cycle::max) {
-            if (_log != nullptr) {
-                _log->put_any(category::abc::gpio, severity::abc::important, 0x1070c, "gpio_smbus_pwm::set_duty_cycle() Out of range: duty_cycle=%u, min=%u, max=%u. Assuming max.",
-                    (unsigned)duty_cycle, (unsigned)gpio_pwm_duty_cycle::min, (unsigned)gpio_pwm_duty_cycle::max);
-            }
+        diag_base::expect(suborigin, duty_cycle >= pwm_duty_cycle::min, 0x1070b, "duty_cycle >= pwm_duty_cycle::min");
+        diag_base::expect(suborigin, duty_cycle <= pwm_duty_cycle::max, 0x1070c, "duty_cycle <= pwm_duty_cycle::max");
 
-            duty_cycle = gpio_pwm_duty_cycle::max;
-        }
+        clock_frequency_t capture_compare = pwm_duty_cycle::min;
 
-        gpio_smbus_clock_frequency_t capture_compare = gpio_pwm_duty_cycle::min;
-
-        if (duty_cycle == gpio_pwm_duty_cycle::min) {
+        if (duty_cycle == pwm_duty_cycle::min) {
             capture_compare = 0;
         }
-        else if (duty_cycle == gpio_pwm_duty_cycle::max) {
+        else if (duty_cycle == pwm_duty_cycle::max) {
             capture_compare = _autoreload;
         }
         else {
-            capture_compare = _min_pulse_width + (duty_cycle * (_max_pulse_width - _min_pulse_width)) / gpio_pwm_duty_cycle::max;
+            capture_compare = _min_pulse_width + (duty_cycle * (_max_pulse_width - _min_pulse_width)) / pwm_duty_cycle::max;
         }
 
-        if (_log != nullptr) {
-            _log->put_any(category::abc::gpio, severity::abc::debug, 0x1070d, "gpio_smbus_pwm::set_duty_cycle() capture_compare = %u", (unsigned)capture_compare);
-        }
+        diag_base::put_any(suborigin, diag::severity::debug, 0x1070d, "capture_compare = %lu", (long)capture_compare);
 
-        _smbus->put_word(_smbus_target, _reg_pwm, capture_compare);
+        _controller->put_word(_target, _reg_pwm, capture_compare);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
-    template <typename Log>
+
     template <typename PwmDuration>
-    inline void gpio_smbus_pwm<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle, PwmDuration duration) noexcept {
+    inline void pwm::set_duty_cycle(pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
+        constexpr const char* suborigin = "set_duty_cycle(duration)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
         set_duty_cycle(duty_cycle);
         std::this_thread::sleep_for(duration);
-        set_duty_cycle(gpio_pwm_duty_cycle::min);
+        set_duty_cycle(pwm_duty_cycle::min);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    template <typename Log>
-    inline gpio_smbus_clock_frequency_t gpio_smbus_pwm<Log>::get_autoreload_from_period(gpio_smbus_clock_frequency_t period) noexcept {
+    inline clock_frequency_t pwm::get_autoreload_from_period(clock_frequency_t period) noexcept {
         std::uint64_t u64_period = static_cast<std::uint64_t>(period);
 
         int autoreload_bit_count = 0;
@@ -173,10 +152,10 @@ namespace abc {
             autoreload_bit_count++;
         }
 
-        return static_cast<gpio_smbus_clock_frequency_t>(((1ULL << autoreload_bit_count) / 1000ULL) * 1000ULL);
+        return static_cast<clock_frequency_t>(((1ULL << autoreload_bit_count) / 1000ULL) * 1000ULL);
     }
 
 
     // --------------------------------------------------------------
 
-}
+} }

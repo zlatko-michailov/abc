@@ -33,7 +33,6 @@ SOFTWARE.
 
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
-#include "../../gpio/i/base.i.h"
 
 
 namespace abc { namespace smbus {
@@ -57,6 +56,9 @@ namespace abc { namespace smbus {
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
+
+        using fd_t = int;
+        static constexpr std::size_t max_path = GPIO_MAX_NAME_SIZE;
 
     public:
         /**
@@ -217,12 +219,12 @@ namespace abc { namespace smbus {
         /**
          * @brief Copy of the SMBus device path.
          */
-        char _path[gpio::max_path];
+        char _path[max_path];
 
         /**
          * @brief File descriptor of the SMBus device.
          */
-        gpio::fd_t _fd;
+        fd_t _fd;
 
         /**
          * @brief Functionality bits.

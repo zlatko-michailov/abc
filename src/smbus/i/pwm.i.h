@@ -33,8 +33,6 @@ SOFTWARE.
 
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
-#include "../../gpio/i/base.i.h"
-#include "../../gpio/i/pwm_base.i.h"
 #include "controller.i.h"
 
 
@@ -65,7 +63,7 @@ namespace abc { namespace smbus {
         template <typename PulseWidthDuration>
         pwm(controller* controller, const target& target,
             PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
-            gpio::pwm_pulse_frequency_t frequency,
+            pwm_pulse_frequency_t frequency,
             register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
             diag::log_ostream* log = nullptr);
 
@@ -80,7 +78,7 @@ namespace abc { namespace smbus {
          * @param log            `diag::log_ostream` pointer. May be `nullptr`.
          */
         pwm(controller* controller, const target& target,
-                    gpio::pwm_pulse_frequency_t frequency,
+                    pwm_pulse_frequency_t frequency,
                     register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
                     diag::log_ostream* log = nullptr);
 
@@ -99,7 +97,7 @@ namespace abc { namespace smbus {
          * @brief            Sets the duty cycle and returns immediately.
          * @param duty_cycle Duty cycle. Must be between 0 and 100.
          */
-        void set_duty_cycle(gpio::pwm_duty_cycle_t duty_cycle);
+        void set_duty_cycle(pwm_duty_cycle_t duty_cycle);
 
         /**
          * @brief              Sets the duty cycle and waits for the given duration.
@@ -108,76 +106,71 @@ namespace abc { namespace smbus {
          * @param duration     Sleep duration.
          */
         template <typename PwmDuration>
-        void set_duty_cycle(gpio::pwm_duty_cycle_t duty_cycle, PwmDuration duration);
+        void set_duty_cycle(pwm_duty_cycle_t duty_cycle, PwmDuration duration);
 
     private:
         /**
-         * @brief                        Calculates ARR from a PWM period.
-         * @details                        Returns a number that is close to sqrt(period) and is round to 1000.
-         * @param                        PWM period.
+         * @brief        Calculates ARR from a PWM period.
+         * @details      Returns a number that is close to sqrt(period) and is round to 1000.
+         * @param period PWM period.
          */
-        static gpio_smbus_clock_frequency_t get_autoreload_from_period(gpio_smbus_clock_frequency_t period) noexcept;
+        static clock_frequency_t get_autoreload_from_period(clock_frequency_t period) noexcept;
 
     private:
         /**
-         * @brief                        Pointer to the `gpio_smbus` instance passed in to the constructor.
+         * @brief Pointer to the `controller` instance passed in to the constructor.
          */
-        gpio_smbus<Log>* _smbus;
+        controller* _controller;
 
         /**
-         * @brief                        Copy of the `gpio_smbus_target` passed in to the constructor.
+         * @brief Copy of the target passed in to the constructor.
          */
-        gpio_smbus_target<Log> _smbus_target;
+        target _target;
 
         /**
-         * @brief                        Minimum pulse width if passed in to the constructor.
+         * @brief Minimum pulse width if passed in to the constructor.
          */
-        gpio_smbus_clock_frequency_t _min_pulse_width;
+        clock_frequency_t _min_pulse_width;
 
         /**
-         * @brief                        Maximum pulse width if passed in to the constructor.
+         * @brief Maximum pulse width if passed in to the constructor.
          */
-        gpio_smbus_clock_frequency_t _max_pulse_width;
+        clock_frequency_t _max_pulse_width;
 
         /**
-         * @brief                        PWM frequency passed in to the constructor.
+         * @brief PWM frequency passed in to the constructor.
          */
-        gpio_pwm_pulse_frequency_t _frequency;
+        pwm_pulse_frequency_t _frequency;
 
         /**
-         * @brief                        Calculated PWM period.
+         * @brief Calculated PWM period.
          */
-        gpio_smbus_clock_frequency_t _period;
+        clock_frequency_t _period;
 
         /**
-         * @brief                        Calculated ARR.
+         * @brief Calculated ARR.
          */
-        gpio_smbus_clock_frequency_t _autoreload;
+        clock_frequency_t _autoreload;
 
         /**
-         * @brief                        Calculated prescaler.
+         * @brief Calculated prescaler.
          */
-        gpio_smbus_clock_frequency_t _prescaler;
+        clock_frequency_t _prescaler;
 
         /**
-         * @brief                        PWM register on the HAT.
+         * @brief PWM register on the HAT.
          */
-        gpio_smbus_register_t _reg_pwm;
+        register_t _reg_pwm;
 
         /**
-         * @brief                        ARR register on the HAT.
+         * @brief ARR register on the HAT.
          */
-        gpio_smbus_register_t _reg_autoreload;
+        register_t _reg_autoreload;
 
         /**
-         * @brief                        Prescaler register on the HAT.
+         * @brief Prescaler register on the HAT.
          */
-        gpio_smbus_register_t _reg_prescaler;
-
-        /**
-         * @brief                        The log passed in to the constructor.
-         */
-        Log* _log;
+        register_t _reg_prescaler;
     };
 
 
