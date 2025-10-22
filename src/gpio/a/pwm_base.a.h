@@ -23,14 +23,32 @@ SOFTWARE.
 */
 
 
-#pragma once
-
-#include <cstdint>
-#include <chrono>
+    using pwm_pulse_frequency_t = std::uint16_t;
+    using pwm_duration          = std::chrono::microseconds;
 
 
-namespace abc { namespace gpio {
+    // --------------------------------------------------------------
 
-#include "..//a/pwm_base.a.h"
 
-} }
+    using pwm_duty_cycle_t = std::uint16_t;
+
+    namespace pwm_duty_cycle {
+        constexpr pwm_duty_cycle_t min =   0;
+        constexpr pwm_duty_cycle_t max = 100;
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief           Returns the duration of the PWM period in `pwm_duration` units based on the given frequency.
+     * @param frequency Frequency in Hz (ticks per second).
+     */
+    constexpr pwm_duration pwm_period(pwm_pulse_frequency_t frequency) noexcept {
+        return pwm_duration(pwm_duration::period::den / frequency);
+    }
+
+
+    // --------------------------------------------------------------
+

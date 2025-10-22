@@ -34,6 +34,7 @@ SOFTWARE.
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
 #include "controller.i.h"
+#include "pwm_base.i.h"
 
 
 namespace abc { namespace smbus {

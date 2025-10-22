@@ -34,14 +34,15 @@ SOFTWARE.
 #include "../../src/gpio/line.h"
 #include "../../src/gpio/ultrasonic.h"
 #include "../../src/gpio/pwm_emulator.h"
+#include "../../src/smbus/pwm.h"
 
 
-////constexpr abc::gpio_smbus_clock_frequency_t    smbus_hat_clock_frequency        = 72 * std::mega::num;
-////constexpr abc::gpio_smbus_address_t            smbus_hat_addr                    = 0x14;
-////constexpr bool                                smbus_hat_requires_byte_swap    = true;
-////constexpr abc::gpio_smbus_register_t        smbus_hat_reg_base_pwm            = 0x20;
-////constexpr abc::gpio_smbus_register_t        reg_base_autoreload                = 0x44;
-////constexpr abc::gpio_smbus_register_t        reg_base_prescaler                = 0x40;
+constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
+constexpr abc::smbus::address_t         smbus_hat_addr               = 0x14;
+constexpr bool                          smbus_hat_requires_byte_swap = true;
+constexpr abc::smbus::register_t        smbus_hat_reg_base_pwm       = 0x20;
+constexpr abc::smbus::register_t        reg_base_autoreload          = 0x44;
+constexpr abc::smbus::register_t        reg_base_prescaler           = 0x40;
 
 
 constexpr const char* origin = "sample_picar_4wd_hacks";
@@ -197,21 +198,22 @@ void turn_servo_emulator(const abc::gpio::chip& chip, abc::diag::log_ostream& lo
 }
 
 
-#if 0
-void turn_servo(log_ostream& log) {
+void turn_servo(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "turn_servo()";
+
     using microseconds = std::chrono::microseconds;
     using milliseconds = std::chrono::milliseconds;
 
     const microseconds min_pulse_width = microseconds(500);
     const microseconds max_pulse_width = microseconds(2500);
-    const abc::gpio_pwm_pulse_frequency_t frequency = 50; // 50 Hz
+    const abc::smbus::pwm_pulse_frequency_t frequency = 50; // 50 Hz
 
-    const abc::gpio_smbus_register_t reg_servo = 0x00;
-    const abc::gpio_smbus_register_t reg_timer = reg_servo / 4;
+    const abc::smbus::register_t reg_servo = 0x00;
+    const abc::smbus::register_t reg_timer = reg_servo / 4;
 
-    abc::gpio_smbus<log_ostream> smbus(1, &log);
-    abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_servo(&smbus, hat, min_pulse_width, max_pulse_width, frequency, smbus_hat_reg_base_pwm + reg_servo, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+    abc::smbus::pwm pwm_servo(&controller, hat, min_pulse_width, max_pulse_width, frequency, smbus_hat_reg_base_pwm + reg_servo, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
 
     const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
 
@@ -219,7 +221,7 @@ void turn_servo(log_ostream& log) {
         const milliseconds duty_duration = milliseconds(250);
         const milliseconds sleep_duration = milliseconds(500);
 
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b0, "duty_cycle = %u", duty_cycle);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b0, "duty_cycle = %u", duty_cycle);
 
         pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
 
@@ -228,6 +230,7 @@ void turn_servo(log_ostream& log) {
 }
 
 
+#if 0
 void turn_wheels(log_ostream& log) {
     abc::gpio_smbus<log_ostream> smbus(1, &log);
     abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
@@ -588,8 +591,8 @@ void run_all() {
 #endif
 
     // Servo - pwm output
-    turn_servo_emulator(chip, log);
-    //turn_servo(log);
+    //turn_servo_emulator(chip, log);
+    turn_servo(log);
 
 #if 0
     // Wheels - pwm output

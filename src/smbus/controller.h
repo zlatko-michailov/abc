@@ -60,6 +60,19 @@ namespace abc { namespace smbus {
     }
 
 
+    inline controller::controller(controller&& other) noexcept
+        : diag_base("abc::smbus::controller", other.log())
+        , _fd(other._fd)
+        , _functionality(other._functionality)
+        , _addr(other._addr) {
+
+        std::strncpy(_path, other._path, max_path);
+
+        other._fd = -1;
+        other._addr = 0;
+    }
+
+
     inline controller::~controller() noexcept {
         constexpr const char* suborigin = "~controller()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106d9, "Begin:");
@@ -305,7 +318,7 @@ namespace abc { namespace smbus {
         }
 
         long laddr = addr;
-        ensure_ioctl(I2C_SLAVE_FORCE, laddr, 0x10700);
+        ensure_ioctl(I2C_SLAVE_FORCE, laddr, tag);
 
         _addr = addr;
 
@@ -315,6 +328,7 @@ namespace abc { namespace smbus {
 
     template <typename Arg>
     void controller::ensure_ioctl(int command, Arg arg, diag::tag_t tag) {
+        constexpr const char* suborigin = "ensure_ioctl()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         int ret = safe_ioctl(command, arg);

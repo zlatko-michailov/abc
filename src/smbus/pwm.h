@@ -65,8 +65,8 @@ namespace abc { namespace smbus {
         {
             diag_base::put_any(suborigin, diag::severity::debug, 0x10707, "(1) min=%lu, max=%lu", (long)_min_pulse_width, (long)_max_pulse_width);
 
-            _min_pulse_width = (_min_pulse_width * _target.clock_frequency()) / gpio_pwm_duration::period::den;
-            _max_pulse_width = (_max_pulse_width * _target.clock_frequency()) / gpio_pwm_duration::period::den;
+            _min_pulse_width = (_min_pulse_width * _target.clock_frequency()) / pwm_duration::period::den;
+            _max_pulse_width = (_max_pulse_width * _target.clock_frequency()) / pwm_duration::period::den;
 
             diag_base::put_any(suborigin, diag::severity::debug, 0x10708, "(2) min=%lu, max=%lu", (long)_min_pulse_width, (long)_max_pulse_width);
         }

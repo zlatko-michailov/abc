@@ -78,7 +78,7 @@ namespace abc { namespace smbus {
         /**
          * @brief Move constructor.
          */
-        controller(controller&& other) noexcept = default;
+        controller(controller&& other) noexcept;
 
         /**
          * @brief Deleted.

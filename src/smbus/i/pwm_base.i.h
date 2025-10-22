@@ -29,8 +29,8 @@ SOFTWARE.
 #include <chrono>
 
 
-namespace abc { namespace gpio {
+namespace abc { namespace smbus {
 
-#include "..//a/pwm_base.a.h"
+#include "../../gpio/a/pwm_base.a.h"
 
 } }
