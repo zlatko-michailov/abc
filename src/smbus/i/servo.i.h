@@ -29,81 +29,80 @@ SOFTWARE.
 #include <ratio>
 #include <chrono>
 #include <linux/gpio.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 
-#include "gpio_base.i.h"
-#include "chip.i.h"
-#include "gpio_line.i.h"
-#include "gpio_smbus.i.h"
-#include "gpio_smbus_pwm.i.h"
-
-
-namespace abc {
-
-	/**
-	 * @brief							Wrapper around `gpio_smbus_pwm` representing a servo connected over SMBus.
-	 * @tparam PwmDuration				`std::duration` type of the duty cycle duration.
-	 * @tparam Log						Logging facility.
-	 */
-	template <typename PwmDuration, typename Log = null_log>
-	class gpio_smbus_servo {
-	public:
-		/**
-		 * @brief						Constructor.
-		 * @tparam PulseWidthDuration	`std::duration` type of the pulse width duration.
-		 * @param smbus					Pointer to a `gpio_smbus` instance.
-		 * @param smbus_target			SMBus target representing the HAT to which the servo is connected.
-		 * @param min_pulse_width		Minimum pulse width duration.
-		 * @param max_pulse_width		Maximum pulse width duration.
-		 * @param pwm_duration			Duty cycle duration.
-		 * @param frequency				Duty cycle frequency.
-		 * @param reg_pwm				Duty cycle register on the HAT for the servo connection.
-		 * @param reg_autoreload		ARR register on the HAT for the servo connection.
-		 * @param reg_prescaler			Prescaler register on the HAT for the servo connection.
-		 * @param log					Pointer to a `Log` instance. May be `nullptr`.
-		 */
-		template <typename PulseWidthDuration>
-		gpio_smbus_servo(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-					PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
-					PwmDuration pwm_duration,
-					gpio_pwm_pulse_frequency_t frequency,
-					gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
-					Log* log = nullptr);
-
-		/**
-		 * @brief						Move constructor.
-		 */
-		gpio_smbus_servo(gpio_smbus_servo<PwmDuration, Log>&& other) noexcept = default;
-
-		/**
-		 * @brief						Deleted.
-		 */
-		gpio_smbus_servo(const gpio_smbus_servo<PwmDuration, Log>& other) = delete;
-
-	public:
-		/**
-		 * @brief						Sets the duty cycle object
-		 * @param duty_cycle			Duty cycle. Must be between 0 and 100.
-		 */
-		void set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept;
-
-	private:
-		/**
-		 * @brief						`gpio_smbus_pwm` instance representing the PWM peripheral.
-		 */
-		gpio_smbus_pwm<Log> _pwm;
-
-		/**
-		 * @brief						Duty cycle duration.
-		 */
-		PwmDuration _pwm_duration;
-
-		/**
-		 * @brief						The log passed in to the constructor.
-		 */
-		Log* _log;
-	};
+#include "../../root/size.h"
+#include "../../diag/i/diag_ready.i.h"
+#include "controller.i.h"
+#include "pwm.i.h"
 
 
-	// --------------------------------------------------------------
+namespace abc { namespace smbus {
 
-}
+    /**
+     * @brief              Wrapper around `pwm` representing a servo connected over SMBus.
+     * @tparam PwmDuration `std::duration` type of the duty cycle duration.
+     */
+    template <typename PwmDuration>
+    class servo
+        : protected diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
+
+    public:
+        /**
+         * @brief                     Constructor.
+         * @tparam PulseWidthDuration `std::duration` type of the pulse width duration.
+         * @param controller          Pointer to an SMBus controller.
+         * @param target              SMBus target representing the HAT to which the servo is connected.
+         * @param min_pulse_width     Minimum pulse width duration.
+         * @param max_pulse_width     Maximum pulse width duration.
+         * @param pwm_duration        Duty cycle duration.
+         * @param frequency           Duty cycle frequency.
+         * @param reg_pwm             Duty cycle register on the HAT for the servo connection.
+         * @param reg_autoreload      ARR register on the HAT for the servo connection.
+         * @param reg_prescaler       Prescaler register on the HAT for the servo connection.
+         * @param log                 `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        template <typename PulseWidthDuration>
+        servo(controller* controller, const target& target,
+            PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+            PwmDuration pwm_duration,
+            pwm_pulse_frequency_t frequency,
+            register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
+            diag::log_ostream* log = nullptr);
+
+        /**
+         * @brief Move constructor.
+         */
+        servo(servo<PwmDuration>&& other) noexcept = default;
+
+        /**
+         * @brief Deleted.
+         */
+        servo(const servo<PwmDuration>& other) = delete;
+
+    public:
+        /**
+         * @brief            Sets the duty cycle object
+         * @param duty_cycle Duty cycle. Must be between 0 and 100.
+         */
+        void set_duty_cycle(pwm_duty_cycle_t duty_cycle);
+
+    private:
+        /**
+         * @brief `pwm` instance representing the PWM peripheral.
+         */
+        pwm _pwm;
+
+        /**
+         * @brief Duty cycle duration.
+         */
+        PwmDuration _pwm_duration;
+    };
+
+
+    // --------------------------------------------------------------
+
+} }

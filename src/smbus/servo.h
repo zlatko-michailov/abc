@@ -25,37 +25,39 @@ SOFTWARE.
 
 #pragma once
 
-#include <thread>
-
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
-
-
-namespace abc {
-
-	template <typename PwmDuration, typename Log>
-	template <typename PulseWidthDuration>
-	inline gpio_smbus_servo<PwmDuration, Log>::gpio_smbus_servo(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-				PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
-				PwmDuration pwm_duration,
-				gpio_pwm_pulse_frequency_t frequency,
-				gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
-				Log* log)
-		: _pwm(smbus, smbus_target, min_pulse_width, max_pulse_width, frequency, reg_pwm, reg_autoreload, reg_prescaler, log)
-		, _pwm_duration(pwm_duration) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x1070e, "gpio_smbus_servo::gpio_smbus_servo() Done.");
-		}
-	}
+#include "../diag/diag_ready.h"
+#include "controller.h"
+#include "pwm.h"
+#include "i/servo.i.h"
 
 
-	template <typename PwmDuration, typename Log>
-	inline void gpio_smbus_servo<PwmDuration, Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
-		_pwm.set_duty_cycle(duty_cycle, _pwm_duration);
-	}
+namespace abc { namespace smbus {
+
+    template <typename PwmDuration>
+    template <typename PulseWidthDuration>
+    inline servo<PwmDuration>::servo(controller* controller, const target& target,
+                PulseWidthDuration min_pulse_width, PulseWidthDuration max_pulse_width,
+                PwmDuration pwm_duration,
+                pwm_pulse_frequency_t frequency,
+                register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
+                diag::log_ostream* log)
+        : diag_base("abc::smbus::servo", log)
+        , _pwm(controller, target, min_pulse_width, max_pulse_width, frequency, reg_pwm, reg_autoreload, reg_prescaler, log)
+        , _pwm_duration(pwm_duration) {
+
+        constexpr const char* suborigin = "servo()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1070e, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	// --------------------------------------------------------------
+    template <typename PwmDuration>
+    inline void servo<PwmDuration>::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
+        _pwm.set_duty_cycle(duty_cycle, _pwm_duration);
+    }
 
-}
+
+    // --------------------------------------------------------------
+
+} }

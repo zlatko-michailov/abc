@@ -28,7 +28,6 @@ SOFTWARE.
 #include <cstdint>
 #include <chrono>
 #include <cmath>
-#include <linux/gpio.h>
 
 #include "../diag/diag_ready.h"
 #include "controller.h"

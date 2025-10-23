@@ -35,6 +35,7 @@ SOFTWARE.
 #include "../../src/gpio/ultrasonic.h"
 #include "../../src/gpio/pwm_emulator.h"
 #include "../../src/smbus/pwm.h"
+#include "../../src/smbus/servo.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -198,8 +199,8 @@ void turn_servo_emulator(const abc::gpio::chip& chip, abc::diag::log_ostream& lo
 }
 
 
-void turn_servo_smbus(abc::diag::log_ostream& log) {
-    constexpr const char* suborigin = "turn_servo()";
+void turn_servo_pwm(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "turn_servo_pwm()";
 
     using microseconds = std::chrono::microseconds;
     using milliseconds = std::chrono::milliseconds;
@@ -224,6 +225,38 @@ void turn_servo_smbus(abc::diag::log_ostream& log) {
         log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b0, "duty_cycle = %u", duty_cycle);
 
         pwm_servo.set_duty_cycle(duty_cycle, duty_duration);
+
+        std::this_thread::sleep_for(sleep_duration);
+    }
+}
+
+
+void turn_servo(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "turn_servo()";
+
+    using microseconds = std::chrono::microseconds;
+    using milliseconds = std::chrono::milliseconds;
+
+    const microseconds min_pulse_width = microseconds(500);
+    const microseconds max_pulse_width = microseconds(2500);
+    const milliseconds duty_duration = milliseconds(250);
+    const abc::smbus::pwm_pulse_frequency_t frequency = 50; // 50 Hz
+
+    const abc::smbus::register_t reg_servo = 0x00;
+    const abc::smbus::register_t reg_timer = reg_servo / 4;
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+    abc::smbus::servo<microseconds> servo(&controller, hat, min_pulse_width, max_pulse_width, duty_duration, frequency, smbus_hat_reg_base_pwm + reg_servo, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
+
+    const std::vector<std::uint32_t> duty_cycles{ 25, 75, 50 };
+
+    for (std::uint32_t duty_cycle : duty_cycles) {
+        const milliseconds sleep_duration = milliseconds(500);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+
+        servo.set_duty_cycle(duty_cycle);
 
         std::this_thread::sleep_for(sleep_duration);
     }
@@ -590,9 +623,12 @@ void run_all() {
     measure_obstacle_ultrasonic(chip, log);
 #endif
 
+#if 0
     // Servo - pwm output
-    //turn_servo_emulator(chip, log);
-    turn_servo_smbus(log);
+    turn_servo_emulator(chip, log);
+    turn_servo_pwm(log);
+    turn_servo(log);
+#endif
 
 #if 0
     // Wheels - pwm output
