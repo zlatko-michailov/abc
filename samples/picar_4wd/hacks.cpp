@@ -198,7 +198,7 @@ void turn_servo_emulator(const abc::gpio::chip& chip, abc::diag::log_ostream& lo
 }
 
 
-void turn_servo(abc::diag::log_ostream& log) {
+void turn_servo_smbus(abc::diag::log_ostream& log) {
     constexpr const char* suborigin = "turn_servo()";
 
     using microseconds = std::chrono::microseconds;
@@ -592,7 +592,7 @@ void run_all() {
 
     // Servo - pwm output
     //turn_servo_emulator(chip, log);
-    turn_servo(log);
+    turn_servo_smbus(log);
 
 #if 0
     // Wheels - pwm output
