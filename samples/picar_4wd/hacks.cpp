@@ -36,6 +36,7 @@ SOFTWARE.
 #include "../../src/gpio/pwm_emulator.h"
 #include "../../src/smbus/pwm.h"
 #include "../../src/smbus/servo.h"
+#include "../../src/smbus/motor.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -263,8 +264,7 @@ void turn_servo(abc::diag::log_ostream& log) {
 }
 
 
-#if 0
-void turn_wheels(log_ostream& log) {
+void turn_wheels_pwm(abc::diag::log_ostream& log) {
     abc::gpio_smbus<log_ostream> smbus(1, &log);
     abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
 
@@ -290,6 +290,7 @@ void turn_wheels(log_ostream& log) {
 }
 
 
+#if 0
 void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
     abc::gpio_smbus<log_ostream> smbus(1, &log);
     abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);

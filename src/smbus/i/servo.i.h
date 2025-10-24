@@ -59,7 +59,7 @@ namespace abc { namespace smbus {
          * @param min_pulse_width     Minimum pulse width duration.
          * @param max_pulse_width     Maximum pulse width duration.
          * @param pwm_duration        Duty cycle duration.
-         * @param frequency           Duty cycle frequency.
+         * @param frequency           Peripheral frequency.
          * @param reg_pwm             Duty cycle register on the HAT for the servo connection.
          * @param reg_autoreload      ARR register on the HAT for the servo connection.
          * @param reg_prescaler       Prescaler register on the HAT for the servo connection.

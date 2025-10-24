@@ -25,50 +25,50 @@ SOFTWARE.
 
 #pragma once
 
-#include <thread>
-
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
-
-
-namespace abc {
-
-	template <typename Log>
-	inline gpio_smbus_motor<Log>::gpio_smbus_motor(const chip<Log>* chip, line_pos_t direction_line_pos,
-				gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-				gpio_pwm_pulse_frequency_t frequency,
-				gpio_smbus_register_t reg_pwm, gpio_smbus_register_t reg_autoreload, gpio_smbus_register_t reg_prescaler,
-				Log* log)
-		: _direction_line(chip, direction_line_pos, log)
-		, _pwm(smbus, smbus_target, frequency, reg_pwm, reg_autoreload, reg_prescaler, log)
-		, _forward(true)
-		, _duty_cycle(gpio_pwm_duty_cycle::min) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x10704, "gpio_smbus_motor::gpio_smbus_motor() Done.");
-		}
-	}
+#include "../diag/diag_ready.h"
+#include "../gpio/chip.h"
+#include "../gpio/line.h"
+#include "controller.h"
+#include "pwm.h"
+#include "i/motor.i.h"
 
 
-	template <typename Log>
-	inline void gpio_smbus_motor<Log>::set_forward(bool forward) noexcept {
-		_forward = forward;
-		_direction_line.put_level(_forward ? level::low : level::high);
-	}
+namespace abc { namespace smbus {
+
+    inline motor::motor(const gpio::chip* chip, gpio::line_pos_t direction_line_pos,
+                controller* controller, const target& target,
+                pwm_pulse_frequency_t frequency,
+                register_t reg_pwm, register_t reg_autoreload, register_t reg_prescaler,
+                diag::log_ostream* log)
+        : diag_base("abc::smbus::motor", log)
+        , _direction_line(chip, direction_line_pos, log)
+        , _pwm(controller, target, frequency, reg_pwm, reg_autoreload, reg_prescaler, log)
+        , _forward(true)
+        , _duty_cycle(pwm_duty_cycle::min) {
+
+        constexpr const char* suborigin = "motor()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10704, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline bool gpio_smbus_motor<Log>::is_forward() const noexcept {
-		return _forward;
-	}
+    inline void motor::set_forward(bool forward) {
+        _forward = forward;
+        _direction_line.put_level(_forward ? gpio::level::low : gpio::level::high);
+    }
 
 
-	template <typename Log>
-	inline void gpio_smbus_motor<Log>::set_duty_cycle(gpio_pwm_duty_cycle_t duty_cycle) noexcept {
-		_pwm.set_duty_cycle(duty_cycle);
-	}
+    inline bool motor::is_forward() const noexcept {
+        return _forward;
+    }
 
 
-	// --------------------------------------------------------------
+    inline void motor::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
+        _pwm.set_duty_cycle(duty_cycle);
+    }
 
-}
+
+    // --------------------------------------------------------------
+
+} }

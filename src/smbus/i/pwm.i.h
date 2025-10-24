@@ -55,7 +55,7 @@ namespace abc { namespace smbus {
          * @param target              SMBus target representing the HAT to which the peripheral is connected.
          * @param min_pulse_width     Minimum pulse width duration.
          * @param max_pulse_width     Maximum pulse width duration.
-         * @param frequency           Duty cycle frequency.
+         * @param frequency           Peripheral frequency.
          * @param reg_pwm             Duty cycle register on the HAT.
          * @param reg_autoreload      ARR register on the HAT.
          * @param reg_prescaler       Prescaler register on the HAT.
