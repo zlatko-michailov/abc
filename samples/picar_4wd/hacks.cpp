@@ -357,16 +357,9 @@ void measure_grayscale(abc::diag::log_ostream& log) {
 
     abc::smbus::grayscale grayscale(&controller, hat, reg_left, reg_center, reg_right, &log);
     for (int i = 0; i < 10; i++) {
-        controller.put_word(hat, reg_left, zero);
-        std::uint16_t left = controller.get_noreg_word(hat);
+        abc::smbus::grayscale_values values = grayscale.get_values();
 
-        controller.put_word(hat, reg_center, zero);
-        std::uint16_t center = controller.get_noreg_word(hat);
-
-        controller.put_word(hat, reg_right, zero);
-        std::uint16_t right = controller.get_noreg_word(hat);
-
-        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
+        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", values.left, values.center, values.right);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -696,8 +689,11 @@ void run_all() {
     measure_speed(chip, log);
 #endif
 
+#if 0
     // Grayscale - pwm input
     measure_grayscale_pwm(log);
+    measure_grayscale(log);
+#endif
 
 #if 0
     // Speed - accelerometer
