@@ -23,11 +23,11 @@ SOFTWARE.
 */
 
 
-#include <iostream>
 #include <chrono>
 #include <ratio>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 #include "../../src/diag/log.h"
 #include "../../src/gpio/chip.h"
@@ -265,26 +265,52 @@ void turn_servo(abc::diag::log_ostream& log) {
 
 
 void turn_wheels_pwm(abc::diag::log_ostream& log) {
-    abc::gpio_smbus<log_ostream> smbus(1, &log);
-    abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+    const abc::smbus::register_t reg_front_left  = 0x0d;
+    const abc::smbus::register_t reg_front_right = 0x0c;
+    const abc::smbus::register_t reg_rear_left   = 0x08;
+    const abc::smbus::register_t reg_rear_right  = 0x09;
 
-    const abc::gpio_smbus_register_t reg_front_left        = 0x0d;
-    const abc::gpio_smbus_register_t reg_front_right    = 0x0c;
-    const abc::gpio_smbus_register_t reg_rear_left        = 0x08;
-    const abc::gpio_smbus_register_t reg_rear_right        = 0x09;
+    const abc::smbus::register_t reg_wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
 
-    const abc::gpio_smbus_register_t reg_wheels[] = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
-
-    for (const abc::gpio_smbus_register_t reg_wheel : reg_wheels) {
-        const abc::gpio_smbus_register_t reg_timer        = reg_wheel / 4;
-        const abc::gpio_pwm_pulse_frequency_t frequency    = 50; // 50 Hz
+    for (const abc::smbus::register_t reg_wheel : reg_wheels) {
+        const abc::smbus::register_t reg_timer = reg_wheel / 4;
+        const abc::smbus::pwm_pulse_frequency_t frequency = 50; // 50 Hz
         const std::chrono::milliseconds duty_duration(500);
 
-        abc::gpio_smbus_pwm<log_ostream> pwm_wheel(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
+        abc::smbus::pwm pwm_wheel(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
 
-        const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
-        for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
+        const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
+        for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
             pwm_wheel.set_duty_cycle(duty_cycle, duty_duration);
+        }
+    }
+}
+
+
+void turn_wheels_motor(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+    const abc::smbus::register_t reg_front_left  = 0x0d;
+    const abc::smbus::register_t reg_front_right = 0x0c;
+    const abc::smbus::register_t reg_rear_left   = 0x08;
+    const abc::smbus::register_t reg_rear_right  = 0x09;
+
+    const abc::gpio::line_pos_t direction_line_wheels[] = {             23,              24,            13,             20 };
+    const abc::smbus::register_t reg_wheels[]           = { reg_front_left, reg_front_right, reg_rear_left, reg_rear_right };
+
+    for (std::size_t i = 0; i < sizeof(reg_wheels) / sizeof(reg_wheels[0]); i++) {
+        const abc::gpio::line_pos_t direction_line_wheel = direction_line_wheels[i];
+        const abc::smbus::register_t reg_wheel = reg_wheels[i];
+        const abc::smbus::register_t reg_timer = reg_wheel / 4;
+        const abc::smbus::pwm_pulse_frequency_t frequency = 50; // 50 Hz
+
+        abc::smbus::motor motor(&chip, direction_line_wheel, &controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel, reg_base_autoreload + reg_timer, reg_base_prescaler + reg_timer, &log);
+
+        const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
+        for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
+            motor.set_duty_cycle(duty_cycle);
         }
     }
 }
@@ -631,10 +657,11 @@ void run_all() {
     turn_servo(log);
 #endif
 
-#if 0
     // Wheels - pwm output
-    turn_wheels(log);
+    turn_wheels_pwm(log);
+    turn_wheels_motor(chip, log);
 
+#if 0
     // Speed - photo interrupter
     measure_speed(chip, log);
 #endif
