@@ -37,6 +37,7 @@ SOFTWARE.
 #include "../../src/smbus/pwm.h"
 #include "../../src/smbus/servo.h"
 #include "../../src/smbus/motor.h"
+#include "../../src/smbus/grayscale.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -312,6 +313,62 @@ void turn_wheels_motor(const abc::gpio::chip& chip, abc::diag::log_ostream& log)
         for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
             motor.set_duty_cycle(duty_cycle);
         }
+    }
+}
+
+
+void measure_grayscale_pwm(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_grayscale_pwm()";
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
+    const abc::smbus::register_t reg_left   = 0x12;
+    const abc::smbus::register_t reg_center = 0x11;
+    const abc::smbus::register_t reg_right  = 0x10;
+    const std::uint16_t zero = 0x0000;
+
+    for (int i = 0; i < 10; i++) {
+        controller.put_word(hat, reg_left, zero);
+        std::uint16_t left = controller.get_noreg_word(hat);
+
+        controller.put_word(hat, reg_center, zero);
+        std::uint16_t center = controller.get_noreg_word(hat);
+
+        controller.put_word(hat, reg_right, zero);
+        std::uint16_t right = controller.get_noreg_word(hat);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+
+void measure_grayscale(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_grayscale()";
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
+    const abc::smbus::register_t reg_left   = 0x12;
+    const abc::smbus::register_t reg_center = 0x11;
+    const abc::smbus::register_t reg_right  = 0x10;
+
+    abc::smbus::grayscale grayscale(&controller, hat, reg_left, reg_center, reg_right, &log);
+    for (int i = 0; i < 10; i++) {
+        controller.put_word(hat, reg_left, zero);
+        std::uint16_t left = controller.get_noreg_word(hat);
+
+        controller.put_word(hat, reg_center, zero);
+        std::uint16_t center = controller.get_noreg_word(hat);
+
+        controller.put_word(hat, reg_right, zero);
+        std::uint16_t right = controller.get_noreg_word(hat);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
@@ -593,35 +650,6 @@ void make_turns(log_ostream& log) {
     pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
     pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
 }
-
-
-void measure_grayscale(log_ostream& log) {
-    abc::gpio_smbus<log_ostream> smbus(1, &log);
-    abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
-
-    const abc::gpio_smbus_register_t reg_left = 0x12;
-    const abc::gpio_smbus_register_t reg_center = 0x11;
-    const abc::gpio_smbus_register_t reg_right = 0x10;
-    const std::uint16_t zero = 0x0000;
-
-    for (int i = 0; i < 10; i++) {
-        std::uint16_t left;
-        smbus.put_word(hat, reg_left, zero);
-        smbus.get_noreg_2(hat, left);
-
-        std::uint16_t center;
-        smbus.put_word(hat, reg_center, zero);
-        smbus.get_noreg_2(hat, center);
-
-        std::uint16_t right;
-        smbus.put_word(hat, reg_right, zero);
-        smbus.get_noreg_2(hat, right);
-
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-}
 #endif
 
 
@@ -657,14 +685,19 @@ void run_all() {
     turn_servo(log);
 #endif
 
+#if 0
     // Wheels - pwm output
     turn_wheels_pwm(log);
     turn_wheels_motor(chip, log);
+#endif
 
 #if 0
     // Speed - photo interrupter
     measure_speed(chip, log);
 #endif
+
+    // Grayscale - pwm input
+    measure_grayscale_pwm(log);
 
 #if 0
     // Speed - accelerometer
@@ -672,8 +705,5 @@ void run_all() {
 
     // Wheels - pwm output
     make_turns(log);
-
-    // Grayscale - pwm input
-    measure_grayscale(log);
 #endif
 }

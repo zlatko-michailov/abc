@@ -25,53 +25,50 @@ SOFTWARE.
 
 #pragma once
 
-#include <thread>
-
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
+#include "../diag/diag_ready.h"
+#include "controller.h"
+#include "i/grayscale.i.h"
 
 
-namespace abc {
+namespace abc { namespace smbus {
 
-	template <typename Log>
-	inline gpio_smbus_grayscale<Log>::gpio_smbus_grayscale(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target,
-					gpio_smbus_register_t reg_left, gpio_smbus_register_t reg_center, gpio_smbus_register_t reg_right,
-					Log* log)
-		: _smbus(smbus)
-		, _smbus_target(smbus_target)
-		, _reg_left(reg_left)
-		, _reg_center(reg_center)
-		, _reg_right(reg_right) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x10749, "gpio_smbus_grayscale::gpio_smbus_grayscale() Start.");
-		}
+    inline grayscale::grayscale(controller* controller, const target& target,
+                register_t reg_left, register_t reg_center, register_t reg_right,
+                diag::log_ostream* log)
+        : diag_base("abc::smbus::grayscale", log)
+        , _controller(controller)
+        , _target(target)
+        , _reg_left(reg_left)
+        , _reg_center(reg_center)
+        , _reg_right(reg_right) {
 
-		if (smbus == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_grayscale::gpio_smbus_grayscale() smbus == nullptr", 0x1074a);
-		}
+        constexpr const char* suborigin = "grayscale()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10749, "Begin:");
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x10703, "gpio_smbus_grayscale::gpio_smbus_grayscale() Done.");
-		}
-	}
+        diag_base::expect(suborigin, controller != nullptr, 0x1074a, "controller != nullptr");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10703, "End:");
+    }
 
 
-	template <typename Log>
-	inline void gpio_smbus_grayscale<Log>::get_values(std::uint16_t& left, std::uint16_t& center, std::uint16_t& right) noexcept {
-		static constexpr std::uint16_t zero = 0x0000;
+    inline grayscale_values grayscale::get_values() {
+        static constexpr std::uint16_t zero = 0x0000;
 
-		_smbus->put_word(_smbus_target, _reg_left, zero);
-		_smbus->get_noreg_2(_smbus_target, left);
+        grayscale_values values{ };
 
-		_smbus->put_word(_smbus_target, _reg_center, zero);
-		_smbus->get_noreg_2(_smbus_target, center);
+        _controller->put_word(_target, _reg_left, zero);
+        values.left = _controller->get_noreg_word(_target);
 
-		_smbus->put_word(_smbus_target, _reg_right, zero);
-		_smbus->get_noreg_2(_smbus_target, right);
-	}
+        _controller->put_word(_target, _reg_center, zero);
+        values.center = _controller->get_noreg_word(_target);
+
+        _controller->put_word(_target, _reg_right, zero);
+        values.right = _controller->get_noreg_word(_target);
+
+        return values;
+    }
 
 
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
 
-}
+} }
