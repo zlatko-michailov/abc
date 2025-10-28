@@ -38,6 +38,7 @@ SOFTWARE.
 #include "../../src/smbus/servo.h"
 #include "../../src/smbus/motor.h"
 #include "../../src/smbus/grayscale.h"
+#include "../../src/smbus/motion.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -268,6 +269,7 @@ void turn_servo(abc::diag::log_ostream& log) {
 void turn_wheels_pwm(abc::diag::log_ostream& log) {
     abc::smbus::controller controller(1, &log);
     abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
     const abc::smbus::register_t reg_front_left  = 0x0d;
     const abc::smbus::register_t reg_front_right = 0x0c;
     const abc::smbus::register_t reg_rear_left   = 0x08;
@@ -293,6 +295,7 @@ void turn_wheels_pwm(abc::diag::log_ostream& log) {
 void turn_wheels_motor(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
     abc::smbus::controller controller(1, &log);
     abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
     const abc::smbus::register_t reg_front_left  = 0x0d;
     const abc::smbus::register_t reg_front_right = 0x0c;
     const abc::smbus::register_t reg_rear_left   = 0x08;
@@ -363,6 +366,85 @@ void measure_grayscale(abc::diag::log_ostream& log) {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+}
+
+
+void measure_accel_and_spin(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_accel_and_spin()";
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
+    const abc::smbus::register_t reg_wheel_front_left  = 0x0d;
+    const abc::smbus::register_t reg_wheel_front_right = 0x0c;
+    const abc::smbus::register_t reg_wheel_rear_left   = 0x08;
+    const abc::smbus::register_t reg_wheel_rear_right  = 0x09;
+    const abc::smbus::register_t reg_timer_front_left  = reg_wheel_front_left / 4;
+    const abc::smbus::register_t reg_timer_front_right = reg_wheel_front_right / 4;
+    const abc::smbus::register_t reg_timer_rear_left   = reg_wheel_rear_left / 4;
+    const abc::smbus::register_t reg_timer_rear_right  = reg_wheel_rear_right / 4;
+    const abc::smbus::pwm_pulse_frequency_t frequency  = 50; // 50 Hz
+
+    abc::smbus::pwm pwm_wheel_front_left(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+                                        reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
+    abc::smbus::pwm pwm_wheel_front_right(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+                                        reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
+    abc::smbus::pwm pwm_wheel_rear_left(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+                                        reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
+    abc::smbus::pwm pwm_wheel_rear_right(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+                                        reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+
+    abc::smbus::motion motion(&controller, &log);
+    abc::smbus::motion_tracker<std::centi> motion_tracker(&motion, &log);
+
+    motion.calibrate(abc::smbus::motion_channel::all);
+
+    constexpr abc::smbus::pwm_duty_cycle_t duty_cycle = 50;
+    const abc::smbus::pwm_duty_cycle_t     duty_cycle_rear_left  = duty_cycle;
+    const abc::smbus::pwm_duty_cycle_t     duty_cycle_rear_right = duty_cycle;
+
+    const std::chrono::system_clock::duration dur_drive   = std::chrono::milliseconds(1 * 1000);
+    const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
+
+    std::chrono::system_clock::time_point tp_begin_drive     = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point tp_begin_iteration = tp_begin_drive;
+
+    // Start tracking.
+    motion_tracker.start();
+
+    // Start driving.
+    bool is_driving = true;
+    pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
+    pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
+    pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
+    pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
+    log.put_blank_line(origin, abc::diag::severity::important);
+
+    while (std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) < dur_drive + dur_inertia) {
+        if (is_driving && std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) >= dur_drive) {
+            // Stop driving.
+            is_driving = false;
+            pwm_wheel_front_left.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+            pwm_wheel_front_right.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+            pwm_wheel_rear_left.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+            pwm_wheel_rear_right.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+            log.put_blank_line(origin, abc::diag::severity::important);
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        tp_begin_iteration = std::chrono::system_clock::now();
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10747, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+            motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
+    }
+
+    // Stop tracking.
+    motion_tracker.set_speed(0);
+    motion_tracker.stop();
+
+    log.put_blank_line(origin, abc::diag::severity::important);
+    log.put_any(origin, suborigin, abc::diag::severity::important, 0x10748, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
+        motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
 }
 
 
@@ -487,84 +569,6 @@ void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
 inline int mod(int i, int n) {
     return (i + n) % n;
 }
-
-void measure_accel_and_spin(log_ostream& log) {
-    abc::gpio_smbus<log_ostream> smbus(1, &log);
-
-    abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
-
-    const abc::gpio_smbus_register_t reg_wheel_front_left    = 0x0d;
-    const abc::gpio_smbus_register_t reg_wheel_front_right    = 0x0c;
-    const abc::gpio_smbus_register_t reg_wheel_rear_left    = 0x08;
-    const abc::gpio_smbus_register_t reg_wheel_rear_right    = 0x09;
-    const abc::gpio_smbus_register_t reg_timer_front_left    = reg_wheel_front_left / 4;
-    const abc::gpio_smbus_register_t reg_timer_front_right    = reg_wheel_front_right / 4;
-    const abc::gpio_smbus_register_t reg_timer_rear_left    = reg_wheel_rear_left / 4;
-    const abc::gpio_smbus_register_t reg_timer_rear_right    = reg_wheel_rear_right / 4;
-    const abc::gpio_pwm_pulse_frequency_t frequency            = 50; // 50 Hz
-
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
-                                                        reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
-                                                        reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
-                                                        reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
-                                                        reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
-
-    abc::gpio_smbus_motion<log_ostream> motion(&smbus, &log);
-    abc::gpio_smbus_motion_tracker<std::centi, log_ostream> motion_tracker(&motion, &log);
-
-    motion.calibrate(abc::gpio_smbus_motion_channel::all);
-
-    constexpr abc::gpio_pwm_duty_cycle_t duty_cycle = 50;
-    const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left    = duty_cycle;
-    const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right    = duty_cycle;
-
-    const std::chrono::system_clock::duration dur_drive = std::chrono::milliseconds(1 * 1000);
-    const std::chrono::system_clock::duration dur_inertia = std::chrono::milliseconds(200);
-
-    std::chrono::system_clock::time_point tp_begin_drive = std::chrono::system_clock::now();
-    std::chrono::system_clock::time_point tp_begin_iteration = tp_begin_drive;
-
-    // Start tracking.
-    motion_tracker.start();
-
-    // Start driving.
-    bool is_driving = true;
-    pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
-    pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
-    pwm_wheel_rear_left.set_duty_cycle(duty_cycle_rear_left);
-    pwm_wheel_rear_right.set_duty_cycle(duty_cycle_rear_right);
-    log.put_blank_line(abc::category::abc::samples, abc::severity::important);
-
-    while (std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) < dur_drive + dur_inertia) {
-        if (is_driving && std::chrono::duration_cast<std::chrono::milliseconds>(tp_begin_iteration - tp_begin_drive) >= dur_drive) {
-            // Stop driving.
-            is_driving = false;
-            pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-            pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-            pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-            pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-            log.put_blank_line(abc::category::abc::samples, abc::severity::important);
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        tp_begin_iteration = std::chrono::system_clock::now();
-
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x10747, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
-            motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
-    }
-
-    // Stop tracking.
-    motion_tracker.set_speed(0);
-    motion_tracker.stop();
-
-    log.put_blank_line(abc::category::abc::samples, abc::severity::important);
-    log.put_any(abc::category::abc::samples, abc::severity::important, 0x10748, "depth = %8.3f | width = %8.3f | direction = %8.3f | speed = %8.3f", 
-        motion_tracker.depth(), motion_tracker.width(), motion_tracker.direction(), motion_tracker.speed());
-}
-
 
 void make_turns(log_ostream& log) {
     const abc::gpio_smbus_register_t reg_wheel_front_left    = 0x0d;

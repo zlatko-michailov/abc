@@ -25,204 +25,196 @@ SOFTWARE.
 
 #pragma once
 
-#include <thread>
+#include <cstdint>
+#include <chrono>
+#include <cmath>
 
-#include "../exception.h"
-#include "../log.h"
-#include "../i/gpio.i.h"
-
-
-namespace abc {
-
-	template <typename Log>
-	inline gpio_smbus_motion<Log>::gpio_smbus_motion(gpio_smbus<Log>* smbus, Log* log)
-		: gpio_smbus_motion<Log>(smbus, gpio_smbus_target<Log>(addr, clock_frequency, requires_byte_swap), log) {
-	}
+#include "../diag/diag_ready.h"
+#include "controller.h"
+#include "i/motion.i.h"
 
 
-	template <typename Log>
-	inline gpio_smbus_motion<Log>::gpio_smbus_motion(gpio_smbus<Log>* smbus, const gpio_smbus_target<Log>& smbus_target, Log* log)
-		: _smbus(smbus)
-		, _smbus_target(smbus_target)
-		, _log(log) {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x1074b, "gpio_smbus_motion::gpio_smbus_motion() Start.");
-		}
+namespace abc { namespace smbus {
 
-		if (smbus == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_motion::gpio_smbus_motion() smbus == nullptr", 0x1074c);
-		}
-
-		_smbus->put_byte(_smbus_target, reg_pwr_mgmt_1, 0x00);			// internal 8MHz oscillator
-		_smbus->put_byte(_smbus_target, reg_config, 0x03);				// Filter - 44Hz, 5ms delay
-		_smbus->put_byte(_smbus_target, reg_config_accel, 0x03 << 3);	// +/-16g
-		_smbus->put_byte(_smbus_target, reg_config_gyro, 0x03 << 3);	// +/-2000 degrees/sec
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x1074d, "gpio_smbus_motion::gpio_smbus_motion() Start.");
-		}
-	}
+    inline motion::motion(controller* controller, diag::log_ostream* log)
+        : motion(controller, target(addr, clock_frequency, requires_byte_swap), log) {
+    }
 
 
-	template <typename Log>
-	inline void gpio_smbus_motion<Log>::calibrate(gpio_smbus_motion_channel_t mask) noexcept {
-		gpio_smbus_motion_measurements measurements{ };
+    inline motion::motion(controller* controller, const target& target, diag::log_ostream* log)
+        : diag_base("abc::smbus::motion", log)
+        , _controller(controller)
+        , _target(target) {
 
-		constexpr int reps_skip = 5;
-		constexpr int reps_take = 20;
-		for (int rep = 0; rep < reps_skip + reps_take; rep++) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        constexpr const char* suborigin = "motion()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1074b, "Begin:");
 
-			gpio_smbus_motion_measurements temp{ };
-			get_measurements(mask & ~gpio_smbus_motion_channel::temperature, temp);
+        diag_base::expect(suborigin, controller != nullptr, 0x1074c, "controller != nullptr");
 
-			if (rep < reps_skip) {
-				continue;
-			}
+        _controller->put_byte(_target, reg_pwr_mgmt_1,   0x00);      // internal 8MHz oscillator
+        _controller->put_byte(_target, reg_config,       0x03);      // Filter - 44Hz, 5ms delay
+        _controller->put_byte(_target, reg_config_accel, 0x03 << 3); // +/-16g
+        _controller->put_byte(_target, reg_config_gyro,  0x03 << 3); // +/-2000 degrees/sec
 
-			_log->put_any(category::abc::gpio, severity::abc::debug, 0x1074e, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
-				mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
-			measurements.accel_x += temp.accel_x;
-			measurements.accel_y += temp.accel_y;
-			measurements.accel_z += temp.accel_z;
-
-			measurements.gyro_x += temp.gyro_x;
-			measurements.gyro_y += temp.gyro_y;
-			measurements.gyro_z += temp.gyro_z;
-		}
-
-		_calibration.accel_x = measurements.accel_x / reps_take;
-		_calibration.accel_y = measurements.accel_y / reps_take;
-		_calibration.accel_z = measurements.accel_z / reps_take;
-
-		_calibration.gyro_x = measurements.gyro_x / reps_take;
-		_calibration.gyro_y = measurements.gyro_y / reps_take;
-		_calibration.gyro_z = measurements.gyro_z / reps_take;
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, 0x1074f, "gpio_smbus_motion::calibrate() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
-				mask, _calibration.accel_x, _calibration.accel_y, _calibration.accel_z, _calibration.gyro_x, _calibration.gyro_y, _calibration.gyro_z, _calibration.temperature);
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1074d, "End:");
+    }
 
 
-	template <typename Log>
-	inline void gpio_smbus_motion<Log>::get_values(gpio_smbus_motion_channel_t mask, gpio_smbus_motion_values& values) noexcept {
-		gpio_smbus_motion_measurements measurements;
-		get_measurements(mask, measurements);
+    inline void motion::calibrate(motion_channel_t mask) {
+        constexpr const char* suborigin = "calibrate()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-		get_values_from_measurements(mask, measurements, _calibration, values);
+        motion_measurements measurements{ };
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10750, "gpio_smbus_motion::get_values() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
-				mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
-		}
-	}
+        constexpr int reps_skip = 5;
+        constexpr int reps_take = 20;
+        for (int rep = 0; rep < reps_skip + reps_take; rep++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
+            motion_measurements temp = get_measurements(mask & ~motion_channel::temperature);
 
-	template <typename Log>
-	inline void gpio_smbus_motion<Log>::get_measurements(gpio_smbus_motion_channel_t mask, gpio_smbus_motion_measurements& measurements) noexcept {
-		measurements = { };
-		std::uint16_t temp_ui16;
+            if (rep < reps_skip) {
+                continue;
+            }
 
-		if ((mask & gpio_smbus_motion_channel::accel_x) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_x, temp_ui16);
-			measurements.accel_x = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+            diag_base::put_any(suborigin, diag::severity::debug, 0x1074e, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+                mask, temp.accel_x, temp.accel_y, temp.accel_z, temp.gyro_x, temp.gyro_y, temp.gyro_z, temp.temperature);
 
-		if ((mask & gpio_smbus_motion_channel::accel_y) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_y, temp_ui16);
-			measurements.accel_y = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+            measurements.accel_x += temp.accel_x;
+            measurements.accel_y += temp.accel_y;
+            measurements.accel_z += temp.accel_z;
 
-		if ((mask & gpio_smbus_motion_channel::accel_z) != 0) {
-			_smbus->get_word(_smbus_target, reg_accel_z, temp_ui16);
-			measurements.accel_z = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+            measurements.gyro_x += temp.gyro_x;
+            measurements.gyro_y += temp.gyro_y;
+            measurements.gyro_z += temp.gyro_z;
+        }
 
-		if ((mask & gpio_smbus_motion_channel::gyro_x) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_x, temp_ui16);
-			measurements.gyro_x = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+        _calibration.accel_x = measurements.accel_x / reps_take;
+        _calibration.accel_y = measurements.accel_y / reps_take;
+        _calibration.accel_z = measurements.accel_z / reps_take;
 
-		if ((mask & gpio_smbus_motion_channel::gyro_y) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_y, temp_ui16);
-			measurements.gyro_y = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+        _calibration.gyro_x = measurements.gyro_x / reps_take;
+        _calibration.gyro_y = measurements.gyro_y / reps_take;
+        _calibration.gyro_z = measurements.gyro_z / reps_take;
 
-		if ((mask & gpio_smbus_motion_channel::gyro_z) != 0) {
-			_smbus->get_word(_smbus_target, reg_gyro_z, temp_ui16);
-			measurements.gyro_z = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
+        diag_base::put_any(suborigin, diag::severity::debug, 0x1074f, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+            mask, _calibration.accel_x, _calibration.accel_y, _calibration.accel_z, _calibration.gyro_x, _calibration.gyro_y, _calibration.gyro_z, _calibration.temperature);
 
-		if ((mask & gpio_smbus_motion_channel::temperature) != 0) {
-			_smbus->get_word(_smbus_target, reg_temperature, temp_ui16);
-			measurements.temperature = static_cast<gpio_smbus_motion_measurement_t>(temp_ui16);
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10751, "gpio_smbus_motion::get_measurements() mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
-				mask, measurements.accel_x, measurements.accel_y, measurements.accel_z, measurements.gyro_x, measurements.gyro_y, measurements.gyro_z, measurements.temperature);
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline void gpio_smbus_motion<Log>::get_values_from_measurements(gpio_smbus_motion_channel_t mask, const gpio_smbus_motion_measurements& measurements, const gpio_smbus_motion_measurements& calibration, gpio_smbus_motion_values& values) noexcept {
-		values = { };
+    inline motion_values motion::get_values(motion_channel_t mask) {
+        constexpr const char* suborigin = "get_values()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-		if ((mask & gpio_smbus_motion_channel::accel_x) != 0) {
-			values.accel_x = get_value_from_measurement(measurements.accel_x, calibration.accel_x, max_accel);
-		}
+        motion_measurements measurements = get_measurements(mask);
 
-		if ((mask & gpio_smbus_motion_channel::accel_y) != 0) {
-			values.accel_y = get_value_from_measurement(measurements.accel_y, calibration.accel_y, max_accel);
-		}
+        motion_values values = get_values_from_measurements(mask, measurements, _calibration);
 
-		if ((mask & gpio_smbus_motion_channel::accel_z) != 0) {
-			values.accel_z = get_value_from_measurement(measurements.accel_z, calibration.accel_z, max_accel);
-		}
+        diag_base::put_any(suborigin, diag::severity::debug, 0x10750, "mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
+            mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
-		if ((mask & gpio_smbus_motion_channel::gyro_x) != 0) {
-			values.gyro_x = get_value_from_measurement(measurements.gyro_x, calibration.gyro_x, max_gyro);
-		}
-
-		if ((mask & gpio_smbus_motion_channel::gyro_y) != 0) {
-			values.gyro_y = get_value_from_measurement(measurements.gyro_y, calibration.gyro_y, max_gyro);
-		}
-
-		if ((mask & gpio_smbus_motion_channel::gyro_z) != 0) {
-			values.gyro_z = get_value_from_measurement(measurements.gyro_z, calibration.gyro_z, max_gyro);
-		}
-
-		if ((mask & gpio_smbus_motion_channel::temperature) != 0) {
-			values.temperature = static_cast<gpio_smbus_motion_value_t>(static_cast<gpio_smbus_motion_measurement_t>(measurements.temperature)) / 340.0 + 36.53;
-		}
-
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::debug, 0x10752, "gpio_smbus_motion::get_values_from_measurements() mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
-				mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
-		}
-	}
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline gpio_smbus_motion_value_t gpio_smbus_motion<Log>::get_value_from_measurement(gpio_smbus_motion_measurement_t measurement, gpio_smbus_motion_measurement_t calibration, gpio_smbus_motion_value_t max_value) noexcept {
-		gpio_smbus_motion_value_t value = max_value * static_cast<gpio_smbus_motion_value_t>(measurement - calibration) / max_measurement;
+    inline motion_measurements motion::get_measurements(motion_channel_t mask) {
+        constexpr const char* suborigin = "get_measurements()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-		return value;
-	}
+        motion_measurements measurements = { };
+
+        if ((mask & motion_channel::accel_x) != 0) {
+            measurements.accel_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_x));
+        }
+
+        if ((mask & motion_channel::accel_y) != 0) {
+            measurements.accel_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_y));
+        }
+
+        if ((mask & motion_channel::accel_z) != 0) {
+            measurements.accel_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_z));
+        }
+
+        if ((mask & motion_channel::gyro_x) != 0) {
+            measurements.gyro_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_x));
+        }
+
+        if ((mask & motion_channel::gyro_y) != 0) {
+            measurements.gyro_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_y));
+        }
+
+        if ((mask & motion_channel::gyro_z) != 0) {
+            measurements.gyro_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_z));
+        }
+
+        if ((mask & motion_channel::temperature) != 0) {
+            measurements.temperature = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_temperature));
+        }
+
+        diag_base::put_any(suborigin, diag::severity::debug, 0x10751, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
+            mask, measurements.accel_x, measurements.accel_y, measurements.accel_z, measurements.gyro_x, measurements.gyro_y, measurements.gyro_z, measurements.temperature);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	template <typename Log>
-	inline const gpio_smbus_motion_measurements& gpio_smbus_motion<Log>::calibration() const noexcept {
-		return _calibration;
-	}
+    inline motion_values motion::get_values_from_measurements(motion_channel_t mask, const motion_measurements& measurements, const motion_measurements& calibration) noexcept {
+        constexpr const char* suborigin = "get_values_from_measurements()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        motion_values values = { };
+
+        if ((mask & motion_channel::accel_x) != 0) {
+            values.accel_x = get_value_from_measurement(measurements.accel_x, calibration.accel_x, max_accel);
+        }
+
+        if ((mask & motion_channel::accel_y) != 0) {
+            values.accel_y = get_value_from_measurement(measurements.accel_y, calibration.accel_y, max_accel);
+        }
+
+        if ((mask & motion_channel::accel_z) != 0) {
+            values.accel_z = get_value_from_measurement(measurements.accel_z, calibration.accel_z, max_accel);
+        }
+
+        if ((mask & motion_channel::gyro_x) != 0) {
+            values.gyro_x = get_value_from_measurement(measurements.gyro_x, calibration.gyro_x, max_gyro);
+        }
+
+        if ((mask & motion_channel::gyro_y) != 0) {
+            values.gyro_y = get_value_from_measurement(measurements.gyro_y, calibration.gyro_y, max_gyro);
+        }
+
+        if ((mask & motion_channel::gyro_z) != 0) {
+            values.gyro_z = get_value_from_measurement(measurements.gyro_z, calibration.gyro_z, max_gyro);
+        }
+
+        if ((mask & motion_channel::temperature) != 0) {
+            values.temperature = static_cast<motion_value_t>(static_cast<motion_measurement_t>(measurements.temperature)) / 340.0 + 36.53;
+        }
+
+        diag_base::put_any(suborigin, diag::severity::debug, 0x10752, "mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
+            mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
-	// --------------------------------------------------------------
+    inline motion_value_t motion::get_value_from_measurement(motion_measurement_t measurement, motion_measurement_t calibration, motion_value_t max_value) noexcept {
+        motion_value_t value = max_value * static_cast<motion_value_t>(measurement - calibration) / max_measurement;
 
-}
+        return value;
+    }
+
+
+    inline const motion_measurements& motion::calibration() const noexcept {
+        return _calibration;
+    }
+
+
+    // --------------------------------------------------------------
+
+} }
