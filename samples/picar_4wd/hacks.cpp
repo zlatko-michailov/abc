@@ -449,40 +449,41 @@ void measure_accel_and_spin(abc::diag::log_ostream& log) {
 }
 
 
-#if 0
-void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
-    abc::gpio_smbus<log_ostream> smbus(1, &log);
-    abc::gpio_smbus_target<log_ostream> hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap, &log);
+void measure_speed(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_speed()";
 
-    const abc::gpio_smbus_register_t reg_wheel_front_left    = 0x0d;
-    const abc::gpio_smbus_register_t reg_wheel_front_right    = 0x0c;
-    const abc::gpio_smbus_register_t reg_wheel_rear_left    = 0x08;
-    const abc::gpio_smbus_register_t reg_wheel_rear_right    = 0x09;
-    const abc::gpio_smbus_register_t reg_timer_front_left    = reg_wheel_front_left / 4;
-    const abc::gpio_smbus_register_t reg_timer_front_right    = reg_wheel_front_right / 4;
-    const abc::gpio_smbus_register_t reg_timer_rear_left    = reg_wheel_rear_left / 4;
-    const abc::gpio_smbus_register_t reg_timer_rear_right    = reg_wheel_rear_right / 4;
-    const abc::gpio_pwm_pulse_frequency_t frequency            = 50; // 50 Hz
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
 
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
-                                                        reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_front_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
-                                                        reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_left(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
-                                                        reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
-    abc::gpio_smbus_pwm<log_ostream> pwm_wheel_rear_right(&smbus, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
-                                                        reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+    const abc::smbus::register_t           reg_wheel_front_left  = 0x0d;
+    const abc::smbus::register_t           reg_wheel_front_right = 0x0c;
+    const abc::smbus::register_t           reg_wheel_rear_left   = 0x08;
+    const abc::smbus::register_t           reg_wheel_rear_right  = 0x09;
+    const abc::smbus::register_t           reg_timer_front_left  = reg_wheel_front_left / 4;
+    const abc::smbus::register_t           reg_timer_front_right = reg_wheel_front_right / 4;
+    const abc::smbus::register_t           reg_timer_rear_left   = reg_wheel_rear_left / 4;
+    const abc::smbus::register_t           reg_timer_rear_right  = reg_wheel_rear_right / 4;
+    const abc::gpio::pwm_pulse_frequency_t frequency             = 50; // 50 Hz
 
-    abc::gpio_input_line<log_ostream> speed_rear_left(&chip, 25, &log);
-    abc::gpio_input_line<log_ostream> speed_rear_right(&chip, 4, &log);
+    abc::smbus::pwm pwm_wheel_front_left(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_left,
+                                        reg_base_autoreload + reg_timer_front_left, reg_base_prescaler + reg_timer_front_left, &log);
+    abc::smbus::pwm pwm_wheel_front_right(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_front_right,
+                                        reg_base_autoreload + reg_timer_front_right, reg_base_prescaler + reg_timer_front_right, &log);
+    abc::smbus::pwm pwm_wheel_rear_left(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_left,
+                                        reg_base_autoreload + reg_timer_rear_left, reg_base_prescaler + reg_timer_rear_left, &log);
+    abc::smbus::pwm pwm_wheel_rear_right(&controller, hat, frequency, smbus_hat_reg_base_pwm + reg_wheel_rear_right,
+                                        reg_base_autoreload + reg_timer_rear_right, reg_base_prescaler + reg_timer_rear_right, &log);
+
+    abc::gpio::input_line speed_rear_left(&chip, 25, &log);
+    abc::gpio::input_line speed_rear_right(&chip, 4, &log);
 
     std::size_t grand_total_count_rear_left  = 0;
     std::size_t grand_total_count_rear_right = 0;
 
-    const abc::gpio_pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100 }; ////{ 25, 50, 75, 100, 75, 50, 25 };
-    for (const abc::gpio_pwm_duty_cycle_t duty_cycle : duty_cycles) {
-        const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_left    = duty_cycle;
-        const abc::gpio_pwm_duty_cycle_t duty_cycle_rear_right    = duty_cycle;
+    const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100 }; ////{ 25, 50, 75, 100, 75, 50, 25 };
+    for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
+        const abc::smbus::pwm_duty_cycle_t duty_cycle_rear_left  = duty_cycle;
+        const abc::smbus::pwm_duty_cycle_t duty_cycle_rear_right = duty_cycle;
 
         pwm_wheel_front_left.set_duty_cycle(duty_cycle_rear_left);
         pwm_wheel_front_right.set_duty_cycle(duty_cycle_rear_right);
@@ -498,18 +499,18 @@ void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
             std::size_t count_rear_left  = 0;
             std::size_t count_rear_right = 0;
 
-            abc::level_t level_prev_rear_left    = abc::level::invalid;
-            abc::level_t level_prev_rear_right    = abc::level::invalid;
+            abc::gpio::level_t level_prev_rear_left  = abc::gpio::level::invalid;
+            abc::gpio::level_t level_prev_rear_right = abc::gpio::level::invalid;
 
             char bit_rear_left[101] = { };
             char bit_rear_right[101] = { };
 
             for (std::size_t c = 0; c < 100; c++) {
-                abc::level_t level_curr_rear_left    = speed_rear_left.get_level();
-                abc::level_t level_curr_rear_right    = speed_rear_right.get_level();
+                abc::gpio::level_t level_curr_rear_left  = speed_rear_left.get_level();
+                abc::gpio::level_t level_curr_rear_right = speed_rear_right.get_level();
 
                 if (c < 100) {
-                    bit_rear_left[c] = '0' + level_curr_rear_left;
+                    bit_rear_left[c]  = '0' + level_curr_rear_left;
                     bit_rear_right[c] = '0' + level_curr_rear_right;
                 }
 
@@ -528,11 +529,11 @@ void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
             count_rear_left  /= 2;
             count_rear_right /= 2;
 
-            log.put_any(abc::category::abc::samples, abc::severity::important, 0x10743, "left =%s", bit_rear_left);
-            log.put_any(abc::category::abc::samples, abc::severity::important, 0x10744, "right=%s", bit_rear_right);
+            log.put_any(origin, suborigin, abc::diag::severity::important, 0x10743, "left =%s", bit_rear_left);
+            log.put_any(origin, suborigin, abc::diag::severity::important, 0x10744, "right=%s", bit_rear_right);
 
-            log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b2, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
-                                            (unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
+            log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b2, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+                            (unsigned)duty_cycle_rear_left, (unsigned)count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)count_rear_right);
 
             total_count_rear_left  += count_rear_left;
             total_count_rear_right += count_rear_right;
@@ -544,29 +545,30 @@ void measure_speed(const abc::chip<log_ostream>& chip, log_ostream& log) {
         total_count_rear_left  = (total_count_rear_left + reps / 2) / reps;
         total_count_rear_right = (total_count_rear_right + reps / 2) / reps;
 
-        ////log.put_any(abc::category::abc::samples, abc::severity::important, 0x10745, "----------------------------------------------------------------------");
+        ////log.put_any(origin, suborigin, abc::diag::severity::important, 0x10745, "----------------------------------------------------------------------");
         ////std::this_thread::sleep_for(std::chrono::seconds(1));
 
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b3, "----------------------------------------------------------------------");
-        log.put_any(abc::category::abc::samples, abc::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
-                                        (unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
-        log.put_blank_line(abc::category::abc::samples, abc::severity::important);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b3, "----------------------------------------------------------------------");
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b4, "duty_left = %3u, count_left = %3u, duty_right = %3u, count_right = %3u",
+                        (unsigned)duty_cycle_rear_left, (unsigned)total_count_rear_left, (unsigned)duty_cycle_rear_right, (unsigned)total_count_rear_right);
+        log.put_blank_line(origin, abc::diag::severity::important);
     }
 
     std::size_t dist_left  = (21 * grand_total_count_rear_left)  / 10;
     std::size_t dist_right = (21 * grand_total_count_rear_right) / 10;
 
-    log.put_any(abc::category::abc::samples, abc::severity::important, 0x10746, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
-                                    (unsigned)grand_total_count_rear_left, (unsigned)dist_left, (unsigned)grand_total_count_rear_right, (unsigned)dist_right);
-    log.put_blank_line(abc::category::abc::samples, abc::severity::important);
+    log.put_any(origin, suborigin, abc::diag::severity::important, 0x10746, "count_left = %3u, dist_left = %3u, count_right = %3u, dist_right = %3u",
+                    (unsigned)grand_total_count_rear_left, (unsigned)dist_left, (unsigned)grand_total_count_rear_right, (unsigned)dist_right);
+    log.put_blank_line(origin, abc::diag::severity::important);
 
-    pwm_wheel_front_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-    pwm_wheel_front_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-    pwm_wheel_rear_left.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
-    pwm_wheel_rear_right.set_duty_cycle(abc::gpio_pwm_duty_cycle::min);
+    pwm_wheel_front_left.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+    pwm_wheel_front_right.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+    pwm_wheel_rear_left.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
+    pwm_wheel_rear_right.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
 }
 
 
+#if 0
 inline int mod(int i, int n) {
     return (i + n) % n;
 }
@@ -700,10 +702,10 @@ void run_all() {
     measure_grayscale(log);
 #endif
 
-#if 0
     // Speed - accelerometer
     measure_accel_and_spin(log);
 
+#if 0
     // Wheels - pwm output
     make_turns(log);
 #endif
