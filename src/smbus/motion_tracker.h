@@ -28,259 +28,264 @@ SOFTWARE.
 #include <chrono>
 #include <cmath>
 
-#include "../log.h"
-#include "../i/gpio_smbus_motion_tracker.i.h"
+#include "../diag/diag_ready.h"
+#include "motion.h"
+#include "i/motion_tracker.i.h"
 
 
-namespace abc {
+namespace abc { namespace smbus {
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_tracker<DistanceScale, Log>::gpio_smbus_motion_tracker(gpio_smbus_motion<Log>* motion, Log* log)
-		: _motion(motion)
-		, _depth(0)
-		, _width(0)
-		, _direction(0)
-		, _speed(0)
-		, _run(false)
-		, _quit(false)
-		, _log(log)
-		, _thread(thread_func, this) {
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x10753, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Start.");
-		}
+    template <typename DistanceScale>
+    inline motion_tracker<DistanceScale>::motion_tracker(motion* motion, diag::log_ostream* log)
+        : diag_base("abc::smbus::motion_tracker", log)
+        , _motion(motion)
+        , _depth(0)
+        , _width(0)
+        , _direction(0)
+        , _speed(0)
+        , _run(false)
+        , _quit(false)
+        , _thread(thread_func, this) {
 
-		if (motion == nullptr) {
-			throw exception<std::logic_error, Log>("gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() motion", 0x10754);
-		}
+        constexpr const char* suborigin = "motion_tracker()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10753, "Begin:");
 
-		if (log != nullptr) {
-			log->put_any(category::abc::gpio, severity::abc::optional, 0x10755, "gpio_smbus_motion_tracker::gpio_smbus_motion_tracker() Done.");
-		}
-	}
+        diag_base::expect(suborigin, motion != nullptr, 0x10754, "motion != nullptr");
 
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10755, "End:");
+    }
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_tracker<DistanceScale, Log>::~gpio_smbus_motion_tracker() noexcept {
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x10756, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Start.");
-		}
 
-		_quit = true;
+    template <typename DistanceScale>
+    motion_tracker<DistanceScale>::motion_tracker(motion_tracker&& other) noexcept
+        : diag_base(std::move(other))
+        , _motion(other._motion)
+        , _depth(other._depth.load())
+        , _width(other._width.load())
+        , _direction(other._direction.load())
+        , _speed(other._speed.load())
+        , _run(other._run.load())
+        , _quit(other._quit.load())
+        , _thread(std::move(other._thread)) {
 
-		// The thread may be sleeping. Notify the condition to wake it up.
-		_control_condition.notify_all();
+        // Clear the other instance.
+        other._motion = nullptr;
+        other._depth = 0;
+        other._width = 0;
+        other._direction = 0;
+        other._speed = 0;
+        other._run = false;
+        other._quit = true;
+    }
 
-		// Wait for the child thread to finish. std::~thread() terminates the process if the thread is running.
-		_thread.join();
 
-		if (_log != nullptr) {
-			_log->put_any(category::abc::gpio, severity::abc::optional, 0x10757, "gpio_smbus_motion_tracker::~gpio_smbus_motion_tracker() Done.");
-		}
-	}
+    template <typename DistanceScale>
+    inline motion_tracker<DistanceScale>::~motion_tracker() noexcept {
+        constexpr const char* suborigin = "~motion_tracker()";
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10756, "Begin:");
 
+        _quit = true;
 
-	template <typename DistanceScale, typename Log>
-	inline bool gpio_smbus_motion_tracker<DistanceScale, Log>::is_running() const noexcept {
-		return _run;
-	}
+        // The thread may be sleeping. Notify the condition to wake it up.
+        _control_condition.notify_all();
 
+        // Wait for the child thread to finish. std::~thread() terminates the process if the thread is running.
+        _thread.join();
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::start() {
-		_run = true;
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10757, "End:");
+    }
 
-		// The thread may be sleeping. Notify the condition to wake it up.
-		_control_condition.notify_all();
-	}
 
+    template <typename DistanceScale>
+    inline bool motion_tracker<DistanceScale>::is_running() const noexcept {
+        return _run;
+    }
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::stop() {
-		_run = false;
 
-		// The thread is running. There is no need to notify it.
-	}
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::start() {
+        _run = true;
 
+        // The thread may be sleeping. Notify the condition to wake it up.
+        _control_condition.notify_all();
+    }
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_value_t gpio_smbus_motion_tracker<DistanceScale, Log>::depth() const noexcept {
-		return _depth;
-	}
 
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::stop() {
+        _run = false;
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_value_t gpio_smbus_motion_tracker<DistanceScale, Log>::width() const noexcept {
-		return _width;
-	}
+        // The thread is running. There is no need to notify it.
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_value_t gpio_smbus_motion_tracker<DistanceScale, Log>::direction() const noexcept {
-		return _direction;
-	}
+    template <typename DistanceScale>
+    inline motion_value_t motion_tracker<DistanceScale>::depth() const noexcept {
+        return _depth;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline gpio_smbus_motion_value_t gpio_smbus_motion_tracker<DistanceScale, Log>::speed() const noexcept {
-		return _speed;
-	}
+    template <typename DistanceScale>
+    inline motion_value_t motion_tracker<DistanceScale>::width() const noexcept {
+        return _width;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::set_depth(gpio_smbus_motion_value_t value) noexcept {
-		_depth = value;
-	}
+    template <typename DistanceScale>
+    inline motion_value_t motion_tracker<DistanceScale>::direction() const noexcept {
+        return _direction;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::set_width(gpio_smbus_motion_value_t value) noexcept {
-		_width = value;
-	}
+    template <typename DistanceScale>
+    inline motion_value_t motion_tracker<DistanceScale>::speed() const noexcept {
+        return _speed;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::set_direction(gpio_smbus_motion_value_t value) noexcept {
-		_direction = value;
-	}
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::set_depth(motion_value_t value) noexcept {
+        _depth = value;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::set_speed(gpio_smbus_motion_value_t value) noexcept {
-		_speed = value;
-	}
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::set_width(motion_value_t value) noexcept {
+        _width = value;
+    }
 
 
-	template <typename DistanceScale, typename Log>
-	inline void gpio_smbus_motion_tracker<DistanceScale, Log>::thread_func(gpio_smbus_motion_tracker<DistanceScale, Log>* this_ptr) noexcept {
-		using clock = std::chrono::steady_clock;
-
-		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x10758, "gpio_smbus_motion_tracker::thread_func() Start.");
-		}
-
-		// Previous motion values;
-		clock::time_point prev_time_point;
-		gpio_smbus_motion_value_t prev_accel;
-		gpio_smbus_motion_value_t prev_gyro;
-
-		for (;;) {
-			bool quit = this_ptr->_quit;
-			bool run = this_ptr->_run;
-
-			if (quit) {
-				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x10759, "gpio_smbus_motion_tracker::thread_func() Quitting (from running).");
-				}
-
-				break;
-			}
-
-			if (!run) {
-				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075a, "gpio_smbus_motion_tracker::thread_func() Stopping.");
-				}
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::set_direction(motion_value_t value) noexcept {
+        _direction = value;
+    }
 
-				// Reset kept measurements.
-				this_ptr->_speed = 0;
-				prev_accel = 0;
-				prev_gyro = 0;
 
-				// Sleep to let the inertia die.
-				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::set_speed(motion_value_t value) noexcept {
+        _speed = value;
+    }
 
-				// Sleep until the owning instance fires the condition.
-				{
-					std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
-					this_ptr->_control_condition.wait(lock);
 
-					quit = this_ptr->_quit;
-					run = this_ptr->_run;
-				}
+    template <typename DistanceScale>
+    inline void motion_tracker<DistanceScale>::thread_func(motion_tracker<DistanceScale>* this_ptr) noexcept {
+        using clock = std::chrono::steady_clock;
 
-				if (quit) {
-					if (this_ptr->_log != nullptr) {
-						this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075b, "gpio_smbus_motion_tracker::thread_func() Quitting (from sleeping).");
-					}
+        constexpr const char* suborigin = "thread_func()";
+        this_ptr->put_any(suborigin, diag::severity::callstack, 0x10758, "Begin:");
 
-					break;
-				}
+        // Previous motion values;
+        clock::time_point prev_time_point;
+        motion_value_t prev_accel;
+        motion_value_t prev_gyro;
 
-				if (this_ptr->_log != nullptr) {
-					this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075c, "gpio_smbus_motion_tracker::thread_func() Starting.");
-				}
+        for (;;) {
+            bool quit = this_ptr->_quit;
+            bool run = this_ptr->_run;
 
-				prev_time_point = clock::time_point();
-			}
+            if (quit) {
+                this_ptr->put_any(suborigin, diag::severity::optional, 0x10759, "Quitting (from running).");
 
-			// Running.
-			// Read the current motion values regardless.
-			gpio_smbus_motion_values values;
-			this_ptr->_motion->get_values(abc::gpio_smbus_motion_channel::accel_x | abc::gpio_smbus_motion_channel::gyro_z, values);
+                break;
+            }
 
-			gpio_smbus_motion_value_t curr_accel = (values.accel_x * gpio_smbus_motion_const::g * DistanceScale::den) / DistanceScale::num;
-			gpio_smbus_motion_value_t curr_gyro = values.gyro_z;
+            if (!run) {
+                this_ptr->put_any(suborigin, diag::severity::optional, 0x1075a, "Stopping.");
 
-			// Snap the current time point.
-			clock::time_point curr_time_point = clock::now();
+                // Reset kept measurements.
+                this_ptr->_speed = 0;
+                prev_accel = 0;
+                prev_gyro = 0;
 
-			// Read the atomic members once.
-			gpio_smbus_motion_value_t prev_depth = this_ptr->_depth;
-			gpio_smbus_motion_value_t prev_width = this_ptr->_width;
-			gpio_smbus_motion_value_t prev_speed = this_ptr->_speed;
-			gpio_smbus_motion_value_t prev_direction = this_ptr->_direction;
+                // Sleep to let the inertia dies.
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-			if (prev_time_point.time_since_epoch().count() != 0) {
-				// There is a previous set of measurements.
-				// Do the calculations.
+                // Sleep until the owning instance fires the condition.
+                {
+                    std::unique_lock<std::mutex> lock(this_ptr->_control_mutex);
+                    this_ptr->_control_condition.wait(lock);
 
-				// Calculate seconds as a floating point number.
-				std::chrono::microseconds::rep microsec = std::chrono::duration_cast<std::chrono::microseconds>(curr_time_point - prev_time_point).count();
-				gpio_smbus_motion_value_t sec = (static_cast<gpio_smbus_motion_value_t>(microsec) / std::micro::den) * std::micro::num;
-				
-				gpio_smbus_motion_value_t accel_accel = (curr_accel - prev_accel) / sec;
-				gpio_smbus_motion_value_t distance = (prev_speed * sec) + (prev_accel * sec * sec / 2.0) + (accel_accel * sec * sec * sec / 6.0);
+                    quit = this_ptr->_quit;
+                    run = this_ptr->_run;
+                }
 
-				gpio_smbus_motion_value_t gyro_accel = (curr_gyro - prev_gyro) / sec;
-				gpio_smbus_motion_value_t gyro = (prev_gyro * sec) + (gyro_accel * sec * sec / 2.0);
+                if (quit) {
+                    this_ptr->put_any(suborigin, diag::severity::optional, 0x1075b, "Quitting (from sleeping).");
 
-				gpio_smbus_motion_value_t direction_rad = deg_to_rad(prev_direction);
+                    break;
+                }
 
-				if (std::abs(gyro) < 0.000001) { // 0.001 degrees / sec
-					// Straight line.
-					this_ptr->_depth = prev_depth + distance * std::cos(direction_rad);
-					this_ptr->_width = prev_width + distance * std::sin(direction_rad);
-				}
-				else {
-					// Arch.
-					gpio_smbus_motion_value_t gyro_rad = deg_to_rad(gyro);
-					gpio_smbus_motion_value_t radius = distance / gyro_rad;
-					gpio_smbus_motion_value_t straight_depth = radius * std::sin(gyro_rad);
-					gpio_smbus_motion_value_t straight_width = radius * (1 - std::cos(gyro_rad));
+                this_ptr->put_any(suborigin, diag::severity::optional, 0x1075c, "Starting.");
 
-					this_ptr->_depth = prev_depth + straight_depth * std::cos(direction_rad) - straight_width * std::sin(direction_rad);
-					this_ptr->_width = prev_width + straight_depth * std::sin(direction_rad) + straight_width * std::cos(direction_rad);
-					this_ptr->_direction = prev_direction + gyro;
-				}
+                prev_time_point = clock::time_point();
+            }
 
-				this_ptr->_speed = prev_speed + (prev_accel * sec) + (accel_accel * sec * sec / 2.0);
-			}
+            // Running.
+            // Read the current motion values regardless.
+            motion_values values = this_ptr->_motion->get_values(abc::smbus::motion_channel::accel_x | abc::smbus::motion_channel::gyro_z);
 
-			prev_time_point = curr_time_point;
-			prev_accel = curr_accel;
-			prev_gyro = curr_gyro;
+            motion_value_t curr_accel = (values.accel_x * motion_const::g * DistanceScale::den) / DistanceScale::num;
+            motion_value_t curr_gyro = values.gyro_z;
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
+            // Snap the current time point.
+            clock::time_point curr_time_point = clock::now();
 
-		if (this_ptr->_log != nullptr) {
-			this_ptr->_log->put_any(category::abc::gpio, severity::abc::optional, 0x1075d, "gpio_smbus_motion_tracker::thread_func() Done.");
-		}
-	}
+            // Read the atomic members once.
+            motion_value_t prev_depth = this_ptr->_depth;
+            motion_value_t prev_width = this_ptr->_width;
+            motion_value_t prev_speed = this_ptr->_speed;
+            motion_value_t prev_direction = this_ptr->_direction;
 
+            if (prev_time_point.time_since_epoch().count() != 0) {
+                // There is a previous set of measurements.
+                // Do the calculations.
 
-	template <typename DistanceScale, typename Log>
-	inline  gpio_smbus_motion_value_t gpio_smbus_motion_tracker<DistanceScale, Log>::deg_to_rad(gpio_smbus_motion_value_t deg) noexcept {
-		return gpio_smbus_motion_const::pi * deg / 180.0;
-	}
+                // Calculate seconds as a floating point number.
+                std::chrono::microseconds::rep microsec = std::chrono::duration_cast<std::chrono::microseconds>(curr_time_point - prev_time_point).count();
+                motion_value_t sec = (static_cast<motion_value_t>(microsec) / std::micro::den) * std::micro::num;
+                
+                motion_value_t accel_accel = (curr_accel - prev_accel) / sec;
+                motion_value_t distance = (prev_speed * sec) + (prev_accel * sec * sec / 2.0) + (accel_accel * sec * sec * sec / 6.0);
 
-}
+                motion_value_t gyro_accel = (curr_gyro - prev_gyro) / sec;
+                motion_value_t gyro = (prev_gyro * sec) + (gyro_accel * sec * sec / 2.0);
+
+                motion_value_t direction_rad = deg_to_rad(prev_direction);
+
+                if (std::abs(gyro) < 0.000001) { // 0.001 degrees / sec
+                    // Straight line.
+                    this_ptr->_depth = prev_depth + distance * std::cos(direction_rad);
+                    this_ptr->_width = prev_width + distance * std::sin(direction_rad);
+                }
+                else {
+                    // Arch.
+                    motion_value_t gyro_rad = deg_to_rad(gyro);
+                    motion_value_t radius = distance / gyro_rad;
+                    motion_value_t straight_depth = radius * std::sin(gyro_rad);
+                    motion_value_t straight_width = radius * (1 - std::cos(gyro_rad));
+
+                    this_ptr->_depth = prev_depth + straight_depth * std::cos(direction_rad) - straight_width * std::sin(direction_rad);
+                    this_ptr->_width = prev_width + straight_depth * std::sin(direction_rad) + straight_width * std::cos(direction_rad);
+                    this_ptr->_direction = prev_direction + gyro;
+                }
+
+                this_ptr->_speed = prev_speed + (prev_accel * sec) + (accel_accel * sec * sec / 2.0);
+            }
+
+            prev_time_point = curr_time_point;
+            prev_accel = curr_accel;
+            prev_gyro = curr_gyro;
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
+        this_ptr->put_any(suborigin, diag::severity::callstack, 0x1075d, "End:");
+    }
+
+
+    template <typename DistanceScale>
+    inline  motion_value_t motion_tracker<DistanceScale>::deg_to_rad(motion_value_t deg) noexcept {
+        return (motion_const::pi * deg) / 180.0;
+    }
+
+} }

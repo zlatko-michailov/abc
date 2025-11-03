@@ -118,6 +118,8 @@ namespace abc { namespace smbus {
             mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return values;
     }
 
 
@@ -159,6 +161,8 @@ namespace abc { namespace smbus {
             mask, measurements.accel_x, measurements.accel_y, measurements.accel_z, measurements.gyro_x, measurements.gyro_y, measurements.gyro_z, measurements.temperature);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return measurements;
     }
 
 
@@ -200,6 +204,8 @@ namespace abc { namespace smbus {
             mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return values;
     }
 
 

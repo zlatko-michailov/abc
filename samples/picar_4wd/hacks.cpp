@@ -39,6 +39,7 @@ SOFTWARE.
 #include "../../src/smbus/motor.h"
 #include "../../src/smbus/grayscale.h"
 #include "../../src/smbus/motion.h"
+#include "../../src/smbus/motion_tracker.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
