@@ -22,9 +22,6 @@
 ## To Do
 - __Rename `master` to `main`.__
 - __UNTABIFY each file before making changes!__
-- `gpio`
-    - Entities
-    - Samples
 - Update docs when all classes are done.
 - Copyright - year.
 
