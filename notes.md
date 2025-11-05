@@ -18,14 +18,13 @@
 - `vmem`
 - `root`
 - `stream`
+- `gpio`
+- `smbus`
 
 ## To Do
 - __Rename `master` to `main`.__
-- __UNTABIFY each file before making changes!__
 - Update docs when all classes are done.
-- Copyright - year.
 
-- Remove `virtual` from `override` definitions?
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
 
