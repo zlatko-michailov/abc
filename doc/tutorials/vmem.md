@@ -68,8 +68,8 @@ For instance, if you want to have two lists, do something like this:
 #pragma pack(push, 1)
 
 using vmem_start_page = struct {
-	abc::vmem_list_state	list1;
-	abc::vmem_list_state	list2;
+    abc::vmem_list_state list1;
+    abc::vmem_list_state list2;
 };
 
 #pragma pack(pop)
@@ -83,7 +83,7 @@ If you need to work with uniform records of data, organize them in a data struct
 ### Traversing a List
 ``` c++
 for (vmem_list::iterator itr = list.begin(); itr != list.end(); itr++) {
-	// Do something with *itr
+    // Do something with *itr
 }
 ```
 
@@ -102,7 +102,7 @@ itr = list.erase(itr);
 ### Traversing a Map
 ``` c++
 for (vmem_map::iterator itr = map.begin(); itr != map.end(); itr++) {
-	// Do something with *itr
+    // Do something with *itr
 }
 ```
 
