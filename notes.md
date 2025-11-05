@@ -22,11 +22,13 @@
 - `smbus`
 
 ## To Do
-- __Rename `master` to `main`.__
+- Sample picar_4wd
 - Update docs when all classes are done.
-
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
+- Address `//// TODO:`.
+- __Untabify__
+- __Rename `master` to `main`.__
 
 - Namespace `vmem`
   - `blob`

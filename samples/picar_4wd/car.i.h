@@ -32,103 +32,100 @@ SOFTWARE.
 #include <thread>
 #include <atomic>
 
-#include "../../src/diag/log.h"
+#include "../../src/diag/diag_ready.h"
 #include "../../src/net/endpoint.h"
 #include "../../src/gpio/chip.h"
+#include "../../src/gpio/ultrasonic.h"
+#include "../../src/smbus/controller.h"
+#include "../../src/smbus/motor.h"
+#include "../../src/smbus/servo.h"
+#include "../../src/smbus/grayscale.h"
+#include "../../src/smbus/motion.h"
+#include "../../src/smbus/motion_tracker.h"
 
 
-namespace abc { namespace samples {
+class picar_4wd_hat
+    : public abc::smbus::target {
 
-	using log_ostream = abc::log_ostream<abc::debug_line_ostream<>, abc::log_filter>;
-	using limits = abc::endpoint_limits;
+    using base = abc::smbus::target;
 
+public:
+    picar_4wd_hat(abc::gpio::chip* chip, abc::smbus::address_t addr, abc::smbus::clock_frequency_t clock_frequency, bool requires_byte_swap);
 
-	// --------------------------------------------------------------
+public:
+    void reset();
 
-
-	template <typename Log>
-	class picar_4wd_hat : public abc::gpio_smbus_target<Log> {
-		using base = abc::gpio_smbus_target<Log>;
-
-	public:
-		picar_4wd_hat(abc::gpio::chip* chip, gpio_smbus_address_t addr, gpio_smbus_clock_frequency_t clock_frequency, bool requires_byte_swap, Log* log);
-
-	public:
-		void reset();
-
-	private:
-		abc::gpio::chip* _chip;
-		Log*             _log;
-	};
+private:
+    abc::gpio::chip* _chip;
+};
 
 
-	// --------------------------------------------------------------
+// --------------------------------------------------------------
 
 
-	template <typename Limits, typename Log>
-	class car_endpoint : public endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log> {
-		using base = endpoint<abc::tcp_server_socket<Log>, abc::tcp_client_socket<Log>, Limits, Log>;
+class car_endpoint
+    : public abc::net::http::endpoint {
 
-	public:
-		car_endpoint(endpoint_config* config, Log* log);
+    using base = abc::net::http::endpoint;
+    using diag_base = abc::diag::diag_ready<const char*>;
 
-	protected:
-		virtual abc::tcp_server_socket<Log>	create_server_socket() override;
-		virtual void	process_rest_request(abc::http_server_stream<Log>& http, const char* method, const char* resource) override;
+public:
+    car_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
-	private:
-		void			process_power(abc::http_server_stream<Log>& http, const char* method);
-		void			process_turn(abc::http_server_stream<Log>& http, const char* method);
-		void			process_autos(abc::http_server_stream<Log>& http, const char* method);
-		void			process_servo(abc::http_server_stream<Log>& http, const char* method);
-		void			process_shutdown(abc::http_server_stream<Log>& http, const char* method);
+protected:
+    virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
+    virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
 
-		template <typename T>
-		bool			verify_range(abc::http_server_stream<Log>& http, T value, T lo_bound, T hi_bound, T step) noexcept;
+private:
+    void process_power(abc::net::http::server& http, const abc::net::http::request& request);
+    void process_turn(abc::net::http::server& http, const abc::net::http::request& request);
+    void process_autos(abc::net::http::server& http, const abc::net::http::request& request);
+    void process_servo(abc::net::http::server& http, const abc::net::http::request& request);
+    void process_shutdown(abc::net::http::server& http, const abc::net::http::request& request);
 
-		void			drive_verified() noexcept;
-		void			get_side_powers(std::int32_t& left_power, std::int32_t& right_power) noexcept;
-		std::int32_t	get_delta_power() noexcept;
+    template <typename T>
+    bool verify_range(abc::net::http::server& http, T value, T lo_bound, T hi_bound, T step) noexcept;
 
-		bool			verify_method_get(abc::http_server_stream<Log>& http, const char* method) noexcept;
-		bool			verify_method_post(abc::http_server_stream<Log>& http, const char* method) noexcept;
-		bool			verify_header_json(abc::http_server_stream<Log>& http) noexcept;
+    void drive_verified() noexcept;
+    void get_side_powers(std::int32_t& left_power, std::int32_t& right_power) noexcept;
+    std::int32_t get_delta_power() noexcept;
 
-	private:
-		static void		start_auto_loop(car_endpoint<Limits, Log>* this_ptr) noexcept;
-		void			auto_loop() noexcept;
-		void			auto_limit_power() noexcept;
+    void require_method_get(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
+    void require_method_post(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
+    void require_content_type_json(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
 
-	private:
-		abc::gpio::chip											_chip;
-		abc::gpio_smbus<Log>									_smbus;
-		picar_4wd_hat<Log>										_hat;
+private:
+    static void start_auto_loop(car_endpoint* this_ptr) noexcept;
+    void auto_loop() noexcept;
+    void auto_limit_power() noexcept;
 
-		abc::gpio_smbus_motor<Log>								_motor_front_left;
-		abc::gpio_smbus_motor<Log>								_motor_front_right;
-		abc::gpio_smbus_motor<Log>								_motor_rear_left;
-		abc::gpio_smbus_motor<Log>								_motor_rear_right;
+private:
+    abc::gpio::chip                              _chip;
+    abc::smbus::controller                       _controller;
+    picar_4wd_hat                                _hat;
 
-		abc::gpio_ultrasonic<std::centi, Log>					_ultrasonic;
-		abc::gpio_smbus_servo<std::chrono::milliseconds, Log>	_servo;
-		abc::gpio_smbus_grayscale<Log>							_grayscale;
+    abc::smbus::motor                            _motor_front_left;
+    abc::smbus::motor                            _motor_front_right;
+    abc::smbus::motor                            _motor_rear_left;
+    abc::smbus::motor                            _motor_rear_right;
 
-		abc::gpio_smbus_motion<Log>								_motion;
-		abc::gpio_smbus_motion_tracker<std::centi, Log>			_motion_tracker;
+    abc::gpio::ultrasonic<std::centi>            _ultrasonic;
+    abc::smbus::servo<std::chrono::milliseconds> _servo;
+    abc::smbus::grayscale                        _grayscale;
 
-		bool													_forward;
-		std::int32_t											_power;
-		std::int32_t											_turn;
-		std::atomic<std::size_t>								_obstacle_cm;
-		std::atomic<std::uint16_t>								_grayscale_left;
-		std::atomic<std::uint16_t>								_grayscale_center;
-		std::atomic<std::uint16_t>								_grayscale_right;
+    abc::smbus::motion                           _motion;
+    abc::smbus::motion_tracker<std::centi>       _motion_tracker;
 
-		std::thread												_auto_thread;
-	};
+    bool                                         _forward;
+    std::int32_t                                 _power;
+    std::int32_t                                 _turn;
+    std::atomic<std::size_t>                     _obstacle_cm;
+    std::atomic<std::uint16_t>                   _grayscale_left;
+    std::atomic<std::uint16_t>                   _grayscale_center;
+    std::atomic<std::uint16_t>                   _grayscale_right;
+
+    std::thread                                   _auto_thread;
+};
 
 
-	// --------------------------------------------------------------
-
-}}
-
+// --------------------------------------------------------------
