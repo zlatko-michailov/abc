@@ -145,7 +145,7 @@ inline std::unique_ptr<abc::net::tcp_server_socket> car_endpoint::create_server_
 
 inline void car_endpoint::process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_rest_request()";
-    base::put_any(suborigin, abc::diag::severity::callstack, 0x10678, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10678, "Begin:");
 
     if (abc::ascii::are_equal_i(request.resource.path.c_str(), "/power")) {
         process_power(http, request);
@@ -168,13 +168,13 @@ inline void car_endpoint::process_rest_request(abc::net::http::server& http, con
             abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "The requested resource was not found.");
     }
 
-    base::put_any(suborigin, abc::diag::severity::callstack, 0x1067a, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1067a, "End:");
 }
 
 
 inline void car_endpoint::process_power(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_power()";
-    base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
     require_method_post(suborigin, __TAG__, request);
     require_content_type_json(suborigin, __TAG__, request);
@@ -248,249 +248,166 @@ inline void car_endpoint::process_power(abc::net::http::server& http, const abc:
 
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10681);
 
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::process_turn(abc::http_server_stream<Log>& http, const char* method) {
-    if (!verify_method_post(http, method)) {
-        return;
-    }
+inline void car_endpoint::process_turn(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_turn()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-    if (!verify_header_json(http)) {
-        return;
-    }
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
 
     std::int32_t turn;
     // Read turn from JSON
     {
-        std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
-        abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
-        char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
-        abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-        constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"turn\": 50}.";
+        std::streambuf* sb = static_cast<abc::net::http::request_reader&>(http).rdbuf();
+        abc::net::json::reader json(sb, diag_base::log());
 
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::begin_object) {
-            // Not {.
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10682, "Content error: Expected '{'.");
-            }
+        abc::net::json::value val = json.get_value();
+        require(suborigin, 0x10682, val.type() == abc::net::json::value_type::object,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a JSON object.");
 
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10683);
-            return;
-        }
+        abc::net::json::literal::object::const_iterator turn_itr = val.object().find("turn");
+        require(suborigin, 0x10683, turn_itr != val.object().cend(),
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"turn\" property.");
+        require(suborigin, 0x10684, turn_itr->second.type() == abc::net::json::value_type::number,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"turn\" number.");
+        require(suborigin, 0x10685, -90 <= turn_itr->second.number() && turn_itr->second.number() <= 90 && (int)turn_itr->second.number() % 30 == 0,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected -90 <= turn <= 90.");
 
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "turn")) {
-            // Not "turn".
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10684, "Content error: Expected \"turn\".");
-            }
-
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10685);
-            return;
-        }
-
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::number || !(-90 <= token->value.number && token->value.number <= 90)) {
-            // Not a valid turn.
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x10686, "Content error: Expected -90 <= number <= 90.");
-            }
-
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10687);
-            return;
-        }
-
-        turn = token->value.number;
-    }
-
-    if (!verify_range(http, turn, -90, 90, 30)) {
-        return;
+        turn = turn_itr->second.number();
     }
 
     _turn = turn;
     drive_verified();
 
     // 200
-    char body[abc::size::_256 + 1];
-    std::snprintf(body, sizeof(body), "turn: power=%d, turn=%d", (int)_power, (int)_turn);
-    base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, 0x10688);
+    std::stringbuf sb;
+    abc::net::json::writer json(&sb, diag_base::log());
+
+    abc::net::json::literal::object obj = {
+        { "forward", abc::net::json::literal::number((int)_forward) },
+        { "power",   abc::net::json::literal::number((int)_power) },
+        { "turn",    abc::net::json::literal::number((int)_turn) }
+    };
+    json.put_value(abc::net::json::value(std::move(obj)));
+
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10688);
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::process_autos(abc::http_server_stream<Log>& http, const char* method) {
-    if (!verify_method_get(http, method)) {
-        return;
-    }
+inline void car_endpoint::process_autos(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_autos()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-    // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-    char body[abc::size::_512 + 1];
-    abc::buffer_streambuf sb(nullptr, 0, 0, body, 0, sizeof(body));
-    abc::json_ostream<abc::size::_16, Log> json(&sb, base::_log);
-    json.put_begin_object();
-        json.put_property("obstacle");
-        json.put_begin_object();
-            json.put_property("distance");
-            json.put_number(_obstacle_cm.load());
-            json.put_property("units");
-            json.put_string("cm");
-        json.put_end_object();
-        json.put_property("grayscale");
-        json.put_begin_object();
-            json.put_property("left");
-            json.put_number(_grayscale_left.load());
-            json.put_property("center");
-            json.put_number(_grayscale_center.load());
-            json.put_property("right");
-            json.put_number(_grayscale_right.load());
-        json.put_end_object();
-        json.put_property("depth");
-        json.put_begin_object();
-            json.put_property("distance");
-            json.put_number(_motion_tracker.depth());
-            json.put_property("units");
-            json.put_string("cm");
-        json.put_end_object();
-        json.put_property("width");
-        json.put_begin_object();
-            json.put_property("distance");
-            json.put_number(_motion_tracker.width());
-            json.put_property("units");
-            json.put_string("cm");
-        json.put_end_object();
-    json.put_end_object();
-    json.put_char('\0');
-    json.flush();
+    require_method_get(suborigin, __TAG__, request);
 
-    char content_length[abc::size::_32 + 1];
-    std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+    // 200
+    std::stringbuf sb;
+    abc::net::json::writer json(&sb, diag_base::log());
 
-    // Send the http response
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::debug, 0x10689, "Sending response 200");
-    }
+    abc::net::json::literal::object obj = {
+        { "obstacle", abc::net::json::literal::object {
+            { "distance", abc::net::json::literal::number((int)_obstacle_cm.load()) },
+            { "units",    abc::net::json::literal::string("cm") }
+        } },
+        { "grayscale", abc::net::json::literal::object {
+            { "left",   abc::net::json::literal::number((int)_grayscale_left.load()) },
+            { "center", abc::net::json::literal::number((int)_grayscale_center.load()) },
+            { "right",  abc::net::json::literal::number((int)_grayscale_right.load()) }
+        } },
+        { "depth", abc::net::json::literal::object {
+            { "distance", abc::net::json::literal::number((int)_motion_tracker.depth()) },
+            { "units",    abc::net::json::literal::string("cm") }
+        } },
+        { "width", abc::net::json::literal::object {
+            { "distance", abc::net::json::literal::number((int)_motion_tracker.width()) },
+            { "units",    abc::net::json::literal::string("cm") }
+        } },
+    };
+    json.put_value(abc::net::json::value(std::move(obj)));
 
-    http.put_protocol(protocol::HTTP_11);
-    http.put_status_code(status_code::OK);
-    http.put_reason_phrase(reason_phrase::OK);
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10689);
 
-    http.put_header_name(header::Connection);
-    http.put_header_value(connection::close);
-    http.put_header_name(header::Content_Type);
-    http.put_header_value(content_type::json);
-    http.put_header_name(header::Content_Length);
-    http.put_header_value(content_length);
-    http.end_headers();
-
-    http.put_body(body);
-
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1068a, "car::process_autos: Done.");
-    }
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::process_servo(abc::http_server_stream<Log>& http, const char* method) {
-    if (!verify_method_post(http, method)) {
-        return;
-    }
+inline void car_endpoint::process_servo(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_servo()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-    if (!verify_header_json(http)) {
-        return;
-    }
+    require_method_post(suborigin, __TAG__, request);
+    require_content_type_json(suborigin, __TAG__, request);
 
     std::int32_t angle;
     // Read turn from JSON
     {
-        std::streambuf* sb = static_cast<abc::http_request_istream<Log>&>(http).rdbuf();
-        abc::json_istream<abc::size::_64, Log> json(sb, base::_log);
-        char buffer[sizeof(abc::json::token_t) + abc::size::k1 + 1];
-        abc::json::token_t* token = reinterpret_cast<abc::json::token_t*>(buffer);
-        constexpr const char* invalid_json = "An invalid JSON payload was supplied. Must be: {\"servo\": 50}.";
+        std::streambuf* sb = static_cast<abc::net::http::request_reader&>(http).rdbuf();
+        abc::net::json::reader json(sb, diag_base::log());
 
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::begin_object) {
-            // Not {.
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068b, "Content error: Expected '{'.");
-            }
+        abc::net::json::value val = json.get_value();
+        require(suborigin, 0x1068b, val.type() == abc::net::json::value_type::object,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a JSON object.");
 
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1068c);
-            return;
-        }
+        abc::net::json::literal::object::const_iterator angle_itr = val.object().find("angle");
+        require(suborigin, 0x1068c, angle_itr != val.object().cend(),
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"angle\" property.");
+        require(suborigin, 0x1068d, angle_itr->second.type() == abc::net::json::value_type::number,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"angle\" number.");
+        require(suborigin, 0x1068e, -90 <= angle_itr->second.number() && angle_itr->second.number() <= 90 && (int)angle_itr->second.number() % 30 == 0,
+            abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected -90 <= angle <= 90.");
 
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::property || !ascii::are_equal(token->value.property, "angle")) {
-            // Not "servo".
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068d, "Content error: Expected \"angle\".");
-            }
-
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x1068e);
-            return;
-        }
-
-        json.get_token(token, sizeof(buffer));
-        if (token->item != abc::json::item::number || !(-90 <= token->value.number && token->value.number <= 90)) {
-            // Not a valid angle.
-            if (base::_log != nullptr) {
-                base::_log->put_any(abc::category::abc::samples, abc::severity::important, 0x1068f, "Content error: Expected -90 <= number <= 90.");
-            }
-
-            // 400
-            base::send_simple_response(http, status_code::Bad_Request, reason_phrase::Bad_Request, content_type::text, invalid_json, 0x10690);
-            return;
-        }
-
-        angle = token->value.number;
+        angle = angle_itr->second.number();
     }
 
-    if (!verify_range(http, angle, -90, 90, 30)) {
-        return;
-    }
-
-    abc::pwm_duty_cycle_t duty_cycle = 100 - static_cast<abc::pwm_duty_cycle_t>(100 * (angle + 92) / 184);
+    abc::smbus::pwm_duty_cycle_t duty_cycle = 100 - static_cast<abc::smbus::pwm_duty_cycle_t>(100 * (angle + 92) / 184);
     _servo.set_duty_cycle(duty_cycle);
 
     // 200
-    char body[abc::size::_256 + 1];
-    std::snprintf(body, sizeof(body), "servo: angle=%d", (int)angle);
-    base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, body, 0x10691);
+    std::stringbuf sb;
+    abc::net::json::writer json(&sb, diag_base::log());
+
+    abc::net::json::literal::object obj = {
+        { "angle", abc::net::json::literal::number((int)angle) },
+    };
+    json.put_value(abc::net::json::value(std::move(obj)));
+
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10691);
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::process_shutdown(abc::http_server_stream<Log>& http, const char* method) {
-    if (!verify_method_post(http, method)) {
-        return;
-    }
+inline void car_endpoint::process_shutdown(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_shutdown()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    require_method_post(suborigin, __TAG__, request);
 
     base::set_shutdown_requested();
     _hat.reset();
     _auto_thread.join();
 
     // 200
-    base::send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Server is shuting down...", 0x10692);
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x10692);
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::drive_verified() noexcept {
-    std::int32_t left_power;
-    std::int32_t right_power;
-    get_side_powers(left_power, right_power);
+inline void car_endpoint::drive_verified() {
+    constexpr const char* suborigin = "drive_verified()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-    pwm_duty_cycle_t left_duty_cycle = static_cast<pwm_duty_cycle_t>(left_power);
-    pwm_duty_cycle_t right_duty_cycle = static_cast<pwm_duty_cycle_t>(right_power);
+    side_powers powers = calculate_side_powers();
+
+    abc::smbus::pwm_duty_cycle_t left_duty_cycle = static_cast<abc::smbus::pwm_duty_cycle_t>(powers.left);
+    abc::smbus::pwm_duty_cycle_t right_duty_cycle = static_cast<abc::smbus::pwm_duty_cycle_t>(powers.right);
 
     _motor_front_left.set_forward(_forward);
     _motor_front_left.set_duty_cycle(left_duty_cycle);
@@ -503,44 +420,51 @@ inline void car_endpoint::drive_verified() noexcept {
 
     _motor_rear_right.set_forward(_forward);
     _motor_rear_right.set_duty_cycle(right_duty_cycle);
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::get_side_powers(std::int32_t& left_power, std::int32_t& right_power) noexcept {
-    std::int32_t delta = get_delta_power();
+inline car_endpoint::side_powers car_endpoint::calculate_side_powers() noexcept {
+    constexpr const char* suborigin = "calculate_side_powers()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-    left_power  = _power + delta;
-    right_power = _power - delta;
+    std::int32_t delta = calculate_delta_power();
 
-    constexpr std::int32_t min_power = static_cast<std::int32_t>(abc::pwm_duty_cycle::min);
-    constexpr std::int32_t max_power = static_cast<std::int32_t>(abc::pwm_duty_cycle::max);
+    side_powers powers;
+    powers.left  = _power + delta;
+    powers.right = _power - delta;
+
+    constexpr std::int32_t min_power = static_cast<std::int32_t>(abc::smbus::pwm_duty_cycle::min);
+    constexpr std::int32_t max_power = static_cast<std::int32_t>(abc::smbus::pwm_duty_cycle::max);
 
     std::int32_t adjust = 0;
-    if (left_power > max_power) {
-        adjust = max_power - left_power;
+    if (powers.left > max_power) {
+        adjust = max_power - powers.left;
     }
-    else if (right_power > max_power) {
-        adjust = max_power - right_power;
+    else if (powers.right > max_power) {
+        adjust = max_power - powers.right;
     }
-    else if (left_power < min_power) {
-        adjust = min_power - left_power;
+    else if (powers.left < min_power) {
+        adjust = min_power - powers.left;
     }
-    else if (right_power < min_power) {
-        adjust = min_power - right_power;
+    else if (powers.right < min_power) {
+        adjust = min_power - powers.right;
     }
 
-    left_power  += adjust;
-    right_power += adjust;
+    powers.left  += adjust;
+    powers.right += adjust;
 
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10693, "left_power = %3d, right_power = %3d", (int)left_power, (int)right_power);
-    }
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10693, "End: powers.left=%3d, powers.right=%3d", (int)powers.left, (int)powers.right);
+
+    return powers;
 }
 
 
-template <typename Limits, typename Log>
-inline std::int32_t car_endpoint::get_delta_power() noexcept {
+inline std::int32_t car_endpoint::calculate_delta_power() noexcept {
+    constexpr const char* suborigin = "calculate_delta_power()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
     std::int32_t delta = 0;
 
     switch (_turn) {
@@ -569,9 +493,7 @@ inline std::int32_t car_endpoint::get_delta_power() noexcept {
         delta = -delta;
     }
 
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x10694, "power = %3d, turn = %3d, delta = %3d", (int)_power, (int)_turn, (int)delta);
-    }
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10694, "End: power=%3d, turn=%3d, delta=%3d", (int)_power, (int)_turn, (int)delta);
 
     return delta;
 }
@@ -599,24 +521,19 @@ inline void car_endpoint::require_content_type_json(const char* suborigin, abc::
 }
 
 
-template <typename T>
-inline void car_endpoint::require_range(const char* suborigin, abc::diag::tag_t tag, T value, T lo_bound, T hi_bound, T step) {
-    require(suborigin, tag, lo_bound <= value && value <= hi_bound && value % step == 0,
-        abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Bad value.");
-}
+inline void car_endpoint::start_auto_loop(car_endpoint* this_ptr) {
+    constexpr const char* suborigin = "start_auto_loop()";
+    this_ptr->put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
 
-
-template <typename Limits, typename Log>
-inline void car_endpoint::start_auto_loop(car_endpoint* this_ptr) noexcept {
     this_ptr->auto_loop();
+
+    this_ptr->put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::auto_loop() noexcept {
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x1069f, "car_endpoint::auto_loop: Start.");
-    }
+inline void car_endpoint::auto_loop() {
+    constexpr const char* suborigin = "auto_loop()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1069f, "Begin:");
 
     while (!base::is_shutdown_requested()) {
         // Refresh obstacle
@@ -624,27 +541,24 @@ inline void car_endpoint::auto_loop() noexcept {
         _obstacle_cm.store(distance_cm);
 
         // Refresh grayscales
-        std::uint16_t grayscale_left = 0;
-        std::uint16_t grayscale_center = 0;
-        std::uint16_t grayscale_right = 0;
-        _grayscale.get_values(grayscale_left, grayscale_center, grayscale_right);
-        _grayscale_left.store(grayscale_left);
-        _grayscale_center.store(grayscale_center);
-        _grayscale_right.store(grayscale_right);
+        abc::smbus::grayscale_values grayscales = _grayscale.get_values();
+        _grayscale_left.store(grayscales.left);
+        _grayscale_center.store(grayscales.center);
+        _grayscale_right.store(grayscales.right);
 
         auto_limit_power();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 
-    if (base::_log != nullptr) {
-        base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x106a0, "car_endpoint::auto_loop: Done.");
-    }
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x106a0, "End:");
 }
 
 
-template <typename Limits, typename Log>
-inline void car_endpoint::auto_limit_power() noexcept {
+inline void car_endpoint::auto_limit_power() {
+    constexpr const char* suborigin = "auto_limit_power()";
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
     std::size_t distance_cm = _obstacle_cm.load();
     std::int32_t power = _power;
 
@@ -664,13 +578,13 @@ inline void car_endpoint::auto_limit_power() noexcept {
     }
 
     if (power < _power) {
-        if (base::_log != nullptr) {
-            base::_log->put_any(abc::category::abc::samples, abc::severity::optional, 0x106a1, "car_endpoint::auto_limit: old_power=%d, new_power=%d.", (int)_power, (int)power);
-        }
+        diag_base::put_any(suborigin, abc::diag::severity::optional, 0x106a1, "old_power=%d, new_power=%d.", (int)_power, (int)power);
 
         _power = power;
         drive_verified();
     }
+
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
 }
 
 

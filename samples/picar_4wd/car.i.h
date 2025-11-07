@@ -69,6 +69,11 @@ class car_endpoint
     using base = abc::net::http::endpoint;
     using diag_base = abc::diag::diag_ready<const char*>;
 
+    struct side_powers {
+        std::int32_t left;
+        std::int32_t right;
+    };
+
 public:
     car_endpoint(abc::net::http::endpoint_config&& config, abc::diag::log_ostream* log);
 
@@ -83,21 +88,18 @@ private:
     void process_servo(abc::net::http::server& http, const abc::net::http::request& request);
     void process_shutdown(abc::net::http::server& http, const abc::net::http::request& request);
 
-    template <typename T>
-    bool verify_range(abc::net::http::server& http, T value, T lo_bound, T hi_bound, T step) noexcept;
-
-    void drive_verified() noexcept;
-    void get_side_powers(std::int32_t& left_power, std::int32_t& right_power) noexcept;
-    std::int32_t get_delta_power() noexcept;
+    void drive_verified();
+    side_powers calculate_side_powers() noexcept;
+    std::int32_t calculate_delta_power() noexcept;
 
     void require_method_get(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
     void require_method_post(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
     void require_content_type_json(const char* suborigin, abc::diag::tag_t tag, const abc::net::http::request& request);
 
 private:
-    static void start_auto_loop(car_endpoint* this_ptr) noexcept;
-    void auto_loop() noexcept;
-    void auto_limit_power() noexcept;
+    static void start_auto_loop(car_endpoint* this_ptr);
+    void auto_loop();
+    void auto_limit_power();
 
 private:
     abc::gpio::chip                              _chip;
