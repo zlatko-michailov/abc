@@ -23,419 +23,419 @@ SOFTWARE.
 -->
 
 <html>
-	<head>
-		<title>picar 4wd (abc Samples)</title>
-		<style>
-			a
-			{
-				color: honeydew;
-			}
+    <head>
+        <title>picar 4wd (abc Samples)</title>
+        <style>
+            a
+            {
+                color: honeydew;
+            }
 
-			input[type=range].horizontal-slider {
-	 		   width: 300px;
-			}
+            input[type=range].horizontal-slider {
+                width: 300px;
+            }
 
-			input[type=range].vertical-slider {
-				height: 200px;
-				-webkit-appearance: slider-vertical;
-				writing-mode: bt-lr;
-			}
+            input[type=range].vertical-slider {
+                height: 200px;
+                -webkit-appearance: slider-vertical;
+                writing-mode: bt-lr;
+            }
 
-			.readonly
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18;
-				background-color: rgb(60, 60, 60);
-				color: rgb(210, 210, 210);
-			}
+            .readonly
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 18;
+                background-color: rgb(60, 60, 60);
+                color: rgb(210, 210, 210);
+            }
 
-			.edit
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18;
-				background-color: rgb(210, 210, 210);
-				color: rgb(60, 60, 60);
-			}
+            .edit
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 18;
+                background-color: rgb(210, 210, 210);
+                color: rgb(60, 60, 60);
+            }
 
-			.title
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 36;
-				text-align: center;
-			}
+            .title
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 36;
+                text-align: center;
+            }
 
-			.subtitle
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 26;
-				text-align: center;
-			}
+            .subtitle
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 26;
+                text-align: center;
+            }
 
-			.copyright
-			{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 14;
-				text-align: center;
-			}
+            .copyright
+            {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14;
+                text-align: center;
+            }
 
-		</style>
-	</head>
-	<body class="readonly">
-		<table>
-			<tr>
-				<td>
-					<div class="title">picar 4wd</div>
-					<div class="subtitle">abc Samples</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+        </style>
+    </head>
+    <body class="readonly">
+        <table>
+            <tr>
+                <td>
+                    <div class="title">picar 4wd</div>
+                    <div class="subtitle">abc Samples</div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			<tr>
-				<td>
-					<div class="readonly">This is a C++ program that drives picar 4wd.</div>
-					<br />
-					<br />
-				</td>
-			</tr>
-
-
-			<tr>
-				<td>
-					<table style="border-spacing: 50px;">
-						<tr>
-							<td>
-								<table>
-									<tr>
-										<td>
-											<div class="subtitle">Power</div>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
-										</td>
-									</tr>
-								</table>
-							</td>
-
-							<td>
-								<table>
-									<tr>
-										<td>
-											<div class="subtitle">Turn</div>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateTurn(value)" />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<br />
-											<br />
-											<br />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<div class="subtitle">Servo</div>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<input id="servo" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateServo(value)" />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<br />
-											<br />
-											<br />
-										</td>
-									</tr>
-								</table>
-							</td>
-
-							<td>
-								<table>
-									<tr>
-										<td>
-											<div class="subtitle">Info</div>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Power:</span>
-										</td>
-										<td>
-											<span id="power-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Turn:</span>
-										</td>
-										<td>
-											<span id="turn-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Obstacle (cm):</span>
-										</td>
-										<td>
-											<span id="obstacle-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Grayscale:</span>
-										</td>
-										<td>
-											<span id="grayscale-numeric-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<input id="grayscale-info" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Depth (cm):</span>
-										</td>
-										<td>
-											<span id="depth-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<span class="readonly">Width (cm):</span>
-										</td>
-										<td>
-											<span id="width-info" class="readonly">0</span>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<br />
-										</td>
-									</tr>
-								</table>
-							</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <div class="readonly">This is a C++ program that drives picar 4wd.</div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
 
-			<tr>
-				<td>
-					<br />
-					<br />
-					<br />
-					<br />
-					<div>
-						<a href="javascript:shutdown()">Shutdown</a>
-					</div>
-					<br />
-					<br />
-				</td>
-			</tr>
+            <tr>
+                <td>
+                    <table style="border-spacing: 50px;">
+                        <tr>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="subtitle">Power</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input id="power" type="range" min="-100" max="100" step="25" value="0" orient="vertical" class="vertical-slider" oninput="updatePower(value)" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
 
-			<tr>
-				<td>
-					<hr />
-					<br />
-					<div id="status" class="readonly"></div>
-					<br />
-					<hr />
-					<br />
-				</td>
-			</tr>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="subtitle">Turn</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input id="turn" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateTurn(value)" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <br />
+                                            <br />
+                                            <br />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="subtitle">Servo</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input id="servo" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" oninput="updateServo(value)" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <br />
+                                            <br />
+                                            <br />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
 
-			<tr>
-				<td>
-					<br />
-					<br />
-					<div class="copyright">Copyright (c) 2018-2025 by Zlatko Michailov, MIT License</div>
-				</td>
-			</tr>
-		</table>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="subtitle">Info</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Power:</span>
+                                        </td>
+                                        <td>
+                                            <span id="power-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Turn:</span>
+                                        </td>
+                                        <td>
+                                            <span id="turn-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Obstacle (cm):</span>
+                                        </td>
+                                        <td>
+                                            <span id="obstacle-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Grayscale:</span>
+                                        </td>
+                                        <td>
+                                            <span id="grayscale-numeric-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input id="grayscale-info" type="range" min="-90" max="90" step="30" value="0" class="horizontal-slider" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Depth (cm):</span>
+                                        </td>
+                                        <td>
+                                            <span id="depth-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="readonly">Width (cm):</span>
+                                        </td>
+                                        <td>
+                                            <span id="width-info" class="readonly">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <br />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
 
-		<script>
-			let isRunning = true;
-			const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
+            <tr>
+                <td>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <div>
+                        <a href="javascript:shutdown()">Shutdown</a>
+                    </div>
+                    <br />
+                    <br />
+                </td>
+            </tr>
 
-			function updatePower(value) {
-				document.getElementById('power-info').innerText = value;
+            <tr>
+                <td>
+                    <hr />
+                    <br />
+                    <div id="status" class="readonly"></div>
+                    <br />
+                    <hr />
+                    <br />
+                </td>
+            </tr>
 
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+            <tr>
+                <td>
+                    <br />
+                    <br />
+                    <div class="copyright">Copyright (c) 2018-2025 by Zlatko Michailov, MIT License</div>
+                </td>
+            </tr>
+        </table>
 
-				let requestInit = {
-					method: "POST",
-					headers: requestHeaders,
-					mode: "same-origin",
-					body: "{ \"power\": " + value + "}"
-				};
 
-				let request = new Request("/power");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.blob();
-					})
-					.then(function (blob) {
-						return blob.text();
-					})
-					.then(function (text) {
-						console.log(text);
-						//document.getElementById("status").innerHTML += text + "<br />";
+        <script>
+            let isRunning = true;
+            const remoteIsDown = "The remote program is down. Restart the program, and refresh this browser tab.";
 
-						if (value == 0) {
-							document.getElementById('turn').value = 0;
-							document.getElementById('turn-info').innerText = 0;
-						}
-					});
-			}
+            function updatePower(value) {
+                document.getElementById('power-info').innerText = value;
 
-			function updateTurn(value) {
-				document.getElementById('turn-info').innerText = value;
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+                let requestInit = {
+                    method: "POST",
+                    headers: requestHeaders,
+                    mode: "same-origin",
+                    body: "{ \"power\": " + value + "}"
+                };
 
-				let requestInit = {
-					method: "POST",
-					headers: requestHeaders,
-					mode: "same-origin",
-					body: "{ \"turn\": " + value + "}"
-				};
+                let request = new Request("/power");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.blob();
+                    })
+                    .then(function (blob) {
+                        return blob.text();
+                    })
+                    .then(function (text) {
+                        console.log(text);
+                        //document.getElementById("status").innerHTML += text + "<br />";
 
-				let request = new Request("/turn");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.blob();
-					})
-					.then(function (blob) {
-						return blob.text();
-					})
-					.then(function (text) {
-						console.log(text);
-						//document.getElementById("status").innerHTML += text + "<br />";
-					});
-			}
+                        if (value == 0) {
+                            document.getElementById('turn').value = 0;
+                            document.getElementById('turn-info').innerText = 0;
+                        }
+                    });
+            }
 
-			function updateServo(value) {
-				document.getElementById('turn-info').innerText = value;
+            function updateTurn(value) {
+                document.getElementById('turn-info').innerText = value;
 
-				let requestHeaders = new Headers();
-				requestHeaders.append("Content-Type", "application/json");
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-				let requestInit = {
-					method: "POST",
-					headers: requestHeaders,
-					mode: "same-origin",
-					body: "{ \"angle\": " + value + "}"
-				};
+                let requestInit = {
+                    method: "POST",
+                    headers: requestHeaders,
+                    mode: "same-origin",
+                    body: "{ \"turn\": " + value + "}"
+                };
 
-				let request = new Request("/servo");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.blob();
-					})
-					.then(function (blob) {
-						return blob.text();
-					})
-					.then(function (text) {
-						console.log(text);
-						//document.getElementById("status").innerHTML += text + "<br />";
-					});
-			}
+                let request = new Request("/turn");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.blob();
+                    })
+                    .then(function (blob) {
+                        return blob.text();
+                    })
+                    .then(function (text) {
+                        console.log(text);
+                        //document.getElementById("status").innerHTML += text + "<br />";
+                    });
+            }
 
-			function getAutos() {
-				let requestInit = {
-					method: "GET",
-					mode: "same-origin"
-				};
+            function updateServo(value) {
+                document.getElementById('turn-info').innerText = value;
 
-				let request = new Request("/autos");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
-						return response.json();
-					})
-					.then(function (result) {
-						console.log((new Date()).toISOString());
-						console.log(result);
-						//document.getElementById("status").innerHTML += text + "<br />";
+                let requestHeaders = new Headers();
+                requestHeaders.append("Content-Type", "application/json");
 
-						document.getElementById('obstacle-info').innerText = result.obstacle.distance;
+                let requestInit = {
+                    method: "POST",
+                    headers: requestHeaders,
+                    mode: "same-origin",
+                    body: "{ \"angle\": " + value + "}"
+                };
 
-						let grayscaleNumeric = 0;
-						if ( (result.grayscale.left > 3 * result.grayscale.center && result.grayscale.left > 3 * result.grayscale.right)
-							|| (3 * result.grayscale.left < result.grayscale.center && 3 * result.grayscale.left < result.grayscale.right) ) {
-							grayscaleNumeric = -90;
-						}
-						else if ( (result.grayscale.right > 3 * result.grayscale.center && result.grayscale.right > 3 * result.grayscale.left)
-							|| (3 * result.grayscale.right < result.grayscale.center && 3 * result.grayscale.right < result.grayscale.left) ) {
-							grayscaleNumeric = 90;
-						}
-						else if ( (result.grayscale.left > 2 * result.grayscale.center && result.grayscale.left > 2 * result.grayscale.right)
-							|| (2 * result.grayscale.left < result.grayscale.center && 2 * result.grayscale.left < result.grayscale.right) ) {
-							grayscaleNumeric = -60;
-						}
-						else if ( (result.grayscale.right > 2 * result.grayscale.center && result.grayscale.right > 2 * result.grayscale.left)
-							|| (2 * result.grayscale.right < result.grayscale.center && 2 * result.grayscale.right < result.grayscale.left) ) {
-							grayscaleNumeric = 60;
-						}
-						else if ( (result.grayscale.left > 1.5 * result.grayscale.center && result.grayscale.left > 1.5 * result.grayscale.right)
-							|| (1.5 * result.grayscale.left < result.grayscale.center && 1.5 * result.grayscale.left < result.grayscale.right) ) {
-							grayscaleNumeric = -30;
-						}
-						else if ( (result.grayscale.right > 1.5 * result.grayscale.center && result.grayscale.right > 1.5 * result.grayscale.left)
-							|| (1.5 * result.grayscale.right < result.grayscale.center && 1.5 * result.grayscale.right < result.grayscale.left) ) {
-							grayscaleNumeric = 30;
-						}
+                let request = new Request("/servo");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.blob();
+                    })
+                    .then(function (blob) {
+                        return blob.text();
+                    })
+                    .then(function (text) {
+                        console.log(text);
+                        //document.getElementById("status").innerHTML += text + "<br />";
+                    });
+            }
 
-						document.getElementById('grayscale-numeric-info').innerText = grayscaleNumeric;
-						document.getElementById('grayscale-info').value = grayscaleNumeric;
+            function getAutos() {
+                let requestInit = {
+                    method: "GET",
+                    mode: "same-origin"
+                };
 
-						document.getElementById('depth-info').innerText = Math.round(result.depth.distance);
-						document.getElementById('width-info').innerText = Math.round(result.width.distance);
+                let request = new Request("/autos");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log((new Date()).toISOString());
+                        console.log(result);
+                        //document.getElementById("status").innerHTML += text + "<br />";
 
-						setTimeout(getAutos, 500);
-					});
-			}
+                        document.getElementById('obstacle-info').innerText = result.obstacle.distance;
 
-			function shutdown() {
-				let requestInit = {
-					method: "POST",
-					mode: "same-origin",
-				};
+                        let grayscaleNumeric = 0;
+                        if ( (result.grayscale.left > 3 * result.grayscale.center && result.grayscale.left > 3 * result.grayscale.right)
+                            || (3 * result.grayscale.left < result.grayscale.center && 3 * result.grayscale.left < result.grayscale.right) ) {
+                            grayscaleNumeric = -90;
+                        }
+                        else if ( (result.grayscale.right > 3 * result.grayscale.center && result.grayscale.right > 3 * result.grayscale.left)
+                            || (3 * result.grayscale.right < result.grayscale.center && 3 * result.grayscale.right < result.grayscale.left) ) {
+                            grayscaleNumeric = 90;
+                        }
+                        else if ( (result.grayscale.left > 2 * result.grayscale.center && result.grayscale.left > 2 * result.grayscale.right)
+                            || (2 * result.grayscale.left < result.grayscale.center && 2 * result.grayscale.left < result.grayscale.right) ) {
+                            grayscaleNumeric = -60;
+                        }
+                        else if ( (result.grayscale.right > 2 * result.grayscale.center && result.grayscale.right > 2 * result.grayscale.left)
+                            || (2 * result.grayscale.right < result.grayscale.center && 2 * result.grayscale.right < result.grayscale.left) ) {
+                            grayscaleNumeric = 60;
+                        }
+                        else if ( (result.grayscale.left > 1.5 * result.grayscale.center && result.grayscale.left > 1.5 * result.grayscale.right)
+                            || (1.5 * result.grayscale.left < result.grayscale.center && 1.5 * result.grayscale.left < result.grayscale.right) ) {
+                            grayscaleNumeric = -30;
+                        }
+                        else if ( (result.grayscale.right > 1.5 * result.grayscale.center && result.grayscale.right > 1.5 * result.grayscale.left)
+                            || (1.5 * result.grayscale.right < result.grayscale.center && 1.5 * result.grayscale.right < result.grayscale.left) ) {
+                            grayscaleNumeric = 30;
+                        }
 
-				let request = new Request("/shutdown");
-				return fetch(request, requestInit)
-					.then(function (response) {
-						console.log("Received status " + response.status + ": " + response.statusText);
+                        document.getElementById('grayscale-numeric-info').innerText = grayscaleNumeric;
+                        document.getElementById('grayscale-info').value = grayscaleNumeric;
 
-						if (response.ok) {
-							isRunning = false;
-							document.getElementById("status").innerHTML += remoteIsDown + "<br />";
-						}
-						else {
-							document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
-						}
-					});
-			}
+                        document.getElementById('depth-info').innerText = Math.round(result.depth.distance);
+                        document.getElementById('width-info').innerText = Math.round(result.width.distance);
 
-			getAutos();
-		</script>
-	</body>
+                        setTimeout(getAutos, 500);
+                    });
+            }
+
+            function shutdown() {
+                let requestInit = {
+                    method: "POST",
+                    mode: "same-origin",
+                };
+
+                let request = new Request("/shutdown");
+                return fetch(request, requestInit)
+                    .then(function (response) {
+                        console.log("Received status " + response.status + ": " + response.statusText);
+
+                        if (response.ok) {
+                            isRunning = false;
+                            document.getElementById("status").innerHTML += remoteIsDown + "<br />";
+                        }
+                        else {
+                            document.getElementById("status").innerHTML += "Received status " + response.status + ": " + response.statusText + "<br />";
+                        }
+                    });
+            }
+
+            getAutos();
+        </script>
+    </body>
 </html>
