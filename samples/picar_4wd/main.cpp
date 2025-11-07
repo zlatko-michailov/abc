@@ -23,71 +23,61 @@ SOFTWARE.
 */
 
 
+#include <iostream>
+#include <string>
+#include <future>
+
 #include "../../src/root/ascii.h"
-#if 0
+
 #include "car.h"
-#endif
+
+
+constexpr const char* origin = "sample_picar_4wd";
 
 
 // --------------------------------------------------------------
+
 
 extern void run_all();
 
 
 int main(int argc, const char* argv[]) {
-	if (argc >= 2 && abc::ascii::are_equal(argv[1], "hacks")) { 
-		run_all();
-		return 0;
-	}
+    constexpr const char* suborigin = "main()";
+    std::srand(std::time(nullptr));
 
-#if 0
-	// Create a log.
-	abc::log_filter filter(abc::severity::abc::important);
-	abc::samples::log_ostream log(std::cout.rdbuf(), &filter);
+    if (argc >= 2 && abc::ascii::are_equal(argv[1], "hacks")) { 
+        run_all();
+        return 0;
+    }
 
-	// Use the path to this program to build the path to the pool file.
-	constexpr std::size_t max_path = abc::size::k1;
-	char path[max_path];
-	path[0] = '\0';
+    // Create a log.
+    abc::stream::table_ostream table(std::cout.rdbuf());
+    abc::diag::debug_line_ostream<> line(&table);
+    abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
+    abc::diag::log_ostream log(&line, &filter);
 
-	const char* prog_last_separator = std::strrchr(argv[0], '/');
-	std::size_t prog_path_len = 0;
+    // Use the path to this program to build the path to the pool file.
+    std::string process_dir = abc::parent_path(argv[0]);
 
-	if (prog_last_separator != nullptr) {
-		prog_path_len = prog_last_separator - argv[0];
+    // Create an endpoint configuration.
+    abc::net::http::endpoint_config config(
+        "30305",             // port
+        5,                   // listen_queue_size
+        process_dir.c_str(), // root_dir (Note: No trailing slash!)
+        "/resources/"        // files_prefix
+    );
 
-		if (prog_path_len >= max_path) {
-			log.put_any(abc::category::abc::samples, abc::severity::critical, 0x106b7,
-				"This sample allows paths up to %zu chars. The path to this process is %zu chars. To continue, either move the current dir closer to the process, or increase the path limit in main.cpp.",
-				max_path, prog_path_len);
+    // Create an endpoint.
+    car_endpoint endpoint(std::move(config), &log);
 
-			return 1;
-		}
+    log.put_any(origin, suborigin, abc::diag::severity::warning, 0x105a9, "Open a browser and navigate to http://<host>:30305/resources/index.html.");
+    log.put_blank_line(origin, abc::diag::severity::warning);
 
-		std::strncpy(path, argv[0], prog_path_len);
-	}
+    // Let the endpoint listen in a separate thread.
+    std::future<void> done = endpoint.start_async();
+    done.wait();
 
-	path[prog_path_len] = '\0';
-
-
-	// Create a endpoint.
-	abc::endpoint_config config(
-		"30305",			// port
-		5,					// listen_queue_size
-		path,				// root_dir (Note: No trailing slash!)
-		"/resources/"		// files_prefix
-	);
-	abc::samples::car_endpoint<abc::samples::limits, abc::samples::log_ostream> endpoint(&config, &log);
-
-	log.put_any(abc::category::abc::samples, abc::severity::warning, 0x106b8, "Open a browser and navigate to http://<host>:30305/resources/index.html.");
-	log.put_blank_line(abc::category::abc::samples, abc::severity::warning);
-
-	// Let the endpoint listen in a separate thread.
-	std::future<void> done = endpoint.start_async();
-	done.wait();
-#endif
-
-	return 0;
+    return 0;
 }
 
 
