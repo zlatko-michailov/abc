@@ -40,6 +40,7 @@ SOFTWARE.
 #include "../../src/smbus/grayscale.h"
 #include "../../src/smbus/motion.h"
 #include "../../src/smbus/motion_tracker.h"
+#include "../../src/smbus/adc.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -321,8 +322,8 @@ void turn_wheels_motor(const abc::gpio::chip& chip, abc::diag::log_ostream& log)
 }
 
 
-void measure_grayscale_pwm(abc::diag::log_ostream& log) {
-    constexpr const char* suborigin = "measure_grayscale_pwm()";
+void measure_grayscale_controller(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "measure_grayscale_controller()";
 
     abc::smbus::controller controller(1, &log);
     abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
@@ -364,6 +365,45 @@ void measure_grayscale(abc::diag::log_ostream& log) {
         abc::smbus::grayscale_values values = grayscale.get_values();
 
         log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", values.left, values.center, values.right);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+
+void read_battery_controller(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "read_battery_controller()";
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
+    const abc::smbus::register_t reg_battery = 0x13;
+    const std::uint16_t zero = 0x0000;
+
+    for (int i = 0; i < 10; i++) {
+        controller.put_word(hat, reg_battery, zero);
+        std::uint16_t battery = controller.get_noreg_word(hat);
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "battery = %4.4x", battery);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+
+void read_battery_adc(abc::diag::log_ostream& log) {
+    constexpr const char* suborigin = "read_battery_adc()";
+
+    abc::smbus::controller controller(1, &log);
+    abc::smbus::target hat(smbus_hat_addr, smbus_hat_clock_frequency, smbus_hat_requires_byte_swap);
+
+    const abc::smbus::register_t reg_battery = 0x13;
+    abc::smbus::adc battery(&controller, hat, reg_battery, &log);
+
+    for (int i = 0; i < 10; i++) {
+        std::uint16_t value = battery.get_value();
+
+        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "battery = %4.4x", value);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -697,15 +737,19 @@ void run_all() {
 #endif
 
 #if 0
-    // Grayscale - pwm input
-    measure_grayscale_pwm(log);
+    // Grayscale
+    measure_grayscale_controller(log);
     measure_grayscale(log);
 #endif
 
+    // Battery
+    read_battery_controller(log);
+    read_battery_adc(log);
+
+#if 0
     // Speed - accelerometer
     measure_accel_and_spin(log);
 
-#if 0
     // Wheels - pwm output
     make_turns(log);
 #endif

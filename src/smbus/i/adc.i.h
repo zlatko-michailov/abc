@@ -38,19 +38,9 @@ SOFTWARE.
 namespace abc { namespace smbus {
 
     /**
-     * @brief Bundle of grayscale sensor values.
+     * @brief Analog-to-digital converter connected over SMBus.
      */
-    struct grayscale_values {
-        std::uint16_t left;
-        std::uint16_t center;
-        std::uint16_t right;
-    };
-
-
-    /**
-     * @brief Grayscale sensor connected over SMBus.
-     */
-    class grayscale
+    class adc
         : protected diag::diag_ready<const char*> {
 
         using diag_base = diag::diag_ready<const char*>;
@@ -60,30 +50,26 @@ namespace abc { namespace smbus {
          * @brief            Constructor.
          * @param controller Pointer to an SMBus controller.
          * @param target     SMBus target representing the HAT to which the servo is connected.
-         * @param reg_left   HAT register of the left sensor.
-         * @param reg_center HAT register of the center sensor.
-         * @param reg_right  HAT register of the right sensor.
+         * @param reg        HAT register of the ADC.
          * @param log        `diag::log_ostream` pointer. May be `nullptr`.
          */
-        grayscale(controller* controller, const target& target,
-            register_t reg_left, register_t reg_center, register_t reg_right,
-            diag::log_ostream* log = nullptr);
+        adc(controller* controller, const target& target, register_t reg, diag::log_ostream* log = nullptr);
 
         /**
          * @brief Move constructor.
          */
-        grayscale(grayscale&& other) noexcept = default;
+        adc(adc&& other) noexcept = default;
 
         /**
          * @brief Deleted.
          */
-        grayscale(const grayscale& other) = delete;
+        adc(const adc& other) = delete;
 
     public:
         /**
-         * @brief Gets the current values of the three sensors.
+         * @brief Gets the current value of the ADC.
          */
-        grayscale_values get_values();
+        std::uint16_t get_value();
 
     private:
         /**
@@ -97,19 +83,9 @@ namespace abc { namespace smbus {
         target _target;
 
         /**
-         * @brief HAT register of the left sensor.
+         * @brief HAT register of the ADC.
          */
-        register_t _reg_left;
-
-        /**
-         * @brief HAT register of the center sensor.
-         */
-        register_t _reg_center;
-
-        /**
-         * @brief HAT register of the right sensor.
-         */
-        register_t _reg_right;
+        register_t _reg;
     };
 
 
