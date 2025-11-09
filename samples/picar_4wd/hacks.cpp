@@ -37,10 +37,10 @@ SOFTWARE.
 #include "../../src/smbus/pwm.h"
 #include "../../src/smbus/servo.h"
 #include "../../src/smbus/motor.h"
+#include "../../src/smbus/adc.h"
 #include "../../src/smbus/grayscale.h"
 #include "../../src/smbus/motion.h"
 #include "../../src/smbus/motion_tracker.h"
-#include "../../src/smbus/adc.h"
 
 
 constexpr abc::smbus::clock_frequency_t smbus_hat_clock_frequency    = 72 * std::mega::num;
@@ -371,7 +371,7 @@ void measure_grayscale(abc::diag::log_ostream& log) {
 }
 
 
-void read_battery_controller(abc::diag::log_ostream& log) {
+void measure_battery_controller(abc::diag::log_ostream& log) {
     constexpr const char* suborigin = "read_battery_controller()";
 
     abc::smbus::controller controller(1, &log);
@@ -391,7 +391,7 @@ void read_battery_controller(abc::diag::log_ostream& log) {
 }
 
 
-void read_battery_adc(abc::diag::log_ostream& log) {
+void measure_battery_adc(abc::diag::log_ostream& log) {
     constexpr const char* suborigin = "read_battery_adc()";
 
     abc::smbus::controller controller(1, &log);
@@ -742,9 +742,11 @@ void run_all() {
     measure_grayscale(log);
 #endif
 
+#if 0
     // Battery
-    read_battery_controller(log);
-    read_battery_adc(log);
+    measure_battery_controller(log);
+    measure_battery_adc(log);
+#endif
 
 #if 0
     // Speed - accelerometer

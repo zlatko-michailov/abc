@@ -36,11 +36,9 @@ namespace abc { namespace smbus {
                 register_t reg_left, register_t reg_center, register_t reg_right,
                 diag::log_ostream* log)
         : diag_base("abc::smbus::grayscale", log)
-        , _controller(controller)
-        , _target(target)
-        , _reg_left(reg_left)
-        , _reg_center(reg_center)
-        , _reg_right(reg_right) {
+        , _adc_left(controller, target, reg_left, log)
+        , _adc_center(controller, target, reg_center, log)
+        , _adc_right(controller, target, reg_right, log) {
 
         constexpr const char* suborigin = "grayscale()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10749, "Begin:");
@@ -52,18 +50,11 @@ namespace abc { namespace smbus {
 
 
     inline grayscale_values grayscale::get_values() {
-        static constexpr std::uint16_t zero = 0x0000;
-
         grayscale_values values{ };
 
-        _controller->put_word(_target, _reg_left, zero);
-        values.left = _controller->get_noreg_word(_target);
-
-        _controller->put_word(_target, _reg_center, zero);
-        values.center = _controller->get_noreg_word(_target);
-
-        _controller->put_word(_target, _reg_right, zero);
-        values.right = _controller->get_noreg_word(_target);
+        values.left = _adc_left.get_value();
+        values.center = _adc_center.get_value();
+        values.right = _adc_right.get_value();
 
         return values;
     }

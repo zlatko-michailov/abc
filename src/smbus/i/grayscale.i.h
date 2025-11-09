@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
 #include "controller.i.h"
+#include "adc.i.h"
 
 
 namespace abc { namespace smbus {
@@ -87,29 +88,19 @@ namespace abc { namespace smbus {
 
     private:
         /**
-         * @brief Pointer to the `controller` instance passed in to the constructor.
+         * @brief ADC of the left sensor.
          */
-        controller* _controller;
+        adc _adc_left;
 
         /**
-         * @brief Copy of the target passed in to the constructor.
+         * @brief ADC of the center sensor.
          */
-        target _target;
+        adc _adc_center;
 
         /**
-         * @brief HAT register of the left sensor.
+         * @brief ADC of the right sensor.
          */
-        register_t _reg_left;
-
-        /**
-         * @brief HAT register of the center sensor.
-         */
-        register_t _reg_center;
-
-        /**
-         * @brief HAT register of the right sensor.
-         */
-        register_t _reg_right;
+        adc _adc_right;
     };
 
 
