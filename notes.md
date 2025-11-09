@@ -24,10 +24,10 @@
 
 ## To Do
 - Sample picar_4wd
+- Address `//// TODO:`.
 - Update docs when all classes are done.
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
-- Address `//// TODO:`.
 - __Rename `master` to `main`.__
 
 - Namespace `vmem`

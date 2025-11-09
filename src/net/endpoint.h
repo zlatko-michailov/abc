@@ -210,7 +210,7 @@ namespace abc { namespace net { namespace http {
 
         const char* content_type = get_content_type_from_path(filepath.c_str());
         if (content_type != nullptr) {
-            response.headers[header::Content_Type] = content_type;
+            response.headers[header::Content_Type] = std::string(content_type);
         }
 
         http.put_response(response);

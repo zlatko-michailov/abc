@@ -165,7 +165,7 @@ namespace abc {
                     ch2 = to_lower(ch2);
                 }
 
-                char ch_diff = ch1 - ch2;
+                int ch_diff = (int)ch1 - (int)ch2;
                 cmp = ch_diff < 0 ? -1 : (ch_diff > 0 ? +1 : 0);
             }
 
