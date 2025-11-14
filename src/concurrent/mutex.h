@@ -118,7 +118,7 @@ namespace abc { namespace concurrent {
     }
 
  
-    inline std::thread::id mutex::get_locking_thread_id() noexcept {
+    inline std::thread::id mutex::locking_thread_id() noexcept {
         std::lock_guard<std::mutex> lock(_state_mutex);
 
         return _thread_id;

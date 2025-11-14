@@ -102,7 +102,7 @@ static bool mutex_1_thread(abc::concurrent::mutex& mutex, test_context& context)
     {
         std::lock_guard<abc::concurrent::mutex> lock(mutex);
         passed = passed && context.are_equal(mutex.is_locked(), true, __TAG__, "%d");
-        passed = passed && context.are_equal(mutex.get_locking_thread_id() == this_thread_id, true, __TAG__, "%d");
+        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, __TAG__, "%d");
         passed = passed && context.are_equal(static_cast<bool>(mutex), true, __TAG__, "%d");
     }
 
@@ -123,7 +123,7 @@ static bool mutex_M_threads(abc::concurrent::mutex& mutex, std::condition_variab
         sync.wait(lock);
 
         passed = passed && context.are_equal(mutex.is_locked(), true, __TAG__, "%d");
-        passed = passed && context.are_equal(mutex.get_locking_thread_id() == this_thread_id, true, __TAG__, "%d");
+        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, __TAG__, "%d");
         passed = passed && context.are_equal(static_cast<bool>(mutex), true, __TAG__, "%d");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -85,7 +85,7 @@ namespace abc { namespace concurrent {
         /**
          * @brief Returns the ID of the thread that has locked the mutex.
          */
-        std::thread::id get_locking_thread_id() noexcept;
+        std::thread::id locking_thread_id() noexcept;
 
         /**
          * @brief Returns `true` if the mutex is currently locked by the current thread, `false` otherwise.
