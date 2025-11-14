@@ -31,7 +31,7 @@ SOFTWARE.
 
 namespace abc { namespace concurrent {
 
-    mutex::mutex(diag::log_ostream* log)
+    inline mutex::mutex(diag::log_ostream* log)
         : diag_base("abc::concurrent::mutex", log)
         , _is_locked(false)
         , _thread_id() {
@@ -43,12 +43,12 @@ namespace abc { namespace concurrent {
     }
 
 
-    void mutex::lock() {
+    inline void mutex::lock() {
         constexpr const char* suborigin = "lock()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         {
-            std::lock_guard<std::mutex> state_lock(_state_mutex);
+            std::unique_lock<std::mutex> state_lock(_state_mutex);
 
             std::thread::id this_thread_id = std::this_thread::get_id();
 
@@ -66,7 +66,7 @@ namespace abc { namespace concurrent {
     }
 
 
-    bool mutex::try_lock() {
+    inline bool mutex::try_lock() {
         constexpr const char* suborigin = "try_lock()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -83,13 +83,13 @@ namespace abc { namespace concurrent {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ret=%d", (int)(ret));
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ret=%d", ret);
 
         return ret;
     }
 
 
-    void mutex::unlock() {
+    inline void mutex::unlock() {
         constexpr const char* suborigin = "unlock()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -111,21 +111,21 @@ namespace abc { namespace concurrent {
     }
 
 
-    bool mutex::is_locked() noexcept {
+    inline bool mutex::is_locked() noexcept {
         std::lock_guard<std::mutex> lock(_state_mutex);
 
         return _is_locked;
     }
 
  
-    std::thread::id mutex::get_locking_thread_id() noexcept {
+    inline std::thread::id mutex::get_locking_thread_id() noexcept {
         std::lock_guard<std::mutex> lock(_state_mutex);
 
         return _thread_id;
     }
 
 
-    mutex::operator bool () noexcept {
+    inline mutex::operator bool () noexcept {
         std::lock_guard<std::mutex> lock(_state_mutex);
 
         return _is_locked && (_thread_id == std::this_thread::get_id());

@@ -111,7 +111,7 @@ namespace abc { namespace concurrent {
         /**
          * @brief Condition variable to block on lock attempts.
          */
-        std::condition_variable_any _blocker;
+        std::condition_variable _blocker;
     };
 
 

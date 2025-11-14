@@ -4,6 +4,8 @@
 - `diag_ready`
 - `vector_streambuf`
 - Remove the `Log` template parameter from all classes.
+- `concurrent`
+    - `mutex`
 - `http`
     - `request_reader`
     - `request_writer`
@@ -24,6 +26,7 @@
 
 ## To Do
 - Sample picar_4wd
+    - BUG: Controller must be locked around `put_` + `get_`, e.g. `controller::get_lock_guard()`
 - Address `//// TODO:`.
 - Update docs when all classes are done.
 - Update doc/ref/*.md for all classes that have been done.

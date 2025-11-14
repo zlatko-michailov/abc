@@ -37,6 +37,7 @@ SOFTWARE.
 #include "inc/vector_streambuf.h"
 #include "inc/stream.h"
 #include "inc/table_stream.h"
+#include "inc/mutex.h"
 #include "inc/http.h"
 #include "inc/json.h"
 #include "inc/socket.h"
@@ -101,6 +102,11 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_line_debug_move",                            test_line_debug_move },
                 { "test_line_diag_move",                             test_line_diag_move },
                 { "test_line_test_move",                             test_line_test_move },
+            } },
+            { "mutex", {
+                { "test_mutex_1_thread_1_use",                       test_mutex_1_thread_1_use },
+                { "test_mutex_1_thread_M_uses",                      test_mutex_1_thread_M_uses },
+                { "test_mutex_M_threads_1_use",                      test_mutex_M_threads_1_use },
             } },
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
