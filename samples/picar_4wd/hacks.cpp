@@ -317,7 +317,10 @@ void turn_wheels_motor(const abc::gpio::chip& chip, abc::diag::log_ostream& log)
         const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
         for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
             motor.set_duty_cycle(duty_cycle);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
+
+        motor.set_duty_cycle(abc::smbus::pwm_duty_cycle::min);
     }
 }
 
@@ -334,14 +337,30 @@ void measure_grayscale_controller(abc::diag::log_ostream& log) {
     const std::uint16_t zero = 0x0000;
 
     for (int i = 0; i < 10; i++) {
-        controller.put_word(hat, reg_left, zero);
-        std::uint16_t left = controller.get_noreg_word(hat);
+        std::uint16_t left;
+        std::uint16_t center;
+        std::uint16_t right;
 
-        controller.put_word(hat, reg_center, zero);
-        std::uint16_t center = controller.get_noreg_word(hat);
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(controller.mutex());
 
-        controller.put_word(hat, reg_right, zero);
-        std::uint16_t right = controller.get_noreg_word(hat);
+            controller.put_word(hat, reg_left, zero);
+            left = controller.get_noreg_word(hat);
+        }
+
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(controller.mutex());
+
+            controller.put_word(hat, reg_center, zero);
+            center = controller.get_noreg_word(hat);
+        }
+
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(controller.mutex());
+
+            controller.put_word(hat, reg_right, zero);
+            right = controller.get_noreg_word(hat);
+        }
 
         log.put_any(origin, suborigin, abc::diag::severity::important, 0x106b6, "left = %4.4x, center = %4.4x, right = %4.4x", left, center, right);
 
@@ -381,8 +400,13 @@ void measure_battery_controller(abc::diag::log_ostream& log) {
     const std::uint16_t zero = 0x0000;
 
     for (int i = 0; i < 10; i++) {
-        controller.put_word(hat, reg_battery, zero);
-        std::uint16_t battery = controller.get_noreg_word(hat);
+        std::uint16_t battery;
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(controller.mutex());
+
+            controller.put_word(hat, reg_battery, zero);
+            battery = controller.get_noreg_word(hat);
+        }
 
         log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "battery = %4.4x", battery);
 

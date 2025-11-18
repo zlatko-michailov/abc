@@ -87,8 +87,12 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::debug, 0x10709, "(3) period=%lu, autoreload=%lu, prescaler=%lu, min=%lu, max=%lu",
                 (long)_period, (long)_autoreload, (long)_prescaler, (long)_min_pulse_width, (long)_max_pulse_width);
 
-        _controller->put_word(_target, _reg_autoreload, _autoreload - 1);
-        _controller->put_word(_target, _reg_prescaler, _prescaler - 1);
+        {
+            std::lock_guard<concurrent::mutex> lock(_controller->mutex());
+
+            _controller->put_word(_target, _reg_autoreload, _autoreload - 1);
+            _controller->put_word(_target, _reg_prescaler, _prescaler - 1);
+        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1070a, "End:");
     }
@@ -123,7 +127,11 @@ namespace abc { namespace smbus {
 
         diag_base::put_any(suborigin, diag::severity::debug, 0x1070d, "capture_compare = %lu", (long)capture_compare);
 
-        _controller->put_word(_target, _reg_pwm, capture_compare);
+        {
+            std::lock_guard<concurrent::mutex> lock(_controller->mutex());
+
+            _controller->put_word(_target, _reg_pwm, capture_compare);
+        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }

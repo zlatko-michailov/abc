@@ -31,7 +31,8 @@ SOFTWARE.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "../diag/i/diag_ready.i.h"
+#include "../diag/diag_ready.h"
+#include "../concurrent/mutex.h"
 #include "i/controller.i.h"
 
 
@@ -41,7 +42,8 @@ namespace abc { namespace smbus {
         : diag_base("abc::smbus::controller", log)
         , _fd(-1)
         , _functionality(0)
-        , _addr(0) {
+        , _addr(0)
+        , _mutex(log) {
 
         char path[max_path];
         std::snprintf(path, max_path, "/dev/i2c-%d", dev_i2c_pos);
@@ -54,7 +56,8 @@ namespace abc { namespace smbus {
         : diag_base("abc::smbus::controller", log)
         , _fd(-1)
         , _functionality(0)
-        , _addr(0) {
+        , _addr(0)
+        , _mutex(log) {
 
         init(path);
     }
@@ -64,7 +67,8 @@ namespace abc { namespace smbus {
         : diag_base("abc::smbus::controller", other.log())
         , _fd(other._fd)
         , _functionality(other._functionality)
-        , _addr(other._addr) {
+        , _addr(other._addr)
+        , _mutex(other.log()) {
 
         std::strncpy(_path, other._path, max_path);
 
@@ -95,7 +99,7 @@ namespace abc { namespace smbus {
         std::strncpy(_path, path, max_path);
 
         _fd = open(path, O_RDWR);
-        diag_base::expect(suborigin, _fd >= 0, 0x106de, "_fd >= 0");
+        diag_base::expect(suborigin, _fd >= 0, 0x106de, "_fd >= 0, errno = %d", errno);
 
         ensure_ioctl(I2C_FUNCS, &_functionality, 0x106df);
         diag_base::put_any(suborigin, diag::severity::optional, 0x106e0, "functionality=0x%4.4lx %4.4lx", _functionality >> 16, _functionality & 0xffff);
@@ -114,9 +118,16 @@ namespace abc { namespace smbus {
     }
 
 
+    inline concurrent::mutex& controller::mutex() noexcept {
+        return _mutex;
+    }
+
+
     inline void controller::put_nodata(const target& target, register_t reg) {
         constexpr const char* suborigin = "put_nodata()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), __TAG__);
 
@@ -134,6 +145,8 @@ namespace abc { namespace smbus {
     inline void controller::put_byte(const target& target, register_t reg, std::uint8_t byte) {
         constexpr const char* suborigin = "put_byte()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), __TAG__);
 
@@ -155,6 +168,8 @@ namespace abc { namespace smbus {
     inline void controller::put_word(const target& target, register_t reg, std::uint16_t word) {
         constexpr const char* suborigin = "put_word()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), __TAG__);
 
@@ -178,6 +193,7 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
         diag_base::expect(suborigin, size <= I2C_SMBUS_BLOCK_MAX, 0x106eb, "size (%zu) <= I2C_SMBUS_BLOCK_MAX", size);
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), __TAG__);
 
@@ -200,6 +216,8 @@ namespace abc { namespace smbus {
     inline std::uint8_t controller::get_noreg_byte(const target& target) {
         constexpr const char* suborigin = "get_noreg_byte()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x", target.address());
+
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), 0x106ef);
 
@@ -238,6 +256,8 @@ namespace abc { namespace smbus {
         constexpr const char* suborigin = "get_byte()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+
         ensure_address(target.address(), 0x106f5);
 
         i2c_smbus_data data{ };
@@ -261,6 +281,8 @@ namespace abc { namespace smbus {
         constexpr const char* suborigin = "get_word()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+
         ensure_address(target.address(), 0x106f8);
 
         i2c_smbus_data data{ };
@@ -283,6 +305,8 @@ namespace abc { namespace smbus {
     inline std::size_t controller::get_block(const target& target, register_t reg, void* block, std::size_t size) {
         constexpr const char* suborigin = "get_block()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
 
         ensure_address(target.address(), 0x106fb);
 
@@ -311,6 +335,8 @@ namespace abc { namespace smbus {
         constexpr const char* suborigin = "ensure_address()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: addr=0x%2.2x", addr);
 
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), tag, "_mutex");
+
         if (_addr == addr) {
             diag_base::put_any(suborigin, diag::severity::callstack, 0x106ff, "End: (Skip)");
 
@@ -327,21 +353,22 @@ namespace abc { namespace smbus {
 
 
     template <typename Arg>
-    void controller::ensure_ioctl(int command, Arg arg, diag::tag_t tag) {
+    inline void controller::ensure_ioctl(int command, Arg arg, diag::tag_t tag) {
         constexpr const char* suborigin = "ensure_ioctl()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        int ret = safe_ioctl(command, arg);
-        diag_base::expect(suborigin, ret >= 0, tag, "ret (%d) >= 0", ret);
+        int ret = ioctl(_fd, command, arg);
+        diag_base::expect(suborigin, ret >= 0, tag, "ret (%d) >= 0, errno = %d", ret, errno);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
+    //// TODO: Remove
     template <typename Arg>
-    int controller::safe_ioctl(int command, Arg arg) noexcept {
+    inline int controller::safe_ioctl(int command, Arg arg) noexcept {
         try {
-            std::lock_guard<std::mutex> lock(_ioctl_mutex);
+            std::lock_guard<concurrent::mutex> lock(_mutex);
             return ioctl(_fd, command, arg);
         }
         catch (...) {

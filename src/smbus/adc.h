@@ -50,8 +50,13 @@ namespace abc { namespace smbus {
     inline std::uint16_t adc::get_value() {
         static constexpr std::uint16_t zero = 0x0000;
 
-        _controller->put_word(_target, _reg, zero);
-        std::uint32_t value = _controller->get_noreg_word(_target);
+        std::uint32_t value;
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(_controller->mutex());
+
+            _controller->put_word(_target, _reg, zero);
+            value = _controller->get_noreg_word(_target);
+        }
 
         return value;
     }

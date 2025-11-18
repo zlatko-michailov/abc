@@ -79,6 +79,25 @@
 					"ignoreFailures": true
 				}
 			]
+		},
+		{
+			"name": "Debug Sample PiCar_4WD",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/out/samples/picar_4wd/picar_4wd",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
 		}
 	]
 }

@@ -48,7 +48,7 @@ namespace abc { namespace gpio {
         /**
          * @brief Flag whether the struct has been successfully populated.
          */
-        bool is_valid; //// TODO: Remove if not used.
+        bool is_valid; //// TODO: Remove, unused.
     };
 
 
@@ -66,7 +66,7 @@ namespace abc { namespace gpio {
         /**
          * @brief Flag whether the struct has been successfully populated.
          */
-        bool is_valid;
+        bool is_valid; //// TODO: Remove, unused.
     };
 
 

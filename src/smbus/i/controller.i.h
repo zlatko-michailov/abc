@@ -33,6 +33,7 @@ SOFTWARE.
 
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
+#include "../../concurrent/i/mutex.i.h"
 
 
 namespace abc { namespace smbus {
@@ -107,6 +108,12 @@ namespace abc { namespace smbus {
          * @brief Returns the functionality bits.
          */
         functionality_t functionality() const noexcept;
+
+        /**
+         * @brief   Returns the operation mutex. This mutex must be locked before performing any SMBus operation.
+         * @details When an operation is compound (involving multiple SMBus operations), this mutex must be held for the entire duration of the compound operation.
+         */
+        concurrent::mutex& mutex() noexcept;
 
     public:
         /**
@@ -237,9 +244,9 @@ namespace abc { namespace smbus {
         address_t _addr;
 
         /**
-         * @brief ioctl() mutex. 
+         * @brief Operation mutex. 
          */
-        std::mutex _ioctl_mutex;
+        concurrent::mutex _mutex;
     };
 
 
