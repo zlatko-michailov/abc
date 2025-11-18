@@ -51,10 +51,14 @@ namespace abc { namespace smbus {
 
         diag_base::expect(suborigin, controller != nullptr, 0x1074c, "controller != nullptr");
 
-        _controller->put_byte(_target, reg_pwr_mgmt_1,   0x00);      // internal 8MHz oscillator
-        _controller->put_byte(_target, reg_config,       0x03);      // Filter - 44Hz, 5ms delay
-        _controller->put_byte(_target, reg_config_accel, 0x03 << 3); // +/-16g
-        _controller->put_byte(_target, reg_config_gyro,  0x03 << 3); // +/-2000 degrees/sec
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(_controller->mutex());
+
+            _controller->put_byte(_target, reg_pwr_mgmt_1,   0x00);      // internal 8MHz oscillator
+            _controller->put_byte(_target, reg_config,       0x03);      // Filter - 44Hz, 5ms delay
+            _controller->put_byte(_target, reg_config_accel, 0x03 << 3); // +/-16g
+            _controller->put_byte(_target, reg_config_gyro,  0x03 << 3); // +/-2000 degrees/sec
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
@@ -129,32 +133,36 @@ namespace abc { namespace smbus {
 
         motion_measurements measurements = { };
 
-        if ((mask & motion_channel::accel_x) != 0) {
-            measurements.accel_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_x));
-        }
+        {
+            std::lock_guard<abc::concurrent::mutex> lock(_controller->mutex());
 
-        if ((mask & motion_channel::accel_y) != 0) {
-            measurements.accel_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_y));
-        }
+            if ((mask & motion_channel::accel_x) != 0) {
+                measurements.accel_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_x));
+            }
 
-        if ((mask & motion_channel::accel_z) != 0) {
-            measurements.accel_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_z));
-        }
+            if ((mask & motion_channel::accel_y) != 0) {
+                measurements.accel_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_y));
+            }
 
-        if ((mask & motion_channel::gyro_x) != 0) {
-            measurements.gyro_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_x));
-        }
+            if ((mask & motion_channel::accel_z) != 0) {
+                measurements.accel_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_accel_z));
+            }
 
-        if ((mask & motion_channel::gyro_y) != 0) {
-            measurements.gyro_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_y));
-        }
+            if ((mask & motion_channel::gyro_x) != 0) {
+                measurements.gyro_x = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_x));
+            }
 
-        if ((mask & motion_channel::gyro_z) != 0) {
-            measurements.gyro_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_z));
-        }
+            if ((mask & motion_channel::gyro_y) != 0) {
+                measurements.gyro_y = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_y));
+            }
 
-        if ((mask & motion_channel::temperature) != 0) {
-            measurements.temperature = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_temperature));
+            if ((mask & motion_channel::gyro_z) != 0) {
+                measurements.gyro_z = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_gyro_z));
+            }
+
+            if ((mask & motion_channel::temperature) != 0) {
+                measurements.temperature = static_cast<motion_measurement_t>(_controller->get_word(_target, reg_temperature));
+            }
         }
 
         diag_base::put_any(suborigin, diag::severity::debug, 0x10751, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
