@@ -37,21 +37,6 @@ SOFTWARE.
 
 namespace abc { namespace gpio {
 
-    inline chip_info::chip_info() noexcept
-        : chip_info_base{ }
-        , is_valid(false) {
-    }
-
-
-    inline line_info::line_info() noexcept
-        : line_info_base{ }
-        , is_valid(false) {
-    }
-
-
-    // --------------------------------------------------------------
-
-
     inline chip::chip(int dev_gpiochip_pos, const char* consumer, diag::log_ostream* log)
         : diag_base("abc::gpio::chip", log) {
 
@@ -104,7 +89,6 @@ namespace abc { namespace gpio {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106c0, "Begin:");
 
         gpio::chip_info info;
-        info.is_valid = false;
 
         fd_t fd = open(_path, O_RDONLY);
         diag_base::expect(suborigin, fd >= 0, 0x106c1, "fd >= 0");
@@ -113,7 +97,6 @@ namespace abc { namespace gpio {
         close(fd);
         diag_base::expect(suborigin, stat >= 0, 0x106c2, "stat >= 0");
 
-        info.is_valid = true;
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106c3, "End:");
 
         return info;
@@ -125,7 +108,6 @@ namespace abc { namespace gpio {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106c4, "Begin: pos=%u", pos);
 
         gpio::line_info info;
-        info.is_valid = false;
 #if ((__ABC__GPIO_VER) == 2)
         info.offset = pos;
 #else
@@ -139,7 +121,6 @@ namespace abc { namespace gpio {
         close(fd);
         diag_base::expect(suborigin, stat >= 0, 0x106c6, "stat >= 0");
 
-        info.is_valid = true;
         diag_base::put_any(suborigin, diag::severity::callstack, 0x106c7, "End:");
 
         return info;

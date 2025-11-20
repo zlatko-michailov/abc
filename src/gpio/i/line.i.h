@@ -55,15 +55,6 @@ namespace abc { namespace gpio {
 
     public:
         /**
-         * @brief       Constructor.
-         * @param chip  Pointer to the owning `chip` instance.
-         * @param pos   Chip-specific line position.
-         * @param flags Line flags.
-         * @param log   `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        //// TODO: REMOVE? line(const chip* chip, line_pos_t pos, line_flags_t flags, diag::log_ostream* log = nullptr);
-
-        /**
          * @brief Move constructor.
          */
         line(line&& other) noexcept = default;

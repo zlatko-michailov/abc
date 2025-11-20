@@ -35,45 +35,6 @@ SOFTWARE.
 namespace abc { namespace gpio {
 
     /**
-     * @brief Wrapper around the corresponding Linux kernel struct.
-     */
-    struct chip_info
-        : public chip_info_base {
-
-        /**
-         * @brief Constructor. Zeroes out the base struct.
-         */
-        chip_info() noexcept;
-
-        /**
-         * @brief Flag whether the struct has been successfully populated.
-         */
-        bool is_valid; //// TODO: Remove, unused.
-    };
-
-
-    /**
-     * @brief Wrapper around the corresponding Linux kernel struct.
-     */
-    struct line_info
-        : public line_info_base {
-
-        /**
-         * @brief Constructor. Zeroes out the base struct.
-         */
-        line_info() noexcept;
-
-        /**
-         * @brief Flag whether the struct has been successfully populated.
-         */
-        bool is_valid; //// TODO: Remove, unused.
-    };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
      * @brief GPIO chip.
      */
     class chip

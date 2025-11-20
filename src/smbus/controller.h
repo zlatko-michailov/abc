@@ -364,19 +364,6 @@ namespace abc { namespace smbus {
     }
 
 
-    //// TODO: Remove
-    template <typename Arg>
-    inline int controller::safe_ioctl(int command, Arg arg) noexcept {
-        try {
-            std::lock_guard<concurrent::mutex> lock(_mutex);
-            return ioctl(_fd, command, arg);
-        }
-        catch (...) {
-            return ENOLCK;
-        }
-    }
-
-
     inline std::uint16_t controller::swap_bytes(std::uint16_t word) noexcept {
         std::uint16_t lo = word & 0x00ff;
         std::uint16_t hi = (word >> 8) & 0x00ff;

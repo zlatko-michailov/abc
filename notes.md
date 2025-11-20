@@ -25,9 +25,6 @@
     - `adc`
 
 ## To Do
-- Sample picar_4wd
-    - BUG: Controller must be locked around `put_` + `get_`, e.g. `controller::mutex()`
-- Address `//// TODO:`.
 - Update docs when all classes are done.
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.

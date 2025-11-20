@@ -205,15 +205,6 @@ namespace abc { namespace smbus {
         template <typename Arg>
         void ensure_ioctl(int command, Arg arg, diag::tag_t tag);
 
-        /**
-         * @brief      Calls `ioctl()` while a mutex is being acquired.
-         * @tparam Arg Argument type.
-         * @param arg  Argument value. 
-         * @return     The return value from `ioctl()`.
-         */
-        template <typename Arg>
-        int safe_ioctl(int command, Arg arg) noexcept;
-
     private:
         /**
          * @brief      Swap the bytes of a word.

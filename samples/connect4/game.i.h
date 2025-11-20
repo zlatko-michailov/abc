@@ -87,12 +87,10 @@ struct start_page_layout {
 // --------------------------------------------------------------
 
 
-////using vmem_pool = abc::vmem_pool;
-////using vmem_page = abc::vmem_page<vmem_pool, log_ostream>;
 using state_scores_map = abc::vmem::map<board_state_t, scores>;
 
 
-struct vmem_bundle { //// TODO: knowledge_base?
+struct vmem_bundle {
     vmem_bundle(abc::vmem::pool_config&& pool_config, abc::diag::log_ostream* log);
 
     std::mutex              mutex;

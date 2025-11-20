@@ -544,7 +544,7 @@ void measure_speed(const abc::gpio::chip& chip, abc::diag::log_ostream& log) {
     std::size_t grand_total_count_rear_left  = 0;
     std::size_t grand_total_count_rear_right = 0;
 
-    const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100 }; ////{ 25, 50, 75, 100, 75, 50, 25 };
+    const abc::smbus::pwm_duty_cycle_t duty_cycles[] = { 25, 50, 75, 100, 75, 50, 25 };
     for (const abc::smbus::pwm_duty_cycle_t duty_cycle : duty_cycles) {
         const abc::smbus::pwm_duty_cycle_t duty_cycle_rear_left  = duty_cycle;
         const abc::smbus::pwm_duty_cycle_t duty_cycle_rear_right = duty_cycle;

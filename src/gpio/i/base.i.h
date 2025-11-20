@@ -68,10 +68,10 @@ namespace abc { namespace gpio {
     constexpr std::size_t max_consumer = GPIO_MAX_NAME_SIZE;
 
 
-    using chip_info_base = gpiochip_info;
-    using line_info_base = gpio_v2_line_info;
-    using line_request   = gpio_v2_line_request;
-    using line_values    = gpio_v2_line_values;
+    using chip_info    = gpiochip_info;
+    using line_info    = gpio_v2_line_info;
+    using line_request = gpio_v2_line_request;
+    using line_values  = gpio_v2_line_values;
     
 
     using ioctl_t = unsigned long;
@@ -116,10 +116,10 @@ namespace abc { namespace gpio {
     constexpr std::size_t max_consumer = 32;
 
 
-    using chip_info_base = gpiochip_info;
-    using line_info_base = gpioline_info;
-    using line_request   = gpiohandle_request;
-    using line_values    = gpiohandle_data;
+    using chip_info    = gpiochip_info;
+    using line_info    = gpioline_info;
+    using line_request = gpiohandle_request;
+    using line_values  = gpiohandle_data;
 
 
     using ioctl_t = unsigned long;

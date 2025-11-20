@@ -169,10 +169,7 @@ inline void board::clear_move(const move& move) {
 
 
 inline bool board::has_move(player_id_t player_id, const move& move) const {
-    //// TODO: board_state_t bits = shift_up(player_id, move);
-    //// TODO: board_state_t mask = shift_up(player_id::mask, move);
-    //// TODO: return (_board_state & mask) == bits;
-    return shift_down(move) == player_id;
+    return (shift_down(move) & player_id::mask) == player_id;
 }
 
 
