@@ -9,13 +9,11 @@ Up to [Documentation](../README.md).
 `abc` doesn't compete with `std`.
 
 While certain `std` concepts may not be perfect, it is better to wait for the C++ community to evolve that concept than to release some competing functionality that is likely to become obsolete.
-An example of this is `std::future` - the only async token that is not continuable.
+An example of this is `std::future` - the only async token in the industry that is not continuable.
 
 ## Exceptions
-`abc` is exception-neutral.
+`abc` methods throw exceptions.
 
-In general, an `abc` method that calls into a potentially throwing `std` method doesn't catch exceptions, and is also potentially throwing.
-An exception to this principle are the `abc::line_ostream:put_*` methods - they catch any exception that may come from the underlying `std` calls, because a program developer should not worry about exceptions coming from diagnostic logging.
+That is because `std` methods in general throw exceptions, and therefore a C++ program should be ready to deal with exceptions.
 
-`abc` methods may throw exceptions on their own.
-Most of those exception represent program logic errors that the program developer must address.
+`abc` uses a small exception class hierarchy, which makes it easy for programs to catch `abc` exceptions separately from other exceptions.
