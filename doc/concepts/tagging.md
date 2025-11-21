@@ -2,7 +2,7 @@
 
 Up to [Documentation](../README.md).
 
-Tags are unique unsigned integers that are used to correlate a log entry with the place in the code where it was created.
+Tags are unique unsigned integers that are used to correlate a log entry with the place in the code where it originates from.
 
 During development, pass in the `__TAG__` sentinel wherever an API needs a `tag_t` value.
 Commit your changes with that sentinel.
