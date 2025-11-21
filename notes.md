@@ -28,6 +28,8 @@
 - Update docs when all classes are done.
 - Update doc/ref/*.md for all classes that have been done.
 - Link the internal docs.
+- `makefile` - v2.0.0
+- Tag
 - __Rename `master` to `main`.__
 
 - Namespace `vmem`
