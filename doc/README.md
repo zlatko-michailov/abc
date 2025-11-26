@@ -14,7 +14,7 @@ Provide the title and the link to the page along with as much information as you
   - [Diagnostics](concepts/diagnostics.md)
   - [HTTP Endpoint](concepts/endpoint.md)
   - [Virtual Memory](concepts/vmem.md)
-  - [GPIO](concepts/gpio.md)
+  - [GPIO and SMBus (I2C)](concepts/gpio.md)
 - Getting Started
   - [Dependencies](start/dependencies.md)
   - [Clone and Build the Repo](start/clone_and_build.md)
