@@ -23,8 +23,8 @@
 # SOFTWARE.
 
 
-sudo chmod g+rw,o+rw /dev/gpiochip0
+sudo chmod g+rw,o+rw /dev/gpiochip*
 ls -al /dev/gpiochip*
 
-sudo chmod g+rw,o+rw /dev/i2c-1
+sudo chmod g+rw,o+rw /dev/i2c-*
 ls -al /dev/i2c-*
