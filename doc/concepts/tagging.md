@@ -13,4 +13,4 @@ While that second step can be done at any time, it should be done in a designate
 The reason for that is to avoid collisions in `bin/tag.conf`.
 A collision would lead to duplicate tag values.
 
-To run `bin\tag.sh` there must be no uncommitted changes.
+To run `bin/tag.sh` there must be no uncommitted changes.

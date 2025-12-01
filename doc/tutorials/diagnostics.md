@@ -6,52 +6,74 @@ Up to [Documentation](../README.md).
 >- [Diagnostics](../concepts/diagnostics.md)
 >- [Tagging](../concepts/tagging.md)
 
-## Creating a `log_filter` and a `log_ostream`
-The `log_ostream` instance must be constructed before and destroyed after any class instance that uses it.
-The `log_filter` instance must be constructed before and destroyed after the `log_ostream` instance.
-Therefore, planning the lifetime of these two instances is important.
+## Creating a `log_ostream`
+The `log_ostream` instance sits at the top of a stack of instances.
+> All of those instances must be constructed before and destroyed after any class instance that uses it.
 
-Since our sample projects are small, and we have access to the `main()` function, we can use local variables on `main()`'s stack.
+It is up to each program to decide how to make that happen.
+Our sample projects are small, and we have access to the `main()` function.
+So, we can use local variables on `main()`'s stack.
 In larger projects, you may have to allocate these two instances on the heap, and assign them to global variables.
+You may also consider using `std::shared_ptr` to automate the lifespan management.
 
-We must construct the `log_filter` instance first.
-That is simple - all we have to pass in is a severity level.
-We can always adjust that if we decide we need more or less log entries:
-``` c++
-// Allow entries of severity 'important' or higher from all components.
-abc::diag::str_log_filter<const char*> filter("myns::", abc::diag::severity::important);
+### `std::streambuf`
+At the very bottom, there is a plain `std::strambuf`.
+This allows for logging to be easily redirected with only changing this parameter.
+
+See [Media and Streams](../concepts/media_and_streams.md) for what `std::streambuf` implementations `abc` provides.
+If you don't find the `std::streambuf` over the medium you need, look at the implementations above, and do your own.
+
+### `abc::stream::table_ostream`
+A log is a table - a sequence of lines that get pushed through the `std::streambuf`.
+
+```c++
+abc::stream::table_ostream table(std::cout.rdbuf());
 ```
 
-To construct the `log_ostream` instance, we must pick a `line_ostream` format, and we have to pass in two other instances - a `streambuf` and a `log_filter`.
+### `abc::diag::log_line_ostream`
+Each log entry is a line that get formatted in a chosen way, and gets appended to the `abc::stream::table_ostream`.
+See [Diagnostics](../concepts/diagnostics.md) for what formatting options `abc` provides.
+Feel free to implement your own `abc::stream::table_ostream` override, if you don't find one with the desired formatting.
 
-Let's pick `debug_line_ostream` as a line format.
-To simplify our type definitions, we can define this shortcut:
-``` c++
-using log_ostream = abc::diag::log_ostream<abc::debug_line_ostream<>>;
+```c++
+abc::diag::debug_line_ostream<> line(&table);
 ```
 
-We already have a `log_filter`.
-We need to choose a `streambuf`.
+### `abc::diag::log_filter`
+The purpose of the filter is to eliminate "noise" entries to make it easier to find the important one.
+`abc` provides only one override - `abc::diag::str_log_filter`, which allows entries with a matching origin and equal or higher severity to pass.
 
-The simplest `streambuf` we can get is the console, i.e. the one that `cout` writes to:
-``` c++
-// Write to the console.
-log_ostream log(std::cout.rdbuf(), &filter);
+```c++
+abc::diag::str_log_filter<const char*> filter("my_namespace::", abc::diag::severity::important);
 ```
 
-The console is easy to start with, but in production, there is nobody to look at it.
-In that case, it is recommended to use either `duration_multifile_streambuf` or `size_multifile_streambuf`.
-Both represent a file.
-The former starts a new file when the given size is reached, while the latter starts a new file when the given duration has expired.
+### `abc::diag::log_ostream`
+The `abc::diag::log_ostream` is the tip of the stack.
+When it gets called, it first checks the filter.
+If the entry passes the filter, it is sent to the `abc::diag::log_line_ostream`, which formats it, and sends it to the `abc::stream::table_ostream` it is linked to.
 
-To use a `size_multifile_streambuf`:
-``` c++
-// We assume 'path' is a local variable that contains the path from where the program is running.
+```c++
+abc::diag::log_ostream log(&line, &filter);
+```
 
-// Create files limited to 16KB each.
-abc::size_multifile_streambuf sb(abc::size::k16, path);
-log_ostream log(&sb, &filter);
-``` 
+### Putting It All Together
+The simplest `std::streambuf` we can get is the console, i.e. the one that `std::cout` writes to.
+As the example above shows, it is easy to start with, but in production, there is nobody to look at the console.
+In that case, it is recommended to use either `abc::stream::duration_multifile_streambuf` or `abc::stream::size_multifile_streambuf`.
+Both output to files.
+The former starts a new file when the given duration has expired, while the latter starts a new file when the given size has been reached.
+
+For the same of this tutorial, we will use `abc::stream::size_multifile_streambuf`.
+We assume that `log_path` is a local variable that contains the path to a folder where we want the log files to be stored.
+We will create log files limited to 16KB each.
+
+```c++
+abc::stream::size_multifile_streambuf sb(abc::size::k16, path);
+abc::stream::table_ostream table(&sb);
+abc::diag::debug_line_ostream<> line(&table);
+abc::diag::str_log_filter<const char*> filter("my_namespace::", abc::diag::severity::important);
+abc::diag::log_ostream log(&line, &filter);
+```
 
 ## Logging
 Log a lot.
@@ -60,28 +82,46 @@ Log everywhere execution branches.
 
 The cost of each log entry is the cost of an `if` statement.
 The value may be priceless.
-You can always filter entries in or out, but you can get entries unless you logged them.
+You can always filter entries in or out, but you cannot get entries unless you logged them.
 
-``` c++
-log->put_any("pkg::cls", "method()", abc::diag::severity::optional, __TAG__, "REST: Sending status=%s", status);
+Prior to version 2.0, the `abc::diag::log_ostream` had to be used directly.
+That is still possible, but it is not recommended.
+
+Since version 2.0, the recommended way is to derive from `abc::diag::diag_ready`, which is a thin wrapper around `abc::diag::log_ostream` that keeps the full name of the current class as _origin_.
+Then, each method should only pass in its own name as _suborigin_ along with the rest of the logging attributes.
+
+It is recommended to log _callstack_ entries from non-trivial method that mark the begin and end of the method:
+```c++
+constexpr const char* suborigin = "my_method()";
+diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+...
+
+diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 ```
 
-### Choosing a Category
-The category of a log entry is a factor you can use to filter out entries.
-The value is an integer of type `severity_t` between `0` and `severity::abc - 1`.
-It is up to you to decide what constitutes a category - a single class, a part of a class, or several classes.
+If your program needs to throw an exception, it is recommended to do that through the `abc::diag::diag_ready` base, which will log the exception before throwing it, that will contain a unique _tag_ to identify the point of origin.
+
+### SAL
+The program's code will be cleaner if you use the SAL methods instead of throwing exceptions directly:
+- `expect()` - potentially throws an exception that derives from `std::logic_error`.
+This method could be called to check state at method begin or to check results from calls. 
+- `ensure()` - potentially throws an exception that derives from `std::logic_error`.
+This method could be called to check state at method end.
+- `assert()` - potentially throws an exception that derives from `std::logic_error`.
+This method could be called in cases where neither `expect()` nor `ensure()` fit (although such cases should not exist).
+- `require()` - potentially throws `std::runtime_error` or a custom exception (that preferably derives from `std::runtime_error`.)
+While the previous methods represent static code checks, this one represents a runtime check.
 
 ### Choosing a Severity
-Severity is also an integer, but the set of allowed values is very small and already defined.
+Severity is an integer, but the set of allowed values is very small and already defined.
 
-Filtering log entries by severity is very useful when investigating an issue - start with a value of `severity::critical` and lower it until you find the thread where the issue occurred.
-So spend some time to devise a severity strategy, and stick to it throughout your program.
+Choose severities wisely when you log.
+Otherwise, filtering by severity may not be effective.
 
 ### Tagging
-The tag is not another factor - it is rather the combination of all the other factors.
-It is rarely used to search for, unless you want to verify a particular hypothesis.
-The tag is primarily used to locate the place in the codebase where a given entry was logged.
+The tag is used to locate the place in the codebase where a given log entry originates from.
 
 When you log entries, always pass in the `__TAG__` sentinel.
 
-Follow the guidance from the [Tagging](../concepts/tagging.md) conceptual page to convert the `__TAG__` sentinels into unique tags.
+Follow the guidance from [Tagging](../concepts/tagging.md) to convert the `__TAG__` sentinels into unique tags.

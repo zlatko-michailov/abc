@@ -32,10 +32,15 @@
 - Tag
 - __Rename `master` to `main`.__
 
-- Namespace `vmem`
+- Namespace `vmem`:
+  - `array`
+  - `mutidim_array`
   - `blob`
 
-- Namespace `ai`.
+- ? Namespace `math`:
+  - `mmul(matrix, vector)`
+
+- Namespace `ai`:
   - `mcp`
   - `neural_net`
 
@@ -45,17 +50,7 @@
     - exceptions
     - severities
     - filters
-- sub-namespaces
-- spaces
 - doxygen comment alignment
-- copy src and samples to boneyard
-- log severities
-- exceptions!
-- assert (sal)
-- enum class
-- std classes
-- LogPtr template parameters
-- clang
 
 ## Pick List
 - drive
