@@ -15,11 +15,11 @@ Using this mechanism, you can skip the HTML, and implement a command line interf
 Since both GUI and REST require processing of HTTP requests, they are coupled together into the `abc::net::http::endpoint` class.
 Thus, enabling GUI and REST boils down to standing up an HTTP endpoint.
 
-## Creating an `abc::diag::log_ostream`
+## Create an `abc::diag::log_ostream`
 It is strongly recommended to pass in an `abc::diag::log_ostream` to the `abc::net::http::endpoint`.
 Visit the [How to Log Diagnostics](diagnostics.md) tutorial if needed.
 
-## Creating an `abc::net::http::endpoint_config`
+## Create an `abc::net::http::endpoint_config`
 An `abc::net::http::endpoint` could be configured by quite a few parameters, and more may be added in future.
 All of those parameters are bundled in a class - `abc::net::http::endpoint_config`.
 
@@ -57,13 +57,13 @@ abc::net::http::endpoint_config config(
 );
 ```
 
-## Deriving Your Own Class from `abc::net::http::endpoint`
+## Derive Your Own Class from `abc::net::http::endpoint`
 `abc::net::http::endpoint` is flexible - it allows for quite a few methods to be overridden.
 However, you may be able to get away with overriding just `process_rest_request()`.
 
 See [equations.h](../../samples/basic/equations.h) from Basic Sample for how to override `abc::net::http::endpoint`.
 
-## Creating an Endpoint
+## Create an Endpoint
 Now that you have everything, constructing your endpoint is simple:
 ```c++
 // Create a log.
@@ -71,6 +71,14 @@ abc::stream::table_ostream table(std::cout.rdbuf());
 abc::diag::debug_line_ostream<> line(&table);
 abc::diag::str_log_filter<const char *> filter("", abc::diag::severity::important);
 abc::diag::log_ostream log(&line, &filter);
+
+// Create an endpoint config.
+abc::net::http::endpoint_config config(
+    "30301",       // port
+    5,             // listen_queue_size
+    path,          // root_dir (Note: No trailing slash!)
+    "/resources/"  // files_prefix
+);
 
 // Create an endpoint.
 your_endpoint endpoint(std::move(config), &log);
