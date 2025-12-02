@@ -20,10 +20,10 @@ Whether you have cloned and built the repo, or whether you have just read the co
 ### Filing
 When you file an issue, keep in mind that the issue must contain enough information so that it can be reproduced, categorized, and ultimately - triaged.
 
-Each issue should fall in one of three categories - _bugs_, _enhancements_, or _questions_.
-A bug is a discrepancy between the intent and the implementation of a released feature.
-An enhancement is a missing or suboptimal functionality.
-And a question is a request for information (which may eventually become a documentation enhancement).
+Each issue should fall in one of three categories:
+- __Bug__ - discrepancy between the intent and the implementation of a released feature.
+- __Enhancement__ - missing or suboptimal functionality.
+- __Question__ - request for information (which may eventually become a documentation enhancement).
 
 To report a bug, consider the following template:
 ```
@@ -51,17 +51,17 @@ For questions, feel encouraged to provide as much context as you are willing to 
 
 ### Triage
 The first step of the triage process is reproducing the issue.
-Be prepared to make your case.
+Make your case.
 
-If the issue is reproducible, it will be labeled with one of the three labels referenced above - bug, enhancement, or question.
+If the issue is reproducible, it will be labeled with one of the three labels referenced above - __bug__, __enhancement__, or __question__.
 Otherwise, it will be closed.
 
-If the issue is accepted, but there are more important issues to be addressed in the near future, the issue will be also be labeled with "help needed".
+If the issue is accepted, but there are more important issues to be addressed in the near future, the issue will also be labeled with "__help needed__".
 Such issued are up for grabs.
 
 ## Pull Requests
 ### Proposal
-Make sure there is an issue that is labeled with "help needed".
+Make sure there is an issue that is labeled with "__help needed__".
 
 Briefly propose a solution in a comment, and wait until it is approved.
 This may take a few comments back and forth.
@@ -79,7 +79,7 @@ Develop on top of that branch.
 #### Style
 Figure out the style by looking at existing code.
 Keep the code consistent.
-If still in doubt, ask for guidance in a comment to the issue.
+If still in doubt, ask for guidance in a comment on the issue.
 
 #### Comments
 In samples, be very generous with comments.
@@ -87,7 +87,7 @@ In the product, if something needs commenting, think how you can make the code m
 
 #### Tests
 Add sufficient tests, and make sure all tests (not just the new ones) pass consistently.
-If you changed the severity of the test `log_filter`, revert it back to `critical`.
+If you changed the severity level of the test `log_filter`, revert it back to `critical`.
 
 #### Pull Request
 Follow GitHub's instructions to [Create a pull request from a fork](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).
