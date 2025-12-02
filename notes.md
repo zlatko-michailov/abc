@@ -33,8 +33,9 @@
 - __Rename `master` to `main`.__
 
 - Namespace `vmem`:
+  - `zip_iterator`
   - `array`
-  - `mutidim_array`
+  - `mutidim_array` (or `matrix`)
   - `blob`
 
 - ? Namespace `math`:
