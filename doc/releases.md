@@ -2,6 +2,47 @@
 
 Up to [Documentation](README.md).
 
+## 2.0.0
+### IMPORTANT
+> Version 2.0 is a full rewrite of `abc` to improve usability and integration with the `std` library.
+
+While all classes and their public methods have remained semantically the same, migration from previous versions should be done carefully.
+Newly added classes should be considered.
+
+### Retrospection
+Originally, `abc` had a strong premise of not throwing exceptions.
+That led to not allocating heap memory, which could potentially throw.
+Because of that, methods that needed memory required buffers from the caller.
+The caller had to estimate the size of each buffer, had to allocate it, and had to dispose of it, which was far from a smooth experience.
+This premise prevented integration with the `std` library where most classes allocate heap memory and eventually throw exceptions.
+
+Another usability spoiler was the `Log` template parameter.
+This was done to automate the lifecycle management of the `log_ostream` instance - the caller could choose whether to use raw pointers or smart pointers.
+Unfortunately, this led to overly complicated class and method signatures.
+Since each class had its own `Log` template parameter, when class `A` referenced class `B`, class `B` had to become a template parameter of class `A`.
+
+### Exceptions
+The first step was to embrace exceptions.
+That opened the door for using `std` containers internally instead of asking the user to provide a buffer.
+
+### `log_ostream`
+As most `std` APIs do, `abc` classes take a raw pointer whenever a reference is needed, including `log_ostream` references.
+It is up to the caller to manage the lifecycle of those instances.
+
+### SAL via `diag_ready`
+Another benefit of embracing exceptions is that simple SAL checks could be used instead without complicating the codebase.
+Also, `abc` implemented a consistent pattern of __callstack__ logging. 
+
+### Subnamespaces
+`std` is not very liberal with namespaces, and `abc` tried to follow that path.
+However, the header and class names had unnecessary prefixes.
+This rewrite was taken as an opportunity to move the components into subfolders and subnamespaces respectively.
+
+### Stream Readers and Writes
+Working with streams directly requires the caller to know the protocol/format of the stream, which takes effort and is prone to errors. 
+Therefore, the concepts of Stream Readers and Writers were implemented for `http` and `json`.
+That came with tangible structs like `http::request`, `http::response`, and `json::value`.
+
 ## 1.20.0
 - Theme
   - `vmem_string`.
