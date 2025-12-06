@@ -36,7 +36,7 @@ Provide the title and the link to the page along with as much information as you
 - [ascii](ref/ascii.md)
 - [timestamp](ref/timestamp.md)
 - [util](ref/util.md)
--
+
 ### Namespace `abc::stream`
 
 - [buffer_streambuf](ref/buffer_streambuf.md)
