@@ -2,29 +2,29 @@
 
 Up to [Documentation](README.md).
 
-> ATTENTION!  
-> The next release will be a complete rewrite.
-> Classes will start using `std` facilities as necessary, which may lead to dynamic memory allocation.
-> Methods will no longer return status codes.
-> Exceptions will be thrown when an operation cannot be performed.
+What is currently on the radar is __deep learning__.
+More specifically - __inference on nano devices__.
 
-## 2.0.0
-- Nested namespaces.
-- Throw exceptions. Return results, not status codes.
-- Use `std` facilities. Allocate heap memory if necessary.
-- Improve logging and filtering.
-- Improve usability for `http` and `json`.
-- Implement basic SAL - at least `assert()`.
+That is likely to require additions to `vmem` and `concurrent`.
 
 ## 2.1.0
-- Async continuations.
+- `vmem`:
+  - `zip_iterator`
+  - `array`
+  - `matrix`
 
 ## 2.2.0
-- Self-driving - shapes of obstacles
+- `concurrent`
+  - `async()`
+  - `future.then()`
 
 ## Pick List
-- Untabify
-- `vmem_pool`:
+- `concurrent`
+  - Async continuations.
+- Self-driving
+  - Reliable speed and location tracking.
+  - Shapes of obstacles.
+- `vmem::pool`:
   - `check`
   - `repair`
   - `rebuild`
