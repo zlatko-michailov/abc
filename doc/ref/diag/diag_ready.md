@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [diag/diag_ready.h](../../src/diag/diag_ready.h)
-Interface        | [diag/i/diag_ready.i.h](../../src/diag/i/diag_ready.i.h)
+Include          | [diag/diag_ready.h](../../../src/diag/diag_ready.h)
+Interface        | [diag/i/diag_ready.i.h](../../../src/diag/i/diag_ready.i.h)
 Tests / Examples | n/a
 
 `diag_ready` is a convenience accessor to logging facilities.

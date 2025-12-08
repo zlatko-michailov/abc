@@ -53,17 +53,16 @@ Provide the title and the link to the page along with as much information as you
 
 ### Namespace `abc::diag`
 
-- [log_ostream](ref/log.md)
-- [log_line_ostream](ref/log.md)
-- [debug_line_ostream](ref/log.md)
-- [diag_line_ostream](ref/log.md)
-- [test_line_ostream](ref/log.md)
+- [log_ostream](ref/diag/log.md)
+- [log_line_ostream](ref/diag/log.md)
+- [debug_line_ostream](ref/diag/log.md)
+- [diag_line_ostream](ref/diag/log.md)
+- [test_line_ostream](ref/diag/log.md)
+- [log_filter](ref/diag/log.md)
 -
-- [log_filter](ref/log.md)
+- [exception](ref/diag/exception.md)
 -
-- [exception](ref/exception.md)
--
-- [diag_ready](ref/diag_ready.md)
+- [diag_ready](ref/diag/diag_ready.md)
 
 ### Namespace `abc::net::http`
 

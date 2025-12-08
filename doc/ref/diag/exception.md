@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [diag/exception.h](../../src/diag/exception.h)
-Interface        | [diag/i/exception.h](../../src/diag/i/exception.i.h)
+Include          | [diag/exception.h](../../../src/diag/exception.h)
+Interface        | [diag/i/exception.h](../../../src/diag/i/exception.i.h)
 Tests / Examples | n/a
 
 `exception` is a thin wrapper around any exception type.
@@ -19,3 +19,8 @@ Represents a general assert failure.
 Represents an "expect" (input state) assert failure.
 - `ensure_error` - derives from `assert_error`.
 Represents an "ensure" (output state) assert failure.
+
+Static analysis exception types should not be used for bad input.
+Exception types that derive from `std::runtime_error` should be used:
+- `input_error` - derives from `std::runtime_error`.
+Represents a transient failure.
