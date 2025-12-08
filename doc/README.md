@@ -97,32 +97,23 @@ Provide the title and the link to the page along with as much information as you
 - [istream](ref/net/json.md)
 - [ostream](ref/net/json.md)
 
-### Namespace `abc::net`
-- [socket_streambuf](ref/net/socket.md)
--
-- [udp_socket](ref/net/socket.md)
-- [tcp_server_socket](ref/net/socket.md)
-- [tcp_client_socket](ref/net/socket.md)
-- [openssl_tcp_server_socket](ref/net/openssl_socket.md)
-- [openssl_tcp_client_socket](ref/net/openssl_socket.md)
--
-- [endpoint](ref/net/endpoint.md)
+### Namespace `abc::gpio`
+- [chip](ref/gpio/gpio.md)
+- [line](ref/gpio/gpio.md)
+- [pwm_emulator](ref/gpio/gpio.md)
+
+### Namespace `abc::smbus`
+- [gpio_smbus](ref/gpio.md)
+- [gpio_smbus_target](ref/gpio.md)
+- [gpio_smbus_pwm](ref/gpio.md)
+- [gpio_smbus_motor](ref/gpio.md)
+- [gpio_smbus_servo](ref/gpio.md)
+- [gpio_smbus_ultrasonic](ref/gpio.md)
+- [gpio_smbus_grayscale](ref/gpio.md)
+- [gpio_smbus_motion](ref/gpio.md)
+- [gpio_smbus_motion_tracker](ref/gpio.md)
 
 xxx
-
-- [gpio](ref/gpio.md)
-  - [chip](ref/gpio.md)
-  - [gpio_line](ref/gpio.md)
-  - [gpio_pwm_emulator](ref/gpio.md)
-  - [gpio_smbus](ref/gpio.md)
-  - [gpio_smbus_target](ref/gpio.md)
-  - [gpio_smbus_pwm](ref/gpio.md)
-  - [gpio_smbus_motor](ref/gpio.md)
-  - [gpio_smbus_servo](ref/gpio.md)
-  - [gpio_smbus_ultrasonic](ref/gpio.md)
-  - [gpio_smbus_grayscale](ref/gpio.md)
-  - [gpio_smbus_motion](ref/gpio.md)
-  - [gpio_smbus_motion_tracker](ref/gpio.md)
 - [test](ref/test.md)
 - [vmem](ref/vmem.md)
   - [vmem_pool](ref/vmem.md)
