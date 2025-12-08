@@ -31,33 +31,30 @@ Provide the title and the link to the page along with as much information as you
 
 ## Class Reference
 ### Namespace `abc`
-
 - [size](ref/root/size.md)
 - [ascii](ref/root/ascii.md)
 - [timestamp](ref/root/timestamp.md)
 - [util](ref/root/util.md)
 
 ### Namespace `abc::stream`
-
 - [buffer_streambuf](ref/stream/buffer_streambuf.md)
 - [vector_streambuf](ref/stream/vector_streambuf.md)
 - [multifile_streambuf](ref/stream/multifile_streambuf.md)
-- [duration_multifile_streambuf](ref/stream/multifile_streambuf.md)
-- [size_multifile_streambuf](ref/stream/multifile_streambuf.md)
+  - [duration_multifile_streambuf](ref/stream/multifile_streambuf.md)
+  - [size_multifile_streambuf](ref/stream/multifile_streambuf.md)
 -
 - [stream](ref/stream/stream.md)
-- [istream](ref/stream/stream.md)
-- [ostream](ref/stream/stream.md)
-- [table_ostream](ref/stream/table_stream.md)
-- [line_ostream](ref/stream/table_stream.md)
+  - [istream](ref/stream/stream.md)
+  - [ostream](ref/stream/stream.md)
+    - [table_ostream](ref/stream/table_stream.md)
+    - [line_ostream](ref/stream/table_stream.md)
 
 ### Namespace `abc::diag`
-
 - [log_ostream](ref/diag/log.md)
 - [log_line_ostream](ref/diag/log.md)
-- [debug_line_ostream](ref/diag/log.md)
-- [diag_line_ostream](ref/diag/log.md)
-- [test_line_ostream](ref/diag/log.md)
+  - [debug_line_ostream](ref/diag/log.md)
+  - [diag_line_ostream](ref/diag/log.md)
+  - [test_line_ostream](ref/diag/log.md)
 - [log_filter](ref/diag/log.md)
 -
 - [exception](ref/diag/exception.md)
@@ -65,40 +62,37 @@ Provide the title and the link to the page along with as much information as you
 - [diag_ready](ref/diag/diag_ready.md)
 
 ### Namespace `abc::net::http`
-
-- [request_reader](ref/http.md)
-- [request_writer](ref/http.md)
-- [response_reader](ref/http.md)
-- [response_writer](ref/http.md)
+- [request_reader](ref/net/http.md)
+- [request_writer](ref/net/http.md)
+- [response_reader](ref/net/http.md)
+- [response_writer](ref/net/http.md)
 -
-- [client](ref/http.md)
-- [server](ref/http.md)
+- [client](ref/net/http.md)
+- [server](ref/net/http.md)
 -
-- [request_istream](ref/http.md)
-- [request_ostream](ref/http.md)
-- [response_istream](ref/http.md)
-- [response_ostream](ref/http.md)
+- [request_istream](ref/net/http.md)
+- [request_ostream](ref/net/http.md)
+- [response_istream](ref/net/http.md)
+- [response_ostream](ref/net/http.md)
 
 ### Namespace `abc::net::json`
-
-- [value](ref/json.md)
+- [value](ref/net/json.md)
 -
-- [reader](ref/json.md)
-- [writer](ref/json.md)
+- [reader](ref/net/json.md)
+- [writer](ref/net/json.md)
 -
-- [istream](ref/json.md)
-- [ostream](ref/json.md)
+- [istream](ref/net/json.md)
+- [ostream](ref/net/json.md)
 
 ### Namespace `abc::net`
-
-- [sockets](ref/socket.md)
-  - [socket_streambuf](ref/socket.md)
-  - [udp_socket](ref/socket.md)
-  - [tcp_server_socket](ref/socket.md)
-  - [tcp_client_socket](ref/socket.md)
-  - [openssl_tcp_server_socket](ref/openssl_socket.md)
-  - [openssl_tcp_client_socket](ref/openssl_socket.md)
-- [endpoint](ref/endpoint.md)
+- [sockets](ref/net/socket.md)
+  - [socket_streambuf](ref/net/socket.md)
+  - [udp_socket](ref/net/socket.md)
+  - [tcp_server_socket](ref/net/socket.md)
+  - [tcp_client_socket](ref/net/socket.md)
+  - [openssl_tcp_server_socket](ref/net/openssl_socket.md)
+  - [openssl_tcp_client_socket](ref/net/openssl_socket.md)
+- [endpoint](ref/net/endpoint.md)
 
 
 

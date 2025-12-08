@@ -25,7 +25,6 @@
     - `adc`
 
 ## To Do
-- Update docs when all classes are done.
 - Update doc/ref/*.md for all classes that have been done.
 - `makefile` - v2.0.0
 - Tag
