@@ -39,16 +39,17 @@ Provide the title and the link to the page along with as much information as you
 
 ### Namespace `abc::stream`
 
-- [buffer_streambuf](ref/buffer_streambuf.md)
-- [multifile_streambuf](ref/multifile_streambuf.md)
-- [duration_multifile_streambuf](ref/multifile_streambuf.md)
-- [size_multifile_streambuf](ref/multifile_streambuf.md)
+- [buffer_streambuf](ref/stream/buffer_streambuf.md)
+- [vector_streambuf](ref/stream/vector_streambuf.md)
+- [multifile_streambuf](ref/stream/multifile_streambuf.md)
+- [duration_multifile_streambuf](ref/stream/multifile_streambuf.md)
+- [size_multifile_streambuf](ref/stream/multifile_streambuf.md)
 -
-- [stream](ref/stream.md)
-- [istream](ref/stream.md)
+- [stream](ref/stream/stream.md)
+- [istream](ref/stream/stream.md)
 - [ostream](ref/stream.md)
-- [table_ostream](ref/table_stream.md)
-- [line_ostream](ref/table_stream.md)
+- [table_ostream](ref/stream/table_stream.md)
+- [line_ostream](ref/stream/table_stream.md)
 
 ### Namespace `abc::diag`
 
@@ -57,6 +58,8 @@ Provide the title and the link to the page along with as much information as you
 - [debug_line_ostream](ref/log.md)
 - [diag_line_ostream](ref/log.md)
 - [test_line_ostream](ref/log.md)
+-
+- [log_filter](ref/log.md)
 -
 - [exception](ref/exception.md)
 -
