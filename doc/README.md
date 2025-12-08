@@ -100,18 +100,19 @@ Provide the title and the link to the page along with as much information as you
 ### Namespace `abc::gpio`
 - [chip](ref/gpio/gpio.md)
 - [line](ref/gpio/gpio.md)
+- [ultrasonic](ref/gpio/gpio.md)
 - [pwm_emulator](ref/gpio/gpio.md)
 
 ### Namespace `abc::smbus`
-- [gpio_smbus](ref/gpio.md)
-- [gpio_smbus_target](ref/gpio.md)
-- [gpio_smbus_pwm](ref/gpio.md)
-- [gpio_smbus_motor](ref/gpio.md)
-- [gpio_smbus_servo](ref/gpio.md)
-- [gpio_smbus_ultrasonic](ref/gpio.md)
-- [gpio_smbus_grayscale](ref/gpio.md)
-- [gpio_smbus_motion](ref/gpio.md)
-- [gpio_smbus_motion_tracker](ref/gpio.md)
+- [controller](ref/smbus/smbus.md)
+- [target](ref/smbus/smbus.md)
+- [pwm](ref/smbus/smbus.md)
+- [motor](ref/smbus/smbus.md)
+- [servo](ref/smbus/smbus.md)
+- [adc](ref/smbus/smbus.md)
+- [grayscale](ref/smbus/smbus.md)
+- [motion](ref/smbus/smbus.md)
+- [motion_tracker](ref/smbus/smbus.md)
 
 xxx
 - [test](ref/test.md)
