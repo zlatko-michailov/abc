@@ -32,10 +32,10 @@ Provide the title and the link to the page along with as much information as you
 ## Class Reference
 ### Namespace `abc`
 
-- [size](ref/size.md)
-- [ascii](ref/ascii.md)
-- [timestamp](ref/timestamp.md)
-- [util](ref/util.md)
+- [size](ref/root/size.md)
+- [ascii](ref/root/ascii.md)
+- [timestamp](ref/root/timestamp.md)
+- [util](ref/root/util.md)
 
 ### Namespace `abc::stream`
 
