@@ -97,6 +97,14 @@ Provide the title and the link to the page along with as much information as you
 - [istream](ref/net/json.md)
 - [ostream](ref/net/json.md)
 
+### Namespace `abc::vmem`
+- [pool](ref/vmem/vmem.md)
+- [page](ref/vmem/vmem.md)
+- [ptr](ref/vmem/vmem.md)
+- [list](ref/vmem/vmem.md)
+- [map](ref/vmem/vmem.md)
+- [string](ref/vmem/vmem.md)
+
 ### Namespace `abc::gpio`
 - [chip](ref/gpio/gpio.md)
 - [line](ref/gpio/gpio.md)
@@ -114,10 +122,5 @@ Provide the title and the link to the page along with as much information as you
 - [motion](ref/smbus/smbus.md)
 - [motion_tracker](ref/smbus/smbus.md)
 
-xxx
-- [test](ref/test.md)
-- [vmem](ref/vmem.md)
-  - [vmem_pool](ref/vmem.md)
-  - [vmem_page](ref/vmem.md)
-  - [vmem_ptr](ref/vmem.md)
-  - [vmem_list](ref/vmem.md)
+### Namespace `abc::test`
+- [test](ref/test/test.md)
