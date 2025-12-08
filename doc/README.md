@@ -47,7 +47,7 @@ Provide the title and the link to the page along with as much information as you
 -
 - [stream](ref/stream/stream.md)
 - [istream](ref/stream/stream.md)
-- [ostream](ref/stream.md)
+- [ostream](ref/stream/stream.md)
 - [table_ostream](ref/stream/table_stream.md)
 - [line_ostream](ref/stream/table_stream.md)
 

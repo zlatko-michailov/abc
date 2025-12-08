@@ -4,9 +4,9 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [stream/multifile_streambuf.h](../../src/stream/multifile_streambuf.h)
-Interface        | [stream/i/multifile_streambuf.i.h](../../src/stream/i/multifile_streambuf.i.h)
-Tests / Examples | n/a
+Include          | [stream/multifile_streambuf.h](../../../src/stream/multifile_streambuf.h)
+Interface        | [stream/i/multifile_streambuf.i.h](../../../src/stream/i/multifile_streambuf.i.h)
+Tests / Examples | [test/multifile_streambuf.cpp](../../../test/multifile_streambuf.cpp)
 
 `multifile_streambuf` is a specialization of `std::filebuf`.
 It is the base class that implements writing to a sequence of files.

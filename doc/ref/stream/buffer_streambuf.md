@@ -4,11 +4,11 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [stream/buffer_streambuf.h](../../src/stream/buffer_streambuf.h)
-Interface        | [stream/i/buffer_streambuf.h](../../src/stream/i/buffer_streambuf.i.h)
-Tests / Examples | [test/streambuf.cpp](../../test/streambuf.cpp)
+Include          | [stream/buffer_streambuf.h](../../../src/stream/buffer_streambuf.h)
+Interface        | [stream/i/buffer_streambuf.h](../../../src/stream/i/buffer_streambuf.i.h)
+Tests / Examples | [test/buffer_streambuf.cpp](../../../test/buffer_streambuf.cpp)
 
-This is a `std::streambuf` specialization that reads from and writes to a fixed `char` buffer.
+This is a `std::streambuf` specialization that reads from and writes to a `char` buffer of a fixed size.
 
 This class is heavily used for testing streams.
 

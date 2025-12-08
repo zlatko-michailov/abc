@@ -4,9 +4,9 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [stream/table_stream.h](../../src/stream/table_stream.h)
-Interface        | [stream/i/table_stream.i.h](../../src/stream/i/table_stream.i.h)
-Tests / Examples | [test/table_stream.cpp](../../test/table_stream.cpp)
+Include          | [stream/table_stream.h](../../../src/stream/table_stream.h)
+Interface        | [stream/i/table_stream.i.h](../../../src/stream/i/table_stream.i.h)
+Tests / Examples | [test/table_stream.cpp](../../../test/table_stream.cpp)
 
 `table_ostream` is a base class that represents a stream of formatted lines.
 
