@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [smbus/*.h](../../../src/smbus/*.h)
-Interface        | [smbus/i/*.i.h](../../../src/smbus/i/*.i.h)
+Include          | [smbus/*.h](../../../src/smbus/controller.h)
+Interface        | [smbus/i/*.i.h](../../../src/smbus/i/controller.i.h)
 Tests / Examples | [samples/picar_4wd/main.cpp](../../../samples/picar_4wd/hacks.cpp)
 
 `controller` is used to send and receive values (typically non-binary) to peripherals/targets - sensors, motors, servos, etc. using the SMBus protocol.

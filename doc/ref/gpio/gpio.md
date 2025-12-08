@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [gpio/*.h](../../../src/gpio/*.h)
-Interface        | [gpio/i/*.i.h](../../../src/gpio/i/*.i.h)
+Include          | [gpio/*.h](../../../src/gpio/chip.h)
+Interface        | [gpio/i/*.i.h](../../../src/gpio/i/chip.i.h)
 Tests / Examples | [samples/picar_4wd/main.cpp](../../../samples/picar_4wd/hacks.cpp)
 
 `chip` provides information about the line functions.

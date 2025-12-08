@@ -101,7 +101,9 @@ Provide the title and the link to the page along with as much information as you
 - [pool](ref/vmem/vmem.md)
 - [page](ref/vmem/vmem.md)
 - [ptr](ref/vmem/vmem.md)
+- [linked](ref/vmem/vmem.md)
 - [list](ref/vmem/vmem.md)
+- [stack](ref/vmem/vmem.md)
 - [map](ref/vmem/vmem.md)
 - [string](ref/vmem/vmem.md)
 
