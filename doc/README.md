@@ -61,6 +61,19 @@ Provide the title and the link to the page along with as much information as you
 -
 - [diag_ready](ref/diag/diag_ready.md)
 
+### Namespace `abc::net`
+- [socket_streambuf](ref/net/socket.md)
+-
+- [udp_socket](ref/net/socket.md)
+- [tcp_server_socket](ref/net/socket.md)
+- [tcp_client_socket](ref/net/socket.md)
+-
+- [endpoint](ref/net/endpoint.md)
+
+### Namespace `abc::net::openssl`
+- [openssl_tcp_server_socket](ref/net/openssl_socket.md)
+- [openssl_tcp_client_socket](ref/net/openssl_socket.md)
+
 ### Namespace `abc::net::http`
 - [request_reader](ref/net/http.md)
 - [request_writer](ref/net/http.md)
@@ -85,16 +98,17 @@ Provide the title and the link to the page along with as much information as you
 - [ostream](ref/net/json.md)
 
 ### Namespace `abc::net`
-- [sockets](ref/net/socket.md)
-  - [socket_streambuf](ref/net/socket.md)
-  - [udp_socket](ref/net/socket.md)
-  - [tcp_server_socket](ref/net/socket.md)
-  - [tcp_client_socket](ref/net/socket.md)
-  - [openssl_tcp_server_socket](ref/net/openssl_socket.md)
-  - [openssl_tcp_client_socket](ref/net/openssl_socket.md)
+- [socket_streambuf](ref/net/socket.md)
+-
+- [udp_socket](ref/net/socket.md)
+- [tcp_server_socket](ref/net/socket.md)
+- [tcp_client_socket](ref/net/socket.md)
+- [openssl_tcp_server_socket](ref/net/openssl_socket.md)
+- [openssl_tcp_client_socket](ref/net/openssl_socket.md)
+-
 - [endpoint](ref/net/endpoint.md)
 
-
+xxx
 
 - [gpio](ref/gpio.md)
   - [chip](ref/gpio.md)

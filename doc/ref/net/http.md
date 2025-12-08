@@ -4,9 +4,9 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [net/http.h](../../src/net/http.h)
-Interface        | [net/i/http.i.h](../../src/net/i/http.i.h)
-Tests / Examples | [test/http.cpp](../../test/http.cpp)
+Include          | [net/http.h](../../../src/net/http.h)
+Interface        | [net/i/http.i.h](../../../src/net/i/http.i.h)
+Tests / Examples | [test/http.cpp](../../../test/http.cpp)
 
 ## Readers and Writers
 These are higher-level entities:
@@ -18,8 +18,8 @@ These are higher-level entities:
 They read/write whole requests/responses.
 Thus, only minimum knowledge of the http protocol is required.
 
-## `client` and `stream` 
-These are _convenience_ classes that simply derive from the the corresponding readers and writers:
+## `client` and `server` 
+These are _convenience_ classes that simply combine the corresponding readers and writers:
 - `client`
   - `request_writer`
   - `response_reader`
@@ -28,8 +28,8 @@ These are _convenience_ classes that simply derive from the the corresponding re
   - `response_writer`
 
 ## Streams
-These lower-level entities that read and write http streams.
-The caller must have sufficient knowledge of the protocol to read/write elements in the exact order.
+These are lower-level entities that read and write http streams.
+The caller must have sufficient knowledge of the protocol to read/write elements in the correct order.
 
 There are four http stream classes:
 - `request_istream`

@@ -4,14 +4,14 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [openssl_socket.h](../../src/openssl_socket.h)
-Interface        | [openssl_socket.i.h](../../src/i/openssl_socket.i.h)
-Tests / Examples | [test/socket.cpp](../../test/socket.cpp)
+Include          | [net/openssl/socket.h](../../../src/net/openssl/socket.h)
+Interface        | [net/openssl/i/socket.i.h](../../../src/net/openssl/i/socket.i.h)
+Tests / Examples | [test/socket.cpp](../../../test/socket.cpp)
 
 __Note__: See the [socket](socket.md) limitations on availability.
 Additionally, this functionality requires `OpenSSL` to be installed.
 
-`abc` does not implement any cryptographic functionality, nor does it distribute `OpenSSL` or any other crypto or TLS library.
+__Note__: `abc` does not implement any cryptographic functionality, nor does it distribute `OpenSSL` or any other crypto or TLS library.
 
 The main purpose of these socket classes is to prove that it is possible to support TLS on top of the existing `abc` sockets as well as to provide an example how to do it.
 
