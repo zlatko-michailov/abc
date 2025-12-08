@@ -4,8 +4,8 @@ Up to [Documentation](../README.md).
 
 Purpose          | File
 ---------------- | ----
-Include          | [root/util.h](../../src/root/util.h)
-Interface        | [root/util.h](../../src/root/util.h)
+Include          | [root/util.h](../../../src/root/util.h)
+Interface        | [root/util.h](../../../src/root/util.h)
 Tests / Examples | n/a
 
 These are possibly unrelated facilities that are too small to warrant dedicated headers.
