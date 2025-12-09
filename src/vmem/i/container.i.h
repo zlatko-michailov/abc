@@ -257,7 +257,7 @@ namespace abc { namespace vmem {
         static constexpr std::size_t items_pos() noexcept;
 
         /**
-         * @briefReturns the maximum possible size of an item.
+         * @brief Returns the maximum possible size of an item.
          */
         static constexpr std::size_t max_item_size() noexcept;
 

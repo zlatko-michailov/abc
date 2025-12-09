@@ -49,7 +49,7 @@ namespace abc { namespace stream {
          * @brief                  Constructor.
          * @param initial_capacity Initial capacity of the underlying `std::vector`.
          */
-        basic_vector_streambuf(std::size_t inital_capacity);
+        basic_vector_streambuf(std::size_t initial_capacity);
 
         /**
          * @brief Move constructor.

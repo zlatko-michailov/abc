@@ -33,9 +33,9 @@ SOFTWARE.
 namespace abc { namespace stream {
 
     template <typename Char>
-    inline basic_vector_streambuf<Char>::basic_vector_streambuf(std::size_t inital_capacity)
+    inline basic_vector_streambuf<Char>::basic_vector_streambuf(std::size_t initial_capacity)
         : base(nullptr, 0, 0, nullptr, 0, 0)
-        , _vector(inital_capacity, ascii::ends) {
+        , _vector(initial_capacity, ascii::ends) {
 
         base::reset(_vector.data(), 0, 0, _vector.size(), _vector.data(), 0, 0, _vector.size());
     }
