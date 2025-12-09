@@ -174,10 +174,10 @@ inline void car_endpoint::process_rest_request(abc::net::http::server& http, con
 
 inline void car_endpoint::process_power(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_power()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10826, "Begin:");
 
-    require_method_post(suborigin, __TAG__, request);
-    require_content_type_json(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x10827, request);
+    require_content_type_json(suborigin, 0x10828, request);
 
     std::int32_t power;
     // Read power from JSON
@@ -248,16 +248,16 @@ inline void car_endpoint::process_power(abc::net::http::server& http, const abc:
 
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10681);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10829, "End:");
 }
 
 
 inline void car_endpoint::process_turn(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_turn()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1082a, "Begin:");
 
-    require_method_post(suborigin, __TAG__, request);
-    require_content_type_json(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x1082b, request);
+    require_content_type_json(suborigin, 0x1082c, request);
 
     std::int32_t turn;
     // Read turn from JSON
@@ -296,15 +296,15 @@ inline void car_endpoint::process_turn(abc::net::http::server& http, const abc::
 
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10688);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1082d, "End:");
 }
 
 
 inline void car_endpoint::process_autos(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_autos()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1082e, "Begin:");
 
-    require_method_get(suborigin, __TAG__, request);
+    require_method_get(suborigin, 0x1082f, request);
 
     // 200
     std::stringbuf sb;
@@ -333,16 +333,16 @@ inline void car_endpoint::process_autos(abc::net::http::server& http, const abc:
 
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10689);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10830, "End:");
 }
 
 
 inline void car_endpoint::process_servo(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_servo()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10831, "Begin:");
 
-    require_method_post(suborigin, __TAG__, request);
-    require_content_type_json(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x10832, request);
+    require_content_type_json(suborigin, 0x10833, request);
 
     std::int32_t angle;
     // Read turn from JSON
@@ -379,15 +379,15 @@ inline void car_endpoint::process_servo(abc::net::http::server& http, const abc:
 
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10691);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10834, "End:");
 }
 
 
 inline void car_endpoint::process_shutdown(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_shutdown()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10835, "Begin:");
 
-    require_method_post(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x10836, request);
 
     base::set_shutdown_requested();
     _hat.reset();
@@ -396,13 +396,13 @@ inline void car_endpoint::process_shutdown(abc::net::http::server& http, const a
     // 200
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x10692);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10837, "End:");
 }
 
 
 inline void car_endpoint::drive_verified() {
     constexpr const char* suborigin = "drive_verified()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10838, "Begin:");
 
     side_powers powers = calculate_side_powers();
 
@@ -421,13 +421,13 @@ inline void car_endpoint::drive_verified() {
     _motor_rear_right.set_forward(_forward);
     _motor_rear_right.set_duty_cycle(right_duty_cycle);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10839, "End:");
 }
 
 
 inline car_endpoint::side_powers car_endpoint::calculate_side_powers() noexcept {
     constexpr const char* suborigin = "calculate_side_powers()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1083a, "Begin:");
 
     std::int32_t delta = calculate_delta_power();
 
@@ -463,7 +463,7 @@ inline car_endpoint::side_powers car_endpoint::calculate_side_powers() noexcept 
 
 inline std::int32_t car_endpoint::calculate_delta_power() noexcept {
     constexpr const char* suborigin = "calculate_delta_power()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1083b, "Begin:");
 
     std::int32_t delta = 0;
 
@@ -523,11 +523,11 @@ inline void car_endpoint::require_content_type_json(const char* suborigin, abc::
 
 inline void car_endpoint::start_auto_loop(car_endpoint* this_ptr) {
     constexpr const char* suborigin = "start_auto_loop()";
-    this_ptr->put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    this_ptr->put_any(suborigin, abc::diag::severity::callstack, 0x1083c, "Begin:");
 
     this_ptr->auto_loop();
 
-    this_ptr->put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    this_ptr->put_any(suborigin, abc::diag::severity::callstack, 0x1083d, "End:");
 }
 
 
@@ -557,7 +557,7 @@ inline void car_endpoint::auto_loop() {
 
 inline void car_endpoint::auto_limit_power() {
     constexpr const char* suborigin = "auto_limit_power()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1083e, "Begin:");
 
     std::size_t distance_cm = _obstacle_cm.load();
     std::int32_t power = _power;
@@ -584,7 +584,7 @@ inline void car_endpoint::auto_limit_power() {
         drive_verified();
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1083f, "End:");
 }
 
 

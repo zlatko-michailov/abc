@@ -70,21 +70,21 @@ namespace abc { namespace net { namespace http {
         , _is_shutdown_requested(false) {
 
         constexpr const char* suborigin = "endpoint()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: port='%s', queue_size=%d, rood_dir='%s', files_prefix='%s'",
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108b7, "Begin: port='%s', queue_size=%d, rood_dir='%s', files_prefix='%s'",
                             _config.port.c_str(), _config.listen_queue_size, _config.root_dir.c_str(), _config.files_prefix.c_str());
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108b8, "End:");
     }
 
 
     inline std::future<void> endpoint::start_async() {
         constexpr const char* suborigin = "start_async()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108b9, "Begin:");
 
         // We can't use std::async() here because we want to detach the thread and return our own std::future.
         std::thread(start_thread_func, this).detach();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ba, "End:");
 
         // Return our own future.
         return _promise.get_future();
@@ -114,7 +114,7 @@ namespace abc { namespace net { namespace http {
             std::thread(process_request_thread_func, this, std::move(connection)).detach();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108bb, "End:");
     }
 
 
@@ -129,7 +129,7 @@ namespace abc { namespace net { namespace http {
 
         // If shutdown has been requested, bail out without any processing.
         if (_is_shutdown_requested) {
-            diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Return: Shutdown requested.");
+            diag_base::put_any(suborigin, diag::severity::callstack, 0x108bc, "Return: Shutdown requested.");
             return;
         }
 
@@ -165,7 +165,7 @@ namespace abc { namespace net { namespace http {
             _promise.set_value();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108bd, "End:");
     }
 
 
@@ -176,7 +176,7 @@ namespace abc { namespace net { namespace http {
         // If the method is not GET, return 405.
         if (!ascii::are_equal_i(request.method.c_str(), method::GET)) {
             send_simple_response(http, status_code::Method_Not_Allowed, reason_phrase::Method_Not_Allowed, content_type::text, "GET is the only supported method for static files.", 0x102e5);
-            diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Return: 405");
+            diag_base::put_any(suborigin, diag::severity::callstack, 0x108be, "Return: 405");
             return;
         }
 
@@ -189,7 +189,7 @@ namespace abc { namespace net { namespace http {
         // If the file was not found, return 404.
         if (err != 0) {
             send_simple_response(http, status_code::Not_Found, reason_phrase::Not_Found, content_type::text, "Error: The requested resource was not found.", 0x102e7);
-            diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Return: 404");
+            diag_base::put_any(suborigin, diag::severity::callstack, 0x108bf, "Return: 404");
             return;
         }
 
@@ -222,7 +222,7 @@ namespace abc { namespace net { namespace http {
             http.put_body(file_chunk, file.gcount());
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c0, "End:");
     }
 
 
@@ -236,7 +236,7 @@ namespace abc { namespace net { namespace http {
 
         send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Consider overriding process_rest_request().", 0x102eb);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c1, "End:");
     }
 
 
@@ -264,7 +264,7 @@ namespace abc { namespace net { namespace http {
 
         http.put_body(body);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c2, "End:");
     }
 
 
@@ -320,13 +320,13 @@ namespace abc { namespace net { namespace http {
 
     inline void endpoint::set_shutdown_requested() {
         constexpr const char* suborigin = "send_simple_response()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c3, "Begin:");
 
         diag_base::put_any(suborigin, diag::severity::important, 0x102ed, "--- Shutdown requested ---");
 
         _is_shutdown_requested = true;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c4, "End:");
     }
 
 
@@ -337,7 +337,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string endpoint::make_root_dir_path(const request& request) const {
         constexpr const char* suborigin = "make_root_dir_path()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: root_dir='%s', path='%s'", _config.root_dir.c_str(), request.resource.path.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c5, "Begin: root_dir='%s', path='%s'", _config.root_dir.c_str(), request.resource.path.c_str());
 
         std::string filepath(_config.root_dir);
         if (filepath.back() != '/') {
@@ -345,7 +345,7 @@ namespace abc { namespace net { namespace http {
         }
         filepath.append(request.resource.path);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: path='%s'", filepath.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c6, "End: path='%s'", filepath.c_str());
 
         return filepath;
     }

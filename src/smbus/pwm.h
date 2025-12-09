@@ -108,7 +108,7 @@ namespace abc { namespace smbus {
 
     inline void pwm::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
         constexpr const char* suborigin = "set_duty_cycle()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d9, "Begin:");
 
         diag_base::expect(suborigin, duty_cycle >= pwm_duty_cycle::min, 0x1070b, "duty_cycle >= pwm_duty_cycle::min");
         diag_base::expect(suborigin, duty_cycle <= pwm_duty_cycle::max, 0x1070c, "duty_cycle <= pwm_duty_cycle::max");
@@ -133,20 +133,20 @@ namespace abc { namespace smbus {
             _controller->put_word(_target, _reg_pwm, capture_compare);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109da, "End:");
     }
 
 
     template <typename PwmDuration>
     inline void pwm::set_duty_cycle(pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
         constexpr const char* suborigin = "set_duty_cycle(duration)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109db, "Begin:");
 
         set_duty_cycle(duty_cycle);
         std::this_thread::sleep_for(duration);
         set_duty_cycle(pwm_duty_cycle::min);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109dc, "End:");
     }
 
 

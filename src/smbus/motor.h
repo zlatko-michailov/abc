@@ -49,7 +49,7 @@ namespace abc { namespace smbus {
         constexpr const char* suborigin = "motor()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10704, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d8, "End:");
     }
 
 

@@ -60,9 +60,9 @@ namespace abc { namespace vmem {
         , _stats{ } {
 
         constexpr const char* suborigin = "pool()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: file_path='%s', max_mapped_page_count=%zu", _config.file_path.c_str(), _config.max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a7b, "Begin: file_path='%s', max_mapped_page_count=%zu", _config.file_path.c_str(), _config.max_mapped_page_count);
 
-        diag_base::expect(suborigin, !_config.file_path.empty(), __TAG__, "!_config.file_path.empty()");
+        diag_base::expect(suborigin, !_config.file_path.empty(), 0x10a7c, "!_config.file_path.empty()");
 
         bool is_init = open();
 
@@ -71,7 +71,7 @@ namespace abc { namespace vmem {
         }
 
         verify();
-        diag_base::ensure(suborigin, _ready, __TAG__, "_ready");
+        diag_base::ensure(suborigin, _ready, 0x10a7d, "_ready");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10390, "End:");
     }
@@ -86,18 +86,18 @@ namespace abc { namespace vmem {
         , _stats(std::move(other._stats)) {
 
         constexpr const char* suborigin = "pool(move)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a7e, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
 
         other._ready = false;
         other._fd = -1;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a7f, "End:");
     }
 
 
     inline pool::~pool() noexcept {
         constexpr const char* suborigin = "~pool()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a80, "Begin: fd=%d, max_mapped_page_count=%zu", _fd, _config.max_mapped_page_count);
 
         if (_ready) {
             if (_fd >= 0) {
@@ -117,7 +117,7 @@ namespace abc { namespace vmem {
         _ready = false;
         _fd = -1;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a81, "End:");
     }
 
 
@@ -146,7 +146,7 @@ namespace abc { namespace vmem {
 
     inline void pool::init() {
         constexpr const char* suborigin = "init()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a82, "Begin:");
 
         // IMPORTANT! Keep this order:
         // root  (0)
@@ -154,7 +154,7 @@ namespace abc { namespace vmem {
         create_root_page();
         create_start_page();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a83, "End:");
     }
 
 
@@ -189,14 +189,14 @@ namespace abc { namespace vmem {
 
     inline void pool::verify() {
         constexpr const char* suborigin = "verify()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a84, "Begin:");
 
         verify_root_page();
         verify_start_page();
 
         _ready = true;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a85, "Begin:");
     }
 
 
@@ -290,7 +290,7 @@ namespace abc { namespace vmem {
             }
         }
         else {
-            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "!_ready");
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10a86, "!_ready");
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b4, "End: page_pos=0x%llx", (unsigned long long)page_pos);
@@ -314,7 +314,7 @@ namespace abc { namespace vmem {
             free_pages_linked.push_back(page_pos);
         }
         else {
-            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "!_ready");
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10a87, "!_ready");
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104b6, "End:");
@@ -347,7 +347,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1039b, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
         vmem::mapped_page* mapped_page = map_page(page_pos);
-        diag_base::ensure(suborigin, mapped_page != nullptr, __TAG__, "mapped_page != nullptr");
+        diag_base::ensure(suborigin, mapped_page != nullptr, 0x10a88, "mapped_page != nullptr");
 
         if (mapped_page->lock_count == 0) {
             // Move lock_count and keep_count from unlocked to locked.
@@ -378,7 +378,7 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), 0x103ad, "mapped_page_itr != _mapped_pages.end()");
 
         // The page's lock count must be strictly bigger than 0.
-        diag_base::expect(suborigin, mapped_page_itr->second.lock_count > 0, __TAG__, "mapped_page_itr->second.lock_count > 0");
+        diag_base::expect(suborigin, mapped_page_itr->second.lock_count > 0, 0x10a89, "mapped_page_itr->second.lock_count > 0");
         mapped_page_itr->second.lock_count--;
 
         if (mapped_page_itr->second.lock_count == 0) {
@@ -398,13 +398,13 @@ namespace abc { namespace vmem {
 
         log_stats();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: lock_count=%u", (unsigned)mapped_page_itr->second.lock_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a8a, "End: lock_count=%u", (unsigned)mapped_page_itr->second.lock_count);
     }
 
 
     inline vmem::mapped_page* pool::map_page(page_pos_t page_pos) {
         constexpr const char* suborigin = "map_page()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a8b, "Begin: page_pos=0x%llx", (unsigned long long)page_pos);
 
         mapped_page_container::iterator mapped_page_itr = _mapped_pages.find(page_pos);
         if (mapped_page_itr != _mapped_pages.end()) {
@@ -417,12 +417,12 @@ namespace abc { namespace vmem {
 
             // Make sure there is capacity.
             ensure_mapping_capacity();
-            diag_base::expect(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+            diag_base::expect(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, 0x10a8c, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
             // Map the OS page.
             off_t page_off = static_cast<off_t>(page_pos * vmem::page_size);
             void* ptr = mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, page_off);
-            diag_base::ensure(suborigin, ptr != MAP_FAILED, __TAG__, "ptr != MAP_FAILED, ptr=%p, errno=%d", ptr, errno);
+            diag_base::ensure(suborigin, ptr != MAP_FAILED, 0x10a8d, "ptr != MAP_FAILED, ptr=%p, errno=%d", ptr, errno);
 
             // Init a mapped_page entry.
             std::pair<page_pos_t, mapped_page> mapped_page_kvp { };
@@ -431,18 +431,18 @@ namespace abc { namespace vmem {
             mapped_page_kvp.second.ptr = ptr;
 
             std::pair<mapped_page_container::iterator, bool> inserted_mapped_page = _mapped_pages.insert(std::move(mapped_page_kvp));
-            diag_base::ensure(suborigin, inserted_mapped_page.second, __TAG__, "inserted_mapped_page.second");
+            diag_base::ensure(suborigin, inserted_mapped_page.second, 0x10a8e, "inserted_mapped_page.second");
             mapped_page_itr = std::move(inserted_mapped_page.first);            
 
             // There is one more unlocked page in the container.
             _stats.unlocked_page_count++;
         }
 
-        diag_base::ensure(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
+        diag_base::ensure(suborigin, mapped_page_itr != _mapped_pages.end(), 0x10a8f, "mapped_page_itr != _mapped_pages.end()");
 
         log_stats();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: mapped_page=%p", &*mapped_page_itr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a90, "End: mapped_page=%p", &*mapped_page_itr);
 
         return &mapped_page_itr->second;
     }
@@ -452,18 +452,18 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "unmap_page()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x103a0, "Begin:");
 
-        diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), __TAG__, "mapped_page_itr != _mapped_pages.end()");
-        diag_base::expect(suborigin, mapped_page_itr->second.ptr != nullptr, __TAG__, "mapped_page_itr->second.ptr != nullptr");
+        diag_base::expect(suborigin, mapped_page_itr != _mapped_pages.end(), 0x10a91, "mapped_page_itr != _mapped_pages.end()");
+        diag_base::expect(suborigin, mapped_page_itr->second.ptr != nullptr, 0x10a92, "mapped_page_itr->second.ptr != nullptr");
 
         if (!_config.sync_pages_on_unlock || (_config.sync_locked_pages_on_destroy && mapped_page_itr->second.lock_count > 0)) {
             // Sync the OS page. 
             int sn = msync(mapped_page_itr->second.ptr, page_size, MS_ASYNC);
-            diag_base::ensure(suborigin, sn == 0, __TAG__, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr, sn, errno);
+            diag_base::ensure(suborigin, sn == 0, 0x10a93, "sn == 0, page_pos=0x%llx, ptr=%p, sn=%d, errno=%d", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr, sn, errno);
         }
 
         // Unmap the OS page.
         int um = munmap(mapped_page_itr->second.ptr, page_size);
-        diag_base::ensure(suborigin, um == 0, __TAG__, "um == 0");
+        diag_base::ensure(suborigin, um == 0, 0x10a94, "um == 0");
 
         if (mapped_page_itr->second.lock_count > 0) {
             _stats.locked_page_keep_count -= mapped_page_itr->second.keep_count;
@@ -474,7 +474,7 @@ namespace abc { namespace vmem {
             _stats.unlocked_page_count--;
         }
 
-        diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "pos=0x%llx, ptr=%p", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr);
+        diag_base::put_any(suborigin, diag::severity::optional, 0x10a95, "pos=0x%llx, ptr=%p", (unsigned long long)mapped_page_itr->second.pos, mapped_page_itr->second.ptr);
 
         // Remove the mapped page entry from the container.
         mapped_page_container::iterator ret_itr = _mapped_pages.erase(mapped_page_itr);
@@ -489,14 +489,14 @@ namespace abc { namespace vmem {
 
     inline void pool::ensure_mapping_capacity() {
         constexpr const char* suborigin = "ensure_mapping_capacity()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: count=%zu, max_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a96, "Begin: count=%zu, max_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
-        diag_base::expect(suborigin, _mapped_pages.size() <= _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() <= _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+        diag_base::expect(suborigin, _mapped_pages.size() <= _config.max_mapped_page_count, 0x10a97, "_mapped_pages.size() <= _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
         if (_mapped_pages.size() == _config.max_mapped_page_count) {
             _stats.free_capacity_count++;
 
-            diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Trying to free capacity.");
+            diag_base::put_any(suborigin, diag::severity::verbose, 0x10a98, "Trying to free capacity.");
             log_stats();
 
             //// TODO: A combination of a container and algorithms should be used so that the following requirements are met:
@@ -506,12 +506,12 @@ namespace abc { namespace vmem {
 
             // If there are no unlocked pages, then nothing can be freed.
             if (_stats.unlocked_page_count == 0) {
-                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. (1) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+                diag_base::throw_exception<std::runtime_error>(suborigin, 0x10a99, "No mapping capacity. (1) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
             }
 
             // Pass 1: Remove all unlocked pages with a keep count not higher than the average.
             count_t avg_keep_count = (_stats.unlocked_page_keep_count + _stats.unlocked_page_count - 1) / _stats.unlocked_page_count;
-            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "avg_keep_count=%u", (unsigned)avg_keep_count);
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10a9a, "avg_keep_count=%u", (unsigned)avg_keep_count);
 
             mapped_page_container::iterator mapped_page_itr = _mapped_pages.begin();
             while (mapped_page_itr != _mapped_pages.end()) {
@@ -539,15 +539,15 @@ namespace abc { namespace vmem {
             }
 
             if (_mapped_pages.size() == _config.max_mapped_page_count) {
-                diag_base::throw_exception<std::runtime_error>(suborigin, __TAG__, "No mapping capacity. (2) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+                diag_base::throw_exception<std::runtime_error>(suborigin, 0x10a9b, "No mapping capacity. (2) max_page_count=%zu, locked_page_count=%u, unlocked_page_count=%u", _config.max_mapped_page_count, (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
             }
         }
 
-        diag_base::ensure(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, __TAG__, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+        diag_base::ensure(suborigin, _mapped_pages.size() < _config.max_mapped_page_count, 0x10a9c, "_mapped_pages.size() < _config.max_mapped_page_count, mapped_page_count=%zu, max_mapped_page_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
 
         log_stats();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: count=%zu, max_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a9d, "End: count=%zu, max_count=%zu", _mapped_pages.size(), _config.max_mapped_page_count);
     }
 
 
@@ -573,10 +573,10 @@ namespace abc { namespace vmem {
         count_t map_hit_percent = map_count == 0 ? 0 : 100 * _stats.map_hit_count / map_count;
         count_t map_miss_percent = map_count == 0 ? 0 : 100 * _stats.map_miss_count / map_count;
 
-        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Pages: container=%zu, locked=%u, unlocked=%u", _mapped_pages.size(), (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
-        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Map: hit=%u (%u%%), miss=%u (%u%%)", (unsigned)_stats.map_hit_count, (unsigned)map_hit_percent, (unsigned)_stats.map_miss_count, (unsigned)map_miss_percent);
-        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Keep: locked=%u, unlocked=%u", (unsigned)_stats.locked_page_keep_count, (unsigned)_stats.unlocked_page_keep_count);
-        diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "Capacity: count=%u", (unsigned)_stats.free_capacity_count);
+        diag_base::put_any(suborigin, diag::severity::verbose, 0x10a9e, "Pages: container=%zu, locked=%u, unlocked=%u", _mapped_pages.size(), (unsigned)_stats.locked_page_count, (unsigned)_stats.unlocked_page_count);
+        diag_base::put_any(suborigin, diag::severity::verbose, 0x10a9f, "Map: hit=%u (%u%%), miss=%u (%u%%)", (unsigned)_stats.map_hit_count, (unsigned)map_hit_percent, (unsigned)_stats.map_miss_count, (unsigned)map_miss_percent);
+        diag_base::put_any(suborigin, diag::severity::verbose, 0x10aa0, "Keep: locked=%u, unlocked=%u", (unsigned)_stats.locked_page_keep_count, (unsigned)_stats.unlocked_page_keep_count);
+        diag_base::put_any(suborigin, diag::severity::verbose, 0x10aa1, "Capacity: count=%u", (unsigned)_stats.free_capacity_count);
     }
 
 

@@ -125,11 +125,11 @@ namespace abc { namespace smbus {
 
     inline void controller::put_nodata(const target& target, register_t reg) {
         constexpr const char* suborigin = "put_nodata()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b8, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109b9, "_mutex");
 
-        ensure_address(target.address(), __TAG__);
+        ensure_address(target.address(), 0x109ba);
 
         i2c_smbus_ioctl_data msg{ };
         msg.read_write = I2C_SMBUS_WRITE;
@@ -144,11 +144,11 @@ namespace abc { namespace smbus {
 
     inline void controller::put_byte(const target& target, register_t reg, std::uint8_t byte) {
         constexpr const char* suborigin = "put_byte()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109bb, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109bc, "_mutex");
 
-        ensure_address(target.address(), __TAG__);
+        ensure_address(target.address(), 0x109bd);
 
         i2c_smbus_data data{ };
         data.byte = byte;
@@ -167,11 +167,11 @@ namespace abc { namespace smbus {
 
     inline void controller::put_word(const target& target, register_t reg, std::uint16_t word) {
         constexpr const char* suborigin = "put_word()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109be, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109bf, "_mutex");
 
-        ensure_address(target.address(), __TAG__);
+        ensure_address(target.address(), 0x109c0);
 
         i2c_smbus_data data{ };
         data.word = target.requires_byte_swap() ? swap_bytes(word) : word;
@@ -190,12 +190,12 @@ namespace abc { namespace smbus {
 
     inline void controller::put_block(const target& target, register_t reg, const void* block, std::size_t size) {
         constexpr const char* suborigin = "put_block()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109c1, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
         diag_base::expect(suborigin, size <= I2C_SMBUS_BLOCK_MAX, 0x106eb, "size (%zu) <= I2C_SMBUS_BLOCK_MAX", size);
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109c2, "_mutex");
 
-        ensure_address(target.address(), __TAG__);
+        ensure_address(target.address(), 0x109c3);
 
         i2c_smbus_data data{ };
         data.block[0] = static_cast<std::uint8_t>(size);
@@ -215,9 +215,9 @@ namespace abc { namespace smbus {
 
     inline std::uint8_t controller::get_noreg_byte(const target& target) {
         constexpr const char* suborigin = "get_noreg_byte()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x", target.address());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109c4, "Begin: target_addr=0x%2.2x", target.address());
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109c5, "_mutex");
 
         ensure_address(target.address(), 0x106ef);
 
@@ -239,7 +239,7 @@ namespace abc { namespace smbus {
 
     inline std::uint16_t controller::get_noreg_word(const target& target) {
         constexpr const char* suborigin = "get_noreg_word()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x", target.address());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109c6, "Begin: target_addr=0x%2.2x", target.address());
 
         std::uint16_t byte0 = get_noreg_byte(target);
         std::uint16_t byte1 = get_noreg_byte(target);
@@ -254,9 +254,9 @@ namespace abc { namespace smbus {
 
     inline std::uint8_t controller::get_byte(const target& target, register_t reg) {
         constexpr const char* suborigin = "get_byte()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109c7, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109c8, "_mutex");
 
         ensure_address(target.address(), 0x106f5);
 
@@ -279,9 +279,9 @@ namespace abc { namespace smbus {
 
     inline std::uint16_t controller::get_word(const target& target, register_t reg) {
         constexpr const char* suborigin = "get_word()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109c9, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109ca, "_mutex");
 
         ensure_address(target.address(), 0x106f8);
 
@@ -304,9 +304,9 @@ namespace abc { namespace smbus {
 
     inline std::size_t controller::get_block(const target& target, register_t reg, void* block, std::size_t size) {
         constexpr const char* suborigin = "get_block()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109cb, "Begin: target_addr=0x%2.2x, reg=0x%2.2x", target.address(), reg);
 
-        diag_base::expect(suborigin, static_cast<bool>(_mutex), __TAG__, "_mutex");
+        diag_base::expect(suborigin, static_cast<bool>(_mutex), 0x109cc, "_mutex");
 
         ensure_address(target.address(), 0x106fb);
 
@@ -333,7 +333,7 @@ namespace abc { namespace smbus {
 
     inline void controller::ensure_address(address_t addr, diag::tag_t tag) {
         constexpr const char* suborigin = "ensure_address()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: addr=0x%2.2x", addr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109cd, "Begin: addr=0x%2.2x", addr);
 
         diag_base::expect(suborigin, static_cast<bool>(_mutex), tag, "_mutex");
 
@@ -355,12 +355,12 @@ namespace abc { namespace smbus {
     template <typename Arg>
     inline void controller::ensure_ioctl(int command, Arg arg, diag::tag_t tag) {
         constexpr const char* suborigin = "ensure_ioctl()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109ce, "Begin:");
 
         int ret = ioctl(_fd, command, arg);
         diag_base::expect(suborigin, ret >= 0, tag, "ret (%d) >= 0, errno = %d", ret, errno);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109cf, "End:");
     }
 
 

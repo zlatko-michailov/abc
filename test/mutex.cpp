@@ -94,20 +94,20 @@ bool test_mutex_M_threads_1_use(test_context& context) {
 static bool mutex_1_thread(abc::concurrent::mutex& mutex, test_context& context) {
     bool passed = true;
 
-    passed = passed && context.are_equal(mutex.is_locked(), false, __TAG__, "%d");
-    passed = passed && context.are_equal(static_cast<bool>(mutex), false, __TAG__, "%d");
+    passed = passed && context.are_equal(mutex.is_locked(), false, 0x10c64, "%d");
+    passed = passed && context.are_equal(static_cast<bool>(mutex), false, 0x10c65, "%d");
 
     std::thread::id this_thread_id = std::this_thread::get_id();
 
     {
         std::lock_guard<abc::concurrent::mutex> lock(mutex);
-        passed = passed && context.are_equal(mutex.is_locked(), true, __TAG__, "%d");
-        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, __TAG__, "%d");
-        passed = passed && context.are_equal(static_cast<bool>(mutex), true, __TAG__, "%d");
+        passed = passed && context.are_equal(mutex.is_locked(), true, 0x10c66, "%d");
+        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, 0x10c67, "%d");
+        passed = passed && context.are_equal(static_cast<bool>(mutex), true, 0x10c68, "%d");
     }
 
-    passed = passed && context.are_equal(mutex.is_locked(), false, __TAG__, "%d");
-    passed = passed && context.are_equal(static_cast<bool>(mutex), false, __TAG__, "%d");
+    passed = passed && context.are_equal(mutex.is_locked(), false, 0x10c69, "%d");
+    passed = passed && context.are_equal(static_cast<bool>(mutex), false, 0x10c6a, "%d");
 
     return passed;
 }
@@ -122,9 +122,9 @@ static bool mutex_M_threads(abc::concurrent::mutex& mutex, std::condition_variab
         std::unique_lock<abc::concurrent::mutex> lock(mutex);
         sync.wait(lock);
 
-        passed = passed && context.are_equal(mutex.is_locked(), true, __TAG__, "%d");
-        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, __TAG__, "%d");
-        passed = passed && context.are_equal(static_cast<bool>(mutex), true, __TAG__, "%d");
+        passed = passed && context.are_equal(mutex.is_locked(), true, 0x10c6b, "%d");
+        passed = passed && context.are_equal(mutex.locking_thread_id() == this_thread_id, true, 0x10c6c, "%d");
+        passed = passed && context.are_equal(static_cast<bool>(mutex), true, 0x10c6d, "%d");
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

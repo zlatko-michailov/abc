@@ -39,11 +39,11 @@ namespace abc { namespace smbus {
         , _reg(reg) {
 
         constexpr const char* suborigin = "adc()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b5, "Begin:");
 
-        diag_base::expect(suborigin, controller != nullptr, __TAG__, "controller != nullptr");
+        diag_base::expect(suborigin, controller != nullptr, 0x109b6, "controller != nullptr");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b7, "End:");
     }
 
 

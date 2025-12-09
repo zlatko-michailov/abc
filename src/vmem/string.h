@@ -49,14 +49,14 @@ namespace abc { namespace vmem {
         , _put_ch(0) {
 
         constexpr const char* suborigin = "basic_string_streambuf()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: string=%p", string);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10aa4, "Begin: string=%p", string);
 
         diag_base::expect(suborigin, string != nullptr, 0x107b3, "string != nullptr");
 
         base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
         base::setp(&_put_ch, &_put_ch + 1);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10aa5, "End:");
     }
 
 
@@ -70,7 +70,7 @@ namespace abc { namespace vmem {
         , _put_ch(other._put_ch) {
 
         constexpr const char* suborigin = "basic_string_streambuf(move)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: other._string=%p", other._string);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10aa6, "Begin: other._string=%p", other._string);
 
         base::setg(&_get_ch, &_get_ch + 1, &_get_ch + 1);
         base::setp(&_put_ch, &_put_ch + 1);
@@ -81,7 +81,7 @@ namespace abc { namespace vmem {
         other.setg(nullptr, nullptr, nullptr);
         other.setp(nullptr, nullptr);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10aa7, "End:");
     }
 
 

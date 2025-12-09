@@ -138,8 +138,8 @@ namespace abc { namespace vmem {
         diag_base::expect(suborigin, sizeof(map_key<Key>) <= max_key_item_size(), 0x1050d, "sizeof(map_key<Key>) <= max_key_item_size()");
         diag_base::expect(suborigin, sizeof(map_value<Key, T>) <= max_value_item_size(), 0x1050e, "sizeof(map_value<Key, T>) <= max_value_item_size()");
         diag_base::expect(suborigin, key_page_capacity() >= 2, 0x1050f, "key_page_capacity() >= 2");
-        diag_base::expect(suborigin, !key_level_stack::is_uninit(&_state->keys), __TAG__, "!key_level_stack::is_uninit(_state->keys)");
-        diag_base::expect(suborigin, !value_level_container::is_uninit(&_state->values), __TAG__, "!value_level_container::is_uninit(_state->values)");
+        diag_base::expect(suborigin, !key_level_stack::is_uninit(&_state->keys), 0x10a25, "!key_level_stack::is_uninit(_state->keys)");
+        diag_base::expect(suborigin, !value_level_container::is_uninit(&_state->values), 0x10a26, "!value_level_container::is_uninit(_state->values)");
         diag_base::expect(suborigin, _state->keys.item_size == sizeof(container_state), 0x10511, "_state->keys.item_size == sizeof(container_state)");
         diag_base::expect(suborigin, _state->values.item_size == sizeof(map_value<Key, T>), 0x10512, "_state->values.item_size == sizeof(map_value<Key, T>)");
 
@@ -256,7 +256,7 @@ namespace abc { namespace vmem {
             result.ok = false;
         }
 
-        diag_base::ensure(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+        diag_base::ensure(suborigin, result.iterator.can_deref(), 0x10a27, "result.iterator.can_deref()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10517, "End: result.ok=%d, result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%u",
                 result.ok, (unsigned long long)result.iterator.page_pos(), (unsigned)result.iterator.item_pos(), result.iterator.edge());
@@ -277,14 +277,14 @@ namespace abc { namespace vmem {
     template <typename InputItr>
     inline void map<Key, T>::insert(InputItr first, InputItr last) {
         constexpr const char* suborigin = "insert(first, last)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a28, "Begin:");
 
         for (InputItr item_itr = first; item_itr != last; item_itr++) {
             bool inserted = insert(*item_itr).second;
             diag_base::ensure(suborigin, !inserted, 0x10518, "!inserted");
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a29, "End:");
     }
 
 
@@ -294,19 +294,19 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10519, "Begin: find_result.iterator.page_pos=0x%llx, find_result.iterator.item_pos=0x%x, find_result.iterator.edge=%d",
                 (unsigned long long)find_result.iterator.page_pos(), (unsigned)find_result.iterator.item_pos(), find_result.iterator.edge());
 
-        diag_base::expect(suborigin, find_result.iterator.is_valid(this), __TAG__, "find_result.iterator.is_valid(this)");
-        diag_base::expect(suborigin, find_result.iterator.can_deref() || find_result.iterator == end_itr(), __TAG__, "find_result.iterator.can_deref() || find_result.iterator == end_itr()");
+        diag_base::expect(suborigin, find_result.iterator.is_valid(this), 0x10a2a, "find_result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, find_result.iterator.can_deref() || find_result.iterator == end_itr(), 0x10a2b, "find_result.iterator.can_deref() || find_result.iterator == end_itr()");
 
         value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), diag_base::log());
 
         value_level_result2 values_result = _values.insert2(values_itr, item);
-        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
-        diag_base::expect(suborigin, values_result.iterator.can_deref(), __TAG__, "values_result.iterator.can_deref()");
+        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), 0x10a2c, "values_result.iterator.is_valid(&_values)");
+        diag_base::expect(suborigin, values_result.iterator.can_deref(), 0x10a2d, "values_result.iterator.can_deref()");
 
         result2 result = update_key_levels(std::move(find_result), std::move(values_result));
-        diag_base::expect(suborigin, result.ok, __TAG__, "result.ok");
-        diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
-        diag_base::expect(suborigin, result.iterator.can_deref(), __TAG__, "result.iterator.can_deref()");
+        diag_base::expect(suborigin, result.ok, 0x10a2e, "result.ok");
+        diag_base::expect(suborigin, result.iterator.is_valid(this), 0x10a2f, "result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, result.iterator.can_deref(), 0x10a30, "result.iterator.can_deref()");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1051a, "End: result.iterator.page_pos=0x%llx, result.iterator.item_pos=0x%x, result.iterator.edge=%d",
                 (unsigned long long)result.iterator.page_pos(), (unsigned)result.iterator.item_pos(), result.iterator.edge());
@@ -344,15 +344,15 @@ namespace abc { namespace vmem {
     template <typename InputItr>
     inline void map<Key, T>::erase(InputItr first, InputItr last) {
         constexpr const char* suborigin = "erase(first, last)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a31, "Begin:");
 
         for (InputItr item_itr = first; item_itr != last; item_itr++) {
             std::size_t result = erase(*item_itr);
 
-            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "result=%zu", result);
+            diag_base::put_any(suborigin, diag::severity::optional, 0x10a32, "result=%zu", result);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a33, "End:");
     }
 
 
@@ -361,17 +361,17 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "erase(find_result2)";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1051e, "Begin:");
 
-        diag_base::expect(suborigin, find_result.iterator.is_valid(this), __TAG__, "find_result.iterator.is_valid(this)");
-        diag_base::expect(suborigin, find_result.iterator.can_deref(), __TAG__, "find_result.iterator.can_deref()");
+        diag_base::expect(suborigin, find_result.iterator.is_valid(this), 0x10a34, "find_result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, find_result.iterator.can_deref(), 0x10a35, "find_result.iterator.can_deref()");
 
         value_level_iterator values_itr(&_values, find_result.iterator.page_pos(), find_result.iterator.item_pos(), find_result.iterator.edge(), diag_base::log());
 
         value_level_result2 values_result = _values.erase2(values_itr);
-        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), __TAG__, "values_result.iterator.is_valid(&_values)");
+        diag_base::expect(suborigin, values_result.iterator.is_valid(&_values), 0x10a36, "values_result.iterator.is_valid(&_values)");
         values_itr = values_result.iterator;
 
         result2 result = update_key_levels(std::move(find_result), std::move(values_result));
-        diag_base::expect(suborigin, result.iterator.is_valid(this), __TAG__, "result.iterator.is_valid(this)");
+        diag_base::expect(suborigin, result.iterator.is_valid(this), 0x10a37, "result.iterator.is_valid(this)");
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1051f, "End: values_itr.page_pos=0x%llx, values_itr.item_pos=0x%x, values_itr.edge=%d",
                 (unsigned long long)values_itr.page_pos(), (unsigned)values_itr.item_pos(), values_itr.edge());
@@ -405,8 +405,8 @@ namespace abc { namespace vmem {
             Key root_key{ };
             {
                 vmem::page front_value_page(_pool, root_page_pos, diag_base::log());
-                diag_base::expect(suborigin, front_value_page.pos() == root_page_pos, __TAG__, "front_value_page.pos() == root_page_pos");
-                diag_base::expect(suborigin, front_value_page.ptr() != nullptr, __TAG__, "front_value_page.ptr() != nullptr");
+                diag_base::expect(suborigin, front_value_page.pos() == root_page_pos, 0x10a38, "front_value_page.pos() == root_page_pos");
+                diag_base::expect(suborigin, front_value_page.ptr() != nullptr, 0x10a39, "front_value_page.ptr() != nullptr");
 
                 map_value_page<Key, T>* front_value_container_page = reinterpret_cast<map_value_page<Key, T>*>(front_value_page.ptr());
                 std::memmove(&root_key, &front_value_container_page->items[0].key, sizeof(Key));
@@ -427,8 +427,8 @@ namespace abc { namespace vmem {
                 {
                     root_page_pos = key_level_state_ptr->front_page_pos;
                     vmem::page front_key_page(_pool, root_page_pos, diag_base::log());
-                    diag_base::expect(suborigin, front_key_page.pos() == root_page_pos, __TAG__, "front_key_page.pos() == root_page_pos");
-                    diag_base::expect(suborigin, front_key_page.ptr() != nullptr, __TAG__, "front_key_page.ptr() != nullptr");
+                    diag_base::expect(suborigin, front_key_page.pos() == root_page_pos, 0x10a3a, "front_key_page.pos() == root_page_pos");
+                    diag_base::expect(suborigin, front_key_page.ptr() != nullptr, 0x10a3b, "front_key_page.ptr() != nullptr");
 
                     map_key_page<Key>* front_key_container_page = reinterpret_cast<map_key_page<Key>*>(front_key_page.ptr());
                     std::memmove(&root_key, &front_key_container_page->items[0].key, sizeof(Key));
@@ -443,7 +443,7 @@ namespace abc { namespace vmem {
                             // Find the old key.
                             key_level_iterator parent_keys_first_itr(&parent_keys, parent_page_pos, 0, iterator_edge::none, diag_base::log());
                             key_level_iterator parent_keys_itr = std::find_if(parent_keys_first_itr, parent_keys.end(), [&page_leads, i] (const vmem::map_key<Key>& map_key) { return page_leads[i].items[1].key == map_key.key; }); // Old key
-                            diag_base::expect(suborigin, parent_keys_itr.can_deref(), __TAG__, "parent_keys_itr.can_deref()");
+                            diag_base::expect(suborigin, parent_keys_itr.can_deref(), 0x10a3c, "parent_keys_itr.can_deref()");
 
                             // Overwrite with the new key.
                             ptr<map_key<Key>> key_ptr = parent_keys_itr.operator->();
@@ -471,7 +471,7 @@ namespace abc { namespace vmem {
                                 parent_page_leads[parent_page_leads_count++] = keys_result.page_leads[0];
                             }
                             if (keys_result.page_leads[1].operation != container_page_lead_operation::none) {
-                                diag_base::expect(suborigin, parent_page_leads[parent_page_leads_count].operation == container_page_lead_operation::none, __TAG__, "suborigin, parent_page_leads[%zu].operation == container_page_lead_operation::none", parent_page_leads_count);
+                                diag_base::expect(suborigin, parent_page_leads[parent_page_leads_count].operation == container_page_lead_operation::none, 0x10a3d, "suborigin, parent_page_leads[%zu].operation == container_page_lead_operation::none", parent_page_leads_count);
                                 parent_page_leads[parent_page_leads_count++] = keys_result.page_leads[1];
                             }
                         }
@@ -488,14 +488,14 @@ namespace abc { namespace vmem {
                                 parent_page_leads[parent_page_leads_count++] = keys_result.page_leads[0];
                             }
                             if (keys_result.page_leads[1].operation != container_page_lead_operation::none) {
-                                diag_base::expect(suborigin, parent_page_leads[parent_page_leads_count].operation == container_page_lead_operation::none, __TAG__, "suborigin, parent_page_leads[%zu].operation == container_page_lead_operation::none", parent_page_leads_count);
+                                diag_base::expect(suborigin, parent_page_leads[parent_page_leads_count].operation == container_page_lead_operation::none, 0x10a3e, "suborigin, parent_page_leads[%zu].operation == container_page_lead_operation::none", parent_page_leads_count);
                                 parent_page_leads[parent_page_leads_count++] = keys_result.page_leads[1];
                             }
                         }
                         break;
 
                         default:
-                            diag_base::expect(suborigin, page_leads[i].operation == container_page_lead_operation::none, __TAG__, "page_leads[%zu].operation(%u) == container_page_lead_operation::none", i, page_leads[i].operation);
+                            diag_base::expect(suborigin, page_leads[i].operation == container_page_lead_operation::none, 0x10a3f, "page_leads[%zu].operation(%u) == container_page_lead_operation::none", i, page_leads[i].operation);
                         break;
                     }
                 }
@@ -549,7 +549,7 @@ namespace abc { namespace vmem {
                     break;
 
                     default:
-                        diag_base::expect(suborigin, page_leads[i].operation == container_page_lead_operation::none, __TAG__, "page_leads[%zu].operation(%u) == container_page_lead_operation::none", i, page_leads[i].operation);
+                        diag_base::expect(suborigin, page_leads[i].operation == container_page_lead_operation::none, 0x10a40, "page_leads[%zu].operation(%u) == container_page_lead_operation::none", i, page_leads[i].operation);
                     break;
                 }
             }
@@ -584,7 +584,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10525, "Begin: key_page_pos=0x%llx, key=0x%llx...", (unsigned long long)key_page_pos, *(unsigned long long*)&key);
 
         vmem::page page(_pool, key_page_pos, diag_base::log());
-        diag_base::expect(suborigin, page.pos() == key_page_pos, __TAG__, "page.pos() == key_page_pos");
+        diag_base::expect(suborigin, page.pos() == key_page_pos, 0x10a41, "page.pos() == key_page_pos");
         diag_base::expect(suborigin, page.ptr() != nullptr, 0x10526, "page.ptr() != nullptr");
 
         map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
@@ -599,19 +599,19 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     inline item_pos_t map<Key, T>::key_item_pos(map_key_page<Key>* key_page, const Key& key) {
         constexpr const char* suborigin = "key_item_pos(key_page)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: key_page=%p, key=0x%llx...", key_page, *(unsigned long long*)&key);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a42, "Begin: key_page=%p, key=0x%llx...", key_page, *(unsigned long long*)&key);
 
-        diag_base::expect(suborigin, key_page != nullptr, __TAG__, "key_page != nullptr");
+        diag_base::expect(suborigin, key_page != nullptr, 0x10a43, "key_page != nullptr");
 
         // Key page: when done, item_pos should reference the biggest key that is smaller or equal to key.
         item_pos_t item_pos = 0;
         for (item_pos_t i = 1; i < key_page->item_count && key_page->items[i].key <= key; i++) {
-            diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item[%u]=0x%llx..., key=0x%llx...", (unsigned)i, *(unsigned long long*)&key_page->items[i].key, *(unsigned long long*)&key);
+            diag_base::put_any(suborigin, diag::severity::verbose, 0x10a44, "item[%u]=0x%llx..., key=0x%llx...", (unsigned)i, *(unsigned long long*)&key_page->items[i].key, *(unsigned long long*)&key);
 
             item_pos = i;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: item_pos=0x%x", (unsigned)item_pos);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a45, "End: item_pos=0x%x", (unsigned)item_pos);
 
         return item_pos;
     }
@@ -623,7 +623,7 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     inline void map<Key, T>::clear() {
         constexpr const char* suborigin = "clear";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a46, "Begin:");
 
         for (key_level_stack_iterator key_stack_itr = _key_stack.rend(); key_stack_itr != _key_stack.rbegin(); key_stack_itr--) {
             // IMPORTANT: Save the ptr instance to keep the page locked.
@@ -637,7 +637,7 @@ namespace abc { namespace vmem {
 
         _values.clear();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a47, "End:");
     }
 
 
@@ -650,8 +650,8 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10529, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
                 (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
 
-        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
-        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), __TAG__, "itr.is_rbegin() || itr.can_deref()");
+        diag_base::expect(suborigin, itr.is_valid(this), 0x10a48, "itr.is_valid(this)");
+        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), 0x10a49, "itr.is_rbegin() || itr.can_deref()");
 
         value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), diag_base::log());
         values_itr++;
@@ -670,8 +670,8 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1052b, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, itr.edge=%u",
                 (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), itr.edge());
 
-        diag_base::expect(suborigin, itr.is_valid(this), __TAG__, "itr.is_valid(this)");
-        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), __TAG__, "itr.is_rbegin() || itr.can_deref()");
+        diag_base::expect(suborigin, itr.is_valid(this), 0x10a4a, "itr.is_valid(this)");
+        diag_base::expect(suborigin, itr.is_rbegin() || itr.can_deref(), 0x10a4b, "itr.is_rbegin() || itr.can_deref()");
 
         value_level_iterator values_itr(&_values, itr.page_pos(), itr.item_pos(), itr.edge(), diag_base::log());
         values_itr--;
@@ -700,11 +700,11 @@ namespace abc { namespace vmem {
             // There are key levels.
 
             // There must be a single root page.
-            diag_base::expect(suborigin, _key_stack.back().front_page_pos == _key_stack.back().back_page_pos, __TAG__, "_key_stack.back().front_page_pos == _key_stack.back().back_page_pos");
+            diag_base::expect(suborigin, _key_stack.back().front_page_pos == _key_stack.back().back_page_pos, 0x10a4c, "_key_stack.back().front_page_pos == _key_stack.back().back_page_pos");
 
             // Start with the root page.
             page_pos = _key_stack.back().front_page_pos;
-            diag_base::expect(suborigin, page_pos != page_pos_nil, __TAG__, "page_pos != page_pos_nil");
+            diag_base::expect(suborigin, page_pos != page_pos_nil, 0x10a4d, "page_pos != page_pos_nil");
 
             // Push the root page into the path.
             result.path.push_back(page_pos);
@@ -712,10 +712,10 @@ namespace abc { namespace vmem {
 
             // From the current/parent page, find the child page (on the next level).
             for (std::size_t level = 0; level < _key_stack.size(); level++) {
-                diag_base::expect(suborigin, page_pos != page_pos_nil, __TAG__, "page_pos != page_pos_nil");
+                diag_base::expect(suborigin, page_pos != page_pos_nil, 0x10a4e, "page_pos != page_pos_nil");
 
                 vmem::page page(_pool, page_pos, diag_base::log());
-                diag_base::expect(suborigin, page.pos() == page_pos, __TAG__, "page.pos() == page_pos");
+                diag_base::expect(suborigin, page.pos() == page_pos, 0x10a4f, "page.pos() == page_pos");
                 diag_base::expect(suborigin, page.ptr() != nullptr, 0x1052f, "page.ptr() != nullptr");
 
                 map_key_page<Key>* key_page = reinterpret_cast<map_key_page<Key>*>(page.ptr());
@@ -723,7 +723,7 @@ namespace abc { namespace vmem {
 
                 // Find the key on the key page.
                 item_pos = key_item_pos(key_page, key);
-                diag_base::expect(suborigin, item_pos < key_page->item_count, __TAG__, "item_pos < key_page->item_count");
+                diag_base::expect(suborigin, item_pos < key_page->item_count, 0x10a50, "item_pos < key_page->item_count");
 
                 // Child page pos.
                 page_pos = key_page->items[item_pos].page_pos;
@@ -732,24 +732,24 @@ namespace abc { namespace vmem {
                 // The page on the leaf level is a value page. It should not be on the path. The pages from all other levels should be.
                 if (level != _key_stack.size() - 1) {
                     result.path.push_back(page_pos);
-                    diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "Push page_pos=0x%llx", (unsigned long long)page_pos);
+                    diag_base::put_any(suborigin, diag::severity::optional, 0x10a51, "Push page_pos=0x%llx", (unsigned long long)page_pos);
                 }
             }
         }
         else {
             // There are no key levels. There must be at most 1 value page.
-            diag_base::expect(suborigin, _state->values.front_page_pos == _state->values.back_page_pos, __TAG__, "_state->values.front_page_pos == _state->values.back_page_pos");
+            diag_base::expect(suborigin, _state->values.front_page_pos == _state->values.back_page_pos, 0x10a52, "_state->values.front_page_pos == _state->values.back_page_pos");
             diag_base::put_any(suborigin, diag::severity::optional, 0x10534, "No key levels. value page_pos=0x%llx", (unsigned long long)_state->values.front_page_pos);
             page_pos = _state->values.front_page_pos;
         }
 
         // page_pos is nil when the structure is empty. Otherwise, it is not.
-        diag_base::expect(suborigin, page_pos != page_pos_nil || empty(), __TAG__, "page_pos != page_pos_nil || empty()");
+        diag_base::expect(suborigin, page_pos != page_pos_nil || empty(), 0x10a53, "page_pos != page_pos_nil || empty()");
 
         if (page_pos != page_pos_nil) {
             // The leaf page is a value page.
             vmem::page page(_pool, page_pos, diag_base::log());
-            diag_base::expect(suborigin, page.pos() == page_pos, __TAG__, "page.pos() == page_pos");
+            diag_base::expect(suborigin, page.pos() == page_pos, 0x10a54, "page.pos() == page_pos");
             diag_base::expect(suborigin, page.ptr() != nullptr, 0x10535, "page.ptr() != nullptr");
 
             map_value_page<Key, T>* value_page = reinterpret_cast<map_value_page<Key, T>*>(page.ptr());
@@ -757,7 +757,7 @@ namespace abc { namespace vmem {
             // Value page: when done, item_pos should reference the smallest key that is bigger or equal to key.
             item_pos = value_page->item_count;
             for (item_pos_t i = value_page->item_count - 1; /* 0 <= i && */ i < value_page->item_count && key <= value_page->items[i].key; i--) {
-                diag_base::put_any(suborigin, diag::severity::verbose, __TAG__, "item[%u]=0x%llx..., key=0x%llx...", (unsigned)i, *(unsigned long long*)&value_page->items[i].key, *(unsigned long long*)&key);
+                diag_base::put_any(suborigin, diag::severity::verbose, 0x10a55, "item[%u]=0x%llx..., key=0x%llx...", (unsigned)i, *(unsigned long long*)&value_page->items[i].key, *(unsigned long long*)&key);
 
                 item_pos = i;
             }
@@ -854,7 +854,7 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     inline typename map<Key, T>::iterator map<Key, T>::itr_from_values(const value_level_iterator& values_itr) const noexcept {
         constexpr const char* suborigin = "itr_from_values";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a56, "Begin:");
 
         iterator itr(this, values_itr.page_pos(), values_itr.item_pos(), values_itr.edge(), diag_base::log());
 
@@ -868,13 +868,13 @@ namespace abc { namespace vmem {
     template <typename Key, typename T>
     inline void map<Key, T>::log_internals(std::function<std::string(const Key&)>&& format_key, diag::severity_t severity) {
         constexpr const char* suborigin = "log_internals";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a57, "Begin:");
 
         // Log key levels.
         if (!_key_stack.empty()) {
             std::size_t level = 0;
             for (typename key_level_stack::iterator key_stack_itr = _key_stack.rend(); key_stack_itr != _key_stack.rbegin(); key_stack_itr--, level++) {
-                diag_base::put_any(suborigin, severity, __TAG__, "key level=%zu:", level);
+                diag_base::put_any(suborigin, severity, 0x10a58, "key level=%zu:", level);
 
                 // IMPORTANT: Save the ptr instance to keep the page locked.
                 vmem::ptr<container_state> key_level_state_ptr = key_stack_itr.operator->();
@@ -882,7 +882,7 @@ namespace abc { namespace vmem {
                 map_key_level<Key> keys(key_level_state_ptr.operator->(), _pool, diag_base::log());
                 for (typename map_key_level<Key>::const_iterator keys_itr = keys.cbegin(); keys_itr != keys.cend(); keys_itr++) {
                     std::string key_str(format_key(keys_itr->key));
-                    diag_base::put_any(suborigin, severity, __TAG__, "  [ page_pos=0x%llx : item_pos=0x%x ] key>='%s' -> page_pos=0x%llx", 
+                    diag_base::put_any(suborigin, severity, 0x10a59, "  [ page_pos=0x%llx : item_pos=0x%x ] key>='%s' -> page_pos=0x%llx", 
                         (unsigned long long)keys_itr.page_pos(), (unsigned)keys_itr.item_pos(), key_str.c_str(), (unsigned long long)keys_itr->page_pos);
                 }
             }
@@ -890,16 +890,16 @@ namespace abc { namespace vmem {
 
         // Log value level.
         {
-            diag_base::put_any(suborigin, severity, __TAG__, "value level:");
+            diag_base::put_any(suborigin, severity, 0x10a5a, "value level:");
 
             for (typename value_level_container::const_iterator values_itr = _values.cbegin(); values_itr != _values.cend(); values_itr++) {
                 std::string key_str(format_key(values_itr->key));
-                diag_base::put_any(suborigin, severity, __TAG__, "  [ page_pos=0x%llx : item_pos=0x%x ] key='%s'", 
+                diag_base::put_any(suborigin, severity, 0x10a5b, "  [ page_pos=0x%llx : item_pos=0x%x ] key='%s'", 
                     (unsigned long long)values_itr.page_pos(), (unsigned)values_itr.item_pos(), key_str.c_str());
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a5c, "End:");
     }
 
 } }

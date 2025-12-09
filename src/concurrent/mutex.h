@@ -37,15 +37,15 @@ namespace abc { namespace concurrent {
         , _thread_id() {
 
         constexpr const char* suborigin = "mutex()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10894, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10895, "End:");
     }
 
 
     inline void mutex::lock() {
         constexpr const char* suborigin = "lock()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10896, "Begin:");
 
         {
             std::unique_lock<std::mutex> state_lock(_state_mutex);
@@ -53,7 +53,7 @@ namespace abc { namespace concurrent {
             std::thread::id this_thread_id = std::this_thread::get_id();
 
             if (_is_locked) {
-                diag_base::expect(suborigin, _thread_id != this_thread_id, __TAG__, "_thread_id != this_thread_id");
+                diag_base::expect(suborigin, _thread_id != this_thread_id, 0x10897, "_thread_id != this_thread_id");
 
                 _blocker.wait(state_lock, [=]{ return !_is_locked; });
             }
@@ -62,13 +62,13 @@ namespace abc { namespace concurrent {
             _thread_id = this_thread_id;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10898, "End:");
     }
 
 
     inline bool mutex::try_lock() {
         constexpr const char* suborigin = "try_lock()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10899, "Begin:");
 
         bool ret = false;
         {
@@ -83,7 +83,7 @@ namespace abc { namespace concurrent {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ret=%d", ret);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1089a, "End: ret=%d", ret);
 
         return ret;
     }
@@ -91,15 +91,15 @@ namespace abc { namespace concurrent {
 
     inline void mutex::unlock() {
         constexpr const char* suborigin = "unlock()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1089b, "Begin:");
 
         {
             std::lock_guard<std::mutex> state_lock(_state_mutex);
 
             std::thread::id this_thread_id = std::this_thread::get_id();
 
-            diag_base::expect(suborigin, _is_locked, __TAG__, "_is_locked");
-            diag_base::expect(suborigin, _thread_id == this_thread_id, __TAG__, "_thread_id == this_thread_id");
+            diag_base::expect(suborigin, _is_locked, 0x1089c, "_is_locked");
+            diag_base::expect(suborigin, _thread_id == this_thread_id, 0x1089d, "_thread_id == this_thread_id");
 
             _is_locked = false;
             _thread_id = std::thread::id();
@@ -107,7 +107,7 @@ namespace abc { namespace concurrent {
 
         _blocker.notify_one();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1089e, "End:");
     }
 
 

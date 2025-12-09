@@ -78,19 +78,19 @@ namespace abc { namespace gpio {
 
     inline line::~line() noexcept {
         constexpr const char* suborigin = "~line()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1089f, "Begin:");
 
         if (_fd >= 0) {
             close(_fd);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a0, "End:");
     }
 
 
     inline level_t line::get_level() const {
         constexpr const char* suborigin = "get_level()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a1, "Begin:");
 
         line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
@@ -98,7 +98,7 @@ namespace abc { namespace gpio {
 #endif        
 
         int ret = ::ioctl(_fd, ioctl::get_line_values, &values);
-        diag_base::expect(suborigin, ret >= 0, __TAG__, "ret >= 0");
+        diag_base::expect(suborigin, ret >= 0, 0x108a2, "ret >= 0");
 
         level_t level;
 #if ((__ABC__GPIO_VER) == 2)
@@ -107,7 +107,7 @@ namespace abc { namespace gpio {
         level = (values.values[0] & level::mask);
 #endif
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a3, "End: level=%u", level);
 
         return level;
     }
@@ -116,7 +116,7 @@ namespace abc { namespace gpio {
     template <typename Duration>
     level_t line::wait_for_level(level_t level, Duration timeout) const {
         constexpr const char* suborigin = "wait_for_level()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a4, "Begin:");
 
         clock::time_point start_tp = clock::now();
         clock::time_point current_tp = clock::now();
@@ -132,7 +132,7 @@ namespace abc { namespace gpio {
             current_level = get_level();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: current_level=%u", current_level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a5, "End: current_level=%u", current_level);
 
         return current_level;
     }
@@ -140,9 +140,9 @@ namespace abc { namespace gpio {
 
     inline level_t line::put_level(level_t level) const {
         constexpr const char* suborigin = "put_level()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a6, "Begin: level=%u", level);
 
-        diag_base::expect(suborigin, (level & ~level::mask) == 0, __TAG__, "(level & ~level::mask) == 0");
+        diag_base::expect(suborigin, (level & ~level::mask) == 0, 0x108a7, "(level & ~level::mask) == 0");
 
         line_values values{ };
 #if ((__ABC__GPIO_VER) == 2)
@@ -153,9 +153,9 @@ namespace abc { namespace gpio {
 #endif
 
         int ret = ::ioctl(_fd, ioctl::set_line_values, &values);
-        diag_base::expect(suborigin, ret >= 0, __TAG__, "ret >= 0");
+        diag_base::expect(suborigin, ret >= 0, 0x108a8, "ret >= 0");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108a9, "End: level=%u", level);
 
         return level;
     }
@@ -164,12 +164,12 @@ namespace abc { namespace gpio {
     template <typename Duration>
     inline level_t line::put_level(level_t level, Duration duration) const {
         constexpr const char* suborigin = "put_level(duration)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108aa, "Begin: level=%u", level);
 
         level = put_level(level);
         std::this_thread::sleep_for(duration);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: level=%u", level);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ab, "End: level=%u", level);
 
         return level;
     }

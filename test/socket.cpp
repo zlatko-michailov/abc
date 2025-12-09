@@ -358,7 +358,7 @@ void http_json_stream_server_request(bool& passed, test_context& context, abc::n
         passed = context.are_equal(request.headers[request_header_name].c_str(), request_header_value, 0x100f6) && passed;
     }
     catch (const std::exception& ex) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+        context.log()->put_any(origin, suborigin, abc::diag::severity::important, 0x10c6e, "client: EXCEPTION: %s", ex.what());
         throw;
     }
 }
@@ -405,7 +405,7 @@ void http_json_stream_server_body_and_response(bool& passed, test_context& conte
         }
     }
     catch (const std::exception& ex) {
-        context.log()->put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "client: EXCEPTION: %s", ex.what());
+        context.log()->put_any(origin, suborigin, abc::diag::severity::important, 0x10c6f, "client: EXCEPTION: %s", ex.what());
         throw;
     }
 }

@@ -91,7 +91,7 @@ inline board::board(abc::diag::log_ostream* log)
 
 inline void board::reset() {
     constexpr const char* suborigin = "reset()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107c1, "Begin:");
 
     _is_game_over      = false;
     _winner            = player_id::none;
@@ -99,18 +99,18 @@ inline void board::reset() {
     _board_state       = { };
     _move_count        = 0;
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107c2, "End:");
 }
 
 
 inline void board::accept_move(const move& move) {
     constexpr const char* suborigin = "accept_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107c3, "Begin: move={%u,%u}", move.row, move.col);
 
-    diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
-    diag_base::expect(suborigin, !is_game_over(), __TAG__, "!is_game_over()");
-    diag_base::expect(suborigin, get_move(move) == player_id::none, __TAG__, "get_move(move) == player_id::none"); 
-    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, __TAG__, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
+    diag_base::expect(suborigin, move.is_valid(), 0x107c4, "move.is_valid()");
+    diag_base::expect(suborigin, !is_game_over(), 0x107c5, "!is_game_over()");
+    diag_base::expect(suborigin, get_move(move) == player_id::none, 0x107c6, "get_move(move) == player_id::none"); 
+    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, 0x107c7, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
 
     set_move(move);
     check_winner(move);
@@ -119,17 +119,17 @@ inline void board::accept_move(const move& move) {
         switch_current_player_id();
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107c8, "End:");
 }
 
 
 inline void board::undo_move(const move& move) {
     constexpr const char* suborigin = "undo_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: move={%u,%u}", move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107c9, "Begin: move={%u,%u}", move.row, move.col);
 
-    diag_base::expect(suborigin, move.is_valid(), __TAG__, "move.is_valid()");
-    diag_base::expect(suborigin, get_move(move) != player_id::none, __TAG__, "get_move(move) != player_id::none"); 
-    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, __TAG__, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
+    diag_base::expect(suborigin, move.is_valid(), 0x107ca, "move.is_valid()");
+    diag_base::expect(suborigin, get_move(move) != player_id::none, 0x107cb, "get_move(move) != player_id::none"); 
+    diag_base::expect(suborigin, move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none, 0x107cc, "move.row == 0 || get_move({move.row - 1, move.col}) != player_id::none"); 
 
     if (!is_game_over()) {
         switch_current_player_id();
@@ -139,7 +139,7 @@ inline void board::undo_move(const move& move) {
     _winner = player_id::none;
     _is_game_over = false;
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107cd, "End:");
 }
 
 
@@ -156,7 +156,7 @@ inline player_id_t board::winner() const {
 inline player_id_t board::get_move(const move& move) const {
     constexpr const char* suborigin = "get_move()";
     count_t col_sz = col_size(move.col);
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107ce, "Begin: board_state=0x%16.16llx, col_sz=%u, move.row=%u", (unsigned long long)_board_state, col_sz, move.row);
 
     player_id_t ret = player_id::none;
     if (col_sz == 0 || move.row >= col_sz) {
@@ -166,7 +166,7 @@ inline player_id_t board::get_move(const move& move) const {
         ret = get_move_bits(move);
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: player_id=%u", ret);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107cf, "End: player_id=%u", ret);
 
     return ret;
 }
@@ -278,21 +278,21 @@ inline count_t board::col_size(count_t col) const {
 
 inline void board::inc_col_size(count_t col) {
     constexpr const char* suborigin = "inc_col_size()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d0, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 
     _board_state += (board_state_1 << col_pos(col));
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d1, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
 }
 
 
 inline void board::dec_col_size(count_t col) {
     constexpr const char* suborigin = "dec_col_size()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d2, "Begin: board_state=0x%16.16llx, col=%u", (unsigned long long)_board_state, col);
 
     _board_state -= (board_state_1 << col_pos(col));
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d3, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
 }
 
 
@@ -303,12 +303,12 @@ inline count_t board::col_pos(count_t col) const {
 
 inline player_id_t board::get_move_bits(const move& move) const {
     constexpr const char* suborigin = "get_move_bits()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d4, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
 
     count_t pos = move_pos(move);
     player_id_t move_bits = ( (_board_state >> pos) & move_mask );
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: bits=%u", move_bits);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d5, "End: bits=%u", move_bits);
 
     return move_bits;
 }
@@ -316,7 +316,7 @@ inline player_id_t board::get_move_bits(const move& move) const {
 
 inline void board::set_move_bits(const move& move, count_t bits) {
     constexpr const char* suborigin = "set_move_bits()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}, bits=%u", (unsigned long long)_board_state, move.row, move.col, bits);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d6, "Begin: board_state=0x%16.16llx, move={%u,%u}, bits=%u", (unsigned long long)_board_state, move.row, move.col, bits);
 
     count_t pos = move_pos(move);
 
@@ -324,19 +324,19 @@ inline void board::set_move_bits(const move& move, count_t bits) {
 
     _board_state |= ((board_state_t)bits << pos);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d7, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
 }
 
 
 inline void board::clear_move_bits(const move& move) {
     constexpr const char* suborigin = "clear_move_bits()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d8, "Begin: board_state=0x%16.16llx, move={%u,%u}", (unsigned long long)_board_state, move.row, move.col);
 
     count_t pos = move_pos(move);
 
     _board_state &= ( ~((board_state_t)move_mask << pos) );
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107d9, "End: board_state=0x%16.16llx", (unsigned long long)_board_state);
 }
 
 
@@ -356,13 +356,13 @@ inline player_agent::player_agent(abc::diag::log_ostream* log)
 
 inline void player_agent::reset(::game* game, player_id_t player_id, player_type_t player_type) {
     constexpr const char* suborigin = "reset()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, player_type=%u", player_id, player_type);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107da, "Begin: player_id=%u, player_type=%u", player_id, player_type);
 
     _game        = game;
     _player_id   = player_id;
     _player_type = player_type;
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107db, "End:");
 }
 
 
@@ -372,7 +372,7 @@ inline void player_agent::make_move_async() {
 
     std::thread(player_agent::make_move_proc, this).detach();
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107dc, "End:");
 }
 
 
@@ -395,7 +395,7 @@ inline void player_agent::make_move() {
             break;
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107dd, "End:");
 }
 
 
@@ -416,16 +416,16 @@ inline void player_agent::slow_make_move() {
 
     _game->accept_move(_player_id, best_move);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107de, "End: best_move={%u,%u}", best_move.row, best_move.col);
 }
 
 
 inline void player_agent::slow_make_first_move(move& best_move) {
     constexpr const char* suborigin = "slow_make_first_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107df, "Begin: player_id=%u", _player_id);
 
     unsigned move_count = _game->moves().size();
-    diag_base::expect(suborigin, move_count < 4, __TAG__, "move_count < 4");
+    diag_base::expect(suborigin, move_count < 4, 0x107e0, "move_count < 4");
 
     move mid_next{ _game->board().col_size(col_count / 2), col_count / 2 };
     move right{ 0, col_count / 2 + 1 };
@@ -446,13 +446,13 @@ inline void player_agent::slow_make_first_move(move& best_move) {
         best_move = right;
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e1, "End: best_move={%u,%u}", best_move.row, best_move.col);
 }
 
 
 inline int player_agent::slow_choose_max_depth() const {
     constexpr const char* suborigin = "slow_choose_max_depth()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e2, "Begin: player_id=%u", _player_id);
 
     unsigned move_count = _game->moves().size();
     int max_depth = -1;
@@ -473,7 +473,7 @@ inline int player_agent::slow_choose_max_depth() const {
         max_depth = 20;
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: max_depth=%d", max_depth);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e3, "End: max_depth=%d", max_depth);
 
     return max_depth;
 }
@@ -481,7 +481,7 @@ inline int player_agent::slow_choose_max_depth() const {
 
 inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int depth) {
     constexpr const char* suborigin = "slow_find_best_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, max_depth=%d, depth=%d", _player_id, max_depth, depth);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e4, "Begin: player_id=%u, max_depth=%d, depth=%d", _player_id, max_depth, depth);
 
     int best_score = -(2 * max_depth);
 
@@ -520,7 +520,7 @@ inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int
         }
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_score=%d", best_score);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e5, "End: best_score=%d", best_score);
 
     return best_score;
 }
@@ -528,23 +528,23 @@ inline int player_agent::slow_find_best_move(move& best_move, int max_depth, int
 
 inline void player_agent::fast_make_move() {
     constexpr const char* suborigin = "fast_make_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, board_state=0x%8.8x", _player_id, (unsigned)_game->board().state());
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e6, "Begin: player_id=%u, board_state=0x%8.8x", _player_id, (unsigned)_game->board().state());
 
     move best_move = fast_find_best_move();
     _game->accept_move(_player_id, best_move);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: best_move={%u,%u}", best_move.row, best_move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e7, "End: best_move={%u,%u}", best_move.row, best_move.col);
 }
 
 
 inline move player_agent::fast_find_best_move() {
     constexpr const char* suborigin = "fast_find_best_move()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, board_state=0x%16.16llx", _player_id, (unsigned long long)_game->board().state());
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107e8, "Begin: player_id=%u, board_state=0x%16.16llx", _player_id, (unsigned long long)_game->board().state());
 
     std::lock_guard<std::mutex> lock(_vmem->mutex);
 
     state_scores_map::iterator itr = ensure_board_state_in_map(_game->board().state());
-    diag_base::expect(suborigin, itr.can_deref(), __TAG__, "itr.can_deref()");
+    diag_base::expect(suborigin, itr.can_deref(), 0x107e9, "itr.can_deref()");
 
     move some_move;
     bool should_explore = true; //// TODO: Calculate exploration
@@ -597,8 +597,8 @@ inline move player_agent::fast_find_best_move() {
 
             if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::max) {
                 if (--rand_i == 0) {
-                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
-                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (max) mv={%u,%u}", mv.row, mv.col);
+                    diag_base::ensure(suborigin, mv.is_valid(), 0x107ea, "mv.is_valid()");
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107eb, "End: (max) mv={%u,%u}", mv.row, mv.col);
 
                     return mv;
                 }
@@ -620,8 +620,8 @@ inline move player_agent::fast_find_best_move() {
 
             if (_game->board().get_move(mv) == player_id::none && itr->value[c] == score::min) {
                 if (--rand_i == 0) {
-                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
-                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: (min) mv={%u,%u}", mv.row, mv.col);
+                    diag_base::ensure(suborigin, mv.is_valid(), 0x107ec, "mv.is_valid()");
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107ed, "End: (min) mv={%u,%u}", mv.row, mv.col);
 
                     return mv;
                 }
@@ -657,8 +657,8 @@ inline move player_agent::fast_find_best_move() {
                 }
 
                 if (rand_sum <= 0) {
-                    diag_base::ensure(suborigin, mv.is_valid(), __TAG__, "mv.is_valid()");
-                    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: mv={%u,%u}, curr_score=%d", mv.row, mv.col, curr_score);
+                    diag_base::ensure(suborigin, mv.is_valid(), 0x107ee, "mv.is_valid()");
+                    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107ef, "End: mv={%u,%u}, curr_score=%d", mv.row, mv.col, curr_score);
 
                     return mv;
                 }
@@ -666,7 +666,7 @@ inline move player_agent::fast_find_best_move() {
         }
     }
 
-    diag_base::assert(suborigin, false, __TAG__, "Impossible!");
+    diag_base::assert(suborigin, false, 0x107f0, "Impossible!");
 
     return some_move;
 }
@@ -674,7 +674,7 @@ inline move player_agent::fast_find_best_move() {
 
 inline void player_agent::learn() {
     constexpr const char* suborigin = "learn()";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u", _player_id);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f1, "Begin: player_id=%u", _player_id);
 
     // Learning is a process that takes place after a game is over.
     // If the game was won by the agent's player, a "reward" is added to the score of each move made by the learning player, but the final can't be higher `max`.
@@ -725,7 +725,7 @@ inline void player_agent::learn() {
         learning_key_board.accept_move(mv);
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f2, "End:");
 }
 
 
@@ -736,12 +736,12 @@ inline player_type_t player_agent::player_type() const {
 
 inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_state_t board_state) {
     constexpr const char* suborigin = "ensure_board_state_in_map";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f3, "Begin:");
 
     state_scores_map::iterator itr = _vmem->state_scores_map.find(board_state);
 
     if (itr.can_deref()) {
-        diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f4, "End:");
 
         return itr;
     }
@@ -757,10 +757,10 @@ inline state_scores_map::iterator player_agent::ensure_board_state_in_map(board_
 
     // Insert the item.
     state_scores_map::iterator_bool itr_b = _vmem->state_scores_map.insert(item);
-    diag_base::expect(suborigin, itr_b.second, __TAG__, "itr_b.second");
-    diag_base::expect(suborigin, itr_b.first.can_deref(), __TAG__, "itr_b.first.can_deref()");
+    diag_base::expect(suborigin, itr_b.second, 0x107f5, "itr_b.second");
+    diag_base::expect(suborigin, itr_b.first.can_deref(), 0x107f6, "itr_b.first.can_deref()");
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f7, "End:");
 
     return itr_b.first;
 }
@@ -790,13 +790,13 @@ inline game::game(const char* origin, abc::diag::log_ostream* log)
 
 inline void game::reset(const player_types& player_types) {
     constexpr const char* suborigin = "reset";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f8, "Begin:");
 
     _agent_x.reset(this, player_id::x, player_types.player_x_type);
     _agent_o.reset(this, player_id::o, player_types.player_o_type);
     _board.reset();
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107f9, "End:");
 }
 
 
@@ -811,15 +811,15 @@ inline void game::start() {
         _agent_o.make_move_async();
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107fa, "End:");
 }
 
 
 inline std::size_t game::accept_move(player_id_t player_id, const move& move) {
     constexpr const char* suborigin = "accept_move";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_id=%u, move={%u,%u}", player_id, move.row, move.col);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107fb, "Begin: player_id=%u, move={%u,%u}", player_id, move.row, move.col);
 
-    diag_base::expect(suborigin, player_id == _board.current_player_id(), __TAG__, "player_id == _board.current_player_id()");
+    diag_base::expect(suborigin, player_id == _board.current_player_id(), 0x107fc, "player_id == _board.current_player_id()");
 
     _board.accept_move(move);
     _moves.push_back(move);
@@ -853,7 +853,7 @@ inline std::size_t game::accept_move(player_id_t player_id, const move& move) {
         }
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: move_i=%zu", move_i);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107fd, "End: move_i=%zu", move_i);
 
     return move_i;
 }
@@ -881,7 +881,7 @@ inline void endpoint_game::reset(endpoint_game_id_t endpoint_game_id,
                                 player_type_t player_x_type, endpoint_player_id_t endpoint_player_x_id,
                                 player_type_t player_o_type, endpoint_player_id_t endpoint_player_o_id) {
     constexpr const char* suborigin = "reset";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: endpoint_game_id=%u", endpoint_game_id);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107fe, "Begin: endpoint_game_id=%u", endpoint_game_id);
 
     player_types player_types;
     player_types.player_x_type = player_x_type;
@@ -899,26 +899,26 @@ inline void endpoint_game::reset(endpoint_game_id_t endpoint_game_id,
         start();
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x107ff, "End:");
 }
 
 
 inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
     constexpr const char* suborigin = "claim_player";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10800, "Begin: player_i=%u", player_i);
 
-    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+    diag_base::expect(suborigin, player_i <= 1, 0x10801, "player_i <= 1");
 
     endpoint_player_id_t endpoint_player_id;
 
     if (player_i == 0) {
-        diag_base::expect(suborigin, !_endpoint_player_x.is_claimed, __TAG__, "!_endpoint_player_x.is_claimed");
+        diag_base::expect(suborigin, !_endpoint_player_x.is_claimed, 0x10802, "!_endpoint_player_x.is_claimed");
 
         endpoint_player_id = _endpoint_player_x.endpoint_player_id;
         _endpoint_player_x.is_claimed = true;
     }
     else {
-        diag_base::expect(suborigin, !_endpoint_player_o.is_claimed, __TAG__, "!_endpoint_player_o.is_claimed");
+        diag_base::expect(suborigin, !_endpoint_player_o.is_claimed, 0x10803, "!_endpoint_player_o.is_claimed");
 
         endpoint_player_id = _endpoint_player_o.endpoint_player_id;
         _endpoint_player_o.is_claimed = true;
@@ -928,7 +928,7 @@ inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
         start();
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: endpoint_player_id=%u", endpoint_player_id);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10804, "End: endpoint_player_id=%u", endpoint_player_id);
 
     return endpoint_player_id;
 }
@@ -936,13 +936,13 @@ inline endpoint_player_id_t endpoint_game::claim_player(unsigned player_i) {
 
 inline bool endpoint_game::is_player_claimed(unsigned player_i) {
     constexpr const char* suborigin = "is_player_claimed";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: player_i=%u", player_i);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10805, "Begin: player_i=%u", player_i);
 
-    diag_base::expect(suborigin, player_i <= 1, __TAG__, "player_i <= 1");
+    diag_base::expect(suborigin, player_i <= 1, 0x10806, "player_i <= 1");
 
     bool is_claimed = player_i == 0 ? _endpoint_player_x.is_claimed : _endpoint_player_o.is_claimed;
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: is_claimed=%d", is_claimed);
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10807, "End: is_claimed=%d", is_claimed);
 
     return is_claimed;
 }
@@ -999,7 +999,7 @@ inline void game_endpoint::process_rest_request(abc::net::http::server& http, co
         base::send_simple_response(http, err.status_code, err.reason_phrase.c_str(), err.content_type.c_str(), err.body.c_str(), err.tag);
     }
     catch (const std::runtime_error& err) {
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, err.what(), __TAG__);
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, err.what(), 0x10808);
     }
 
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10628, "End:");
@@ -1008,7 +1008,7 @@ inline void game_endpoint::process_rest_request(abc::net::http::server& http, co
 
 inline void game_endpoint::process_games(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_games";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10809, "Begin: method=%s, path=%s", request.method.c_str(), request.resource.path.c_str());
 
     const char* request_path_games = request.resource.path.c_str() + len_request_path_games;
     if (abc::ascii::are_equal_i(request_path_games, "")) {
@@ -1040,7 +1040,7 @@ inline void game_endpoint::process_games(abc::net::http::server& http, const abc
         }
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1080a, "End:");
 }
 
 
@@ -1048,11 +1048,11 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
     constexpr const char* suborigin = "create_game";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10629, "Begin: method=%s", request.method.c_str());
 
-    require_method_post(suborigin, __TAG__, request);
-    require_content_type_json(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x1080b, request);
+    require_content_type_json(suborigin, 0x1080c, request);
 
     player_types player_types = get_player_types(http, request);
-    require(suborigin, __TAG__, player_types.player_x_type != player_type::none && player_types.player_o_type != player_type::none,
+    require(suborigin, 0x1080d, player_types.player_x_type != player_type::none && player_types.player_o_type != player_type::none,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "At least one of the player types provided was invalid.");
 
     // Create an endpoint_game in memory.
@@ -1090,15 +1090,15 @@ inline void game_endpoint::create_game(abc::net::http::server& http, const abc::
     };
     json.put_value(abc::net::json::value(std::move(obj)));
 
-    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+    base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x1080e);
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1080f, "End:");
 }
 
 
 inline player_types game_endpoint::get_player_types(abc::net::http::server& http, const abc::net::http::request& /*request*/) {
     constexpr const char* suborigin = "get_player_types";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10810, "Begin:");
 
     player_types player_types{ player_type::none, player_type::none };
 
@@ -1110,21 +1110,21 @@ inline player_types game_endpoint::get_player_types(abc::net::http::server& http
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a JSON object.");
 
     abc::net::json::literal::object::const_iterator players_itr = val.object().find("players");
-    require(suborigin, __TAG__, players_itr != val.object().cend(),
+    require(suborigin, 0x10811, players_itr != val.object().cend(),
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" property.");
-    require(suborigin, __TAG__, players_itr->second.type() == abc::net::json::value_type::array,
+    require(suborigin, 0x10812, players_itr->second.type() == abc::net::json::value_type::array,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" array.");
 
     const abc::net::json::literal::array& players_array = players_itr->second.array();
-    require(suborigin, __TAG__, players_array.size() == 2,
+    require(suborigin, 0x10813, players_array.size() == 2,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a \"players\" array of size 2.");
 
     for (std::size_t i = 0; i < 2; i++) {
-        require(suborigin, __TAG__, players_array[i].type() == abc::net::json::value_type::string,
+        require(suborigin, 0x10814, players_array[i].type() == abc::net::json::value_type::string,
             abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a string item in the \"players\" array.");
 
         player_type_t current_player_type = player_type::from_text(players_array[i].string().c_str());
-        require(suborigin, __TAG__, current_player_type != player_type::none,
+        require(suborigin, 0x10815, current_player_type != player_type::none,
             abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Content error: Expected a valid player_type item in the \"players\" array.");
 
         // { player_x_type, player_o_type }
@@ -1136,7 +1136,7 @@ inline player_types game_endpoint::get_player_types(abc::net::http::server& http
         }
     }
 
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10816, "End:");
     return player_types;
 }
 
@@ -1145,14 +1145,14 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
     constexpr const char* suborigin = "claim_player";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10641, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)player_i);
 
-    require_method_post(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x10817, request);
 
-    require(suborigin, __TAG__, endpoint_game_id > 0 && player_i <= 1,
+    require(suborigin, 0x10818, endpoint_game_id > 0 && player_i <= 1,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID or player ID was supplied.");
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
-            require(suborigin, __TAG__, !_games[game_i].is_player_claimed(player_i),
+            require(suborigin, 0x10819, !_games[game_i].is_player_claimed(player_i),
                 abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The player with the given index has already been claimed.");
 
             endpoint_player_id_t endpoint_player_id = _games[game_i].claim_player(player_i);
@@ -1166,7 +1166,7 @@ inline void game_endpoint::claim_player(abc::net::http::server& http, const abc:
             };
             json.put_value(abc::net::json::value(std::move(obj)));
 
-            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x1081a);
 
             diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10647, "End:");
             return;
@@ -1183,8 +1183,8 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
     constexpr const char* suborigin = "accept_move";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1064a, "Begin: method=%s, game_id=%u, player_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, (unsigned)endpoint_player_id);
 
-    require_method_post(suborigin, __TAG__, request);
-    require_content_type_json(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x1081b, request);
+    require_content_type_json(suborigin, 0x1081c, request);
 
     require(suborigin, 0x1064b, abc::ascii::are_equal_i(moves, "moves"),
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: The segment after the player ID must be 'moves'.");
@@ -1221,14 +1221,14 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
 
     for (std::size_t game_i = 0; game_i < _games.size(); game_i++) {
         if (_games[game_i].id() == endpoint_game_id) {
-            require(suborigin, __TAG__, !_games[game_i].board().is_game_over(),
+            require(suborigin, 0x1081d, !_games[game_i].board().is_game_over(),
                 abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The game with the supplied ID is over.");
 
             player_id_t player_id = _games[game_i].player_id(endpoint_player_id);
             require(suborigin, 0x10659, player_id != player_id::none,
                abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "A player with the supplied ID was not found.");
 
-            require(suborigin, __TAG__, _games[game_i].board().get_move(mv) == player_id::none,
+            require(suborigin, 0x1081e, _games[game_i].board().get_move(mv) == player_id::none,
                 abc::net::http::status_code::Conflict, abc::net::http::reason_phrase::Conflict, abc::net::http::content_type::text, "State error: The square of the supplied move is occupied.");
 
             std::size_t move_i = _games[game_i].accept_move(player_id, mv);
@@ -1245,9 +1245,9 @@ inline void game_endpoint::accept_move(abc::net::http::server& http, const abc::
             }
             json.put_value(abc::net::json::value(std::move(obj)));
 
-            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x1081f);
 
-            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10820, "End:");
             return;
         }
     }
@@ -1262,7 +1262,7 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
     constexpr const char* suborigin = "get_moves";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10661, "Begin: method=%s, game_id=%u, move_i=%u", request.method.c_str(), (unsigned)endpoint_game_id, since_move_i);
 
-    require_method_get(suborigin, __TAG__, request);
+    require_method_get(suborigin, 0x10821, request);
 
     require(suborigin, 0x10662, endpoint_game_id > 0,
         abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Resource error: An invalid game ID was supplied.");
@@ -1292,9 +1292,9 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
             }
             json.put_value(abc::net::json::value(std::move(obj)));
 
-            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), __TAG__);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::json, sb.str().c_str(), 0x10822);
 
-            diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10823, "End:");
             return;
         }
     }
@@ -1307,9 +1307,9 @@ inline void game_endpoint::get_moves(abc::net::http::server& http, const abc::ne
 
 inline void game_endpoint::process_shutdown(abc::net::http::server& http, const abc::net::http::request& request) {
     constexpr const char* suborigin = "process_shutdown";
-    diag_base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin: method=%s", request.method.c_str());
+    diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x10824, "Begin: method=%s", request.method.c_str());
 
-    require_method_post(suborigin, __TAG__, request);
+    require_method_post(suborigin, 0x10825, request);
 
     base::set_shutdown_requested();
 

@@ -51,7 +51,7 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "basic_iterator_state()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10604, "Begin: _page_pos=0x%llx, _item_pos=0x%x", (unsigned long long)_page_pos, (unsigned)_item_pos);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a13, "End:");
     }
 
 
@@ -72,7 +72,7 @@ namespace abc { namespace vmem {
             && _item_pos == other._item_pos
             && _edge == other._edge;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: are_equal=%d", are_equal);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a14, "End: are_equal=%d", are_equal);
 
         return are_equal;
     }
@@ -187,7 +187,7 @@ namespace abc { namespace vmem {
             *this = Base::_container->next(*this);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a15, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
         return *this;
     }
@@ -204,7 +204,7 @@ namespace abc { namespace vmem {
             *this = Base::_container->next(*this);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a16, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
         return thisCopy;
     }
@@ -219,7 +219,7 @@ namespace abc { namespace vmem {
             *this = Base::_container->prev(*this);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a17, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
         return *this;
     }
@@ -236,7 +236,7 @@ namespace abc { namespace vmem {
             *this = Base::_container->prev(*this);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a18, "End: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
         return thisCopy;
     }
@@ -280,7 +280,7 @@ namespace abc { namespace vmem {
     template <typename Base, typename Container, typename T>
     inline T& basic_iterator<Base, Container, T>::deref() const {
         constexpr const char* suborigin = "deref()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a19, "Begin: _page_pos=0x%llx, _item_pos=0x%x, _edge=%u", (unsigned long long)base::_page_pos, (unsigned)base::_item_pos, (unsigned)base::_edge);
 
         pointer p = ptr();
         diag_base::expect(suborigin, p != nullptr, 0x10606, "p != nullptr");

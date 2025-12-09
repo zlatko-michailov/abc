@@ -94,10 +94,10 @@ namespace abc { namespace gpio {
 
     inline void pwm_emulator::set_duty_cycle(pwm_duty_cycle_t duty_cycle) {
         constexpr const char* suborigin = "set_duty_cycle()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: _duty_cycle=%u, duty_cycle=%u", _duty_cycle.load(), duty_cycle);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ac, "Begin: _duty_cycle=%u, duty_cycle=%u", _duty_cycle.load(), duty_cycle);
 
         if (duty_cycle == _duty_cycle) {
-            diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: (noop)");
+            diag_base::put_any(suborigin, diag::severity::callstack, 0x108ad, "End: (noop)");
             return;
         }
 
@@ -114,20 +114,20 @@ namespace abc { namespace gpio {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ae, "End:");
     }
 
 
     template <typename PwmDuration>
     inline void pwm_emulator::set_duty_cycle(pwm_duty_cycle_t duty_cycle, PwmDuration duration) {
         constexpr const char* suborigin = "set_duty_cycle(duration)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108af, "Begin:");
 
         set_duty_cycle(duty_cycle);
         std::this_thread::sleep_for(duration);
         set_duty_cycle(pwm_duty_cycle::min);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108b0, "End:");
     }
 
 

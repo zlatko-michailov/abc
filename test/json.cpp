@@ -63,7 +63,7 @@ bool test_json_value_boolean(test_context& context) {
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value& value) -> bool { 
-            return context.are_equal(value.boolean(), true, __TAG__, "%u");
+            return context.are_equal(value.boolean(), true, 0x10b9b, "%u");
         };
 
     return json_value_copy_move(context, std::move(value), abc::net::json::value_type::boolean, std::move(verifier));
@@ -75,7 +75,7 @@ bool test_json_value_number(test_context& context) {
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value& value) -> bool { 
-            return context.are_equal(value.number(), 42.5, __TAG__, "%f");
+            return context.are_equal(value.number(), 42.5, 0x10b9c, "%f");
         };
 
     return json_value_copy_move(context, std::move(value), abc::net::json::value_type::number, std::move(verifier));
@@ -89,7 +89,7 @@ bool test_json_value_string(test_context& context) {
 
     json_literal_verifier verifier = 
         [] (test_context& context, const abc::net::json::value& value) -> bool { 
-            return context.are_equal(value.string().c_str(), str, __TAG__);
+            return context.are_equal(value.string().c_str(), str, 0x10b9d);
         };
 
     return json_value_copy_move(context, std::move(value), abc::net::json::value_type::string, std::move(verifier));
@@ -111,11 +111,11 @@ bool test_json_value_array_simple(test_context& context) {
         [] (test_context& context, const abc::net::json::value& value) -> bool { 
             bool passed = true;
 
-            passed = context.are_equal(value.array()[0].type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[1].type(),            abc::net::json::value_type::null,  __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[2].boolean(),         true, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[3].number(),          99.9, __TAG__, "%4.1f") & passed;
-            passed = context.are_equal(value.array()[4].string().c_str(),  "xyz", __TAG__) & passed;
+            passed = context.are_equal(value.array()[0].type(),            abc::net::json::value_type::empty, 0x10b9e, "%u") & passed;
+            passed = context.are_equal(value.array()[1].type(),            abc::net::json::value_type::null,  0x10b9f, "%u") & passed;
+            passed = context.are_equal(value.array()[2].boolean(),         true, 0x10ba0, "%u") & passed;
+            passed = context.are_equal(value.array()[3].number(),          99.9, 0x10ba1, "%4.1f") & passed;
+            passed = context.are_equal(value.array()[4].string().c_str(),  "xyz", 0x10ba2) & passed;
 
             return passed;
         };
@@ -139,11 +139,11 @@ bool test_json_value_object_simple(test_context& context) {
         [] (test_context& context, const abc::net::json::value& value) -> bool { 
             bool passed = true;
 
-            passed = context.are_equal(value.object().at("empty").type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object().at("null").type(),             abc::net::json::value_type::null,  __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object().at("boolean").boolean(),       true, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object().at("number").number(),         99.9, __TAG__, "%4.1f") & passed;
-            passed = context.are_equal(value.object().at("string").string().c_str(), "xyz", __TAG__) & passed;
+            passed = context.are_equal(value.object().at("empty").type(),            abc::net::json::value_type::empty, 0x10ba3, "%u") & passed;
+            passed = context.are_equal(value.object().at("null").type(),             abc::net::json::value_type::null,  0x10ba4, "%u") & passed;
+            passed = context.are_equal(value.object().at("boolean").boolean(),       true, 0x10ba5, "%u") & passed;
+            passed = context.are_equal(value.object().at("number").number(),         99.9, 0x10ba6, "%4.1f") & passed;
+            passed = context.are_equal(value.object().at("string").string().c_str(), "xyz", 0x10ba7) & passed;
 
             return passed;
         };
@@ -174,11 +174,11 @@ bool test_json_value_array_complex(test_context& context) {
             bool passed = true;
 
             for (std::size_t i = 0; i < value.array().size(); i++) {
-                passed = context.are_equal(value.array()[i].array()[0].type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[i].array()[1].type(),            abc::net::json::value_type::null,  __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[i].array()[2].boolean(),         true, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[i].array()[3].number(),          99.9, __TAG__, "%4.1f") & passed;
-                passed = context.are_equal(value.array()[i].array()[4].string().c_str(),  "xyz", __TAG__) & passed;
+                passed = context.are_equal(value.array()[i].array()[0].type(),            abc::net::json::value_type::empty, 0x10ba8, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[1].type(),            abc::net::json::value_type::null,  0x10ba9, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[2].boolean(),         true, 0x10baa, "%u") & passed;
+                passed = context.are_equal(value.array()[i].array()[3].number(),          99.9, 0x10bab, "%4.1f") & passed;
+                passed = context.are_equal(value.array()[i].array()[4].string().c_str(),  "xyz", 0x10bac) & passed;
             }
 
             return passed;
@@ -212,11 +212,11 @@ bool test_json_value_object_complex(test_context& context) {
             bool passed = true;
 
             for (const std::string& key : keys) {
-                passed = context.are_equal(value.object().at(key).object().at("empty").type(),            abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object().at(key).object().at("null").type(),             abc::net::json::value_type::null,  __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object().at(key).object().at("boolean").boolean(),       true, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object().at(key).object().at("number").number(),         99.9, __TAG__, "%4.1f") & passed;
-                passed = context.are_equal(value.object().at(key).object().at("string").string().c_str(), "xyz", __TAG__) & passed;
+                passed = context.are_equal(value.object().at(key).object().at("empty").type(),            abc::net::json::value_type::empty, 0x10bad, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("null").type(),             abc::net::json::value_type::null,  0x10bae, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("boolean").boolean(),       true, 0x10baf, "%u") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("number").number(),         99.9, 0x10bb0, "%4.1f") & passed;
+                passed = context.are_equal(value.object().at(key).object().at("string").string().c_str(), "xyz", 0x10bb1) & passed;
             }
 
             return passed;
@@ -231,50 +231,50 @@ bool json_value_copy_move(test_context& context, abc::net::json::value&& value, 
 
     bool passed = true;
 
-    passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.type(), type, 0x10bb2, "%u") & passed;
     
     abc::net::json::value value_copy_ctr(value);
     {
-        passed = context.are_equal(value_copy_ctr.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_copy_ctr == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_copy_ctr.type(), type, 0x10bb3, "%u") & passed;
+        passed = context.are_equal(value_copy_ctr == value, true, 0x10bb4, "%u *") & passed;
         passed = verify_literal(context, value_copy_ctr) & passed;
 
-        passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value.type(), type, 0x10bb5, "%u") & passed;
+        passed = context.are_equal(value == value, true, 0x10bb6, "%u *") & passed;
         passed = verify_literal(context, value) & passed;
     }
 
     abc::net::json::value value_copy_assign(context.log());
     value_copy_assign = value;
     {
-        passed = context.are_equal(value_copy_assign.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_copy_assign == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_copy_assign.type(), type, 0x10bb7, "%u") & passed;
+        passed = context.are_equal(value_copy_assign == value, true, 0x10bb8, "%u *") & passed;
         passed = verify_literal(context, value_copy_assign) & passed;
         
-        passed = context.are_equal(value.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value.type(), type, 0x10bb9, "%u") & passed;
+        passed = context.are_equal(value == value, true, 0x10bba, "%u *") & passed;
         passed = verify_literal(context, value) & passed;
     }
 
     abc::net::json::value value_move_ctr(std::move(value_copy_ctr));
     {
-        passed = context.are_equal(value_move_ctr.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_move_ctr == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_move_ctr.type(), type, 0x10bbb, "%u") & passed;
+        passed = context.are_equal(value_move_ctr == value, true, 0x10bbc, "%u *") & passed;
         passed = verify_literal(context, value_move_ctr) & passed;
 
-        passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_copy_ctr == empty, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_copy_ctr.type(), abc::net::json::value_type::empty, 0x10bbd, "%u") & passed;
+        passed = context.are_equal(value_copy_ctr == empty, true, 0x10bbe, "%u *") & passed;
     }
 
     abc::net::json::value value_move_assign(context.log());
     value_move_assign = std::move(value_copy_assign);
     {
-        passed = context.are_equal(value_move_assign.type(), type, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_move_assign == value, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_move_assign.type(), type, 0x10bbf, "%u") & passed;
+        passed = context.are_equal(value_move_assign == value, true, 0x10bc0, "%u *") & passed;
         passed = verify_literal(context, value_move_assign) & passed;
 
-        passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, __TAG__, "%u") & passed;
-        passed = context.are_equal(value_copy_assign == empty, true, __TAG__, "%u *") & passed;
+        passed = context.are_equal(value_copy_assign.type(), abc::net::json::value_type::empty, 0x10bc1, "%u") & passed;
+        passed = context.are_equal(value_copy_assign == empty, true, 0x10bc2, "%u *") & passed;
     }
 
     return passed;
@@ -1122,7 +1122,7 @@ bool test_json_reader_null(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::null, 0x10bc3, "%u") & passed;
 
     return passed;
 }
@@ -1139,8 +1139,8 @@ bool test_json_reader_boolean_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.boolean(), false, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, 0x10bc4, "%u") & passed;
+    passed = context.are_equal(value.boolean(), false, 0x10bc5, "%u") & passed;
 
     return passed;
 }
@@ -1157,8 +1157,8 @@ bool test_json_reader_boolean_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.boolean(), true, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, 0x10bc6, "%u") & passed;
+    passed = context.are_equal(value.boolean(), true, 0x10bc7, "%u") & passed;
 
     return passed;
 }
@@ -1175,8 +1175,8 @@ bool test_json_reader_number_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), 42.0, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10bc8, "%u") & passed;
+    passed = context.are_equal(value.number(), 42.0, 0x10bc9, "%f") & passed;
 
     return passed;
 }
@@ -1193,8 +1193,8 @@ bool test_json_reader_number_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), 1234.567, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10bca, "%u") & passed;
+    passed = context.are_equal(value.number(), 1234.567, 0x10bcb, "%f") & passed;
 
     return passed;
 }
@@ -1211,8 +1211,8 @@ bool test_json_reader_number_03(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), -56.0, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10bcc, "%u") & passed;
+    passed = context.are_equal(value.number(), -56.0, 0x10bcd, "%f") & passed;
 
     return passed;
 }
@@ -1229,8 +1229,8 @@ bool test_json_reader_number_04(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), -67.899e23, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10bce, "%u") & passed;
+    passed = context.are_equal(value.number(), -67.899e23, 0x10bcf, "%f") & passed;
 
     return passed;
 }
@@ -1247,8 +1247,8 @@ bool test_json_reader_number_05(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), -88776655443322.999E-5, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10bd0, "%u") & passed;
+    passed = context.are_equal(value.number(), -88776655443322.999E-5, 0x10bd1, "%f") & passed;
 
     return passed;
 }
@@ -1265,8 +1265,8 @@ bool test_json_reader_string_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.string().c_str(), "", std::strlen(""), __TAG__) & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::string, 0x10bd2, "%u") & passed;
+    passed = context.are_equal(value.string().c_str(), "", std::strlen(""), 0x10bd3) & passed;
 
     return passed;
 }
@@ -1283,8 +1283,8 @@ bool test_json_reader_string_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.string().c_str(), "abc xyz", std::strlen("abc xyz"), __TAG__) & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::string, 0x10bd4, "%u") & passed;
+    passed = context.are_equal(value.string().c_str(), "abc xyz", std::strlen("abc xyz"), 0x10bd5) & passed;
 
     return passed;
 }
@@ -1301,8 +1301,8 @@ bool test_json_reader_string_03(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.string().c_str(), "a\nb\rc\txyz", std::strlen("a\nb\rc\txyz"), __TAG__) & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::string, 0x10bd6, "%u") & passed;
+    passed = context.are_equal(value.string().c_str(), "a\nb\rc\txyz", std::strlen("a\nb\rc\txyz"), 0x10bd7) & passed;
 
     return passed;
 }
@@ -1319,8 +1319,8 @@ bool test_json_reader_string_04(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.string().c_str(), "абв юя", std::strlen("абв юя"), __TAG__) & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::string, 0x10bd8, "%u") & passed;
+    passed = context.are_equal(value.string().c_str(), "абв юя", std::strlen("абв юя"), 0x10bd9) & passed;
 
     return passed;
 }
@@ -1337,8 +1337,8 @@ bool test_json_reader_array_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.array().size(), (std::size_t)0, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::array, 0x10bda, "%u") & passed;
+    passed = context.are_equal(value.array().size(), (std::size_t)0, 0x10bdb, "%zu") & passed;
     {
     }
 
@@ -1357,19 +1357,19 @@ bool test_json_reader_array_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.array().size(), (std::size_t)4, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::array, 0x10bdc, "%u") & passed;
+    passed = context.are_equal(value.array().size(), (std::size_t)4, 0x10bdd, "%zu") & passed;
     {
-        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[0].number(), 12.34, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::number, 0x10bde, "%u") & passed;
+        passed = context.are_equal(value.array()[0].number(), 12.34, 0x10bdf, "%f") & passed;
 
-        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
+        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::null, 0x10be0, "%u") & passed;
 
-        passed = context.are_equal(value.array()[2].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[2].boolean(), true, __TAG__, "%u") & passed;
+        passed = context.are_equal(value.array()[2].type(), abc::net::json::value_type::boolean, 0x10be1, "%u") & passed;
+        passed = context.are_equal(value.array()[2].boolean(), true, 0x10be2, "%u") & passed;
 
-        passed = context.are_equal(value.array()[3].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[3].string().c_str(), "abc", std::strlen("abc"), __TAG__) & passed;
+        passed = context.are_equal(value.array()[3].type(), abc::net::json::value_type::string, 0x10be3, "%u") & passed;
+        passed = context.are_equal(value.array()[3].string().c_str(), "abc", std::strlen("abc"), 0x10be4) & passed;
     }
 
     return passed;
@@ -1387,44 +1387,44 @@ bool test_json_reader_array_03(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.array().size(), (std::size_t)4, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::array, 0x10be5, "%u") & passed;
+    passed = context.are_equal(value.array().size(), (std::size_t)4, 0x10be6, "%zu") & passed;
     {
-        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[0].number(), 1.0, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::number, 0x10be7, "%u") & passed;
+        passed = context.are_equal(value.array()[0].number(), 1.0, 0x10be8, "%f") & passed;
 
-        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[1].number(), 2.0, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::number, 0x10be9, "%u") & passed;
+        passed = context.are_equal(value.array()[1].number(), 2.0, 0x10bea, "%f") & passed;
 
-        passed = context.are_equal(value.array()[2].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[2].array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.array()[2].type(), abc::net::json::value_type::array, 0x10beb, "%u") & passed;
+        passed = context.are_equal(value.array()[2].array().size(), (std::size_t)2, 0x10bec, "%zu") & passed;
         {
-            passed = context.are_equal(value.array()[2].array()[0].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[2].array()[0].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[2].array()[0].type(), abc::net::json::value_type::array, 0x10bed, "%u") & passed;
+            passed = context.are_equal(value.array()[2].array()[0].array().size(), (std::size_t)1, 0x10bee, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[2].array()[0].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[2].array()[0].array()[0].number(), 3.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.array()[2].array()[0].array()[0].type(), abc::net::json::value_type::number, 0x10bef, "%u") & passed;
+                passed = context.are_equal(value.array()[2].array()[0].array()[0].number(), 3.0, 0x10bf0, "%f") & passed;
             }
 
-            passed = context.are_equal(value.array()[2].array()[1].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[2].array()[1].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[2].array()[1].type(), abc::net::json::value_type::array, 0x10bf1, "%u") & passed;
+            passed = context.are_equal(value.array()[2].array()[1].array().size(), (std::size_t)1, 0x10bf2, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[2].array()[1].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[2].array()[1].array()[0].number(), 4.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.array()[2].array()[1].array()[0].type(), abc::net::json::value_type::number, 0x10bf3, "%u") & passed;
+                passed = context.are_equal(value.array()[2].array()[1].array()[0].number(), 4.0, 0x10bf4, "%f") & passed;
             }
         }
 
-        passed = context.are_equal(value.array()[3].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[3].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.array()[3].type(), abc::net::json::value_type::array, 0x10bf5, "%u") & passed;
+        passed = context.are_equal(value.array()[3].array().size(), (std::size_t)1, 0x10bf6, "%zu") & passed;
         {
-            passed = context.are_equal(value.array()[3].array()[0].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[3].array()[0].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[3].array()[0].type(), abc::net::json::value_type::array, 0x10bf7, "%u") & passed;
+            passed = context.are_equal(value.array()[3].array()[0].array().size(), (std::size_t)1, 0x10bf8, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[3].array()[0].array()[0].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[3].array()[0].array()[0].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.array()[3].array()[0].array()[0].type(), abc::net::json::value_type::array, 0x10bf9, "%u") & passed;
+                passed = context.are_equal(value.array()[3].array()[0].array()[0].array().size(), (std::size_t)1, 0x10bfa, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.array()[3].array()[0].array()[0].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.array()[3].array()[0].array()[0].array()[0].number(), 5.0, __TAG__, "%f") & passed;
+                    passed = context.are_equal(value.array()[3].array()[0].array()[0].array()[0].type(), abc::net::json::value_type::number, 0x10bfb, "%u") & passed;
+                    passed = context.are_equal(value.array()[3].array()[0].array()[0].array()[0].number(), 5.0, 0x10bfc, "%f") & passed;
                 }
             }
         }
@@ -1445,8 +1445,8 @@ bool test_json_reader_object_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.object().size(), (std::size_t)0, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::object, 0x10bfd, "%u") & passed;
+    passed = context.are_equal(value.object().size(), (std::size_t)0, 0x10bfe, "%zu") & passed;
     {
     }
 
@@ -1474,19 +1474,19 @@ bool test_json_reader_object_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.object().size(), (std::size_t)4, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::object, 0x10bff, "%u") & passed;
+    passed = context.are_equal(value.object().size(), (std::size_t)4, 0x10c00, "%zu") & passed;
     {
-        passed = context.are_equal(value.object()["a"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a"].number(), 12.34, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.object()["a"].type(), abc::net::json::value_type::number, 0x10c01, "%u") & passed;
+        passed = context.are_equal(value.object()["a"].number(), 12.34, 0x10c02, "%f") & passed;
 
-        passed = context.are_equal(value.object()["bb"].type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
+        passed = context.are_equal(value.object()["bb"].type(), abc::net::json::value_type::null, 0x10c03, "%u") & passed;
 
-        passed = context.are_equal(value.object()["ccc"].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["ccc"].boolean(), true, __TAG__, "%u") & passed;
+        passed = context.are_equal(value.object()["ccc"].type(), abc::net::json::value_type::boolean, 0x10c04, "%u") & passed;
+        passed = context.are_equal(value.object()["ccc"].boolean(), true, 0x10c05, "%u") & passed;
 
-        passed = context.are_equal(value.object()["dddd"].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["dddd"].string().c_str(), "abc", std::strlen("abc"), __TAG__) & passed;
+        passed = context.are_equal(value.object()["dddd"].type(), abc::net::json::value_type::string, 0x10c06, "%u") & passed;
+        passed = context.are_equal(value.object()["dddd"].string().c_str(), "abc", std::strlen("abc"), 0x10c07) & passed;
     }
 
     return passed;
@@ -1523,44 +1523,44 @@ bool test_json_reader_object_03(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.object().size(), (std::size_t)4, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::object, 0x10c08, "%u") & passed;
+    passed = context.are_equal(value.object().size(), (std::size_t)4, 0x10c09, "%zu") & passed;
     {
-        passed = context.are_equal(value.object()["a1"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a1"].number(), 1.0, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.object()["a1"].type(), abc::net::json::value_type::number, 0x10c0a, "%u") & passed;
+        passed = context.are_equal(value.object()["a1"].number(), 1.0, 0x10c0b, "%f") & passed;
 
-        passed = context.are_equal(value.object()["a2"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a2"].number(), 2.0, __TAG__, "%f") & passed;
+        passed = context.are_equal(value.object()["a2"].type(), abc::net::json::value_type::number, 0x10c0c, "%u") & passed;
+        passed = context.are_equal(value.object()["a2"].number(), 2.0, 0x10c0d, "%f") & passed;
 
-        passed = context.are_equal(value.object()["a3"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a3"].object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.object()["a3"].type(), abc::net::json::value_type::object, 0x10c0e, "%u") & passed;
+        passed = context.are_equal(value.object()["a3"].object().size(), (std::size_t)2, 0x10c0f, "%zu") & passed;
         {
-            passed = context.are_equal(value.object()["a3"].object()["a31"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a3"].object()["a31"].object().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a3"].object()["a31"].type(), abc::net::json::value_type::object, 0x10c10, "%u") & passed;
+            passed = context.are_equal(value.object()["a3"].object()["a31"].object().size(), (std::size_t)1, 0x10c11, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a3"].object()["a31"].object()["a313"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a3"].object()["a31"].object()["a313"].number(), 3.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.object()["a3"].object()["a31"].object()["a313"].type(), abc::net::json::value_type::number, 0x10c12, "%u") & passed;
+                passed = context.are_equal(value.object()["a3"].object()["a31"].object()["a313"].number(), 3.0, 0x10c13, "%f") & passed;
             }
 
-            passed = context.are_equal(value.object()["a3"].object()["a32"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a3"].object()["a32"].object().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a3"].object()["a32"].type(), abc::net::json::value_type::object, 0x10c14, "%u") & passed;
+            passed = context.are_equal(value.object()["a3"].object()["a32"].object().size(), (std::size_t)1, 0x10c15, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a3"].object()["a32"].object()["a324"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a3"].object()["a32"].object()["a324"].number(), 4.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.object()["a3"].object()["a32"].object()["a324"].type(), abc::net::json::value_type::number, 0x10c16, "%u") & passed;
+                passed = context.are_equal(value.object()["a3"].object()["a32"].object()["a324"].number(), 4.0, 0x10c17, "%f") & passed;
             }
         }
 
-        passed = context.are_equal(value.object()["a5"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a5"].object().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.object()["a5"].type(), abc::net::json::value_type::object, 0x10c18, "%u") & passed;
+        passed = context.are_equal(value.object()["a5"].object().size(), (std::size_t)1, 0x10c19, "%zu") & passed;
         {
-            passed = context.are_equal(value.object()["a5"].object()["a51"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a5"].object()["a51"].object().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a5"].object()["a51"].type(), abc::net::json::value_type::object, 0x10c1a, "%u") & passed;
+            passed = context.are_equal(value.object()["a5"].object()["a51"].object().size(), (std::size_t)1, 0x10c1b, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].type(), abc::net::json::value_type::object, 0x10c1c, "%u") & passed;
+                passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object().size(), (std::size_t)1, 0x10c1d, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object()["a5123"].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object()["a5123"].number(), 5.0, __TAG__, "%f") & passed;
+                    passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object()["a5123"].type(), abc::net::json::value_type::number, 0x10c1e, "%u") & passed;
+                    passed = context.are_equal(value.object()["a5"].object()["a51"].object()["a512"].object()["a5123"].number(), 5.0, 0x10c1f, "%f") & passed;
                 }
             }
         }
@@ -1593,56 +1593,56 @@ bool test_json_reader_mixed_01(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::array, 0x10c20, "%u") & passed;
+    passed = context.are_equal(value.array().size(), (std::size_t)2, 0x10c21, "%zu") & passed;
     {
-        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[0].object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.array()[0].type(), abc::net::json::value_type::object, 0x10c22, "%u") & passed;
+        passed = context.are_equal(value.array()[0].object().size(), (std::size_t)2, 0x10c23, "%zu") & passed;
         {
-            passed = context.are_equal(value.array()[0].object()["a11"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[0].object()["a11"].array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[0].object()["a11"].type(), abc::net::json::value_type::array, 0x10c24, "%u") & passed;
+            passed = context.are_equal(value.array()[0].object()["a11"].array().size(), (std::size_t)2, 0x10c25, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[0].object()["a11"].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[0].object()["a11"].array()[0].number(), 1.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.array()[0].object()["a11"].array()[0].type(), abc::net::json::value_type::number, 0x10c26, "%u") & passed;
+                passed = context.are_equal(value.array()[0].object()["a11"].array()[0].number(), 1.0, 0x10c27, "%f") & passed;
 
-                passed = context.are_equal(value.array()[0].object()["a11"].array()[1].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[0].object()["a11"].array()[1].boolean(), true, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.array()[0].object()["a11"].array()[1].type(), abc::net::json::value_type::boolean, 0x10c28, "%u") & passed;
+                passed = context.are_equal(value.array()[0].object()["a11"].array()[1].boolean(), true, 0x10c29, "%u") & passed;
             }
 
-            passed = context.are_equal(value.array()[0].object()["a12"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[0].object()["a12"].array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[0].object()["a12"].type(), abc::net::json::value_type::array, 0x10c2a, "%u") & passed;
+            passed = context.are_equal(value.array()[0].object()["a12"].array().size(), (std::size_t)2, 0x10c2b, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[0].object()["a12"].array()[0].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[0].object()["a12"].array()[0].string().c_str(), "abc", std::strlen("abc"), __TAG__) & passed;
+                passed = context.are_equal(value.array()[0].object()["a12"].array()[0].type(), abc::net::json::value_type::string, 0x10c2c, "%u") & passed;
+                passed = context.are_equal(value.array()[0].object()["a12"].array()[0].string().c_str(), "abc", std::strlen("abc"), 0x10c2d) & passed;
 
-                passed = context.are_equal(value.array()[0].object()["a12"].array()[1].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[0].object()["a12"].array()[1].number(), 2.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.array()[0].object()["a12"].array()[1].type(), abc::net::json::value_type::number, 0x10c2e, "%u") & passed;
+                passed = context.are_equal(value.array()[0].object()["a12"].array()[1].number(), 2.0, 0x10c2f, "%f") & passed;
             }
         }
 
-        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.array()[1].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.array()[1].type(), abc::net::json::value_type::array, 0x10c30, "%u") & passed;
+        passed = context.are_equal(value.array()[1].array().size(), (std::size_t)1, 0x10c31, "%zu") & passed;
         {
-            passed = context.are_equal(value.array()[1].array()[0].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.array()[1].array()[0].object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.array()[1].array()[0].type(), abc::net::json::value_type::object, 0x10c32, "%u") & passed;
+            passed = context.are_equal(value.array()[1].array()[0].object().size(), (std::size_t)2, 0x10c33, "%zu") & passed;
             {
-                passed = context.are_equal(value.array()[1].array()[0].object()["a211"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array().size(), (std::size_t)3, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.array()[1].array()[0].object()["a211"].type(), abc::net::json::value_type::array, 0x10c34, "%u") & passed;
+                passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array().size(), (std::size_t)3, 0x10c35, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[0].number(), 4.0, __TAG__, "%f") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[0].type(), abc::net::json::value_type::number, 0x10c36, "%u") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[0].number(), 4.0, 0x10c37, "%f") & passed;
 
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[1].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[1].string().c_str(), "def", std::strlen("def"), __TAG__) & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[1].type(), abc::net::json::value_type::string, 0x10c38, "%u") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[1].string().c_str(), "def", std::strlen("def"), 0x10c39) & passed;
 
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[2].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[2].boolean(), false, __TAG__, "%u") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[2].type(), abc::net::json::value_type::boolean, 0x10c3a, "%u") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a211"].array()[2].boolean(), false, 0x10c3b, "%u") & passed;
                 }
 
-                passed = context.are_equal(value.array()[1].array()[0].object()["a212"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.array()[1].array()[0].object()["a212"].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.array()[1].array()[0].object()["a212"].type(), abc::net::json::value_type::array, 0x10c3c, "%u") & passed;
+                passed = context.are_equal(value.array()[1].array()[0].object()["a212"].array().size(), (std::size_t)1, 0x10c3d, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.array()[1].array()[0].object()["a212"].array()[0].type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
+                    passed = context.are_equal(value.array()[1].array()[0].object()["a212"].array()[0].type(), abc::net::json::value_type::null, 0x10c3e, "%u") & passed;
                 }
             }
         }
@@ -1675,56 +1675,56 @@ bool test_json_reader_mixed_02(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::object, 0x10c3f, "%u") & passed;
+    passed = context.are_equal(value.object().size(), (std::size_t)2, 0x10c40, "%zu") & passed;
     {
-        passed = context.are_equal(value.object()["a1"].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a1"].object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.object()["a1"].type(), abc::net::json::value_type::object, 0x10c41, "%u") & passed;
+        passed = context.are_equal(value.object()["a1"].object().size(), (std::size_t)2, 0x10c42, "%zu") & passed;
         {
-            passed = context.are_equal(value.object()["a1"].object()["a11"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a1"].object()["a11"].array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a1"].object()["a11"].type(), abc::net::json::value_type::array, 0x10c43, "%u") & passed;
+            passed = context.are_equal(value.object()["a1"].object()["a11"].array().size(), (std::size_t)2, 0x10c44, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[0].number(), 1.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[0].type(), abc::net::json::value_type::number, 0x10c45, "%u") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[0].number(), 1.0, 0x10c46, "%f") & passed;
 
-                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[1].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[1].boolean(), true, __TAG__, "%u") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[1].type(), abc::net::json::value_type::boolean, 0x10c47, "%u") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a11"].array()[1].boolean(), true, 0x10c48, "%u") & passed;
             }
 
-            passed = context.are_equal(value.object()["a1"].object()["a12"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a1"].object()["a12"].array().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a1"].object()["a12"].type(), abc::net::json::value_type::array, 0x10c49, "%u") & passed;
+            passed = context.are_equal(value.object()["a1"].object()["a12"].array().size(), (std::size_t)2, 0x10c4a, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[0].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[0].string().c_str(), "abc", std::strlen("abc"), __TAG__) & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[0].type(), abc::net::json::value_type::string, 0x10c4b, "%u") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[0].string().c_str(), "abc", std::strlen("abc"), 0x10c4c) & passed;
 
-                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[1].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[1].number(), 2.0, __TAG__, "%f") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[1].type(), abc::net::json::value_type::number, 0x10c4d, "%u") & passed;
+                passed = context.are_equal(value.object()["a1"].object()["a12"].array()[1].number(), 2.0, 0x10c4e, "%f") & passed;
             }
         }
 
-        passed = context.are_equal(value.object()["a2"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-        passed = context.are_equal(value.object()["a2"].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+        passed = context.are_equal(value.object()["a2"].type(), abc::net::json::value_type::array, 0x10c4f, "%u") & passed;
+        passed = context.are_equal(value.object()["a2"].array().size(), (std::size_t)1, 0x10c50, "%zu") & passed;
         {
-            passed = context.are_equal(value.object()["a2"].array()[0].type(), abc::net::json::value_type::object, __TAG__, "%u") & passed;
-            passed = context.are_equal(value.object()["a2"].array()[0].object().size(), (std::size_t)2, __TAG__, "%zu") & passed;
+            passed = context.are_equal(value.object()["a2"].array()[0].type(), abc::net::json::value_type::object, 0x10c51, "%u") & passed;
+            passed = context.are_equal(value.object()["a2"].array()[0].object().size(), (std::size_t)2, 0x10c52, "%zu") & passed;
             {
-                passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array().size(), (std::size_t)3, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].type(), abc::net::json::value_type::array, 0x10c53, "%u") & passed;
+                passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array().size(), (std::size_t)3, 0x10c54, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[0].type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[0].number(), 4.0, __TAG__, "%f") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[0].type(), abc::net::json::value_type::number, 0x10c55, "%u") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[0].number(), 4.0, 0x10c56, "%f") & passed;
 
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[1].type(), abc::net::json::value_type::string, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[1].string().c_str(), "def", std::strlen("def"), __TAG__) & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[1].type(), abc::net::json::value_type::string, 0x10c57, "%u") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[1].string().c_str(), "def", std::strlen("def"), 0x10c58) & passed;
 
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[2].type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[2].boolean(), false, __TAG__, "%u") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[2].type(), abc::net::json::value_type::boolean, 0x10c59, "%u") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a211"].array()[2].boolean(), false, 0x10c5a, "%u") & passed;
                 }
 
-                passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].type(), abc::net::json::value_type::array, __TAG__, "%u") & passed;
-                passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].array().size(), (std::size_t)1, __TAG__, "%zu") & passed;
+                passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].type(), abc::net::json::value_type::array, 0x10c5b, "%u") & passed;
+                passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].array().size(), (std::size_t)1, 0x10c5c, "%zu") & passed;
                 {
-                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].array()[0].type(), abc::net::json::value_type::null, __TAG__, "%u") & passed;
+                    passed = context.are_equal(value.object()["a2"].array()[0].object()["a212"].array()[0].type(), abc::net::json::value_type::null, 0x10c5d, "%u") & passed;
                 }
             }
         }
@@ -2835,7 +2835,7 @@ bool test_json_writer(test_context& context, const abc::net::json::value& value,
 
     writer.put_value(value);
 
-    passed = context.are_equal(sb.str().c_str(), expected, __TAG__) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, 0x10c5e) && passed;
 
     return passed;
 }
@@ -2879,14 +2879,14 @@ bool test_json_reader_move(test_context& context) {
     bool passed = true;
 
     abc::net::json::value value = reader1.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.boolean(), false, __TAG__, "%u") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::boolean, 0x10c5f, "%u") & passed;
+    passed = context.are_equal(value.boolean(), false, 0x10c60, "%u") & passed;
 
     abc::net::json::reader reader2(std::move(reader1));
 
     value = reader2.get_value();
-    passed = context.are_equal(value.type(), abc::net::json::value_type::number, __TAG__, "%u") & passed;
-    passed = context.are_equal(value.number(), 42.0, __TAG__, "%f") & passed;
+    passed = context.are_equal(value.type(), abc::net::json::value_type::number, 0x10c61, "%u") & passed;
+    passed = context.are_equal(value.number(), 42.0, 0x10c62, "%f") & passed;
 
     return passed;
 }
@@ -2936,7 +2936,7 @@ bool test_json_writer_move(test_context& context) {
 
     writer2.put_value(42.0);
 
-    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), __TAG__) && passed;
+    passed = context.are_equal(sb.str().c_str(), expected, std::strlen(expected), 0x10c63) && passed;
 
     return passed;
 }

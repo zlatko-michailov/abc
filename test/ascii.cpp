@@ -135,20 +135,20 @@ bool test_ascii_equal_i_n(test_context& context) {
 bool test_ascii_less(test_context& context) {
     bool passed = true;
 
-    passed = context.are_equal(abc::ascii::is_less(nullptr, nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less(nullptr, ""), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less(nullptr, "abc"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("", nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abc", nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("", ""), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("", "abc"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abc", ""), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abc", "abc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("aBc", "aBc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abc", "abcd"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abcd", "abc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("aBc", "abc"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less("abc", "aBc"), false, __TAG__, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less(nullptr, nullptr), false, 0x10aa8, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less(nullptr, ""), true, 0x10aa9, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less(nullptr, "abc"), true, 0x10aaa, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("", nullptr), false, 0x10aab, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abc", nullptr), false, 0x10aac, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("", ""), false, 0x10aad, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("", "abc"), true, 0x10aae, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abc", ""), false, 0x10aaf, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abc", "abc"), false, 0x10ab0, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("aBc", "aBc"), false, 0x10ab1, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abc", "abcd"), true, 0x10ab2, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abcd", "abc"), false, 0x10ab3, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("aBc", "abc"), true, 0x10ab4, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less("abc", "aBc"), false, 0x10ab5, "%d") && passed;
 
     return passed;
 }
@@ -157,30 +157,30 @@ bool test_ascii_less(test_context& context) {
 bool test_ascii_less_n(test_context& context) {
     bool passed = true;
 
-    passed = context.are_equal(abc::ascii::is_less_n(nullptr, nullptr, 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n(nullptr, "", 3), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n(nullptr, "abc", 0), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("", nullptr, 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", nullptr, 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("", "", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("", "abc", 5), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("", "abc", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "abc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("aBc", "aBc", 2), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "abcd", 5), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "abcd", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abcd", "abc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abcd", "abc", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 5), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 2), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 1), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 2), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 1), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 0), false, __TAG__, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n(nullptr, nullptr, 3), false, 0x10ab6, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n(nullptr, "", 3), true, 0x10ab7, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n(nullptr, "abc", 0), true, 0x10ab8, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("", nullptr, 3), false, 0x10ab9, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", nullptr, 0), false, 0x10aba, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("", "", 3), false, 0x10abb, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("", "abc", 5), true, 0x10abc, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("", "abc", 0), false, 0x10abd, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "", 5), false, 0x10abe, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "", 0), false, 0x10abf, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "abc", 5), false, 0x10ac0, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("aBc", "aBc", 2), false, 0x10ac1, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "abcd", 5), true, 0x10ac2, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "abcd", 3), false, 0x10ac3, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abcd", "abc", 5), false, 0x10ac4, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abcd", "abc", 3), false, 0x10ac5, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 5), true, 0x10ac6, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 2), true, 0x10ac7, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 1), false, 0x10ac8, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("aBc", "abc", 0), false, 0x10ac9, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 5), false, 0x10aca, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 2), false, 0x10acb, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 1), false, 0x10acc, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_n("abc", "aBc", 0), false, 0x10acd, "%d") && passed;
 
     return passed;
 }
@@ -189,18 +189,18 @@ bool test_ascii_less_n(test_context& context) {
 bool test_ascii_less_i(test_context& context) {
     bool passed = true;
 
-    passed = context.are_equal(abc::ascii::is_less_i(nullptr, nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i(nullptr, ""), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i(nullptr, "abc"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("", nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("abc", nullptr), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("", ""), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("abc", "abc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("aBc", "aBc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("abc", "abcd"), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("abcd", "abc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("aBc", "abc"), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i("abc", "aBc"), false, __TAG__, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i(nullptr, nullptr), false, 0x10ace, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i(nullptr, ""), true, 0x10acf, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i(nullptr, "abc"), true, 0x10ad0, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("", nullptr), false, 0x10ad1, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("abc", nullptr), false, 0x10ad2, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("", ""), false, 0x10ad3, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("abc", "abc"), false, 0x10ad4, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("aBc", "aBc"), false, 0x10ad5, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("abc", "abcd"), true, 0x10ad6, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("abcd", "abc"), false, 0x10ad7, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("aBc", "abc"), false, 0x10ad8, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i("abc", "aBc"), false, 0x10ad9, "%d") && passed;
 
     return passed;
 }
@@ -209,30 +209,30 @@ bool test_ascii_less_i(test_context& context) {
 bool test_ascii_less_i_n(test_context& context) {
     bool passed = true;
 
-    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, nullptr, 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, "", 3), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, "abc", 0), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("", nullptr, 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", nullptr, 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("", "", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("", "abc", 5), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("", "abc", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "aBc", 2), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abcd", 5), true, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abcd", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abcd", "abc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abcd", "abc", 3), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 2), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 1), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 0), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 5), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 2), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 1), false, __TAG__, "%d") && passed;
-    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 0), false, __TAG__, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, nullptr, 3), false, 0x10ada, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, "", 3), true, 0x10adb, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n(nullptr, "abc", 0), true, 0x10adc, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("", nullptr, 3), false, 0x10add, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", nullptr, 0), false, 0x10ade, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("", "", 3), false, 0x10adf, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("", "abc", 5), true, 0x10ae0, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("", "abc", 0), false, 0x10ae1, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "", 5), false, 0x10ae2, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "", 0), false, 0x10ae3, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abc", 5), false, 0x10ae4, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "aBc", 2), false, 0x10ae5, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abcd", 5), true, 0x10ae6, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "abcd", 3), false, 0x10ae7, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abcd", "abc", 5), false, 0x10ae8, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abcd", "abc", 3), false, 0x10ae9, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 5), false, 0x10aea, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 2), false, 0x10aeb, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 1), false, 0x10aec, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("aBc", "abc", 0), false, 0x10aed, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 5), false, 0x10aee, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 2), false, 0x10aef, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 1), false, 0x10af0, "%d") && passed;
+    passed = context.are_equal(abc::ascii::is_less_i_n("abc", "aBc", 0), false, 0x10af1, "%d") && passed;
 
     return passed;
 }

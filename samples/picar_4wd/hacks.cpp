@@ -169,7 +169,7 @@ void measure_obstacle_ultrasonic(const abc::gpio::chip& chip, abc::diag::log_ost
         const std::size_t max_distance_mm = 500;
         std::size_t distance_mm = ultrasonic_mm.measure_distance(max_distance_mm);
 
-        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "mm = %zu", distance_mm);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10840, "mm = %zu", distance_mm);
 
         // Sleep for 1 sec between iterations.
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -259,7 +259,7 @@ void turn_servo(abc::diag::log_ostream& log) {
     for (std::uint32_t duty_cycle : duty_cycles) {
         const milliseconds sleep_duration = milliseconds(500);
 
-        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "duty_cycle = %u", duty_cycle);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10841, "duty_cycle = %u", duty_cycle);
 
         servo.set_duty_cycle(duty_cycle);
 
@@ -383,7 +383,7 @@ void measure_grayscale(abc::diag::log_ostream& log) {
     for (int i = 0; i < 10; i++) {
         abc::smbus::grayscale_values values = grayscale.get_values();
 
-        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "left = %4.4x, center = %4.4x, right = %4.4x", values.left, values.center, values.right);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10842, "left = %4.4x, center = %4.4x, right = %4.4x", values.left, values.center, values.right);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -408,7 +408,7 @@ void measure_battery_controller(abc::diag::log_ostream& log) {
             battery = controller.get_noreg_word(hat);
         }
 
-        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "battery = %4.4x", battery);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10843, "battery = %4.4x", battery);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -427,7 +427,7 @@ void measure_battery_adc(abc::diag::log_ostream& log) {
     for (int i = 0; i < 10; i++) {
         std::uint16_t value = battery.get_value();
 
-        log.put_any(origin, suborigin, abc::diag::severity::important, __TAG__, "battery = %4.4x", value);
+        log.put_any(origin, suborigin, abc::diag::severity::important, 0x10844, "battery = %4.4x", value);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }

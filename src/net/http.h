@@ -41,19 +41,19 @@ namespace abc { namespace net { namespace http {
         , _next(next) {
 
         constexpr const char* suborigin = "state()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s' next=%u", origin, (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c7, "Begin: origin='%s' next=%u", origin, (unsigned)next);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c8, "End:");
     }
 
 
     inline void state::reset(item next) {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c9, "Begin: next=%u", (unsigned)next);
 
         _next = next;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ca, "End:");
     }
 
 
@@ -64,11 +64,11 @@ namespace abc { namespace net { namespace http {
 
     inline void state::assert_next(item item) {
         constexpr const char* suborigin = "assert_next()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: item=%u", (unsigned)item);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108cb, "Begin: item=%u", (unsigned)item);
 
-        diag_base::assert(suborigin, _next == item, __TAG__, "_next=%u, item=%u:", (unsigned)_next, (unsigned)item);
+        diag_base::assert(suborigin, _next == item, 0x108cc, "_next=%u, item=%u:", (unsigned)_next, (unsigned)item);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108cd, "End:");
     }
 
 
@@ -80,11 +80,11 @@ namespace abc { namespace net { namespace http {
         , state_base(origin, next, log) {
 
         constexpr const char* suborigin = "istream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ce, "Begin: origin='%s', next=%u", origin, (unsigned)next);
 
-        diag_base::expect(suborigin, sb != nullptr, __TAG__, "sb");
+        diag_base::expect(suborigin, sb != nullptr, 0x108cf, "sb");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d0, "End:");
     }
 
 
@@ -96,7 +96,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d1, "Begin:");
 
         state_base::assert_next(item::protocol);
 
@@ -157,7 +157,7 @@ namespace abc { namespace net { namespace http {
 
         skip_spaces();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: protocol='%s'", protocol.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d2, "End: protocol='%s'", protocol.c_str());
 
         return protocol;
     }
@@ -165,7 +165,7 @@ namespace abc { namespace net { namespace http {
 
     inline headers istream::get_headers() {
         constexpr const char* suborigin = "get_headers()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d3, "Begin:");
 
         state_base::assert_next(item::header_name);
 
@@ -190,7 +190,7 @@ namespace abc { namespace net { namespace http {
 
         set_gstate(gcount, item::body);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: headers.size()=%zu", headers.size());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d4, "End: headers.size()=%zu", headers.size());
 
         return headers;
     }
@@ -198,7 +198,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string istream::get_header_name() {
         constexpr const char* suborigin = "get_header_name()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d5, "Begin:");
 
         state_base::assert_next(item::header_name);
 
@@ -228,7 +228,7 @@ namespace abc { namespace net { namespace http {
 
         set_gstate(header_name.length(), item::header_value);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: header_name='%s'", header_name.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d6, "End: header_name='%s'", header_name.c_str());
 
         return header_name;
     }
@@ -236,7 +236,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string istream::get_header_value() {
         constexpr const char* suborigin = "get_header_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d7, "Begin:");
 
         state_base::assert_next(item::header_value);
 
@@ -272,7 +272,7 @@ namespace abc { namespace net { namespace http {
 
         set_gstate(header_value.length(), item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: header_value='%s'", header_value.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d8, "End: header_value='%s'", header_value.c_str());
 
         return header_value;
     }
@@ -280,7 +280,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string istream::get_body(std::size_t max_len) {
         constexpr const char* suborigin = "get_body()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: max_len=%zu", max_len);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108d9, "Begin: max_len=%zu", max_len);
 
         state_base::assert_next(item::body);
 
@@ -289,7 +289,7 @@ namespace abc { namespace net { namespace http {
 
         set_gstate(body.length(), base::eof() ? item::eof : item::body);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: body='%s'", body.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108da, "End: body='%s'", body.c_str());
 
         return body;
     }
@@ -401,12 +401,12 @@ namespace abc { namespace net { namespace http {
     
     inline void istream::set_gstate(std::size_t gcount, item next) {
         constexpr const char* suborigin = "set_gstate()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: gcount=%zu, next=%u", gcount, (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108db, "Begin: gcount=%zu, next=%u", gcount, (unsigned)next);
 
         base::set_gcount(gcount);
         state_base::reset(next);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108dc, "End:");
     }
 
 
@@ -418,9 +418,9 @@ namespace abc { namespace net { namespace http {
         , state_base(origin, next, log) {
 
         constexpr const char* suborigin = "ostream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: origin='%s', next=%u", origin, (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108dd, "Begin: origin='%s', next=%u", origin, (unsigned)next);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108de, "End:");
     }
 
 
@@ -432,7 +432,7 @@ namespace abc { namespace net { namespace http {
 
     inline void ostream::put_headers(const headers& headers) {
         constexpr const char* suborigin = "put_headers()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108df, "Begin:");
 
         for (const headers::value_type& header : headers) {
             put_header_name(header.first.c_str());
@@ -441,15 +441,15 @@ namespace abc { namespace net { namespace http {
 
         end_headers();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e0, "End:");
     }
 
 
     inline void ostream::put_header_name(const char* header_name, std::size_t header_name_len) {
         constexpr const char* suborigin = "put_header_name()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: header_name='%s'", header_name);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e1, "Begin: header_name='%s'", header_name);
 
-        diag_base::expect(suborigin, header_name != nullptr, __TAG__, "header_name != nullptr");
+        diag_base::expect(suborigin, header_name != nullptr, 0x108e2, "header_name != nullptr");
 
         state_base::assert_next(item::header_name);
 
@@ -472,15 +472,15 @@ namespace abc { namespace net { namespace http {
 
         set_pstate(item::header_value);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e3, "End:");
     }
 
 
     inline void ostream::put_header_value(const char* header_value, std::size_t header_value_len) {
         constexpr const char* suborigin = "put_header_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: header_value='%s'", header_value);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e4, "Begin: header_value='%s'", header_value);
 
-        diag_base::expect(suborigin, header_value != nullptr, __TAG__, "header_value != nullptr");
+        diag_base::expect(suborigin, header_value != nullptr, 0x108e5, "header_value != nullptr");
 
         state_base::assert_next(item::header_value);
 
@@ -513,13 +513,13 @@ namespace abc { namespace net { namespace http {
 
         set_pstate(item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e6, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::end_headers() {
         constexpr const char* suborigin = "put_header_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e7, "Begin:");
 
         state_base::assert_next(item::header_name);
 
@@ -527,15 +527,15 @@ namespace abc { namespace net { namespace http {
 
         set_pstate(item::body);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e8, "End:");
     }
 
 
     inline void ostream::put_body(const char* body, std::size_t body_len) {
         constexpr const char* suborigin = "put_body()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108e9, "Begin:");
 
-        diag_base::expect(suborigin, body != nullptr, __TAG__, "body != nullptr");
+        diag_base::expect(suborigin, body != nullptr, 0x108ea, "body != nullptr");
 
         state_base::assert_next(item::body);
 
@@ -547,15 +547,15 @@ namespace abc { namespace net { namespace http {
 
         set_pstate(item::body);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108eb, "End: pcount=%zu", pcount);
     }
 
 
     inline std::size_t ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ec, "Begin: protocol='%s'", protocol);
 
-        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+        diag_base::expect(suborigin, protocol != nullptr, 0x108ed, "protocol != nullptr");
 
         state_base::assert_next(item::protocol);
 
@@ -606,7 +606,7 @@ namespace abc { namespace net { namespace http {
             base::set_bad();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ee, "End: pcount=%zu", pcount);
 
         return pcount;
     }
@@ -660,9 +660,9 @@ namespace abc { namespace net { namespace http {
 
     inline std::size_t ostream::put_chars(ascii::predicate_t&& predicate, const char* chars, std::size_t chars_len) {
         constexpr const char* suborigin = "put_chars()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ef, "Begin: chars='%s'", chars);
 
-        diag_base::expect(suborigin, chars != nullptr, __TAG__, "chars != nullptr");
+        diag_base::expect(suborigin, chars != nullptr, 0x108f0, "chars != nullptr");
 
         std::size_t pcount = 0;
 
@@ -674,7 +674,7 @@ namespace abc { namespace net { namespace http {
             base::put(chars[pcount++]);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f1, "End: pcount=%zu", pcount);
 
         return pcount;
     }
@@ -710,12 +710,12 @@ namespace abc { namespace net { namespace http {
 
     inline void ostream::set_pstate(item next) {
         constexpr const char* suborigin = "set_pstate()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: next=%u", (unsigned)next);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f2, "Begin: next=%u", (unsigned)next);
 
         base::flush();
         state_base::reset(next);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f3, "End:");
     }
 
 
@@ -726,9 +726,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_istream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f4, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f5, "End:");
     }
 
 
@@ -744,17 +744,17 @@ namespace abc { namespace net { namespace http {
 
     inline void request_istream::reset() {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f6, "Begin:");
 
         base::set_gstate(0, item::method);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f7, "End:");
     }
 
 
     inline std::string request_istream::get_method() {
         constexpr const char* suborigin = "get_method()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f8, "Begin:");
 
         base::assert_next(item::method);
 
@@ -764,7 +764,7 @@ namespace abc { namespace net { namespace http {
 
         base::set_gstate(method.length(), item::resource);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, method='%s'", method.length(), method.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108f9, "End: gcount=%zu, method='%s'", method.length(), method.c_str());
 
         return method;
     }
@@ -772,7 +772,7 @@ namespace abc { namespace net { namespace http {
 
     inline resource request_istream::get_resource() {
         constexpr const char* suborigin = "get_resource()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108fa, "Begin:");
 
         base::assert_next(item::resource);
 
@@ -784,7 +784,7 @@ namespace abc { namespace net { namespace http {
 
         resource resource = split_resource(raw_resource);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, raw_resource='%s'", raw_resource.length(), raw_resource.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108fb, "End: gcount=%zu, raw_resource='%s'", raw_resource.length(), raw_resource.c_str());
 
         return resource;
     }
@@ -792,14 +792,14 @@ namespace abc { namespace net { namespace http {
 
     inline std::string request_istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108fc, "Begin:");
 
         std::string protocol = base::get_protocol();
         base::skip_crlf();
 
         base::set_gstate(protocol.length(), item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108fd, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
 
         return protocol;
     }
@@ -807,7 +807,7 @@ namespace abc { namespace net { namespace http {
 
     inline resource request_istream::split_resource(const std::string& raw_resource) {
         constexpr const char* suborigin = "split_resource()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: raw_resource='%s'", raw_resource.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108fe, "Begin: raw_resource='%s'", raw_resource.c_str());
 
         // Format: path?param1=...&param2=...#...
 
@@ -863,7 +863,7 @@ namespace abc { namespace net { namespace http {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ff, "End:");
 
         return resource;
     }
@@ -876,9 +876,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_reader()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10900, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10901, "End:");
     }
 
 
@@ -894,7 +894,7 @@ namespace abc { namespace net { namespace http {
 
     inline request request_reader::get_request() {
         constexpr const char* suborigin = "get_request()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10902, "Begin:");
 
         request request;
 
@@ -903,7 +903,7 @@ namespace abc { namespace net { namespace http {
         request.protocol = base::get_protocol();
         request.headers  = base::get_headers();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10903, "End:");
 
         return request;
     }
@@ -926,9 +926,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, item::method, log) {
 
         constexpr const char* suborigin = "request_ostream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10904, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10905, "End:");
     }
 
 
@@ -944,19 +944,19 @@ namespace abc { namespace net { namespace http {
 
     inline void request_ostream::reset() {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10906, "Begin:");
 
         base::set_pstate(item::method);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10907, "End:");
     }
 
 
     inline void request_ostream::put_method(const char* method, std::size_t method_len) {
         constexpr const char* suborigin = "put_method()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: method='%s'", method);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10908, "Begin: method='%s'", method);
 
-        diag_base::expect(suborigin, method != nullptr, __TAG__, "method != nullptr");
+        diag_base::expect(suborigin, method != nullptr, 0x10909, "method != nullptr");
 
         base::assert_next(item::method);
 
@@ -969,13 +969,13 @@ namespace abc { namespace net { namespace http {
 
         base::set_pstate(item::resource);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1090a, "End:");
     }
 
 
     inline void request_ostream::put_resource(const resource& resource) {
         constexpr const char* suborigin = "put_resource()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1090b, "Begin:");
 
         base::assert_next(item::resource);
 
@@ -1014,15 +1014,15 @@ namespace abc { namespace net { namespace http {
 
         base::set_pstate(item::protocol);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1090c, "End:");
     }
 
 
     inline void request_ostream::put_resource(const char* resource, std::size_t resource_len) {
         constexpr const char* suborigin = "put_method()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: resource='%s'", resource);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1090d, "Begin: resource='%s'", resource);
 
-        diag_base::expect(suborigin, resource != nullptr, __TAG__, "resource != nullptr");
+        diag_base::expect(suborigin, resource != nullptr, 0x1090e, "resource != nullptr");
 
         base::assert_next(item::resource);
 
@@ -1035,22 +1035,22 @@ namespace abc { namespace net { namespace http {
 
         base::set_pstate(item::protocol);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1090f, "End:");
     }
 
 
     inline void request_ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10910, "Begin: protocol='%s'", protocol);
 
-        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+        diag_base::expect(suborigin, protocol != nullptr, 0x10911, "protocol != nullptr");
 
         base::put_protocol(protocol, protocol_len);
         base::put_crlf();
 
         base::set_pstate(item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10912, "End:");
     }
 
 
@@ -1061,9 +1061,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "request_writer()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10913, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10914, "End:");
     }
 
 
@@ -1079,7 +1079,7 @@ namespace abc { namespace net { namespace http {
 
     inline void request_writer::put_request(const request& request) {
         constexpr const char* suborigin = "put_request()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10915, "Begin:");
 
         base::put_method(request.method.c_str(), request.method.length());
         base::put_resource(request.resource);
@@ -1088,7 +1088,7 @@ namespace abc { namespace net { namespace http {
 
         base::flush();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10916, "End:");
     }
 
 
@@ -1111,9 +1111,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_istream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10917, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10918, "End:");
     }
 
 
@@ -1129,23 +1129,23 @@ namespace abc { namespace net { namespace http {
 
     inline void response_istream::reset() {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10919, "Begin:");
 
         base::set_gstate(0, item::protocol);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091a, "End:");
     }
 
 
     inline std::string response_istream::get_protocol() {
         constexpr const char* suborigin = "get_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091b, "Begin:");
 
         std::string protocol = base::get_protocol();
 
         base::set_gstate(protocol.length(), item::status_code);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091c, "End: gcount=%zu, protocol='%s'", protocol.length(), protocol.c_str());
 
         return protocol;
     }
@@ -1153,7 +1153,7 @@ namespace abc { namespace net { namespace http {
 
     inline status_code_t response_istream::get_status_code() {
         constexpr const char* suborigin = "get_status_code()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091d, "Begin:");
 
         base::assert_next(item::status_code);
 
@@ -1165,7 +1165,7 @@ namespace abc { namespace net { namespace http {
 
         base::set_gstate(digits.length(), item::reason_phrase);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, status_code='%u'", digits.length(), (unsigned)status_code);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091e, "End: gcount=%zu, status_code='%u'", digits.length(), (unsigned)status_code);
 
         return status_code;
     }
@@ -1173,7 +1173,7 @@ namespace abc { namespace net { namespace http {
 
     inline std::string response_istream::get_reason_phrase() {
         constexpr const char* suborigin = "get_reason_phrase()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1091f, "Begin:");
 
         base::assert_next(item::reason_phrase);
 
@@ -1184,7 +1184,7 @@ namespace abc { namespace net { namespace http {
 
         base::set_gstate(reason_phrase.length(), item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: gcount=%zu, reason_phrase='%s'", reason_phrase.length(), reason_phrase.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10920, "End: gcount=%zu, reason_phrase='%s'", reason_phrase.length(), reason_phrase.c_str());
 
         return reason_phrase;
     }
@@ -1197,9 +1197,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_reader()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10921, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10922, "End:");
     }
 
 
@@ -1215,7 +1215,7 @@ namespace abc { namespace net { namespace http {
 
     inline response response_reader::get_response() {
         constexpr const char* suborigin = "get_response()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10923, "Begin:");
 
         response response;
 
@@ -1224,7 +1224,7 @@ namespace abc { namespace net { namespace http {
         response.reason_phrase = base::get_reason_phrase();
         response.headers       = base::get_headers();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10924, "End:");
 
         return response;
     }
@@ -1247,9 +1247,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, item::protocol, log) {
 
         constexpr const char* suborigin = "response_ostream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10925, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10926, "End:");
     }
 
 
@@ -1265,32 +1265,32 @@ namespace abc { namespace net { namespace http {
 
     inline void response_ostream::reset() {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10927, "Begin:");
 
         base::set_pstate(item::protocol);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10928, "End:");
     }
 
 
     inline void response_ostream::put_protocol(const char* protocol, std::size_t protocol_len) {
         constexpr const char* suborigin = "put_protocol()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: protocol='%s'", protocol);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10929, "Begin: protocol='%s'", protocol);
 
-        diag_base::expect(suborigin, protocol != nullptr, __TAG__, "protocol != nullptr");
+        diag_base::expect(suborigin, protocol != nullptr, 0x1092a, "protocol != nullptr");
 
         base::put_protocol(protocol, protocol_len);
         base::put_space();
 
         base::set_pstate(item::status_code);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1092b, "End:");
     }
 
 
     inline void response_ostream::put_status_code(status_code_t status_code) {
         constexpr const char* suborigin = "put_status_code()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: status_code='%u'", (unsigned)status_code);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1092c, "Begin: status_code='%u'", (unsigned)status_code);
 
         base::assert_next(item::status_code);
 
@@ -1302,13 +1302,13 @@ namespace abc { namespace net { namespace http {
 
         base::set_pstate(item::reason_phrase);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1092d, "End:");
     }
 
 
     inline void response_ostream::put_reason_phrase(const char* reason_phrase, std::size_t reason_phrase_len) {
         constexpr const char* suborigin = "put_reason_phrase()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: reason_phrase='%s'", reason_phrase);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1092e, "Begin: reason_phrase='%s'", reason_phrase);
 
         base::assert_next(item::reason_phrase);
 
@@ -1324,7 +1324,7 @@ namespace abc { namespace net { namespace http {
 
         base::set_pstate(item::header_name);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1092f, "End:");
     }
 
 
@@ -1335,9 +1335,9 @@ namespace abc { namespace net { namespace http {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "response_writer()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10930, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10931, "End:");
     }
 
 
@@ -1353,7 +1353,7 @@ namespace abc { namespace net { namespace http {
 
     inline void response_writer::put_response(const response& response) {
         constexpr const char* suborigin = "put_response()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10932, "Begin:");
 
         base::put_protocol(response.protocol.c_str(), response.protocol.length());
         base::put_status_code(response.status_code);
@@ -1362,7 +1362,7 @@ namespace abc { namespace net { namespace http {
 
         base::flush();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10933, "End:");
     }
 
 

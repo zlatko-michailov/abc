@@ -52,13 +52,13 @@ bool test_vector_streambuf_move(test_context& context) {
     abc::stream::vector_streambuf sb1(abc::size::_256);
     std::ostream out(&sb1);
     out.write(expected, std::strlen(expected) + 1);
-    passed = context.are_equal(sb1.vector().data(), expected, __TAG__) && passed;
+    passed = context.are_equal(sb1.vector().data(), expected, 0x10c72) && passed;
 
     abc::stream::vector_streambuf sb2(std::move(sb1));
     std::istream in(&sb2);
     char actual2[abc::size::_256 + 1];
     in.read(actual2, std::strlen(expected) + 1);
-    passed = context.are_equal(actual2, expected, __TAG__) && passed;
+    passed = context.are_equal(actual2, expected, 0x10c73) && passed;
 
     return passed;
 }
@@ -88,5 +88,5 @@ bool test_vector_streambuf(test_context& context, const char* text, std::size_t 
 
     out.put(abc::ascii::ends);
 
-    return context.are_equal(sb.vector().data(), text, __TAG__);
+    return context.are_equal(sb.vector().data(), text, 0x10c74);
 }

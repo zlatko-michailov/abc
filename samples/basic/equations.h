@@ -68,7 +68,7 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
 
         base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x102ce);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 200");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b7, "Return: 200");
         return;
     }
 
@@ -76,7 +76,7 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     if (!abc::ascii::are_equal_i(request.resource.path.c_str(), "/problem")) {
         base::send_simple_response(http, abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "The requested resource was not found.", 0x102cf);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 404");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b8, "Return: 404");
         return;
     }
 
@@ -84,22 +84,22 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     if (!abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST)) {
         base::send_simple_response(http, abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 405");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b9, "Return: 405");
         return;
     }
 
     // Require header Content-Type: application/json
     abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
     if (content_type_itr == request.headers.cend()) {
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", __TAG__);
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107ba);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 400 (No Content-Type)");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bb, "Return: 400 (No Content-Type)");
         return;
     }
     if (!abc::ascii::are_equal_i(content_type_itr->second.c_str(), abc::net::http::content_type::json)) {
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", __TAG__);
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107bc);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 400 (Wrong Content-Type)");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bd, "Return: 400 (Wrong Content-Type)");
         return;
     }
 
@@ -126,9 +126,9 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
             || input_value.object()["b"].array()[0].type() != abc::net::json::value_type::number
             || input_value.object()["b"].array()[1].type() != abc::net::json::value_type::number) {
         const char* const invalid_json = "An invalid JSON payload was supplied. Must be {\"a\": [ [1, 2], [3, 4] ], \"b\": [5, 6] }.";
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, invalid_json, __TAG__);
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, invalid_json, 0x107be);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Return: 400 (Wrong JSON payload)");
+        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bf, "Return: 400 (Wrong JSON payload)");
         return;
     }
 
@@ -190,7 +190,7 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
 
     // Send the http response
-    base::put_any(suborigin, abc::diag::severity::optional, __TAG__, "Sending response 200");
+    base::put_any(suborigin, abc::diag::severity::optional, 0x107c0, "Sending response 200");
 
     abc::net::http::response response;
     response.protocol = abc::net::http::protocol::HTTP_11;

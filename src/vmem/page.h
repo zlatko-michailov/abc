@@ -50,7 +50,7 @@ namespace abc { namespace vmem {
         , _ptr(nullptr) {
 
         constexpr const char* suborigin = "page()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a5d, "Begin: pool=%p, pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         diag_base::expect(suborigin, _pool != nullptr, 0x103af, "_pool != nullptr");
 
@@ -60,7 +60,7 @@ namespace abc { namespace vmem {
 
         lock();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a5e, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
@@ -71,11 +71,11 @@ namespace abc { namespace vmem {
         , _ptr(other._ptr) {
 
         constexpr const char* suborigin = "page(move)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a5f, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         other.invalidate();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a60, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
@@ -86,13 +86,13 @@ namespace abc { namespace vmem {
         , _ptr(nullptr) {
 
         constexpr const char* suborigin = "page(copy)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a61, "Begin: pool=%p, pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         if (_pool != nullptr && _pos != page_pos_nil) {
             lock();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a62, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
@@ -103,26 +103,26 @@ namespace abc { namespace vmem {
         , _ptr(nullptr) {
 
         constexpr const char* suborigin = "page(nullptr)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a63, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a64, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
     inline page::~page() noexcept {
         constexpr const char* suborigin = "~page()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a65, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         unlock();
         invalidate();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a66, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
     inline page& page::operator =(page&& other) noexcept {
         constexpr const char* suborigin = "=(move)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", other._pool, (unsigned long long)other._pos, other._ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a67, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", other._pool, (unsigned long long)other._pos, other._ptr);
 
         unlock();
 
@@ -137,7 +137,7 @@ namespace abc { namespace vmem {
         other.unlock();
         other.invalidate();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a68, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         return *this;
     }
@@ -145,7 +145,7 @@ namespace abc { namespace vmem {
 
     inline page& page::operator =(const page& other) noexcept {
         constexpr const char* suborigin = "=(copy)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", other._pool, (unsigned long long)other._pos, other._ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a69, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", other._pool, (unsigned long long)other._pos, other._ptr);
 
         unlock();
 
@@ -157,7 +157,7 @@ namespace abc { namespace vmem {
             lock();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a6a, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         return *this;
     }
@@ -165,7 +165,7 @@ namespace abc { namespace vmem {
 
     inline void page::free() noexcept {
         constexpr const char* suborigin = "free()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a6b, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         unlock();
 
@@ -175,43 +175,43 @@ namespace abc { namespace vmem {
 
         invalidate();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a6c, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
     inline void page::alloc() {
         constexpr const char* suborigin = "alloc()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a6d, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
-        diag_base::expect(suborigin, _pool != nullptr, __TAG__, "_pool != nullptr");
-        diag_base::expect(suborigin, _pos == page_pos_nil, __TAG__, "_pos == page_pos_nil");
-        diag_base::expect(suborigin, _ptr == nullptr, __TAG__, "_ptr == nullptr");
+        diag_base::expect(suborigin, _pool != nullptr, 0x10a6e, "_pool != nullptr");
+        diag_base::expect(suborigin, _pos == page_pos_nil, 0x10a6f, "_pos == page_pos_nil");
+        diag_base::expect(suborigin, _ptr == nullptr, 0x10a70, "_ptr == nullptr");
 
         _pos = _pool->alloc_page();
-        diag_base::ensure(suborigin, _pos != page_pos_nil, __TAG__, "_pos != page_pos_nil");
+        diag_base::ensure(suborigin, _pos != page_pos_nil, 0x10a71, "_pos != page_pos_nil");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a72, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
     inline void page::lock() {
         constexpr const char* suborigin = "lock()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a73, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
-        diag_base::expect(suborigin, _pool != nullptr, __TAG__, "_pool != nullptr");
-        diag_base::expect(suborigin, _pos != page_pos_nil, __TAG__, "_pos != page_pos_nil");
-        diag_base::expect(suborigin, _ptr == nullptr, __TAG__, "_ptr == nullptr");
+        diag_base::expect(suborigin, _pool != nullptr, 0x10a74, "_pool != nullptr");
+        diag_base::expect(suborigin, _pos != page_pos_nil, 0x10a75, "_pos != page_pos_nil");
+        diag_base::expect(suborigin, _ptr == nullptr, 0x10a76, "_ptr == nullptr");
 
         _ptr = _pool->lock_page(_pos);
-        diag_base::ensure(suborigin, _ptr != nullptr, __TAG__, "_ptr != nullptr");
+        diag_base::ensure(suborigin, _ptr != nullptr, 0x10a77, "_ptr != nullptr");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a78, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 
     inline void page::unlock() noexcept {
         constexpr const char* suborigin = "unlock()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a79, "Begin: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
 
         if (_pool != nullptr && _pos != page_pos_nil && _ptr != nullptr)
         {
@@ -219,7 +219,7 @@ namespace abc { namespace vmem {
             _ptr = nullptr;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a7a, "End: pool=%p, page_pos=0x%llu, ptr=%p", _pool, (unsigned long long)_pos, _ptr);
     }
 
 

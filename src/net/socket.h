@@ -48,7 +48,7 @@ namespace abc { namespace net {
         , _fd(fd) {
 
         constexpr const char* suborigin = "basic_socket()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)fd, (int)kind, (int)family);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a1, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)fd, (int)kind, (int)family);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10006, "End: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
     }
@@ -62,7 +62,7 @@ namespace abc { namespace net {
         , _fd(other._fd) {
 
         constexpr const char* suborigin = "basic_socket()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)other._fd, (int)other._kind, (int)other._family);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a2, "Begin: fd=%d, kind=%d, family=%d, protocol=%d", (int)other._fd, (int)other._kind, (int)other._family);
 
         other._fd = socket::fd::invalid;
 
@@ -72,11 +72,11 @@ namespace abc { namespace net {
 
     inline basic_socket::~basic_socket() noexcept {
         constexpr const char* suborigin = "~basic_socket()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a3, "Begin: %s, %s", _kind == socket::kind::stream ? "tcp" : "udp", _family == socket::family::ipv4 ? "ipv4" : "ipv6");
 
         close();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a4, "End:");
     }
 
 
@@ -87,7 +87,7 @@ namespace abc { namespace net {
 
     inline void basic_socket::close() noexcept {
         constexpr const char* suborigin = "close()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: fd=%d", _fd);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a5, "Begin: fd=%d", _fd);
 
         if (is_open()) {
             diag_base::put_any(suborigin, diag::severity::optional, 0x10009, "Closing");
@@ -98,7 +98,7 @@ namespace abc { namespace net {
             _fd = socket::fd::invalid;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: fd=%d", _fd);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a6, "End: fd=%d", _fd);
     }
 
 
@@ -195,7 +195,7 @@ namespace abc { namespace net {
         const char* const tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
         constexpr const char* suborigin = "tie(socket::address)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: %s(socket::address)", tt_str);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a7, "Begin: %s(socket::address)", tt_str);
 
         diag_base::expect(suborigin, !is_open() || tt == socket::tie::connect, 0x10012, "!is_open");
 
@@ -206,9 +206,9 @@ namespace abc { namespace net {
         socket::error_t err = try_tie(address.value, address.size, tt);
         diag_base::require(suborigin, err == socket::error::none, 0x10013, "try_tie() err=%d", err);
 
-        diag_base::ensure(suborigin, is_open(), __TAG__, "is_open");
+        diag_base::ensure(suborigin, is_open(), 0x109a8, "is_open");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: %s(socket::address)", tt_str);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a9, "End: %s(socket::address)", tt_str);
     }
 
 
@@ -216,7 +216,7 @@ namespace abc { namespace net {
         const char* const tt_str = tt == socket::tie::bind ? "bind" : "connect";
 
         constexpr const char* suborigin = "try_tie(sockaddr)";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: %s(sockaddr)", tt_str);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109aa, "Begin: %s(sockaddr)", tt_str);
 
         diag_base::expect(suborigin, is_open(), 0x10014, "is_open");
 
@@ -305,7 +305,7 @@ namespace abc { namespace net {
 
     inline std::size_t client_socket::send(const void* buffer, std::size_t size, const socket::address* address) {
         constexpr const char* suborigin = "send()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", size);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109ab, "Begin: size=%zu", size);
 
         diag_base::expect(suborigin, base::is_open(), 0x10017, "is_open");
         diag_base::expect(suborigin, address == nullptr || base::kind() == socket::kind::dgram, 0x10018, "!address || dgram");
@@ -331,7 +331,7 @@ namespace abc { namespace net {
 
         diag_base::put_binary(suborigin, diag::severity::verbose, 0x10066, buffer, size);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu, sent_size=%ld", size, (long)sent_size);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109ac, "End: size=%zu, sent_size=%ld", size, (long)sent_size);
 
         return sent_size;
     }
@@ -339,7 +339,7 @@ namespace abc { namespace net {
 
     inline std::size_t client_socket::receive(void* buffer, std::size_t size, socket::address* address) {
         constexpr const char* suborigin = "receive()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", size);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109ad, "Begin: size=%zu", size);
 
         diag_base::expect(suborigin, base::is_open(), 0x1001d, "is_open");
         diag_base::expect(suborigin, address == nullptr || base::kind() == socket::kind::dgram, 0x1001e, "!address || dgram");
@@ -365,7 +365,7 @@ namespace abc { namespace net {
 
         diag_base::put_binary(suborigin, diag::severity::verbose, 0x10067, buffer, size);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu, received_size=%ld", size, (long)received_size);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109ae, "End: size=%zu, received_size=%ld", size, (long)received_size);
 
         return received_size;
     }
@@ -434,10 +434,10 @@ namespace abc { namespace net {
         constexpr const char* suborigin = "listen()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10022, "Begin:");
 
-        diag_base::expect(suborigin, base::is_open(), __TAG__, "is_open");
+        diag_base::expect(suborigin, base::is_open(), 0x109af, "is_open");
 
         socket::error_t err = ::listen(base::fd(), backlog_size);
-        diag_base::require(suborigin, err == socket::error::none, __TAG__, "::listen() err=%d", err);
+        diag_base::require(suborigin, err == socket::error::none, 0x109b0, "::listen() err=%d", err);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10024, "End:");
     }
@@ -472,14 +472,14 @@ namespace abc { namespace net {
         , _socket(socket) {
 
         constexpr const char* suborigin = "tcp_client_socket_streambuf()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b1, "Begin:");
 
         diag_base::expect(suborigin, socket != nullptr, 0x10068, "socket");
 
         setg(&_get_ch, &_get_ch, &_get_ch);
         setp(&_put_ch, &_put_ch + 1);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b2, "End:");
     }
 
 
@@ -491,7 +491,7 @@ namespace abc { namespace net {
         , _put_ch(other._put_ch) {
 
         constexpr const char* suborigin = "tcp_client_socket_streambuf()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b3, "Begin:");
 
         setg(&_get_ch, &_get_ch, &_get_ch);
         setp(&_put_ch, &_put_ch + 1);
@@ -500,7 +500,7 @@ namespace abc { namespace net {
         other.setg(nullptr, nullptr, nullptr);
         other.setp(nullptr, nullptr);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109b4, "End:");
     }
 
 

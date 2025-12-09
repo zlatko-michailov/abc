@@ -68,7 +68,7 @@ namespace abc { namespace smbus {
 
     inline void motion::calibrate(motion_channel_t mask) {
         constexpr const char* suborigin = "calibrate()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d0, "Begin:");
 
         motion_measurements measurements{ };
 
@@ -106,13 +106,13 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::debug, 0x1074f, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
             mask, _calibration.accel_x, _calibration.accel_y, _calibration.accel_z, _calibration.gyro_x, _calibration.gyro_y, _calibration.gyro_z, _calibration.temperature);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d1, "End:");
     }
 
 
     inline motion_values motion::get_values(motion_channel_t mask) {
         constexpr const char* suborigin = "get_values()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d2, "Begin:");
 
         motion_measurements measurements = get_measurements(mask);
 
@@ -121,7 +121,7 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::debug, 0x10750, "mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
             mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d3, "End:");
 
         return values;
     }
@@ -129,7 +129,7 @@ namespace abc { namespace smbus {
 
     inline motion_measurements motion::get_measurements(motion_channel_t mask) {
         constexpr const char* suborigin = "get_measurements()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d4, "Begin:");
 
         motion_measurements measurements = { };
 
@@ -168,7 +168,7 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::debug, 0x10751, "mask=%x, accel_x=%x, accel_y=%x, accel_z=%x, gyro_x=%x, gyro_y=%x, gyro_z=%x, temp=%x",
             mask, measurements.accel_x, measurements.accel_y, measurements.accel_z, measurements.gyro_x, measurements.gyro_y, measurements.gyro_z, measurements.temperature);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d5, "End:");
 
         return measurements;
     }
@@ -176,7 +176,7 @@ namespace abc { namespace smbus {
 
     inline motion_values motion::get_values_from_measurements(motion_channel_t mask, const motion_measurements& measurements, const motion_measurements& calibration) noexcept {
         constexpr const char* suborigin = "get_values_from_measurements()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d6, "Begin:");
 
         motion_values values = { };
 
@@ -211,7 +211,7 @@ namespace abc { namespace smbus {
         diag_base::put_any(suborigin, diag::severity::debug, 0x10752, "mask=%x, accel_x=%.3f, accel_y=%.3f, accel_z=%.3f, gyro_x=%.3f, gyro_y=%.3f, gyro_z=%.3f, temp=%.2f",
             mask, values.accel_x, values.accel_y, values.accel_z, values.gyro_x, values.gyro_y, values.gyro_z, values.temperature);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109d7, "End:");
 
         return values;
     }

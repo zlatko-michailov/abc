@@ -77,7 +77,7 @@ namespace abc { namespace vmem {
             _state->back_page_pos = page_pos_nil;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: front_page_pos=0x%llx, back_page_pos=0x%llx", 
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10a1a, "End: front_page_pos=0x%llx, back_page_pos=0x%llx", 
                 (unsigned long long)_state->front_page_pos, (unsigned long long)_state->back_page_pos);
     }
 
@@ -231,7 +231,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10492, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x, page_pos=0x%llx",
             (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos(), (unsigned long long)page_pos);
 
-        diag_base::expect(suborigin, page_pos != page_pos_nil, __TAG__, "page_pos != page_pos_nil");
+        diag_base::expect(suborigin, page_pos != page_pos_nil, 0x10a1b, "page_pos != page_pos_nil");
 
         vmem::page page(_pool, page_pos, diag_base::log());
         diag_base::expect(suborigin, page.ptr() != nullptr, 0x10493, "page.ptr() != nullptr");
@@ -248,7 +248,7 @@ namespace abc { namespace vmem {
         else if (itr.page_pos() == page_pos_nil) {
             // Inserting at the end.
 
-            diag_base::expect(suborigin, back_page_pos != page_pos_nil, __TAG__, "back_page_pos != page_pos_nil");
+            diag_base::expect(suborigin, back_page_pos != page_pos_nil, 0x10a1c, "back_page_pos != page_pos_nil");
 
             vmem::page back_page(_pool, back_page_pos, diag_base::log());
             diag_base::expect(suborigin, back_page.ptr() != nullptr, 0x10494, "page.ptr() != nullptr");
@@ -261,7 +261,7 @@ namespace abc { namespace vmem {
             // Inserting at the middle or at the front.
             // A previous page may or may not exist, but the next page does, and itr is pointing at it.
 
-            diag_base::expect(suborigin, itr.page_pos() != page_pos_nil, __TAG__, "itr.page_pos() != page_pos_nil");
+            diag_base::expect(suborigin, itr.page_pos() != page_pos_nil, 0x10a1d, "itr.page_pos() != page_pos_nil");
 
             vmem::page next_page(_pool, itr.page_pos(), diag_base::log());
             diag_base::expect(suborigin, next_page.ptr() != nullptr, 0x10495, "page.ptr() != nullptr");
@@ -275,7 +275,7 @@ namespace abc { namespace vmem {
             }
             else {
                 // Inserting at the middle.
-                diag_base::expect(suborigin, next_linked_page->prev_page_pos != page_pos_nil, __TAG__, "next_linked_page->prev_page_pos != page_pos_nil");
+                diag_base::expect(suborigin, next_linked_page->prev_page_pos != page_pos_nil, 0x10a1e, "next_linked_page->prev_page_pos != page_pos_nil");
 
                 vmem::page prev_page(_pool, next_linked_page->prev_page_pos, diag_base::log());
                 diag_base::expect(suborigin, next_page.ptr() != nullptr, 0x10496, "page.ptr() != nullptr");
@@ -300,7 +300,7 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "erase()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10499, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos());
 
-        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, __TAG__, "itr.item_pos() == item_pos_nil");
+        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, 0x10a1f, "itr.item_pos() == item_pos_nil");
         diag_base::expect(suborigin, itr.page_pos() != page_pos_nil && itr.edge() == iterator_edge::none, 0x10498, "itr.page_pos() != page_pos_nil && itr.edge() == iterator_edge::none");
 
         // The result, upon success, is the next of itr.
@@ -329,7 +329,7 @@ namespace abc { namespace vmem {
         constexpr const char* suborigin = "erase()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1049b, "Begin: itr.page_pos=0x%llx, itr.item_pos=0x%x", (unsigned long long)itr.page_pos(), (unsigned)itr.item_pos());
 
-        diag_base::expect(suborigin, itr.page_pos() != page_pos_nil, __TAG__, "itr.page_pos() != page_pos_nil");
+        diag_base::expect(suborigin, itr.page_pos() != page_pos_nil, 0x10a20, "itr.page_pos() != page_pos_nil");
 
         vmem::page page(_pool, itr.page_pos(), diag_base::log());
         diag_base::expect(suborigin, page.ptr() != nullptr, 0x1049c, "page.ptr() != nullptr");
@@ -405,7 +405,7 @@ namespace abc { namespace vmem {
         else {
             // Connect the back page of this and the front page of the other.
             {
-                diag_base::expect(suborigin, _state->back_page_pos != page_pos_nil, __TAG__, "_state->back_page_pos != page_pos_nil");
+                diag_base::expect(suborigin, _state->back_page_pos != page_pos_nil, 0x10a21, "_state->back_page_pos != page_pos_nil");
 
                 // ... this back to the other front.
                 vmem::page back_page(_pool, _state->back_page_pos, diag_base::log());
@@ -416,7 +416,7 @@ namespace abc { namespace vmem {
             }
 
             {
-                diag_base::expect(suborigin, other._state->front_page_pos != page_pos_nil, __TAG__, "other._state->front_page_pos != page_pos_nil");
+                diag_base::expect(suborigin, other._state->front_page_pos != page_pos_nil, 0x10a22, "other._state->front_page_pos != page_pos_nil");
 
                 // ... the other front to this back.
                 vmem::page other_front_page(_pool, other._state->front_page_pos, diag_base::log());
@@ -446,7 +446,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104a5, "Begin: itr.page_pos=0x%llx, itr.edge=%u, itr.item_pos=0x%x",
             (unsigned long long)itr.page_pos(), (unsigned)itr.edge(), (unsigned)itr.item_pos());
 
-        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, __TAG__, "itr.item_pos() == item_pos_nil");
+        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, 0x10a23, "itr.item_pos() == item_pos_nil");
 
         iterator result = end_itr();
 
@@ -480,7 +480,7 @@ namespace abc { namespace vmem {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x104a8, "Begin: itr.page_pos=0x%llx, itr.edge=%u, itr.item_pos=0x%x",
             (unsigned long long)itr.page_pos(), (unsigned)itr.edge(), (unsigned)itr.item_pos());
 
-        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, __TAG__, "itr.item_pos() == item_pos_nil");
+        diag_base::expect(suborigin, itr.item_pos() == item_pos_nil, 0x10a24, "itr.item_pos() == item_pos_nil");
 
         iterator result = rbegin_itr();
 

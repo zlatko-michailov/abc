@@ -30,13 +30,13 @@ bool test_util_strprintf(test_context& context) {
     bool passed = true;
 
     std::string str = abc::strprintf("%d %4.4u", -23, 45);
-    passed = context.are_equal(str.c_str(), "-23 0045", __TAG__) && passed;
+    passed = context.are_equal(str.c_str(), "-23 0045", 0x10c70) && passed;
 
     str = abc::strprintf("%2d %s %3d %s %4d %s", 2, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,",
         5, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE", 9, "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
     passed = context.are_equal(str.c_str(), " 2 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
         "  5 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
-        "   9 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER", __TAG__) && passed;
+        "   9 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER", 0x10c71) && passed;
 
     return passed;
 }

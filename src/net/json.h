@@ -159,56 +159,56 @@ namespace abc { namespace net { namespace json {
 
 
     inline literal::boolean value::boolean() const {
-        diag_base::assert("boolean()", _type == value_type::boolean, __TAG__, "_type=%u", _type);
+        diag_base::assert("boolean()", _type == value_type::boolean, 0x10934, "_type=%u", _type);
 
         return _boolean;
     }
 
     
     inline literal::number value::number() const {
-        diag_base::assert("number()", _type == value_type::number, __TAG__, "_type=%u", _type);
+        diag_base::assert("number()", _type == value_type::number, 0x10935, "_type=%u", _type);
 
         return _number;
     }
 
 
     inline const literal::string& value::string() const {
-        diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
+        diag_base::assert("string()", _type == value_type::string, 0x10936, "_type=%u", _type);
 
         return _string;
     }
 
 
     inline literal::string& value::string() {
-        diag_base::assert("string()", _type == value_type::string, __TAG__, "_type=%u", _type);
+        diag_base::assert("string()", _type == value_type::string, 0x10937, "_type=%u", _type);
 
         return _string;
     }
 
 
     inline const literal::array& value::array() const {
-        diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
+        diag_base::assert("array()", _type == value_type::array, 0x10938, "_type=%u", _type);
 
         return _array;
     }
 
 
     inline literal::array& value::array() {
-        diag_base::assert("array()", _type == value_type::array, __TAG__, "_type=%u", _type);
+        diag_base::assert("array()", _type == value_type::array, 0x10939, "_type=%u", _type);
 
         return _array;
     }
 
 
     inline const literal::object& value::object() const {
-        diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
+        diag_base::assert("object()", _type == value_type::object, 0x1093a, "_type=%u", _type);
 
         return _object;
     }
 
 
     inline literal::object& value::object() {
-        diag_base::assert("object()", _type == value_type::object, __TAG__, "_type=%u", _type);
+        diag_base::assert("object()", _type == value_type::object, 0x1093b, "_type=%u", _type);
 
         return _object;
     }
@@ -241,7 +241,7 @@ namespace abc { namespace net { namespace json {
         }
 
         // Must remain unreached.
-        diag_base::ensure("operator ==", false, __TAG__, "_type=%u", _type);
+        diag_base::ensure("operator ==", false, 0x1093c, "_type=%u", _type);
         return false;
     }
 
@@ -323,22 +323,22 @@ namespace abc { namespace net { namespace json {
         , _expect_property(false) {
 
         constexpr const char* suborigin = "state()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1093d, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1093e, "End:");
     }
 
 
     inline void state::reset() noexcept {
         constexpr const char* suborigin = "reset()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1093f, "Begin:");
 
         _expect_property = false;
         while (!_nest_stack.empty()) {
             _nest_stack.pop();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10940, "End:");
     }
 
 
@@ -359,37 +359,37 @@ namespace abc { namespace net { namespace json {
 
     inline void state::set_expect_property(bool expect) {
         constexpr const char* suborigin = "set_expect_property()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: expect=%u", expect);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10941, "Begin: expect=%u", expect);
 
-        diag_base::expect(suborigin, !expect || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), __TAG__, "expect");
+        diag_base::expect(suborigin, !expect || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), 0x10942, "expect");
 
         _expect_property = expect;
 
-        diag_base::ensure(suborigin, !_expect_property || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), __TAG__, "_expect_property");
+        diag_base::ensure(suborigin, !_expect_property || (!_nest_stack.empty() && _nest_stack.top() == nest_type::object), 0x10943, "_expect_property");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10944, "End:");
     }
 
 
     inline void state::nest(nest_type type) {
         constexpr const char* suborigin = "nest()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10945, "Begin: type=%u", type);
 
         _nest_stack.push(type);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10946, "End:");
     }
 
 
     inline void state::unnest(nest_type type) {
         constexpr const char* suborigin = "unnest()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", type);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10947, "Begin: type=%u", type);
 
-        diag_base::expect(suborigin, !_nest_stack.empty() && _nest_stack.top() == type, __TAG__, "type");
+        diag_base::expect(suborigin, !_nest_stack.empty() && _nest_stack.top() == type, 0x10948, "type");
 
         _nest_stack.pop();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10949, "End:");
     }
 
 
@@ -401,9 +401,9 @@ namespace abc { namespace net { namespace json {
         , state_base(origin, log) {
 
         constexpr const char* suborigin = "istream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1094a, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1094b, "End:");
     }
 
 
@@ -420,7 +420,7 @@ namespace abc { namespace net { namespace json {
 
     inline void istream::skip_value() {
         constexpr const char* suborigin = "skip_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1094c, "Begin:");
 
         std::size_t nest_stack_size = state_base::nest_stack().size();
         do {
@@ -428,13 +428,13 @@ namespace abc { namespace net { namespace json {
         }
         while (state_base::nest_stack().size() > nest_stack_size);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1094d, "End:");
     }
 
 
     inline token istream::get_token() {
         constexpr const char* suborigin = "get_token()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1094e, "Begin:");
 
         token tok;
         bool trail_comma = true;
@@ -449,14 +449,14 @@ namespace abc { namespace net { namespace json {
 
                 skip_spaces();
                 ch = peek_char();
-                expect_char(ch, ':', true, suborigin, __TAG__);
+                expect_char(ch, ':', true, suborigin, 0x1094f);
 
                 state_base::set_expect_property(false);
                 trail_comma = false;
             }
             else {
-                expect_char(ch, '}', true, suborigin, __TAG__);
-                unnest(nest_type::object, suborigin, __TAG__);
+                expect_char(ch, '}', true, suborigin, 0x10950);
+                unnest(nest_type::object, suborigin, 0x10951);
 
                 tok.type = token_type::end_object;
 
@@ -499,7 +499,7 @@ namespace abc { namespace net { namespace json {
             }
             else if (ch == ']') {
                 base::get();
-                unnest(nest_type::array, suborigin, __TAG__);
+                unnest(nest_type::array, suborigin, 0x10952);
 
                 tok.type = token_type::end_array;
             }
@@ -513,7 +513,7 @@ namespace abc { namespace net { namespace json {
             }
             else {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected ch=%c (\\u%4.4x)", ch, ch);
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x10953, "Unexpected ch=%c (\\u%4.4x)", ch, ch);
             }
 
             if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object) {
@@ -530,17 +530,17 @@ namespace abc { namespace net { namespace json {
             }
             else {
                 if (state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
-                    expect_char(ch, '}', false, suborigin, __TAG__);
+                    expect_char(ch, '}', false, suborigin, 0x10954);
                 }
                 else {
-                    expect_char(ch, ']', false, suborigin, __TAG__);
+                    expect_char(ch, ']', false, suborigin, 0x10955);
                 }
             }
         }
 
         base::set_gcount(tok.string.length());
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: tok.type=%u, tok.string='%s'", tok.type, tok.string.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10956, "End: tok.type=%u, tok.string='%s'", tok.type, tok.string.c_str());
 
         return tok;
     }
@@ -564,7 +564,7 @@ namespace abc { namespace net { namespace json {
 
     inline literal::string istream::get_string() {
         constexpr const char* suborigin = "get_string()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10957, "Begin:");
 
         literal::string str;
 
@@ -586,7 +586,7 @@ namespace abc { namespace net { namespace json {
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10958, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -594,7 +594,7 @@ namespace abc { namespace net { namespace json {
 
     inline literal::string istream::get_number() {
         constexpr const char* suborigin = "get_number()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10959, "Begin:");
 
         literal::string str;
 
@@ -624,7 +624,7 @@ namespace abc { namespace net { namespace json {
             str += get_digits();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1095a, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -632,18 +632,18 @@ namespace abc { namespace net { namespace json {
 
     inline literal::string istream::get_literal(const char* literal) {
         constexpr const char* suborigin = "get_literal()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: literal='%s'", literal);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1095b, "Begin: literal='%s'", literal);
 
         literal::string str;
 
         for (const char* itr = literal; *itr != '\0'; itr++) {
             char ch = peek_char();
-            expect_char(ch, *itr, true, suborigin, __TAG__);
+            expect_char(ch, *itr, true, suborigin, 0x1095c);
 
             str += ch;
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: str='%s'", str.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1095d, "End: str='%s'", str.c_str());
 
         return str;
     }
@@ -651,10 +651,10 @@ namespace abc { namespace net { namespace json {
 
     inline char istream::get_escaped_char() {
         constexpr const char* suborigin = "get_escaped_char()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1095e, "Begin:");
 
         char ch = peek_char();
-        expect_char(ch, '\\', true, suborigin, __TAG__);
+        expect_char(ch, '\\', true, suborigin, 0x1095f);
 
         ch = peek_char();
         if (ch == '"' || ch == '\\' || ch == '/') {
@@ -687,18 +687,18 @@ namespace abc { namespace net { namespace json {
 
             if (str.length() != 4) {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "str='%s'", str.c_str());
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x10960, "str='%s'", str.c_str());
             }
             else if (str[0] == '0' && str[1] == '0') {
                 ch = (ascii::hex(str[2]) << 4) | ascii::hex(str[3]);
             }
             else {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Wide chars not supported.");
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x10961, "Wide chars not supported.");
             }
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ch='%c' (0x%2.2x)", ch, ch);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10962, "End: ch='%c' (0x%2.2x)", ch, ch);
 
         return ch;
     }
@@ -783,9 +783,9 @@ namespace abc { namespace net { namespace json {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "reader()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10963, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10964, "End:");
     }
 
 
@@ -801,13 +801,13 @@ namespace abc { namespace net { namespace json {
 
     inline value reader::get_value() {
         constexpr const char* suborigin = "get_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10965, "Begin:");
 
         token token = base::get_token();
 
         value value = get_value_from_token(std::move(token));
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10966, "End:");
 
         return value;
     }
@@ -815,7 +815,7 @@ namespace abc { namespace net { namespace json {
 
     inline value reader::get_value_from_token(token&& token) {
         constexpr const char* suborigin = "get_value_from_token()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10967, "Begin:");
 
         switch (token.type) {
             case token_type::null:
@@ -838,10 +838,10 @@ namespace abc { namespace net { namespace json {
 
             default:
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected token_type=%u", token.type);
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x10968, "Unexpected token_type=%u", token.type);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10969, "End:");
 
         return value(base::log());
     }
@@ -849,7 +849,7 @@ namespace abc { namespace net { namespace json {
 
     inline literal::array reader::get_array() {
         constexpr const char* suborigin = "get_array()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1096a, "Begin:");
 
         literal::array array;
 
@@ -858,7 +858,7 @@ namespace abc { namespace net { namespace json {
             value value = get_value_from_token(std::move(token));
             if (value.type() == value_type::empty) {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x1096b, "Unexpected value_type=%u", value.type());
             }
 
             array.push_back(std::move(value));
@@ -866,7 +866,7 @@ namespace abc { namespace net { namespace json {
             token = base::get_token();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu", array.size());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1096c, "End: size=%zu", array.size());
 
         return array;
     }
@@ -874,7 +874,7 @@ namespace abc { namespace net { namespace json {
 
     inline literal::object reader::get_object() {
         constexpr const char* suborigin = "get_object()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1096d, "Begin:");
 
         literal::object object;
 
@@ -882,13 +882,13 @@ namespace abc { namespace net { namespace json {
         while (token.type != token_type::end_object) {
             if (token.type != token_type::property) {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected token_type=%u", token.type);
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x1096e, "Unexpected token_type=%u", token.type);
             }
 
             value value = get_value();
             if (value.type() == value_type::empty) {
                 base::set_bad();
-                diag_base::template throw_exception<diag::input_error>(suborigin, __TAG__, "Unexpected value_type=%u", value.type());
+                diag_base::template throw_exception<diag::input_error>(suborigin, 0x1096f, "Unexpected value_type=%u", value.type());
             }
 
             object[token.string] = std::move(value);
@@ -896,7 +896,7 @@ namespace abc { namespace net { namespace json {
             token = base::get_token();
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: size=%zu", object.size());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10970, "End: size=%zu", object.size());
 
         return object;
     }
@@ -911,9 +911,9 @@ namespace abc { namespace net { namespace json {
         , _skip_comma(false) {
 
         constexpr const char* suborigin = "ostream()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10971, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10972, "End:");
     }
 
 
@@ -983,17 +983,17 @@ namespace abc { namespace net { namespace json {
 
     inline void ostream::put_null() {
         constexpr const char* suborigin = "put_null()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10973, "Begin:");
 
         std::size_t pcount = put_literal("null", 4);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10974, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_boolean(literal::boolean b) {
         constexpr const char* suborigin = "put_boolean()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: b=%d", b);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10975, "Begin: b=%d", b);
 
         std::size_t pcount = 0;
         if (b) {
@@ -1003,26 +1003,26 @@ namespace abc { namespace net { namespace json {
             pcount = put_literal("false", 5);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10976, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_number(literal::number n) {
         constexpr const char* suborigin = "put_number()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: n=%.16lg", n);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10977, "Begin: n=%.16lg", n);
 
         char literal[19 + 6 + 1];
         std::size_t size = std::snprintf(literal, sizeof(literal), "%.16lg", n);
 
         std::size_t pcount = put_literal(literal, size);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10978, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_string(const literal::string& s) {
         constexpr const char* suborigin = "put_string()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: s='%s'", s.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10979, "Begin: s='%s'", s.c_str());
 
         put_literal_precond();
 
@@ -1033,17 +1033,17 @@ namespace abc { namespace net { namespace json {
 
         put_literal_postcond();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1097a, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_property(const literal::string& name) {
         constexpr const char* suborigin = "put_property()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: name='%s'", name.c_str());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1097b, "Begin: name='%s'", name.c_str());
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object || !state_base::expect_property()) {
             base::set_bad();
-            diag_base::expect(suborigin, false, __TAG__, "Did not expect a property.");
+            diag_base::expect(suborigin, false, 0x1097c, "Did not expect a property.");
             return;
         }
 
@@ -1059,13 +1059,13 @@ namespace abc { namespace net { namespace json {
         _skip_comma = true;
         state_base::set_expect_property(false);
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1097d, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_begin_array() {
         constexpr const char* suborigin = "put_begin_array()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1097e, "Begin:");
 
         put_literal_precond();
 
@@ -1074,17 +1074,17 @@ namespace abc { namespace net { namespace json {
         state_base::nest_stack().push(nest_type::array);
         _skip_comma = true;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1097f, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_end_array() {
         constexpr const char* suborigin = "put_end_array()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10980, "Begin:");
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::array) {
             base::set_bad();
-            diag_base::expect(suborigin, false, __TAG__, "Not in an array.");
+            diag_base::expect(suborigin, false, 0x10981, "Not in an array.");
             return;
         }
 
@@ -1093,13 +1093,13 @@ namespace abc { namespace net { namespace json {
         state_base::nest_stack().pop();
         put_literal_postcond();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10982, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_begin_object() {
         constexpr const char* suborigin = "put_begin_object()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10983, "Begin:");
 
         put_literal_precond();
 
@@ -1109,17 +1109,17 @@ namespace abc { namespace net { namespace json {
         state_base::set_expect_property(true);
         _skip_comma = true;
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10984, "End: pcount=%zu", pcount);
     }
 
 
     inline void ostream::put_end_object() {
         constexpr const char* suborigin = "put_end_object()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10985, "Begin:");
 
         if (state_base::nest_stack().empty() || state_base::nest_stack().top() != nest_type::object) {
             base::set_bad();
-            diag_base::expect(suborigin, false, __TAG__, "Not in an object.");
+            diag_base::expect(suborigin, false, 0x10986, "Not in an object.");
             return;
         }
 
@@ -1128,7 +1128,7 @@ namespace abc { namespace net { namespace json {
         state_base::nest_stack().pop();
         put_literal_postcond();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10987, "End: pcount=%zu", pcount);
     }
 
 
@@ -1154,7 +1154,7 @@ namespace abc { namespace net { namespace json {
 
     inline std::size_t ostream::put_literal(const char* chars, std::size_t chars_len) {
         constexpr const char* suborigin = "put_literal()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: chars='%s'", chars);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10988, "Begin: chars='%s'", chars);
 
         put_literal_precond();
 
@@ -1162,7 +1162,7 @@ namespace abc { namespace net { namespace json {
 
         put_literal_postcond();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: pcount=%zu", pcount);
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10989, "End: pcount=%zu", pcount);
 
         return pcount;
     }
@@ -1170,11 +1170,11 @@ namespace abc { namespace net { namespace json {
 
     inline void ostream::put_literal_precond() {
         constexpr const char* suborigin = "put_literal_precond()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1098a, "Begin:");
 
         if (!state_base::nest_stack().empty() && state_base::nest_stack().top() == nest_type::object && state_base::expect_property()) {
             base::set_bad();
-            diag_base::expect(suborigin, false, __TAG__, "Expected a property.");
+            diag_base::expect(suborigin, false, 0x1098b, "Expected a property.");
             return;
         }
 
@@ -1182,13 +1182,13 @@ namespace abc { namespace net { namespace json {
             put_chars(",", 1);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1098c, "End:");
     }
 
 
     inline void ostream::put_literal_postcond() {
         constexpr const char* suborigin = "put_literal_postcond()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1098d, "Begin:");
 
         _skip_comma = false;
 
@@ -1196,7 +1196,7 @@ namespace abc { namespace net { namespace json {
             state_base::set_expect_property(true);
         }
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1098e, "End:");
     }
 
 
@@ -1237,9 +1237,9 @@ namespace abc { namespace net { namespace json {
         : base(origin, sb, log) {
 
         constexpr const char* suborigin = "writer()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1098f, "Begin:");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10990, "End:");
     }
 
 
@@ -1255,7 +1255,7 @@ namespace abc { namespace net { namespace json {
 
     inline void writer::put_value(const value& value) {
         constexpr const char* suborigin = "put_value()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%u", value.type());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10991, "Begin: type=%u", value.type());
 
         switch (value.type()) {
             case value_type::null:
@@ -1283,18 +1283,18 @@ namespace abc { namespace net { namespace json {
                 break;
 
             default:
-                diag_base::expect(suborigin, false, __TAG__, "Unexpected value_type=%u", value.type());
+                diag_base::expect(suborigin, false, 0x10992, "Unexpected value_type=%u", value.type());
         }
 
         base::flush();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10993, "End:");
     }
 
 
     inline void writer::put_array(const literal::array& array) {
         constexpr const char* suborigin = "put_array()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", array.size());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10994, "Begin: size=%zu", array.size());
 
         base::put_begin_array();
 
@@ -1306,13 +1306,13 @@ namespace abc { namespace net { namespace json {
 
         base::flush();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10995, "End:");
     }
 
 
     inline void writer::put_object(const literal::object& object) {
         constexpr const char* suborigin = "put_object()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: size=%zu", object.size());
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10996, "Begin: size=%zu", object.size());
 
         base::put_begin_object();
 
@@ -1325,7 +1325,7 @@ namespace abc { namespace net { namespace json {
 
         base::flush();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x10997, "End:");
     }
 
 

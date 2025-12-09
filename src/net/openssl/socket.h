@@ -80,7 +80,7 @@ namespace abc { namespace net { namespace openssl {
         constexpr const char* suborigin = "tcp_client_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1076a, "Begin: _verify_server=%d, ctx=%p", _verify_server, ctx);
 
-        diag_base::expect(suborigin, ctx != nullptr, __TAG__, "ctx != nullptr");
+        diag_base::expect(suborigin, ctx != nullptr, 0x10998, "ctx != nullptr");
 
         _ssl = SSL_new(ctx);
         diag_base::require(suborigin, _ssl != nullptr, 0x1076b, "::SSL_new()");
@@ -115,8 +115,8 @@ namespace abc { namespace net { namespace openssl {
         constexpr const char* suborigin = "connect()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10770, "Begin: host='%s', port='%s'", host, port);
 
-        diag_base::expect(suborigin, host != nullptr, __TAG__, "host != nullptr");
-        diag_base::expect(suborigin, port != nullptr, __TAG__, "host != nullptr");
+        diag_base::expect(suborigin, host != nullptr, 0x10999, "host != nullptr");
+        diag_base::expect(suborigin, port != nullptr, 0x1099a, "host != nullptr");
 
         base::connect(host, port);
         connect_handshake();
@@ -223,9 +223,9 @@ namespace abc { namespace net { namespace openssl {
         constexpr const char* suborigin = "tcp_server_socket()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x1078b, "Begin:");
 
-        diag_base::expect(suborigin, cert_file_path != nullptr, __TAG__, "is_open");
-        diag_base::expect(suborigin, pkey_file_path != nullptr, __TAG__, "is_open");
-        diag_base::expect(suborigin, pkey_file_password != nullptr, __TAG__, "is_open");
+        diag_base::expect(suborigin, cert_file_path != nullptr, 0x1099b, "is_open");
+        diag_base::expect(suborigin, pkey_file_path != nullptr, 0x1099c, "is_open");
+        diag_base::expect(suborigin, pkey_file_password != nullptr, 0x1099d, "is_open");
 
         _pkey_file_password = pkey_file_password;
 
@@ -281,10 +281,10 @@ namespace abc { namespace net { namespace openssl {
 
     inline std::unique_ptr<net::tcp_client_socket> tcp_server_socket::accept() const {
         constexpr const char* suborigin = "accept()";
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x1099e, "Begin:");
 
         socket::fd_t fd = base::accept_fd();
-        diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "fd=%d", (int)fd);
+        diag_base::put_any(suborigin, diag::severity::optional, 0x1099f, "fd=%d", (int)fd);
 
         const bool verify_server = false; // This value doesn't matter.
         std::unique_ptr<tcp_client_socket> openssl_client(new tcp_client_socket(fd, _ctx, verify_server, base::family(), diag_base::log()));
@@ -292,7 +292,7 @@ namespace abc { namespace net { namespace openssl {
         int stat = SSL_accept(openssl_client->_ssl);
         diag_base::require(suborigin, stat > 0, 0x10796, "::SSL_accept()");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+        diag_base::put_any(suborigin, diag::severity::callstack, 0x109a0, "End:");
 
         return openssl_client;
     }

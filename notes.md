@@ -1,5 +1,4 @@
 ## To Do
-- Tag
 - __Rename `master` to `main`.__
 
 - Namespace `vmem`:
