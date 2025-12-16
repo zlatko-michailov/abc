@@ -5,9 +5,9 @@ Up to [Documentation](../README.md).
 ## Get a Release
 > The recommended way to get `abc` is to download the `abc_xx.xx.xx.zip` file from the latest [release](../../../../releases).
 
-Releases are cut from the `master` (stable) branch, and the latest of them should be the most suitable one.
+Releases are cut from the `main` (stable) branch, and the latest of them should be the most suitable one.
 
-In case you want to adopt features that haven't been merged into `master` yet, e.g. features from the `dev` branch, you will have to build a release yourself, which is straightforward - simply follow the instructions from [Clone and Build the Repo](./clone_and_build.md).
+In case you want to adopt features that haven't been merged into `main` yet, e.g. features from the `dev` branch, you will have to build a release yourself, which is straightforward - simply follow the instructions from [Clone and Build the Repo](./clone_and_build.md).
 You will find an `abc_xx.xx.xx.zip` file in the `out` folder.
 
 ## Integrate with Your Project

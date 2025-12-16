@@ -1,6 +1,4 @@
 ## To Do
-- __Rename `master` to `main`.__
-
 - Namespace `vmem`:
   - `zip_iterator`
   - `array`

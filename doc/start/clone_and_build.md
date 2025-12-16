@@ -12,21 +12,21 @@ cd abc
 ```
 
 ## Choose a Branch
-### `master`
-`master` is the "stable" branch.
+### `main`
+`main` is the "stable" branch.
 This is the branch from where releases are cut.
 Documentation reflects this branch.
 
 > This is the only branch that is tagged.
 
 ```sh
-git checkout master
+git checkout main
 ```
 
 ### `dev`
 `dev` is the "development" branch.
 This is the branch where the next big feature is developed.
-When that feature is ready, this branch gets merged into `master`.
+When that feature is ready, this branch gets merged into `main`.
 
 ```sh
 git checkout dev

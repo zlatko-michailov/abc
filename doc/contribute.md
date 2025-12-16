@@ -72,7 +72,7 @@ Once the issue is approved, assign it to yourself.
 Clone the repo under your own GitHub account.
 
 #### Branch
-Issues are typically merged into the `master` branch.
+Issues are typically merged into the `main` branch.
 If that will not be the case for a particular issue, it will be noted in the comments.
 Develop on top of that branch.
 
