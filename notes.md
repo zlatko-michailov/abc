@@ -1,24 +1,22 @@
 ## To Do
+- Namespace `ai`:
+  - `mcp`
+    - `engine`
+    - `endpoint`
+
 - Namespace `vmem`:
   - `zip_iterator`
   - `array`
-  - `mutidim_array` (or `matrix`)
+  - `matrix` (or `mutidim_array`)
+
+- Namespace `vmem`:
   - `blob`
 
-- ? Namespace `math`:
+- Namespace `math` (or `algorithm`):
   - `mmul(matrix, vector)`
 
 - Namespace `ai`:
-  - `mcp`
-  - `neural_net`
-
-## To Do Refactoring
-- internal docs
-  - log
-    - exceptions
-    - severities
-    - filters
-- doxygen comment alignment
+  - `deep_learning` (or `neural_net`)
 
 ## Pick List
 - drive
