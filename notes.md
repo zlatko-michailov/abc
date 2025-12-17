@@ -1,8 +1,13 @@
 ## To Do
+- Namespace `net`:
+  - `json_rpc`
+  - Server events?
+
 - Namespace `ai`:
   - `mcp`
-    - `engine`
+    - `server`
     - `endpoint`
+    - `client`
 
 - Namespace `vmem`:
   - `zip_iterator`

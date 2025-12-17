@@ -2,18 +2,21 @@
 
 Up to [Documentation](README.md).
 
-What is currently on the radar is __deep learning__.
-More specifically - __inference on nano devices__.
-
-That is likely to require additions to `vmem` and `concurrent`.
-
 ## 2.1.0
-- `vmem`:
+- `net`
+  - `json_rpc`
+- `ai::mcp`
+  - `server`
+  - `endpoint`
+  - `client`
+
+## 2.2.0
+- `vmem`
   - `zip_iterator`
   - `array`
   - `matrix`
 
-## 2.2.0
+## 2.3.0
 - `concurrent`
   - `async()`
   - `future.then()`
