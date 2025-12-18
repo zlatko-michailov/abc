@@ -1,7 +1,22 @@
 ## To Do
-- Namespace `net`:
+- Namespace `net::http`:
+  - Server-Sent Events (SSE)
+    - `endpoint`
+      - method - `PATCH`
+      - content_type - `event-stream`
+      - ---
+      - `send_event_part()`
+      - `send_event()`
+    - `event_part`
+      - `event_comment(const char*) : event_part`
+        - `event_field(const char*, const char* = nullptr) : event_part`
+          - `event_type(const char*) : event_field`
+          - `event_data(const char*) : event_field`
+          - `event_id(const char*) : event_field`
+          - `event_retry(const char*) : event_field`
+    - `event` = `std::vector<event_part>`
+  - ---
   - `json_rpc`
-  - Server events?
 
 - Namespace `ai`:
   - `mcp`

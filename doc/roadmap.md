@@ -3,7 +3,8 @@
 Up to [Documentation](README.md).
 
 ## 2.1.0
-- `net`
+- `net::http`
+  - Server-Sent Events (SSE)?
   - `json_rpc`
 - `ai::mcp`
   - `server`
