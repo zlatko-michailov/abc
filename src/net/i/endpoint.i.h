@@ -26,6 +26,7 @@ SOFTWARE.
 #include <future>
 #include <atomic>
 #include <string>
+#include <vector>
 
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
@@ -101,6 +102,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* GET                     = "GET";
         constexpr const char* POST                    = "POST";
         constexpr const char* PUT                     = "PUT";
+        constexpr const char* PATCH                   = "PATCH";
         constexpr const char* DELETE                  = "DELETE";
         constexpr const char* HEAD                    = "HEAD";
     }
@@ -166,6 +168,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* css                     = "text/css; charset=utf-8";
         constexpr const char* javascript              = "text/javascript; charset=utf-8";
         constexpr const char* xml                     = "text/xml; charset=utf-8";
+        constexpr const char* event_stream            = "text/event-stream";
 
         constexpr const char* json                    = "application/json";
 
@@ -175,6 +178,155 @@ namespace abc { namespace net { namespace http {
         constexpr const char* bmp                     = "image/bmp";
         constexpr const char* svg                     = "image/svg+xml";
     }
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Self-sufficient Server-Sent Events (SSE) message that can be sent to a `std::streambuf`.
+     */
+    class event_message {
+    public:
+        /**
+         * @brief       Constructor.
+         * @param name  Field name. May be `nullptr`.
+         * @param value Field value. May be `nullptr`.
+         */
+        event_message(const char* name, const char* value);
+
+        /**
+         * @brief Move constructor.
+         */
+        event_message(event_message&& other) noexcept = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        event_message(const event_message& other) = default;
+
+    public:
+        /**
+         * @brief Sends the event message to the given `std::streambuf` with a trailing newline.
+         */
+        void send(std::streambuf* sb) const;
+
+    protected:
+        /**
+         * @brief Message.
+         */
+        std::string _message;
+    };
+
+
+    /**
+     * @brief Comment event message.
+     */
+    class comment_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param comment Comment.
+         */
+        comment_event_message(const char* comment);
+    };
+
+
+    /**
+     * @brief "event" (type) event message.
+     */
+    class type_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief      Constructor.
+         * @param type Event type.
+         */
+        type_event_message(const char* type);
+    };
+
+
+    /**
+     * @brief "data" event message.
+     */
+    class data_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief      Constructor.
+         * @param data Event data.
+         */
+        data_event_message(const char* data);
+    };
+
+
+    /**
+     * @brief "id" event message.
+     */
+    class id_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief    Constructor.
+         * @param id Event data.
+         */
+        id_event_message(const char* id);
+    };
+
+
+    /**
+     * @brief "retry" event message.
+     */
+    class retry_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief              Constructor.
+         * @param milliseconds Retry milliseconds.
+         */
+        retry_event_message(std::uint32_t milliseconds);
+    };
+
+
+    /**
+     * @brief Self-sufficient Server-Sent Event (SSE) that can be sent to a `std::streambuf`.
+     */
+    class event {
+    public:
+        /**
+         * @brief                Constructor.
+         * @param event_messages Server-Sent Events messages.
+         */
+        event(std::vector<event_message>&& event_messages);
+
+        /**
+         * @brief Move constructor.
+         */
+        event(event&& other) noexcept = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        event(const event& other) = default;
+
+    public:
+        /**
+         * @brief Sends the event to the given `std::streambuf` with a trailing newline.
+         */
+        void send(std::streambuf* sb) const;
+
+    protected:
+        /**
+         * @brief Event.
+         */
+        std::vector<event_message> _event_messages;
+    };
 
 
     // --------------------------------------------------------------

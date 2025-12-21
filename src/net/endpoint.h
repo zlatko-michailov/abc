@@ -37,6 +37,7 @@ SOFTWARE.
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "../root/ascii.h"
 #include "../diag/diag_ready.h"
 #include "socket.h"
 #include "http.h"
@@ -44,6 +45,70 @@ SOFTWARE.
 
 
 namespace abc { namespace net { namespace http {
+
+
+    inline event_message::event_message(const char* name, const char* value)
+        : _message() {
+
+        if (name != nullptr) {
+            _message += name;
+        }
+
+        if (value != nullptr) {
+            _message += ": ";
+            _message += value;
+        }
+    }
+
+
+    inline void event_message::send(std::streambuf* sb) const {
+        std::ostream out(sb);
+        out << _message << ascii::endl;
+    }
+
+
+    inline comment_event_message::comment_event_message(const char* comment)
+        : event_message(nullptr, comment) {
+    }
+
+
+    inline type_event_message::type_event_message(const char* type)
+        : event_message("event", type) {
+    }
+
+
+    inline data_event_message::data_event_message(const char* data)
+        : event_message("data", data) {
+    }
+
+
+    inline id_event_message::id_event_message(const char* id)
+        : event_message("id", id) {
+    }
+
+
+    inline retry_event_message::retry_event_message(std::uint32_t milliseconds)
+        : event_message("retry", std::to_string(milliseconds).c_str()) {
+    }
+
+
+    inline event::event(std::vector<event_message>&& event_messages)
+        : _event_messages(std::move(event_messages)) {
+    }
+
+
+    inline void event::send(std::streambuf* sb) const {
+        for (const event_message& message : _event_messages) {
+            message.send(sb);
+        }
+
+        std::ostream out(sb);
+        out << ascii::endl;
+    }
+
+
+    // --------------------------------------------------------------
+
 
     inline endpoint_error::endpoint_error(diag::tag_t tag, status_code_t status_code, const char* reason_phrase, const char* content_type, const char* body)
         : base(body)

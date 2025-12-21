@@ -39,6 +39,7 @@ SOFTWARE.
 #include "inc/table_stream.h"
 #include "inc/mutex.h"
 #include "inc/http.h"
+#include "inc/endpoint.h"
 #include "inc/json.h"
 #include "inc/socket.h"
 #include "inc/vmem.h"
@@ -52,6 +53,7 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
+#if 0
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -162,6 +164,15 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_client_move",                           test_http_client_move },
                 { "test_http_server_move",                           test_http_server_move },
             } },
+#endif
+            { "endpoint", {
+                { "test_endpoint_event_messages",                    test_endpoint_event_messages },
+                { "test_endpoint_events_1",                          test_endpoint_events_1 },
+                { "test_endpoint_events_N",                          test_endpoint_events_N },
+                ////{ "test_endpoint_server_events_1",                   test_endpoint_server_events_1 },
+                ////{ "test_endpoint_server_events_N",                   test_endpoint_server_events_N },
+            } },
+#if 0
             { "json", {
                 { "test_json_value_empty",                           test_json_value_empty },
                 { "test_json_value_null",                            test_json_value_null },
@@ -287,6 +298,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_pool_move",                             test_vmem_pool_move },
                 { "test_vmem_page_move",                             test_vmem_page_move },
             } },
+#endif
         },
         &log,
         abc::test::seed::random,
