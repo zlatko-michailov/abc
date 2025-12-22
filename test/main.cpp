@@ -39,7 +39,6 @@ SOFTWARE.
 #include "inc/table_stream.h"
 #include "inc/mutex.h"
 #include "inc/http.h"
-#include "inc/endpoint.h"
 #include "inc/json.h"
 #include "inc/socket.h"
 #include "inc/vmem.h"
@@ -110,6 +109,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_mutex_1_thread_M_uses",                      test_mutex_1_thread_M_uses },
                 { "test_mutex_M_threads_1_use",                      test_mutex_M_threads_1_use },
             } },
+#endif
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
                 { "test_http_request_istream_bodytext",              test_http_request_istream_bodytext },
@@ -153,6 +153,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_response_writer_headers",               test_http_response_writer_headers },
                 { "test_http_response_writer_body",                  test_http_response_writer_body },
                 { "test_http_response_writer_headers_body",          test_http_response_writer_headers_body },
+                { "test_http_response_writer_event_messages",        test_http_response_writer_event_messages },
+                { "test_http_response_writer_events_1",              test_http_response_writer_events_1 },
+                { "test_http_response_writer_events_N",              test_http_response_writer_events_N },
                 { "test_http_request_istream_move",                  test_http_request_istream_move },
                 { "test_http_request_ostream_move",                  test_http_request_ostream_move },
                 { "test_http_response_istream_move",                 test_http_response_istream_move },
@@ -163,14 +166,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_response_writer_move",                  test_http_response_writer_move },
                 { "test_http_client_move",                           test_http_client_move },
                 { "test_http_server_move",                           test_http_server_move },
-            } },
-#endif
-            { "endpoint", {
-                { "test_endpoint_event_messages",                    test_endpoint_event_messages },
-                { "test_endpoint_events_1",                          test_endpoint_events_1 },
-                { "test_endpoint_events_N",                          test_endpoint_events_N },
-                ////{ "test_endpoint_server_events_1",                   test_endpoint_server_events_1 },
-                ////{ "test_endpoint_server_events_N",                   test_endpoint_server_events_N },
             } },
 #if 0
             { "json", {

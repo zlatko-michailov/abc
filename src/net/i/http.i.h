@@ -29,6 +29,7 @@ SOFTWARE.
 #include <istream>
 #include <ostream>
 #include <string>
+#include <vector>
 #include <map>
 
 #include "../../root/util.h"
@@ -111,6 +112,155 @@ namespace abc { namespace net { namespace http {
 
         status_code_t status_code;
         std::string   reason_phrase;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Individual message of a Server-Sent Event (SSE).
+     */
+    class event_message {
+    public:
+        /**
+         * @brief       Constructor.
+         * @param name  Field name. May be `nullptr`.
+         * @param value Field value. May be `nullptr`.
+         */
+        event_message(const char* name, const char* value);
+
+        /**
+         * @brief Move constructor.
+         */
+        event_message(event_message&& other) noexcept = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        event_message(const event_message& other) = default;
+
+    public:
+        /**
+         * @brief Returns the event message as a string without a trailing newline.
+         */
+        const std::string& message() const noexcept;
+
+    protected:
+        /**
+         * @brief Message.
+         */
+        std::string _message;
+    };
+
+
+    /**
+     * @brief Comment event message.
+     */
+    class comment_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief         Constructor.
+         * @param comment Comment.
+         */
+        comment_event_message(const char* comment);
+    };
+
+
+    /**
+     * @brief "event" (type) event message.
+     */
+    class type_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief      Constructor.
+         * @param type Event type.
+         */
+        type_event_message(const char* type);
+    };
+
+
+    /**
+     * @brief "data" event message.
+     */
+    class data_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief      Constructor.
+         * @param data Event data.
+         */
+        data_event_message(const char* data);
+    };
+
+
+    /**
+     * @brief "id" event message.
+     */
+    class id_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief    Constructor.
+         * @param id Event data.
+         */
+        id_event_message(const char* id);
+    };
+
+
+    /**
+     * @brief "retry" event message.
+     */
+    class retry_event_message
+        : public event_message {
+
+    public:
+        /**
+         * @brief              Constructor.
+         * @param milliseconds Retry milliseconds.
+         */
+        retry_event_message(std::uint32_t milliseconds);
+    };
+
+
+    /**
+     * @brief Self-sufficient Server-Sent Event (SSE) that can be sent to a `std::streambuf`.
+     */
+    class event {
+    public:
+        /**
+         * @brief                Constructor.
+         * @param event_messages Server-Sent Events messages.
+         */
+        event(std::vector<event_message>&& event_messages);
+
+        /**
+         * @brief Move constructor.
+         */
+        event(event&& other) noexcept = default;
+
+        /**
+         * @brief Copy constructor.
+         */
+        event(const event& other) = default;
+
+    public:
+        /**
+         * @brief Returns the event messages.
+         */
+        const std::vector<event_message>& event_messages() const noexcept;
+
+    protected:
+        /**
+         * @brief Event messages.
+         */
+        std::vector<event_message> _event_messages;
     };
 
 
@@ -1029,6 +1179,18 @@ namespace abc { namespace net { namespace http {
          * @param body_len Body length. Optional.
          */
         void put_body(const char* body, std::size_t body_len = size::strlen);
+
+        /**
+         * @brief       Writes a whole Server-Sent Event (SSE).
+         * @param event A Server-Sent Event (SSE).
+         */
+        void put_event(const http::event& event);
+
+        /**
+         * @brief               Writes an individual message/line of a Server-Sent Event (SSE).
+         * @param event_message An individual event message/line.
+         */
+        void put_event_message(const event_message& event_message);
 
     public:
         /**

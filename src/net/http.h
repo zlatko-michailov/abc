@@ -36,6 +36,63 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace http {
 
+    inline event_message::event_message(const char* name, const char* value)
+        : _message() {
+
+        if (name != nullptr) {
+            _message += name;
+        }
+
+        if (value != nullptr) {
+            _message += ": ";
+            _message += value;
+        }
+    }
+
+
+    inline const std::string& event_message::message() const noexcept {
+        return _message;
+    }
+
+
+    inline comment_event_message::comment_event_message(const char* comment)
+        : event_message(nullptr, comment) {
+    }
+
+
+    inline type_event_message::type_event_message(const char* type)
+        : event_message("event", type) {
+    }
+
+
+    inline data_event_message::data_event_message(const char* data)
+        : event_message("data", data) {
+    }
+
+
+    inline id_event_message::id_event_message(const char* id)
+        : event_message("id", id) {
+    }
+
+
+    inline retry_event_message::retry_event_message(std::uint32_t milliseconds)
+        : event_message("retry", std::to_string(milliseconds).c_str()) {
+    }
+
+
+    inline event::event(std::vector<event_message>&& event_messages)
+        : _event_messages(std::move(event_messages)) {
+    }
+
+
+    inline const std::vector<event_message>& event::event_messages() const noexcept {
+        return _event_messages;
+    }
+
+
+    // --------------------------------------------------------------
+
+
     inline state::state(const char* origin, item next, diag::log_ostream* log) noexcept
         : diag_base(copy(origin), log)
         , _next(next) {
@@ -1370,6 +1427,22 @@ namespace abc { namespace net { namespace http {
         base::put_body(body, body_len);
 
         base::flush();
+    }
+
+    inline void response_writer::put_event(const http::event& event) {
+        const std::vector<event_message>& event_messages = event.event_messages();
+
+        for (const event_message& event_message : event_messages) {
+            put_event_message(event_message);
+        }
+        base::put_crlf();
+    }
+
+    inline void response_writer::put_event_message(const event_message& event_message) {
+        const std::string& inner_message = event_message.message();
+
+        base::put_prints_and_spaces(inner_message.c_str(), inner_message.length());
+        base::put_crlf();
     }
 
 

@@ -1,13 +1,16 @@
 ## Done
 - Namespace `net::http`:
   - Server-Sent Events (SSE)
-    - `event_message`
     - `event`
-    - `endpoint`
-      - `send_event_message()`
+    - `event_message`
+    - `response_writer`
       - `send_event()`
+      - `send_event_message()`
 
 ## To Do
+- SSE
+  - Test manually in a browser.
+
 - Namespace `net::http`:
   - Server-Sent Events (SSE)
   - ---

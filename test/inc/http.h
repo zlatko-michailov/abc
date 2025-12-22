@@ -79,6 +79,9 @@ bool test_http_response_writer_none(test_context& context);
 bool test_http_response_writer_headers(test_context& context);
 bool test_http_response_writer_body(test_context& context);
 bool test_http_response_writer_headers_body(test_context& context);
+bool test_http_response_writer_event_messages(test_context& context);
+bool test_http_response_writer_events_1(test_context& context);
+bool test_http_response_writer_events_N(test_context& context);
 
 bool test_http_request_istream_move(test_context& context);
 bool test_http_request_ostream_move(test_context& context);

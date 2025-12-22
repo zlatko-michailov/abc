@@ -1082,6 +1082,181 @@ bool http_response_writer(test_context& context, bool use_headers, bool use_body
 }
 
 
+bool http_response_writer_event_message(test_context& context, const abc::net::http::event_message& event_message, const char* expected, abc::diag::tag_t tag);
+bool http_response_writer_event(test_context& context, const abc::net::http::event& event, const char* expected, abc::diag::tag_t tag);
+
+
+bool test_http_response_writer_event_messages(test_context& context) {
+    bool passed = true;
+
+    {
+        abc::net::http::comment_event_message event_message("This is a comment.");
+        const char* expected = ": This is a comment.\r\n";
+
+        passed = http_response_writer_event_message(context, event_message, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::type_event_message event_message("test");
+        const char* expected = "event: test\r\n";
+
+        passed = http_response_writer_event_message(context, event_message, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::data_event_message event_message("This is some data.");
+        const char* expected = "data: This is some data.\r\n";
+
+        passed = http_response_writer_event_message(context, event_message, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::id_event_message event_message("ABC123");
+        const char* expected = "id: ABC123\r\n";
+
+        passed = http_response_writer_event_message(context, event_message, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::retry_event_message event_message(456);
+        const char* expected = "retry: 456\r\n";
+
+        passed = http_response_writer_event_message(context, event_message, expected, __TAG__) && passed;
+    }
+
+    return passed;
+}
+
+
+bool test_http_response_writer_events_1(test_context& context) {
+    bool passed = true;
+
+    {
+        abc::net::http::event event({
+            abc::net::http::comment_event_message("This is a comment."),
+        });
+        const char* expected = ": This is a comment.\r\n\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::event event({
+            abc::net::http::type_event_message("test"),
+        });
+        const char* expected = "event: test\r\n\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::event event({
+            abc::net::http::data_event_message("This is some data."),
+        });
+        const char* expected = "data: This is some data.\r\n\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::event event({
+            abc::net::http::id_event_message("ABC123"),
+        });
+        const char* expected = "id: ABC123\r\n\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::event event({
+            abc::net::http::retry_event_message(456),
+        });
+        const char* expected = "retry: 456\r\n\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    return passed;
+}
+
+
+bool test_http_response_writer_events_N(test_context& context) {
+    bool passed = true;
+
+    {
+        abc::net::http::event event({
+            abc::net::http::comment_event_message("This is a comment."),
+            abc::net::http::type_event_message("test"),
+            abc::net::http::data_event_message("This is some data."),
+            abc::net::http::id_event_message("ABC123"),
+            abc::net::http::retry_event_message(456),
+        });
+        const char* expected =
+            ": This is a comment.\r\n"
+            "event: test\r\n"
+            "data: This is some data.\r\n"
+            "id: ABC123\r\n"
+            "retry: 456\r\n"
+            "\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    {
+        abc::net::http::event event({
+            abc::net::http::comment_event_message("Event 1:"),
+            abc::net::http::type_event_message("test"),
+            abc::net::http::id_event_message("1"),
+            abc::net::http::data_event_message("Message 1.1"),
+            abc::net::http::data_event_message("Message 1.2"),
+            abc::net::http::data_event_message("Message 1.3"),
+        });
+        const char* expected =
+            ": Event 1:\r\n"
+            "event: test\r\n"
+            "id: 1\r\n"
+            "data: Message 1.1\r\n"
+            "data: Message 1.2\r\n"
+            "data: Message 1.3\r\n"
+            "\r\n";
+
+        passed = http_response_writer_event(context, event, expected, __TAG__) && passed;
+    }
+
+    return passed;
+}
+
+
+bool http_response_writer_event_message(test_context& context, const abc::net::http::event_message& event_message, const char* expected, abc::diag::tag_t tag) {
+    bool passed = true;
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::response_writer writer(&sb, context.log());
+
+    writer.put_event_message(event_message);
+
+    passed = context.are_equal(sb.str().c_str(), expected, tag) && passed;
+
+    return passed;
+}
+
+
+bool http_response_writer_event(test_context& context, const abc::net::http::event& event, const char* expected, abc::diag::tag_t tag) {
+    bool passed = true;
+
+    std::stringbuf sb(std::ios_base::out);
+
+    abc::net::http::response_writer writer(&sb, context.log());
+
+    writer.put_event(event);
+
+    passed = context.are_equal(sb.str().c_str(), expected, tag) && passed;
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 
