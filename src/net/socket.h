@@ -28,6 +28,7 @@ SOFTWARE.
 #include <stdexcept>
 #include <memory>
 #include <cstdio>
+#include <cerrno>
 
 #include "../diag/diag_ready.h"
 #include "i/socket.i.h"
@@ -320,13 +321,19 @@ namespace abc { namespace net {
             sent_size = ::send(base::fd(), buffer, size, MSG_NOSIGNAL);
         }
 
+        if (errno == EPIPE) {
+            diag_base::put_any(suborigin, diag::severity::important, __TAG__, "EPIPE detected. Closing socket.");
+
+            base::close();
+        }
+
         if (sent_size < 0) {
-            diag_base::put_any(suborigin, diag::severity::important, 0x1043f, "sent_size=%ld", (long)sent_size);
+            diag_base::put_any(suborigin, diag::severity::important, 0x1043f, "sent_size=%ld, errno=%d, strerror=%s", (long)sent_size, errno, std::strerror(errno));
 
             sent_size = 0;
         }
         else if ((std::size_t)sent_size < size) {
-            diag_base::put_any(suborigin, diag::severity::important, 0x10440, "sent_size=%ld", (long)sent_size);
+            diag_base::put_any(suborigin, diag::severity::important, 0x10440, "sent_size=%ld, errno=%d, strerror=%s", (long)sent_size, errno, std::strerror(errno));
         }
 
         diag_base::put_binary(suborigin, diag::severity::verbose, 0x10066, buffer, size);
@@ -354,13 +361,19 @@ namespace abc { namespace net {
             received_size = ::recv(base::fd(), buffer, size, 0);
         }
 
+        if (errno == EPIPE) {
+            diag_base::put_any(suborigin, diag::severity::important, __TAG__, "EPIPE detected. Closing socket.");
+
+            base::close();
+        }
+
         if (received_size < 0) {
-            diag_base::put_any(suborigin, diag::severity::important, 0x10441, "received_size=%ld", (long)received_size);
+            diag_base::put_any(suborigin, diag::severity::important, 0x10441, "received_size=%ld, errno=%d, strerror=%s", (long)received_size, errno, std::strerror(errno));
 
             received_size = 0;
         }
         else if ((std::size_t)received_size < size) {
-            diag_base::put_any(suborigin, diag::severity::important, 0x10442, "size=%zu, received_size=%ld", size, (long)received_size);
+            diag_base::put_any(suborigin, diag::severity::important, 0x10442, "size=%zu, received_size=%ld, errno=%d, strerror=%s", size, (long)received_size, errno, std::strerror(errno));
         }
 
         diag_base::put_binary(suborigin, diag::severity::verbose, 0x10067, buffer, size);
@@ -510,6 +523,10 @@ namespace abc { namespace net {
 
 
     inline std::streambuf::int_type tcp_client_socket_streambuf::underflow() {
+        if (!_socket->is_open()) {
+            return traits_type::eof();
+        }
+
         _socket->receive(&_get_ch, sizeof(char));
 
         setg(&_get_ch, &_get_ch, &_get_ch + 1);
@@ -519,6 +536,10 @@ namespace abc { namespace net {
 
 
     inline std::streambuf::int_type tcp_client_socket_streambuf::overflow(std::streambuf::int_type ch) {
+        if (!_socket->is_open()) {
+            return traits_type::eof();
+        }
+
         _socket->send(&_put_ch, sizeof(char));
         _socket->send(&ch, sizeof(char));
 
@@ -529,6 +550,10 @@ namespace abc { namespace net {
 
 
     inline int tcp_client_socket_streambuf::sync() {
+        if (!_socket->is_open()) {
+            return traits_type::eof();
+        }
+
         if (pptr() != &_put_ch) {
             _socket->send(&_put_ch, sizeof(char));
         }
