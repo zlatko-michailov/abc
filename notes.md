@@ -1,5 +1,8 @@
 ## Done
+- Namespace `net`:
+  - `client_socket` - close on Broken pipe (32 EPIPE)
 - Namespace `net::http`:
+  - `request_reader`, `request_writer`, `response_reader`, `response_writer` - expose the underlying streams, so that callers can check the stream state bits.
   - Server-Sent Events (SSE)
     - `event`
     - `event_message`
@@ -8,12 +11,9 @@
       - `send_event_message()`
 
 ## To Do
-- SSE
-  - Test manually in a browser.
+- Copyright -2026
 
 - Namespace `net::http`:
-  - Server-Sent Events (SSE)
-  - ---
   - `json_rpc`
 
 - Namespace `ai`:

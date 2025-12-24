@@ -158,6 +158,8 @@ namespace abc { namespace net { namespace http {
     namespace header {
         constexpr const char* Content_Type            = "Content-Type";
         constexpr const char* Content_Length          = "Content-Length";
+        constexpr const char* Cache_Control           = "Cache-Control";
+        constexpr const char* Connection              = "Connection";
     }
 
 
@@ -176,6 +178,19 @@ namespace abc { namespace net { namespace http {
         constexpr const char* gif                     = "image/gif";
         constexpr const char* bmp                     = "image/bmp";
         constexpr const char* svg                     = "image/svg+xml";
+    }
+
+
+    namespace cache_control {
+        constexpr const char* no_cache                = "no-cache";
+        constexpr const char* no_store                = "no-store";
+        constexpr const char* max_age                 = "max-age";
+    }
+
+
+    namespace connection {
+        constexpr const char* keep_alive              = "keep-alive";
+        constexpr const char* close                   = "close";
     }
 
 

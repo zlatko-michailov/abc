@@ -23,7 +23,13 @@ SOFTWARE.
 */
 
 
+#include <set>
+#include <mutex>
+#include <cstdlib>
+#include <sstream>
+
 #include "../../src/root/ascii.h"
+#include "../../src/root/size.h"
 #include "../../src/diag/log.h"
 #include "../../src/net/json.h"
 #include "../../src/net/http.h"
@@ -42,6 +48,10 @@ public:
 protected:
     virtual std::unique_ptr<abc::net::tcp_server_socket> create_server_socket() override;
     virtual void process_rest_request(abc::net::http::server& http, const abc::net::http::request& request) override;
+
+private:
+    void process_event_stream_request(abc::net::http::server& http, const abc::net::http::request& request);
+    std::uint32_t get_event_stream_id(const abc::net::http::request& request);
 };
 
 
@@ -62,147 +72,229 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     constexpr const char* suborigin = "process_rest_request()";
     base::put_any(suborigin, abc::diag::severity::callstack, 0x102f1, "Begin:");
 
-    // Support a graceful shutdown.
-    if (abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST) && abc::ascii::are_equal_i(request.resource.path.c_str(), "/shutdown")) {
-        base::set_shutdown_requested();
+    try {
+        // Support a graceful shutdown.
+        if (abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST) && abc::ascii::are_equal_i(request.resource.path.c_str(), "/shutdown")) {
+            base::set_shutdown_requested();
 
-        base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x102ce);
+            base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x102ce);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b7, "Return: 200");
-        return;
-    }
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107b7, "Return: 200");
+            return;
+        }
 
-    // If the resource is not /problem, return 404.
-    if (!abc::ascii::are_equal_i(request.resource.path.c_str(), "/problem")) {
-        base::send_simple_response(http, abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "The requested resource was not found.", 0x102cf);
+        // If the resource is /stream/..., process event stream request.
+        if (abc::ascii::are_equal_i_n(request.resource.path.c_str(), "/stream/", 8)) {
+            process_event_stream_request(http, request);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b8, "Return: 404");
-        return;
-    }
+            base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+            return;
+        }
 
-    // If the method is not POST, return 405.
-    if (!abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST)) {
-        base::send_simple_response(http, abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
+        // If the resource is not /problem, return 404.
+        if (!abc::ascii::are_equal_i(request.resource.path.c_str(), "/problem")) {
+            base::send_simple_response(http, abc::net::http::status_code::Not_Found, abc::net::http::reason_phrase::Not_Found, abc::net::http::content_type::text, "The requested resource was not found.", 0x102cf);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107b9, "Return: 405");
-        return;
-    }
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107b8, "Return: 404");
+            return;
+        }
 
-    // Require header Content-Type: application/json
-    abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
-    if (content_type_itr == request.headers.cend()) {
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107ba);
+        // If the method is not POST, return 405.
+        if (!abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST)) {
+            base::send_simple_response(http, abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "POST is the only supported method for resource '/problem'.", 0x102d0);
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bb, "Return: 400 (No Content-Type)");
-        return;
-    }
-    if (!abc::ascii::are_equal_i(content_type_itr->second.c_str(), abc::net::http::content_type::json)) {
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107bc);
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107b9, "Return: 405");
+            return;
+        }
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bd, "Return: 400 (Wrong Content-Type)");
-        return;
-    }
+        // Require header Content-Type: application/json
+        abc::net::http::headers::const_iterator content_type_itr = request.headers.find(abc::net::http::header::Content_Type);
+        if (content_type_itr == request.headers.cend()) {
+            base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107ba);
 
-    std::streambuf* request_body_sb = static_cast<const abc::net::http::request_reader&>(http).rdbuf();
-    abc::net::json::reader json_reader(request_body_sb, base::log());
-    abc::net::json::value input_value = json_reader.get_value();
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107bb, "Return: 400 (No Content-Type)");
+            return;
+        }
+        if (!abc::ascii::are_equal_i(content_type_itr->second.c_str(), abc::net::http::content_type::json)) {
+            base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "The Content-Type header was not supplied.", 0x107bc);
 
-    if (input_value.type() != abc::net::json::value_type::object
-        || input_value.object().size() != 2
-        || input_value.object().find("a") == input_value.object().cend()
-            || input_value.object()["a"].type() != abc::net::json::value_type::array
-            || input_value.object()["a"].array().size() != 2
-            || input_value.object()["a"].array()[0].type() != abc::net::json::value_type::array
-            || input_value.object()["a"].array()[0].array().size() != 2
-            || input_value.object()["a"].array()[0].array()[0].type() != abc::net::json::value_type::number
-            || input_value.object()["a"].array()[0].array()[1].type() != abc::net::json::value_type::number
-            || input_value.object()["a"].array()[1].type() != abc::net::json::value_type::array
-            || input_value.object()["a"].array()[1].array().size() != 2
-            || input_value.object()["a"].array()[1].array()[0].type() != abc::net::json::value_type::number
-            || input_value.object()["a"].array()[1].array()[1].type() != abc::net::json::value_type::number
-        || input_value.object().find("b") == input_value.object().cend()
-            || input_value.object()["b"].type() != abc::net::json::value_type::array
-            || input_value.object()["b"].array().size() != 2
-            || input_value.object()["b"].array()[0].type() != abc::net::json::value_type::number
-            || input_value.object()["b"].array()[1].type() != abc::net::json::value_type::number) {
-        const char* const invalid_json = "An invalid JSON payload was supplied. Must be {\"a\": [ [1, 2], [3, 4] ], \"b\": [5, 6] }.";
-        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, invalid_json, 0x107be);
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107bd, "Return: 400 (Wrong Content-Type)");
+            return;
+        }
 
-        base::put_any(suborigin, abc::diag::severity::callstack, 0x107bf, "Return: 400 (Wrong JSON payload)");
-        return;
-    }
+        std::streambuf* request_body_sb = static_cast<const abc::net::http::request_reader&>(http).rdbuf();
+        abc::net::json::reader json_reader(request_body_sb, base::log());
+        abc::net::json::value input_value = json_reader.get_value();
 
-    // Here's where we store the parsed JSON input.
-    double a[2][2] = {
-        {
-            input_value.object()["a"].array()[0].array()[0].number(),
-            input_value.object()["a"].array()[0].array()[1].number(),
-        },
-        {
-            input_value.object()["a"].array()[1].array()[0].number(),
-            input_value.object()["a"].array()[1].array()[1].number(),
-        },
-    };
+        if (input_value.type() != abc::net::json::value_type::object
+            || input_value.object().size() != 2
+            || input_value.object().find("a") == input_value.object().cend()
+                || input_value.object()["a"].type() != abc::net::json::value_type::array
+                || input_value.object()["a"].array().size() != 2
+                || input_value.object()["a"].array()[0].type() != abc::net::json::value_type::array
+                || input_value.object()["a"].array()[0].array().size() != 2
+                || input_value.object()["a"].array()[0].array()[0].type() != abc::net::json::value_type::number
+                || input_value.object()["a"].array()[0].array()[1].type() != abc::net::json::value_type::number
+                || input_value.object()["a"].array()[1].type() != abc::net::json::value_type::array
+                || input_value.object()["a"].array()[1].array().size() != 2
+                || input_value.object()["a"].array()[1].array()[0].type() != abc::net::json::value_type::number
+                || input_value.object()["a"].array()[1].array()[1].type() != abc::net::json::value_type::number
+            || input_value.object().find("b") == input_value.object().cend()
+                || input_value.object()["b"].type() != abc::net::json::value_type::array
+                || input_value.object()["b"].array().size() != 2
+                || input_value.object()["b"].array()[0].type() != abc::net::json::value_type::number
+                || input_value.object()["b"].array()[1].type() != abc::net::json::value_type::number) {
+            const char* const invalid_json = "An invalid JSON payload was supplied. Must be {\"a\": [ [1, 2], [3, 4] ], \"b\": [5, 6] }.";
+            base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, invalid_json, 0x107be);
 
-    double b[2] = {
-        input_value.object()["b"].array()[0].number(),
-        input_value.object()["b"].array()[1].number(),
-    };
+            base::put_any(suborigin, abc::diag::severity::callstack, 0x107bf, "Return: 400 (Wrong JSON payload)");
+            return;
+        }
 
-    // Now, let's solve the system.
-    double det = (a[0][0] * a[1][1]) - (a[0][1] * a[1][0]);
-    double det_x = (b[0] * a[1][1]) - (a[0][1] * b[1]);
-    double det_y = (a[0][0] * b[1]) - (b[0] * a[1][0]);
-
-    double status = -1;
-    double x = 0;
-    double y = 0;
-
-    if (det != 0) {
-        // 1 solution
-        status = 1;
-        x = det_x / det;
-        y = det_y / det;
-    }
-    else if (det_x != 0 || det_y != 0) {
-        // 0 solutions
-        status = 0;
-    }
-    else {
-        // inf. solutions
-        status = 2;
-    }
-
-    abc::net::json::value output_value = 
-        abc::net::json::literal::object {
-            { "status", status },
-            { "x", x },
-            { "y", y },
+        // Here's where we store the parsed JSON input.
+        double a[2][2] = {
+            {
+                input_value.object()["a"].array()[0].array()[0].number(),
+                input_value.object()["a"].array()[0].array()[1].number(),
+            },
+            {
+                input_value.object()["a"].array()[1].array()[0].number(),
+                input_value.object()["a"].array()[1].array()[1].number(),
+            },
         };
 
-    // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
-    char body[abc::size::k1 + 1] { };
-    abc::stream::buffer_streambuf response_body_sb(nullptr, 0, 0, body, 0, sizeof(body));
-    abc::net::json::writer json_writer(&response_body_sb, base::log());
-    json_writer.put_value(output_value);
+        double b[2] = {
+            input_value.object()["b"].array()[0].number(),
+            input_value.object()["b"].array()[1].number(),
+        };
 
-    char content_length[abc::size::_32 + 1];
-    std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+        // Now, let's solve the system.
+        double det = (a[0][0] * a[1][1]) - (a[0][1] * a[1][0]);
+        double det_x = (b[0] * a[1][1]) - (a[0][1] * b[1]);
+        double det_y = (a[0][0] * b[1]) - (b[0] * a[1][0]);
 
-    // Send the http response
-    base::put_any(suborigin, abc::diag::severity::optional, 0x107c0, "Sending response 200");
+        double status = -1;
+        double x = 0;
+        double y = 0;
 
+        if (det != 0) {
+            // 1 solution
+            status = 1;
+            x = det_x / det;
+            y = det_y / det;
+        }
+        else if (det_x != 0 || det_y != 0) {
+            // 0 solutions
+            status = 0;
+        }
+        else {
+            // inf. solutions
+            status = 2;
+        }
+
+        abc::net::json::value output_value = 
+            abc::net::json::literal::object {
+                { "status", status },
+                { "x", x },
+                { "y", y },
+            };
+
+        // Write the JSON to a char buffer, so we can calculate the Content-Length before we start sending the body.
+        char body[abc::size::k1 + 1] { };
+        abc::stream::buffer_streambuf response_body_sb(nullptr, 0, 0, body, 0, sizeof(body));
+        abc::net::json::writer json_writer(&response_body_sb, base::log());
+        json_writer.put_value(output_value);
+
+        char content_length[abc::size::_32 + 1];
+        std::snprintf(content_length, sizeof(content_length), "%zu", std::strlen(body));
+
+        // Send the http response
+        base::put_any(suborigin, abc::diag::severity::optional, 0x107c0, "Sending response 200");
+
+        abc::net::http::response response;
+        response.protocol = abc::net::http::protocol::HTTP_11;
+        response.status_code = abc::net::http::status_code::OK;
+        response.reason_phrase = abc::net::http::reason_phrase::OK;
+        response.headers = abc::net::http::headers {
+            { abc::net::http::header::Content_Type,   abc::net::http::content_type::json },
+            { abc::net::http::header::Content_Length, content_length },
+        };
+
+        http.put_response(response);
+        http.put_body(body);
+    }
+    catch (const abc::net::http::endpoint_error& err) {
+        base::send_simple_response(http, err.status_code, err.reason_phrase.c_str(), err.content_type.c_str(), err.body.c_str(), err.tag);
+    }
+    catch (const std::runtime_error& err) {
+        base::send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, err.what(), 0x10876);
+    }
+
+    base::put_any(suborigin, abc::diag::severity::callstack, 0x102d9, "End:");
+}
+
+
+inline void equations_endpoint::process_event_stream_request(abc::net::http::server& http, const abc::net::http::request& request) {
+    constexpr const char* suborigin = "process_event_stream_request()";
+    base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    // EventSource sends a GET request.
+    if (!abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::GET)) {
+        base::send_simple_response(http, abc::net::http::status_code::Method_Not_Allowed, abc::net::http::reason_phrase::Method_Not_Allowed, abc::net::http::content_type::text, "Only GET method is supported for resource '/stream'.", __TAG__);
+    }
+
+    std::uint32_t stream_id = get_event_stream_id(request);
+
+    // Send the HTTP response headers for event stream.
     abc::net::http::response response;
     response.protocol = abc::net::http::protocol::HTTP_11;
     response.status_code = abc::net::http::status_code::OK;
     response.reason_phrase = abc::net::http::reason_phrase::OK;
     response.headers = abc::net::http::headers {
-        { abc::net::http::header::Content_Type,   abc::net::http::content_type::json },
-        { abc::net::http::header::Content_Length, content_length },
+        { abc::net::http::header::Content_Type,  abc::net::http::content_type::event_stream },
+        { abc::net::http::header::Cache_Control, abc::net::http::cache_control::no_cache },
+        { abc::net::http::header::Connection,    abc::net::http::connection::keep_alive },
     };
 
     http.put_response(response);
-    http.put_body(body);
 
-    base::put_any(suborigin, abc::diag::severity::callstack, 0x102d9, "End:");
+    // Stream some events until the stream is stopped.
+    std::uint32_t event_id = stream_id * 1000 + 1;
+    while (!base::is_shutdown_requested()) {
+        std::stringstream data_message_text;
+        data_message_text <<  event_id << " " << event_id << " " << event_id << " " << event_id;
+
+        abc::net::http::event event({
+            abc::net::http::type_event_message("demo"),
+            abc::net::http::id_event_message(std::to_string(event_id++).c_str()),
+            abc::net::http::data_event_message(data_message_text.str().c_str()),
+        });
+        http.put_event(event);
+
+        // Streams are broken by clients. If that has happened, break out.
+        if (!static_cast<abc::net::http::response_writer&>(http).good()) {
+            break;
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+
+    base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End:");
+}
+
+
+inline std::uint32_t equations_endpoint::get_event_stream_id(const abc::net::http::request& request) {
+    constexpr const char* suborigin = "get_event_stream_id()";
+    base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "Begin:");
+
+    constexpr const char* stream = "/stream/";
+    base::require(suborigin, __TAG__, abc::ascii::are_equal_i_n(request.resource.path.c_str(), stream, 8), abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Missing stream ID.");
+
+    const char* stream_id_str = request.resource.path.c_str() + std::strlen(stream);
+    std::uint32_t stream_id = static_cast<std::uint32_t>(std::strtoul(stream_id_str, nullptr, 10));
+    base::require(suborigin, __TAG__, stream_id > 0, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, "Bad stream ID.");
+
+    base::put_any(suborigin, abc::diag::severity::callstack, __TAG__, "End: stream_id=%u", stream_id);
+
+    return stream_id;
 }

@@ -709,6 +709,12 @@ namespace abc { namespace net { namespace http {
 
         while (base::is_good() && pcount < any_chars_len) {
             base::put(any_chars[pcount++]);
+
+            // Undo the last char if the stream is no longer good.
+            if (!base::is_good()) {
+                pcount--;
+                break;
+            }
         }
 
         return pcount;
@@ -1436,13 +1442,17 @@ namespace abc { namespace net { namespace http {
             put_event_message(event_message);
         }
         base::put_crlf();
+
+        base::flush();
     }
 
     inline void response_writer::put_event_message(const event_message& event_message) {
         const std::string& inner_message = event_message.message();
 
-        base::put_prints_and_spaces(inner_message.c_str(), inner_message.length());
+        base::put_any_chars(inner_message.c_str(), inner_message.length());
         base::put_crlf();
+
+        base::flush();
     }
 
 

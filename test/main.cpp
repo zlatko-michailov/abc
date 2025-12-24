@@ -52,7 +52,6 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
-#if 0
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -109,7 +108,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_mutex_1_thread_M_uses",                      test_mutex_1_thread_M_uses },
                 { "test_mutex_M_threads_1_use",                      test_mutex_M_threads_1_use },
             } },
-#endif
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },
                 { "test_http_request_istream_bodytext",              test_http_request_istream_bodytext },
@@ -167,7 +165,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_http_client_move",                           test_http_client_move },
                 { "test_http_server_move",                           test_http_server_move },
             } },
-#if 0
             { "json", {
                 { "test_json_value_empty",                           test_json_value_empty },
                 { "test_json_value_null",                            test_json_value_null },
@@ -293,7 +290,6 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_pool_move",                             test_vmem_pool_move },
                 { "test_vmem_page_move",                             test_vmem_page_move },
             } },
-#endif
         },
         &log,
         abc::test::seed::random,

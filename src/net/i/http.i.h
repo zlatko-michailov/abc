@@ -737,7 +737,7 @@ namespace abc { namespace net { namespace http {
      * @brief http request reader. Used on the server side to read whole requests.
      */
     class request_reader
-        : protected request_istream {
+        : public request_istream {
 
         using base      = request_istream;
         using diag_base = diag::diag_ready<const char*>;
@@ -876,7 +876,7 @@ namespace abc { namespace net { namespace http {
      * @brief http request writer. Used on the client side to write whole requests.
      */
     class request_writer
-        : protected request_ostream {
+        : public request_ostream {
 
         using base      = request_ostream;
         using diag_base = diag::diag_ready<const char*>;
@@ -1003,7 +1003,7 @@ namespace abc { namespace net { namespace http {
      * @brief http response reader. Used on the client side to read whole responses.
      */
     class response_reader
-        : protected response_istream {
+        : public response_istream {
 
         using base      = response_istream;
         using diag_base = diag::diag_ready<const char*>;
@@ -1134,7 +1134,7 @@ namespace abc { namespace net { namespace http {
      * @brief http response writer. Used on the server side to write whole responses.
      */
     class response_writer
-        : protected response_ostream {
+        : public response_ostream {
 
         using base      = response_ostream;
         using diag_base = diag::diag_ready<const char*>;
