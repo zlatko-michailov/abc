@@ -831,5 +831,170 @@ namespace abc { namespace net { namespace json {
         void put_object(const literal::object& object);
     };
 
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief   JSON-RPC validator.
+     * @details Checks whether a JSON value represents a valid JSON-RPC construct.
+     *          See https://www.jsonrpc.org/specification
+     *          Some methods are virtual to allow overriding if needed.
+     */
+    class json_rpc_validator
+        : protected diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        json_rpc_validator(diag::log_ostream* log = nullptr);
+
+        /**
+         * @brief Copy constructor.
+         */
+        json_rpc_validator(const json_rpc_validator& other) = default;
+
+        /**
+         * @brief Move constructor.
+         */
+        json_rpc_validator(json_rpc_validator&& other) = default;
+
+    public:
+        /**
+         * @brief       Checks whether the given value is a batch JSON-RPC request.
+         * @details     A batch request is a non-empty array.
+         *              Its elements do not have to be valid requests or notifications.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a batch JSON-RPC request.
+         */
+        bool virtual is_batch_request(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a simple JSON-RPC request.
+         * @details     A simple request is an object that contains the following members:
+         *              "jsonrpc" (string with value "2.0"),
+         *              "id" (string or number. NOTE: `null` is not allowed),
+         *              "method" (string).
+         *              If "params" is present, it must be either an array or an object.
+         *              Other properties may be present.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a simple JSON-RPC request.
+         */
+        bool virtual is_simple_request(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a JSON-RPC notification.
+         * @details     A notification is an object that contains the following members:
+         *              "jsonrpc" (string with value "2.0"),
+         *              "method" (string).
+         *              If "params" is present, it must be either an array or an object.
+         *              "id" must NOT be present.
+         *              Other properties may be present.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a JSON-RPC notification.
+         */
+        bool virtual is_simple_notification(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a batch JSON-RPC response.
+         * @details     A batch response is a non-empty array.
+         *              Its elements must be valid simple responses.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a batch JSON-RPC response.
+         */
+        bool virtual is_batch_response(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a simple JSON-RPC response.
+         * @details     A simple response is an object that contains the following members:
+         *              "jsonrpc" (string with value "2.0"),
+         *              "id" (string or number. NOTE: `null` is not allowed).
+         *              Either "result" or "error" must be present.
+         *              Other properties may be present.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a simple JSON-RPC response.
+         */
+        bool virtual is_simple_response(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a simple JSON-RPC result response.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a simple JSON-RPC result response.
+         */
+        bool virtual is_result_response(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is a simple JSON-RPC error response.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is a simple JSON-RPC error response.
+         */
+        bool virtual is_error_response(const value& value) const;
+
+    protected:
+        /**
+         * @brief       Checks whether the given value is valid for the "error" property.
+         * @details     An error is an object that contains the following members:
+         *              "code" (number that must be an integer),
+         *              "message" (string),
+         *              "data" (any type, optional).
+         *              Other properties may be present.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "error" property.
+         */
+        bool virtual is_error(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "jsonrpc" property.
+         * @details     Must be a string - exactly "2.0".
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "jsonrpc" property.
+         */
+        bool virtual is_jsonrpc(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "id" property.
+         * @details     Must be a string or a number. NOTE: `null` is not allowed.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "id" property.
+         */
+        bool virtual is_id(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "method" property.
+         * @details     Must be a string.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "method" property.
+         */
+        bool virtual is_method(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "params" property.
+         * @details     Must be an array or an object.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "params" property.
+         */
+        bool virtual is_params(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "code" property.
+         * @details     Must be a number (integer).
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "code" property.
+         */
+        bool virtual is_code(const value& value) const;
+
+        /**
+         * @brief       Checks whether the given value is valid for the "message" property.
+         * @details     Must be a string.
+         * @param value A `json::value` to check.
+         * @return      `true` iff the value is valid for the "message" property.
+         */
+        bool virtual is_message(const value& value) const;
+    };
+
 } } }
 

@@ -1331,4 +1331,246 @@ namespace abc { namespace net { namespace json {
 
     // --------------------------------------------------------------
 
+
+    inline json_rpc_validator::json_rpc_validator(diag::log_ostream* log)
+        : diag_base("abc::net::json::json_rpc_validator", log) {
+
+        constexpr const char* suborigin = "json_rpc_validator()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline bool json_rpc_validator::is_batch_request(const value& value) const {
+        constexpr const char* suborigin = "is_batch_request()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::array && !value.array().empty();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_simple_request(const value& value) const {
+        constexpr const char* suborigin = "is_simple_request()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::object;
+
+        if (ok) {
+            literal::object::const_iterator jsonrpc_itr = value.object().find("jsonrpc");
+            ok = jsonrpc_itr != value.object().end() && is_jsonrpc(jsonrpc_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator id_itr = value.object().find("id");
+            ok = id_itr != value.object().end() && is_id(id_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator method_itr = value.object().find("method");
+            ok = method_itr != value.object().end() && is_method(method_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator params_itr = value.object().find("params");
+            if (params_itr != value.object().end()) {
+                ok = is_params(params_itr->second);
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_simple_notification(const value& value) const {
+        constexpr const char* suborigin = "is_simple_notification()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::object;
+
+        if (ok) {
+            literal::object::const_iterator jsonrpc_itr = value.object().find("jsonrpc");
+            ok = jsonrpc_itr != value.object().end() && is_jsonrpc(jsonrpc_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator id_itr = value.object().find("id");
+            ok = id_itr == value.object().end();
+        }
+
+        if (ok) {
+            literal::object::const_iterator method_itr = value.object().find("method");
+            ok = method_itr != value.object().end() && is_method(method_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator params_itr = value.object().find("params");
+            if (params_itr != value.object().end()) {
+                ok = is_params(params_itr->second);
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_batch_response(const value& value) const {
+        constexpr const char* suborigin = "is_batch_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::array && !value.array().empty();
+
+        if (ok) {
+            for (const json::value& item : value.array()) {
+                ok = is_simple_response(item);
+                if (!ok) {
+                    break;
+                }
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_simple_response(const value& value) const {
+        constexpr const char* suborigin = "is_simple_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = is_result_response(value) || is_error_response(value);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_result_response(const value& value) const {
+        constexpr const char* suborigin = "is_result_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::object;
+
+        if (ok) {
+            literal::object::const_iterator jsonrpc_itr = value.object().find("jsonrpc");
+            ok = jsonrpc_itr != value.object().end() && is_jsonrpc(jsonrpc_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator id_itr = value.object().find("id");
+            ok = id_itr != value.object().end() && is_id(id_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator result_itr = value.object().find("result");
+            ok = result_itr != value.object().end();
+        }
+
+        if (ok) {
+            literal::object::const_iterator error_itr = value.object().find("error");
+            ok = error_itr == value.object().end();
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_error_response(const value& value) const {
+        constexpr const char* suborigin = "is_error_response()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::object;
+
+        if (ok) {
+            literal::object::const_iterator jsonrpc_itr = value.object().find("jsonrpc");
+            ok = jsonrpc_itr != value.object().end() && is_jsonrpc(jsonrpc_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator id_itr = value.object().find("id");
+            ok = id_itr != value.object().end() && is_id(id_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator error_itr = value.object().find("error");
+            ok = error_itr != value.object().end() && is_error(error_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator result_itr = value.object().find("result");
+            ok = result_itr == value.object().end();
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_error(const value& value) const {
+        constexpr const char* suborigin = "is_error()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = value.type() == value_type::object;
+
+        if (ok) {
+            literal::object::const_iterator code_itr = value.object().find("code");
+            ok = code_itr != value.object().end() && is_code(code_itr->second);
+        }
+
+        if (ok) {
+            literal::object::const_iterator message_itr = value.object().find("message");
+            ok = message_itr != value.object().end() && is_message(message_itr->second);
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_rpc_validator::is_jsonrpc(const value& value) const {
+        return value.type() == value_type::string && value.string() == "2.0";
+    }
+
+
+    inline bool json_rpc_validator::is_id(const value& value) const {
+        return value.type() == value_type::string || (value.type() == value_type::number && static_cast<literal::number>(static_cast<std::int64_t>(value.number())) == value.number());
+    }
+
+
+    inline bool json_rpc_validator::is_method(const value& value) const {
+        return value.type() == value_type::string;
+    }
+
+
+    inline bool json_rpc_validator::is_params(const value& value) const {
+        return value.type() == value_type::array || value.type() == value_type::object;
+    }
+
+
+    inline bool json_rpc_validator::is_code(const value& value) const {
+        return value.type() == value_type::number && static_cast<literal::number>(static_cast<std::int64_t>(value.number())) == value.number();
+    }
+
+
+    inline bool json_rpc_validator::is_message(const value& value) const {
+        return value.type() == value_type::string;
+    }
+
+
+    // --------------------------------------------------------------
+
 } } }

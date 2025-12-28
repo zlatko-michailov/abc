@@ -9,12 +9,12 @@
     - `response_writer`
       - `send_event()`
       - `send_event_message()`
+- Namespace `net::json`:
+  - `json_rpc_validator`
+
 
 ## To Do
 - Copyright -2026
-
-- Namespace `net::http`:
-  - `json_rpc`
 
 - Namespace `ai`:
   - `mcp`
@@ -27,14 +27,17 @@
   - `array`
   - `matrix` (or `mutidim_array`)
 
-- Namespace `vmem`:
-  - `blob`
-
 - Namespace `math` (or `algorithm`):
   - `mmul(matrix, vector)`
 
 - Namespace `ai`:
   - `deep_learning` (or `neural_net`)
+
+- Namespace `vmem`:
+  - `blob`
+
+- Namespace `net::json`:
+  - `json_schema_validator`
 
 ## Pick List
 - drive

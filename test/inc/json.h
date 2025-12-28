@@ -117,6 +117,13 @@ bool test_json_writer_object_03(test_context& context);
 bool test_json_writer_mixed_01(test_context& context);
 bool test_json_writer_mixed_02(test_context& context);
 
+bool test_json_rpc_validator_batch_requests(test_context& context);
+bool test_json_rpc_validator_simple_requests(test_context& context);
+bool test_json_rpc_validator_simple_notifications(test_context& context);
+bool test_json_rpc_validator_simple_result_responses(test_context& context);
+bool test_json_rpc_validator_simple_error_responses(test_context& context);
+bool test_json_rpc_validator_batch_responses(test_context& context);
+
 bool test_json_istream_move(test_context& context);
 bool test_json_reader_move(test_context& context);
 bool test_json_ostream_move(test_context& context);

@@ -2844,6 +2844,651 @@ bool test_json_writer(test_context& context, const abc::net::json::value& value,
 // --------------------------------------------------------------
 
 
+bool test_json_rpc_validator_batch_requests(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Not array
+    {
+        abc::net::json::value num { 1.0 };
+        passed = context.are_equal(validator.is_batch_request(num), false, __TAG__, "%d") && passed;
+
+        abc::net::json::value str { "something" };
+        passed = context.are_equal(validator.is_batch_request(str), false, __TAG__, "%d") && passed;
+
+        abc::net::json::value obj
+        { 
+            abc::net::json::literal::object
+            {
+                { "a", 1.0 },
+                { "b", 2.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_batch_request(obj), false, __TAG__, "%d") && passed;
+    }
+
+    // Empty array
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+            }
+        };
+        passed = context.are_equal(validator.is_batch_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Any non-empty array
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+                1.0,
+                2.0,
+                3.0,
+            }
+        };
+        passed = context.are_equal(validator.is_batch_request(value), true, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+
+}
+
+
+bool test_json_rpc_validator_simple_requests(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Full, numeric "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Full, string "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", "request-1" },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Full, null "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", nullptr },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Full, missing "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Full, missing "params"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Missing "jsonrpc" property
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "jsonrpc" property type
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", 2.0 },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "jsonrpc" property value
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "3.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "method" property type
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", 2.0 },
+                { "method", 42.0 },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_request(value), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+
+}
+
+
+bool test_json_rpc_validator_simple_notifications(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Full
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Full, with "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", "request-1" },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Full, null "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+                { "id", nullptr },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Full, missing "params"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "method", "subtract" },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Missing "jsonrpc" property
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "jsonrpc" property type
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", 2.0 },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "jsonrpc" property value
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "3.0" },
+                { "method", "subtract" },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Wrong "method" property type
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", 2.0 },
+                { "method", 42.0 },
+                { "params", abc::net::json::literal::array { 42.0, 23.0 } },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_notification(value), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+
+}
+
+
+bool test_json_rpc_validator_simple_result_responses(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Full
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+                { "result", 19.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), true, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_result_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Full, null "result"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+                { "result", nullptr },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), true, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_result_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Missing "result"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_result_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Missing "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "result", 19.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_result_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Extra "error"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+                { "result", 19.0 },
+                { "error", abc::net::json::literal::object
+                    {
+                        { "code", -32601.0 },
+                        { "message", "Method not found" },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_result_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
+bool test_json_rpc_validator_simple_error_responses(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Full
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+                { "error", abc::net::json::literal::object
+                    {
+                        { "code", -32601.0 },
+                        { "message", "Method not found" },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), true, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_error_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Missing "error"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_error_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Missing "id"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "error", abc::net::json::literal::object
+                    {
+                        { "code", -32601.0 },
+                        { "message", "Method not found" },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_error_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Extra "result"
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::object
+            {
+                { "jsonrpc", "2.0" },
+                { "id", 1.0 },
+                { "result", 19.0 },
+                { "error", abc::net::json::literal::object
+                    {
+                        { "code", -32601.0 },
+                        { "message", "Method not found" },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_simple_response(value), false, __TAG__, "%d") && passed;
+        passed = context.are_equal(validator.is_error_response(value), false, __TAG__, "%d") && passed;
+    }
+
+   return passed;
+}
+
+
+bool test_json_rpc_validator_batch_responses(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_rpc_validator validator(context.log());
+
+    // Not array
+    {
+        abc::net::json::value num { 1.0 };
+        passed = context.are_equal(validator.is_batch_response(num), false, __TAG__, "%d") && passed;
+
+        abc::net::json::value str { "something" };
+        passed = context.are_equal(validator.is_batch_response(str), false, __TAG__, "%d") && passed;
+
+        abc::net::json::value obj
+        { 
+            abc::net::json::literal::object
+            {
+                { "a", 1.0 },
+                { "b", 2.0 },
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(obj), false, __TAG__, "%d") && passed;
+    }
+
+    // Empty array
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Array with a wrong element
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 1.0 },
+                    { "result", 19.0 },
+                },
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 2.0 },
+                    { "error", abc::net::json::literal::object
+                        {
+                            { "code", -32601.0 },
+                            { "message", "Method not found" },
+                        }
+                    },
+                },
+                1.0,
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(value), false, __TAG__, "%d") && passed;
+    }
+
+    // Array with all results
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 1.0 },
+                    { "result", 19.0 },
+                },
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 2.0 },
+                    { "result", 19.0 },
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Array with all errors
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 2.0 },
+                    { "error", abc::net::json::literal::object
+                        {
+                            { "code", -32601.0 },
+                            { "message", "Method not found" },
+                        }
+                    },
+                },
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 3.0 },
+                    { "error", abc::net::json::literal::object
+                        {
+                            { "code", -32601.0 },
+                            { "message", "Method not found" },
+                        }
+                    },
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    // Array with a mix of results and errors
+    {
+        abc::net::json::value value 
+        { 
+            abc::net::json::literal::array
+            {
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 1.0 },
+                    { "result", 19.0 },
+                },
+                abc::net::json::literal::object
+                {
+                    { "jsonrpc", "2.0" },
+                    { "id", 3.0 },
+                    { "error", abc::net::json::literal::object
+                        {
+                            { "code", -32601.0 },
+                            { "message", "Method not found" },
+                        }
+                    },
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_batch_response(value), true, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+
+}
+
+
+// --------------------------------------------------------------
+
+
 bool test_json_istream_move(test_context& context) {
     std::string content =
         "false 42 ";
