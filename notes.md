@@ -11,21 +11,20 @@
       - `send_event_message()`
 - Namespace `net::json`:
   - `json_rpc_validator`
-  - `value(int)`
+  - `value(int)`, `value(unsigned)`, `value(long)`, `value(unsigned long)`, `value(long long)`, `value(unsigned long long)`
 
 
 ## To Do
 - Copyright -2026
 
 - Namespace `net::json`:
-  - `literal::number(std::int64_t)`
   - `schema`
   - `schema_validator`
 
 - Namespace `ai`:
   - `mcp`
     - `server`
-    - `endpoint`
+    - `transport`
     - `client`
 
 - Namespace `vmem`:

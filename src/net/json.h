@@ -69,6 +69,31 @@ namespace abc { namespace net { namespace json {
     }
 
 
+    inline value::value(unsigned n, diag::log_ostream* log) noexcept
+        : value(static_cast<literal::number>(n), log) {
+    }
+
+
+    inline value::value(long n, diag::log_ostream* log) noexcept
+        : value(static_cast<literal::number>(n), log) {
+    }
+
+
+    inline value::value(unsigned long n, diag::log_ostream* log) noexcept
+        : value(static_cast<literal::number>(n), log) {
+    }
+
+
+    inline value::value(long long n, diag::log_ostream* log) noexcept
+        : value(static_cast<literal::number>(n), log) {
+    }
+
+
+    inline value::value(unsigned long long n, diag::log_ostream* log) noexcept
+        : value(static_cast<literal::number>(n), log) {
+    }
+
+
     inline value::value(const char* str, diag::log_ostream* log)
         : value(std::string(str), log) {
     }
