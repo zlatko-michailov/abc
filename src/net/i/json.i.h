@@ -109,6 +109,13 @@ namespace abc { namespace net { namespace json {
         value(literal::number n, diag::log_ostream* log = nullptr) noexcept;
 
         /**
+         * @brief     Constructor - number value.
+         * @param n   Number value.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        value(int n, diag::log_ostream* log = nullptr) noexcept;
+
+        /**
          * @brief     Constructor - string value.
          * @param str String value.
          * @param log `diag::log_ostream` pointer. May be `nullptr`.

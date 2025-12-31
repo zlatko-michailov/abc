@@ -11,10 +11,16 @@
       - `send_event_message()`
 - Namespace `net::json`:
   - `json_rpc_validator`
+  - `value(int)`
 
 
 ## To Do
 - Copyright -2026
+
+- Namespace `net::json`:
+  - `literal::number(std::int64_t)`
+  - `schema`
+  - `schema_validator`
 
 - Namespace `ai`:
   - `mcp`
@@ -35,9 +41,6 @@
 
 - Namespace `vmem`:
   - `blob`
-
-- Namespace `net::json`:
-  - `json_schema_validator`
 
 ## Pick List
 - drive

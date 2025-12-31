@@ -2518,7 +2518,7 @@ bool test_json_writer_boolean_02(test_context& context) {
 
 
 bool test_json_writer_number_01(test_context& context) {
-    abc::net::json::value value(42.0);
+    abc::net::json::value value(42);
 
     char expected[] =
         "42";
@@ -2603,13 +2603,13 @@ bool test_json_writer_array_02(test_context& context) {
 bool test_json_writer_array_03(test_context& context) {
     abc::net::json::literal::array array
     {
-        1.0,
+        1,
         2.0,
         abc::net::json::literal::array
         {
             abc::net::json::literal::array
             {
-                3.0,
+                3,
             },
             abc::net::json::literal::array
             {
@@ -2622,7 +2622,7 @@ bool test_json_writer_array_03(test_context& context) {
             {
                 abc::net::json::value(abc::net::json::literal::array
                 {
-                    5.0,
+                    5,
                 }),
             }),
         }),
@@ -2690,11 +2690,11 @@ bool test_json_writer_object_02(test_context& context) {
 bool test_json_writer_object_03(test_context& context) {
     abc::net::json::literal::object object
     {
-        { "a1", 1.0 },
+        { "a1", 1 },
         { "a2", 2.0 },
         { "a3", abc::net::json::literal::object {
             { "a31", abc::net::json::literal::object {
-                { "a313", 3.0 },
+                { "a313", 3 },
             } },
             { "a32", abc::net::json::literal::object {
                 { "a324", 4.0 },
@@ -2740,7 +2740,7 @@ bool test_json_writer_mixed_01(test_context& context) {
     {
         abc::net::json::literal::object {
             { "a11", abc::net::json::literal::array {
-                1.0,
+                1,
                 true,
             } },
             { "a12", abc::net::json::literal::array {
@@ -2785,7 +2785,7 @@ bool test_json_writer_mixed_02(test_context& context) {
     {
         { "a1", abc::net::json::literal::object {
             { "a11", abc::net::json::literal::array {
-                1.0,
+                1,
                 true,
             } },
             { "a12", abc::net::json::literal::array {
@@ -2796,7 +2796,7 @@ bool test_json_writer_mixed_02(test_context& context) {
         { "a2", abc::net::json::literal::array {
             abc::net::json::literal::object {
                 { "a211", abc::net::json::literal::array {
-                    4.0,
+                    4,
                     "def",
                     false,
                 } },
@@ -3340,7 +3340,7 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
 
     // Not array
     {
-        abc::net::json::value num { 1.0 };
+        abc::net::json::value num { 1 };
         passed = context.are_equal(validator.is_batch_response(num), false, __TAG__, "%d") && passed;
 
         abc::net::json::value str { "something" };
@@ -3351,7 +3351,7 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
             abc::net::json::literal::object
             {
                 { "a", 1.0 },
-                { "b", 2.0 },
+                { "b", 2 },
             }
         };
         passed = context.are_equal(validator.is_batch_response(obj), false, __TAG__, "%d") && passed;
@@ -3378,20 +3378,20 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                 {
                     { "jsonrpc", "2.0" },
                     { "id", 1.0 },
-                    { "result", 19.0 },
+                    { "result", 19 },
                 },
                 abc::net::json::literal::object
                 {
                     { "jsonrpc", "2.0" },
-                    { "id", 2.0 },
+                    { "id", 2 },
                     { "error", abc::net::json::literal::object
                         {
-                            { "code", -32601.0 },
+                            { "code", -32601 },
                             { "message", "Method not found" },
                         }
                     },
                 },
-                1.0,
+                1,
             }
         };
         passed = context.are_equal(validator.is_batch_response(value), false, __TAG__, "%d") && passed;
@@ -3406,14 +3406,14 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                 abc::net::json::literal::object
                 {
                     { "jsonrpc", "2.0" },
-                    { "id", 1.0 },
+                    { "id", 1 },
                     { "result", 19.0 },
                 },
                 abc::net::json::literal::object
                 {
                     { "jsonrpc", "2.0" },
-                    { "id", 2.0 },
-                    { "result", 19.0 },
+                    { "id", 2 },
+                    { "result", 19 },
                 },
             }
         };
@@ -3429,10 +3429,10 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                 abc::net::json::literal::object
                 {
                     { "jsonrpc", "2.0" },
-                    { "id", 2.0 },
+                    { "id", 2 },
                     { "error", abc::net::json::literal::object
                         {
-                            { "code", -32601.0 },
+                            { "code", -32601 },
                             { "message", "Method not found" },
                         }
                     },
@@ -3443,7 +3443,7 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                     { "id", 3.0 },
                     { "error", abc::net::json::literal::object
                         {
-                            { "code", -32601.0 },
+                            { "code", -32601 },
                             { "message", "Method not found" },
                         }
                     },
@@ -3462,7 +3462,7 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                 abc::net::json::literal::object
                 {
                     { "jsonrpc", "2.0" },
-                    { "id", 1.0 },
+                    { "id", 1 },
                     { "result", 19.0 },
                 },
                 abc::net::json::literal::object
@@ -3471,7 +3471,7 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
                     { "id", 3.0 },
                     { "error", abc::net::json::literal::object
                         {
-                            { "code", -32601.0 },
+                            { "code", -32601 },
                             { "message", "Method not found" },
                         }
                     },
