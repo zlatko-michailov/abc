@@ -15,8 +15,6 @@
 
 
 ## To Do
-- Copyright -2026
-
 - Namespace `net::json`:
   - `schema`
   - `schema_validator`
