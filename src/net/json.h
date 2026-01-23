@@ -1603,4 +1603,203 @@ namespace abc { namespace net { namespace json {
 
     // --------------------------------------------------------------
 
+
+    inline json_schema_validator::json_schema_validator(diag::log_ostream* log)
+        : diag_base("abc::net::json::json_schema_validator", log) {
+
+        constexpr const char* suborigin = "json_schema_validator()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline bool json_schema_validator::is_valid(const value& document, const value& schema) const {
+        constexpr const char* suborigin = "is_valid()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = is_valid(document, schema, schema);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid(const value& fragment, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid(fragment)";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = true;
+
+        // boolean
+        if (fragment_schema.type() == value_type::boolean) {
+            ok = fragment_schema.boolean();
+        }
+        // object
+        else if (fragment_schema.type() == value_type::object) {
+            // type
+            literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+            if (type_itr != fragment_schema.object().end()) {
+                if (type_itr->second.type() == value_type::string) {
+                    const literal::string& schema_type_name = type_itr->second.string();
+                    const value_type fragment_type = fragment.type();
+
+                    if (schema_type_name == "null") {
+                        ok = fragment_type == value_type::null;
+                    }
+                    else if (schema_type_name == "boolean") {
+                        ok = fragment_type == value_type::boolean;
+                    }
+                    else if (schema_type_name == "number") {
+                        ok = fragment_type == value_type::number;
+                    }
+                    else if (schema_type_name == "string") {
+                        ok = fragment_type == value_type::string;
+                    }
+                    else if (schema_type_name == "array") {
+                        ok = fragment_type == value_type::array
+                            && is_valid_array(fragment, fragment_schema, document_schema);
+                    }
+                    else if (schema_type_name == "object") {
+                        ok = fragment_type == value_type::object
+                            && is_valid_object(fragment, fragment_schema, document_schema);
+                    }
+                }
+            }
+
+            // $ref
+            literal::object::const_iterator ref_itr = fragment_schema.object().find("$ref");
+            if (ref_itr != fragment_schema.object().end()) {
+                if (ref_itr->second.type() == value_type::string) {
+                    const literal::string& ref = ref_itr->second.string();
+
+                    diag_base::require(suborigin, ascii::are_equal_n(ref.c_str(), "#/$defs/", 8), __TAG__, "ref.c_str(), == '#/$defs/'");
+
+                    const value& refed_fragment_schema = get_def(ref.substr(8).c_str(), document_schema);
+                    ok = is_valid(fragment, refed_fragment_schema, document_schema);
+                }
+            }
+
+            // Additional schema validations can be added here.
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_array(const value& fragment, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::expect(suborigin, fragment.type() == value_type::array, __TAG__, "fragment.type() == value_type::array");
+
+        bool ok = true;
+
+        // items
+        literal::object::const_iterator items_itr = fragment_schema.object().find("items");
+        if (ok && items_itr != fragment_schema.object().end()) {
+            const value& item_schema = items_itr->second;
+            for (const value& item : fragment.array()) {
+                ok = is_valid(item, item_schema, document_schema);
+                if (!ok) {
+                    break;
+                }
+            }
+        }
+
+        // prefixItems
+        literal::object::const_iterator prefix_items_itr = fragment_schema.object().find("prefixItems");
+        if (ok && prefix_items_itr != fragment_schema.object().end()) {
+            const value& prefix_items_schema = prefix_items_itr->second;
+
+            diag_base::require(suborigin, prefix_items_schema.type() == value_type::array, __TAG__, "prefix_items_schema.type() == value_type::array");
+            diag_base::require(suborigin, fragment.array().size() == prefix_items_schema.array().size(), __TAG__, "fragment.array().size() == prefix_items_schema.array().size()");
+            
+            for (std::size_t i = 0; i < prefix_items_schema.array().size() && i < fragment.array().size(); i++) {
+                ok = is_valid(fragment.array()[i], prefix_items_schema.array()[i], document_schema);
+                if (!ok) {
+                    break;
+                }
+            }
+        }
+
+        // contains
+        literal::object::const_iterator contains_itr = fragment_schema.object().find("contains");
+        if (ok && contains_itr != fragment_schema.object().end()) {
+            const value& contains_schema = contains_itr->second;
+            for (const value& item : fragment.array()) {
+                ok = is_valid(item, contains_schema, document_schema);
+                if (ok) {
+                    break;
+                }
+            }
+        }
+
+        // minItems
+        literal::object::const_iterator min_items_itr = fragment_schema.object().find("minItems");
+        if (ok && min_items_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, min_items_itr->second.type() == value_type::number, __TAG__, "minItems_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, min_items_itr->second.number() >= 0, __TAG__, "minItems_itr->second.number() >= 0");
+            diag_base::require(suborigin, min_items_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(min_items_itr->second.number())), __TAG__, "minItems_itr->second.number() is integer");
+
+            std::size_t min_items = static_cast<std::size_t>(static_cast<std::int64_t>(min_items_itr->second.number()));
+            ok = fragment.array().size() >= min_items;
+        }
+
+        // maxItems
+        literal::object::const_iterator max_items_itr = fragment_schema.object().find("maxItems");
+        if (ok && max_items_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, max_items_itr->second.type() == value_type::number, __TAG__, "maxItems_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, max_items_itr->second.number() >= 0, __TAG__, "maxItems_itr->second.number() >= 0");
+            diag_base::require(suborigin, max_items_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(max_items_itr->second.number())), __TAG__, "maxItems_itr->second.number() is integer");
+
+            std::size_t max_items = static_cast<std::size_t>(static_cast<std::int64_t>(max_items_itr->second.number()));
+            ok = fragment.array().size() <= max_items;
+        }
+
+        // uniqueItems
+        literal::object::const_iterator unique_items_itr = fragment_schema.object().find("uniqueItems");
+        if (ok && unique_items_itr != fragment_schema.object().end()) {
+            const value& unique_items_schema = unique_items_itr->second;
+
+            diag_base::require(suborigin, unique_items_schema.type() == value_type::boolean, __TAG__, "unique_items_schema.type() == value_type::boolean");
+
+            if (unique_items_schema.boolean()) {
+                for (std::size_t i = 0; i < fragment.array().size(); i++) {
+                    for (std::size_t j = i + 1; j < fragment.array().size(); j++) {
+                        if (fragment.array()[i] == fragment.array()[j]) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_object(const value& fragment, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = false;
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    // --------------------------------------------------------------
+
 } } }

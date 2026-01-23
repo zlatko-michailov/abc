@@ -913,7 +913,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a batch JSON-RPC request.
          */
-        bool virtual is_batch_request(const value& value) const;
+        virtual bool is_batch_request(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a simple JSON-RPC request.
@@ -926,7 +926,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a simple JSON-RPC request.
          */
-        bool virtual is_simple_request(const value& value) const;
+        virtual bool is_simple_request(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a JSON-RPC notification.
@@ -939,7 +939,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a JSON-RPC notification.
          */
-        bool virtual is_simple_notification(const value& value) const;
+        virtual bool is_simple_notification(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a batch JSON-RPC response.
@@ -948,7 +948,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a batch JSON-RPC response.
          */
-        bool virtual is_batch_response(const value& value) const;
+        virtual bool is_batch_response(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a simple JSON-RPC response.
@@ -960,21 +960,21 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a simple JSON-RPC response.
          */
-        bool virtual is_simple_response(const value& value) const;
+        virtual bool is_simple_response(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a simple JSON-RPC result response.
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a simple JSON-RPC result response.
          */
-        bool virtual is_result_response(const value& value) const;
+        virtual bool is_result_response(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is a simple JSON-RPC error response.
          * @param value A `json::value` to check.
          * @return      `true` iff the value is a simple JSON-RPC error response.
          */
-        bool virtual is_error_response(const value& value) const;
+        virtual bool is_error_response(const value& value) const;
 
     protected:
         /**
@@ -987,7 +987,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "error" property.
          */
-        bool virtual is_error(const value& value) const;
+        virtual bool is_error(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "jsonrpc" property.
@@ -995,7 +995,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "jsonrpc" property.
          */
-        bool virtual is_jsonrpc(const value& value) const;
+        virtual bool is_jsonrpc(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "id" property.
@@ -1003,7 +1003,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "id" property.
          */
-        bool virtual is_id(const value& value) const;
+        virtual bool is_id(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "method" property.
@@ -1011,7 +1011,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "method" property.
          */
-        bool virtual is_method(const value& value) const;
+        virtual bool is_method(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "params" property.
@@ -1019,7 +1019,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "params" property.
          */
-        bool virtual is_params(const value& value) const;
+        virtual bool is_params(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "code" property.
@@ -1027,7 +1027,7 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "code" property.
          */
-        bool virtual is_code(const value& value) const;
+        virtual bool is_code(const value& value) const;
 
         /**
          * @brief       Checks whether the given value is valid for the "message" property.
@@ -1035,7 +1035,68 @@ namespace abc { namespace net { namespace json {
          * @param value A `json::value` to check.
          * @return      `true` iff the value is valid for the "message" property.
          */
-        bool virtual is_message(const value& value) const;
+        virtual bool is_message(const value& value) const;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief   JSON Schema validator.
+     * @details Checks whether a JSON document conforms to a JSON schema.
+     *          See https://json-schema.org/
+     *          Some methods are virtual to allow overriding if needed.
+     */
+    class json_schema_validator
+        : protected diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        json_schema_validator(diag::log_ostream* log = nullptr);
+
+        /**
+         * @brief Copy constructor.
+         */
+        json_schema_validator(const json_schema_validator& other) = default;
+
+        /**
+         * @brief Move constructor.
+         */
+        json_schema_validator(json_schema_validator&& other) = default;
+
+    public:
+        /**
+         * @brief          Checks whether the JSON document conforms to the JSON schema.
+         * @param document A JSON document to check.
+         * @param schema   A JSON schema to validate against.
+         * @return         `true` iff the document conforms to the schema.
+         */
+        virtual bool is_valid(const value& document, const value& schema) const;
+
+    protected:
+        virtual bool is_valid(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_type(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_array(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_object(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_allOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_anyOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_oneOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_multipleOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual const value& get_def(const char* ref, const value& document_schema) const;
     };
 
 } } }
