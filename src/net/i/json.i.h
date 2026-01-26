@@ -1082,21 +1082,25 @@ namespace abc { namespace net { namespace json {
     protected:
         virtual bool is_valid(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_type(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_boolean(const literal::boolean& b, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_array(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_number(const literal::number& num, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_object(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_string(const literal::string& str, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_allOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_array(const literal::array& arr, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_anyOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_object(const literal::object& obj, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_oneOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        //// TODO: virtual bool is_valid_allOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
-        virtual bool is_valid_multipleOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        //// TODO: virtual bool is_valid_anyOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
-        virtual const value& get_def(const char* ref, const value& document_schema) const;
+        //// TODO: virtual bool is_valid_oneOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        //// TODO: virtual bool is_valid_multipleOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
+        virtual const value& resolve_ref(const char* ref, const value& document_schema) const;
     };
 
 } } }

@@ -27,6 +27,7 @@ SOFTWARE.
 
 #include <cstdlib>
 #include <cstdio>
+#include <regex>
 
 #include "../root/size.h"
 #include "../root/ascii.h"
@@ -1649,21 +1650,24 @@ namespace abc { namespace net { namespace json {
                         ok = fragment_type == value_type::null;
                     }
                     else if (schema_type_name == "boolean") {
-                        ok = fragment_type == value_type::boolean;
+                        ok = fragment_type == value_type::boolean
+                            && is_valid_boolean(fragment.boolean(), fragment_schema, document_schema);
                     }
                     else if (schema_type_name == "number") {
-                        ok = fragment_type == value_type::number;
+                        ok = fragment_type == value_type::number
+                            && is_valid_number(fragment.number(), fragment_schema, document_schema);
                     }
                     else if (schema_type_name == "string") {
-                        ok = fragment_type == value_type::string;
+                        ok = fragment_type == value_type::string
+                            && is_valid_string(fragment.string(), fragment_schema, document_schema);
                     }
                     else if (schema_type_name == "array") {
                         ok = fragment_type == value_type::array
-                            && is_valid_array(fragment, fragment_schema, document_schema);
+                            && is_valid_array(fragment.array(), fragment_schema, document_schema);
                     }
                     else if (schema_type_name == "object") {
                         ok = fragment_type == value_type::object
-                            && is_valid_object(fragment, fragment_schema, document_schema);
+                            && is_valid_object(fragment.object(), fragment_schema, document_schema);
                     }
                 }
             }
@@ -1676,7 +1680,7 @@ namespace abc { namespace net { namespace json {
 
                     diag_base::require(suborigin, ascii::are_equal_n(ref.c_str(), "#/$defs/", 8), __TAG__, "ref.c_str(), == '#/$defs/'");
 
-                    const value& refed_fragment_schema = get_def(ref.substr(8).c_str(), document_schema);
+                    const value& refed_fragment_schema = resolve_ref(ref.substr(8).c_str(), document_schema);
                     ok = is_valid(fragment, refed_fragment_schema, document_schema);
                 }
             }
@@ -1690,11 +1694,146 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    inline bool json_schema_validator::is_valid_array(const value& fragment, const value& fragment_schema, const value& document_schema) const {
-        constexpr const char* suborigin = "is_valid_array()";
+    inline bool json_schema_validator::is_valid_boolean(const literal::boolean& b, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_boolean()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        diag_base::expect(suborigin, fragment.type() == value_type::array, __TAG__, "fragment.type() == value_type::array");
+        bool ok = true;
+
+        // const
+        literal::object::const_iterator const_itr = fragment_schema.object().find("const");
+        if (ok && const_itr != fragment_schema.object().end()) {
+            ok = const_itr->second.type() == value_type::boolean && const_itr->second.boolean() == b;
+        }
+
+        // enum
+        literal::object::const_iterator enum_itr = fragment_schema.object().find("enum");
+        if (ok && enum_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, enum_itr->second.type() == value_type::array, __TAG__, "enum_itr->second.type() == value_type::array");
+
+            const literal::array& enum_arr = enum_itr->second.array();
+            for (const value& item : enum_arr) {
+                ok = item.type() == value_type::boolean && item.boolean() == b;
+                if (ok) {
+                    break;
+                }
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_number(const literal::number& num, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_number()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = true;
+
+        // const
+        literal::object::const_iterator const_itr = fragment_schema.object().find("const");
+        if (ok && const_itr != fragment_schema.object().end()) {
+            ok = const_itr->second.type() == value_type::number && const_itr->second.number() == num;
+        }
+
+        // enum
+        literal::object::const_iterator enum_itr = fragment_schema.object().find("enum");
+        if (ok && enum_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, enum_itr->second.type() == value_type::array, __TAG__, "enum_itr->second.type() == value_type::array");
+
+            const literal::array& enum_arr = enum_itr->second.array();
+            for (const value& item : enum_arr) {
+                ok = item.type() == value_type::number && item.number() == num;
+                if (ok) {
+                    break;
+                }
+            }
+        }
+
+        // minimum
+        literal::object::const_iterator minimum_itr = fragment_schema.object().find("minimum");
+        if (ok && minimum_itr != fragment_schema.object().end()) {
+            ok = minimum_itr->second.type() == value_type::number && minimum_itr->second.number() <= num;
+        }
+
+        // exclusiveMinimum
+        literal::object::const_iterator exclusive_minimum_itr = fragment_schema.object().find("exclusiveMinimum");
+        if (ok && exclusive_minimum_itr != fragment_schema.object().end()) {
+            ok = exclusive_minimum_itr->second.type() == value_type::number && exclusive_minimum_itr->second.number() < num;
+        }
+
+        // maximum
+        literal::object::const_iterator maximum_itr = fragment_schema.object().find("maximum");
+        if (ok && maximum_itr != fragment_schema.object().end()) {
+            ok = maximum_itr->second.type() == value_type::number && maximum_itr->second.number() >= num;
+        }
+
+        // exclusiveMaximum
+        literal::object::const_iterator exclusive_maximum_itr = fragment_schema.object().find("exclusiveMaximum");
+        if (ok && exclusive_maximum_itr != fragment_schema.object().end()) {
+            ok = exclusive_maximum_itr->second.type() == value_type::number && exclusive_maximum_itr->second.number() > num;
+        }
+
+        // multipleOf
+        literal::object::const_iterator multiple_of_itr = fragment_schema.object().find("multipleOf");
+        if (ok && multiple_of_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, multiple_of_itr->second.type() == value_type::number, __TAG__, "multiple_of_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, multiple_of_itr->second.number() != 0, __TAG__, "multiple_of_itr->second.number() != 0");
+
+            ok = num / multiple_of_itr->second.number() == static_cast<int>(num / multiple_of_itr->second.number());
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_string(const literal::string& str, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_string()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = true;
+
+        // const
+        literal::object::const_iterator const_itr = fragment_schema.object().find("const");
+        if (ok && const_itr != fragment_schema.object().end()) {
+            ok = const_itr->second.type() == value_type::string && const_itr->second.string() == str;
+        }
+
+        // enum
+        literal::object::const_iterator enum_itr = fragment_schema.object().find("enum");
+        if (ok && enum_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, enum_itr->second.type() == value_type::array, __TAG__, "enum_itr->second.type() == value_type::array");
+
+            const literal::array& enum_arr = enum_itr->second.array();
+            for (const value& item : enum_arr) {
+                ok = item.type() == value_type::string && item.string() == str;
+                if (ok) {
+                    break;
+                }
+            }
+        }
+
+        // pattern
+        literal::object::const_iterator pattern_itr = fragment_schema.object().find("pattern");
+        if (ok && pattern_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, pattern_itr->second.type() == value_type::string, __TAG__, "pattern_itr->second.type() == value_type::string");
+
+            ok = std::regex_match(str, std::regex(pattern_itr->second.string()));
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_array(const literal::array& arr, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_array()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = true;
 
@@ -1702,7 +1841,7 @@ namespace abc { namespace net { namespace json {
         literal::object::const_iterator items_itr = fragment_schema.object().find("items");
         if (ok && items_itr != fragment_schema.object().end()) {
             const value& item_schema = items_itr->second;
-            for (const value& item : fragment.array()) {
+            for (const value& item : arr) {
                 ok = is_valid(item, item_schema, document_schema);
                 if (!ok) {
                     break;
@@ -1716,26 +1855,32 @@ namespace abc { namespace net { namespace json {
             const value& prefix_items_schema = prefix_items_itr->second;
 
             diag_base::require(suborigin, prefix_items_schema.type() == value_type::array, __TAG__, "prefix_items_schema.type() == value_type::array");
-            diag_base::require(suborigin, fragment.array().size() == prefix_items_schema.array().size(), __TAG__, "fragment.array().size() == prefix_items_schema.array().size()");
+
+            ok = arr.size() == prefix_items_schema.array().size();
             
-            for (std::size_t i = 0; i < prefix_items_schema.array().size() && i < fragment.array().size(); i++) {
-                ok = is_valid(fragment.array()[i], prefix_items_schema.array()[i], document_schema);
-                if (!ok) {
-                    break;
-                }
+            for (std::size_t i = 0; ok && i < prefix_items_schema.array().size() && i < arr.size(); i++) {
+                ok = is_valid(arr[i], prefix_items_schema.array()[i], document_schema);
             }
         }
 
-        // contains
+        // contains (minContains, maxContains)
         literal::object::const_iterator contains_itr = fragment_schema.object().find("contains");
         if (ok && contains_itr != fragment_schema.object().end()) {
+            literal::object::const_iterator min_contains_itr = fragment_schema.object().find("minContains");
+            std::size_t min_contains = min_contains_itr != fragment_schema.object().end() ? static_cast<std::size_t>(static_cast<std::int64_t>(min_contains_itr->second.number())) : 1;
+            
+            literal::object::const_iterator max_contains_itr = fragment_schema.object().find("maxContains");
+            std::size_t max_contains = max_contains_itr != fragment_schema.object().end() ? static_cast<std::size_t>(static_cast<std::int64_t>(max_contains_itr->second.number())) : arr.size();
+
             const value& contains_schema = contains_itr->second;
-            for (const value& item : fragment.array()) {
-                ok = is_valid(item, contains_schema, document_schema);
-                if (ok) {
-                    break;
+            std::size_t contains_count = 0;
+            for (const value& item : arr) {
+                if (is_valid(item, contains_schema, document_schema)) {
+                    contains_count++;
                 }
             }
+
+            ok = contains_count >= min_contains && contains_count <= max_contains;
         }
 
         // minItems
@@ -1746,7 +1891,7 @@ namespace abc { namespace net { namespace json {
             diag_base::require(suborigin, min_items_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(min_items_itr->second.number())), __TAG__, "minItems_itr->second.number() is integer");
 
             std::size_t min_items = static_cast<std::size_t>(static_cast<std::int64_t>(min_items_itr->second.number()));
-            ok = fragment.array().size() >= min_items;
+            ok = arr.size() >= min_items;
         }
 
         // maxItems
@@ -1757,7 +1902,7 @@ namespace abc { namespace net { namespace json {
             diag_base::require(suborigin, max_items_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(max_items_itr->second.number())), __TAG__, "maxItems_itr->second.number() is integer");
 
             std::size_t max_items = static_cast<std::size_t>(static_cast<std::int64_t>(max_items_itr->second.number()));
-            ok = fragment.array().size() <= max_items;
+            ok = arr.size() <= max_items;
         }
 
         // uniqueItems
@@ -1768,9 +1913,9 @@ namespace abc { namespace net { namespace json {
             diag_base::require(suborigin, unique_items_schema.type() == value_type::boolean, __TAG__, "unique_items_schema.type() == value_type::boolean");
 
             if (unique_items_schema.boolean()) {
-                for (std::size_t i = 0; i < fragment.array().size(); i++) {
-                    for (std::size_t j = i + 1; j < fragment.array().size(); j++) {
-                        if (fragment.array()[i] == fragment.array()[j]) {
+                for (std::size_t i = 0; i < arr.size(); i++) {
+                    for (std::size_t j = i + 1; j < arr.size(); j++) {
+                        if (arr[i] == arr[j]) {
                             ok = false;
                             break;
                         }
@@ -1788,15 +1933,27 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    inline bool json_schema_validator::is_valid_object(const value& fragment, const value& fragment_schema, const value& document_schema) const {
+    inline bool json_schema_validator::is_valid_object(const literal::object& obj, const value& fragment_schema, const value& document_schema) const {
         constexpr const char* suborigin = "is_valid_object()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        bool ok = true;
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline const value& json_schema_validator::resolve_ref(const char* ref, const value& document_schema) const {
+        constexpr const char* suborigin = "resolve_ref()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = false;
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
 
-        return ok;
+        return document_schema;  //// TODO: Placeholder return to avoid compiler warning.
     }
 
 

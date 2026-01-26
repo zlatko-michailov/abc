@@ -15,6 +15,9 @@
 
 
 ## To Do
+- Switch back to `json::value` => `is_valid(fragment)`.
+- Handle "$ref" for each type.
+
 - Namespace `net::json`:
   - `schema`
   - `schema_validator`
