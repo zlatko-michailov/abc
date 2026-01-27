@@ -1674,7 +1674,7 @@ namespace abc { namespace net { namespace json {
 
             // $ref
             literal::object::const_iterator ref_itr = fragment_schema.object().find("$ref");
-            if (ref_itr != fragment_schema.object().end()) {
+            if (ok && ref_itr != fragment_schema.object().end()) {
                 if (ref_itr->second.type() == value_type::string) {
                     const literal::string& ref = ref_itr->second.string();
 
@@ -1684,8 +1684,6 @@ namespace abc { namespace net { namespace json {
                     ok = is_valid(fragment, refed_fragment_schema, document_schema);
                 }
             }
-
-            // Additional schema validations can be added here.
         }
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
@@ -1694,7 +1692,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    inline bool json_schema_validator::is_valid_boolean(const literal::boolean& b, const value& fragment_schema, const value& document_schema) const {
+    inline bool json_schema_validator::is_valid_boolean(const literal::boolean& b, const value& fragment_schema, const value& /*document_schema*/) const {
         constexpr const char* suborigin = "is_valid_boolean()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1726,7 +1724,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    inline bool json_schema_validator::is_valid_number(const literal::number& num, const value& fragment_schema, const value& document_schema) const {
+    inline bool json_schema_validator::is_valid_number(const literal::number& num, const value& fragment_schema, const value& /*document_schema*/) const {
         constexpr const char* suborigin = "is_valid_number()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1791,7 +1789,7 @@ namespace abc { namespace net { namespace json {
     }
 
 
-    inline bool json_schema_validator::is_valid_string(const literal::string& str, const value& fragment_schema, const value& document_schema) const {
+    inline bool json_schema_validator::is_valid_string(const literal::string& str, const value& fragment_schema, const value& /*document_schema*/) const {
         constexpr const char* suborigin = "is_valid_string()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -1939,6 +1937,76 @@ namespace abc { namespace net { namespace json {
 
         bool ok = true;
 
+        // properties
+        literal::object::const_iterator properties_itr = fragment_schema.object().find("properties");
+        if (ok && properties_itr != fragment_schema.object().end()) {
+            const value& properties_schema = properties_itr->second;
+            for (const literal::object::value_type& prop : obj) {
+                literal::object::const_iterator property_schema_itr = properties_schema.object().find(prop.first);
+                if (property_schema_itr != properties_schema.object().end()) {
+                    ok = is_valid(prop.second, property_schema_itr->second, document_schema);
+                    if (!ok) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // required
+        literal::object::const_iterator required_itr = fragment_schema.object().find("required");
+        if (ok && required_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, required_itr->second.type() == value_type::array, __TAG__, "required_itr->second.type() == value_type::array");
+
+            for (const value& required_prop : required_itr->second.array()) {
+                diag_base::require(suborigin, required_prop.type() == value_type::string, __TAG__, "required_prop.type() == value_type::string");
+
+                ok = obj.find(required_prop.string()) != obj.end();
+                if (!ok) {
+                    break;
+                }
+            }
+        }
+
+        // minProperties
+        literal::object::const_iterator min_properties_itr = fragment_schema.object().find("minProperties");
+        if (ok && min_properties_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, min_properties_itr->second.type() == value_type::number, __TAG__, "minProperties_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, min_properties_itr->second.number() >= 0, __TAG__, "minProperties_itr->second.number() >= 0");
+            diag_base::require(suborigin, min_properties_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(min_properties_itr->second.number())), __TAG__, "minProperties_itr->second.number() is integer");
+
+            std::size_t min_properties = static_cast<std::size_t>(static_cast<std::int64_t>(min_properties_itr->second.number()));
+            ok = obj.size() >= min_properties;
+        }
+
+        // maxProperties
+        literal::object::const_iterator max_properties_itr = fragment_schema.object().find("maxProperties");
+        if (ok && max_properties_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, max_properties_itr->second.type() == value_type::number, __TAG__, "maxProperties_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, max_properties_itr->second.number() >= 0, __TAG__, "maxProperties_itr->second.number() >= 0");
+            diag_base::require(suborigin, max_properties_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(max_properties_itr->second.number())), __TAG__, "maxProperties_itr->second.number() is integer");
+
+            std::size_t max_properties = static_cast<std::size_t>(static_cast<std::int64_t>(max_properties_itr->second.number()));
+            ok = obj.size() <= max_properties;
+        }
+
+        // additionalProperties
+        literal::object::const_iterator additional_properties_itr = fragment_schema.object().find("additionalProperties");
+        if (ok && additional_properties_itr != fragment_schema.object().end()) {
+            const value& additional_properties_schema = additional_properties_itr->second;
+            diag_base::require(suborigin, additional_properties_schema.type() == value_type::boolean, __TAG__, "additional_properties_schema.type() == value_type::boolean");
+
+            if (!additional_properties_schema.boolean()) {
+                literal::object::const_iterator properties_itr = fragment_schema.object().find("properties");
+                for (const literal::object::value_type& prop : obj) {
+                    const literal::object& properties = fragment_schema.object().find("properties")->second.object();
+                    ok = properties_itr != fragment_schema.object().end() && properties.find(prop.first) != properties.end();
+                    if (!ok) {
+                        break;
+                    }
+                }
+            }
+        }
+
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
 
         return ok;
@@ -1949,11 +2017,18 @@ namespace abc { namespace net { namespace json {
         constexpr const char* suborigin = "resolve_ref()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        bool ok = false;
+        literal::object::const_iterator defs_itr = document_schema.object().find("$defs");
+        diag_base::require(suborigin, defs_itr != document_schema.object().end(), __TAG__, "defs_itr != document_schema.object().end()");
 
-        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+        const value& defs_schema = defs_itr->second;
+        diag_base::require(suborigin, defs_schema.type() == value_type::object, __TAG__, "defs_schema.type() == value_type::object");
 
-        return document_schema;  //// TODO: Placeholder return to avoid compiler warning.
+        literal::object::const_iterator def_itr = defs_schema.object().find(ref);
+        diag_base::require(suborigin, def_itr != defs_schema.object().end(), __TAG__, "def_itr != defs_schema.object().end()");
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+
+        return def_itr->second;
     }
 
 
