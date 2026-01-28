@@ -1639,37 +1639,22 @@ namespace abc { namespace net { namespace json {
         }
         // object
         else if (fragment_schema.type() == value_type::object) {
-            // type
-            literal::object::const_iterator type_itr = fragment_schema.object().find("type");
-            if (type_itr != fragment_schema.object().end()) {
-                if (type_itr->second.type() == value_type::string) {
-                    const literal::string& schema_type_name = type_itr->second.string();
-                    const value_type fragment_type = fragment.type();
+            const value_type fragment_type = fragment.type();
 
-                    if (schema_type_name == "null") {
-                        ok = fragment_type == value_type::null;
-                    }
-                    else if (schema_type_name == "boolean") {
-                        ok = fragment_type == value_type::boolean
-                            && is_valid_boolean(fragment.boolean(), fragment_schema, document_schema);
-                    }
-                    else if (schema_type_name == "number") {
-                        ok = fragment_type == value_type::number
-                            && is_valid_number(fragment.number(), fragment_schema, document_schema);
-                    }
-                    else if (schema_type_name == "string") {
-                        ok = fragment_type == value_type::string
-                            && is_valid_string(fragment.string(), fragment_schema, document_schema);
-                    }
-                    else if (schema_type_name == "array") {
-                        ok = fragment_type == value_type::array
-                            && is_valid_array(fragment.array(), fragment_schema, document_schema);
-                    }
-                    else if (schema_type_name == "object") {
-                        ok = fragment_type == value_type::object
-                            && is_valid_object(fragment.object(), fragment_schema, document_schema);
-                    }
-                }
+            if (fragment_type == value_type::boolean) {
+                ok = is_valid_boolean(fragment.boolean(), fragment_schema, document_schema);
+            }
+            else if (fragment_type == value_type::number) {
+                ok = is_valid_number(fragment.number(), fragment_schema, document_schema);
+            }
+            else if (fragment_type == value_type::string) {
+                ok = is_valid_string(fragment.string(), fragment_schema, document_schema);
+            }
+            else if (fragment_type == value_type::array) {
+                ok = is_valid_array(fragment.array(), fragment_schema, document_schema);
+            }
+            else if (fragment_type == value_type::object) {
+                ok = is_valid_object(fragment.object(), fragment_schema, document_schema);
             }
 
             // $ref
@@ -1697,6 +1682,12 @@ namespace abc { namespace net { namespace json {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = true;
+
+        // type
+        literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+        if (ok && type_itr != fragment_schema.object().end()) {
+            ok = type_itr->second.type() == value_type::string && type_itr->second.string() == "boolean";
+        }
 
         // const
         literal::object::const_iterator const_itr = fragment_schema.object().find("const");
@@ -1729,6 +1720,12 @@ namespace abc { namespace net { namespace json {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = true;
+
+        // type
+        literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+        if (ok && type_itr != fragment_schema.object().end()) {
+            ok = type_itr->second.type() == value_type::string && type_itr->second.string() == "number";
+        }
 
         // const
         literal::object::const_iterator const_itr = fragment_schema.object().find("const");
@@ -1795,6 +1792,12 @@ namespace abc { namespace net { namespace json {
 
         bool ok = true;
 
+        // type
+        literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+        if (ok && type_itr != fragment_schema.object().end()) {
+            ok = type_itr->second.type() == value_type::string && type_itr->second.string() == "string";
+        }
+
         // const
         literal::object::const_iterator const_itr = fragment_schema.object().find("const");
         if (ok && const_itr != fragment_schema.object().end()) {
@@ -1834,6 +1837,12 @@ namespace abc { namespace net { namespace json {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = true;
+
+        // type
+        literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+        if (ok && type_itr != fragment_schema.object().end()) {
+            ok = type_itr->second.type() == value_type::string && type_itr->second.string() == "array";
+        }
 
         // items
         literal::object::const_iterator items_itr = fragment_schema.object().find("items");
@@ -1936,6 +1945,12 @@ namespace abc { namespace net { namespace json {
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         bool ok = true;
+
+        // type
+        literal::object::const_iterator type_itr = fragment_schema.object().find("type");
+        if (ok && type_itr != fragment_schema.object().end()) {
+            ok = type_itr->second.type() == value_type::string && type_itr->second.string() == "object";
+        }
 
         // properties
         literal::object::const_iterator properties_itr = fragment_schema.object().find("properties");

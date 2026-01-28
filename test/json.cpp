@@ -3498,6 +3498,272 @@ bool test_json_rpc_validator_batch_responses(test_context& context) {
 // --------------------------------------------------------------
 
 
+bool test_json_schema_validator_boolean(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document { true };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "boolean" },
+                { "const", true },
+                { "enum", abc::net::json::literal::array { true } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "number" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "const", false },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "enum", abc::net::json::literal::array { false } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "boolean" },
+                                { "const", true },
+                                { "enum", abc::net::json::literal::array { true } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "number" },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
+bool test_json_schema_validator_number(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document { 42 };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "number" },
+                { "const", 42 },
+                { "enum", abc::net::json::literal::array { 42 } },
+                { "minimum", 40 },
+                { "maximum", 50 },
+                { "exclusiveMinimum", 40 },
+                { "exclusiveMaximum", 50 },
+                { "multipleOf", 6 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "boolean" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "const", 99.99 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "enum", abc::net::json::literal::array { 99.99 } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "minimum", 43 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "maximum", 41 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "exclusiveMinimum", 42 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "exclusiveMaximum", 42 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "multipleOf", 10 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "number" },
+                                { "const", 42 },
+                                { "enum", abc::net::json::literal::array { 42 } },
+                                { "minimum", 40 },
+                                { "maximum", 50 },
+                                { "exclusiveMinimum", 40 },
+                                { "exclusiveMaximum", 50 },
+                                { "multipleOf", 6 },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "boolean" },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
+// --------------------------------------------------------------
+
+
 bool test_json_istream_move(test_context& context) {
     std::string content =
         "false 42 ";

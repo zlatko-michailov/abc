@@ -124,6 +124,12 @@ bool test_json_rpc_validator_simple_result_responses(test_context& context);
 bool test_json_rpc_validator_simple_error_responses(test_context& context);
 bool test_json_rpc_validator_batch_responses(test_context& context);
 
+bool test_json_schema_validator_boolean(test_context& context);
+bool test_json_schema_validator_number(test_context& context);
+bool test_json_schema_validator_string(test_context& context);
+bool test_json_schema_validator_array(test_context& context);
+bool test_json_schema_validator_object(test_context& context);
+
 bool test_json_istream_move(test_context& context);
 bool test_json_reader_move(test_context& context);
 bool test_json_ostream_move(test_context& context);
