@@ -129,6 +129,7 @@ bool test_json_schema_validator_number(test_context& context);
 bool test_json_schema_validator_string(test_context& context);
 bool test_json_schema_validator_array(test_context& context);
 bool test_json_schema_validator_object(test_context& context);
+bool test_json_schema_validator_mixed(test_context& context);
 
 bool test_json_istream_move(test_context& context);
 bool test_json_reader_move(test_context& context);

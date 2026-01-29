@@ -3873,6 +3873,167 @@ bool test_json_schema_validator_string(test_context& context) {
 }
 
 
+bool test_json_schema_validator_array(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document {
+        abc::net::json::literal::array { 11, 12, 13, 14 }
+    };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "items", abc::net::json::literal::object { 
+                    { "type", "number" },
+                    { "minimum", 11 },
+                    { "maximum", 14 },
+                    { "exclusiveMinimum", 10 },
+                    { "exclusiveMaximum", 15 },
+                    { "multipleOf", 1 },
+                } },
+                { "prefixItems", abc::net::json::literal::array {
+                    abc::net::json::literal::object {
+                        { "type", "number" },
+                        { "const", 11 }
+                    },
+                    abc::net::json::literal::object {
+                        { "type", "number" },
+                        { "const", 12 }
+                    },
+                    abc::net::json::literal::object {
+                        { "type", "number" },
+                        { "const", 13 }
+                    },
+                    abc::net::json::literal::object {
+                        { "type", "number" },
+                        { "const", 14 }
+                    },
+                } },
+                { "minItems", 2 },
+                { "maxItems", 5 },
+                { "uniqueItems", true },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "items", abc::net::json::literal::object { 
+                    { "type", "string" },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "minItems", 5 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "maxItems", 3 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "array" },
+                                { "items", abc::net::json::literal::object { 
+                                    { "type", "number" },
+                                    { "minimum", 11 },
+                                    { "maximum", 14 },
+                                    { "exclusiveMinimum", 10 },
+                                    { "exclusiveMaximum", 15 },
+                                    { "multipleOf", 1 },
+                                } },
+                                { "prefixItems", abc::net::json::literal::array {
+                                    abc::net::json::literal::object {
+                                        { "type", "number" },
+                                        { "const", 11 }
+                                    },
+                                    abc::net::json::literal::object {
+                                        { "type", "number" },
+                                        { "const", 12 }
+                                    },
+                                    abc::net::json::literal::object {
+                                        { "type", "number" },
+                                        { "const", 13 }
+                                    },
+                                    abc::net::json::literal::object {
+                                        { "type", "number" },
+                                        { "const", 14 }
+                                    },
+                                } },
+                                { "minItems", 2 },
+                                { "maxItems", 5 },
+                                { "uniqueItems", true },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "array" },
+                                { "minItems", 5 },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 
