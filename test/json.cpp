@@ -3761,6 +3761,118 @@ bool test_json_schema_validator_number(test_context& context) {
 }
 
 
+bool test_json_schema_validator_string(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document { "hello" };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "string" },
+                { "const", "hello" },
+                { "enum", abc::net::json::literal::array { "hello" } },
+                { "pattern", "he[l]{2}o" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "number" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "const", "world" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "enum", abc::net::json::literal::array { "world" } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "pattern", "world" },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "string" },
+                                { "const", "hello" },
+                                { "enum", abc::net::json::literal::array { "hello" } },
+                                { "pattern", "he[l]{2}o" },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "number" },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 
