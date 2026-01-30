@@ -10,15 +10,12 @@
       - `send_event()`
       - `send_event_message()`
 - Namespace `net::json`:
+  - `json_schema_validator`
   - `json_rpc_validator`
   - `value(int)`, `value(unsigned)`, `value(long)`, `value(unsigned long)`, `value(long long)`, `value(unsigned long long)`
 
 
 ## To Do
-- Namespace `net::json`:
-  - `schema`
-  - `schema_validator`
-
 - Namespace `ai`:
   - `mcp`
     - `server`

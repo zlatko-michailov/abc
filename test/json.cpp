@@ -4163,6 +4163,246 @@ bool test_json_schema_validator_object(test_context& context) {
 }
 
 
+bool test_json_schema_validator_mixed(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document1 {
+        abc::net::json::literal::object
+        {
+            { "arr", abc::net::json::literal::array
+                { 
+                    abc::net::json::literal::object
+                    {
+                        { "num", 30 },
+                    },
+                }
+            },
+        }
+    };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "object" },
+                { "properties", abc::net::json::literal::object { 
+                    { "arr", abc::net::json::literal::object { 
+                        { "items", abc::net::json::literal::object { 
+                            { "type", "object" },
+                            { "properties", abc::net::json::literal::object { 
+                                { "num", abc::net::json::literal::object { { "type", "number" } } },
+                            } },
+                            { "required", abc::net::json::literal::array { "num" } },
+                        } },
+                    } },
+                } },
+                { "additionalProperties", true },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document1, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "object" },
+                { "properties", abc::net::json::literal::object { 
+                    { "arr", abc::net::json::literal::object { 
+                        { "items", abc::net::json::literal::object { 
+                            { "type", "object" },
+                            { "properties", abc::net::json::literal::object { 
+                                { "num", abc::net::json::literal::object { { "type", "number" } } },
+                            } },
+                            { "required", abc::net::json::literal::array { "missing" } },
+                        } },
+                    } },
+                } },
+                { "additionalProperties", true },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document1, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "object" },
+                { "properties", abc::net::json::literal::object { 
+                    { "arr", abc::net::json::literal::object { 
+                        { "items", abc::net::json::literal::object { 
+                            { "type", "object" },
+                            { "properties", abc::net::json::literal::object { 
+                                { "num", abc::net::json::literal::object { { "type", "string" } } },
+                            } },
+                            { "required", abc::net::json::literal::array { "num" } },
+                        } },
+                    } },
+                } },
+                { "additionalProperties", true },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document1, schema), false, __TAG__, "%d") && passed;
+    }
+
+    abc::net::json::value document2 {
+        abc::net::json::literal::array
+        {
+            abc::net::json::literal::object
+            {
+                { "arr", abc::net::json::literal::array { 11, 12, 13, 14 } },
+            },
+        }
+    };
+
+    // simple (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "items", abc::net::json::literal::object { 
+                    { "type", "object" },
+                    { "properties", abc::net::json::literal::object { 
+                        { "arr", abc::net::json::literal::object {
+                            { "type", "array" },
+                            { "items", abc::net::json::literal::object { 
+                                { "type", "number" },
+                            } },
+                        } },
+                    } },
+                    { "required", abc::net::json::literal::array { "arr" } },
+                    { "additionalProperties", true },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document2, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "items", abc::net::json::literal::object { 
+                    { "type", "object" },
+                    { "properties", abc::net::json::literal::object { 
+                        { "arr", abc::net::json::literal::object {
+                            { "type", "array" },
+                            { "items", abc::net::json::literal::object { 
+                                { "type", "string" },
+                            } },
+                        } },
+                    } },
+                    { "required", abc::net::json::literal::array { "arr" } },
+                    { "additionalProperties", true },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document2, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "array" },
+                { "items", abc::net::json::literal::object { 
+                    { "type", "object" },
+                    { "properties", abc::net::json::literal::object { 
+                        { "arr", abc::net::json::literal::object {
+                            { "type", "array" },
+                            { "items", abc::net::json::literal::object { 
+                                { "type", "number" },
+                            } },
+                        } },
+                    } },
+                    { "required", abc::net::json::literal::array { "missing" } },
+                    { "additionalProperties", true },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document2, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "object" },
+                                { "properties", abc::net::json::literal::object { 
+                                    { "arr", abc::net::json::literal::object { 
+                                        { "type", "array" },
+                                        { "items", abc::net::json::literal::object { 
+                                            { "type", "object" },
+                                            { "properties", abc::net::json::literal::object { 
+                                                { "num", abc::net::json::literal::object { { "type", "number" } } },
+                                            } },
+                                            { "required", abc::net::json::literal::array { "num" } },
+                                        } },
+                                    } },
+                                } },
+                                { "additionalProperties", true },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document1, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "type", "array" },
+                                { "items", abc::net::json::literal::object { 
+                                    { "type", "object" },
+                                    { "properties", abc::net::json::literal::object { 
+                                        { "arr", abc::net::json::literal::object {
+                                            { "type", "array" },
+                                            { "items", abc::net::json::literal::object { 
+                                                { "type", "number" },
+                                            } },
+                                        } },
+                                    } },
+                                    { "required", abc::net::json::literal::array { "arr" } },
+                                    { "additionalProperties", true },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document2, schema), true, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 
