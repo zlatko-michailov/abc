@@ -1092,13 +1092,13 @@ namespace abc { namespace net { namespace json {
 
         virtual bool is_valid_object(const literal::object& obj, const value& fragment_schema, const value& document_schema) const;
 
+        //// TODO: virtual bool is_valid_Of(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+
         //// TODO: virtual bool is_valid_allOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
         //// TODO: virtual bool is_valid_anyOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
         //// TODO: virtual bool is_valid_oneOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
-
-        //// TODO: virtual bool is_valid_multipleOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
 
         virtual const value& resolve_ref(const char* ref, const value& document_schema) const;
     };

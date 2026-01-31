@@ -3777,6 +3777,8 @@ bool test_json_schema_validator_string(test_context& context) {
                 { "const", "hello" },
                 { "enum", abc::net::json::literal::array { "hello" } },
                 { "pattern", "he[l]{2}o" },
+                { "minLength", 5 },
+                { "maxLength", 5 },
             }
         };
         passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
@@ -3826,6 +3828,28 @@ bool test_json_schema_validator_string(test_context& context) {
         passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
     }
 
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "minLength", 6 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "maxLength", 4 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
     // $ref (good)
     {
         abc::net::json::value schema {
@@ -3840,6 +3864,8 @@ bool test_json_schema_validator_string(test_context& context) {
                                 { "const", "hello" },
                                 { "enum", abc::net::json::literal::array { "hello" } },
                                 { "pattern", "he[l]{2}o" },
+                                { "minLength", 5 },
+                                { "maxLength", 5 },
                             }
                         },
                     }
@@ -4062,6 +4088,8 @@ bool test_json_schema_validator_object(test_context& context) {
                 } },
                 { "required", abc::net::json::literal::array { "str", "num" } },
                 { "additionalProperties", true },
+                { "minProperties", 4 },
+                { "maxProperties", 4 },
             }
         };
         passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
@@ -4106,6 +4134,30 @@ bool test_json_schema_validator_object(test_context& context) {
             {
                 { "type", "object" },
                 { "required", abc::net::json::literal::array { "str", "num", "missing" } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "object" },
+                { "minProperties", 5 },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "type", "object" },
+                { "maxProperties", 3 },
             }
         };
         passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;

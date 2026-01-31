@@ -1818,6 +1818,26 @@ namespace abc { namespace net { namespace json {
             }
         }
 
+        // minLength
+        literal::object::const_iterator min_length_itr = fragment_schema.object().find("minLength");
+        if (ok && min_length_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, min_length_itr->second.type() == value_type::number, __TAG__, "min_length_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, min_length_itr->second.number() >= 0, __TAG__, "minLength_itr->second.number() >= 0");
+            diag_base::require(suborigin, min_length_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(min_length_itr->second.number())), __TAG__, "minLength_itr->second.number() is integer");
+            
+            ok = str.size() >= static_cast<std::size_t>(min_length_itr->second.number());
+        }
+
+        // maxLength
+        literal::object::const_iterator max_length_itr = fragment_schema.object().find("maxLength");
+        if (ok && max_length_itr != fragment_schema.object().end()) {
+            diag_base::require(suborigin, max_length_itr->second.type() == value_type::number, __TAG__, "max_length_itr->second.type() == value_type::number");
+            diag_base::require(suborigin, max_length_itr->second.number() >= 0, __TAG__, "maxLength_itr->second.number() >= 0");
+            diag_base::require(suborigin, max_length_itr->second.number() == static_cast<double>(static_cast<std::int64_t>(max_length_itr->second.number())), __TAG__, "maxLength_itr->second.number() is integer");
+
+            ok = str.size() <= static_cast<std::size_t>(max_length_itr->second.number());
+        }
+
         // pattern
         literal::object::const_iterator pattern_itr = fragment_schema.object().find("pattern");
         if (ok && pattern_itr != fragment_schema.object().end()) {
