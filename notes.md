@@ -16,7 +16,7 @@
 
 
 ## To Do
-- allOf, anyOf, oneOf
+- allOf, anyOf, oneOf, not
 
 - Namespace `ai`:
   - `mcp`

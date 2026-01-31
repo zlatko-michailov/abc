@@ -1053,6 +1053,14 @@ namespace abc { namespace net { namespace json {
 
         using diag_base = diag::diag_ready<const char*>;
 
+    protected:
+        enum class of_type : std::uint8_t {
+            none = 0,
+            one  = 1,
+            any  = 2,
+            all  = 3,
+        };
+
     public:
         /**
          * @brief     Constructor.
@@ -1092,13 +1100,7 @@ namespace abc { namespace net { namespace json {
 
         virtual bool is_valid_object(const literal::object& obj, const value& fragment_schema, const value& document_schema) const;
 
-        //// TODO: virtual bool is_valid_Of(const value& fragment, const value& fragment_schema, const value& document_schema) const;
-
-        //// TODO: virtual bool is_valid_allOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
-
-        //// TODO: virtual bool is_valid_anyOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
-
-        //// TODO: virtual bool is_valid_oneOf(const value& fragment, const value& fragment_schema, const value& document_schema) const;
+        virtual bool is_valid_of(const value& fragment, of_type type, const value& fragment_schema, const value& document_schema) const;
 
         virtual const value& resolve_ref(const char* ref, const value& document_schema) const;
     };

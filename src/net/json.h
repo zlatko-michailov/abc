@@ -1657,6 +1657,30 @@ namespace abc { namespace net { namespace json {
                 ok = is_valid_object(fragment.object(), fragment_schema, document_schema);
             }
 
+            // allOf
+            literal::object::const_iterator all_of_itr = fragment_schema.object().find("allOf");
+            if (ok && all_of_itr != fragment_schema.object().end()) {
+                ok = is_valid_of(fragment, of_type::all, all_of_itr->second, document_schema);
+            }
+
+            // anyOf
+            literal::object::const_iterator any_of_itr = fragment_schema.object().find("anyOf");
+            if (ok && any_of_itr != fragment_schema.object().end()) {
+                ok = is_valid_of(fragment, of_type::any, any_of_itr->second, document_schema);
+            }
+
+            // oneOf
+            literal::object::const_iterator one_of_itr = fragment_schema.object().find("oneOf");
+            if (ok && one_of_itr != fragment_schema.object().end()) {
+                ok = is_valid_of(fragment, of_type::one, one_of_itr->second, document_schema);
+            }
+
+            // not
+            literal::object::const_iterator not_itr = fragment_schema.object().find("not");
+            if (ok && not_itr != fragment_schema.object().end()) {
+                ok = is_valid_of(fragment, of_type::none, not_itr->second, document_schema);
+            }
+
             // $ref
             literal::object::const_iterator ref_itr = fragment_schema.object().find("$ref");
             if (ok && ref_itr != fragment_schema.object().end()) {
@@ -2038,6 +2062,58 @@ namespace abc { namespace net { namespace json {
                     if (!ok) {
                         break;
                     }
+                }
+            }
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_of(const value& fragment, of_type type, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_of()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%d", static_cast<int>(type));
+
+        bool ok = fragment.type() == value_type::array;
+
+        if (ok) {
+            int count = 0;
+            for (const value& item : fragment.array()) {
+                ok = is_valid(item, fragment_schema, document_schema);
+
+                if (ok) {
+                    count++;
+
+                    if (type == of_type::none) {
+                        ok = false;
+                        break;
+                    }
+                    else if (type == of_type::one) {
+                        if (count > 1) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    else if (type == of_type::any) {
+                        break;
+                    }
+                }
+                else {
+                    if (type == of_type::all) {
+                        ok = false;
+                        break;
+                    }
+                }
+            }
+
+            if (ok) {
+                if (type == of_type::one) {
+                    ok = count == 1;
+                }
+                else if (type == of_type::any) {
+                    ok = count >= 1;
                 }
             }
         }
