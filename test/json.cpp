@@ -4455,6 +4455,334 @@ bool test_json_schema_validator_mixed(test_context& context) {
 }
 
 
+bool test_json_schema_validator_of(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document { 20 };
+
+    // simple allOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "allOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple allOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "allOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple anyOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "anyOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple anyOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "anyOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                    abc::net::json::literal::object { { "multipleOf", 8 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple oneOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "oneOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple oneOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "oneOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                    abc::net::json::literal::object { { "multipleOf", 8 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // simple oneOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "oneOf", abc::net::json::literal::array { 
+                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                } },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref allOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "allOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref allOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "allOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 4 } },
+                                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref anyOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "anyOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref anyOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "anyOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref oneOf (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "oneOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 5 } },
+                                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref oneOf (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "anyOf", abc::net::json::literal::array { 
+                                    abc::net::json::literal::object { { "multipleOf", 6 } },
+                                    abc::net::json::literal::object { { "multipleOf", 7 } },
+                                } },
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
+bool test_json_schema_validator_cond(test_context& context) {
+    bool passed = true;
+
+    abc::net::json::json_schema_validator validator(context.log());
+
+    abc::net::json::value document { 20 };
+
+    // simple not (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "not", abc::net::json::literal::object { { "multipleOf", 6 } } }
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // simple not (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "not", abc::net::json::literal::object { { "multipleOf", 5 } } }
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    // $ref not (good)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "not", abc::net::json::literal::object { { "multipleOf", 6 } } }
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), true, __TAG__, "%d") && passed;
+    }
+
+    // $ref not (bad)
+    {
+        abc::net::json::value schema {
+            abc::net::json::literal::object
+            {
+                { "$ref", "#/$defs/ref" },
+                { "$defs", abc::net::json::literal::object
+                    {
+                        { "ref", abc::net::json::literal::object
+                            {
+                                { "not", abc::net::json::literal::object { { "multipleOf", 5 } } }
+                            }
+                        },
+                    }
+                },
+            }
+        };
+        passed = context.are_equal(validator.is_valid(document, schema), false, __TAG__, "%d") && passed;
+    }
+
+    return passed;
+}
+
+
 // --------------------------------------------------------------
 
 

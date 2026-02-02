@@ -1678,7 +1678,7 @@ namespace abc { namespace net { namespace json {
             // not
             literal::object::const_iterator not_itr = fragment_schema.object().find("not");
             if (ok && not_itr != fragment_schema.object().end()) {
-                ok = is_valid_of(fragment, of_type::none, not_itr->second, document_schema);
+                ok = is_valid_cond(fragment, cond_type::inverted, not_itr->second, document_schema);
             }
 
             // $ref
@@ -2076,21 +2076,19 @@ namespace abc { namespace net { namespace json {
         constexpr const char* suborigin = "is_valid_of()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%d", static_cast<int>(type));
 
-        bool ok = fragment.type() == value_type::array;
+        bool ok = fragment_schema.type() == value_type::array;
 
         if (ok) {
             int count = 0;
-            for (const value& item : fragment.array()) {
-                ok = is_valid(item, fragment_schema, document_schema);
+            const literal::array& schema_array = fragment_schema.array();
+            for (std::size_t i = 0; i < schema_array.size(); i++) {
+                const value& schema_item = schema_array[i];
+                bool local_ok = is_valid(fragment, schema_item, document_schema);
 
-                if (ok) {
+                if (local_ok) {
                     count++;
 
-                    if (type == of_type::none) {
-                        ok = false;
-                        break;
-                    }
-                    else if (type == of_type::one) {
+                    if (type == of_type::one) {
                         if (count > 1) {
                             ok = false;
                             break;
@@ -2117,6 +2115,19 @@ namespace abc { namespace net { namespace json {
                 }
             }
         }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
+
+        return ok;
+    }
+
+
+    inline bool json_schema_validator::is_valid_cond(const value& fragment, cond_type type, const value& fragment_schema, const value& document_schema) const {
+        constexpr const char* suborigin = "is_valid_cond()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin: type=%d", static_cast<int>(type));
+
+        bool cond = is_valid(fragment, fragment_schema, document_schema);
+        bool ok = (type == cond_type::straight && cond) || (type == cond_type::inverted && !cond);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End: ok=%d", ok);
 

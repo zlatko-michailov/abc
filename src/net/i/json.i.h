@@ -1055,10 +1055,14 @@ namespace abc { namespace net { namespace json {
 
     protected:
         enum class of_type : std::uint8_t {
-            none = 0,
-            one  = 1,
-            any  = 2,
-            all  = 3,
+            all  = 0,
+            any  = 1,
+            one  = 2,
+        };
+
+        enum class cond_type : std::uint8_t {
+            inverted = 0,
+            straight = 1,
         };
 
     public:
@@ -1101,6 +1105,8 @@ namespace abc { namespace net { namespace json {
         virtual bool is_valid_object(const literal::object& obj, const value& fragment_schema, const value& document_schema) const;
 
         virtual bool is_valid_of(const value& fragment, of_type type, const value& fragment_schema, const value& document_schema) const;
+
+        virtual bool is_valid_cond(const value& fragment, cond_type type, const value& fragment_schema, const value& document_schema) const;
 
         virtual const value& resolve_ref(const char* ref, const value& document_schema) const;
     };

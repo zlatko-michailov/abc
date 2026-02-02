@@ -259,6 +259,8 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_json_schema_validator_array",                test_json_schema_validator_array },
                 { "test_json_schema_validator_object",               test_json_schema_validator_object },
                 { "test_json_schema_validator_mixed",                test_json_schema_validator_mixed },
+                { "test_json_schema_validator_of",                   test_json_schema_validator_of },
+                { "test_json_schema_validator_cond",                 test_json_schema_validator_cond },
                 { "test_json_istream_move",                          test_json_istream_move },
                 { "test_json_reader_move",                           test_json_reader_move },
                 { "test_json_ostream_move",                          test_json_ostream_move },
