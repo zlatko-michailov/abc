@@ -16,11 +16,16 @@
 
 
 ## To Do
-- Namespace `ai`:
-  - `mcp`
-    - `server`
-    - `transport`
-    - `client`
+- Namespace `net::msg`
+  - o `message_processor`
+  - o `transport`
+  - `streambuf_transport` : `transport`
+  - `console_transport` : `streambuf_transport`
+  - `http_server_transport` : `transport`
+  - `http_client_transport` : `transport`
+- Namespace `ai::mcp`:
+  - `server` : `message_processor`
+  - `client` : `message_processor`
 
 - Namespace `vmem`:
   - `zip_iterator`
