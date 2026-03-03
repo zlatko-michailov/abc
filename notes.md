@@ -9,6 +9,7 @@
     - `response_writer`
       - `send_event()`
       - `send_event_message()`
+  - `endpoint` - explicitly delete the move constructor.
 - Namespace `net::json`:
   - `json_schema_validator`
   - `json_rpc_validator`

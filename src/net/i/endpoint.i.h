@@ -270,6 +270,14 @@ namespace abc { namespace net { namespace http {
 
         /**
          * @brief Deleted.
+         * @details The endpoint is not copyable or movable, because it contains a `std::promise` and `std::atomic` members, 
+         *          which are not copyable or movable.
+         *          Also, the thread function keeps a pointer to the endpoint instance, so moving it would cause issues.
+         */
+        endpoint(endpoint&& other) = delete;
+
+        /**
+         * @brief Deleted.
          */
         endpoint(const endpoint& other) = delete;
 
