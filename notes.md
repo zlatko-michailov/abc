@@ -17,6 +17,10 @@
 
 
 ## To Do
+- Namespace `net`
+  - `daemon` - test.
+- Namespace `net::http`
+  - `endpoint` - derive from `daemon`.
 - Namespace `net::msg`
   - o `message_processor`
   - o `transport`
