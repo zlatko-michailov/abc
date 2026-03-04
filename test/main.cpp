@@ -38,6 +38,7 @@ SOFTWARE.
 #include "inc/stream.h"
 #include "inc/table_stream.h"
 #include "inc/mutex.h"
+#include "inc/daemon.h"
 #include "inc/http.h"
 #include "inc/json.h"
 #include "inc/socket.h"
@@ -107,6 +108,9 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_mutex_1_thread_1_use",                       test_mutex_1_thread_1_use },
                 { "test_mutex_1_thread_M_uses",                      test_mutex_1_thread_M_uses },
                 { "test_mutex_M_threads_1_use",                      test_mutex_M_threads_1_use },
+            } },
+            { "daemon", {
+                { "test_daemon_events",                              test_daemon_events },
             } },
             { "http", {
                 { "test_http_request_istream_extraspaces",           test_http_request_istream_extraspaces },

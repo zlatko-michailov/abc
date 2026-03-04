@@ -42,20 +42,27 @@ namespace abc { namespace net {
     inline daemon::daemon(const char* origin, diag::log_ostream* log)
         : diag_base(copy(origin), log)
         , _is_stop_requested(false) {
+
+        constexpr const char* suborigin = "daemon()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        _future = _promise.get_future().share();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    inline std::future<void> daemon::start_async() {
+    inline std::shared_future<void> daemon::start_async() {
         constexpr const char* suborigin = "start_async()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        // We can't use std::async() here because we want to detach the thread and return our own std::future.
+        // We can't use std::async() here because we want to detach the thread and return our own std::shared_future.
         std::thread(thread_func, this).detach();
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 
         // Return our own future.
-        return _promise.get_future();
+        return _future;
     }
 
 
@@ -91,7 +98,7 @@ namespace abc { namespace net {
     }
 
 
-    inline std::future<void> daemon::stop_async() {
+    inline std::shared_future<void> daemon::stop_async() {
         constexpr const char* suborigin = "stop_async()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -99,7 +106,7 @@ namespace abc { namespace net {
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
 
-        return _promise.get_future();
+        return _future;
     }
 
 

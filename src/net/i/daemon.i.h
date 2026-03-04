@@ -76,9 +76,9 @@ namespace abc { namespace net {
     public:
         /**
          * @brief  Starts the daemon on a separate thread.
-         * @return `std::future<void>` that will get set after the daemon is stopped.
+         * @return `std::shared_future<void>` that will get set after the daemon is stopped.
          */
-        std::future<void> start_async();
+        std::shared_future<void> start_async();
 
         /**
          * @brief   Starts the daemon on the current thread.
@@ -87,10 +87,10 @@ namespace abc { namespace net {
         void start();
 
         /**
-         * @brief  Triggers a stop of daemon and return immediately.
-         * @return The same `std::future<void>` returned from `start_async()`.
+         * @brief  Triggers a stop of the daemon and returns immediately.
+         * @return The same `std::shared_future<void>` returned from `start_async()`.
          */
-        std::future<void> stop_async();
+        std::shared_future<void> stop_async();
 
         /**
          * @brief   Triggers a stop of the daemon and waits for it to complete.
@@ -123,7 +123,7 @@ namespace abc { namespace net {
          * @brief Called **once**, **after** the daemon has stopped. Defaults to no-op.
          */
         virtual void on_stopped();
-        
+
     private:
         /**
          * @brief Thread function for the autonomous thread.
@@ -132,9 +132,14 @@ namespace abc { namespace net {
 
     private:
         /**
-         * @brief The `std::promise` that is returned by `start_async()`, which gets signaled when the daemon stops.
+         * @brief The `std::promise` that is signaled when the daemon stops.
          */
         std::promise<void> _promise;
+
+        /**
+         * @brief The `std::shared_future` that is returned by `start_async()`.
+         */
+        std::shared_future<void> _future;
 
         /**
          * @brief Flag that gets set when `stop()` or `stop_async()` is called.

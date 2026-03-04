@@ -98,7 +98,7 @@ namespace abc { namespace net { namespace http {
 
 
     inline void endpoint::start() {
-        constexpr const char* suborigin = "start_async()";
+        constexpr const char* suborigin = "start()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102f1, "Begin:");
 
         // Create a listener, bind to a port, and start listening.

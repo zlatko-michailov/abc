@@ -1,6 +1,7 @@
 ## Done
 - Namespace `net`:
   - `client_socket` - close on Broken pipe (32 EPIPE)
+  - `daemon`
 - Namespace `net::http`:
   - `request_reader`, `request_writer`, `response_reader`, `response_writer` - expose the underlying streams, so that callers can check the stream state bits.
   - Server-Sent Events (SSE)
@@ -15,10 +16,7 @@
   - `json_rpc_validator`
   - `value(int)`, `value(unsigned)`, `value(long)`, `value(unsigned long)`, `value(long long)`, `value(unsigned long long)`
 
-
 ## To Do
-- Namespace `net`
-  - `daemon` - test.
 - Namespace `net::http`
   - `endpoint` - derive from `daemon`.
 - Namespace `net::msg`
