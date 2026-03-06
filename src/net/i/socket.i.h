@@ -224,6 +224,11 @@ namespace abc { namespace net {
          */
         socket::protocol protocol() const noexcept;
 
+        /**
+         * @brief Returns the socket bind/connect address.
+         */
+        socket::address address() const noexcept;
+
     private:
         /**
          * @brief The socket kind passed in to the constructor - stream or datagram.
@@ -244,6 +249,11 @@ namespace abc { namespace net {
          * @brief The socket descriptor.
          */
         socket::fd_t _fd;
+
+        /**
+         * @brief The socket bind/connect address.
+         */
+        socket::address _address;
     };
 
 
@@ -515,6 +525,11 @@ namespace abc { namespace net {
          * @return New `tcp_client_socket` instance for the new connection.
          */
         virtual std::unique_ptr<tcp_client_socket> accept() const;
+
+        /**
+         * @brief Interrupts a blocking `accept()` by performing a dummy self-connection.
+         */
+        virtual void interrupt_accept() const;
 
     protected:
         /**

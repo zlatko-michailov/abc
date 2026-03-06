@@ -152,9 +152,9 @@ namespace abc { namespace net {
         }
 
         addrinfo hnt = hints();
-        addrinfo* hostList = nullptr;
+        addrinfo* addr_list = nullptr;
 
-        socket::error_t err = ::getaddrinfo(host, port, &hnt, &hostList);
+        socket::error_t err = ::getaddrinfo(host, port, &hnt, &addr_list);
 
         if (err != socket::error::none) {
             if (tt == socket::tie::bind) {
@@ -164,21 +164,24 @@ namespace abc { namespace net {
             diag_base::require(suborigin, false, 0x1000f, "::getaddrinfo() err=%d", err);
         }
 
-        if (hostList == nullptr) {
+        if (addr_list == nullptr) {
             diag_base::put_any(suborigin, diag::severity::important, 0x10798, "%s(host, port), ::getaddrinfo() nullptr", tt_str);
         }
 
         bool is_done = false;
-        for (addrinfo* host = hostList; host != nullptr; host = host->ai_next) {
-            err = try_tie(*(host->ai_addr), host->ai_addrlen, tt);
+        for (addrinfo* addr = addr_list; addr != nullptr; addr = addr->ai_next) {
+            err = try_tie(*(addr->ai_addr), addr->ai_addrlen, tt);
 
             if (err == socket::error::none) {
+                _address.value = *(addr->ai_addr);
+                _address.size = addr->ai_addrlen;
+
                 is_done = true;
                 break;
             }
         }
 
-        ::freeaddrinfo(hostList);
+        ::freeaddrinfo(addr_list);
 
         if (!is_done) {
             if (tt == socket::tie::bind) {
@@ -206,6 +209,8 @@ namespace abc { namespace net {
 
         socket::error_t err = try_tie(address.value, address.size, tt);
         diag_base::require(suborigin, err == socket::error::none, 0x10013, "try_tie() err=%d", err);
+
+        _address = address;
 
         diag_base::ensure(suborigin, is_open(), 0x109a8, "is_open");
 
@@ -273,6 +278,11 @@ namespace abc { namespace net {
 
     inline socket::protocol basic_socket::protocol() const noexcept {
         return _protocol;
+    }
+
+
+    inline socket::address basic_socket::address() const noexcept {
+        return _address;
     }
 
 
@@ -459,7 +469,7 @@ namespace abc { namespace net {
     inline std::unique_ptr<tcp_client_socket> tcp_server_socket::accept() const {
         socket::fd_t fd = accept_fd();
 
-        return std::unique_ptr<tcp_client_socket>(new tcp_client_socket("abc::net::tcp_server_socket", fd, base::family(), base::log()));
+        return std::unique_ptr<tcp_client_socket>(new tcp_client_socket("abc::net::tcp_client_socket", fd, base::family(), base::log()));
     }
 
 
@@ -473,6 +483,23 @@ namespace abc { namespace net {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x10027, "End:");
 
         return fd;
+    }
+
+
+    inline void tcp_server_socket::interrupt_accept() const {
+        constexpr const char* suborigin = "interrupt_accept()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        tcp_client_socket client(base::family(), base::log());
+
+        try {
+            client.connect(base::address());
+        }
+        catch (const std::exception& ex) {
+            diag_base::put_any(suborigin, diag::severity::optional, __TAG__, "Exception swallown: %s", ex.what());
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
