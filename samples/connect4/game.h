@@ -1311,7 +1311,7 @@ inline void game_endpoint::process_shutdown(abc::net::http::server& http, const 
 
     require_method_post(suborigin, 0x10825, request);
 
-    base::set_shutdown_requested();
+    base::request_stop();
 
     // 200
     base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x10668);

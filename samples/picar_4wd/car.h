@@ -389,7 +389,7 @@ inline void car_endpoint::process_shutdown(abc::net::http::server& http, const a
 
     require_method_post(suborigin, 0x10836, request);
 
-    base::set_shutdown_requested();
+    base::request_stop();
     _hat.reset();
     _auto_thread.join();
 
@@ -535,7 +535,7 @@ inline void car_endpoint::auto_loop() {
     constexpr const char* suborigin = "auto_loop()";
     diag_base::put_any(suborigin, abc::diag::severity::callstack, 0x1069f, "Begin:");
 
-    while (!base::is_shutdown_requested()) {
+    while (!base::is_stop_requested()) {
         // Refresh obstacle
         std::size_t distance_cm = _ultrasonic.measure_distance(ultrasonic_max_cm);
         _obstacle_cm.store(distance_cm);

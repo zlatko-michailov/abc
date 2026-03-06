@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include <future>
 #include <atomic>
 #include <string>
@@ -76,9 +78,9 @@ namespace abc { namespace net {
     public:
         /**
          * @brief  Starts the daemon on a separate thread.
-         * @return `std::shared_future<void>` that will get set after the daemon is stopped.
+         * @return `std::future<void>` that will get set after the daemon is stopped.
          */
-        std::shared_future<void> start_async();
+        std::future<void> start_async();
 
         /**
          * @brief   Starts the daemon on the current thread.
@@ -86,17 +88,16 @@ namespace abc { namespace net {
          */
         void start();
 
+    public:
         /**
-         * @brief  Triggers a stop of the daemon and returns immediately.
-         * @return The same `std::shared_future<void>` returned from `start_async()`.
+         * @brief Requests a stop of the daemon. This is not reversible.
          */
-        std::shared_future<void> stop_async();
+        virtual void request_stop();
 
         /**
-         * @brief   Triggers a stop of the daemon and waits for it to complete.
-         * @details This thread will block until the daemon is stopped.
+         * @brief Returns `true` if a stop has been requested; `false` otherwise.
          */
-        void stop();
+        virtual bool is_stop_requested() const;
 
     protected:
         /**
@@ -137,14 +138,9 @@ namespace abc { namespace net {
         std::promise<void> _promise;
 
         /**
-         * @brief The `std::shared_future` that is returned by `start_async()`.
+         * @brief Flag that gets set when `request_stop()` is called.
          */
-        std::shared_future<void> _future;
-
-        /**
-         * @brief Flag that gets set when `stop()` or `stop_async()` is called.
-         */
-        std::atomic<bool> _is_stop_requested{ false };
+        std::atomic_bool _is_stop_requested;
     };
 
 

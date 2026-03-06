@@ -39,6 +39,7 @@ SOFTWARE.
 
 #include "../root/ascii.h"
 #include "../diag/diag_ready.h"
+#include "daemon.h"
 #include "socket.h"
 #include "http.h"
 #include "i/endpoint.i.h"
@@ -65,10 +66,9 @@ namespace abc { namespace net { namespace http {
 
 
     inline endpoint::endpoint(const char* origin, endpoint_config&& config, diag::log_ostream* log)
-        : diag_base(copy(origin), log)
+        : daemon(origin, log)
         , _config(std::move(config))
-        , _requests_in_progress(0)
-        , _is_shutdown_requested(false) {
+        , _requests_in_progress(0) {
 
         constexpr const char* suborigin = "endpoint()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x108b7, "Begin: port='%s', queue_size=%d, rood_dir='%s', files_prefix='%s'",
@@ -78,44 +78,62 @@ namespace abc { namespace net { namespace http {
     }
 
 
-    inline std::future<void> endpoint::start_async() {
-        constexpr const char* suborigin = "start_async()";
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x108b9, "Begin:");
+    inline void endpoint::request_stop() {
+        constexpr const char* suborigin = "request_stop()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        // We can't use std::async() here because we want to detach the thread and return our own std::future.
-        std::thread(start_thread_func, this).detach();
+        // Request a daemon stop.
+        base::request_stop();
 
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x108ba, "End:");
+        // Interrupt an eventual blocking `accept()`.
+        _listener->interrupt_accept();
 
-        // Return our own future.
-        return _promise.get_future();
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    inline void endpoint::start_thread_func(endpoint* this_ptr) {
-        this_ptr->start();
+    inline bool endpoint::can_stop() const {
+        diag_base::put_any("can_stop()", diag::severity::optional, __TAG__, "requests_in_progress=%d", _requests_in_progress.load());
+        return _requests_in_progress.load() == 0;
     }
 
 
-    inline void endpoint::start() {
-        constexpr const char* suborigin = "start()";
+    inline void endpoint::on_started() {
+        constexpr const char* suborigin = "on_started()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102f1, "Begin:");
 
         // Create a listener, bind to a port, and start listening.
-        std::unique_ptr<net::tcp_server_socket> listener = create_server_socket();
-        listener->bind(_config.port.c_str());
-        listener->listen(_config.listen_queue_size);
+        _listener = create_server_socket();
+        _listener->bind(_config.port.c_str());
+        _listener->listen(_config.listen_queue_size);
 
         diag_base::put_any(suborigin, diag::severity::important, 0x102f2, "Listening (port='%s')", _config.port.c_str());
         diag_base::put_blank_line(diag::severity::important);
 
-        while (_requests_in_progress != 0 || !_is_shutdown_requested) {
-            // Accept the next request and process it asynchronously.
-            std::unique_ptr<net::tcp_client_socket> connection = listener->accept();
-            std::thread(process_request_thread_func, this, std::move(connection)).detach();
-        }
-
         diag_base::put_any(suborigin, diag::severity::callstack, 0x108bb, "End:");
+    }
+
+
+    inline void endpoint::on_idle() {
+        constexpr const char* suborigin = "on_idle()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        // Accept the next request and process it asynchronously.
+        std::unique_ptr<net::tcp_client_socket> connection = _listener->accept();
+        std::thread(process_request_thread_func, this, std::move(connection)).detach();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void endpoint::on_stopped() {
+        constexpr const char* suborigin = "on_stopped()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::put_blank_line(diag::severity::important);
+        diag_base::put_any(suborigin, diag::severity::important, 0x102f3, "Stopped (port='%s')", _config.port.c_str());
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
@@ -128,9 +146,9 @@ namespace abc { namespace net { namespace http {
         constexpr const char* suborigin = "process_request()";
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102de, "Begin:");
 
-        // If shutdown has been requested, bail out without any processing.
-        if (_is_shutdown_requested) {
-            diag_base::put_any(suborigin, diag::severity::callstack, 0x108bc, "Return: Shutdown requested.");
+        // If stop has been requested, bail out without any processing.
+        if (is_stop_requested()) {
+            diag_base::put_any(suborigin, diag::severity::callstack, 0x108bc, "Return: Shutting down.");
             return;
         }
 
@@ -156,15 +174,10 @@ namespace abc { namespace net { namespace http {
             process_rest_request(http, request);
         }
 
+        --_requests_in_progress;
+
         diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Done processing request: protocol='%s', method='%s', path='%s'", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str());
         diag_base::put_blank_line(diag::severity::optional);
-
-        if (--_requests_in_progress == 0 && _is_shutdown_requested) {
-            diag_base::put_blank_line(diag::severity::important);
-            diag_base::put_any(suborigin, diag::severity::important, 0x102f3, "Stopped (port='%s')", _config.port.c_str());
-
-            _promise.set_value();
-        }
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x108bd, "End:");
     }
@@ -232,7 +245,7 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::callstack, 0x102ea, "Begin: method='%s', path='%s'", request.method.c_str(), request.resource.path.c_str());
 
         if (ascii::are_equal_i(request.method.c_str(), method::POST) && ascii::are_equal_i(request.resource.path.c_str(), "/shutdown")) {
-            set_shutdown_requested();
+            request_stop();
         }
 
         send_simple_response(http, status_code::OK, reason_phrase::OK, content_type::text, "Consider overriding process_rest_request().", 0x102eb);
@@ -316,23 +329,6 @@ namespace abc { namespace net { namespace http {
     inline bool endpoint::is_file_request(const request& request) {
         return ascii::are_equal_i_n(request.resource.path.c_str(), _config.files_prefix.c_str(), _config.files_prefix.size())
             || (ascii::are_equal_i(request.method.c_str(), method::GET) && ascii::are_equal_i(request.resource.path.c_str(), "/favicon.ico"));
-    }
-
-
-    inline void endpoint::set_shutdown_requested() {
-        constexpr const char* suborigin = "set_shutdown_requested()";
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c3, "Begin:");
-
-        diag_base::put_any(suborigin, diag::severity::important, 0x102ed, "--- Shutdown requested ---");
-
-        _is_shutdown_requested = true;
-
-        diag_base::put_any(suborigin, diag::severity::callstack, 0x108c4, "End:");
-    }
-
-
-    inline bool endpoint::is_shutdown_requested() const {
-        return _is_shutdown_requested;
     }
 
 

@@ -23,12 +23,16 @@ SOFTWARE.
 */
 
 
+#pragma once
+
 #include <future>
 #include <atomic>
 #include <string>
+#include <memory>
 
 #include "../../root/size.h"
 #include "../../diag/i/diag_ready.i.h"
+#include "daemon.i.h"
 #include "socket.i.h"
 #include "http.i.h"
 
@@ -252,12 +256,13 @@ namespace abc { namespace net { namespace http {
 
     /**
      * @brief               Base http endpoint.
-     * @details             This class supports the most common functionality - reads requests and dispatches them for REST- or file-processing.
+     * @details             An autonomous daemon that supports the most common http server functionality - accepts requests and dispatches them for REST- or file-processing.
      *                      This class must be subclassed to implement the processing of requests.
      */
     class endpoint
-        : protected diag::diag_ready<const char*>  {
+        : public daemon {
 
+        using base = daemon;
         using diag_base = diag::diag_ready<const char*>;
 
     public:
@@ -267,24 +272,6 @@ namespace abc { namespace net { namespace http {
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
         endpoint(endpoint_config&& config, diag::log_ostream* log);
-
-        /**
-         * @brief Deleted.
-         * @details The endpoint is not copyable or movable, because it contains a `std::promise` and `std::atomic` members, 
-         *          which are not copyable or movable.
-         *          Also, the thread function keeps a pointer to the endpoint instance, so moving it would cause issues.
-         */
-        endpoint(endpoint&& other) = delete;
-
-        /**
-         * @brief Deleted.
-         */
-        endpoint(const endpoint& other) = delete;
-
-        /**
-         * @brief Destructor.
-         */
-        virtual ~endpoint() noexcept = default;
 
     protected:
         /**
@@ -297,16 +284,30 @@ namespace abc { namespace net { namespace http {
 
     public:
         /**
-         * @brief  Starts the endpoint on a separate thread.
-         * @return `std::future<void>` that will get set after a `POST /shutdown` is received from a client.
+         * @brief Requests a stop of the endpoint. This is not reversible.
          */
-        std::future<void> start_async();
+        virtual void request_stop() override;
+
+    protected:
+        /**
+         * @brief Returns `true` if there are no requests in progress.
+         */
+        virtual bool can_stop() const override;
 
         /**
-         * @brief   Starts the endpoint on the current thread.
-         * @details This thread will block until a `POST /shutdown` is received from a client.
+         * @brief Binds and starts listening at the configured port.
          */
-        void start();
+        virtual void on_started() override;
+
+        /**
+         * @brief Blocks on waiting for new requests.
+         */
+        virtual void on_idle() override;
+
+        /**
+         * @brief Only logs the event.
+         */
+        virtual void on_stopped() override;
 
     protected:
         /**
@@ -362,16 +363,6 @@ namespace abc { namespace net { namespace http {
         void process_request(std::unique_ptr<net::tcp_client_socket>&& connection);
 
         /**
-         * @brief Sets the "shutdown requested" flag.
-         */
-        void set_shutdown_requested();
-
-        /**
-         * @brief Returns the state of the "shutdown requested" flag.
-         */
-        bool is_shutdown_requested() const;
-
-        /**
          * @brief Makes a physical path under `root_dir` from the virtual path of the request.
          */
         std::string make_root_dir_path(const request& request) const;
@@ -403,11 +394,6 @@ namespace abc { namespace net { namespace http {
 
     private:
         /**
-         * @brief Thread function for the 'start' thread.
-         */
-        static void start_thread_func(endpoint* this_ptr);
-
-        /**
          * @brief Thread function for the 'process_request' thread.
          */
         static void process_request_thread_func(endpoint* this_ptr, std::unique_ptr<net::tcp_client_socket>&& connection);
@@ -425,19 +411,14 @@ namespace abc { namespace net { namespace http {
         endpoint_config _config;
 
         /**
-         * @brief The `std::promise` that is returned by `start_async()`, which gets signaled when shutdown is requested.
+         * @brief Listener socket.
          */
-        std::promise<void> _promise;
+        std::unique_ptr<net::tcp_server_socket> _listener;
 
         /**
          * @brief Number of requests currently in progress.
          */
         std::atomic_int32_t _requests_in_progress;
-
-        /**
-         * @brief Flag that gets set when `POST /shutdown` is received.
-         */
-        std::atomic_bool _is_shutdown_requested;
     };
 
 

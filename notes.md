@@ -4,21 +4,19 @@
   - `daemon`
 - Namespace `net::http`:
   - `request_reader`, `request_writer`, `response_reader`, `response_writer` - expose the underlying streams, so that callers can check the stream state bits.
-  - Server-Sent Events (SSE)
+  - Server-Sent Events (SSE):
     - `event`
     - `event_message`
     - `response_writer`
       - `send_event()`
       - `send_event_message()`
-  - `endpoint` - explicitly delete the move constructor.
+  - `endpoint` - derives from `daemon`.
 - Namespace `net::json`:
   - `json_schema_validator`
   - `json_rpc_validator`
   - `value(int)`, `value(unsigned)`, `value(long)`, `value(unsigned long)`, `value(long long)`, `value(unsigned long long)`
 
 ## To Do
-- Namespace `net::http`
-  - `endpoint` - derive from `daemon`.
 - Namespace `net::msg`
   - o `message_processor`
   - o `transport`
@@ -26,6 +24,7 @@
   - `console_transport` : `streambuf_transport`
   - `http_server_transport` : `transport`
   - `http_client_transport` : `transport`
+
 - Namespace `ai::mcp`:
   - `server` : `message_processor`
   - `client` : `message_processor`

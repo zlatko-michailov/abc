@@ -496,7 +496,7 @@ inline void test_endpoint_base::process_rest_request(abc::net::http::server& htt
 
     http_json_stream_server_body_and_response(_passed, _context, http);
 
-    base::set_shutdown_requested();
+    base::request_stop();
 }
 
 

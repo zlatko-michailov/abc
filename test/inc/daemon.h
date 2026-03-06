@@ -62,7 +62,7 @@ protected:
         _passed = _context.are_equal(_count > 5, true, __TAG__, "%d") && _passed;
 
         if (--_count == 5) {
-            stop_async();
+            request_stop();
         }
     }
 

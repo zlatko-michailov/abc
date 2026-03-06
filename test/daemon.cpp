@@ -29,7 +29,7 @@ SOFTWARE.
 bool test_daemon_events(test_context& context) {
     test_daemon daemon(context);
 
-    std::shared_future<void> future = daemon.start_async();
+    std::future<void> future = daemon.start_async();
     future.wait();
 
     context.are_equal(daemon.passed(), true, __TAG__, "%d");

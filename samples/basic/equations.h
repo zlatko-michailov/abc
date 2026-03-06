@@ -75,7 +75,7 @@ inline void equations_endpoint::process_rest_request(abc::net::http::server& htt
     try {
         // Support a graceful shutdown.
         if (abc::ascii::are_equal_i(request.method.c_str(), abc::net::http::method::POST) && abc::ascii::are_equal_i(request.resource.path.c_str(), "/shutdown")) {
-            base::set_shutdown_requested();
+            base::request_stop();
 
             base::send_simple_response(http, abc::net::http::status_code::OK, abc::net::http::reason_phrase::OK, abc::net::http::content_type::text, "Server is shuting down...", 0x102ce);
 
@@ -260,7 +260,7 @@ inline void equations_endpoint::process_event_stream_request(abc::net::http::ser
 
     // Stream some events until the stream is stopped.
     std::uint32_t event_id = stream_id * 1000 + 1;
-    while (!base::is_shutdown_requested()) {
+    while (!base::is_stop_requested()) {
         std::stringstream data_message_text;
         data_message_text <<  event_id << " " << event_id << " " << event_id << " " << event_id;
 
