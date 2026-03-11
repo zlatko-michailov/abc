@@ -30,160 +30,91 @@ SOFTWARE.
 #include <string>
 #include <streambuf>
 
-#include "../../diag/i/diag_ready.i.h"
-#include "json.i.h"
-#include "http.i.h"
-#include "endpoint.i.h"
+#include "../diag/diag_ready.h"
+#include "json.h"
+#include "http.h"
+#include "endpoint.h"
+#include "i/msg.i.h"
 
 
 namespace abc { namespace net { namespace msg {
 
-    /**
-     * @brief Abstract message processor.
-     */
-    class message_processor {
-    public:
-        /**
-         * @brief         Processes a message.
-         * @param message Message to process.
-         */
-        virtual void process_message(const json::value& message) = 0;
-    };
+    inline streambuf_transport::streambuf_transport(const char* origin, std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log)
+        : transport()
+        , daemon(copy(origin), log)
+        , _sb_in(sb_in)
+        , _sb_out(sb_out)
+        , _log(log)
+        , _strm_in(sb_in) {
+    }
+
+
+    inline streambuf_transport::streambuf_transport(std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log)
+        : streambuf_transport("abc::net::msg::streambuf_transport", sb_in, sb_out, log) {
+    }
+
+
+    inline void streambuf_transport::send_message(const json::value& message) {
+        constexpr const char* suborigin = "send_message()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        json::writer writer(_sb_out, _log);
+        writer.put_value(message);
+
+        json::ostream ostream(_sb_out, _log);
+        ostream.put_lf();
+        ostream.flush();
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void streambuf_transport::set_message_processor(message_processor* processor, const char* key) {
+        constexpr const char* suborigin = "set_message_processor()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+    
+        diag_base::assert(suborigin, _processor == nullptr, __TAG__, "_processor == nullptr"); // A message processor can be set only once for streambuf transport.
+        diag_base::assert(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
+        diag_base::assert(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
+
+        _processor = processor;
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void streambuf_transport::on_idle() {
+        constexpr const char* suborigin = "on_idle()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::assert(suborigin, _processor != nullptr, __TAG__, "_processor != nullptr");
+
+        // Do not crash on bad input.
+        try {
+            std::string line;
+            std::getline(_strm_in, line);
+
+            // Parse the line as a JSON value.
+            json::reader json_reader(std::stringstream(line).rdbuf(), _log);
+            json::value message = json_reader.get_value();
+
+            // Process the message.
+            _processor->process_message(message);
+        }
+        catch (const diag::input_error& ex) {
+            diag_base::put_any(suborigin, diag::severity::important, __TAG__, "Input error: %s", ex.what());
+        }
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
 
     // --------------------------------------------------------------
 
 
-    /**
-     * @brief Abstract transport.
-     */
-    class transport {
-    public:
-        /**
-         * @brief         Sends a message.
-         * @param message Message to send.
-         */
-        virtual void send_message(const json::value& message) = 0;
-
-        /**
-         * @brief           Sets the message processor to process incoming messages.
-         * @param processor Message processor.
-         * @param key       Optional key to identify the message processor for multiplexing.
-         */
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) = 0;
-    };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief Transport over streambuf's.
-     */
-    class streambuf_transport
-        : public transport
-        , public daemon {
-
-        using diag_base = diag::diag_ready<const char*>;
-
-    public:
-        /**
-         * @brief         Constructor.
-         * @param sb_in   Input stream buffer.
-         * @param sb_out  Output stream buffer.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        streambuf_transport(std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
-
-        /**
-         * @brief Deleted.
-         */
-        streambuf_transport(streambuf_transport&& other) noexcept = delete;
-
-        /**
-         * @brief Deleted.
-         */
-        streambuf_transport(const streambuf_transport& other) = delete;
-
-    protected:
-        /**
-         * @brief         Constructor.
-         * @param origin  Origin.
-         * @param sb_in   Input stream buffer.
-         * @param sb_out  Output stream buffer.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        streambuf_transport(const char* origin, std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
-
-    // `transport` overrides.
-    public:
-        /**
-         * @brief         Sends a message.
-         * @param message Message to send.
-         */
-        virtual void send_message(const json::value& message) override;
-
-        /**
-         * @brief           Sets the message processor to process incoming messages.
-         * @param processor Message processor.
-         * @param key       Optional key to identify the message processor for multiplexing.
-         *                  If provided, must be `nullptr`. Multiplexing is not supported for streambuf transport.
-         */ 
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
-
-    // `daemon` overrides.
-    protected:
-        /**
-         * @brief   Blocks the current thread until a whole line of input is read.
-         * @details When a whole line is read, it is parsed as a JSON message and processed by the message processor.
-         */
-        virtual void on_idle() override;
-
-    protected:
-        /**
-         * @brief Input stream buffer.
-         */
-        std::streambuf* _sb_in;
-
-        /**
-         * @brief Output stream buffer.
-         */
-        std::streambuf* _sb_out;
-
-        /**
-         * @brief `diag::log_ostream` pointer passed in to the constructor. May be `nullptr`.
-         */
-        diag::log_ostream* _log;
-
-        /**
-         * @brief Message processor.
-         */
-        message_processor* _processor = nullptr;
-
-        /**
-         * @brief Input stream around the passed input stream buffer.
-         */
-        std::istream _strm_in;
-
-    };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief Transport over the console - `std::cin` and `std::cout`.
-     */
-    class console_transport
-        : public streambuf_transport{
-
-    public:
-        /**
-         * @brief         Constructor.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        console_transport(diag::log_ostream* log = nullptr);
-    };
+    console_transport::console_transport(diag::log_ostream* log)
+        : streambuf_transport("abc::net::msg::console_transport", std::cin.rdbuf(), std::cout.rdbuf(), log) {
+    }
 
 
     // --------------------------------------------------------------
@@ -243,8 +174,8 @@ namespace abc { namespace net { namespace msg {
      * @brief http server transport.
      */
     class http_server_transport
-        : protected diag::diag_ready<const char*>
-        , public transport {
+        : public transport
+        , protected diag::diag_ready<const char*>  {
 
         using diag_base = diag::diag_ready<const char*>;
 
@@ -291,8 +222,8 @@ namespace abc { namespace net { namespace msg {
      * @brief http client transport.
      */
     class http_client_transport
-        : protected diag::diag_ready<const char*>
-        , public transport {
+        : public transport
+        , protected diag::diag_ready<const char*>  {
 
         using diag_base = diag::diag_ready<const char*>;
 
