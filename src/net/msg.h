@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../diag/diag_ready.h"
 #include "json.h"
 #include "http.h"
+#include "daemon.h"
 #include "endpoint.h"
 #include "i/msg.i.h"
 
@@ -95,7 +96,8 @@ namespace abc { namespace net { namespace msg {
             std::getline(_strm_in, line);
 
             // Parse the line as a JSON value.
-            json::reader json_reader(std::stringstream(line).rdbuf(), _log);
+            std::stringbuf sb_line(line, std::ios::in);
+            json::reader json_reader(&sb_line, _log);
             json::value message = json_reader.get_value();
 
             // Process the message.
@@ -112,7 +114,7 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
-    console_transport::console_transport(diag::log_ostream* log)
+    inline console_transport::console_transport(diag::log_ostream* log)
         : streambuf_transport("abc::net::msg::console_transport", std::cin.rdbuf(), std::cout.rdbuf(), log) {
     }
 
@@ -120,6 +122,7 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
+#if 0
     /**
      * @brief   Endpoint for http server transport.
      * @details This class overrides the necessary methods to provide transport-specific functionality.
@@ -260,6 +263,7 @@ namespace abc { namespace net { namespace msg {
          */
         virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
     };
+#endif
 
 
     // --------------------------------------------------------------

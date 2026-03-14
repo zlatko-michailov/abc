@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../../diag/i/diag_ready.i.h"
 #include "json.i.h"
 #include "http.i.h"
+#include "daemon.i.h"
 #include "endpoint.i.h"
 
 

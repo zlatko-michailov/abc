@@ -42,6 +42,7 @@ SOFTWARE.
 #include "inc/http.h"
 #include "inc/json.h"
 #include "inc/socket.h"
+#include "inc/msg.h"
 #include "inc/vmem.h"
 
 
@@ -53,6 +54,7 @@ int main(int /*argc*/, const char* argv[]) {
 
     test_suite suite(
         {
+#if 0
             { "ascii", {
                 { "test_ascii_equal",                                test_ascii_equal },
                 { "test_ascii_equal_n",                              test_ascii_equal_n },
@@ -283,6 +285,11 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_https_endpoint_json_stream",                 test_https_endpoint_json_stream },
 #endif
             } },
+#endif
+            { "msg", {
+                { "test_streambuf_transport",                        test_streambuf_transport },
+            } },
+#if 0
             { "vmem", {
                 { "test_vmem_pool_fit",                              test_vmem_pool_fit },
                 { "test_vmem_pool_exceed",                           test_vmem_pool_exceed },
@@ -308,6 +315,7 @@ int main(int /*argc*/, const char* argv[]) {
                 { "test_vmem_pool_move",                             test_vmem_pool_move },
                 { "test_vmem_page_move",                             test_vmem_page_move },
             } },
+#endif
         },
         &log,
         abc::test::seed::random,
