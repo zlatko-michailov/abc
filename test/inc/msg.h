@@ -75,12 +75,12 @@ public:
     }
 
 
-    virtual void set_transport(abc::net::msg::transport* transport, const char* key) override {
+    virtual void set_transport(abc::net::msg::transport* transport, const char* key = nullptr) override {
         _transport = transport;
     };
 
 public:
-    void set_transport_daemon(abc::net::daemon* daemon) noexcept {
+    void set_daemon_to_stop(abc::net::daemon* daemon) noexcept {
         _daemon = daemon;
     }
 

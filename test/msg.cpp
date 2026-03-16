@@ -47,25 +47,28 @@ bool test_streambuf_transport(test_context& context) {
     std::stringbuf receiver_sb_out;
 
     // Sender - set up.
-    abc::net::msg::streambuf_transport sender_transport(&sender_sb_in, &medium_sb, context.log());
     test_processor sender_processor(context);
+    abc::net::msg::streambuf_transport sender_transport(&sender_sb_in, &medium_sb, context.log());
     sender_transport.set_message_processor(&sender_processor);
-    sender_processor.set_transport_daemon(&sender_transport);
-
+    sender_processor.set_transport(&sender_transport);
+    sender_processor.set_daemon_to_stop(&sender_transport);
+    
     // Sender - execute.
     std::future<void> sender_future = sender_transport.start_async();
     sender_future.wait();
 
     // Receiver - ser up.
-    abc::net::msg::streambuf_transport receiver_transport(&medium_sb, &receiver_sb_out, context.log());
     test_processor receiver_processor(context);
+    abc::net::msg::streambuf_transport receiver_transport(&medium_sb, &receiver_sb_out, context.log());
     receiver_transport.set_message_processor(&receiver_processor);
-    receiver_processor.set_transport_daemon(&receiver_transport);
+    receiver_processor.set_transport(&receiver_transport);
+    receiver_processor.set_daemon_to_stop(&receiver_transport);
 
     // Receiver - execute.
     std::future<void> receiver_future = receiver_transport.start_async();
     receiver_future.wait();
 
+    // Verifications.
     passed = context.are_equal(sender_processor.passed(), true, __TAG__, "%d") && passed;
     passed = context.are_equal(sender_processor.message_count(), (std::size_t)7, __TAG__, "%zu") && passed;
 

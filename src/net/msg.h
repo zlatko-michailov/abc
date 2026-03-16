@@ -80,7 +80,6 @@ namespace abc { namespace net { namespace msg {
         diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
 
         _processor = processor;
-        _processor->set_transport(this);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -154,7 +153,6 @@ namespace abc { namespace net { namespace msg {
         base::expect(suborigin, key != nullptr, __TAG__, "key != nullptr"); // Multiplexing is required for the http transport.
 
         _processors[key] = processor;
-        _processors[key]->set_transport(this, key);
 
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
