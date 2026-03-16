@@ -29,32 +29,52 @@ SOFTWARE.
 
 
 bool test_streambuf_transport(test_context& context) {
-    test_processor processor(context);
+    bool passed = true;
 
-    std::stringbuf sb_in(
+    // Since we don't have a blocking memory streambuf, we cannot easily connect a sender and a receiver that work simultaneously.
+    // Instead, we connect the sender to a medium streambuf, and then connect the receiver to the same medium streambuf.
+
+    std::stringbuf sender_sb_in(
         "{ \"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [21, 12], \"id\": 1 }\n"
         "[ { \"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [21, 12], \"id\": 1 }, { \"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [45, 34], \"id\": 2 } ]\n"
         "{ \"jsonrpc\": \"2.0\", \"method\": \"notify\", \"params\": [21, 12] }\n"
         "{ \"jsonrpc\": \"2.0\", \"result\": 9, \"id\": 1 }\n"
         "{ \"jsonrpc\": \"2.0\", \"error\": {\"code\": -32001, \"message\": \"Method not found\"}, \"id\": 2 }\n"
         "[ { \"jsonrpc\": \"2.0\", \"result\": 9, \"id\": 1 }, { \"jsonrpc\": \"2.0\", \"error\": {\"code\": -32001, \"message\": \"Method not found\"}, \"id\": 2 } ]\n"
-        "{ \"jsonrpc\": \"2.0\", \"method\": \"stop\" }\n",
-        std::ios::in
+        "{ \"jsonrpc\": \"2.0\", \"method\": \"stop\" }\n"
     );
+    std::stringbuf medium_sb;
+    std::stringbuf receiver_sb_out;
 
-    std::stringbuf dummy_sb_out(std::ios::out);
+    // Sender - set up.
+    abc::net::msg::streambuf_transport sender_transport(&sender_sb_in, &medium_sb, context.log());
+    test_processor sender_processor(context);
+    sender_transport.set_message_processor(&sender_processor);
+    sender_processor.set_transport_daemon(&sender_transport);
 
-    abc::net::msg::streambuf_transport transport(&sb_in, &dummy_sb_out, context.log());
-    transport.set_message_processor(&processor);
+    // Sender - execute.
+    std::future<void> sender_future = sender_transport.start_async();
+    sender_future.wait();
 
-    processor.set_transport_daemon(&transport);
+    // Receiver - ser up.
+    abc::net::msg::streambuf_transport receiver_transport(&medium_sb, &receiver_sb_out, context.log());
+    test_processor receiver_processor(context);
+    receiver_transport.set_message_processor(&receiver_processor);
+    receiver_processor.set_transport_daemon(&receiver_transport);
 
-    std::future<void> future = transport.start_async();
-    future.wait();
+    // Receiver - execute.
+    std::future<void> receiver_future = receiver_transport.start_async();
+    receiver_future.wait();
 
-    context.are_equal(processor.passed(), true, __TAG__, "%d");
-    context.are_equal(processor.message_count(), (std::size_t)7, __TAG__, "%zu");
+    passed = context.are_equal(sender_processor.passed(), true, __TAG__, "%d") && passed;
+    passed = context.are_equal(sender_processor.message_count(), (std::size_t)7, __TAG__, "%zu") && passed;
 
-    return processor.passed();
+    passed = context.are_equal(receiver_processor.passed(), true, __TAG__, "%d") && passed;
+    passed = context.are_equal(receiver_processor.message_count(), (std::size_t)7, __TAG__, "%zu") && passed;
+
+    passed = sender_processor.passed() && passed;
+    passed = receiver_processor.passed() && passed;
+
+    return passed;
 }
 

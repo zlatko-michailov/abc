@@ -36,11 +36,48 @@ class test_processor
 
 public:
     test_processor(test_context& context)
-        : _daemon(nullptr)
+        : _transport(nullptr)
+        , _daemon(nullptr)
         , _validator(context.log())
         , _passed(true)
         , _message_count(0) {
     }
+
+public:
+    virtual void process_message(const abc::net::json::value& message) override {
+        // Count the messages so we can verify intput.
+        _message_count++;
+
+        // Make sure all exchanged messages are valid.
+        _passed = ( _validator.is_simple_request(message)
+                || _validator.is_simple_notification(message)
+                || _validator.is_simple_response(message)
+                || _validator.is_batch_request(message)
+                || _validator.is_batch_response(message)
+                || _validator.is_error_response(message)
+            )
+            && _passed;
+
+        // Forward the same message.
+        _transport->send_message(message);
+
+        // Stop the daemon if the message is a "stop" request.
+        if (message.type() == abc::net::json::value_type::object) {
+            abc::net::json::literal::object obj = message.object();
+            abc::net::json::literal::object::const_iterator method_itr = obj.find("method");
+            if (method_itr != obj.end()) {
+                abc::net::json::literal::string name = method_itr->second.string();
+                if (name == "stop") {
+                    _daemon->request_stop();
+                }
+            }
+        }
+    }
+
+
+    virtual void set_transport(abc::net::msg::transport* transport, const char* key) override {
+        _transport = transport;
+    };
 
 public:
     void set_transport_daemon(abc::net::daemon* daemon) noexcept {
@@ -55,32 +92,8 @@ public:
         return _message_count;
     }
 
-public:
-    virtual void process_message(const abc::net::json::value& message) override {
-        _message_count++;
-
-        _passed = ( _validator.is_simple_request(message)
-                || _validator.is_simple_notification(message)
-                || _validator.is_simple_response(message)
-                || _validator.is_batch_request(message)
-                || _validator.is_batch_response(message)
-                || _validator.is_error_response(message)
-            )
-            && _passed;
-
-        if (message.type() == abc::net::json::value_type::object) {
-            abc::net::json::literal::object obj = message.object();
-            abc::net::json::literal::object::const_iterator method_itr = obj.find("method");
-            if (method_itr != obj.end()) {
-                abc::net::json::literal::string name = method_itr->second.string();
-                if (name == "stop") {
-                    _daemon->request_stop();
-                }
-            }
-        }
-    }
-
 private:
+    abc::net::msg::transport* _transport;
     abc::net::daemon* _daemon;
     abc::net::json::json_rpc_validator _validator;
     bool _passed;

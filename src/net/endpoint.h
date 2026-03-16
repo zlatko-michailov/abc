@@ -327,7 +327,7 @@ namespace abc { namespace net { namespace http {
 
 
     inline bool endpoint::is_file_request(const request& request) {
-        return (_config.files_prefix.length() > 0 && ascii::are_equal_i_n(request.resource.path.c_str(), _config.files_prefix.c_str(), _config.files_prefix.size()))
+        return (!_config.files_prefix.empty() && ascii::are_equal_i_n(request.resource.path.c_str(), _config.files_prefix.c_str(), _config.files_prefix.size()))
             || (ascii::are_equal_i(request.method.c_str(), method::GET) && ascii::are_equal_i(request.resource.path.c_str(), "/favicon.ico"));
     }
 

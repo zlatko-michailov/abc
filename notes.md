@@ -18,16 +18,17 @@
 
 ## To Do
 - Namespace `net::msg`
-  - o `message_processor`
   - o `transport`
+    - Both methods should take a `key` for multiplexing.
   - `streambuf_transport` : `transport`
-  - `console_transport` : `streambuf_transport`
-  - `http_server_transport` : `transport`
-  - `http_client_transport` : `transport`
+    - Test sender and receiver.
 
 - Namespace `ai::mcp`:
   - `server` : `message_processor`
   - `client` : `message_processor`
+
+- Namespace `stream`:
+  - `*_streambuf` - Consider introducing a 'blocking' option to make `underflow()` block until there is input.
 
 - Namespace `vmem`:
   - `zip_iterator`

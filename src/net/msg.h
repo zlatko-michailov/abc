@@ -55,9 +55,11 @@ namespace abc { namespace net { namespace msg {
     }
 
 
-    inline void streambuf_transport::send_message(const json::value& message) {
+    inline void streambuf_transport::send_message(const json::value& message, const char* key) {
         constexpr const char* suborigin = "send_message()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
 
         json::writer writer(_sb_out, _log);
         writer.put_value(message);
@@ -74,11 +76,11 @@ namespace abc { namespace net { namespace msg {
         constexpr const char* suborigin = "set_message_processor()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
     
-        diag_base::assert(suborigin, _processor == nullptr, __TAG__, "_processor == nullptr"); // A message processor can be set only once for streambuf transport.
-        diag_base::assert(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
-        diag_base::assert(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
+        diag_base::expect(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
+        diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
 
         _processor = processor;
+        _processor->set_transport(this);
 
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
@@ -88,7 +90,7 @@ namespace abc { namespace net { namespace msg {
         constexpr const char* suborigin = "on_idle()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        diag_base::assert(suborigin, _processor != nullptr, __TAG__, "_processor != nullptr");
+        diag_base::expect(suborigin, _processor != nullptr, __TAG__, "_processor != nullptr");
 
         // Do not crash on bad input.
         try {
@@ -122,105 +124,43 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
+    inline http_server_transport::http_server_transport(http::endpoint_config&& config, diag::log_ostream* log)
+        : base("abc::net::msg::http_server_transport", std::move(config), log) {
+
+        constexpr const char* suborigin = "http_server_transport()";
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        base::expect(suborigin, config.files_prefix.empty(), __TAG__, "config.files_prefix.empty()"); // File requests should be disabled.
+
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void http_server_transport::send_message(const json::value& message, const char* key) {
+        constexpr const char* suborigin = "send_message()";
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        //// TODO: NOW
+
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    inline void http_server_transport::set_message_processor(message_processor* processor, const char* key) {
+        constexpr const char* suborigin = "set_message_processor()";
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        base::expect(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
+        base::expect(suborigin, key != nullptr, __TAG__, "key != nullptr"); // Multiplexing is required for the http transport.
+
+        _processors[key] = processor;
+        _processors[key]->set_transport(this, key);
+
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
 #if 0
-    /**
-     * @brief   Endpoint for http server transport.
-     * @details This class overrides the necessary methods to provide transport-specific functionality.
-     *          This class is not to be used directly.
-     */
-    class http_transport_endpoint
-        : public http::endpoint {
-
-        using base = http::endpoint;
-
-    public:
-        /**
-         * @brief        Constructor.
-         * @param config `endpoint_config` instance.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        http_transport_endpoint(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
-
-    protected:
-        /**
-         * @brief Creates and returns an instance of ServerSocket.
-         */
-        virtual std::unique_ptr<tcp_server_socket> create_server_socket() override;
-
-        /**
-         * @brief         Processes a REST request.
-         * @param http    A reference to `http::server`.
-         * @param request A reference to `http::request`.
-         */
-        virtual void process_rest_request(http::server& http, const http::request& request) override;
-
-    private:
-        /**
-         * @brief         Starts a server-sent event (SSE) stream.
-         * @param http    A reference to `http::server`.
-         * @param request A reference to `http::request`.
-         */
-        void process_event_stream_request(http::server& http, const http::request& request);
-
-        /**
-         * @brief         Returns the event stream ID from the request.
-         * @param request A reference to `http::request`.
-         */
-        std::uint32_t get_event_stream_id(const http::request& request);
-    };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief http server transport.
-     */
-    class http_server_transport
-        : public transport
-        , protected diag::diag_ready<const char*>  {
-
-        using diag_base = diag::diag_ready<const char*>;
-
-    public:
-        /**
-         * @brief         Constructor.
-         * @param config `endpoint_config` instance.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
-         */
-        http_server_transport(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
-
-        /**
-         * @brief Move constructor.
-         */
-        http_server_transport(http_server_transport&& other) noexcept = default;
-
-        /**
-         * @brief Deleted.
-         */
-        http_server_transport(const http_server_transport& other) = delete;
-
-    public:
-        /**
-         * @brief         Sends a message.
-         * @param message Message to send.
-         */
-        virtual void send_message(const json::value& message) override;
-
-        /**
-         * @brief           Sets the message processor to process incoming messages.
-         * @param processor Message processor.
-         * @param key       Optional key to identify the message processor for multiplexing.
-         *                  The http endpoint supports multiplexing by REST path.
-         *                  If provided, must be the REST path for the given processor.
-         */
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
-    };
-
-
-    // --------------------------------------------------------------
-
-
     /**
      * @brief http client transport.
      */
