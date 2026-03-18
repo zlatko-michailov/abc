@@ -158,6 +158,62 @@ namespace abc { namespace net { namespace msg {
     }
 
 
+    inline void http_server_transport::process_rest_request(http::server& http, const http::request& request) {
+        constexpr const char* suborigin = "process_rest_request()";
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        // https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#sending-messages-to-the-server
+
+        // Accept header.
+        http::headers::const_iterator accept_header = request.headers.find(http::header::Accept);
+        base::require(suborigin, __TAG__, accept_header != request.headers.end(), http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Missing 'Accept' header.");
+
+        bool acceptsJson = false;
+        bool acceptsEventStream = false;
+        std::stringstream acceptHeaderValueStream(accept_header->second);
+        std::string acceptType;
+        while (std::getline(acceptHeaderValueStream, acceptType, ',') && !acceptsJson && !acceptsEventStream) {
+            if (ascii::are_equal_i(acceptType.c_str(), http::content_type::json)) {
+                acceptsJson = true;
+            }
+            else if (ascii::are_equal_i(acceptType.c_str(), http::content_type::event_stream)) {
+                acceptsEventStream = true;
+            }
+        }
+
+        json::value message(nullptr);
+
+        if (request.method == http::method::POST) {
+            base::require(suborigin, __TAG__, acceptsJson, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept JSON.");
+            base::require(suborigin, __TAG__, acceptsEventStream, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept event stream.");
+
+            // Content-Type header is not required.
+
+            // JSON-RPC body.
+            json::reader json_reader(static_cast<http::request_reader&>(http).rdbuf(), base::log());
+            message = json_reader.get_value();
+
+            json::json_rpc_validator json_rpc_validator(base::log());
+            bool isJsonRpc = json_rpc_validator.is_simple_request(message) || json_rpc_validator.is_simple_notification(message) || json_rpc_validator.is_simple_response(message);
+            base::require(suborigin, __TAG__, isJsonRpc, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must be a valid JSON-RPC message.");
+        }
+        else if (request.method == http::method::GET) {
+            base::require(suborigin, __TAG__, acceptsEventStream, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept event stream.");
+        }
+        else {
+            base::require(suborigin, __TAG__, false, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "The method must be POST or GET.");
+        }
+
+        // Get the processor for the requested path.
+        std::map<std::string, message_processor*>::iterator processor = _processors.find(request.resource.path);
+        base::require(suborigin, __TAG__, processor != _processors.end(), http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "There is no processor for the requested path.");
+
+        // Process the message.
+        processor->second->process_message(message);
+
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
 #if 0
     /**
      * @brief http client transport.

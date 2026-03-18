@@ -107,16 +107,6 @@ namespace abc { namespace net { namespace msg {
          */
         streambuf_transport(std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
 
-        /**
-         * @brief Deleted.
-         */
-        streambuf_transport(streambuf_transport&& other) noexcept = delete;
-
-        /**
-         * @brief Deleted.
-         */
-        streambuf_transport(const streambuf_transport& other) = delete;
-
     protected:
         /**
          * @brief         Constructor.
@@ -221,16 +211,6 @@ namespace abc { namespace net { namespace msg {
          */
         http_server_transport(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
 
-        /**
-         * @brief Deleted.
-         */
-        http_server_transport(http_server_transport&& other) noexcept = delete;
-
-        /**
-         * @brief Deleted.
-         */
-        http_server_transport(const http_server_transport& other) = delete;
-
     public:
         /**
          * @brief         Sends a message.
@@ -248,10 +228,19 @@ namespace abc { namespace net { namespace msg {
          */
         virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
 
+    protected:
+        /**
+         * @brief         Processes a REST request.
+         * @param http    A reference to `http::server`.
+         * @param request A reference to `http::request`.
+         */
+        virtual void process_rest_request(http::server& http, const http::request& request) override;
+
     private:
         /**
          * @brief Map of REST path to message processor, for multiplexing.
          */
+        //// TODO: Define all the metadata that should accompany a processor.
         std::map<std::string, message_processor*> _processors;
     };
 

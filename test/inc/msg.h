@@ -75,7 +75,7 @@ public:
     }
 
 
-    virtual void set_transport(abc::net::msg::transport* transport, const char* key = nullptr) override {
+    virtual void set_transport(abc::net::msg::transport* transport, const char* /*key*/ = nullptr) override {
         _transport = transport;
     };
 
