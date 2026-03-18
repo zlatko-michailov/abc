@@ -160,6 +160,7 @@ namespace abc { namespace net { namespace http {
 
 
     namespace header {
+        constexpr const char* Accept                  = "Accept";
         constexpr const char* Content_Type            = "Content-Type";
         constexpr const char* Content_Length          = "Content-Length";
         constexpr const char* Cache_Control           = "Cache-Control";

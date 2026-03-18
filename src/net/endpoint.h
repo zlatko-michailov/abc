@@ -162,21 +162,36 @@ namespace abc { namespace net { namespace http {
         http::request request = http.get_request();
         diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Request received: protocol='%s', method='%s', path='%s'", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str());
 
+        bool ok = true;
         ++_requests_in_progress;
 
-        // This endpoint supports two kinds of requests:
-        //    a) requests for static files
-        //    b) REST requests
-        if (is_file_request(request)) {
-            process_file_request(http, request);
+        try {
+            // This endpoint supports two kinds of requests:
+            //    a) requests for static files
+            //    b) REST requests
+            if (is_file_request(request)) {
+                process_file_request(http, request);
+            }
+            else {
+                process_rest_request(http, request);
+            }
         }
-        else {
-            process_rest_request(http, request);
+        catch (const abc::net::http::endpoint_error& err) {
+            ok = false;
+            send_simple_response(http, err.status_code, err.reason_phrase.c_str(), err.content_type.c_str(), err.body.c_str(), err.tag);
+        }
+        catch (const std::runtime_error& err) {
+            ok = false;
+            send_simple_response(http, abc::net::http::status_code::Bad_Request, abc::net::http::reason_phrase::Bad_Request, abc::net::http::content_type::text, err.what(), __TAG__);
+        }
+        catch (const std::exception& ex) {
+            ok = false;
+            send_simple_response(http, abc::net::http::status_code::Internal_Server_Error, abc::net::http::reason_phrase::Internal_Server_Error, abc::net::http::content_type::text, ex.what(), __TAG__);
         }
 
         --_requests_in_progress;
 
-        diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Done processing request: protocol='%s', method='%s', path='%s'", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str());
+        diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Done processing request: protocol='%s', method='%s', path='%s', ok=%d", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str(), (int)ok);
         diag_base::put_blank_line(diag::severity::optional);
 
         diag_base::put_any(suborigin, diag::severity::callstack, 0x108bd, "End:");
