@@ -40,31 +40,26 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace msg {
 
-    inline streambuf_transport::streambuf_transport(const char* origin, std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log)
-        : transport()
-        , daemon(copy(origin), log)
-        , _sb_in(sb_in)
-        , _sb_out(sb_out)
-        , _log(log)
-        , _strm_in(sb_in) {
+    inline streambuf_otransport::streambuf_otransport(const char* origin, std::streambuf* sb, diag::log_ostream* log)
+        : diag_base(copy(origin), log)
+        , _sb(sb)
+        , _log(log) {
     }
 
 
-    inline streambuf_transport::streambuf_transport(std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log)
-        : streambuf_transport("abc::net::msg::streambuf_transport", sb_in, sb_out, log) {
+    inline streambuf_otransport::streambuf_otransport(std::streambuf* sb, diag::log_ostream* log)
+        : streambuf_otransport("abc::net::msg::streambuf_otransport", sb, log) {
     }
 
 
-    inline void streambuf_transport::send_message(const json::value& message, const char* key) {
+    inline void streambuf_otransport::send_message(const json::value& message) {
         constexpr const char* suborigin = "send_message()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
-        diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
-
-        json::writer writer(_sb_out, _log);
+        json::writer writer(_sb, _log);
         writer.put_value(message);
 
-        json::ostream ostream(_sb_out, _log);
+        json::ostream ostream(_sb, _log);
         ostream.put_lf();
         ostream.flush();
 
@@ -72,12 +67,28 @@ namespace abc { namespace net { namespace msg {
     }
 
 
-    inline void streambuf_transport::set_message_processor(message_processor* processor, const char* key) {
-        constexpr const char* suborigin = "set_message_processor()";
+    // --------------------------------------------------------------
+
+
+    inline streambuf_itransport::streambuf_itransport(const char* origin, std::streambuf* sb, std::streambuf* sb_out, diag::log_ostream* log)
+        : daemon(copy(origin), log)
+        , _sb(sb)
+        , _log(log)
+        , _otransport(sb_out, log) {
+    }
+
+
+    inline streambuf_itransport::streambuf_itransport(std::streambuf* sb, std::streambuf* sb_out, diag::log_ostream* log)
+        : streambuf_itransport("abc::net::msg::streambuf_itransport", sb, sb_out, log) {
+    }
+
+
+    inline void streambuf_itransport::set_processor(processor* processor, const char* key) {
+        constexpr const char* suborigin = "set_processor()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
     
         diag_base::expect(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
-        diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf transport.
+        diag_base::expect(suborigin, key == nullptr, __TAG__, "key == nullptr"); // Multiplexing is not supported for streambuf itransport.
 
         _processor = processor;
 
@@ -85,7 +96,7 @@ namespace abc { namespace net { namespace msg {
     }
 
 
-    inline void streambuf_transport::on_idle() {
+    inline void streambuf_itransport::on_idle() {
         constexpr const char* suborigin = "on_idle()";
         diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -93,8 +104,9 @@ namespace abc { namespace net { namespace msg {
 
         // Do not crash on bad input.
         try {
+            std::istream strm(_sb);
             std::string line;
-            std::getline(_strm_in, line);
+            std::getline(strm, line);
 
             // Parse the line as a JSON value.
             std::stringbuf sb_line(line, std::ios::in);
@@ -102,7 +114,7 @@ namespace abc { namespace net { namespace msg {
             json::value message = json_reader.get_value();
 
             // Process the message.
-            _processor->process_message(message);
+            _processor->process_message(message, &_otransport);
         }
         catch (const diag::input_error& ex) {
             diag_base::put_any(suborigin, diag::severity::important, __TAG__, "Input error: %s", ex.what());
@@ -116,13 +128,15 @@ namespace abc { namespace net { namespace msg {
 
 
     inline console_transport::console_transport(diag::log_ostream* log)
-        : streambuf_transport("abc::net::msg::console_transport", std::cin.rdbuf(), std::cout.rdbuf(), log) {
+        : streambuf_otransport("abc::net::msg::console_otransport", std::cout.rdbuf(), log)
+        , streambuf_itransport("abc::net::msg::console_itransport", std::cin.rdbuf(), std::cout.rdbuf(), log) {
     }
 
 
     // --------------------------------------------------------------
 
 
+#if 0
     inline http_server_transport::http_server_transport(http::endpoint_config&& config, diag::log_ostream* log)
         : base("abc::net::msg::http_server_transport", std::move(config), log) {
 
@@ -213,6 +227,7 @@ namespace abc { namespace net { namespace msg {
 
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
+#endif
 
 #if 0
     /**

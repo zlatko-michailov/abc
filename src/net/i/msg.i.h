@@ -40,49 +40,16 @@ SOFTWARE.
 
 namespace abc { namespace net { namespace msg {
 
-    class transport;
-
     /**
-     * @brief Abstract message processor.
+     * @brief Abstract outbound transport.
      */
-    class message_processor {
-    public:
-        /**
-         * @brief         Processes a message.
-         * @param message Message to process.
-         */
-        virtual void process_message(const json::value& message) = 0;
-
-        /**
-         * @brief           Sets the transport through which the processor sends outgoing messages.
-         * @param transport Transport to use.
-         * @param key       Optional key to identify the connection if the transport supports multiplexing.
-         */
-        virtual void set_transport(transport* transport, const char* key = nullptr) = 0;
-    };
-
-
-    // --------------------------------------------------------------
-
-
-    /**
-     * @brief Abstract transport.
-     */
-    class transport {
+    class otransport {
     public:
         /**
          * @brief         Sends a message.
          * @param message Message to send.
-         * @param key     Optional key to identify the connection if multiplexing is supported.
          */
-        virtual void send_message(const json::value& message, const char* key = nullptr) = 0;
-
-        /**
-         * @brief           Sets the message processor to process incoming messages.
-         * @param processor Message processor.
-         * @param key       Optional key to identify the connection if the transport supports multiplexing.
-         */
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) = 0;
+        virtual void send_message(const json::value& message) = 0;
     };
 
 
@@ -90,50 +57,126 @@ namespace abc { namespace net { namespace msg {
 
 
     /**
-     * @brief Transport over streambuf.
+     * @brief Abstract message processor.
      */
-    class streambuf_transport
-        : public transport
+    class processor {
+    public:
+        /**
+         * @brief           Processes a message.
+         * @param message   Message to process.
+         * @param transport Outbound transport for an eventual result.
+         */
+        virtual void process_message(const json::value& message, otransport* transport) = 0;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Abstract inbound transport.
+     */
+    class itransport {
+    public:
+        /**
+         * @brief           Sets the message processor to process incoming messages.
+         * @param processor Message processor.
+         * @param key       Optional key to identify the connection if this inbound transport supports multiplexing.
+         */
+        virtual void set_processor(processor* processor, const char* key = nullptr) = 0;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Outbound transport over streambuf.
+     */
+    class streambuf_otransport
+        : public otransport
+        , public diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
+
+    public:
+        /**
+         * @brief     Constructor.
+         * @param sb  Output stream buffer.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        streambuf_otransport(std::streambuf* sb, diag::log_ostream* log = nullptr);
+
+    protected:
+        /**
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     Output stream buffer.
+         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        streambuf_otransport(const char* origin, std::streambuf* sb, diag::log_ostream* log = nullptr);
+
+    // `otransport` overrides.
+    public:
+        /**
+         * @brief         Sends a message.
+         * @param message Message to send.
+         */
+        virtual void send_message(const json::value& message) override;
+
+    protected:
+        /**
+         * @brief Output stream buffer.
+         */
+        std::streambuf* _sb;
+
+        /**
+         * @brief `diag::log_ostream` pointer passed in to the constructor. May be `nullptr`.
+         */
+        diag::log_ostream* _log;
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief Inbound transport over streambuf.
+     */
+    class streambuf_itransport
+        : public itransport
         , public daemon {
 
         using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
-         * @brief         Constructor.
-         * @param sb_in   Input stream buffer.
-         * @param sb_out  Output stream buffer.
+         * @brief        Constructor.
+         * @param sb     Input stream buffer.
+         * @param sb_out Output stream buffer for message responses.
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        streambuf_transport(std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
+        streambuf_itransport(std::streambuf* sb, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
 
     protected:
         /**
-         * @brief         Constructor.
-         * @param origin  Origin.
-         * @param sb_in   Input stream buffer.
-         * @param sb_out  Output stream buffer.
+         * @brief        Constructor.
+         * @param origin Origin.
+         * @param sb     Input stream buffer.
+         * @param sb_out Output stream buffer for message responses.
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        streambuf_transport(const char* origin, std::streambuf* sb_in, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
+        streambuf_itransport(const char* origin, std::streambuf* sb, std::streambuf* sb_out, diag::log_ostream* log = nullptr);
 
-    // `transport` overrides.
+    // `itransport` overrides.
     public:
-        /**
-         * @brief         Sends a message.
-         * @param message Message to send.
-         * @param key     Optional key to identify the connection if the transport supports multiplexing.
-         *                If provided, must be `nullptr`. Multiplexing is not supported for streambuf transport.
-         */
-        virtual void send_message(const json::value& message, const char* key = nullptr) override;
-
         /**
          * @brief           Sets the message processor to process incoming messages.
          * @param processor Message processor.
          * @param key       Optional key to identify the connection if the transport supports multiplexing.
          *                  If provided, must be `nullptr`. Multiplexing is not supported for streambuf transport.
          */ 
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
+        virtual void set_processor(processor* processor, const char* key = nullptr) override;
 
     // `daemon` overrides.
     protected:
@@ -147,12 +190,7 @@ namespace abc { namespace net { namespace msg {
         /**
          * @brief Input stream buffer.
          */
-        std::streambuf* _sb_in;
-
-        /**
-         * @brief Output stream buffer.
-         */
-        std::streambuf* _sb_out;
+        std::streambuf* _sb;
 
         /**
          * @brief `diag::log_ostream` pointer passed in to the constructor. May be `nullptr`.
@@ -162,13 +200,12 @@ namespace abc { namespace net { namespace msg {
         /**
          * @brief Message processor.
          */
-        message_processor* _processor = nullptr;
+        processor* _processor = nullptr;
 
         /**
-         * @brief Input stream around the passed input stream buffer.
+         * @brief `streambuf_otransport` to be used for message responses.
          */
-        std::istream _strm_in;
-
+        streambuf_otransport _otransport;
     };
 
 
@@ -179,7 +216,8 @@ namespace abc { namespace net { namespace msg {
      * @brief Transport over the console - `std::cin` and `std::cout`.
      */
     class console_transport
-        : public streambuf_transport{
+        : public streambuf_otransport
+        , public streambuf_itransport {
 
     public:
         /**
@@ -193,13 +231,63 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
+    class http_server_itransport;
+
+
     /**
-     * @brief http server transport.
-     * @details This class can multiplex multiple message processors by REST path.
+     * @brief   Outbound transport over HTTP as response.
+     * @details This class is not be instantiated directly.
      */
-    class http_server_transport
-        : public http::endpoint
-        , public transport {
+    class http_server_response_otransport
+        : public otransport {
+
+        friend class http_server_itransport;
+
+    private:
+        /**
+         * @brief     Constructor.
+         * @param sb  Output stream buffer.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        http_server_response_otransport(std::streambuf* sb, diag::log_ostream* log = nullptr);
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    class http_server_itransport;
+
+
+    /**
+     * @brief   Outbound transport over HTTP as Server-Sent Event (SSE).
+     * @details This class is not be instantiated directly.
+     */
+    class http_server_event_otransport
+        : public otransport {
+
+        friend class http_server_itransport;
+
+    private:
+        /**
+         * @brief     Constructor.
+         * @param sb  Output stream buffer.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
+         */
+        http_server_event_otransport(std::streambuf* sb, diag::log_ostream* log = nullptr);
+    };
+
+
+    // --------------------------------------------------------------
+
+
+    /**
+     * @brief   Inbound transport over an HTTP endpoint.
+     * @details This class multiplexes message processors by REST path.
+     */
+    class http_server_itransport
+        : public itransport
+        , public http::endpoint {
 
         using base = http::endpoint;
 
@@ -209,25 +297,20 @@ namespace abc { namespace net { namespace msg {
          * @param config `endpoint_config` instance.
          * @param log    `diag::log_ostream` pointer. May be `nullptr`.
          */
-        http_server_transport(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
+        http_server_itransport(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
 
+    // `itransport` overrides.
     public:
-        /**
-         * @brief         Sends a message.
-         * @param message Message to send.
-         * @param key     Optional key to identify the connection.
-         */
-        virtual void send_message(const json::value& message, const char* key = nullptr) override;
-
         /**
          * @brief           Sets the message processor to process incoming messages.
          * @param processor Message processor.
          * @param key       Optional key to identify the connection.
-         *                  The http endpoint supports multiplexing by REST path.
-         *                  If provided, must be the REST path for the given processor.
+         *                  The HTTP endpoint multiplexes by REST path.
+         *                  Must be the REST path for the given processor.
          */
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
+        virtual void set_processor(processor* processor, const char* key = nullptr) override;
 
+    // `endpoint` overrides.
     protected:
         /**
          * @brief         Processes a REST request.
@@ -241,7 +324,7 @@ namespace abc { namespace net { namespace msg {
          * @brief Map of REST path to message processor, for multiplexing.
          */
         //// TODO: Define all the metadata that should accompany a processor.
-        std::map<std::string, message_processor*> _processors;
+        std::map<std::string, processor*> _processors;
     };
 
 
@@ -249,47 +332,43 @@ namespace abc { namespace net { namespace msg {
 
 
     /**
-     * @brief http client transport.
+     * @brief Outbound and inbound transport over an HTTP client.
      */
     class http_client_transport
-        : protected diag::diag_ready<const char*>
-        , public transport {
+        : public otransport
+        , public itransport
+        , public daemon {
 
         using diag_base = diag::diag_ready<const char*>;
 
     public:
         /**
-         * @brief         Constructor.
-         * @param config `endpoint_config` instance.
-         * @param log    `diag::log_ostream` pointer. May be `nullptr`.
+         * @brief     Constructor.
+         * @param url URL of the HTTP endpoint.
+         * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
-        http_client_transport(http::endpoint_config&& config, diag::log_ostream* log = nullptr);
+        http_client_transport(const char* url, diag::log_ostream* log = nullptr);
 
-        /**
-         * @brief Move constructor.
-         */
-        http_client_transport(http_client_transport&& other) noexcept = default;
-
-        /**
-         * @brief Deleted.
-         */
-        http_client_transport(const http_client_transport& other) = delete;
-
+    // `otransport` overrides.
     public:
         /**
          * @brief         Sends a message.
          * @param message Message to send.
-         * @param key     Optional key to identify the connection.
          */
-        virtual void send_message(const json::value& message, const char* key = nullptr) override;
+        virtual void send_message(const json::value& message) override;
 
+    // `itransport` overrides.
+    public:
         /**
          * @brief           Sets the message processor to process incoming messages.
          * @param processor Message processor.
          * @param key       Optional key to identify the connection.
          *                  If provided, must be `nullptr`. Multiplexing is not supported for http client transport.
          */
-        virtual void set_message_processor(message_processor* processor, const char* key = nullptr) override;
+        virtual void set_processor(processor* processor, const char* key = nullptr) override;
+
+    // `daemon` overrides.
+    public:
     };
 
 

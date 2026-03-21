@@ -32,22 +32,21 @@ SOFTWARE.
 
 
 class test_processor
-    : public abc::net::msg::message_processor {
+    : public abc::net::msg::processor {
 
 public:
     test_processor(test_context& context)
-        : _transport(nullptr)
-        , _daemon(nullptr)
+        : _daemon(nullptr)
         , _validator(context.log())
         , _passed(true)
         , _message_count(0) {
     }
 
 public:
-    virtual void process_message(const abc::net::json::value& message) override {
+    virtual void process_message(const abc::net::json::value& message, abc::net::msg::otransport* otransport) override {
         // Count the messages so we can verify intput.
         _message_count++;
-
+        
         // Make sure all exchanged messages are valid.
         _passed = ( _validator.is_simple_request(message)
                 || _validator.is_simple_notification(message)
@@ -59,7 +58,7 @@ public:
             && _passed;
 
         // Forward the same message.
-        _transport->send_message(message);
+        otransport->send_message(message);
 
         // Stop the daemon if the message is a "stop" request.
         if (message.type() == abc::net::json::value_type::object) {
@@ -73,11 +72,6 @@ public:
             }
         }
     }
-
-
-    virtual void set_transport(abc::net::msg::transport* transport, const char* /*key*/ = nullptr) override {
-        _transport = transport;
-    };
 
 public:
     void set_daemon_to_stop(abc::net::daemon* daemon) noexcept {
@@ -93,7 +87,6 @@ public:
     }
 
 private:
-    abc::net::msg::transport* _transport;
     abc::net::daemon* _daemon;
     abc::net::json::json_rpc_validator _validator;
     bool _passed;
