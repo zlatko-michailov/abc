@@ -136,6 +136,110 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
+    inline http_server_response_otransport::http_server_response_otransport(std::streambuf* sb, diag::log_ostream* log)
+        : diag_base("abc::net::msg::http_server_response_otransport", log)
+        , _sb(sb)
+        , _log(log) {
+    }
+
+
+    inline void http_server_response_otransport::send_message(const json::value& message) {
+        constexpr const char* suborigin = "send_message()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        std::stringstream body;
+        json::writer json_writer(body.rdbuf(), _log);
+        json_writer.put_value(message);
+
+        std::string content_length = std::to_string(body.str().size());
+
+        http::response response;
+        response.protocol = http::protocol::HTTP_11;
+        response.status_code = http::status_code::OK;
+        response.reason_phrase = http::reason_phrase::OK;
+        response.headers = {
+            { http::header::Content_Type,   http::content_type::json },
+            { http::header::Content_Length, std::move(content_length) },
+        }; 
+
+        http::response_writer response_writer(_sb, _log);
+        response_writer.put_response(response);
+        response_writer.put_body(body.str().c_str());
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    // --------------------------------------------------------------
+
+
+    inline http_server_event_otransport::http_server_event_otransport(std::streambuf* sb, diag::log_ostream* log)
+        : diag_base("abc::net::msg::http_server_event_otransport", log)
+        , _sb(sb)
+        , _log(log) {
+    }
+
+
+    inline void http_server_event_otransport::send_message(const json::value& message) {
+        constexpr const char* suborigin = "send_message()";
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        // The event stream must be already open by the `http_server_itransport`.
+        // The processor may call this method multiple times for the same request.
+
+        std::vector<http::event_message> event_messages;
+
+        // If the message is a string, it is assumed to be a comment.
+        if (message.type() == json::value_type::string) {
+            event_messages.emplace_back(http::comment_event_message(message.string().c_str()));
+        }
+
+        // If the message is an object, each property name is the event type, and the property value, which should be a string, is the event value.
+        else if (message.type() == json::value_type::object) {
+            for (const json::literal::object::value_type& property : message.object()) {
+                const std::string& event_type = property.first;
+                const json::value& event_value = property.second;
+
+                diag_base::expect(suborigin, event_value.type() == json::value_type::string, __TAG__, "event_value.type() == json::value_type::string");
+
+                event_messages.emplace_back(http::event_message(event_type.c_str(), event_value.string().c_str()));
+            }
+        }
+
+        // If the message is an array, each item should also be an array, with two items of type string - the event type and the event value.
+        else if (message.type() == json::value_type::array) {
+            for (const json::value& item : message.array()) {
+                diag_base::expect(suborigin, item.type() == json::value_type::array, __TAG__, "item.type() == json::value_type::array");
+                diag_base::expect(suborigin, item.array().size() == 2, __TAG__, "item.array().size() == 2");
+                diag_base::expect(suborigin, item.array()[0].type() == json::value_type::string, __TAG__, "item.array()[0].type() == json::value_type::string");
+                diag_base::expect(suborigin, item.array()[1].type() == json::value_type::string, __TAG__, "item.array()[1].type() == json::value_type::string");
+
+                const std::string& event_type = item.array()[0].string();
+                const std::string& event_value = item.array()[1].string();
+
+                event_messages.emplace_back(http::event_message(event_type.c_str(), event_value.c_str()));
+            }
+        }
+
+        // No other message types are supported.
+        else {
+            diag_base::expect(suborigin, false, __TAG__, "Unsupported message type.");
+        }
+
+        // Construct the event.
+        abc::net::http::event event(std::move(event_messages));
+
+        // Write the event to the stream.
+        http::response_writer response_writer(_sb, _log);
+        response_writer.put_event(event);
+
+        diag_base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
+
+
+    // --------------------------------------------------------------
+
+
 #if 0
     inline http_server_transport::http_server_transport(http::endpoint_config&& config, diag::log_ostream* log)
         : base("abc::net::msg::http_server_transport", std::move(config), log) {

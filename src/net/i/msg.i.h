@@ -239,7 +239,10 @@ namespace abc { namespace net { namespace msg {
      * @details This class is not be instantiated directly.
      */
     class http_server_response_otransport
-        : public otransport {
+        : public otransport
+        , public diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
 
         friend class http_server_itransport;
 
@@ -250,6 +253,25 @@ namespace abc { namespace net { namespace msg {
          * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
         http_server_response_otransport(std::streambuf* sb, diag::log_ostream* log = nullptr);
+
+    // `otransport` overrides.
+    public:
+        /**
+         * @brief         Sends a message.
+         * @param message Message to send.
+         */
+        virtual void send_message(const json::value& message) override;
+
+    protected:
+        /**
+         * @brief Output stream buffer.
+         */
+        std::streambuf* _sb;
+
+        /**
+         * @brief `diag::log_ostream` pointer passed in to the constructor. May be `nullptr`.
+         */
+        diag::log_ostream* _log;
     };
 
 
@@ -264,7 +286,10 @@ namespace abc { namespace net { namespace msg {
      * @details This class is not be instantiated directly.
      */
     class http_server_event_otransport
-        : public otransport {
+        : public otransport
+        , public diag::diag_ready<const char*> {
+
+        using diag_base = diag::diag_ready<const char*>;
 
         friend class http_server_itransport;
 
@@ -275,6 +300,25 @@ namespace abc { namespace net { namespace msg {
          * @param log `diag::log_ostream` pointer. May be `nullptr`.
          */
         http_server_event_otransport(std::streambuf* sb, diag::log_ostream* log = nullptr);
+
+    // `otransport` overrides.
+    public:
+        /**
+         * @brief         Sends a message.
+         * @param message Message to send.
+         */
+        virtual void send_message(const json::value& message) override;
+
+    protected:
+        /**
+         * @brief Output stream buffer.
+         */
+        std::streambuf* _sb;
+
+        /**
+         * @brief `diag::log_ostream` pointer passed in to the constructor. May be `nullptr`.
+         */
+        diag::log_ostream* _log;
     };
 
 
