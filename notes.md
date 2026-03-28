@@ -17,7 +17,10 @@
   - `value(int)`, `value(unsigned)`, `value(long)`, `value(unsigned long)`, `value(long long)`, `value(unsigned long long)`
 
 ## To Do
-- Namespace `net::msg`
+- Namespace `net::msg`:
+  - `http_server_itransport`
+    - How can the processor get the context, e.g. `last_event_id`?
+
 - Namespace `ai::mcp`:
   - `server` : `message_processor`
   - `client` : `message_processor`

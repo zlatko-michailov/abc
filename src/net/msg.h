@@ -29,6 +29,7 @@ SOFTWARE.
 #include <atomic>
 #include <string>
 #include <streambuf>
+#include <thread>
 
 #include "../diag/diag_ready.h"
 #include "json.h"
@@ -240,11 +241,10 @@ namespace abc { namespace net { namespace msg {
     // --------------------------------------------------------------
 
 
-#if 0
-    inline http_server_transport::http_server_transport(http::endpoint_config&& config, diag::log_ostream* log)
-        : base("abc::net::msg::http_server_transport", std::move(config), log) {
+    inline http_server_itransport::http_server_itransport(http::endpoint_config&& config, diag::log_ostream* log)
+        : base("abc::net::msg::http_server_itransport", std::move(config), log) {
 
-        constexpr const char* suborigin = "http_server_transport()";
+        constexpr const char* suborigin = "http_server_itransport()";
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         base::expect(suborigin, config.files_prefix.empty(), __TAG__, "config.files_prefix.empty()"); // File requests should be disabled.
@@ -253,30 +253,30 @@ namespace abc { namespace net { namespace msg {
     }
 
 
-    inline void http_server_transport::send_message(const json::value& message, const char* key) {
-        constexpr const char* suborigin = "send_message()";
-        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
-
-        //// TODO: NOW
-
-        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
-    }
-
-
-    inline void http_server_transport::set_message_processor(message_processor* processor, const char* key) {
-        constexpr const char* suborigin = "set_message_processor()";
+    inline void http_server_itransport::set_processor(processor* processor, const char* key) {
+        constexpr const char* suborigin = "set_processor()";
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
         base::expect(suborigin, processor != nullptr, __TAG__, "processor != nullptr");
         base::expect(suborigin, key != nullptr, __TAG__, "key != nullptr"); // Multiplexing is required for the http transport.
 
-        _processors[key] = processor;
+        {
+            std::lock_guard<std::mutex> lock(_processor_contexts_mutex);
+
+            std::string key_str(key);
+            http_server_processor_map::iterator processor_context_itr = _processor_contexts.find(key_str);
+            if (processor_context_itr == _processor_contexts.end()) {
+                processor_context_itr = _processor_contexts.emplace(key_str, http_server_processor_context()).first;
+            }
+
+            processor_context_itr->second.processor = processor;
+        }
 
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
 
 
-    inline void http_server_transport::process_rest_request(http::server& http, const http::request& request) {
+    inline void http_server_itransport::process_rest_request(http::server& http, const http::request& request) {
         constexpr const char* suborigin = "process_rest_request()";
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
 
@@ -299,8 +299,16 @@ namespace abc { namespace net { namespace msg {
             }
         }
 
-        json::value message(nullptr);
+        // Get the processor context for the requested path.
+        http_server_processor_map::iterator processor_context_itr;
+        {
+            std::lock_guard<std::mutex> lock(_processor_contexts_mutex);
 
+            processor_context_itr = _processor_contexts.find(request.resource.path);
+        }
+        base::require(suborigin, __TAG__, processor_context_itr != _processor_contexts.end(), http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "There is no processor for the requested path.");
+
+        // POST JSON-RPC request => JSON-RPC response.
         if (request.method == http::method::POST) {
             base::require(suborigin, __TAG__, acceptsJson, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept JSON.");
             base::require(suborigin, __TAG__, acceptsEventStream, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept event stream.");
@@ -309,29 +317,96 @@ namespace abc { namespace net { namespace msg {
 
             // JSON-RPC body.
             json::reader json_reader(static_cast<http::request_reader&>(http).rdbuf(), base::log());
-            message = json_reader.get_value();
+            json::value message = json_reader.get_value();
 
             json::json_rpc_validator json_rpc_validator(base::log());
-            bool isJsonRpc = json_rpc_validator.is_simple_request(message) || json_rpc_validator.is_simple_notification(message) || json_rpc_validator.is_simple_response(message);
+            bool isJsonRpc = json_rpc_validator.is_simple_request(message) || json_rpc_validator.is_simple_notification(message) || json_rpc_validator.is_simple_response(message)
+                        || json_rpc_validator.is_batch_request(message) || json_rpc_validator.is_batch_response(message);
             base::require(suborigin, __TAG__, isJsonRpc, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must be a valid JSON-RPC message.");
+
+            // Prepare the processor context.
+            processor_context_itr->second.request_type = http_server_response_type::post_json_rpc;
+            processor_context_itr->second.json_rpc_request_id = nullptr;
+            if (message.type() == json::value_type::object) {
+                json::literal::object::const_iterator id_itr = message.object().find("id");
+                if (id_itr != message.object().end()) {
+                    processor_context_itr->second.json_rpc_request_id = id_itr->second;
+                }
+            }
+
+            // Process the message.
+            base::expect(suborigin, processor_context_itr->second.processor != nullptr, __TAG__, "processor_context_itr->second.processor != nullptr");
+            http_server_response_otransport response_otransport(static_cast<http::response_writer&>(http).rdbuf(), base::log());
+            processor_context_itr->second.processor->process_message(message, &response_otransport);
         }
+
+        // GET request => SSE stream.
         else if (request.method == http::method::GET) {
             base::require(suborigin, __TAG__, acceptsEventStream, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "Must accept event stream.");
+
+            // Prepare the processor context.
+            processor_context_itr->second.request_type = http_server_response_type::post_json_rpc;
+            processor_context_itr->second.last_event_id.clear();
+            http::headers::const_iterator last_event_id_header = request.headers.find(http::header::Last_Event_ID);
+            if (last_event_id_header != request.headers.end()) {
+                processor_context_itr->second.last_event_id = last_event_id_header->second;
+            }
+
+            // Send an HTTP response on the current thread.
+            abc::net::http::response response;
+            response.protocol = abc::net::http::protocol::HTTP_11;
+            response.status_code = abc::net::http::status_code::OK;
+            response.reason_phrase = abc::net::http::reason_phrase::OK;
+            response.headers = abc::net::http::headers {
+                { abc::net::http::header::Content_Type,  abc::net::http::content_type::event_stream },
+                { abc::net::http::header::Cache_Control, abc::net::http::cache_control::no_cache },
+                { abc::net::http::header::Connection,    abc::net::http::connection::keep_alive },
+            };
+
+            http.put_response(response);
+
+            // Start a new thread for the event stream.
+            std::thread(send_event_stream_thread_func, this, static_cast<http::response_writer&>(http).rdbuf(), &processor_context_itr->second).detach();
         }
+
+        // Bad Request.
         else {
             base::require(suborigin, __TAG__, false, http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "The method must be POST or GET.");
         }
 
-        // Get the processor for the requested path.
-        std::map<std::string, message_processor*>::iterator processor = _processors.find(request.resource.path);
-        base::require(suborigin, __TAG__, processor != _processors.end(), http::status_code::Bad_Request, http::reason_phrase::Bad_Request, http::content_type::text, "There is no processor for the requested path.");
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
+    }
 
-        // Process the message.
-        processor->second->process_message(message);
+
+    inline void http_server_itransport::send_event_stream_thread_func(http_server_itransport* this_ptr, std::streambuf* sb, http_server_processor_context* processor_context) {
+        this_ptr->send_event_stream(sb, processor_context);
+    }
+
+
+    inline void http_server_itransport::send_event_stream(std::streambuf* sb, http_server_processor_context* processor_context) {
+        constexpr const char* suborigin = "send_event_stream()";
+        base::put_any(suborigin, diag::severity::callstack, __TAG__, "Begin:");
+
+        base::expect(suborigin, sb != nullptr, __TAG__, "sb != nullptr");
+        base::expect(suborigin, processor_context != nullptr, __TAG__, "processor_context != nullptr");
+        base::expect(suborigin, processor_context->processor != nullptr, __TAG__, "processor_context->processor != nullptr");
+
+        base::increment_requests_in_progress();
+
+        try {
+            http_server_event_otransport event_otransport(sb, base::log());
+
+            processor_context->processor->process_message(json::value(), &event_otransport);
+        }
+        catch (std::exception& ex) {
+            base::put_any(suborigin, diag::severity::optional, __TAG__, "Processor threw an exception - '%s'.", ex.what());
+        }
+
+        base::decrement_requests_in_progress();
 
         base::put_any(suborigin, diag::severity::callstack, __TAG__, "End:");
     }
-#endif
+
 
 #if 0
     /**

@@ -30,6 +30,7 @@ SOFTWARE.
 #include <string>
 #include <streambuf>
 #include <map>
+#include <mutex>
 
 #include "../../diag/i/diag_ready.i.h"
 #include "json.i.h"
@@ -326,6 +327,46 @@ namespace abc { namespace net { namespace msg {
 
 
     /**
+     * @brief HTTP server itransport request types.
+     */
+    enum class http_server_response_type {
+        /**
+         * @brief Invalid request type.
+         */
+        invalid = 0,
+
+        /**
+         * @brief POST JSON-RPC request.
+         */
+        post_json_rpc = 1,
+
+        /**
+         * @brief GET SSE stream request.
+         */
+        get_sse_stream = 2,
+    };
+
+
+    /**
+     * @brief   Internal context for an HTTP server processor.
+     * @details This class is not to be instantiated directly.
+     */
+    struct http_server_processor_context {
+        processor*                processor           = nullptr;
+        http_server_response_type request_type        = http_server_response_type::invalid;
+        json::value               json_rpc_request_id = nullptr;
+        std::string               last_event_id;
+    };
+
+
+    /**
+     * @brief   Internal map of HTTP server processor contexts.
+     * @details This class is not to be instantiated directly.
+     */
+    using http_server_processor_map = std::map<std::string, http_server_processor_context>;
+
+
+    /**
      * @brief   Inbound transport over an HTTP endpoint.
      * @details This class multiplexes message processors by REST path.
      */
@@ -363,12 +404,28 @@ namespace abc { namespace net { namespace msg {
          */
         virtual void process_rest_request(http::server& http, const http::request& request) override;
 
+    protected:
+        /**
+         * @brief Thread function for the SSE stream thread.
+         */
+        void send_event_stream(std::streambuf* sb, http_server_processor_context* processor_context);
+
     private:
         /**
-         * @brief Map of REST path to message processor, for multiplexing.
+         * @brief Thread function for the SSE stream thread.
          */
-        //// TODO: Define all the metadata that should accompany a processor.
-        std::map<std::string, processor*> _processors;
+        static void send_event_stream_thread_func(http_server_itransport* this_ptr, std::streambuf* sb, http_server_processor_context* processor_context);
+
+    private:
+        /**
+         * @brief Map of REST path to processor context, for multiplexing.
+         */
+        http_server_processor_map _processor_contexts;
+
+        /**
+         * @brief Lock for accessing the `_processor_contexts` map.
+         */
+        std::mutex _processor_contexts_mutex;
     };
 
 
