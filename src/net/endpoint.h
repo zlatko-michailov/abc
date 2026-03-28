@@ -163,7 +163,7 @@ namespace abc { namespace net { namespace http {
         diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Request received: protocol='%s', method='%s', path='%s'", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str());
 
         bool ok = true;
-        ++_requests_in_progress;
+        increment_requests_in_progress();
 
         try {
             // This endpoint supports two kinds of requests:
@@ -189,7 +189,7 @@ namespace abc { namespace net { namespace http {
             send_simple_response(http, abc::net::http::status_code::Internal_Server_Error, abc::net::http::reason_phrase::Internal_Server_Error, abc::net::http::content_type::text, ex.what(), __TAG__);
         }
 
-        --_requests_in_progress;
+        decrement_requests_in_progress();
 
         diag_base::put_any(suborigin, diag::severity::optional, 0x102e1, "Done processing request: protocol='%s', method='%s', path='%s', ok=%d", request.protocol.c_str(), request.method.c_str(), request.resource.path.c_str(), (int)ok);
         diag_base::put_blank_line(diag::severity::optional);
@@ -377,6 +377,16 @@ namespace abc { namespace net { namespace http {
 
     inline const endpoint_config& endpoint::config() const {
         return _config;
+    }
+
+
+    inline void endpoint::increment_requests_in_progress() noexcept {
+        ++_requests_in_progress;
+    }
+
+
+    inline void endpoint::decrement_requests_in_progress() noexcept {
+        --_requests_in_progress;
     }
 
 

@@ -165,6 +165,7 @@ namespace abc { namespace net { namespace http {
         constexpr const char* Content_Length          = "Content-Length";
         constexpr const char* Cache_Control           = "Cache-Control";
         constexpr const char* Connection              = "Connection";
+        constexpr const char* Last_Event_ID           = "Last-Event-ID";
     }
 
 
@@ -404,6 +405,16 @@ namespace abc { namespace net { namespace http {
          * @brief Returns the config settings passed in to the constructor.
          */
         const endpoint_config& config() const;
+
+        /**
+         * @brief Increments the number of requests currently in progress.
+         */
+        void increment_requests_in_progress() noexcept;
+
+        /**
+         * @brief Decrements the number of requests currently in progress.
+         */
+        void decrement_requests_in_progress() noexcept;
 
     private:
         /**
